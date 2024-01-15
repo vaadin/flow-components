@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -460,8 +460,9 @@ public class SpreadsheetFactory implements Serializable {
                 && !tableForCTAutoFilterAlreadyLoaded(spreadsheet,
                         autoFilter)) {
             SpreadsheetTable sheetFilterTable = new SpreadsheetFilterTable(
-                    spreadsheet, CellRangeAddress.valueOf(autoFilter.getRef()));
-            sheetFilterTable.setCtWorksheetAutoFilter(autoFilter);
+                    spreadsheet, spreadsheet.getActiveSheet(),
+                    CellRangeAddress.valueOf(autoFilter.getRef()), autoFilter,
+                    null);
 
             spreadsheet.registerTable(sheetFilterTable);
 
@@ -471,9 +472,9 @@ public class SpreadsheetFactory implements Serializable {
         for (XSSFTable table : sheet.getTables()) {
             if (!tableForXSSFTableAlreadyLoaded(spreadsheet, table)) {
                 SpreadsheetTable spreadsheetTable = new SpreadsheetFilterTable(
-                        spreadsheet,
-                        CellRangeAddress.valueOf(table.getCTTable().getRef()));
-                spreadsheetTable.setXssfTable(table);
+                        spreadsheet, spreadsheet.getActiveSheet(),
+                        CellRangeAddress.valueOf(table.getCTTable().getRef()),
+                        null, table);
 
                 spreadsheet.registerTable(spreadsheetTable);
             }

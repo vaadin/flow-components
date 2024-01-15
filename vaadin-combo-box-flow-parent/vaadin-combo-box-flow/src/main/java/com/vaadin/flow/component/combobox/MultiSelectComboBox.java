@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -72,9 +72,9 @@ import java.util.Set;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "24.3.0-beta1")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "24.4.0-alpha4")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
@@ -504,6 +504,30 @@ public class MultiSelectComboBox<TItem>
      */
     public void setSelectedItemsOnTop(boolean selectedItemsOnTop) {
         getElement().setProperty("selectedItemsOnTop", selectedItemsOnTop);
+    }
+
+    /**
+     * Gets whether the filter is kept after selecting items. {@code false} by
+     * default.
+     *
+     * @since 24.4
+     * @return {@code true} if enabled, {@code false} otherwise
+     */
+    public boolean isKeepFilter() {
+        return getElement().getProperty("keepFilter", false);
+    }
+
+    /**
+     * Enables or disables keeping the filter after selecting items. By default,
+     * the filter is cleared after selecting an item and the overlay shows the
+     * unfiltered list of items again. Enabling this option will keep the
+     * filter, which allows to select multiple filtered items in succession.
+     *
+     * @param keepFilter
+     *            whether to keep the filter after selecting an item
+     */
+    public void setKeepFilter(boolean keepFilter) {
+        getElement().setProperty("keepFilter", keepFilter);
     }
 
     /**

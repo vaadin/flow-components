@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -31,14 +31,14 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
-import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
-import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -72,9 +72,9 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/radio-group", version = "24.3.0-beta1")
+@NpmPackage(value = "@vaadin/radio-group", version = "24.4.0-alpha4")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
@@ -107,6 +107,8 @@ public class RadioButtonGroup<T>
 
     private boolean manualValidationEnabled = false;
 
+    private SelectionPreservationHandler<T> selectionPreservationHandler;
+
     private static <T> T presentationToModel(
             RadioButtonGroup<T> radioButtonGroup, String presentation) {
         if (radioButtonGroup.keyMapper == null) {
@@ -135,6 +137,8 @@ public class RadioButtonGroup<T>
                 RadioButtonGroup::modelToPresentation);
 
         addValueChangeListener(e -> validate());
+
+        initSelectionPreservationHandler();
     }
 
     /**
@@ -283,7 +287,8 @@ public class RadioButtonGroup<T>
     @Override
     public RadioButtonGroupListDataView<T> getListDataView() {
         return new RadioButtonGroupListDataView<>(this::getDataProvider, this,
-                this::identifierProviderChanged, (filter, sorting) -> reset());
+                this::identifierProviderChanged,
+                (filter, sorting) -> rebuild());
     }
 
     /**
@@ -319,7 +324,10 @@ public class RadioButtonGroup<T>
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
-        reset();
+
+        keyMapper.removeAll();
+        clear();
+        rebuild();
 
         setupDataProviderListener(dataProvider);
     }
@@ -329,15 +337,7 @@ public class RadioButtonGroup<T>
             dataProviderListenerRegistration.remove();
         }
         dataProviderListenerRegistration = dataProvider
-                .addDataProviderListener(event -> {
-                    if (event instanceof DataChangeEvent.DataRefreshEvent) {
-                        resetRadioButton(
-                                ((DataChangeEvent.DataRefreshEvent<T>) event)
-                                        .getItem());
-                    } else {
-                        reset();
-                    }
-                });
+                .addDataProviderListener(this::handleDataChange);
     }
 
     /**
@@ -371,8 +371,12 @@ public class RadioButtonGroup<T>
     @Override
     public void setValue(T value) {
         super.setValue(value);
-        getRadioButtons()
-                .forEach(rb -> rb.setChecked(valueEquals(rb.getItem(), value)));
+        if (value == null) {
+            getRadioButtons().forEach(rb -> rb.setChecked(false));
+        } else {
+            getRadioButtons().forEach(
+                    rb -> rb.setChecked(valueEquals(rb.getItem(), value)));
+        }
         refreshButtons();
     }
 
@@ -524,6 +528,34 @@ public class RadioButtonGroup<T>
         return getElement().getProperty("label");
     }
 
+    /**
+     * Sets the selection preservation mode. Determines what happens with the
+     * selection when {@link DataProvider#refreshAll} is called. The selection
+     * is discarded in any case when a new data provider is set. The default is
+     * {@link SelectionPreservationMode#DISCARD}.
+     *
+     * @param selectionPreservationMode
+     *            the selection preservation mode to switch to, not {@code null}
+     *
+     * @see SelectionPreservationMode
+     */
+    public void setSelectionPreservationMode(
+            SelectionPreservationMode selectionPreservationMode) {
+        selectionPreservationHandler
+                .setSelectionPreservationMode(selectionPreservationMode);
+    }
+
+    /**
+     * Gets the selection preservation mode.
+     *
+     * @return the selection preservation mode
+     *
+     * @see #setSelectionPreservationMode(SelectionPreservationMode)
+     */
+    public SelectionPreservationMode getSelectionPreservationMode() {
+        return selectionPreservationHandler.getSelectionPreservationMode();
+    }
+
     @Override
     public void setAriaLabel(String ariaLabel) {
         getElement().setProperty("accessibleName", ariaLabel);
@@ -546,10 +578,7 @@ public class RadioButtonGroup<T>
     }
 
     @SuppressWarnings("unchecked")
-    private void reset() {
-        keyMapper.removeAll();
-        clear();
-
+    private void rebuild() {
         synchronized (dataProvider) {
             // Cache helper component before removal
             Component helperComponent = getHelperComponent();
@@ -715,6 +744,46 @@ public class RadioButtonGroup<T>
     private void identifierProviderChanged(
             IdentifierProvider<T> identifierProvider) {
         keyMapper.setIdentifierGetter(identifierProvider);
+    }
+
+    private void initSelectionPreservationHandler() {
+        selectionPreservationHandler = new SelectionPreservationHandler<>(
+                SelectionPreservationMode.DISCARD) {
+
+            @Override
+            public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
+                // NO-OP
+            }
+
+            @Override
+            @SuppressWarnings("unchecked")
+            public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
+                T initialValue = getValue();
+                if (getDataProvider()
+                        .fetch(DataViewUtils.getQuery(RadioButtonGroup.this))
+                        .noneMatch(
+                                item -> valueEquals((T) item, initialValue))) {
+                    clear();
+                }
+            }
+
+            @Override
+            public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
+                clear();
+            }
+        };
+    }
+
+    private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
+        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent) {
+            resetRadioButton(
+                    ((DataChangeEvent.DataRefreshEvent<T>) dataChangeEvent)
+                            .getItem());
+        } else {
+            keyMapper.removeAll();
+            selectionPreservationHandler.handleDataChange(dataChangeEvent);
+            rebuild();
+        }
     }
 
     @Override

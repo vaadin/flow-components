@@ -4,7 +4,7 @@
     <parent>
         <artifactId>vaadin-spreadsheet-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>24.3-SNAPSHOT</version>
+        <version>24.4-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-spreadsheet-testbench</artifactId>
     <packaging>jar</packaging>

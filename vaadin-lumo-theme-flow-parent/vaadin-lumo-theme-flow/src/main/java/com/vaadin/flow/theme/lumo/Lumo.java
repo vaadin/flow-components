@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -29,10 +29,10 @@ import com.vaadin.flow.theme.AbstractTheme;
 /**
  * Lumo component theme class implementation.
  */
-@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "24.3.0-beta1")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "24.4.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "24.3.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "24.4.0-alpha4")
 @JsModule("@vaadin/vaadin-lumo-styles/color-global.js")
 @JsModule("@vaadin/vaadin-lumo-styles/typography-global.js")
 @JsModule("@vaadin/vaadin-lumo-styles/sizing.js")

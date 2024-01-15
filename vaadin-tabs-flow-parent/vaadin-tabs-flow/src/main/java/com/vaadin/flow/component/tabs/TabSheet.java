@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,6 +28,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefix;
@@ -35,6 +36,7 @@ import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -44,7 +46,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabsheet")
-@NpmPackage(value = "@vaadin/tabsheet", version = "24.3.0-beta1")
+@NpmPackage(value = "@vaadin/tabsheet", version = "24.4.0-alpha4")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
         HasSuffix, HasThemeVariant<TabSheetVariant> {
@@ -139,16 +141,27 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
             tabToContent.get(tab).removeFromParent();
         }
 
-        // On the client, content is associated with a tab by id
-        var id = "tabsheet-tab-" + UUID.randomUUID().toString();
-        tab.setId(id);
-        content.getElement().setAttribute("tab", id);
+        linkTabToContent(tab, content);
 
         tabToContent.put(tab, content.getElement());
 
         updateContent();
 
         return tab;
+    }
+
+    private void linkTabToContent(Tab tab, Component content) {
+        runBeforeClientResponse(ui -> {
+            // On the client, content is associated with a tab by id
+            var tabId = tab.getId().orElse("tabsheet-tab-" + UUID.randomUUID());
+            tab.setId(tabId);
+            content.getElement().setAttribute("tab", tabId);
+        });
+    }
+
+    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
     /**

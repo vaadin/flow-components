@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -201,8 +201,9 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                     SerializableBiConsumer<SOURCE, JsonArray> handler = clientCallables
                             .get(handlerName);
                     SOURCE item = keyMapper.get(itemKey);
-
-                    handler.accept(item, args);
+                    if (item != null) {
+                        handler.accept(item, args);
+                    }
                 });
 
         JsonArray clientCallablesArray = JsonUtils

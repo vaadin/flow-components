@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,27 +15,26 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import java.util.List;
-import java.util.Map;
-
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.component.orderedlayout.testbench.VerticalLayoutElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-combo-box/component-renderer")
-public class ComponentRendererIT extends AbstractComponentIT {
+public class ComponentRendererIT extends AbstractComboBoxIT {
+
+    @Before
+    public void init() {
+        open();
+    }
 
     @Test
     public void captionsForItemsExistWhenFirstAddingItems() {
-        open();
-
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id("before-renderer");
 
@@ -45,8 +44,6 @@ public class ComponentRendererIT extends AbstractComponentIT {
 
     @Test
     public void captionsForItemsExistWhenFirstAddingRenderer() {
-        open();
-
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id("after-renderer");
 
@@ -55,8 +52,6 @@ public class ComponentRendererIT extends AbstractComponentIT {
 
     @Test
     public void captionsForItemsExistWhenFirstSettingDataProvider() {
-        open();
-
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id("dp-before-renderer");
 
@@ -66,12 +61,30 @@ public class ComponentRendererIT extends AbstractComponentIT {
 
     @Test
     public void captionsForItemsExistWhenFirstAddingRenderer_thenDataProvider() {
-        open();
-
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id("dp-after-renderer");
 
         testItems(comboBox);
+    }
+
+    @Test
+    public void multiplePagesOfItems_scrollDown_close_noItemsWhenReopened() {
+        ComboBoxElement comboBox = $(ComboBoxElement.class)
+                .id("multiple-pages-of-items");
+
+        comboBox.openPopup();
+        waitUntilTextInContent("Song");
+
+        for (int i = 0; i < 600; i += 50) {
+            scrollToItem(comboBox, i);
+        }
+
+        comboBox.closePopup();
+
+        String firstItemText = (String) executeScript("arguments[0].open();"
+                + "return document.querySelector('vaadin-combo-box-item')?.textContent;",
+                comboBox);
+        Assert.assertEquals("", firstItemText);
     }
 
     private void testItems(TestBenchElement comboBox) {
@@ -87,16 +100,4 @@ public class ComponentRendererIT extends AbstractComponentIT {
                 "Component renderer not run as we have no VerticalLayout.",
                 item.$(VerticalLayoutElement.class).exists()));
     }
-
-    private List<?> getItems(WebElement combo) {
-        List<?> items = (List<?>) getCommandExecutor()
-                .executeScript("return arguments[0].items;", combo);
-        return items;
-    }
-
-    private Object getItem(List<?> items, int index) {
-        Map<?, ?> map = (Map<?, ?>) items.get(index);
-        return map.get("label");
-    }
-
 }

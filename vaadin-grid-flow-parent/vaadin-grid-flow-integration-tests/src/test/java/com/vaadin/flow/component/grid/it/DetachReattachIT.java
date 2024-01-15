@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -120,6 +120,39 @@ public class DetachReattachIT extends AbstractComponentIT {
         open();
 
         clickElementWithJs("select-and-detach-button");
+
+        clickElementWithJs("attach-button");
+
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void setPageSizeAndDetach_reAttach_noErrorIsThrown() {
+        open();
+
+        clickElementWithJs("set-page-size-and-detach-button");
+
+        clickElementWithJs("attach-button");
+
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void setSelectionModeAndDetach_reAttach_noErrorIsThrown() {
+        open();
+
+        clickElementWithJs("set-selection-mode-and-detach-button");
+
+        clickElementWithJs("attach-button");
+
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void sortAndDetach_reAttach_noErrorIsThrown() {
+        open();
+
+        clickElementWithJs("sort-and-detach-button");
 
         clickElementWithJs("attach-button");
 

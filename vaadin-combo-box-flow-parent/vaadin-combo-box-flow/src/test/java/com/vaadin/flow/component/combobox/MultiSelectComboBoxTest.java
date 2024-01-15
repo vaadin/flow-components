@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -321,6 +321,21 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         Assert.assertTrue(comboBox.isSelectedItemsOnTop());
         Assert.assertTrue(
                 comboBox.getElement().getProperty("selectedItemsOnTop", true));
+    }
+
+    @Test
+    public void setKeepFilter() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+
+        Assert.assertFalse(comboBox.isKeepFilter());
+        Assert.assertFalse(
+                comboBox.getElement().getProperty("keepFilter", false));
+
+        comboBox.setKeepFilter(true);
+
+        Assert.assertTrue(comboBox.isKeepFilter());
+        Assert.assertTrue(
+                comboBox.getElement().getProperty("keepFilter", true));
     }
 
     @Test

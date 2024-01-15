@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,7 +25,9 @@ import com.vaadin.flow.component.ComponentEvent;
  */
 public class FileRejectedEvent extends ComponentEvent<Upload> {
 
-    private String errorMessage;
+    private final String fileName;
+
+    private final String errorMessage;
 
     /**
      * Creates a new event using the given source and indicator whether the
@@ -35,10 +37,14 @@ public class FileRejectedEvent extends ComponentEvent<Upload> {
      *            the source component
      * @param errorMessage
      *            the error message
+     * @param fileName
+     *            the rejected file name
      */
-    public FileRejectedEvent(Upload source, String errorMessage) {
+    public FileRejectedEvent(Upload source, String errorMessage,
+            String fileName) {
         super(source, true);
         this.errorMessage = errorMessage;
+        this.fileName = fileName;
     }
 
     /**
@@ -48,5 +54,14 @@ public class FileRejectedEvent extends ComponentEvent<Upload> {
      */
     public String getErrorMessage() {
         return errorMessage;
+    }
+
+    /**
+     * Get the file name.
+     *
+     * @return file name
+     */
+    public String getFileName() {
+        return fileName;
     }
 }

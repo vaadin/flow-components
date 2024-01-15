@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,6 +35,11 @@ public class ProgressUpdateEvent extends ComponentEvent<Upload> {
     private final long contentLength;
 
     /**
+     * Name of file currently being uploaded
+     */
+    private final String fileName;
+
+    /**
      * Event constructor method to construct a new progress event.
      *
      * @param source
@@ -43,12 +48,15 @@ public class ProgressUpdateEvent extends ComponentEvent<Upload> {
      *            bytes transferred
      * @param contentLength
      *            total size of file currently being uploaded, -1 if unknown
+     * @param fileName
+     *            name of file currently being uploaded
      */
     public ProgressUpdateEvent(Upload source, long readBytes,
-            long contentLength) {
+            long contentLength, String fileName) {
         super(source, false);
         this.readBytes = readBytes;
         this.contentLength = contentLength;
+        this.fileName = fileName;
     }
 
     /**
@@ -76,5 +84,14 @@ public class ProgressUpdateEvent extends ComponentEvent<Upload> {
      */
     public long getContentLength() {
         return contentLength;
+    }
+
+    /**
+     * Get the file name.
+     *
+     * @return file name
+     */
+    public String getFileName() {
+        return fileName;
     }
 }
