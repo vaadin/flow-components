@@ -339,7 +339,7 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
     }
 
     @Test
-    public void setOverlayWidth_smokeTests() {
+    public void setOverlayWidth() {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setOverlayWidth(null);
         Assert.assertNull(comboBox.getStyle()

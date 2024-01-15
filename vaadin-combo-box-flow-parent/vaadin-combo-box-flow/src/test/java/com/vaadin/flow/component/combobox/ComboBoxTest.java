@@ -212,7 +212,7 @@ public class ComboBoxTest extends ComboBoxBaseTest {
     }
 
     @Test
-    public void setOverlayWidth_smokeTests() {
+    public void setOverlayWidth() {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setOverlayWidth(null);
         Assert.assertNull(
