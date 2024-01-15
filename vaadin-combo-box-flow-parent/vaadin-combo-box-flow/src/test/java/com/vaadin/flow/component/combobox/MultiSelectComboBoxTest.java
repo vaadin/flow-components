@@ -17,6 +17,7 @@ package com.vaadin.flow.component.combobox;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.shared.InputField;
 import elemental.json.JsonArray;
 import org.junit.Assert;
@@ -335,5 +336,22 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         Assert.assertTrue(comboBox.isKeepFilter());
         Assert.assertTrue(
                 comboBox.getElement().getProperty("keepFilter", true));
+    }
+
+    @Test
+    public void setOverlayWidth() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setOverlayWidth(null);
+        Assert.assertNull(comboBox.getStyle()
+                .get("--vaadin-multi-select-combo-box-overlay-width"));
+        comboBox.setOverlayWidth("30em");
+        Assert.assertEquals("30em", comboBox.getStyle()
+                .get("--vaadin-multi-select-combo-box-overlay-width"));
+        comboBox.setOverlayWidth(-1, Unit.EM);
+        Assert.assertNull(comboBox.getStyle()
+                .get("--vaadin-multi-select-combo-box-overlay-width"));
+        comboBox.setOverlayWidth(100, Unit.PIXELS);
+        Assert.assertEquals("100.0px", comboBox.getStyle()
+                .get("--vaadin-multi-select-combo-box-overlay-width"));
     }
 }
