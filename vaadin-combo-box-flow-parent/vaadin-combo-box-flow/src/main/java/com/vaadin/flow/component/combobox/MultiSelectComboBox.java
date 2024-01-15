@@ -507,6 +507,31 @@ public class MultiSelectComboBox<TItem>
     }
 
     /**
+     * Gets whether the filter is kept after selecting items. {@code false} by
+     * default.
+     *
+     * @since 23.4
+     * @return {@code true} if enabled, {@code false} otherwise
+     */
+    public boolean isKeepFilter() {
+        return getElement().getProperty("keepFilter", false);
+    }
+
+    /**
+     * Enables or disables keeping the filter after selecting items. By default,
+     * the filter is cleared after selecting an item and the overlay shows the
+     * unfiltered list of items again. Enabling this option will keep the
+     * filter, which allows to select multiple filtered items in succession.
+     *
+     * @since 23.4
+     * @param keepFilter
+     *            whether to keep the filter after selecting an item
+     */
+    public void setKeepFilter(boolean keepFilter) {
+        getElement().setProperty("keepFilter", keepFilter);
+    }
+
+    /**
      * Gets the internationalization object previously set for this component.
      * <p>
      * Note: updating the i18n object that is returned from this method will not
