@@ -510,7 +510,7 @@ public class MultiSelectComboBox<TItem>
      * Gets whether the filter is kept after selecting items. {@code false} by
      * default.
      *
-     * @since 24.4
+     * @since 23.4
      * @return {@code true} if enabled, {@code false} otherwise
      */
     public boolean isKeepFilter() {
@@ -523,6 +523,7 @@ public class MultiSelectComboBox<TItem>
      * unfiltered list of items again. Enabling this option will keep the
      * filter, which allows to select multiple filtered items in succession.
      *
+     * @since 23.4
      * @param keepFilter
      *            whether to keep the filter after selecting an item
      */
