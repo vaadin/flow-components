@@ -25,6 +25,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -361,6 +362,73 @@ public class MultiSelectListBoxTest {
         listBox.setAriaLabelledBy(null);
 
         Assert.assertTrue(listBox.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void discardSelectionOnDataChange_noExtraChangeEventsFired() {
+        listBox.setSelectionPreservationMode(SelectionPreservationMode.DISCARD);
+
+        Item selectedItem = items.get(0);
+        listBox.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNotNull(selectionEvent);
+        selectionEvent = null;
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assert.assertNotNull(selectionEvent);
+    }
+
+    @Test
+    public void preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
+        listBox.setSelectionPreservationMode(
+                SelectionPreservationMode.PRESERVE_EXISTING);
+
+        Item selectedItem = items.get(0);
+        listBox.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNotNull(selectionEvent);
+        selectionEvent = null;
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(items.get(1));
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(selectedItem);
+        listBox.getDataProvider().refreshAll();
+        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assert.assertNotNull(selectionEvent);
+    }
+
+    @Test
+    public void preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
+        listBox.setSelectionPreservationMode(
+                SelectionPreservationMode.PRESERVE_ALL);
+
+        Item selectedItem = items.get(0);
+        listBox.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNotNull(selectionEvent);
+        selectionEvent = null;
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(items.get(1));
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(selectedItem);
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
     }
 
     private void assertValueChangeEvents(Set<Item>... expectedValues) {

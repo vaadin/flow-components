@@ -17,12 +17,19 @@ package com.vaadin.flow.component.listbox;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import com.vaadin.flow.component.shared.SelectionPreservationHandler;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
+import com.vaadin.flow.data.provider.DataChangeEvent;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
@@ -45,6 +52,8 @@ public class MultiSelectListBox<T>
         extends ListBoxBase<MultiSelectListBox<T>, T, Set<T>>
         implements MultiSelect<MultiSelectListBox<T>, T> {
 
+    private SelectionPreservationHandler<T> selectionPreservationHandler;
+
     /**
      * Creates a new list box component with multi-selection.
      */
@@ -53,6 +62,40 @@ public class MultiSelectListBox<T>
                 MultiSelectListBox::presentationToModel,
                 MultiSelectListBox::modelToPresentation);
         getElement().setProperty("multiple", true);
+        initSelectionPreservationHandler();
+    }
+
+    private void initSelectionPreservationHandler() {
+        selectionPreservationHandler = new SelectionPreservationHandler<>(
+                SelectionPreservationMode.DISCARD) {
+
+            @Override
+            public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
+                // NO-OP
+            }
+
+            @Override
+            public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
+                Map<Object, T> deselectionCandidateIdsToItems = getSelectedItems()
+                        .stream().collect(Collectors
+                                .toMap(item -> getItemId(item), item -> item));
+                @SuppressWarnings("unchecked")
+                Stream<T> itemsStream = getDataProvider()
+                        .fetch(DataViewUtils.getQuery(MultiSelectListBox.this));
+                Set<Object> existingItemIds = itemsStream
+                        .map(item -> getItemId(item))
+                        .filter(deselectionCandidateIdsToItems::containsKey)
+                        .limit(deselectionCandidateIdsToItems.size())
+                        .collect(Collectors.toSet());
+                existingItemIds.forEach(deselectionCandidateIdsToItems::remove);
+                deselect(deselectionCandidateIdsToItems.values());
+            }
+
+            @Override
+            public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
+                clear();
+            }
+        };
     }
 
     private static <T> Set<T> presentationToModel(MultiSelectListBox<T> listBox,
@@ -128,9 +171,48 @@ public class MultiSelectListBox<T>
     @Override
     public Registration addSelectionListener(
             MultiSelectionListener<MultiSelectListBox<T>, T> listener) {
-        return addValueChangeListener(event -> listener
-                .selectionChange(new MultiSelectionEvent<>(this, this,
-                        event.getOldValue(), event.isFromClient())));
+        return addValueChangeListener(event -> {
+            listener.selectionChange(new MultiSelectionEvent<>(this, this,
+                    event.getOldValue(), event.isFromClient()));
+        });
+    }
+
+    /**
+     * Sets the selection preservation mode. Determines what happens with the
+     * selection when {@link DataProvider#refreshAll} is called. The selection
+     * is discarded in any case when a new data provider is set. The default is
+     * {@link SelectionPreservationMode#DISCARD}.
+     *
+     * @param selectionPreservationMode
+     *            the selection preservation mode to switch to, not {@code null}
+     *
+     * @see SelectionPreservationMode
+     */
+    public void setSelectionPreservationMode(
+            SelectionPreservationMode selectionPreservationMode) {
+        selectionPreservationHandler
+                .setSelectionPreservationMode(selectionPreservationMode);
+    }
+
+    /**
+     * Gets the selection preservation mode.
+     *
+     * @return the selection preservation mode
+     *
+     * @see #setSelectionPreservationMode(SelectionPreservationMode)
+     */
+    public SelectionPreservationMode getSelectionPreservationMode() {
+        return selectionPreservationHandler.getSelectionPreservationMode();
+    }
+
+    @Override
+    void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
+        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent) {
+            super.handleDataChange(dataChangeEvent);
+        } else {
+            selectionPreservationHandler.handleDataChange(dataChangeEvent);
+            rebuild();
+        }
     }
 
     /**

@@ -64,6 +64,8 @@ import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.grid.editor.EditorImpl;
 import com.vaadin.flow.component.grid.editor.EditorRenderer;
+import com.vaadin.flow.component.shared.SelectionPreservationHandler;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
@@ -1441,6 +1443,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private SerializableFunction<T, String> tooltipGenerator = item -> null;
 
+    private SelectionPreservationHandler<T> selectionPreservationHandler;
+
     /**
      * Creates a new instance, with page size of 50.
      */
@@ -1669,6 +1673,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         addDragEndListener(this::onDragEnd);
 
         updateMultiSortPriority(defaultMultiSortPriority);
+
+        initSelectionPreservationHandler();
     }
 
     private void generateUniqueKeyData(T item, JsonObject jsonObject) {
@@ -1677,6 +1683,55 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (uniqueKeyPropertyName != null
                 && !jsonObject.hasKey(uniqueKeyPropertyName)) {
             jsonObject.put(uniqueKeyPropertyName, getUniqueKey(item));
+        }
+    }
+
+    private void initSelectionPreservationHandler() {
+        selectionPreservationHandler = new SelectionPreservationHandler<>(
+                SelectionPreservationMode.PRESERVE_ALL) {
+
+            @Override
+            public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
+                // NO-OP
+            }
+
+            @Override
+            public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
+                Map<Object, T> deselectionCandidateIdsToItems = getSelectedItems()
+                        .stream().collect(Collectors
+                                .toMap(getDataProvider()::getId, item -> item));
+                if (deselectionCandidateIdsToItems.isEmpty()) {
+                    return;
+                }
+                @SuppressWarnings("unchecked")
+                Stream<T> itemsStream = getDataProvider().fetch(
+                        getDataCommunicator().buildQuery(0, Integer.MAX_VALUE));
+                Set<Object> existingItemIds = itemsStream
+                        .map(getDataProvider()::getId)
+                        .filter(deselectionCandidateIdsToItems::containsKey)
+                        .limit(deselectionCandidateIdsToItems.size())
+                        .collect(Collectors.toSet());
+                existingItemIds.forEach(deselectionCandidateIdsToItems::remove);
+                if (getSelectionModel() instanceof GridMultiSelectionModel) {
+                    asMultiSelect()
+                            .deselect(deselectionCandidateIdsToItems.values());
+                } else if (!deselectionCandidateIdsToItems.isEmpty()) {
+                    deselectAll();
+                }
+            }
+
+            @Override
+            public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
+                deselectAll();
+            }
+        };
+    }
+
+    private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
+        onDataProviderChange();
+        if (!(dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent)
+                && !(getSelectionModel() instanceof GridNoneSelectionModel)) {
+            selectionPreservationHandler.handleDataChange(dataChangeEvent);
         }
     }
 
@@ -2540,6 +2595,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
+        if (SelectionPreservationMode.PRESERVE_EXISTING.equals(
+                getSelectionPreservationMode()) && !dataProvider.isInMemory()) {
+            throw new UnsupportedOperationException(
+                    "Lazy data providers do not support preserve existing selection mode.");
+        }
         handleDataProviderChange(dataProvider);
 
         deselectAll();
@@ -2888,6 +2948,40 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void deselectAll() {
         getSelectionModel().deselectAll();
+    }
+
+    /**
+     * Sets the selection preservation mode. Determines what happens with the
+     * selection when {@link DataProvider#refreshAll} is called. The selection
+     * is discarded in any case when a new data provider is set. The default is
+     * {@link SelectionPreservationMode#PRESERVE_ALL}. Lazy data providers do
+     * not support {@link SelectionPreservationMode#PRESERVE_EXISTING}.
+     *
+     * @param selectionPreservationMode
+     *            the selection preservation mode to switch to, not {@code null}
+     *
+     * @see SelectionPreservationMode
+     */
+    public void setSelectionPreservationMode(
+            SelectionPreservationMode selectionPreservationMode) {
+        if (SelectionPreservationMode.PRESERVE_EXISTING.equals(
+                selectionPreservationMode) && !getDataProvider().isInMemory()) {
+            throw new UnsupportedOperationException(
+                    "Lazy data providers do not support preserve existing selection mode.");
+        }
+        selectionPreservationHandler
+                .setSelectionPreservationMode(selectionPreservationMode);
+    }
+
+    /**
+     * Gets the selection preservation mode.
+     *
+     * @return the selection preservation mode
+     *
+     * @see #setSelectionPreservationMode(SelectionPreservationMode)
+     */
+    public SelectionPreservationMode getSelectionPreservationMode() {
+        return selectionPreservationHandler.getSelectionPreservationMode();
     }
 
     void doClientSideSelection(Set<T> items) {
@@ -4170,7 +4264,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         dataProviderChangeRegistration = dataProvider
-                .addDataProviderListener(event -> onDataProviderChange());
+                .addDataProviderListener(this::handleDataChange);
     }
 
     /**
