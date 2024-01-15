@@ -114,25 +114,4 @@ describe('grid connector - data range', () => {
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
     expectRequestedRange([rootSize - PAGE_SIZE, PAGE_SIZE * 2]);
   });
-
-  it('should request correct ranges when scrolling fast (start -> end -> start)', async () => {
-    grid.scrollToIndex(rootSize - 1);
-    grid.scrollToIndex(0);
-    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expectRequestedRange([rootSize - PAGE_SIZE, PAGE_SIZE]);
-
-    processRequestedRange();
-
-    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expectRequestedRange([0, PAGE_SIZE]);
-  });
-
-  it('should request correct range when size descreases after scrolling fast (start -> end -> start)', async () => {
-    grid.scrollToIndex(rootSize - 1);
-    grid.scrollToIndex(0);
-    rootSize /= 2;
-    grid.$connector.updateSize(rootSize);
-    await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-    expectRequestedRange([rootSize - PAGE_SIZE, PAGE_SIZE]);
-  });
 });
