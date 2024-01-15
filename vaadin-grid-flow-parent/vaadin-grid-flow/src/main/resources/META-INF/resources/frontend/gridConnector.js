@@ -308,24 +308,40 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           return false;
         });
 
+        grid.$connector.debounceRootRequest = tryCatchWrapper(function (page) {
+          const delay = grid._hasData ? rootRequestDelay : 0;
+
+          rootRequestDebouncer = Debouncer.debounce(rootRequestDebouncer, timeOut.after(delay), () => {
+            grid.$connector.fetchPage(
+              (firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size),
+              page,
+              root
+            );
+          });
+        });
+
         grid.$connector.flushParentRequests = tryCatchWrapper(function () {
-          let pendingFetches = parentRequestQueue.splice(0, parentRequestBatchMaxSize);
+          const pendingFetches = [];
+
+          parentRequestQueue.splice(0, parentRequestBatchMaxSize).forEach(({ parentKey, page }) => {
+            grid.$connector.fetchPage(
+              (firstIndex, size) => pendingFetches.push({ parentKey, firstIndex, size }),
+              page,
+              parentKey
+            );
+          });
 
           if (pendingFetches.length) {
             grid.$server.setParentRequestedRanges(pendingFetches);
-            return true;
           }
-          return false;
         });
 
-        grid.$connector.beforeParentRequest = tryCatchWrapper(function (firstIndex, size, parentKey) {
-          // add request in queue
-          parentRequestQueue.push({
-            firstIndex: firstIndex,
-            size: size,
-            parentKey: parentKey
-          });
-
+        grid.$connector.debounceParentRequest = tryCatchWrapper(function (parentKey, page) {
+          // Remove any pending requests for the same parentKey.
+          parentRequestQueue = parentRequestQueue.filter((request) => request.parentKey !== parentKey);
+          // Add the new request to the queue.
+          parentRequestQueue.push({ parentKey, page });
+          // Debounce the request to avoid sending multiple requests for the same parentKey.
           parentRequestDebouncer = Debouncer.debounce(parentRequestDebouncer, timeOut.after(parentRequestDelay), () => {
             while (parentRequestQueue.length) {
               grid.$connector.flushParentRequests();
@@ -410,11 +426,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             } else {
               treePageCallbacks[parentUniqueKey][page] = callback;
 
-              grid.$connector.fetchPage(
-                (firstIndex, size) => grid.$connector.beforeParentRequest(firstIndex, size, params.parentItem.key),
-                page,
-                parentUniqueKey
-              );
+              grid.$connector.debounceParentRequest(parentUniqueKey, page);
             }
           } else {
             // workaround: sometimes grid-element gives page index that overflows
@@ -437,17 +449,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             } else {
               rootPageCallbacks[page] = callback;
 
-              rootRequestDebouncer = Debouncer.debounce(
-                rootRequestDebouncer,
-                timeOut.after(grid._hasData ? rootRequestDelay : 0),
-                () => {
-                  grid.$connector.fetchPage(
-                    (firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size),
-                    page,
-                    root
-                  );
-                }
-              );
+              grid.$connector.debounceRootRequest(page);
             }
           }
         });
