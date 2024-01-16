@@ -491,31 +491,21 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
          * @returns an array of the updated items for the page, or undefined if no items were cached for the page
          */
         const updateGridCache = function (page, parentKey = root) {
-          let items = cache[parentKey][page];
+          const items = cache[parentKey][page] || new Array(grid.pageSize);
+
+          let gridCache = dataProviderController.rootCache;
           if (parentKey !== root) {
             const parentItem = createEmptyItemFromKey(parentKey);
             const parentItemContext = dataProviderController.getItemContext(parentItem);
-            const parentItemSubCache = parentItemContext?.subCache;
-            if (parentItemSubCache) {
-              _updateGridCache(page, items, parentItemSubCache);
-            }
-          } else {
-            _updateGridCache(page, items, dataProviderController.rootCache);
+            gridCache = parentItemContext?.subCache;
           }
-          return items;
-        };
 
-        const _updateGridCache = function (page, items, cache) {
           // Force update unless there's a callback waiting
-          if (cache.pendingRequests[page]) {
-            return;
+          if (gridCache && !gridCache.pendingRequests[page]) {
+            gridCache.setPage(page, items);
           }
 
-          if (items) {
-            cache.setPage(page, items);
-          } else {
-            cache.setPage(page, new Array(grid.pageSize));
-          }
+          return items;
         };
 
         /**
