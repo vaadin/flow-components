@@ -41,7 +41,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           return grid.$connector.hasEnsureSubCacheQueue() || this.isLoadingOriginal();
         });
 
-        const cache = {};
+        let cache = {};
 
         /* parentRequestDelay - optimizes parent requests by batching several requests
          *  into one request. Delay in milliseconds. Disable by setting to 0.
