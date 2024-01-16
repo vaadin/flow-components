@@ -41,7 +41,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           return grid.$connector.hasEnsureSubCacheQueue() || this.isLoadingOriginal();
         });
 
-        const cache = {};
+        let cache = {};
 
         /* parentRequestDelay - optimizes parent requests by batching several requests
          *  into one request. Delay in milliseconds. Disable by setting to 0.
@@ -697,9 +697,9 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
 
         grid.$connector.reset = tryCatchWrapper(function () {
           grid.size = 0;
-          deleteObjectContents(cache);
-          deleteObjectContents(dataProviderController.rootCache.items);
-          deleteObjectContents(lastRequestedRanges);
+          cache = {};
+          dataProviderController.rootCache.items = [];
+          lastRequestedRanges = {};
           if (ensureSubCacheDebouncer) {
             ensureSubCacheDebouncer.cancel();
           }
@@ -715,8 +715,6 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           parentRequestQueue = [];
           updateAllGridRowsInDomBasedOnCache();
         });
-
-        const deleteObjectContents = (obj) => Object.keys(obj).forEach((key) => delete obj[key]);
 
         grid.$connector.updateSize = (newSize) => (grid.size = newSize);
 
@@ -857,7 +855,8 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
               delete cache[parentKey];
             }
           }
-          deleteObjectContents(lastRequestedRanges);
+
+          lastRequestedRanges = {};
 
           dataProviderController.rootCache.removeSubCaches();
 
