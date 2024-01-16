@@ -357,6 +357,66 @@ public class SideNavItem extends SideNavItemContainer
         }
     }
 
+    /**
+     * Gets the target of this item.
+     *
+     * @return the target of this item
+     */
+    public String getTarget() {
+        return getElement().getProperty("target");
+    }
+
+    /**
+     * Where to display the linked URL, as the name for a browsing context.
+     * <p>
+     * The following keywords have special meanings for where to load the URL:
+     * <ul>
+     * <li><code>_self</code>: the current browsing context. (Default)</li>
+     * <li><code>_blank</code>: usually a new tab, but users can configure
+     * browsers to open a new window instead.</li>
+     * <li><code>_parent</code>: the parent browsing context of the current one.
+     * If no parent, behaves as <code>_self</code>.</li>
+     * <li><code>_top</code>: the topmost browsing context (the "highest"
+     * context that’s an ancestor of the current one). If no ancestors, behaves
+     * as <code>_self</code>.</li>
+     * </ul>
+     * </p>
+     *
+     * @param target
+     *            the target of this item
+     */
+    public void setTarget(String target) {
+        if (target == null) {
+            getElement().removeProperty("target");
+        } else {
+            getElement().setProperty("target", target);
+        }
+    }
+
+    /**
+     * Sets whether the target URL should be opened in a new browser tab.
+     * <p>
+     * This is a convenience method for setting the target to
+     * <code>_blank</code>. See {@link #setTarget(String)} for more information.
+     * </p>
+     *
+     * @param openInNewBrowserTab true if the target URL should be opened in a
+     *                            new browser tab, false otherwise
+     */
+    public void setOpenInNewBrowserTab(boolean openInNewBrowserTab) {
+        setTarget(openInNewBrowserTab ? "_blank" : null);
+    }
+
+    /**
+     * Gets whether the target URL should be opened in a new browser tab.
+     *
+     * @return true if the target URL should be opened in a new browser tab,
+     *         false otherwise
+     */
+    public boolean isOpenInNewBrowserTab() {
+        return "_blank".equals(getTarget());
+    }
+
     private Set<String> getPathAliasesFromView(Class<? extends Component> view,
             RouteParameters routeParameters) {
         RouteAlias[] routeAliases = view.getAnnotationsByType(RouteAlias.class);
