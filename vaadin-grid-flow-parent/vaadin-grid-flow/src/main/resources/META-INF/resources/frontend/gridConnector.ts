@@ -490,44 +490,25 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
          * @param parentKey the key of the parent item for the page
          * @returns an array of the updated items for the page, or undefined if no items were cached for the page
          */
-        const updateGridCache = function (page, parentKey) {
-          let items;
-          if ((parentKey || root) !== root) {
-            items = cache[parentKey][page];
+        const updateGridCache = function (page, parentKey = root) {
+          const items = cache[parentKey][page];
+
+          let gridCache = dataProviderController.rootCache;
+          if (parentKey !== root) {
             const parentItem = createEmptyItemFromKey(parentKey);
             const parentItemContext = dataProviderController.getItemContext(parentItem);
-            const parentItemSubCache = parentItemContext?.subCache;
-            if (parentItemSubCache) {
-              _updateGridCache(page, items, parentItemSubCache);
-            }
-          } else {
-            items = cache[root][page];
-            _updateGridCache(page, items, dataProviderController.rootCache);
+            gridCache = parentItemContext?.subCache;
           }
-          return items;
-        };
 
-        const _updateGridCache = function (page, items, levelcache) {
           // Force update unless there's a callback waiting
-          if (!levelcache.pendingRequests[page]) {
-            let rangeStart = page * grid.pageSize;
-            let rangeEnd = rangeStart + grid.pageSize;
-            if (!items) {
-              if (levelcache && levelcache.items) {
-                for (let idx = rangeStart; idx < rangeEnd; idx++) {
-                  delete levelcache.items[idx];
-                }
-              }
-            } else {
-              if (levelcache && levelcache.items) {
-                for (let idx = rangeStart; idx < rangeEnd; idx++) {
-                  if (levelcache.items[idx]) {
-                    levelcache.items[idx] = items[idx - rangeStart];
-                  }
-                }
-              }
-            }
+          if (gridCache && !gridCache.pendingRequests[page]) {
+            // Update the items in the grid cache or set an array of undefined items
+            // to remove the page from the grid cache if there are no corresponding items
+            // in the connector cache.
+            gridCache.setPage(page, items || Array.from({ length: grid.pageSize }));
           }
+
+          return items;
         };
 
         /**
