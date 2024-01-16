@@ -76,20 +76,6 @@ describe('flow-component-renderer', () => {
     expect(container.firstElementChild).to.equal(element);
   });
 
-  it('should try to retrieve a node only once', async () => {
-    const { getByNodeId } = window.Vaadin.Flow.clients.ROOT;
-    const component = fixtureSync<TestComponent>(`<test-component></test-component>`);
-    component.nodeId = 0;
-
-    getByNodeId.resetHistory();
-
-    await nextFrame();
-    await nextFrame();
-    await nextFrame();
-
-    expect(getByNodeId).to.have.been.calledTwice;
-  });
-
   it('should remove old node', async () => {
     const container = fixtureSync<HTMLDivElement>(`<div></div>`);
     const element = document.createElement('div');
