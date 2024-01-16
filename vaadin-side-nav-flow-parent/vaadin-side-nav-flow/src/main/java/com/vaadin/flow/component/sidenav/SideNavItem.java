@@ -400,8 +400,9 @@ public class SideNavItem extends SideNavItemContainer
      * <code>_blank</code>. See {@link #setTarget(String)} for more information.
      * </p>
      *
-     * @param openInNewBrowserTab true if the target URL should be opened in a
-     *                            new browser tab, false otherwise
+     * @param openInNewBrowserTab
+     *            true if the target URL should be opened in a new browser tab,
+     *            false otherwise
      */
     public void setOpenInNewBrowserTab(boolean openInNewBrowserTab) {
         setTarget(openInNewBrowserTab ? "_blank" : null);
