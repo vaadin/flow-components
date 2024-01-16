@@ -502,12 +502,10 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
 
           // Force update unless there's a callback waiting
           if (gridCache && !gridCache.pendingRequests[page]) {
-            if (items) {
-              gridCache.setPage(page, items);
-            } else {
-              // Pass an array with undefined items to remove the page from the cache.
-              gridCache.setPage(page, Array.from({ length: grid.pageSize }));
-            }
+            // Update the items in the grid cache or set an array of undefined items
+            // to remove the page from the grid cache if there are no corresponding items
+            // in the connector cache.
+            gridCache.setPage(page, items || Array.from({ length: grid.pageSize }));
           }
 
           return items;
