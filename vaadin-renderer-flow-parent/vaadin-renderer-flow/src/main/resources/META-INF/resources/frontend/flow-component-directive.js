@@ -22,14 +22,14 @@ class FlowComponentDirective extends AsyncDirective {
     const newNode = hasNewNodeId ? this.getNewNode(appid, nodeid) : null;
     const oldNode = this.getOldNode(part);
 
-    this.__isRetry = !!this.__nodeRetryTimeout;
-    clearTimeout(this.__nodeRetryTimeout);
-
     if (hasNewNodeId && !newNode) {
       // If the node is not found, try again later once.
-      if (!this.__isRetry) {
-        this.__nodeRetryTimeout = setTimeout(() => this.updateContent(part, appid, nodeid));
+      if (this.__onRetry) {
+        this.__onRetry = undefined;
+        return;
       }
+      this.__onRetry = true;
+      queueMicrotask(() => this.updateContent(part, appid, nodeid));
     } else if (oldNode === newNode) {
       return;
     } else if (oldNode && newNode) {
@@ -54,7 +54,7 @@ class FlowComponentDirective extends AsyncDirective {
   }
 
   disconnected() {
-    clearTimeout(this.__nodeRetryTimeout);
+    this.__onRetry = undefined;
   }
 }
 
