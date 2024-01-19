@@ -69,16 +69,18 @@ public class SideNavItemElement extends TestBenchElement {
     }
 
     public void navigate() {
-        WebElement anchorElement;
+        // click() on elements in shadow DOM does not work with Chrome driver
+        executeScript("arguments[0].click();", getAnchor());
+    }
+
+    public WebElement getAnchor() {
         try {
-            anchorElement = getWrappedElement().getShadowRoot()
+            return getWrappedElement().getShadowRoot()
                     .findElement((By.cssSelector("a")));
         } catch (NoSuchElementException e) {
             throw new NoSuchElementException("Item does not contain an anchor",
                     e);
         }
-        // click() on elements in shadow DOM does not work with Chrome driver
-        executeScript("arguments[0].click();", anchorElement);
     }
 
     public void toggle() {

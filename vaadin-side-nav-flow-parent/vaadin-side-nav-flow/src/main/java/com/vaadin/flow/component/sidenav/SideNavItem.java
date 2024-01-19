@@ -33,6 +33,8 @@ import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.internal.ConfigureRoutes;
 import elemental.json.JsonArray;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -231,12 +233,8 @@ public class SideNavItem extends SideNavItemContainer
      * @see SideNavItem#setPath(Class)
      */
     public void setPath(String path) {
-        if (path == null) {
-            getElement().removeAttribute("path");
-        } else {
-            getElement().setAttribute("path",
-                    sanitizePath(updateQueryParameters(path)));
-        }
+        setRouterIgnore(isPathComplete(path));
+        doSetPath(path);
     }
 
     /**
@@ -282,14 +280,24 @@ public class SideNavItem extends SideNavItemContainer
      */
     public void setPath(Class<? extends Component> view,
             RouteParameters routeParameters) {
+        setRouterIgnore(false);
         if (view == null) {
-            setPath((String) null);
+            doSetPath(null);
             setPathAliases(Collections.emptySet());
         } else {
             RouteConfiguration routeConfiguration = RouteConfiguration
                     .forRegistry(ComponentUtil.getRouter(this).getRegistry());
-            setPath(routeConfiguration.getUrl(view, routeParameters));
+            doSetPath(routeConfiguration.getUrl(view, routeParameters));
             setPathAliases(getPathAliasesFromView(view, routeParameters));
+        }
+    }
+
+    private void doSetPath(String path) {
+        if (path == null) {
+            getElement().removeAttribute("path");
+        } else {
+            getElement().setAttribute("path",
+                    sanitizePath(updateQueryParameters(path)));
         }
     }
 
@@ -354,6 +362,28 @@ public class SideNavItem extends SideNavItemContainer
                     .map(this::updateQueryParameters).map(this::sanitizePath)
                     .collect(Collectors.toSet()));
             getElement().setPropertyJson("pathAliases", aliasesAsJson);
+        }
+    }
+
+    private void setRouterIgnore(boolean routerIgnore) {
+        String jsExpression;
+        if (routerIgnore) {
+            jsExpression = "queueMicrotask(() => this.shadowRoot.querySelector('a').setAttribute('router-ignore', true));";
+        } else {
+            jsExpression = "queueMicrotask(() => this.shadowRoot.querySelector('a').removeAttribute('router-ignore'));";
+        }
+        getElement().executeJs(jsExpression);
+    }
+
+    private boolean isPathComplete(String path) {
+        if (path == null) {
+            return false;
+        }
+        try {
+            new URL(path);
+            return true;
+        } catch (MalformedURLException e) {
+            return false;
         }
     }
 
