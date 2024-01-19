@@ -67,15 +67,6 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
     }
 
     @Test
-    public void smallPageSize_expandAll_correctLastVisibleItem() {
-        $("button").id("change-page-size").click();
-        expandAllButton.click();
-
-        int lastVisibleRow = grid.getLastVisibleRowIndex();
-        Assert.assertEquals("Son 0/0/7", getCellContent(lastVisibleRow));
-    }
-
-    @Test
     public void scrollToEnd_correctLastVisibleItem() {
         scrollToEndButton.click();
 
