@@ -677,10 +677,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
             grid.$connector.doDeselection(items.filter((item) => selectedKeys[item.key]));
             items.forEach((item) => grid.closeItemDetails(item));
             delete cache[pkey][page];
-            const updatedItems = updateGridCache(page, parentKey);
-            if (updatedItems) {
-              itemsUpdated(updatedItems);
-            }
+            updateGridCache(page, parentKey);
             updateGridItemsInDomBasedOnCache(items);
           }
           let cacheToClear = dataProviderController.rootCache;
