@@ -41,6 +41,10 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           return grid.$connector.hasEnsureSubCacheQueue() || this.isLoadingOriginal();
         });
 
+        dataProviderController.getItemSubCache = tryCatchWrapper(function (item) {
+          return this.getItemContext(item)?.subCache;
+        });
+
         let cache = {};
 
         /* parentRequestDelay - optimizes parent requests by batching several requests
@@ -323,8 +327,8 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           if (params.parentItem) {
             let parentUniqueKey = grid.getItemId(params.parentItem);
 
-            const parentItemContext = dataProviderController.getItemContext(params.parentItem);
-            if (cache[parentUniqueKey]?.[page] && parentItemContext.subCache) {
+            const parentItemSubCache = dataProviderController.getItemSubCache(params.parentItem);
+            if (cache[parentUniqueKey]?.[page] && parentItemSubCache) {
               // Ensure grid isn't in loading state when the callback executes
               ensureSubCacheQueue = [];
               // Resolve the callback from cache
@@ -492,13 +496,11 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
          */
         const updateGridCache = function (page, parentKey = root) {
           const items = cache[parentKey][page];
+          const parentItem = createEmptyItemFromKey(parentKey);
 
-          let gridCache = dataProviderController.rootCache;
-          if (parentKey !== root) {
-            const parentItem = createEmptyItemFromKey(parentKey);
-            const parentItemContext = dataProviderController.getItemContext(parentItem);
-            gridCache = parentItemContext?.subCache;
-          }
+          let gridCache = parentKey === root
+            ? dataProviderController.rootCache
+            : dataProviderController.getItemSubCache(parentItem);
 
           // Force update unless there's a callback waiting
           if (gridCache && !gridCache.pendingRequests[page]) {
@@ -681,8 +683,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           let cacheToClear = dataProviderController.rootCache;
           if (parentKey) {
             const parentItem = createEmptyItemFromKey(pkey);
-            const parentItemContext = dataProviderController.getItemContext(parentItem);
-            cacheToClear = parentItemContext.subCache;
+            cacheToClear = dataProviderController.getItemSubCache(parentItem);
           }
           const endIndex = index + updatedPageCount * grid.pageSize;
           for (let itemIndex = index; itemIndex < endIndex; itemIndex++) {
@@ -738,8 +739,8 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
         grid.$connector.removeFromQueue = tryCatchWrapper(function (item) {
           // The page callbacks for the given item are about to be discarded ->
           // Resolve the callbacks with an empty array to not leave grid in loading state
-          const itemContext = dataProviderController.getItemContext(item);
-          Object.values(itemContext?.subCache?.pendingRequests || {}).forEach((callback) => callback([]));
+          const itemSubCache = dataProviderController.getItemSubCache(item);
+          Object.values(itemSubCache?.pendingRequests || {}).forEach((callback) => callback([]));
 
           const itemId = grid.getItemId(item);
           ensureSubCacheQueue = ensureSubCacheQueue.filter((item) => item.itemkey !== itemId);
@@ -759,8 +760,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           }
 
           const parentItem = createEmptyItemFromKey(parentKey);
-          const parentItemContext = dataProviderController.getItemContext(parentItem);
-          const parentItemSubCache = parentItemContext?.subCache;
+          const parentItemSubCache = dataProviderController.getItemSubCache(parentItem);
           if (parentItemSubCache) {
             // If grid has pending requests for this parent, then resolve them
             // and let grid update the flat size and re-render.
