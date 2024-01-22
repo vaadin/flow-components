@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -21,7 +21,7 @@ package com.vaadin.flow.component.charts.model;
  * Language object. The language object is global and it can't be set on each
  * chart initiation. Instead, use <code>Highcharts.setOptions</code> to set it
  * before any chart is initiated.
- * 
+ *
  * <pre>
  * Highcharts.setOptions({
  * 	lang: {
@@ -377,7 +377,7 @@ public class Lang extends AbstractConfigurationObject {
      * space character, which is compatible with ISO and works across
      * Anglo-American and continental European languages.
      * </p>
-     * 
+     *
      * <p>
      * The default is a single space.
      * </p>

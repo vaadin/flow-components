@@ -135,7 +135,7 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
     /**
      * Sets the minimum value of the field. Entering a value which is smaller
      * than {@code min} invalidates the field.
-     * 
+     *
      * @param min
      *            the min value to set
      */
@@ -180,7 +180,7 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
      * {@link #setHasControls(boolean) control buttons}. It is also used to
      * invalidate the field, if the value doesn't align with the specified step
      * and {@link #setMin(int) min} (if specified by user).
-     * 
+     *
      * @param step
      *            the new step to set
      * @throws IllegalArgumentException

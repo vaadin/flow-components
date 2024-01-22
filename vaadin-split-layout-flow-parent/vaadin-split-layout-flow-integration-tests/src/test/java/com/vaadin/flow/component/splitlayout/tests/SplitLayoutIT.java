@@ -66,7 +66,7 @@ public class SplitLayoutIT extends ComponentDemoTest {
 
         WebElement splitter = new TestBenchWrapper(splitLayout,
                 getCommandExecutor()).$("*").id("splitter")
-                        .findElement(By.tagName("div"));
+                .findElement(By.tagName("div"));
 
         new Actions(getDriver()).dragAndDropBy(splitter, 1, 1).clickAndHold()
                 .moveByOffset(200, 0).release().build().perform();
@@ -101,7 +101,7 @@ public class SplitLayoutIT extends ComponentDemoTest {
                 .findElements(By.tagName(SPLIT_LAYOUT_TAG)).get(5);
         WebElement splitter = new TestBenchWrapper(splitLayout,
                 getCommandExecutor()).$("*").id("splitter")
-                        .findElement(By.tagName("div"));
+                .findElement(By.tagName("div"));
         WebElement primaryComponent = findElement(
                 By.id("min-max-first-component"));
 

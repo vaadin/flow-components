@@ -105,7 +105,7 @@ public class MenuBar extends Component
      * <p>
      * To add content to the sub menu opened by clicking the root level item,
      * use {@link MenuItem#getSubMenu()}.
-     * 
+     *
      * @param component
      *            the component to add inside new item
      * @return the added {@link MenuItem} component
@@ -186,7 +186,7 @@ public class MenuBar extends Component
      * @throws IllegalArgumentException
      *             if any of the item components to remove is not a child of
      *             this menu bar
-     * 
+     *
      */
     public void remove(MenuItem... items) {
         menuManager.remove(items);
@@ -214,7 +214,7 @@ public class MenuBar extends Component
 
     /**
      * Sets the event which opens the sub menus of the root level buttons.
-     * 
+     *
      * @param openOnHover
      *            {@code true} to make the sub menus open on hover (mouseover),
      *            {@code false} to make them openable by clicking
@@ -226,7 +226,7 @@ public class MenuBar extends Component
     /**
      * Gets whether the sub menus open by clicking or hovering on the root level
      * buttons.
-     * 
+     *
      * @return {@code true} if the sub menus open by hovering on the root level
      *         buttons, {@code false} if they open by clicking
      */

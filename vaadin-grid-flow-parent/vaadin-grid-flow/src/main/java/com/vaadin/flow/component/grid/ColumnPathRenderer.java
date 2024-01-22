@@ -33,7 +33,7 @@ import elemental.json.Json;
  * Renderer for columns that doesn't use any template for rendering its contents
  * (only the value from the object model). In such cases, a {@code template}
  * element is not needed on the client-side, only the {@code path} property.
- * 
+ *
  * @author Vaadin Ltd.
  *
  * @param <SOURCE>
@@ -45,7 +45,7 @@ public class ColumnPathRenderer<SOURCE> extends Renderer<SOURCE> {
     /**
      * Creates a new renderer based on the property and the value provider for
      * that property.
-     * 
+     *
      * @param property
      *            the property name
      * @param provider

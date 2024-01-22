@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -36,7 +36,7 @@ public class AxisList<T extends Axis> extends AbstractConfigurationObject {
 
     /**
      * Finds the axis at the given index
-     * 
+     *
      * @param index
      *            The index of the axis
      * @return The axis at the given index
@@ -54,7 +54,7 @@ public class AxisList<T extends Axis> extends AbstractConfigurationObject {
 
     /**
      * Adds a new axis to the list
-     * 
+     *
      * @param axis
      *            The axis to add
      */
@@ -72,7 +72,7 @@ public class AxisList<T extends Axis> extends AbstractConfigurationObject {
 
     /**
      * Removes an axis from the list
-     * 
+     *
      * @param axis
      *            The axis to remove
      */

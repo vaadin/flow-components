@@ -35,9 +35,9 @@ import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 
 /**
- * 
+ *
  * Integration tests for the {@link GridTestPage}.
- * 
+ *
  * @author Vaadin Ltd.
  */
 @TestPath("vaadin-grid-test")

@@ -44,7 +44,7 @@ public class FeaturesDiy extends Features {
         dialog.setHeader("Delete product");
         dialog.setText(new Html(
                 "<span>Are you sure you want to delete? This operation <b>can not be undone</b></span>")
-                        .getElement());
+                .getElement());
         Button deleteButton = new Button("Delete");
         deleteButton.setId("confirmDiy");
         deleteButton.setIconAfterText(true);
@@ -94,7 +94,7 @@ public class FeaturesDiy extends Features {
         dialog.setHeader("Unsaved changes");
         dialog.setText(new Html(
                 "<span>Do you want to <b>save</b> or <b>discard</b> your changes before navigating away?</span>")
-                        .getElement());
+                .getElement());
 
         Button saveButton = new Button("Save");
         saveButton.setId("confirmDiy");

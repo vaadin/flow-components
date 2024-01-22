@@ -79,7 +79,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     /**
      * Sets up the common logic for number fields.
-     * 
+     *
      * @param parser
      *            function to parse the client-side value string into
      *            server-side value

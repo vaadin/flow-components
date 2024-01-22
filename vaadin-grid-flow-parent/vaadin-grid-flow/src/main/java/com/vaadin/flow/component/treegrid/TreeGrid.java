@@ -483,7 +483,7 @@ public class TreeGrid<T> extends Grid<T>
     private Column<T> addHierarchyColumn(PropertyDefinition<T, ?> property) {
         Column<T> column = addHierarchyColumn(
                 item -> String.valueOf(property.getGetter().apply(item)))
-                        .setHeader(property.getCaption());
+                .setHeader(property.getCaption());
         try {
             return column.setKey(property.getName());
         } catch (IllegalArgumentException exception) {

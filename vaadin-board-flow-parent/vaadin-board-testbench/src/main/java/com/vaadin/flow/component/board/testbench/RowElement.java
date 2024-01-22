@@ -15,7 +15,7 @@ public class RowElement extends TestBenchElement {
 
     /**
      * Returns all the immediate child elements of this row.
-     * 
+     *
      * @return all immediate child elements of this row
      */
     public List<TestBenchElement> getChildren() {

@@ -494,7 +494,7 @@ public class BigDecimalField
     /**
      * Sets the locale for this BigDecimalField. It is used to determine which
      * decimal separator (the radix point) should be used.
-     * 
+     *
      * @param locale
      *            the locale to set, not {@code null}
      */
@@ -509,7 +509,7 @@ public class BigDecimalField
     /**
      * Gets the locale used by this BigDecimalField. It is used to determine
      * which decimal separator (the radix point) should be used.
-     * 
+     *
      * @return the locale of this field, never {@code null}
      */
     @Override

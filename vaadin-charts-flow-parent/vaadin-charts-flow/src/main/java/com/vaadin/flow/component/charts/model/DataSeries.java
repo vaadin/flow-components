@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -31,7 +31,7 @@ import java.util.List;
  * The class uses {@link DataSeriesItem} to represent individual data points.
  * The class also has various helper methods and constructors that allow passing
  * data as arrays or lists.
- * 
+ *
  * @see ListSeries
  * @see RangeSeries
  * @see HeatSeries
@@ -53,7 +53,7 @@ public class DataSeries extends AbstractSeries {
     /**
      * Constructs a DataSeries instance containing the given category name, Y
      * value pairs.
-     * 
+     *
      * @param categories
      * @param ys
      */
@@ -65,7 +65,7 @@ public class DataSeries extends AbstractSeries {
 
     /**
      * Constructs a new DataSeries instance with the given name.
-     * 
+     *
      */
     public DataSeries(String name) {
         setName(name);
@@ -73,7 +73,7 @@ public class DataSeries extends AbstractSeries {
 
     /**
      * Constructs a new DataSeries instance with the given items.
-     * 
+     *
      * @param items
      *            items to be contained in the constructed DataSeries
      */
@@ -83,7 +83,7 @@ public class DataSeries extends AbstractSeries {
 
     /**
      * Constructs a new DataSeries with the given items.
-     * 
+     *
      * @param items
      *            items to be contained in the constructed DataSeries
      */
@@ -93,13 +93,13 @@ public class DataSeries extends AbstractSeries {
 
     /**
      * Adds a list of (x,y) data pairs
-     * 
+     *
      * e.g. <code>[[0, 15], [10, -50], [20, -56.5]...</code>
-     * 
+     *
      * could be inserted as follows
-     * 
+     *
      * <code>new Number[][] { { 0, 15 }, { 10, -50 }, { 20, -56.5 }</code>
-     * 
+     *
      * @param entries
      *            An array of Numbers representing the (x,y) data pairs.
      */
@@ -112,9 +112,9 @@ public class DataSeries extends AbstractSeries {
     /**
      * Sets the data entries, first clearing the old ones. Uses the given
      * category names and numeric values.
-     * 
+     *
      * The categoryNames and values arrays must be of equal length.
-     * 
+     *
      * @param categoryNames
      *            An array of the category names.
      * @param values
@@ -132,9 +132,9 @@ public class DataSeries extends AbstractSeries {
     /**
      * Sets the data entries, first clearing the old ones. Uses the given
      * category names, numeric values, and colors.
-     * 
+     *
      * The categoryNames, values and colors arrays must be of equal length.
-     * 
+     *
      * @param categoryNames
      *            An array of the category names.
      * @param values
@@ -159,7 +159,7 @@ public class DataSeries extends AbstractSeries {
     /**
      * Sets the data entries, first clearing the old ones. Uses the same numeric
      * value for names (value.toString) and Y-values.
-     * 
+     *
      * @param values
      */
     public void setData(Number... values) {
@@ -171,7 +171,7 @@ public class DataSeries extends AbstractSeries {
 
     /**
      * Sets the data to the provided list of data items.
-     * 
+     *
      * @param data
      */
     public void setData(List<DataSeriesItem> data) {
@@ -197,7 +197,7 @@ public class DataSeries extends AbstractSeries {
      * Adds a data item and immediately updates the chart if it already has been
      * drawn. If the chart has not yet been drawn, all items added will be added
      * to the chart when the chart is drawn.
-     * 
+     *
      * @see #add(DataSeriesItem, boolean, boolean)
      * @param item
      *            the data item to be added
@@ -209,10 +209,10 @@ public class DataSeries extends AbstractSeries {
     /**
      * Adds a new item to the series data. And sets the series as its drilldown.
      * Used for eager loading drilldown. Series must have an id.
-     * 
+     *
      * The remaining drilldown configurations can be set in
      * {@link Configuration#getDrilldown()}
-     * 
+     *
      * @param item
      * @param series
      */
@@ -230,10 +230,10 @@ public class DataSeries extends AbstractSeries {
      * lazy loading drilldown. Using async drilldown requires setting
      * {@link Chart#setDrilldownCallback(com.vaadin.flow.component.charts.DrilldownCallbackHandler)}
      * to return a {@link Series} when drilldown is done.
-     * 
+     *
      * The remaining drilldown configurations can be set in
      * {@link Configuration#getDrilldown()}
-     * 
+     *
      * @param item
      */
     public void addItemWithDrilldown(DataSeriesItem item) {
@@ -266,7 +266,7 @@ public class DataSeries extends AbstractSeries {
      * This method is useful if you want to add many items without a
      * client/server round-trip for each item added. Do this by setting the
      * updateChartImmediately parameter to false.
-     * 
+     *
      * @param item
      *            The item to add.
      * @param updateChartImmediately
@@ -289,7 +289,7 @@ public class DataSeries extends AbstractSeries {
 
     /**
      * Removes a given item and immediately removes it from the chart.
-     * 
+     *
      * @param item
      *            The item to remove.
      */
@@ -311,7 +311,7 @@ public class DataSeries extends AbstractSeries {
     /**
      * Triggers an update of the chart for the specified data item. Only the Y
      * value of the DataSeriesItem is updated.
-     * 
+     *
      * @param item
      *            The item to update.
      */
@@ -323,7 +323,7 @@ public class DataSeries extends AbstractSeries {
 
     /**
      * Returns {@link DataSeriesItem} at given index
-     * 
+     *
      * @param index
      * @return the Item
      * @throws IndexOutOfBoundsException
@@ -349,7 +349,7 @@ public class DataSeries extends AbstractSeries {
 
     /**
      * Sets a new sliced value to the item with the specified index
-     * 
+     *
      * @param index
      *            Index of the Item to modify
      * @param sliced
@@ -362,7 +362,7 @@ public class DataSeries extends AbstractSeries {
 
     /**
      * Sets a new sliced value to the item with the specified index
-     * 
+     *
      * @param index
      *            Index of the Item to modify
      * @param sliced
@@ -377,7 +377,7 @@ public class DataSeries extends AbstractSeries {
 
     /**
      * Sets a new sliced value to the item with the specified index
-     * 
+     *
      * @param index
      *            Index of the Item to modify
      * @param sliced

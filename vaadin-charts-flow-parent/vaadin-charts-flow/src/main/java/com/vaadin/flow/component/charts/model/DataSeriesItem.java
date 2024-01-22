@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -322,7 +322,7 @@ public class DataSeriesItem extends AbstractSeriesItem {
      * for a drilldown for this point. If the value doesn't correspond to the ID
      * of a series the point will be shown as if drilldown was enabled and a
      * {@link DrilldownCallback} will be triggered when user clicks in a point.
-     * 
+     *
      * @param drilldown
      */
     void setDrilldown(String drilldown) {
@@ -332,7 +332,7 @@ public class DataSeriesItem extends AbstractSeriesItem {
     /**
      * True to enable drilldown and a {@link DrilldownCallback} will be
      * triggered when user clicks in a point.
-     * 
+     *
      * @param drilldown
      */
     void setDrilldown(Boolean drilldown) {
@@ -349,7 +349,7 @@ public class DataSeriesItem extends AbstractSeriesItem {
 
     /**
      * Set the label configuration for this item
-     * 
+     *
      * @param dataLabels
      */
     public void setDataLabels(DataLabels dataLabels) {

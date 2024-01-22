@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model.style;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -42,7 +42,7 @@ public class LabelStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the <code>color</code> CSS attribute.
-     * 
+     *
      * @param color
      */
     public void setColor(Color color) {
@@ -58,7 +58,7 @@ public class LabelStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the <code>font-weight</code> CSS attribute.
-     * 
+     *
      * @param fontWeight
      */
     public void setFontWeight(FontWeight fontWeight) {
@@ -74,7 +74,7 @@ public class LabelStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the <code>font-family</code> CSS attribute.
-     * 
+     *
      * @param fontFamily
      */
     public void setFontFamily(String fontFamily) {
@@ -90,7 +90,7 @@ public class LabelStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the <code>font-size</code> CSS attribute.
-     * 
+     *
      * @param fontSize
      */
     public void setFontSize(String fontSize) {
@@ -106,7 +106,7 @@ public class LabelStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the <code>left</code> CSS attribute
-     * 
+     *
      * @param left
      */
     public void setLeft(String left) {
@@ -122,7 +122,7 @@ public class LabelStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the <code>top</code> CSS attribute
-     * 
+     *
      * @param top
      */
     public void setTop(String top) {
@@ -131,7 +131,7 @@ public class LabelStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the <code>position</code> CSS attribute
-     * 
+     *
      * @param position
      */
     public void setPosition(StylePosition position) {

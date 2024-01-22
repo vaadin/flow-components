@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -22,7 +22,7 @@ package com.vaadin.flow.component.charts.model;
  * from options.symbols. Other possible values are "circle", "square",
  * "diamond", "triangle" and "triangle-down". Additionally, the URL to a graphic
  * can be given on this form: URL.setUrl("url(graphic.png)").
- * 
+ *
  */
 public enum MarkerSymbolEnum implements MarkerSymbol, ChartEnum {
     CIRCLE("circle"), SQUARE("square"), DIAMOND("diamond"), TRIANGLE(

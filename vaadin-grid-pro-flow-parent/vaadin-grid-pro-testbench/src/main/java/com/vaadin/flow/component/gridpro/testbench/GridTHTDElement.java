@@ -8,10 +8,10 @@ package com.vaadin.flow.component.gridpro.testbench;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file license.html distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <http://vaadin.com/license/cval-3>.
  * #L%
@@ -88,7 +88,7 @@ public class GridTHTDElement extends TestBenchElement {
     public GridProElement getGrid() {
         return ((TestBenchElement) executeScript(
                 "return arguments[0].getRootNode().host", this))
-                        .wrap(GridProElement.class);
+                .wrap(GridProElement.class);
     }
 
     @Override

@@ -44,7 +44,7 @@ public class MenuBarElement extends TestBenchElement {
     /**
      * Gets the button which opens the sub menu of overflowing items, or
      * {@code null} if the overflow button is not visible.
-     * 
+     *
      * @return the button which opens the sub menu of overflowing items
      */
     public TestBenchElement getOverflowButton() {

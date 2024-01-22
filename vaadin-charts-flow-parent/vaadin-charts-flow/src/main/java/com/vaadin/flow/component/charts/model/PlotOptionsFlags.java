@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * 
+ *
  */
 public class PlotOptionsFlags extends AbstractPlotOptions {
 
@@ -348,7 +348,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 
     /**
      * Adds key to the keys array
-     * 
+     *
      * @param key
      *            to add
      * @see #setKeys(String...)
@@ -362,7 +362,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of key in keys array
-     * 
+     *
      * @param key
      *            to remove
      * @see #setKeys(String...)
@@ -437,7 +437,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
      * <a class="internal" href="#plotOptions.series">plotOptions</a> and
      * <a class="internal" href="#series">series</a>.
      * </p>
-     * 
+     *
      * <p>
      * These options are merged with options in
      * <a href="#navigator.series">navigator.series</a>, and will take
@@ -670,7 +670,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
      * plane (or <a href="#plotOptions.series.threshold">threshold</a> option)
      * unless the data actually crosses the plane.
      * </p>
-     * 
+     *
      * <p>
      * For example, if <code>softThreshold</code> is <code>false</code>, a
      * series of 0, 1, 2, 3 will make the Y axis show negative values according
@@ -882,7 +882,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
      * axis, Y axis or Z axis for bubbles, according to the
      * <code>zoneAxis</code> option.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -899,7 +899,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 
     /**
      * Adds zone to the zones array
-     * 
+     *
      * @param zone
      *            to add
      * @see #setZones(Zones...)
@@ -913,7 +913,7 @@ public class PlotOptionsFlags extends AbstractPlotOptions {
 
     /**
      * Removes first occurrence of zone in zones array
-     * 
+     *
      * @param zone
      *            to remove
      * @see #setZones(Zones...)

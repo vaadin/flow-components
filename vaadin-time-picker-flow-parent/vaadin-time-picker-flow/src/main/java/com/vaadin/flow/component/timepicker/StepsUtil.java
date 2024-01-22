@@ -40,7 +40,7 @@ public class StepsUtil {
     /**
      * Converts a Duration object into a decimal value that is used internally
      * by the time picker web component.
-     * 
+     *
      * @param duration
      * @return
      */
@@ -64,7 +64,7 @@ public class StepsUtil {
     /**
      * Converts the decimal steps value use internally by the time picker web
      * component into a Duration instance
-     * 
+     *
      * @param stepsValue
      * @return
      */

@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -62,10 +62,10 @@ public class SeriesTooltip extends AbstractConfigurationObject {
      * overview of the replacement codes, see
      * <a href="#Highcharts.dateFormat">dateFormat</a>.
      * </p>
-     * 
+     *
      * <p>
      * Defaults to:
-     * 
+     *
      * <pre>
      * {
      * 	    millisecond:"%A, %b %e, %H:%M:%S.%L",
@@ -78,7 +78,7 @@ public class SeriesTooltip extends AbstractConfigurationObject {
      * 	    year:"%Y"
      * 	}
      * </pre>
-     * 
+     *
      * </p>
      */
     public void setDateTimeLabelFormats(
@@ -165,7 +165,7 @@ public class SeriesTooltip extends AbstractConfigurationObject {
      * datetime string depending on the type of axis. For datetime axes, the
      * <code>point.key</code> date format can be set using tooltip.xDateFormat.
      * </p>
-     * 
+     *
      * <p>
      * Defaults to
      * <code>&lt;span style="font-size: 10px"&gt;{point.key}&lt;/span&gt;&lt;br/&gt;</code>

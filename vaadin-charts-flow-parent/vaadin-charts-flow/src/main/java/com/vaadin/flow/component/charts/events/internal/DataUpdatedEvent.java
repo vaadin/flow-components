@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.events.internal;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -22,7 +22,7 @@ import com.vaadin.flow.component.charts.model.Series;
 
 /**
  * Event for updating existing data series.
- * 
+ *
  * @since 2.0
  *
  */
@@ -34,7 +34,7 @@ public class DataUpdatedEvent extends AbstractSeriesItemEvent {
 
     /**
      * Constructs the event with given series, number and point index.
-     * 
+     *
      * @param series
      *            Series.
      * @param value
@@ -49,7 +49,7 @@ public class DataUpdatedEvent extends AbstractSeriesItemEvent {
 
     /**
      * Constructs the event with given series, item and point index.
-     * 
+     *
      * @param series
      *            Series.
      * @param item
@@ -65,7 +65,7 @@ public class DataUpdatedEvent extends AbstractSeriesItemEvent {
 
     /**
      * Returns the point index.
-     * 
+     *
      * @return Point index.
      */
     public int getPointIndex() {

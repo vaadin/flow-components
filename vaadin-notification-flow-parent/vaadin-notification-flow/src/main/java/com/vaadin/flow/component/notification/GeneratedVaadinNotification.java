@@ -105,7 +105,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code duration} property from the webcomponent
      */
     protected double getDurationDouble() {
@@ -120,7 +120,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * The duration in milliseconds to show the notification. Set to {@code 0}
      * or a negative number to disable the notification auto-closing.
      * </p>
-     * 
+     *
      * @param duration
      *            the double value to set
      */
@@ -138,7 +138,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * This property is synchronized automatically from client side when a
      * 'opened-changed' event happens.
      * </p>
-     * 
+     *
      * @return the {@code opened} property from the webcomponent
      */
     @Synchronize(property = "opened", value = "opened-changed")
@@ -153,7 +153,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * <p>
      * True if the notification is currently displayed.
      * </p>
-     * 
+     *
      * @param opened
      *            the boolean value to set
      */
@@ -172,7 +172,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code position} property from the webcomponent
      */
     protected String getPositionString() {
@@ -187,7 +187,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
      * Alignment of the notification in the viewport Valid values are
      * {@code top-stretch|top-start|top-center|top-end|middle|bottom-start|bottom-center|bottom-end|bottom-stretch}
      * </p>
-     * 
+     *
      * @param position
      *            the String value to set
      */
@@ -248,7 +248,7 @@ public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotif
     /**
      * Adds a listener for {@code opened-changed} events fired by the
      * webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener

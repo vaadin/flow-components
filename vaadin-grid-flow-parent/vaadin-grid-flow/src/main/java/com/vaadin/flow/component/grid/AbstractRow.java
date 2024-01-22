@@ -34,14 +34,14 @@ import com.vaadin.flow.function.SerializableFunction;
 
 /**
  * Base class for header and footer rows
- * 
+ *
  * @author Vaadin Ltd.
  */
 abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
 
     /**
      * Base class for header and footer cells.
-     * 
+     *
      * @author Vaadin Ltd.
      */
     public static abstract class AbstractCell implements Serializable {
@@ -69,7 +69,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
          * <p>
          * This will remove a component set with
          * {@link #setComponent(Component)}.
-         * 
+         *
          * @param text
          *            the text to be shown in this cell
          */
@@ -79,7 +79,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
          * Sets the component as the content of this cell.
          * <p>
          * This will remove text set with {@link #setText(String)}.
-         * 
+         *
          * @param component
          *            the component to set
          */
@@ -102,7 +102,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
 
     /**
      * Change this row to wrap the given layer
-     * 
+     *
      * @param layer
      *            the layer to wrap
      */
@@ -113,7 +113,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
 
     /**
      * Change the cells to wrap the given columns
-     * 
+     *
      * @param columns
      *            new column components for the cells
      */
@@ -141,7 +141,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
 
     /**
      * Gets the cells that belong to this row as an unmodifiable list.
-     * 
+     *
      * @return the cells on this row
      */
     public List<CELL> getCells() {
@@ -150,7 +150,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
 
     /**
      * Gets the cell on this row that is on the given column.
-     * 
+     *
      * @param column
      *            the column to find cell for
      * @return the corresponding cell
@@ -189,7 +189,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
      * hierarchical DOM structure to support this case. You can, however, join
      * all three cells in the footer, because then it's again possible to
      * organize the client-side elements in a hierarchical structure.
-     * 
+     *
      * @param columns
      *            the columns of the cells that should be joined
      * @return the merged cell
@@ -217,7 +217,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
      * hierarchical DOM structure to support this case. You can, however, join
      * all three cells in the footer, because then it's again possible to
      * organize the client-side elements in a hierarchical structure.
-     * 
+     *
      * @param cells
      *            the cells to join
      * @return the merged cell
@@ -244,7 +244,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
      * hierarchical DOM structure to support this case. You can, however, join
      * all three cells in the footer, because then it's again possible to
      * organize the client-side elements in a hierarchical structure.
-     * 
+     *
      * @param cells
      *            the cells to join
      * @return the merged cell
@@ -422,7 +422,7 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
 
     /**
      * Gets whether this is the top-most HeaderRow or the bottom-most FooterRow.
-     * 
+     *
      * @return whether this is the outmost row
      */
     protected abstract boolean isOutmostRow();

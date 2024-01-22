@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -51,7 +51,7 @@ public class RangeSelectorButton extends AbstractConfigurationObject {
 
     /**
      * Defines the timespan for the button
-     * 
+     *
      * @param type
      */
     public void setType(RangeSelectorTimespan type) {
@@ -67,7 +67,7 @@ public class RangeSelectorButton extends AbstractConfigurationObject {
 
     /**
      * Defines how many units of the defined type to use.
-     * 
+     *
      * @param count
      */
     public void setCount(Number count) {
@@ -83,7 +83,7 @@ public class RangeSelectorButton extends AbstractConfigurationObject {
 
     /**
      * Defines the text for the button
-     * 
+     *
      * @param text
      */
     public void setText(String text) {
@@ -99,7 +99,7 @@ public class RangeSelectorButton extends AbstractConfigurationObject {
 
     /**
      * Defines a custom data grouping definition for the button
-     * 
+     *
      * @param dataGrouping
      */
     public void setDataGrouping(DataGrouping dataGrouping) {
