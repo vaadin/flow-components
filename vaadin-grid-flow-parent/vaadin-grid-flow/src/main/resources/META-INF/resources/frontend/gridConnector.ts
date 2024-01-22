@@ -683,8 +683,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           let cacheToClear = dataProviderController.rootCache;
           if (parentKey) {
             const parentItem = createEmptyItemFromKey(pkey);
-            const parentItemContext = dataProviderController.getItemContext(parentItem);
-            cacheToClear = parentItemContext.subCache;
+            cacheToClear = dataProviderController.getItemSubCache(parentItem);
           }
           const endIndex = index + updatedPageCount * grid.pageSize;
           for (let itemIndex = index; itemIndex < endIndex; itemIndex++) {
@@ -761,8 +760,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           }
 
           const parentItem = createEmptyItemFromKey(parentKey);
-          const parentItemContext = dataProviderController.getItemContext(parentItem);
-          const parentItemSubCache = parentItemContext?.subCache;
+          const parentItemSubCache = dataProviderController.getItemSubCache(parentItem);
           if (parentItemSubCache) {
             // If grid has pending requests for this parent, then resolve them
             // and let grid update the flat size and re-render.
