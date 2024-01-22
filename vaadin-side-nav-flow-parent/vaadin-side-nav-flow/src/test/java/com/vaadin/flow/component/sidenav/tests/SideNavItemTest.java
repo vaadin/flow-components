@@ -604,6 +604,39 @@ public class SideNavItemTest {
         }, TestRouteWithAliases.class);
     }
 
+    @Test
+    public void setTarget_hasTarget() {
+        sideNavItem.setTarget("_blank");
+        Assert.assertEquals("_blank",
+                sideNavItem.getElement().getProperty("target"));
+        Assert.assertEquals("_blank", sideNavItem.getTarget());
+    }
+
+    @Test
+    public void targetDefined_setToNull_noTarget() {
+        sideNavItem.setTarget("_blank");
+        sideNavItem.setTarget(null);
+        Assert.assertFalse(sideNavItem.getElement().hasProperty("target"));
+        Assert.assertNull(sideNavItem.getTarget());
+    }
+
+    @Test
+    public void setOpenInNewBrowserTab_targetBlankDefinedOnProperty() {
+        // call setOpenInNewTab and check that getTarget returns "_blank"
+        sideNavItem.setOpenInNewBrowserTab(true);
+        Assert.assertEquals("_blank",
+                sideNavItem.getElement().getProperty("target"));
+        Assert.assertTrue(sideNavItem.isOpenInNewBrowserTab());
+    }
+
+    @Test
+    public void openInNewBrowserTabDefined_setOpenInNewBrowserTabToFalse() {
+        sideNavItem.setOpenInNewBrowserTab(true);
+        sideNavItem.setOpenInNewBrowserTab(false);
+        Assert.assertFalse(sideNavItem.getElement().hasProperty("target"));
+        Assert.assertFalse(sideNavItem.isOpenInNewBrowserTab());
+    }
+
     private boolean sideNavItemHasLabelElement() {
         return sideNavItem.getElement().getChildren()
                 .anyMatch(this::isLabelElement);
