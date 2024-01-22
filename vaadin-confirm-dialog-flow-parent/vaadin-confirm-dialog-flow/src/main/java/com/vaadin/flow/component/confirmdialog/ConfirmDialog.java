@@ -21,7 +21,6 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -698,6 +697,118 @@ public class ConfirmDialog extends Component
     }
 
     /**
+     * Confirm dialog does not support adding content.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public void add(Component... components) {
+        HasOrderedComponents.super.add(components);
+    }
+
+    /**
+     * Confirm dialog does not support adding content.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public void add(Collection<Component> components) {
+        HasOrderedComponents.super.add(components);
+    }
+
+    /**
+     * Confirm dialog does not support adding content.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public void add(String text) {
+        HasOrderedComponents.super.add(text);
+    }
+
+    /**
+     * Confirm dialog does not support removing content.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public void remove(Component... components) {
+        HasOrderedComponents.super.remove(components);
+    }
+
+    /**
+     * Confirm dialog does not support removing content.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public void remove(Collection<Component> components) {
+        HasOrderedComponents.super.remove(components);
+    }
+
+    /**
+     * Confirm dialog does not support removing content.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public void removeAll() {
+        HasOrderedComponents.super.removeAll();
+    }
+
+    /**
+     * Confirm dialog does not support adding content.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public void addComponentAtIndex(int index, Component component) {
+        HasOrderedComponents.super.addComponentAtIndex(index, component);
+    }
+
+    /**
+     * Confirm dialog does not support adding content.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public void addComponentAsFirst(Component component) {
+        HasOrderedComponents.super.addComponentAsFirst(component);
+    }
+
+    /**
      * Confirm dialog does not support replacing content.
      * <p>
      * This method is inherited from {@link HasOrderedComponents} and has been
@@ -712,45 +823,45 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Confirm dialog does not support removing content.
+     * Confirm dialog does not support adding components.
      * <p>
-     * This method is inherited from {@link HasComponents} and has been marked
-     * as deprecated to indicate that it is not supported.
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
      *
      * @deprecated since v24.4, not supported
      */
     @Deprecated
     @Override
-    public void remove(Component... components) {
-        HasOrderedComponents.super.remove(components);
+    public int indexOf(Component component) {
+        return HasOrderedComponents.super.indexOf(component);
     }
 
     /**
-     * Confirm dialog does not support removing content.
+     * Confirm dialog does not support adding components.
      * <p>
-     * This method is inherited from {@link HasComponents} and has been marked
-     * as deprecated to indicate that it is not supported.
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
      *
      * @deprecated since v24.4, not supported
      */
     @Deprecated
     @Override
-    public void remove(Collection<Component> components) {
-        HasOrderedComponents.super.remove(components);
+    public int getComponentCount() {
+        return HasOrderedComponents.super.getComponentCount();
     }
 
     /**
-     * Confirm dialog does not support removing content.
+     * Confirm dialog does not support adding components.
      * <p>
-     * This method is inherited from {@link HasComponents} and has been marked
-     * as deprecated to indicate that it is not supported.
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
      *
      * @deprecated since v24.4, not supported
      */
     @Deprecated
     @Override
-    public void removeAll() {
-        HasOrderedComponents.super.removeAll();
+    public Component getComponentAt(int index) {
+        return HasOrderedComponents.super.getComponentAt(index);
     }
 
     @Override
