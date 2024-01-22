@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -115,9 +115,9 @@ public class RangeSelector extends AbstractConfigurationObject {
      * <p>
      * An array of configuration objects for the buttons.
      * </p>
-     * 
+     *
      * Defaults to
-     * 
+     *
      * <pre>
      * buttons: [{
      * 		type: 'month',
@@ -151,7 +151,7 @@ public class RangeSelector extends AbstractConfigurationObject {
 
     /**
      * Adds button to the buttons array
-     * 
+     *
      * @param button
      *            to add
      * @see #setButtons(RangeSelectorButton...)
@@ -165,7 +165,7 @@ public class RangeSelector extends AbstractConfigurationObject {
 
     /**
      * Removes first occurrence of button in buttons array
-     * 
+     *
      * @param button
      *            to remove
      * @see #setButtons(RangeSelectorButton...)

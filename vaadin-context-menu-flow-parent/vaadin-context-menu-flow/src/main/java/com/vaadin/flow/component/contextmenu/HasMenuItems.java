@@ -24,10 +24,10 @@ import com.vaadin.flow.component.ComponentEventListener;
 /**
  * A common interface for components that can have {@link MenuItem}s with click
  * listeners inside them.
- * 
+ *
  * @see ContextMenu
  * @see SubMenu
- * 
+ *
  * @author Vaadin Ltd.
  */
 public interface HasMenuItems extends Serializable {

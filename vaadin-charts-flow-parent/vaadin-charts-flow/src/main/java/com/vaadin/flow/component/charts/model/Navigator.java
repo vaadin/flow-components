@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -158,16 +158,16 @@ public class Navigator extends AbstractConfigurationObject {
      * <a class="internal" href="#plotOptions.series">plotOptions</a> and
      * <a class="internal" href="#series">series</a>.
      * </p>
-     * 
+     *
      * <p>
      * Unless data is explicitly defined on navigator.series, the data is
      * borrowed from the first series in the chart.
      * </p>
-     * 
+     *
      * <p>
      * Default series options for the navigator series are:
      * </p>
-     * 
+     *
      * <pre>
      * series: {
      * 		type: 'areaspline',
@@ -201,7 +201,7 @@ public class Navigator extends AbstractConfigurationObject {
      * Options for the navigator X axis. Available options are the same as any X
      * axis, documented at <a class="internal" href="#xAxis">xAxis</a>. Default
      * series options for the navigator xAxis are:
-     * 
+     *
      * <pre>
      * xAxis: {
      * 	    tickWidth: 0,
@@ -237,7 +237,7 @@ public class Navigator extends AbstractConfigurationObject {
      * Options for the navigator Y axis. Available options are the same as any y
      * axis, documented at <a class="internal" href="#yAxis">yAxis</a>. Default
      * series options for the navigator yAxis are:
-     * 
+     *
      * <pre>
      * yAxis: {
      * 		gridLineWidth: 0,

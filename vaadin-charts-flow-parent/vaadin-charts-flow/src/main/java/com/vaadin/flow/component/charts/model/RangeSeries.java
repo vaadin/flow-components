@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -27,7 +27,7 @@ public class RangeSeries extends DataSeries {
 
     /**
      * Constructs a RangeSeries with the given name
-     * 
+     *
      * @param name
      */
     public RangeSeries(String name) {
@@ -36,7 +36,7 @@ public class RangeSeries extends DataSeries {
 
     /**
      * Constructs a RangeSeries with the given values
-     * 
+     *
      * @param values
      *            low-high pairs, or x-low-high triplets
      */
@@ -77,7 +77,7 @@ public class RangeSeries extends DataSeries {
 
     /**
      * Constructs a RangeSeries with the given name and values
-     * 
+     *
      * @param name
      *            the name of the series
      * @param values
@@ -90,7 +90,7 @@ public class RangeSeries extends DataSeries {
 
     /**
      * Sets the numeric data for this series.
-     * 
+     *
      * @param values
      *            low-high pairs, or x-low-high triplets
      */

@@ -528,18 +528,14 @@
             <plugin>
                 <groupId>net.revelc.code.formatter</groupId>
                 <artifactId>formatter-maven-plugin</artifactId>
-                <version>2.11.0</version>
+                <version>2.23.0</version>
                 <configuration>
-                    <configFile>eclipse/VaadinJavaConventions.xml</configFile>
+                    <configFile>https://raw.githubusercontent.com/vaadin/flow/main/eclipse/VaadinJavaConventions.xml</configFile>
                     <skipHtmlFormatting>true</skipHtmlFormatting>
+                    <excludes>
+                        <exclude>**/*.css</exclude>
+                    </excludes>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>${project.groupId}</groupId>
-                        <artifactId>flow-buildtools</artifactId>
-                        <version>${flow.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>

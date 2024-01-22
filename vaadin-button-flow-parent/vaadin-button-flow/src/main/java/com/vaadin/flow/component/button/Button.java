@@ -404,8 +404,8 @@ public class Button extends GeneratedVaadinButton<Button>
         if (changes != null) {
             changes.remove("disabled");
             setEnabled(false);
-            getUI().ifPresent(ui -> ui.beforeClientResponse(this,
-                    executionContext -> {
+            getUI().ifPresent(
+                    ui -> ui.beforeClientResponse(this, executionContext -> {
                         // in case the disabled status was reverted,
                         // the client might not update the value in
                         // case it was that already

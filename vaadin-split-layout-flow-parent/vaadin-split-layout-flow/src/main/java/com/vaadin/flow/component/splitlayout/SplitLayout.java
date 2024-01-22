@@ -205,7 +205,7 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      * client side, so the returned value may not be the same as in client side.
      * </p>
      *
-     * 
+     *
      * @return the {@code orientation} property of the SplitLayout.
      */
     public Orientation getOrientation() {

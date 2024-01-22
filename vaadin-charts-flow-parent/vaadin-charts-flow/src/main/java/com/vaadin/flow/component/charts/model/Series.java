@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -33,14 +33,14 @@ public interface Series extends Serializable {
     /**
      * Sets the name of the series as shown in the legend, tooltip etc. Defaults
      * to "".
-     * 
+     *
      * @param name
      */
     void setName(String name);
 
     /**
      * Sets the configuration to which this series is linked.
-     * 
+     *
      * @param configuration
      */
     void setConfiguration(Configuration configuration);
@@ -73,7 +73,7 @@ public interface Series extends Serializable {
 
     /**
      * Sets an id for the series
-     * 
+     *
      * @param id
      *            new ID to set
      */

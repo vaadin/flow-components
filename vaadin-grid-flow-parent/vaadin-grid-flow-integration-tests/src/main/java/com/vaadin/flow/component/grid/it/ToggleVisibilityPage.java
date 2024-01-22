@@ -26,7 +26,7 @@ import com.vaadin.flow.router.Route;
 /**
  * Page that reproduces the bug described at
  * https://github.com/vaadin/flow/issues/4448
- * 
+ *
  * @author Vaadin Ltd.
  */
 @Route("vaadin-grid/toggle-visibility")

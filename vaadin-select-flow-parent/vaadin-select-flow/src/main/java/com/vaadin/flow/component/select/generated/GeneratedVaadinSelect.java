@@ -1,12 +1,12 @@
 /*
  * Copyright 2000-2022 Vaadin Ltd.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -203,7 +203,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code autofocus} property from the webcomponent
      */
     protected boolean isAutofocusBoolean() {
@@ -217,7 +217,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * <p>
      * Specify that this control should have input focus when the page loads.
      * </p>
-     * 
+     *
      * @param autofocus
      *            the boolean value to set
      */
@@ -235,7 +235,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code disabled} property from the webcomponent
      */
     protected boolean isDisabledBoolean() {
@@ -249,7 +249,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * <p>
      * If true, the user cannot interact with this element.
      * </p>
-     * 
+     *
      * @param disabled
      *            the boolean value to set
      */
@@ -267,7 +267,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * This property is synchronized automatically from client side when a
      * 'opened-changed' event happens.
      * </p>
-     * 
+     *
      * @return the {@code opened} property from the webcomponent
      */
     @Synchronize(property = "opened", value = "opened-changed")
@@ -282,7 +282,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * <p>
      * Set when the select is open
      * </p>
-     * 
+     *
      * @param opened
      *            the boolean value to set
      */
@@ -300,7 +300,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code errorMessage} property from the webcomponent
      */
     protected String getErrorMessageString() {
@@ -314,7 +314,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * <p>
      * The error message to display when the select value is invalid
      * </p>
-     * 
+     *
      * @param errorMessage
      *            the String value to set
      */
@@ -333,7 +333,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code label} property from the webcomponent
      */
     protected String getLabelString() {
@@ -347,7 +347,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * <p>
      * String used for the label element.
      * </p>
-     * 
+     *
      * @param label
      *            the String value to set
      */
@@ -365,7 +365,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code required} property from the webcomponent
      */
     protected boolean isRequiredBoolean() {
@@ -379,7 +379,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * <p>
      * The current required state of the select. True if required.
      * </p>
-     * 
+     *
      * @param required
      *            the boolean value to set
      */
@@ -397,7 +397,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code invalid} property from the webcomponent
      */
     protected boolean isInvalidBoolean() {
@@ -411,7 +411,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * <p>
      * Set to true if the value is invalid.
      * </p>
-     * 
+     *
      * @param invalid
      *            the boolean value to set
      */
@@ -429,7 +429,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code name} property from the webcomponent
      */
     protected String getNameString() {
@@ -443,7 +443,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * <p>
      * The name of this element.
      * </p>
-     * 
+     *
      * @param name
      *            the String value to set
      */
@@ -464,7 +464,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code placeholder} property from the webcomponent
      */
     protected String getPlaceholderString() {
@@ -481,7 +481,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * selected item has an empty string label, or the selected item has no
      * label and it's DOM content is empty.
      * </p>
-     * 
+     *
      * @param placeholder
      *            the String value to set
      */
@@ -500,7 +500,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code readonly} property from the webcomponent
      */
     protected boolean isReadonlyBoolean() {
@@ -514,7 +514,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
      * <p>
      * When present, it specifies that the element is read-only.
      * </p>
-     * 
+     *
      * @param readonly
      *            the boolean value to set
      */
@@ -568,7 +568,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
     /**
      * Adds a listener for {@code opened-changed} events fired by the
      * webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -599,7 +599,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
     /**
      * Adds a listener for {@code invalid-changed} events fired by the
      * webcomponent.
-     * 
+     *
      * @param listener
      *            the listener
      * @return a {@link Registration} for removing the event listener
@@ -616,7 +616,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
     /**
      * Adds the given components as children of this component at the slot
      * 'prefix'.
-     * 
+     *
      * @param components
      *            The components to add.
      * @see <a href=
@@ -635,7 +635,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
 
     /**
      * Removes the given child components from this component.
-     * 
+     *
      * @param components
      *            The components to remove.
      * @throws IllegalArgumentException
@@ -667,7 +667,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
     /**
      * Constructs a new GeneratedVaadinSelect component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
@@ -696,7 +696,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
     /**
      * Constructs a new GeneratedVaadinSelect component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue
@@ -716,7 +716,7 @@ public abstract class GeneratedVaadinSelect<R extends GeneratedVaadinSelect<R, T
     /**
      * Constructs a new GeneratedVaadinSelect component with the given
      * arguments.
-     * 
+     *
      * @param initialValue
      *            the initial value to set to the value
      * @param defaultValue

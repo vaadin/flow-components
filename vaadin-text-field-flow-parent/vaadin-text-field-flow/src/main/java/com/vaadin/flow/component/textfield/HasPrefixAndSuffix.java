@@ -32,7 +32,7 @@ public interface HasPrefixAndSuffix extends HasElement {
      * <p>
      * This is most commonly used to add a simple icon or static text into the
      * field.
-     * 
+     *
      * @param component
      *            the component to set, can be {@code null} to remove existing
      *            prefix component
@@ -48,7 +48,7 @@ public interface HasPrefixAndSuffix extends HasElement {
 
     /**
      * Gets the component in the prefix slot of this field.
-     * 
+     *
      * @return the prefix component of this field, or {@code null} if no prefix
      *         component has been set
      * @see #setPrefixComponent(Component)
@@ -63,7 +63,7 @@ public interface HasPrefixAndSuffix extends HasElement {
      * <p>
      * This is most commonly used to add a simple icon or static text into the
      * field.
-     * 
+     *
      * @param component
      *            the component to set, can be {@code null} to remove existing
      *            suffix component
@@ -79,7 +79,7 @@ public interface HasPrefixAndSuffix extends HasElement {
 
     /**
      * Gets the component in the suffix slot of this field.
-     * 
+     *
      * @return the suffix component of this field, or {@code null} if no suffix
      *         component has been set
      * @see #setPrefixComponent(Component)

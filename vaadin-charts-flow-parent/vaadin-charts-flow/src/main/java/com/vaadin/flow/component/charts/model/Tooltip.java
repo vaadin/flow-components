@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -97,7 +97,7 @@ public class Tooltip extends AbstractConfigurationObject {
      * <p>
      * The pixel width of the tooltip border.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -129,10 +129,10 @@ public class Tooltip extends AbstractConfigurationObject {
      * overview of the replacement codes, see
      * <a href="#Highcharts.dateFormat">dateFormat</a>.
      * </p>
-     * 
+     *
      * <p>
      * Defaults to:
-     * 
+     *
      * <pre>
      * {
      * 	    millisecond:"%A, %b %e, %H:%M:%S.%L",
@@ -145,7 +145,7 @@ public class Tooltip extends AbstractConfigurationObject {
      * 	    year:"%Y"
      * 	}
      * </pre>
-     * 
+     *
      * </p>
      */
     public void setDateTimeLabelFormats(
@@ -260,7 +260,7 @@ public class Tooltip extends AbstractConfigurationObject {
      * datetime string depending on the type of axis. For datetime axes, the
      * <code>point.key</code> date format can be set using tooltip.xDateFormat.
      * </p>
-     * 
+     *
      * <p>
      * Defaults to
      * <code>&lt;span style="font-size: 10px"&gt;{point.key}&lt;/span&gt;&lt;br/&gt;</code>
@@ -397,7 +397,7 @@ public class Tooltip extends AbstractConfigurationObject {
      * is recommended for single series charts and for tablet/mobile optimized
      * charts.
      * </p>
-     * 
+     *
      * <p>
      * See also <a href="#tooltip.split">tooltip.split</a>, that is better
      * suited for charts with many series, especially line-type series.
@@ -421,7 +421,7 @@ public class Tooltip extends AbstractConfigurationObject {
      * Proximity snap for graphs or single points. It defaults to 10 for
      * mouse-powered devices and 25 for touch devices.
      * </p>
-     * 
+     *
      * <p>
      * Note that in most cases the whole plot area captures the mouse movement,
      * and in these cases <code>tooltip.snap</code> doesn't make sense. This

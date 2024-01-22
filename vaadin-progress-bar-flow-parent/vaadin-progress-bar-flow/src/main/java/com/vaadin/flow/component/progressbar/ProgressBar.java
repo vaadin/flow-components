@@ -85,7 +85,7 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
 
     /**
      * Sets value to the progressbar.
-     * 
+     *
      * @param value
      *            the double value to set
      */
@@ -102,7 +102,7 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
 
     /**
      * Gets the current value of the progressbar
-     * 
+     *
      * @return the {@code value} property of the progressbar
      */
     public double getValue() {
@@ -111,7 +111,7 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
 
     /**
      * Sets the maximum bound of the progressbar.
-     * 
+     *
      * @param max
      *            the double value to set
      */
@@ -121,7 +121,7 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
 
     /**
      * Gets the maximum bound of the progressbar.
-     * 
+     *
      * @return the {@code max} property of the progressbar
      */
     public double getMax() {
@@ -130,7 +130,7 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
 
     /**
      * Sets the minimum bound of the progressbar
-     * 
+     *
      * @param min
      *            the double value to set
      */
@@ -140,7 +140,7 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
 
     /**
      * Gets the minimum bound of the progressbar.
-     * 
+     *
      * @return the {@code min} property of the progressbar
      */
     public double getMin() {
@@ -158,7 +158,7 @@ public class ProgressBar extends GeneratedVaadinProgressBar<ProgressBar>
      * This property is not synchronized automatically from the client side, so
      * the returned value may not be the same as in client side.
      * </p>
-     * 
+     *
      * @return the {@code indeterminate} property of the progressbar
      */
     public boolean isIndeterminate() {

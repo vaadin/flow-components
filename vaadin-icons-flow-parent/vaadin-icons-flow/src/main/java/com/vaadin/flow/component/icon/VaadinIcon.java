@@ -22,7 +22,7 @@ package com.vaadin.flow.component.icon;
  * These instances can be used to create {@link IronIcon} components either by
  * using their {@link #create()} method or by passing them to Icon's
  * constructor.
- * 
+ *
  * @author Vaadin Ltd
  *
  */
@@ -33,7 +33,7 @@ public enum VaadinIcon implements IconFactory {
     /**
      * Creates a new {@link IronIcon} instance with the icon determined by the
      * name of this instance.
-     * 
+     *
      * @return a new instance of {@link IronIcon} component
      */
     public Icon create() {

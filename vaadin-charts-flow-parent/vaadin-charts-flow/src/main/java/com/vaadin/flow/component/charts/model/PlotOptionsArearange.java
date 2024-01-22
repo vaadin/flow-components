@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -376,7 +376,7 @@ public class PlotOptionsArearange extends AreaOptions {
 
     /**
      * Adds key to the keys array
-     * 
+     *
      * @param key
      *            to add
      * @see #setKeys(String...)
@@ -390,7 +390,7 @@ public class PlotOptionsArearange extends AreaOptions {
 
     /**
      * Removes first occurrence of key in keys array
-     * 
+     *
      * @param key
      *            to remove
      * @see #setKeys(String...)
@@ -814,7 +814,7 @@ public class PlotOptionsArearange extends AreaOptions {
      * axis, Y axis or Z axis for bubbles, according to the
      * <code>zoneAxis</code> option.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -831,7 +831,7 @@ public class PlotOptionsArearange extends AreaOptions {
 
     /**
      * Adds zone to the zones array
-     * 
+     *
      * @param zone
      *            to add
      * @see #setZones(Zones...)
@@ -845,7 +845,7 @@ public class PlotOptionsArearange extends AreaOptions {
 
     /**
      * Removes first occurrence of zone in zones array
-     * 
+     *
      * @param zone
      *            to remove
      * @see #setZones(Zones...)
@@ -911,7 +911,7 @@ public class PlotOptionsArearange extends AreaOptions {
      * points become closer than a certain pixel value, determined by the
      * <code>groupPixelWidth</code> option.
      * </p>
-     * 
+     *
      * <p>
      * If data grouping is applied, the grouping information of grouped points
      * can be read from the <a href="#Point.dataGroup">Point.dataGroup</a>.
@@ -934,7 +934,7 @@ public class PlotOptionsArearange extends AreaOptions {
      * the distance between two points is greater than five times that of the
      * two closest points, the graph will be broken.
      * </p>
-     * 
+     *
      * <p>
      * In practice, this option is most often used to visualize gaps in time
      * series. In a stock chart, intraday data is available for daytime hours,
@@ -995,7 +995,7 @@ public class PlotOptionsArearange extends AreaOptions {
      * <a class="internal" href="#plotOptions.series">plotOptions</a> and
      * <a class="internal" href="#series">series</a>.
      * </p>
-     * 
+     *
      * <p>
      * These options are merged with options in
      * <a href="#navigator.series">navigator.series</a>, and will take

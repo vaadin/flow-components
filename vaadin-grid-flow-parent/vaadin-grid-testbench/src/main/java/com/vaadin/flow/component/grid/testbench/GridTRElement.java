@@ -66,7 +66,7 @@ public class GridTRElement extends TestBenchElement {
 
     /**
      * Gets the row details for this row.
-     * 
+     *
      * @return the details cell
      */
     public GridTHTDElement getDetails() {
@@ -111,7 +111,7 @@ public class GridTRElement extends TestBenchElement {
     public GridElement getGrid() {
         return ((TestBenchElement) executeScript(
                 "return arguments[0].getRootNode().host", this))
-                        .wrap(GridElement.class);
+                .wrap(GridElement.class);
     }
 
     /**

@@ -33,7 +33,7 @@ public enum MenuBarVariant {
 
     /**
      * Gets the variant name.
-     * 
+     *
      * @return variant name
      */
     public String getVariantName() {

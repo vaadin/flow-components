@@ -3173,13 +3173,12 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
     protected SerializableComparator<T> createSortingComparator() {
         BinaryOperator<SerializableComparator<T>> operator = (comparator1,
                 comparator2) -> {
-                    /*
-                     * thenComparing is defined to return a serializable
-                     * comparator as long as both original comparators are also
-                     * serializable
-                     */
-                    return comparator1.thenComparing(comparator2)::compare;
-                };
+            /*
+             * thenComparing is defined to return a serializable comparator as
+             * long as both original comparators are also serializable
+             */
+            return comparator1.thenComparing(comparator2)::compare;
+        };
         return sortOrder.stream().map(
                 order -> order.getSorted().getComparator(order.getDirection()))
                 .reduce(operator).orElse(null);

@@ -431,7 +431,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * {@link Dialog#close()}). The reason being that a modeless dialog allows
      * user to interact with the interface under it and won't be closed by
      * clicking outside or the ESC key.
-     * 
+     *
      * @param modal
      *            {@code false} to enable dialog to open as modeless modal,
      *            {@code true} otherwise.
@@ -442,7 +442,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     /**
      * Gets whether component is set as modal or modeless dialog.
-     * 
+     *
      * @return {@code true} if modal dialog (default), {@code false} otherwise.
      */
     public boolean isModal() {
@@ -461,7 +461,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
      * in the case the user closes and opens it again. Reason being that a self
      * attached dialog is removed from the DOM when it's closed and position is
      * not synched.
-     * 
+     *
      * @param draggable
      *            {@code true} to enable dragging of the dialog, {@code false}
      *            otherwise
@@ -493,7 +493,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
 
     /**
      * Gets whether dialog is enabled to be resized or not.
-     * 
+     *
      * @return {@code true} if resizing is enabled, {@code falsoe} otherwiser
      *         (default).
      */

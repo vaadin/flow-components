@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -24,7 +24,7 @@ import com.vaadin.flow.component.charts.model.style.Color;
  * An optional scrollbar to display on the Y axis in response to limiting the
  * minimum an maximum of the axis values.
  * </p>
- * 
+ *
  * <p>
  * In
  * <a href="http://www.highcharts.com/docs/chart-design-and-style/style-by-css"

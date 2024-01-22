@@ -28,7 +28,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Scroller is a component container which enables scrolling overflowing
  * content.
- * 
+ *
  * Scroll direction can be configured with
  * {@link #setScrollDirection(ScrollDirection)}
  */
@@ -47,7 +47,7 @@ public class Scroller extends Component implements HasSize, HasStyle {
      * {@link #setContent(Component)} and scroll direction defaults to
      * {@link ScrollDirection#BOTH} and can be set with
      * {@link #setScrollDirection(ScrollDirection)}.
-     * 
+     *
      */
     public Scroller() {
     }
@@ -56,7 +56,7 @@ public class Scroller extends Component implements HasSize, HasStyle {
      * Convenience constructor to create a scroller with the given content.
      * Scroll direction defaults to {@link ScrollDirection#BOTH} and can be set
      * with {@link #setScrollDirection(ScrollDirection)}.
-     * 
+     *
      * @param content
      *            the content of this scroller
      * @see #setContent(Component)
@@ -98,7 +98,7 @@ public class Scroller extends Component implements HasSize, HasStyle {
      *
      * The content must always be set, either with a constructor parameter or by
      * calling this method.
-     * 
+     *
      * @param content
      *            a component to use as content
      */
@@ -141,9 +141,9 @@ public class Scroller extends Component implements HasSize, HasStyle {
 
     /**
      * Returns the scroll direction for this scroller.
-     * 
+     *
      * @see #setScrollDirection(ScrollDirection)
-     * 
+     *
      * @return the scroll direction for this scroller.
      */
     public ScrollDirection getScrollDirection() {
@@ -153,7 +153,7 @@ public class Scroller extends Component implements HasSize, HasStyle {
 
     /**
      * Enum for the values of the ScrollDirection property.
-     * 
+     *
      * @see Scroller#setScrollDirection(ScrollDirection)
      */
     public enum ScrollDirection {

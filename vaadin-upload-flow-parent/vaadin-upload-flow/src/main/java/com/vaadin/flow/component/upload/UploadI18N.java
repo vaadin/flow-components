@@ -440,7 +440,7 @@ public class UploadI18N implements Serializable {
 
         /**
          * get units size list
-         * 
+         *
          * @return
          */
         public List<String> getSize() {
@@ -450,7 +450,7 @@ public class UploadI18N implements Serializable {
         /**
          * units size list: ["B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB",
          * "YB"]
-         * 
+         *
          * @param size
          * @return
          */

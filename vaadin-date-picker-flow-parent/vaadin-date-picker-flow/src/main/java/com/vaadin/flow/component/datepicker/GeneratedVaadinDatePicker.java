@@ -585,7 +585,9 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *               // Translation of the Cancel button text.
      *               cancel: 'Cancel',
      *
-     *               // A function to format given {@code Object} as
+     *               // A function to format given {@code
+     * Object
+     * } as
      *               // date string. Object is in the format {@code { day: ..., month: ..., year: ... }}
      *               // Note: The argument month is 0-based. This means that January = 0 and December = 11.
      *               formatDate: d =&gt; {
@@ -593,17 +595,27 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *                 // object in 'MM/DD/YYYY' -format
      *               },
      *
-     *               // A function to parse the given text to an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
-     *               // Must properly parse (at least) text formatted by {@code formatDate}.
+     *               // A function to parse the given text to an {@code
+     * Object
+     * } in the format {@code { day: ..., month: ..., year: ... }}.
+     *               // Must properly parse (at least) text formatted by {@code
+     * formatDate
+     * }.
      *               // Setting the property to null will disable keyboard input feature.
      *               // Note: The argument month is 0-based. This means that January = 0 and December = 11.
      *               parseDate: text =&gt; {
      *                 // Parses a string in 'MM/DD/YY', 'MM/DD' or 'DD' -format to
-     *                 // an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
+     *                 // an {@code
+     * Object
+     * } in the format {@code { day: ..., month: ..., year: ... }}.
      *               }
      *
-     *               // A function to format given {@code monthName} and
-     *               // {@code fullYear} integer as calendar title string.
+     *               // A function to format given {@code
+     * monthName
+     * } and
+     *               // {@code
+     * fullYear
+     * } integer as calendar title string.
      *               formatTitle: (monthName, fullYear) =&gt; {
      *                 return monthName + ' ' + fullYear;
      *               }
@@ -673,7 +685,9 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *               // Translation of the Cancel button text.
      *               cancel: 'Cancel',
      *
-     *               // A function to format given {@code Object} as
+     *               // A function to format given {@code
+     * Object
+     * } as
      *               // date string. Object is in the format {@code { day: ..., month: ..., year: ... }}
      *               // Note: The argument month is 0-based. This means that January = 0 and December = 11.
      *               formatDate: d =&gt; {
@@ -681,17 +695,27 @@ public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePic
      *                 // object in 'MM/DD/YYYY' -format
      *               },
      *
-     *               // A function to parse the given text to an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
-     *               // Must properly parse (at least) text formatted by {@code formatDate}.
+     *               // A function to parse the given text to an {@code
+     * Object
+     * } in the format {@code { day: ..., month: ..., year: ... }}.
+     *               // Must properly parse (at least) text formatted by {@code
+     * formatDate
+     * }.
      *               // Setting the property to null will disable keyboard input feature.
      *               // Note: The argument month is 0-based. This means that January = 0 and December = 11.
      *               parseDate: text =&gt; {
      *                 // Parses a string in 'MM/DD/YY', 'MM/DD' or 'DD' -format to
-     *                 // an {@code Object} in the format {@code { day: ..., month: ..., year: ... }}.
+     *                 // an {@code
+     * Object
+     * } in the format {@code { day: ..., month: ..., year: ... }}.
      *               }
      *
-     *               // A function to format given {@code monthName} and
-     *               // {@code fullYear} integer as calendar title string.
+     *               // A function to format given {@code
+     * monthName
+     * } and
+     *               // {@code
+     * fullYear
+     * } integer as calendar title string.
      *               formatTitle: (monthName, fullYear) =&gt; {
      *                 return monthName + ' ' + fullYear;
      *               }

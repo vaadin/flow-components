@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.events;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -38,7 +38,7 @@ public class ChartSelectionEvent extends ComponentEvent<Chart> {
 
     /**
      * Construct a ChartSelectionEvent
-     * 
+     *
      * @param source
      * @param selectionStart
      * @param selectionEnd
@@ -60,7 +60,7 @@ public class ChartSelectionEvent extends ComponentEvent<Chart> {
     /**
      * This value is undefined and shouldn't be considered if
      * {@link ChartModel#setZoomType(Dimension)} was set to {@link Dimension#Y}
-     * 
+     *
      * @return the X coordinate where the selection started if ZoomType is
      *         {@link Dimension#X} or {@link Dimension#XY}.
      */
@@ -82,7 +82,7 @@ public class ChartSelectionEvent extends ComponentEvent<Chart> {
     /**
      * This value is undefined and shouldn't be considered if
      * {@link ChartModel#setZoomType(Dimension)} was set to {@link Dimension#X}
-     * 
+     *
      * @return the Y coordinate where the selection started if ZoomType is
      *         {@link Dimension#Y} or {@link Dimension#XY}.
      */
@@ -93,7 +93,7 @@ public class ChartSelectionEvent extends ComponentEvent<Chart> {
     /**
      * This value is undefined and shouldn't be considered if
      * {@link ChartModel#setZoomType(Dimension)} was set to {@link Dimension#X}
-     * 
+     *
      * @return the Y coordinate where the selection ended if ZoomType is
      *         {@link Dimension#Y} or {@link Dimension#XY}.
      */

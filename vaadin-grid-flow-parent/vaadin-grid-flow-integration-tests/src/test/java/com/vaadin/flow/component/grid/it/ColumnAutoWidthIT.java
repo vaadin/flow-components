@@ -44,7 +44,7 @@ public class ColumnAutoWidthIT extends AbstractComponentIT {
     /**
      * Converts a CSS pixel value string to an integer. Assumes that the given
      * string is a CSS value in pixels (e.g. "100px").
-     * 
+     *
      * @param cssValue
      *            Css pixel value (e.g. "100px")
      * @return Number of pixels as an integer
@@ -56,7 +56,7 @@ public class ColumnAutoWidthIT extends AbstractComponentIT {
     /**
      * Assert that the given CSS pixel value is close to the expected value
      * (with a margin of ±<code>delta</code>)
-     * 
+     *
      * @param expected
      *            expected value
      * @param cssValue

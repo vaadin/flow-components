@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.events.internal;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -22,7 +22,7 @@ import java.io.Serializable;
 /**
  * Event for information about rescaling the axis. Wraps
  * <code>Axis.setExtremes()</code>.
- * 
+ *
  * @since 2.0
  */
 public class AxisRescaledEvent implements Serializable {
@@ -43,7 +43,7 @@ public class AxisRescaledEvent implements Serializable {
 
     /**
      * Constructs the event.
-     * 
+     *
      * @param axis
      *            Number depicting the dimension of the axis. 0 is X, 1 is Y,
      *            etc.
@@ -70,7 +70,7 @@ public class AxisRescaledEvent implements Serializable {
 
     /**
      * Constructs the event with animated transition.
-     * 
+     *
      * @param axis
      *            Number depicting the dimension of the axis. 0 is X, 1 is Y,
      *            etc.
@@ -90,7 +90,7 @@ public class AxisRescaledEvent implements Serializable {
 
     /**
      * Constructs the event with animated transition, redraws the chart.
-     * 
+     *
      * @param axis
      *            Number depicting the dimension of the axis. 0 is X, 1 is Y,
      *            etc.
@@ -108,7 +108,7 @@ public class AxisRescaledEvent implements Serializable {
 
     /**
      * Returns the new minimum value on the axis.
-     * 
+     *
      * @return The new minimum value on the axis.
      */
     public Number getMinimum() {
@@ -117,7 +117,7 @@ public class AxisRescaledEvent implements Serializable {
 
     /**
      * Returns the new maximum value on the axis.
-     * 
+     *
      * @return The new maximum value on the axis.
      */
     public Number getMaximum() {
@@ -126,7 +126,7 @@ public class AxisRescaledEvent implements Serializable {
 
     /**
      * Checks whether or not to redraw the chart.
-     * 
+     *
      * @return <b>true</b> when chart needs to be redrawn, <b>false</b>
      *         otherwise.
      */
@@ -136,7 +136,7 @@ public class AxisRescaledEvent implements Serializable {
 
     /**
      * Checks whether or not animate the resizing.
-     * 
+     *
      * @return <b>true</b> when redrawing should be animated, <b>false</b>
      *         otherwise.
      */
@@ -146,7 +146,7 @@ public class AxisRescaledEvent implements Serializable {
 
     /**
      * Returns the axis the event is about.
-     * 
+     *
      * @return The axis that was rescaled.
      */
     public int getAxisIndex() {
@@ -155,7 +155,7 @@ public class AxisRescaledEvent implements Serializable {
 
     /**
      * Returns a number indicating axis dimension (X, Y, ...).
-     * 
+     *
      * @return Axis dimension.
      */
     public int getAxis() {

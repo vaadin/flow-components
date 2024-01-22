@@ -94,7 +94,7 @@ public class TimePickerElement extends TestBenchElement
     /**
      * Gets the <code>&lt;vaadin-combo-box-light&gt;</code> element inside the
      * <code>&lt;vaadin-time-picker&gt;</code> element.
-     * 
+     *
      * @return the combo box light element
      */
     public TimePickerComboBoxLightElement getTimePickerComboBoxLightElement() {
@@ -125,7 +125,7 @@ public class TimePickerElement extends TestBenchElement
      * <p>
      * <em>NOTE:</em> the time picker drop down should be opened with
      * {@link #openDropDown()} first.
-     * 
+     *
      * @param index
      *            the index of the item
      * @return the text content for the item
@@ -153,7 +153,7 @@ public class TimePickerElement extends TestBenchElement
      * <p>
      * <em>NOTE:</em> this is not the same as the value property for the time
      * picker, returned by {@link #getValue()}.
-     * 
+     *
      * @return the value of the text field inside the time picker
      */
     public String getTimePickerTextFieldValue() {
@@ -190,7 +190,7 @@ public class TimePickerElement extends TestBenchElement
      * <p>
      * <em>NOTE:</em> the drop down must be opened before scrolling, e.g. use
      * {@link #openDropDown()}.
-     * 
+     *
      * @param index
      *            the index of the item to scroll to
      */
@@ -202,7 +202,7 @@ public class TimePickerElement extends TestBenchElement
     /**
      * Selects the item with the given index by clicking on the item from the
      * combo box drop down.
-     * 
+     *
      * @param index
      *            the index of the item to select
      */
@@ -217,7 +217,7 @@ public class TimePickerElement extends TestBenchElement
 
     /**
      * Enter the given time input to the text field.
-     * 
+     *
      * @param timeInput
      *            the time input to enter, not {@code null}
      */

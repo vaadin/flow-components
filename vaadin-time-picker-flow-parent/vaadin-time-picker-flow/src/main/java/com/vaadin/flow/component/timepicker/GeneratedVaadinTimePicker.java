@@ -694,19 +694,29 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * <pre>
      * <code>            {
-     * 	              // A function to format given {@code Object} as
+     * 	              // A function to format given {@code
+     * Object
+     * } as
      * 	              // time string. Object is in the format {@code { hours: ..., minutes: ..., seconds: ..., milliseconds: ... }}
      * 	              formatTime: (time) =&gt; {
      * 	                // returns a string representation of the given
-     * 	                // object in {@code hh} / 'hh:mm' / 'hh:mm:ss' / 'hh:mm:ss.fff' - formats
+     * 	                // object in {@code
+     * hh
+     * } / 'hh:mm' / 'hh:mm:ss' / 'hh:mm:ss.fff' - formats
      * 	              },
      *
-     * 	              // A function to parse the given text to an {@code Object} in the format
+     * 	              // A function to parse the given text to an {@code
+     * Object
+     * } in the format
      * 	              // {@code { hours: ..., minutes: ..., seconds: ..., milliseconds: ... }}.
      * 	              // Must properly parse (at least) text
-     * 	              // formatted by {@code formatTime}.
+     * 	              // formatted by {@code
+     * formatTime
+     * }.
      * 	              parseTime: text =&gt; {
-     * 	                // Parses a string in object/string that can be formatted by{@code formatTime}.
+     * 	                // Parses a string in object/string that can be formatted by{@code
+     * formatTime
+     * }.
      * 	              }
      *
      * 	              // Translation of the time selector icon button title.
@@ -740,19 +750,29 @@ public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePic
      *
      * <pre>
      * <code>            {
-     * 	              // A function to format given {@code Object} as
+     * 	              // A function to format given {@code
+     * Object
+     * } as
      * 	              // time string. Object is in the format {@code { hours: ..., minutes: ..., seconds: ..., milliseconds: ... }}
      * 	              formatTime: (time) =&gt; {
      * 	                // returns a string representation of the given
-     * 	                // object in {@code hh} / 'hh:mm' / 'hh:mm:ss' / 'hh:mm:ss.fff' - formats
+     * 	                // object in {@code
+     * hh
+     * } / 'hh:mm' / 'hh:mm:ss' / 'hh:mm:ss.fff' - formats
      * 	              },
      *
-     * 	              // A function to parse the given text to an {@code Object} in the format
+     * 	              // A function to parse the given text to an {@code
+     * Object
+     * } in the format
      * 	              // {@code { hours: ..., minutes: ..., seconds: ..., milliseconds: ... }}.
      * 	              // Must properly parse (at least) text
-     * 	              // formatted by {@code formatTime}.
+     * 	              // formatted by {@code
+     * formatTime
+     * }.
      * 	              parseTime: text =&gt; {
-     * 	                // Parses a string in object/string that can be formatted by{@code formatTime}.
+     * 	                // Parses a string in object/string that can be formatted by{@code
+     * formatTime
+     * }.
      * 	              }
      *
      * 	              // Translation of the time selector icon button title.

@@ -1316,8 +1316,8 @@ public class GridDemo extends DemoView {
         firstGrid.setColumnReorderingAllowed(true);
         ((GridMultiSelectionModel<?>) firstGrid
                 .setSelectionMode(Grid.SelectionMode.MULTI))
-                        // Freezing the selection column only
-                        .setSelectionColumnFrozen(true);
+                // Freezing the selection column only
+                .setSelectionColumnFrozen(true);
 
         H3 secondHeader = new H3("Freezing the data columns");
         Grid<Person> secondGrid = new Grid<>();

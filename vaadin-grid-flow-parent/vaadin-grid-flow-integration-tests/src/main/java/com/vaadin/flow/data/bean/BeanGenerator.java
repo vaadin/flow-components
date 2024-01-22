@@ -21,7 +21,7 @@ import java.util.Random;
 
 /**
  * Base class for other random data generators used in the demo.
- * 
+ *
  * @author Vaadin Ltd.
  *
  */

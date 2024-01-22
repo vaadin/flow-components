@@ -8,10 +8,10 @@ package com.vaadin.flow.component.charts.model;
  * %%
  * This program is available under Commercial Vaadin Add-On License 3.0
  * (CVALv3).
- * 
+ *
  * See the file licensing.txt distributed with this software for more
  * information about licensing.
- * 
+ *
  * You should have received a copy of the CVALv3 along with this program.
  * If not, see <https://vaadin.com/license/cval-3>.
  * #L%
@@ -23,7 +23,7 @@ package com.vaadin.flow.component.charts.model;
  * point. By default, the crosshair is enabled on the X axis and disabled on Y
  * axis.
  * </p>
- * 
+ *
  * <p>
  * In
  * <a href="http://www.highcharts.com/docs/chart-design-and-style/style-by-css"
@@ -104,7 +104,7 @@ public class Crosshair extends AbstractConfigurationObject {
      * <p>
      * A label on the axis next to the crosshair.
      * </p>
-     * 
+     *
      * <p>
      * In <a href=
      * "http://www.highcharts.com/docs/chart-design-and-style/style-by-css"

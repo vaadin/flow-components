@@ -123,7 +123,7 @@ public interface ThemableLayout extends HasElement {
 
     /**
      * Sets the {@code box-sizing} CSS property of the layout.
-     * 
+     *
      * @param boxSizing
      *            the box-sizing of the layout. <code>null</code> is interpreted
      *            as {@link BoxSizing#UNDEFINED}
@@ -148,7 +148,7 @@ public interface ThemableLayout extends HasElement {
     /**
      * Gets the box-sizing defined for the layout, or
      * {@link BoxSizing#UNDEFINED} if none was defined on the server-side.
-     * 
+     *
      * @return the box-sizing, never <code>null</code>
      * @see BoxSizing
      */
