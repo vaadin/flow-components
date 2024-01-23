@@ -823,7 +823,7 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Confirm dialog does not support adding components.
+     * Confirm dialog does not support multiple components.
      * <p>
      * This method is inherited from {@link HasOrderedComponents} and has been
      * marked as deprecated to indicate that it is not supported.
@@ -837,7 +837,7 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Confirm dialog does not support adding components.
+     * Confirm dialog does not support multiple components.
      * <p>
      * This method is inherited from {@link HasOrderedComponents} and has been
      * marked as deprecated to indicate that it is not supported.
@@ -851,7 +851,7 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Confirm dialog does not support adding components.
+     * Confirm dialog does not support multiple components.
      * <p>
      * This method is inherited from {@link HasOrderedComponents} and has been
      * marked as deprecated to indicate that it is not supported.
