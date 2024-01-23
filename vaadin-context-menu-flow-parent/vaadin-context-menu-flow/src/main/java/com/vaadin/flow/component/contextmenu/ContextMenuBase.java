@@ -120,8 +120,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         if (getTarget() != null) {
             targetBeforeOpenRegistration.remove();
             targetAttachRegistration.remove();
-            getTarget().getElement().callJsFunction(
-                    "$contextMenuTargetConnector.removeConnector");
+            getTarget().getElement().executeJs(
+                    "if (this.$contextMenuTargetConnector) { this.$contextMenuTargetConnector.removeConnector() }");
             if (isTargetJsPending()) {
                 targetJsRegistration.cancelExecution();
                 targetJsRegistration = null;
