@@ -4670,7 +4670,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * Note that the item index provider should be explicitly set using
      * {@link GridLazyDataView#setItemIndexProvider(ItemIndexProvider)} for lazy
-     * loading data providers.
+     * loading data providers. Otherwise, an
+     * {@link UnsupportedOperationException} will be thrown.
      *
      * @param item
      *            the item to scroll to, not {@code null}.
@@ -4678,6 +4679,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *             if the {@code item} parameter is {@code null}.
      * @throws NoSuchElementException
      *             if the {@code item} cannot be found.
+     * @throws UnsupportedOperationException
+     *             if {@link ItemIndexProvider} is missing for grid with a lazy
+     *             loading data provider.
      */
     public void scrollToItem(T item) {
         Objects.requireNonNull(item, "Item to scroll to cannot be null.");
