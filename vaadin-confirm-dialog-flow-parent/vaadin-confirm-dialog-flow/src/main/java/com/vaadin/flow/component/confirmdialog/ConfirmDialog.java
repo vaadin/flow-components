@@ -697,7 +697,8 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Confirm dialog does not support adding content.
+     * Confirm dialog does not support adding content. Use
+     * {@link #setText(Component)} instead to initialize content as a component.
      * <p>
      * This method is inherited from {@link HasOrderedComponents} and has been
      * marked as deprecated to indicate that it is not supported.
@@ -711,7 +712,8 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Confirm dialog does not support adding content.
+     * Confirm dialog does not support adding content. Use
+     * {@link #setText(Component)} instead to initialize content as a component.
      * <p>
      * This method is inherited from {@link HasOrderedComponents} and has been
      * marked as deprecated to indicate that it is not supported.
@@ -725,7 +727,8 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Confirm dialog does not support adding content.
+     * Confirm dialog does not support adding content. Use
+     * {@link #setText(String)} instead to initialize content as text.
      * <p>
      * This method is inherited from {@link HasOrderedComponents} and has been
      * marked as deprecated to indicate that it is not supported.
@@ -781,7 +784,8 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Confirm dialog does not support adding content.
+     * Confirm dialog does not support adding content. Use
+     * {@link #setText(Component)} instead to initialize content as a component.
      * <p>
      * This method is inherited from {@link HasOrderedComponents} and has been
      * marked as deprecated to indicate that it is not supported.
@@ -795,7 +799,8 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Confirm dialog does not support adding content.
+     * Confirm dialog does not support adding content. Use
+     * {@link #setText(Component)} instead to initialize content as a component.
      * <p>
      * This method is inherited from {@link HasOrderedComponents} and has been
      * marked as deprecated to indicate that it is not supported.
