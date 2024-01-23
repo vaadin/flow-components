@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import com.vaadin.flow.internal.Range;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
 public class GridScrollTest {
@@ -92,6 +93,17 @@ public class GridScrollTest {
 
         grid.scrollToItem(items.get(500));
         Assert.assertEquals("500-550", getRequestedRange(grid));
+    }
+
+    @Test
+    public void scrollToNonExistingItem_noSuchElementExceptionThrown() {
+        List<String> items = IntStream.range(0, 10).mapToObj(String::valueOf)
+                .toList();
+
+        grid.setItems(items);
+
+        Assert.assertThrows(NoSuchElementException.class,
+                () -> grid.scrollToItem("Not present"));
     }
 
     private String getRequestedRange(Grid<String> grid) {
