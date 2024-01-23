@@ -72,7 +72,7 @@ public class GridScrollTest {
     }
 
     @Test
-    public void listDataProvider_scrollToItem() {
+    public void listDataProvider_scrollToItem_loadsCorrectRange() {
         List<String> items = IntStream.range(0, 1000).mapToObj(String::valueOf)
                 .toList();
 
@@ -83,7 +83,18 @@ public class GridScrollTest {
     }
 
     @Test
-    public void lazyDataProvider_scrollToItem() {
+    public void lazyDataProvider_noItemIndexProvider_scrollToItem_throwsUnsupportedOperationException() {
+        List<String> items = IntStream.range(0, 1000).mapToObj(String::valueOf)
+                .toList();
+
+        grid.setItems(
+                q -> items.stream().skip(q.getOffset()).limit(q.getLimit()));
+        Assert.assertThrows(UnsupportedOperationException.class,
+                () -> grid.scrollToItem(items.get(500)));
+    }
+
+    @Test
+    public void lazyDataProvider_withItemIndexProvider_scrollToItem_loadsCorrectRange() {
         List<String> items = IntStream.range(0, 1000).mapToObj(String::valueOf)
                 .toList();
 
