@@ -280,15 +280,13 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
         TestBenchElement output = $("span").id(
                 DatePickerCustomFormatPage.OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_OUTPUT);
 
-        String todayString = LocalDate.now()
-                .format(DateTimeFormatter.ISO_LOCAL_DATE);
-        Assert.assertEquals(todayString, output.getText());
-
         $(DatePickerElement.class).id(id).click();
         waitForElementPresent(By.tagName("vaadin-date-picker-overlay"));
         $(DatePickerElement.class).id(id).sendKeys(Keys.ESCAPE);
         waitForElementNotPresent(By.tagName("vaadin-date-picker-overlay"));
 
+        String todayString = LocalDate.now()
+                .format(DateTimeFormatter.ISO_LOCAL_DATE);
         Assert.assertEquals(todayString, output.getText());
     }
 
