@@ -74,6 +74,7 @@ import com.vaadin.flow.data.binder.PropertySet;
 import com.vaadin.flow.data.binder.Setter;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.event.SortEvent.SortNotifier;
+import com.vaadin.flow.data.provider.AbstractDataView;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
@@ -92,6 +93,7 @@ import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
+import com.vaadin.flow.data.provider.ItemIndexProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
@@ -206,10 +208,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.4.0-alpha6")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.4.0-alpha6")
+@NpmPackage(value = "@vaadin/grid", version = "24.4.0-alpha7")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.4.0-alpha7")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -434,7 +436,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha6")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha7")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -4661,6 +4663,35 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         // Scroll to the requested index
         getElement().callJsFunction("scrollToIndex", rowIndex);
+    }
+
+    /**
+     * Scrolls to the row presenting the given item.
+     * <p>
+     * Note that the item index provider should be explicitly set using
+     * {@link GridLazyDataView#setItemIndexProvider(ItemIndexProvider)} for lazy
+     * loading data providers. Otherwise, an
+     * {@link UnsupportedOperationException} will be thrown.
+     *
+     * @param item
+     *            the item to scroll to, not {@code null}.
+     * @throws NullPointerException
+     *             if the {@code item} parameter is {@code null}.
+     * @throws NoSuchElementException
+     *             if the {@code item} cannot be found.
+     * @throws UnsupportedOperationException
+     *             if {@link ItemIndexProvider} is missing for grid with a lazy
+     *             loading data provider.
+     */
+    public void scrollToItem(T item) {
+        Objects.requireNonNull(item, "Item to scroll to cannot be null.");
+        AbstractDataView<T> dataView = getDataProvider().isInMemory()
+                ? getListDataView()
+                : getLazyDataView();
+        int itemIndex = dataView.getItemIndex(item)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Item to scroll to cannot be found: " + item));
+        scrollToIndex(itemIndex);
     }
 
     /**

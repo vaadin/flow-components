@@ -50,6 +50,19 @@ public class GridScrollToPage extends Div {
                 });
         addRowAndScrollToIndex.setId("add-row-and-scroll-to-index");
 
+        NativeButton scrollToItem500 = new NativeButton("Scroll to item 500",
+                e -> grid.scrollToItem(items.get(500)));
+        scrollToItem500.setId("scroll-to-item-500");
+
+        NativeButton addRowAndScrollToItem = new NativeButton(
+                "Add row and scroll to item", e -> {
+                    String itemToAdd = String.valueOf(items.size());
+                    items.add(itemToAdd);
+                    grid.getDataProvider().refreshAll();
+                    grid.scrollToItem(itemToAdd);
+                });
+        addRowAndScrollToItem.setId("add-row-and-scroll-to-item");
+
         NativeButton setSmallPageSize = new NativeButton(
                 "Set small page size (5)", e -> {
                     grid.setPageSize(5);
@@ -57,7 +70,7 @@ public class GridScrollToPage extends Div {
         setSmallPageSize.setId("set-small-page-size");
 
         add(grid, scrollToStart, scrollToEnd, scrollToRow500,
-                addRowsAndScrollToEnd, addRowAndScrollToIndex,
-                setSmallPageSize);
+                addRowsAndScrollToEnd, addRowAndScrollToIndex, scrollToItem500,
+                addRowAndScrollToItem, setSmallPageSize);
     }
 }
