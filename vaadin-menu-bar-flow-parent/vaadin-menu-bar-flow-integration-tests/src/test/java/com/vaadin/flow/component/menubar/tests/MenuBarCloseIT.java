@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,8 +22,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-@TestPath("vaadin-menu-bar/popup-button")
-public class MenuBarPopupButtonIT extends AbstractComponentIT {
+@TestPath("vaadin-menu-bar/close")
+public class MenuBarCloseIT extends AbstractComponentIT {
 
     @Before
     public void init() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,19 +23,18 @@ import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.router.Route;
 
 /**
- * Reuses MenuBar as a popup button and tests that the menu can be closed via a
- * close button.
+ * IT page for testing the close method.
  */
-@Route("vaadin-menu-bar/popup-button")
-public class MenuBarPopupButtonPage extends Div {
+@Route("vaadin-menu-bar/close")
+public class MenuBarClosePage extends Div {
 
-    public MenuBarPopupButtonPage() {
+    public MenuBarClosePage() {
         MenuBar menuBar = new MenuBar();
-        final SubMenu popup = menuBar.addItem("popup").getSubMenu();
-        final NativeButton closePopupButton = new NativeButton("Close",
+        final SubMenu submenu = menuBar.addItem("Open").getSubMenu();
+        final NativeButton closeButton = new NativeButton("Close",
                 e -> menuBar.close());
-        closePopupButton.setId("close-button");
-        popup.add(new Div(new Span("popup contents"), closePopupButton));
+        closeButton.setId("close-button");
+        submenu.add(new Div(new Span("menu contents"), closeButton));
         add(menuBar);
     }
 }

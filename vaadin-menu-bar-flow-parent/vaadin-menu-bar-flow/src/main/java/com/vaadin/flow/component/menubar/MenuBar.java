@@ -516,9 +516,9 @@ public class MenuBar extends Component
     }
 
     /**
-     * Closes any open submenus.
+     * Closes the current submenu.
      */
     public void close() {
-        getElement().executeJs("this._subMenu.close()");
+        getElement().callJsFunction("close");
     }
 }
