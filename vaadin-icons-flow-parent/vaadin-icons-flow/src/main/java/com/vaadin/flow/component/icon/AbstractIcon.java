@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -29,9 +29,9 @@ import com.vaadin.flow.dom.ElementConstants;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-icon")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/icon", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/icon", version = "24.4.0-alpha8")
 @JsModule("@vaadin/icon/src/vaadin-icon.js")
 public abstract class AbstractIcon<T extends AbstractIcon<T>> extends Component
         implements ClickNotifier<T>, HasTooltip {

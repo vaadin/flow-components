@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -34,9 +34,9 @@ import com.vaadin.flow.dom.Style;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-cookie-consent")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/cookie-consent", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/cookie-consent", version = "24.4.0-alpha8")
 @JsModule("@vaadin/cookie-consent/src/vaadin-cookie-consent.js")
 @JsModule("./cookieConsentConnector.js")
 public class CookieConsent extends Component implements HasStyle {

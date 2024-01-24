@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -602,6 +602,39 @@ public class SideNavItemTest {
             assertPath("foo/bar");
             assertPathAliases(Set.of("foo/baz", "foo/qux"));
         }, TestRouteWithAliases.class);
+    }
+
+    @Test
+    public void setTarget_hasTarget() {
+        sideNavItem.setTarget("_blank");
+        Assert.assertEquals("_blank",
+                sideNavItem.getElement().getProperty("target"));
+        Assert.assertEquals("_blank", sideNavItem.getTarget());
+    }
+
+    @Test
+    public void targetDefined_setToNull_noTarget() {
+        sideNavItem.setTarget("_blank");
+        sideNavItem.setTarget(null);
+        Assert.assertFalse(sideNavItem.getElement().hasProperty("target"));
+        Assert.assertNull(sideNavItem.getTarget());
+    }
+
+    @Test
+    public void setOpenInNewBrowserTab_targetBlankDefinedOnProperty() {
+        // call setOpenInNewTab and check that getTarget returns "_blank"
+        sideNavItem.setOpenInNewBrowserTab(true);
+        Assert.assertEquals("_blank",
+                sideNavItem.getElement().getProperty("target"));
+        Assert.assertTrue(sideNavItem.isOpenInNewBrowserTab());
+    }
+
+    @Test
+    public void openInNewBrowserTabDefined_setOpenInNewBrowserTabToFalse() {
+        sideNavItem.setOpenInNewBrowserTab(true);
+        sideNavItem.setOpenInNewBrowserTab(false);
+        Assert.assertFalse(sideNavItem.getElement().hasProperty("target"));
+        Assert.assertFalse(sideNavItem.isOpenInNewBrowserTab());
     }
 
     private boolean sideNavItemHasLabelElement() {

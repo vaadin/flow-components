@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,6 +18,7 @@ package com.vaadin.flow.component.checkbox;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -41,10 +42,12 @@ import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -81,9 +84,9 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "24.4.0-alpha8")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
@@ -120,6 +123,8 @@ public class CheckboxGroup<T>
 
     private boolean manualValidationEnabled = false;
 
+    private SelectionPreservationHandler<T> selectionPreservationHandler;
+
     /**
      * Creates an empty checkbox group
      */
@@ -129,6 +134,8 @@ public class CheckboxGroup<T>
                 CheckboxGroup::modelToPresentation);
 
         addValueChangeListener(e -> validate());
+
+        initSelectionPreservationHandler();
     }
 
     /**
@@ -286,7 +293,8 @@ public class CheckboxGroup<T>
     @Override
     public CheckboxGroupListDataView<T> getListDataView() {
         return new CheckboxGroupListDataView<>(this::getDataProvider, this,
-                this::identifierProviderChanged, (filter, sorting) -> reset());
+                this::identifierProviderChanged,
+                (filter, sorting) -> rebuild());
     }
 
     /**
@@ -301,6 +309,54 @@ public class CheckboxGroup<T>
     public CheckboxGroupDataView<T> getGenericDataView() {
         return new CheckboxGroupDataView<>(this::getDataProvider, this,
                 this::identifierProviderChanged);
+    }
+
+    private void initSelectionPreservationHandler() {
+        selectionPreservationHandler = new SelectionPreservationHandler<>(
+                SelectionPreservationMode.DISCARD) {
+
+            @Override
+            public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
+                // NO-OP
+            }
+
+            @Override
+            public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
+                Map<Object, T> deselectionCandidateIdsToItems = getSelectedItems()
+                        .stream().collect(Collectors
+                                .toMap(item -> getItemId(item), item -> item));
+                @SuppressWarnings("unchecked")
+                Stream<T> itemsStream = getDataProvider()
+                        .fetch(DataViewUtils.getQuery(CheckboxGroup.this));
+                Set<Object> existingItemIds = itemsStream
+                        .map(item -> getItemId(item))
+                        .filter(deselectionCandidateIdsToItems::containsKey)
+                        .limit(deselectionCandidateIdsToItems.size())
+                        .collect(Collectors.toSet());
+                existingItemIds.forEach(deselectionCandidateIdsToItems::remove);
+                deselect(deselectionCandidateIdsToItems.values());
+            }
+
+            @Override
+            public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
+                clear();
+            }
+        };
+    }
+
+    private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
+        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent) {
+            T otherItem = ((DataChangeEvent.DataRefreshEvent<T>) dataChangeEvent)
+                    .getItem();
+            Object otherItemId = getItemId(otherItem);
+            getCheckboxItems().filter(
+                    item -> Objects.equals(getItemId(item.item), otherItemId))
+                    .findFirst().ifPresent(this::updateCheckbox);
+        } else {
+            keyMapper.removeAll();
+            selectionPreservationHandler.handleDataChange(dataChangeEvent);
+            rebuild();
+        }
     }
 
     private static class CheckBoxItem<T> extends Checkbox
@@ -332,25 +388,15 @@ public class CheckboxGroup<T>
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
-        reset();
+        keyMapper.removeAll();
+        clear();
+        rebuild();
 
         if (dataProviderListenerRegistration != null) {
             dataProviderListenerRegistration.remove();
         }
         dataProviderListenerRegistration = dataProvider
-                .addDataProviderListener(event -> {
-                    if (event instanceof DataChangeEvent.DataRefreshEvent) {
-                        T otherItem = ((DataChangeEvent.DataRefreshEvent<T>) event)
-                                .getItem();
-                        this.getCheckboxItems()
-                                .filter(item -> Objects.equals(
-                                        getItemId(item.item),
-                                        getItemId(otherItem)))
-                                .findFirst().ifPresent(this::updateCheckbox);
-                    } else {
-                        reset();
-                    }
-                });
+                .addDataProviderListener(this::handleDataChange);
     }
 
     @Override
@@ -636,11 +682,36 @@ public class CheckboxGroup<T>
         refreshCheckboxItems();
     }
 
-    @SuppressWarnings("unchecked")
-    private void reset() {
-        keyMapper.removeAll();
-        clear();
+    /**
+     * Sets the selection preservation mode. Determines what happens with the
+     * selection when {@link DataProvider#refreshAll} is called. The selection
+     * is discarded in any case when a new data provider is set. The default is
+     * {@link SelectionPreservationMode#DISCARD}.
+     *
+     * @param selectionPreservationMode
+     *            the selection preservation mode to switch to, not {@code null}
+     *
+     * @see SelectionPreservationMode
+     */
+    public void setSelectionPreservationMode(
+            SelectionPreservationMode selectionPreservationMode) {
+        selectionPreservationHandler
+                .setSelectionPreservationMode(selectionPreservationMode);
+    }
 
+    /**
+     * Gets the selection preservation mode.
+     *
+     * @return the selection preservation mode
+     *
+     * @see #setSelectionPreservationMode(SelectionPreservationMode)
+     */
+    public SelectionPreservationMode getSelectionPreservationMode() {
+        return selectionPreservationHandler.getSelectionPreservationMode();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void rebuild() {
         synchronized (dataProvider) {
             // Cache helper component before removal
             Component helperComponent = getHelperComponent();

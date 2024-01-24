@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -494,5 +495,96 @@ public class RadioButtonGroupTest {
         RadioButtonGroup<String> field = new RadioButtonGroup<String>();
         Assert.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<RadioButtonGroup<String>, String>, String>);
+    }
+
+    @Test
+    public void discardSelectionOnDataChange_noExtraChangeEventsFired() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        List<HasValue.ValueChangeEvent<String>> events = new ArrayList<>();
+        group.addValueChangeListener(events::add);
+
+        List<String> items = new ArrayList<>(
+                Arrays.asList("Item 1", "Item 2", "Item 3"));
+        group.setItems(items);
+
+        group.setSelectionPreservationMode(SelectionPreservationMode.DISCARD);
+
+        String selectedItem = items.get(0);
+        group.setValue(selectedItem);
+        Assert.assertEquals(selectedItem, group.getValue());
+        Assert.assertEquals(1, events.size());
+        events.clear();
+
+        group.getDataProvider().refreshAll();
+        Assert.assertNull(group.getValue());
+        Assert.assertEquals(1, events.size());
+    }
+
+    @Test
+    public void preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        List<HasValue.ValueChangeEvent<String>> events = new ArrayList<>();
+        group.addValueChangeListener(events::add);
+
+        List<String> items = new ArrayList<>(
+                Arrays.asList("Item 1", "Item 2", "Item 3"));
+        group.setItems(items);
+
+        group.setSelectionPreservationMode(
+                SelectionPreservationMode.PRESERVE_EXISTING);
+
+        String selectedItem = items.get(0);
+        group.setValue(selectedItem);
+        Assert.assertEquals(selectedItem, group.getValue());
+        Assert.assertEquals(1, events.size());
+        events.clear();
+
+        group.getDataProvider().refreshAll();
+        Assert.assertEquals(selectedItem, group.getValue());
+        Assert.assertTrue(events.isEmpty());
+
+        items.remove(items.get(1));
+        group.getDataProvider().refreshAll();
+        Assert.assertEquals(selectedItem, group.getValue());
+        Assert.assertTrue(events.isEmpty());
+
+        items.remove(selectedItem);
+        group.getDataProvider().refreshAll();
+        Assert.assertNull(group.getValue());
+        Assert.assertEquals(1, events.size());
+    }
+
+    @Test
+    public void preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        List<HasValue.ValueChangeEvent<String>> events = new ArrayList<>();
+        group.addValueChangeListener(events::add);
+
+        List<String> items = new ArrayList<>(
+                Arrays.asList("Item 1", "Item 2", "Item 3"));
+        group.setItems(items);
+
+        group.setSelectionPreservationMode(
+                SelectionPreservationMode.PRESERVE_ALL);
+
+        String selectedItem = items.get(0);
+        group.setValue(selectedItem);
+        Assert.assertEquals(selectedItem, group.getValue());
+        Assert.assertEquals(1, events.size());
+        events.clear();
+
+        group.getDataProvider().refreshAll();
+        Assert.assertEquals(selectedItem, group.getValue());
+        Assert.assertTrue(events.isEmpty());
+
+        items.remove(items.get(1));
+        group.getDataProvider().refreshAll();
+        Assert.assertEquals(selectedItem, group.getValue());
+        Assert.assertTrue(events.isEmpty());
+
+        items.remove(selectedItem);
+        group.getDataProvider().refreshAll();
+        Assert.assertEquals(selectedItem, group.getValue());
+        Assert.assertTrue(events.isEmpty());
     }
 }

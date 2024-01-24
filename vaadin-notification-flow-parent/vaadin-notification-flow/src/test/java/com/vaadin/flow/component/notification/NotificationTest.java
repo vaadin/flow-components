@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -358,5 +358,14 @@ public class NotificationTest {
         int expectedInvocationsCount = 2 * notifications.size();
         Assert.assertEquals(expectedInvocationsCount,
                 listenerInvokedCount.get());
+    }
+
+    @Test
+    public void setText_notificationHasUnmodifiedText() {
+        Notification notification = new Notification();
+        notification.setText("foo > bar");
+
+        Assert.assertEquals("foo > bar",
+                notification.getElement().getProperty("text"));
     }
 }

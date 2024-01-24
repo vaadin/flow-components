@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -36,6 +36,8 @@ public class EditColumnConfigurator<T> implements Serializable {
 
     private final EditColumn<T> column;
     private Registration attachRegistration;
+
+    private boolean editModeRendererRequested = false;
 
     /**
      * Creates a new configurator for the given column.
@@ -150,21 +152,37 @@ public class EditColumnConfigurator<T> implements Serializable {
             attachRegistration.remove();
             attachRegistration = null;
         }
+        // Need to call on attach to make sure that the edit mode renderer is
+        // set in case the GridPro is detached and attached again
         attachRegistration = column.getElement()
                 .addAttachListener(e -> setEditModeRenderer(component));
 
-        column.getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(column,
-                        context -> setEditModeRenderer(component)));
+        // Calling setEditModeRenderer here in case the GridPro is already
+        // attached and the column is added later
+        // This is needed because in this case the attach listener is not called
+        setEditModeRenderer(component);
+
         return configureColumn(valueProvider, (item, ignore) -> itemUpdater
                 .accept(item, component.getValue()), EditorType.CUSTOM,
                 component);
     }
 
     private <V> void setEditModeRenderer(HasValueAndElement<?, V> component) {
-        UI.getCurrent().getPage().executeJs(
-                "window.Vaadin.Flow.gridProConnector.setEditModeRenderer($0, $1)",
-                column.getElement(), component.getElement());
+        if (editModeRendererRequested) {
+            return;
+        }
+        editModeRendererRequested = true;
+        column.getElement().getNode().runWhenAttached(ui -> {
+            ui.beforeClientResponse(column, context -> {
+                if (!editModeRendererRequested) {
+                    return;
+                }
+                ui.getPage().executeJs(
+                        "window.Vaadin.Flow.gridProConnector.setEditModeRenderer($0, $1)",
+                        column.getElement(), component.getElement());
+                editModeRendererRequested = false;
+            });
+        });
     }
 
     /**

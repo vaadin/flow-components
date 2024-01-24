@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -64,15 +64,6 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
             return grid.hasRow(lastVisibleRow)
                     && "Son 49/19/19".equals(getCellContent(lastVisibleRow));
         }, 2);
-    }
-
-    @Test
-    public void smallPageSize_expandAll_correctLastVisibleItem() {
-        $("button").id("change-page-size").click();
-        expandAllButton.click();
-
-        int lastVisibleRow = grid.getLastVisibleRowIndex();
-        Assert.assertEquals("Son 0/0/7", getCellContent(lastVisibleRow));
     }
 
     @Test

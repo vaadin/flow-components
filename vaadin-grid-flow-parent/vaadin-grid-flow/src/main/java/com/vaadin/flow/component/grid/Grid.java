@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -64,6 +64,8 @@ import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.grid.editor.EditorImpl;
 import com.vaadin.flow.component.grid.editor.EditorRenderer;
+import com.vaadin.flow.component.shared.SelectionPreservationHandler;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
@@ -72,6 +74,7 @@ import com.vaadin.flow.data.binder.PropertySet;
 import com.vaadin.flow.data.binder.Setter;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.event.SortEvent.SortNotifier;
+import com.vaadin.flow.data.provider.AbstractDataView;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
@@ -90,12 +93,14 @@ import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
+import com.vaadin.flow.data.provider.ItemIndexProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.data.selection.MultiSelect;
@@ -203,16 +208,16 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.3.0-alpha11")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/grid", version = "24.4.0-alpha8")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.4.0-alpha8")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 @JsModule("./flow-component-renderer.js")
-@JsModule("./gridConnector.js")
+@JsModule("./gridConnector.ts")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Grid<T> extends Component implements HasStyle, HasSize,
         Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>, HasTheme,
@@ -431,7 +436,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha11")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha8")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -1440,6 +1445,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private SerializableFunction<T, String> tooltipGenerator = item -> null;
 
+    private SelectionPreservationHandler<T> selectionPreservationHandler;
+
     /**
      * Creates a new instance, with page size of 50.
      */
@@ -1668,6 +1675,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         addDragEndListener(this::onDragEnd);
 
         updateMultiSortPriority(defaultMultiSortPriority);
+
+        initSelectionPreservationHandler();
     }
 
     private void generateUniqueKeyData(T item, JsonObject jsonObject) {
@@ -1676,6 +1685,55 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (uniqueKeyPropertyName != null
                 && !jsonObject.hasKey(uniqueKeyPropertyName)) {
             jsonObject.put(uniqueKeyPropertyName, getUniqueKey(item));
+        }
+    }
+
+    private void initSelectionPreservationHandler() {
+        selectionPreservationHandler = new SelectionPreservationHandler<>(
+                SelectionPreservationMode.PRESERVE_ALL) {
+
+            @Override
+            public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
+                // NO-OP
+            }
+
+            @Override
+            public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
+                Map<Object, T> deselectionCandidateIdsToItems = getSelectedItems()
+                        .stream().collect(Collectors
+                                .toMap(getDataProvider()::getId, item -> item));
+                if (deselectionCandidateIdsToItems.isEmpty()) {
+                    return;
+                }
+                @SuppressWarnings("unchecked")
+                Stream<T> itemsStream = getDataProvider().fetch(
+                        getDataCommunicator().buildQuery(0, Integer.MAX_VALUE));
+                Set<Object> existingItemIds = itemsStream
+                        .map(getDataProvider()::getId)
+                        .filter(deselectionCandidateIdsToItems::containsKey)
+                        .limit(deselectionCandidateIdsToItems.size())
+                        .collect(Collectors.toSet());
+                existingItemIds.forEach(deselectionCandidateIdsToItems::remove);
+                if (getSelectionModel() instanceof GridMultiSelectionModel) {
+                    asMultiSelect()
+                            .deselect(deselectionCandidateIdsToItems.values());
+                } else if (!deselectionCandidateIdsToItems.isEmpty()) {
+                    deselectAll();
+                }
+            }
+
+            @Override
+            public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
+                deselectAll();
+            }
+        };
+    }
+
+    private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
+        onDataProviderChange();
+        if (!(dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent)
+                && !(getSelectionModel() instanceof GridNoneSelectionModel)) {
+            selectionPreservationHandler.handleDataChange(dataChangeEvent);
         }
     }
 
@@ -2539,6 +2597,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
+        if (SelectionPreservationMode.PRESERVE_EXISTING.equals(
+                getSelectionPreservationMode()) && !dataProvider.isInMemory()) {
+            throw new UnsupportedOperationException(
+                    "Lazy data providers do not support preserve existing selection mode.");
+        }
         handleDataProviderChange(dataProvider);
 
         deselectAll();
@@ -2705,7 +2768,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             + pageSize);
         }
         getElement().setProperty("pageSize", pageSize);
-        getElement().callJsFunction("$connector.reset");
+        getElement()
+                .executeJs("if (this.$connector) { this.$connector.reset() }");
         getDataCommunicator().setPageSize(pageSize);
         setRequestedRange(0, pageSize);
         getDataCommunicator().reset();
@@ -2756,8 +2820,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     protected void updateSelectionModeOnClient() {
-        getElement().callJsFunction("$connector.setSelectionMode",
+        callJsFunctionBeforeClientResponse("$connector.setSelectionMode",
                 selectionMode.name());
+    }
+
+    /**
+     * Returns the selection mode for this grid.
+     *
+     * @return the selection mode, not null
+     */
+    public SelectionMode getSelectionMode() {
+        assert selectionMode != null : "No selection mode set by "
+                + getClass().getName() + " constructor";
+        return selectionMode;
     }
 
     /**
@@ -2877,6 +2952,40 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         getSelectionModel().deselectAll();
     }
 
+    /**
+     * Sets the selection preservation mode. Determines what happens with the
+     * selection when {@link DataProvider#refreshAll} is called. The selection
+     * is discarded in any case when a new data provider is set. The default is
+     * {@link SelectionPreservationMode#PRESERVE_ALL}. Lazy data providers do
+     * not support {@link SelectionPreservationMode#PRESERVE_EXISTING}.
+     *
+     * @param selectionPreservationMode
+     *            the selection preservation mode to switch to, not {@code null}
+     *
+     * @see SelectionPreservationMode
+     */
+    public void setSelectionPreservationMode(
+            SelectionPreservationMode selectionPreservationMode) {
+        if (SelectionPreservationMode.PRESERVE_EXISTING.equals(
+                selectionPreservationMode) && !getDataProvider().isInMemory()) {
+            throw new UnsupportedOperationException(
+                    "Lazy data providers do not support preserve existing selection mode.");
+        }
+        selectionPreservationHandler
+                .setSelectionPreservationMode(selectionPreservationMode);
+    }
+
+    /**
+     * Gets the selection preservation mode.
+     *
+     * @return the selection preservation mode
+     *
+     * @see #setSelectionPreservationMode(SelectionPreservationMode)
+     */
+    public SelectionPreservationMode getSelectionPreservationMode() {
+        return selectionPreservationHandler.getSelectionPreservationMode();
+    }
+
     void doClientSideSelection(Set<T> items) {
         callSelectionFunctionForItems("doSelection", items);
     }
@@ -2900,21 +3009,22 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     : null;
             jsonArray.set(jsonArray.length(), jsonObject);
         }
-        final SerializableRunnable jsFunctionCall = () -> getElement()
-                .callJsFunction("$connector." + function, jsonArray, false);
-        if (getElement().getNode().isAttached()) {
-            jsFunctionCall.run();
-        } else {
-            getElement().getNode()
-                    .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                            context -> jsFunctionCall.run()));
-        }
+
+        callJsFunctionBeforeClientResponse("$connector." + function, jsonArray,
+                false);
     }
 
     private JsonObject generateJsonForSelection(T item) {
         JsonObject json = Json.createObject();
         json.put("key", getDataCommunicator().getKeyMapper().key(item));
         return json;
+    }
+
+    private void callJsFunctionBeforeClientResponse(String functionName,
+            Serializable... arguments) {
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, context -> getElement()
+                        .callJsFunction(functionName, arguments)));
     }
 
     /**
@@ -3455,6 +3565,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         updateClientSideSorterIndicators(sortOrder);
+        updateSelectionModeOnClient();
         if (getDataProvider() != null) {
             handleDataProviderChange(getDataProvider());
         }
@@ -3552,7 +3663,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         if (getElement().getNode().isAttached()) {
-            getElement().callJsFunction("$connector.setSorterDirections",
+            callJsFunctionBeforeClientResponse("$connector.setSorterDirections",
                     directions);
         }
     }
@@ -4155,7 +4266,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         dataProviderChangeRegistration = dataProvider
-                .addDataProviderListener(event -> onDataProviderChange());
+                .addDataProviderListener(this::handleDataChange);
     }
 
     /**
@@ -4552,6 +4663,35 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         // Scroll to the requested index
         getElement().callJsFunction("scrollToIndex", rowIndex);
+    }
+
+    /**
+     * Scrolls to the row presenting the given item.
+     * <p>
+     * Note that the item index provider should be explicitly set using
+     * {@link GridLazyDataView#setItemIndexProvider(ItemIndexProvider)} for lazy
+     * loading data providers. Otherwise, an
+     * {@link UnsupportedOperationException} will be thrown.
+     *
+     * @param item
+     *            the item to scroll to, not {@code null}.
+     * @throws NullPointerException
+     *             if the {@code item} parameter is {@code null}.
+     * @throws NoSuchElementException
+     *             if the {@code item} cannot be found.
+     * @throws UnsupportedOperationException
+     *             if {@link ItemIndexProvider} is missing for grid with a lazy
+     *             loading data provider.
+     */
+    public void scrollToItem(T item) {
+        Objects.requireNonNull(item, "Item to scroll to cannot be null.");
+        AbstractDataView<T> dataView = getDataProvider().isInMemory()
+                ? getListDataView()
+                : getLazyDataView();
+        int itemIndex = dataView.getItemIndex(item)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Item to scroll to cannot be found: " + item));
+        scrollToIndex(itemIndex);
     }
 
     /**

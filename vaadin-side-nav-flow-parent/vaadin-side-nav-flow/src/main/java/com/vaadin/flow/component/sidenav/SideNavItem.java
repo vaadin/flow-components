@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav-item")
-@NpmPackage(value = "@vaadin/side-nav", version = "24.3.0-alpha11")
+@NpmPackage(value = "@vaadin/side-nav", version = "24.4.0-alpha8")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 public class SideNavItem extends SideNavItemContainer
         implements HasPrefix, HasSuffix {
@@ -355,6 +355,67 @@ public class SideNavItem extends SideNavItemContainer
                     .collect(Collectors.toSet()));
             getElement().setPropertyJson("pathAliases", aliasesAsJson);
         }
+    }
+
+    /**
+     * Gets the target of this item.
+     *
+     * @return the target of this item
+     */
+    public String getTarget() {
+        return getElement().getProperty("target");
+    }
+
+    /**
+     * Where to display the linked URL, as the name for a browsing context.
+     * <p>
+     * The following keywords have special meanings for where to load the URL:
+     * <ul>
+     * <li><code>_self</code>: the current browsing context. (Default)</li>
+     * <li><code>_blank</code>: usually a new tab, but users can configure
+     * browsers to open a new window instead.</li>
+     * <li><code>_parent</code>: the parent browsing context of the current one.
+     * If no parent, behaves as <code>_self</code>.</li>
+     * <li><code>_top</code>: the topmost browsing context (the "highest"
+     * context that’s an ancestor of the current one). If no ancestors, behaves
+     * as <code>_self</code>.</li>
+     * </ul>
+     * </p>
+     *
+     * @param target
+     *            the target of this item
+     */
+    public void setTarget(String target) {
+        if (target == null) {
+            getElement().removeProperty("target");
+        } else {
+            getElement().setProperty("target", target);
+        }
+    }
+
+    /**
+     * Sets whether the target URL should be opened in a new browser tab.
+     * <p>
+     * This is a convenience method for setting the target to
+     * <code>_blank</code>. See {@link #setTarget(String)} for more information.
+     * </p>
+     *
+     * @param openInNewBrowserTab
+     *            true if the target URL should be opened in a new browser tab,
+     *            false otherwise
+     */
+    public void setOpenInNewBrowserTab(boolean openInNewBrowserTab) {
+        setTarget(openInNewBrowserTab ? "_blank" : null);
+    }
+
+    /**
+     * Gets whether the target URL should be opened in a new browser tab.
+     *
+     * @return true if the target URL should be opened in a new browser tab,
+     *         false otherwise
+     */
+    public boolean isOpenInNewBrowserTab() {
+        return "_blank".equals(getTarget());
     }
 
     private Set<String> getPathAliasesFromView(Class<? extends Component> view,

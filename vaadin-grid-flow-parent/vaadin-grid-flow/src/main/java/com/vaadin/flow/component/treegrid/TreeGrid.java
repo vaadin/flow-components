@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -140,7 +140,7 @@ public class TreeGrid<T> extends Grid<T>
         private SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory;
         private int viewportRemaining = 0;
         private final List<JsonValue> queuedParents = new ArrayList<>();
-        private VaadinRequest previousRequest;
+        private transient VaadinRequest previousRequest;
 
         public TreeGridArrayUpdaterImpl(
                 SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
@@ -1094,5 +1094,24 @@ public class TreeGrid<T> extends Grid<T>
         getUI().ifPresent(ui -> ui.beforeClientResponse(this,
                 ctx -> getElement().executeJs(
                         "this.scrollToIndex(...Array(10).fill(Infinity))")));
+    }
+
+    /**
+     * TreeGrid does not support scrolling to a given item. Use
+     * {@link #scrollToIndex(int...)} instead.
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
+     * {@link UnsupportedOperationException}.
+     *
+     * @param item
+     *            the item to scroll to
+     * @deprecated
+     */
+    @Deprecated
+    @Override
+    public void scrollToItem(T item) {
+        throw new UnsupportedOperationException(
+                "scrollToItem method is not supported in TreeGrid");
     }
 }

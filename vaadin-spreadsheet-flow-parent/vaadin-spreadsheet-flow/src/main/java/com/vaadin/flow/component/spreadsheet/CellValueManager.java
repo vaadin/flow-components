@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -91,7 +91,7 @@ public class CellValueManager implements Serializable {
     private CellValueHandler customCellValueHandler;
     private CellDeletionHandler customCellDeletionHandler;
 
-    private DataFormatter formatter;
+    private DataFormatter formatter = new CustomDataFormatter();
 
     /** Cell keys that have values sent to client side and are cached there. */
     private final HashSet<String> sentCells = new HashSet<String>();
@@ -127,11 +127,10 @@ public class CellValueManager implements Serializable {
      */
     public CellValueManager(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
+
         UI current = UI.getCurrent();
         if (current != null) {
-            formatter = new CustomDataFormatter(current.getLocale());
-        } else {
-            formatter = new CustomDataFormatter();
+            updateLocale(current.getLocale());
         }
     }
 
