@@ -1677,6 +1677,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         updateMultiSortPriority(defaultMultiSortPriority);
 
         initSelectionPreservationHandler();
+
+        addAttachListener(e -> {
+            dataCommunicator.reset();
+        });
     }
 
     private void generateUniqueKeyData(T item, JsonObject jsonObject) {
