@@ -1110,10 +1110,11 @@ public class HeaderFooterTest {
     }
 
     @Test
-    public void addHeaderRowsAlternatingPrependAndAppend_removeEachRow_rowsRemoved() {
+    public void addHeaderRowsAlternatingPrependAndAppend_removeEachRowExceptDefault_rowsRemoved() {
+        grid.appendHeaderRow();
         List<HeaderRow> headerRows = addMixedHeaderRows(6);
         headerRows.forEach(row -> grid.removeHeaderRow(row));
-        Assert.assertEquals(0, grid.getHeaderRows().size());
+        Assert.assertEquals(1, grid.getHeaderRows().size());
     }
 
     @Test
