@@ -2363,6 +2363,54 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return insertInmostColumnLayer(true, false).asHeaderRow();
     }
 
+    public void removeHeaderRow(HeaderRow headerRow) {
+        Objects.requireNonNull(headerRow);
+        List<HeaderRow> headerRows = getHeaderRows();
+        if (headerRow.equals(defaultHeaderRow)) {
+            if (headerRows.size() != 1) {
+                throw new UnsupportedOperationException(
+                        "Default header row cannot be removed while there are other header rows.");
+            }
+            removeDefaultHeaderRow();
+        } else {
+            if (!headerRows.contains(headerRow)) {
+                throw new NoSuchElementException(
+                        "Header to remove cannot be found.");
+            }
+            ColumnLayer layerToRemove = headerRow.layer;
+            if (getColumnLayers().get(0).equals(layerToRemove)) {
+                // Switch with next header row
+                HeaderRow nextHeaderRow = headerRows
+                        .get(headerRows.indexOf(headerRow) - 1);
+                layerToRemove = nextHeaderRow.layer;
+                headerRow.layer.setHeaderRow(nextHeaderRow);
+                layerToRemove.setHeaderRow(headerRow);
+            }
+            removeColumnLayer(layerToRemove);
+        }
+    }
+
+    public void removeAllHeaderRows() {
+        List<HeaderRow> headerRows = getHeaderRows();
+        if (headerRows.isEmpty()) {
+            return;
+        }
+        int headerRowCount = headerRows.size();
+        IntStream.range(0, headerRowCount)
+                .mapToObj(index -> headerRows.get(headerRowCount - 1 - index))
+                .filter(headerRow -> !headerRow.equals(defaultHeaderRow))
+                .forEach(this::removeHeaderRow);
+        removeDefaultHeaderRow();
+    }
+
+    private void removeDefaultHeaderRow() {
+        defaultHeaderRow.getCells()
+                .forEach(headerCell -> headerCell.setText(null));
+        defaultHeaderRow.layer.setHeaderRow(null);
+        defaultHeaderRow.layer = null;
+        defaultHeaderRow = null;
+    }
+
     protected HeaderRow addFirstHeaderRow() {
         defaultHeaderRow = columnLayers.get(0).asHeaderRow();
         columnLayers.get(0).updateSortingIndicators(true);
@@ -2399,6 +2447,34 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             return columnLayers.get(0).asFooterRow();
         }
         return insertColumnLayer(getLastFooterLayerIndex() + 1).asFooterRow();
+    }
+
+    public void removeFooterRow(FooterRow footerRow) {
+        Objects.requireNonNull(footerRow);
+        List<FooterRow> footerRows = getFooterRows();
+        if (!footerRows.contains(footerRow)) {
+            throw new NoSuchElementException(
+                    "Footer to remove cannot be found.");
+        }
+        if (getColumnLayers().get(0).equals(footerRow.layer)) {
+            footerRow.getCells()
+                    .forEach(footerCell -> footerCell.setText(null));
+            footerRow.layer.setFooterRow(null);
+            footerRow.layer = null;
+        } else {
+            removeColumnLayer(footerRow.layer);
+        }
+    }
+
+    public void removeAllFooterRows() {
+        List<FooterRow> footerRows = getFooterRows();
+        if (footerRows.isEmpty()) {
+            return;
+        }
+        IntStream.range(0, footerRows.size())
+                .mapToObj(
+                        index -> footerRows.get(footerRows.size() - 1 - index))
+                .forEach(this::removeFooterRow);
     }
 
     protected List<ColumnLayer> getColumnLayers() {
