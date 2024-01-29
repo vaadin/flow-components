@@ -53,8 +53,12 @@ public class DetachReattachPage extends Div {
         NativeButton addItemDetailsButton = new NativeButton("Add item details",
                 e -> {
                     grid.setSelectionMode(Grid.SelectionMode.NONE);
-                    grid.setItemDetailsRenderer(new ComponentRenderer<>(
-                            item -> new Span("Item details")));
+                    grid.setItemDetailsRenderer(
+                            new ComponentRenderer<>(item -> {
+                                var span = new Span("Item details");
+                                span.setClassName("item-details");
+                                return span;
+                            }));
                 });
         addItemDetailsButton.setId("add-item-details-button");
 
