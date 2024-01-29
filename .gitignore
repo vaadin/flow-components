@@ -29,4 +29,5 @@ error-screenshots
 
 **/frontend/generated
 **/frontend/index.html
+**/frontend/*.tsx
 dev-bundle
