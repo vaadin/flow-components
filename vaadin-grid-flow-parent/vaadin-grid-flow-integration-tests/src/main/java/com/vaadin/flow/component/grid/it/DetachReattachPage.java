@@ -30,7 +30,9 @@ public class DetachReattachPage extends Div {
     public DetachReattachPage() {
         Grid<String> grid = new Grid<String>();
         grid.setItems("A", "B", "C");
-        grid.addColumn(x -> x).setHeader("Col").setSortable(true);
+        grid.addColumn(x -> x).setHeader("Text column").setSortable(true);
+        grid.addComponentColumn(x -> new Span("Component " + x))
+                .setHeader("Component column").setSortable(true);
 
         grid.setSelectionMode(Grid.SelectionMode.SINGLE);
 
