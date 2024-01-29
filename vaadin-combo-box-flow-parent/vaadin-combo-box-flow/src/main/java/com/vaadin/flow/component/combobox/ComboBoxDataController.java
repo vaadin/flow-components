@@ -218,6 +218,8 @@ class ComboBoxDataController<TItem>
 
         clearFilterOnCloseRegistration = comboBox.getElement()
                 .addPropertyChangeListener("opened", this::clearFilterOnClose);
+
+        reset();
     }
 
     /**
