@@ -2363,6 +2363,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return insertInmostColumnLayer(true, false).asHeaderRow();
     }
 
+    /**
+     * Removes the header row from the grid. Note that the default header row
+     * can be removed only if it is the only header row.
+     *
+     * @see #removeAllHeaderRows()
+     * @param headerRow
+     *            the header row to remove
+     * @throws UnsupportedOperationException
+     *             if default row is being removed while there are other header
+     *             rows
+     * @throws NoSuchElementException
+     *             if the header row cannot be found
+     */
     public void removeHeaderRow(HeaderRow headerRow) {
         Objects.requireNonNull(headerRow);
         List<HeaderRow> headerRows = getHeaderRows();
@@ -2390,6 +2403,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
     }
 
+    /**
+     * Removes all header rows from the grid.
+     *
+     * @see #removeHeaderRow(HeaderRow)
+     */
     public void removeAllHeaderRows() {
         List<HeaderRow> headerRows = getHeaderRows();
         if (headerRows.isEmpty()) {
@@ -2449,6 +2467,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return insertColumnLayer(getLastFooterLayerIndex() + 1).asFooterRow();
     }
 
+    /**
+     * Removes the footer row from the grid.
+     *
+     * @see #removeAllFooterRows()
+     * @param footerRow
+     *            the footer row to remove
+     * @throws NoSuchElementException
+     *             if the footer row cannot be found
+     */
     public void removeFooterRow(FooterRow footerRow) {
         Objects.requireNonNull(footerRow);
         List<FooterRow> footerRows = getFooterRows();
@@ -2472,6 +2499,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         removeColumnLayer(footerRow.layer);
     }
 
+    /**
+     * Removes all footer rows from the grid.
+     *
+     * @see #removeFooterRow(FooterRow)
+     */
     public void removeAllFooterRows() {
         getFooterRows().forEach(this::removeFooterRow);
     }
