@@ -25,6 +25,7 @@ import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.LitRenderer;
 
@@ -1107,6 +1108,43 @@ public class HeaderFooterTest {
         grid.prependHeaderRow();
         Assert.assertThrows(UnsupportedOperationException.class,
                 () -> grid.removeHeaderRow(defaultHeaderRow));
+    }
+
+    @Test
+    public void addTextHeaderRow_appendAnotherTextHeaderRow_removeAppendedHeaderRow_correctRowIsRemoved() {
+        int columnCount = grid.getColumns().size();
+        HeaderRow defaultHeaderRow = grid.appendHeaderRow();
+        defaultHeaderRow.getCells().forEach(cell -> cell.setText("DEFAULT"));
+        HeaderRow newHeaderRow = grid.appendHeaderRow();
+        newHeaderRow.getCells().forEach(cell -> cell.setText("NEW"));
+        grid.removeHeaderRow(newHeaderRow);
+        List<HeaderCell> headerCells = grid.getHeaderRows().get(0).getCells();
+        Assert.assertEquals(columnCount, headerCells.size());
+        headerCells.forEach(
+                cell -> Assert.assertEquals("DEFAULT", cell.getText()));
+    }
+
+    @Test
+    public void addComponentHeaderRow_appendAnotherComponentHeaderRow_removeAppendedHeaderRow_correctRowIsRemoved() {
+        int columnCount = grid.getColumns().size();
+        HeaderRow defaultHeaderRow = grid.appendHeaderRow();
+        List<NativeLabel> defaultHeaderRowComponents = IntStream
+                .range(0, columnCount).mapToObj(Integer::toString)
+                .map(NativeLabel::new).toList();
+        for (int i = 0; i < columnCount; i++) {
+            defaultHeaderRow.getCells().get(i)
+                    .setComponent(defaultHeaderRowComponents.get(i));
+        }
+        HeaderRow newHeaderRow = grid.appendHeaderRow();
+        newHeaderRow.getCells()
+                .forEach(cell -> cell.setComponent(new NativeLabel("NEW")));
+        grid.removeHeaderRow(newHeaderRow);
+        List<HeaderCell> headerCells = grid.getHeaderRows().get(0).getCells();
+        Assert.assertEquals(columnCount, headerCells.size());
+        for (int i = 0; i < columnCount; i++) {
+            Assert.assertEquals(defaultHeaderRowComponents.get(i),
+                    headerCells.get(i).getComponent());
+        }
     }
 
     @Test
