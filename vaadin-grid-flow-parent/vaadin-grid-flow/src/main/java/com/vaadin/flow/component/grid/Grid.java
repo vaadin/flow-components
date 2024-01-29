@@ -1677,10 +1677,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         updateMultiSortPriority(defaultMultiSortPriority);
 
         initSelectionPreservationHandler();
-
-        addAttachListener(e -> {
-            dataCommunicator.reset();
-        });
     }
 
     private void generateUniqueKeyData(T item, JsonObject jsonObject) {
@@ -3567,12 +3563,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
         updateClientSideSorterIndicators(sortOrder);
         updateSelectionModeOnClient();
         if (getDataProvider() != null) {
             handleDataProviderChange(getDataProvider());
         }
+        // When the component is detached and reattached in the same roundtrip,
+        // data communicator will clear all data generators, which will also
+        // remove all components rendered by component renderers. Thus reset the
+        // data communicator to re-render components.
+        dataCommunicator.reset();
     }
 
     @Override
