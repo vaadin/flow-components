@@ -2377,17 +2377,52 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 throw new NoSuchElementException(
                         "Header to remove cannot be found.");
             }
-            ColumnLayer layerToRemove = headerRow.layer;
-            if (getColumnLayers().get(0).equals(layerToRemove)) {
+            if (getColumnLayers().get(0).equals(headerRow.layer)) {
                 // Switch with next header row
                 HeaderRow nextHeaderRow = headerRows
                         .get(headerRows.indexOf(headerRow) - 1);
-                layerToRemove = nextHeaderRow.layer;
-                headerRow.layer.setHeaderRow(nextHeaderRow);
-                layerToRemove.setHeaderRow(headerRow);
+                switchHeaderRowContent(headerRow, nextHeaderRow);
+                if (nextHeaderRow.equals(defaultHeaderRow)) {
+                    nextHeaderRow.layer.updateSortingIndicators(true);
+                }
             }
-            removeColumnLayer(layerToRemove);
+            removeColumnLayer(headerRow.layer);
         }
+    }
+
+    private void switchHeaderRowContent(HeaderRow headerRow,
+            HeaderRow nextHeaderRow) {
+        List<HeaderRow.HeaderCell> headerRowCells = headerRow.cells;
+        List<HeaderRow.HeaderCell> nextHeaderRowCells = nextHeaderRow.cells;
+
+        // Update cell content
+        for (int i = 0; i < headerRowCells.size(); i++) {
+            HeaderRow.HeaderCell headerRowCell = headerRowCells.get(i);
+            Component headerRowCellComponent = headerRowCell.getComponent();
+            String headerRowCellText = headerRowCell.getText();
+
+            HeaderRow.HeaderCell nextHeaderRowCell = nextHeaderRowCells.get(i);
+            Component nextHeaderRowCellComponent = nextHeaderRowCell
+                    .getComponent();
+            String nextHeaderRowCellText = nextHeaderRowCell.getText();
+
+            if (headerRowCellComponent != null) {
+                nextHeaderRowCell.setComponent(headerRowCellComponent);
+            } else {
+                nextHeaderRowCell.setText(headerRowCellText);
+            }
+
+            if (nextHeaderRowCellComponent != null) {
+                headerRowCell.setComponent(nextHeaderRowCellComponent);
+            } else {
+                headerRowCell.setText(nextHeaderRowCellText);
+            }
+        }
+
+        // Update layer references
+        ColumnLayer headerRowLayer = headerRow.layer;
+        nextHeaderRow.layer.setHeaderRow(headerRow);
+        headerRowLayer.setHeaderRow(nextHeaderRow);
     }
 
     public void removeAllHeaderRows() {
