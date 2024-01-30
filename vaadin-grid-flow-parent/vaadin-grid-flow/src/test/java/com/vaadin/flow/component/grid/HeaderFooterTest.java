@@ -1111,6 +1111,16 @@ public class HeaderFooterTest {
     }
 
     @Test
+    public void addHeaderRow_setSortable_appendAnotherHeaderRow_removeLastHeaderRow_firstHeaderRowIsSortable() {
+        HeaderRow defaultHeaderRow = grid.appendHeaderRow();
+        grid.getColumns().forEach(col -> col.setSortable(true));
+        HeaderRow newHeaderRow = grid.appendHeaderRow();
+        grid.removeHeaderRow(newHeaderRow);
+        defaultHeaderRow.layer.getColumns()
+                .forEach(col -> Assert.assertTrue(col.hasSortingIndicators()));
+    }
+
+    @Test
     public void addTextHeaderRow_appendAnotherTextHeaderRow_removeAppendedHeaderRow_correctRowIsRemoved() {
         String textContent = "DEFAULT";
         HeaderRow defaultHeaderRow = grid.appendHeaderRow();
