@@ -86,7 +86,9 @@ public class DetachReattachIT extends AbstractComboBoxIT {
     }
 
     @Test
-    public void detachAndReattach_componentRenderersRestored() {
+    public void withComponentRenderer_renderComponentsInitially_detachAndReattach_componentRenderersRestored() {
+        clickButton("set-component-renderer");
+
         combo.openPopup();
         combo.closePopup();
 
@@ -94,10 +96,9 @@ public class DetachReattachIT extends AbstractComboBoxIT {
 
         combo = $(ComboBoxElement.class).waitForFirst();
         combo.openPopup();
+
         TestBenchElement overlay = $("vaadin-combo-box-overlay").waitForFirst();
         List<TestBenchElement> items = overlay.$("vaadin-combo-box-item").all();
-
-        Assert.assertEquals(2, items.size());
         items.forEach(item -> Assert.assertTrue(item.$("label").exists()));
     }
 

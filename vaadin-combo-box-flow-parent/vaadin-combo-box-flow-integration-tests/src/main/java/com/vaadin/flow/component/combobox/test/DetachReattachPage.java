@@ -28,7 +28,6 @@ public class DetachReattachPage extends Div {
 
     public DetachReattachPage() {
         ComboBox<String> comboBox = new ComboBox<>();
-        comboBox.setRenderer(new ComponentRenderer<>(s -> new NativeLabel(s)));
         comboBox.setItems("foo", "bar");
 
         NativeButton detach = new NativeButton("detach", e -> remove(comboBox));
@@ -53,6 +52,11 @@ public class DetachReattachPage extends Div {
                 e -> comboBox.setValue("foo"));
         setValue.setId("set-value");
 
+        NativeButton setComponentRenderer = new NativeButton(
+                "set component renderer", e -> comboBox.setRenderer(
+                        new ComponentRenderer<>(s -> new NativeLabel(s))));
+        setComponentRenderer.setId("set-component-renderer");
+
         Div valueChanges = new Div();
         valueChanges.setId("value-changes");
         comboBox.addValueChangeListener(e -> {
@@ -60,6 +64,6 @@ public class DetachReattachPage extends Div {
         });
 
         add(comboBox, detach, attach, attachDetach, detachAttach, setValue,
-                valueChanges);
+                setComponentRenderer, valueChanges);
     }
 }
