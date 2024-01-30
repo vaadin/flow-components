@@ -2391,16 +2391,27 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                         "Header to remove cannot be found.");
             }
             if (getColumnLayers().get(0).equals(headerRow.layer)) {
-                // Switch with next header row
-                HeaderRow nextHeaderRow = headerRows
-                        .get(headerRows.indexOf(headerRow) - 1);
-                switchRowContent(headerRow, nextHeaderRow);
-                if (nextHeaderRow.equals(defaultHeaderRow)) {
-                    nextHeaderRow.layer.updateSortingIndicators(true);
-                }
+                // Bottom layer needs special handling and content manipulation
+                // because it cannot be removed.
+                removeNonDefaultHeaderInBottomLayer(headerRow);
+            } else {
+                removeColumnLayer(headerRow.layer);
             }
-            removeColumnLayer(headerRow.layer);
         }
+    }
+
+    private void removeNonDefaultHeaderInBottomLayer(HeaderRow headerRow) {
+        // Move content from next footer row and remove that layer
+        List<HeaderRow> headerRows = getHeaderRows();
+        HeaderRow nextHeaderRow = headerRows.get(headerRows.size() - 2);
+        ColumnLayer layerToRemove = nextHeaderRow.layer;
+        moveRowContent(nextHeaderRow, headerRow);
+        headerRow.layer.setHeaderRow(nextHeaderRow);
+        if (nextHeaderRow.equals(defaultHeaderRow)) {
+            nextHeaderRow.layer.updateSortingIndicators(true);
+        }
+        layerToRemove.setHeaderRow(null);
+        removeColumnLayer(layerToRemove);
     }
 
     /**
@@ -2478,25 +2489,38 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void removeFooterRow(FooterRow footerRow) {
         Objects.requireNonNull(footerRow);
-        List<FooterRow> footerRows = getFooterRows();
-        if (!footerRows.contains(footerRow)) {
+        if (!getFooterRows().contains(footerRow)) {
             throw new NoSuchElementException(
                     "Footer to remove cannot be found.");
         }
         if (getColumnLayers().get(0).equals(footerRow.layer)) {
-            if (footerRows.size() == 1) {
-                footerRow.getCells()
-                        .forEach(footerCell -> footerCell.setText(null));
-                footerRow.layer.setFooterRow(null);
-                footerRow.layer = null;
-                return;
-            }
-            // Switch with next footer row
-            FooterRow nextFooterRow = footerRows
-                    .get(footerRows.indexOf(footerRow) + 1);
-            switchRowContent(footerRow, nextFooterRow);
+            // Bottom layer needs special handling and content manipulation
+            // because it cannot be removed.
+            removeFooterInBottomLayer(footerRow);
+        } else {
+            removeColumnLayer(footerRow.layer);
         }
-        removeColumnLayer(footerRow.layer);
+    }
+
+    private void removeFooterInBottomLayer(FooterRow footerRow) {
+        List<FooterRow> footerRows = getFooterRows();
+        if (footerRows.size() == 1) {
+            // There is no other footer row to move content from. Therefore, the
+            // layer is cleared.
+            footerRow.getCells()
+                    .forEach(footerCell -> footerCell.setText(null));
+            footerRow.layer.setFooterRow(null);
+            footerRow.layer = null;
+            return;
+        }
+        // Move content from next footer row and remove that layer
+        FooterRow nextFooterRow = footerRows
+                .get(footerRows.indexOf(footerRow) + 1);
+        ColumnLayer layerToRemove = nextFooterRow.layer;
+        moveRowContent(nextFooterRow, footerRow);
+        footerRow.layer.setFooterRow(nextFooterRow);
+        layerToRemove.setFooterRow(null);
+        removeColumnLayer(layerToRemove);
     }
 
     /**
@@ -2508,52 +2532,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         getFooterRows().forEach(this::removeFooterRow);
     }
 
-    private void switchRowContent(
-            AbstractRow<? extends AbstractRow.AbstractCell> row1,
-            AbstractRow<? extends AbstractRow.AbstractCell> row2) {
-        if (!(row1 instanceof HeaderRow && row2 instanceof HeaderRow
-                || row1 instanceof FooterRow && row2 instanceof FooterRow)) {
-            throw new UnsupportedOperationException(
-                    "Header/footer row content can only be switched with a row of the same type.");
-        }
-        List<? extends AbstractRow.AbstractCell> cells1 = row1.cells;
-        List<? extends AbstractRow.AbstractCell> cells2 = row2.cells;
-        if (cells1.size() != cells2.size()) {
-            throw new UnsupportedOperationException(
-                    "Header/footer row content cannot be switched for rows with different column counts.");
-        }
-
-        // Update cell content
-        for (int i = 0; i < cells1.size(); i++) {
-            AbstractRow.AbstractCell cell1 = cells1.get(i);
-            Component cell1Component = cell1.getComponent();
-            String cell1Text = cell1.getText();
-
-            AbstractRow.AbstractCell cell2 = cells2.get(i);
-            Component cell2Component = cell2.getComponent();
-            String cell2Text = cell2.getText();
-
-            if (cell1Component != null) {
-                cell2.setComponent(cell1Component);
+    private void moveRowContent(
+            AbstractRow<? extends AbstractRow.AbstractCell> sourceRow,
+            AbstractRow<? extends AbstractRow.AbstractCell> targetRow) {
+        for (int i = 0; i < sourceRow.cells.size(); i++) {
+            AbstractRow.AbstractCell sourceCell = sourceRow.cells.get(i);
+            AbstractRow.AbstractCell targetCell = targetRow.cells.get(i);
+            if (sourceCell.getComponent() != null) {
+                targetCell.setComponent(sourceCell.getComponent());
             } else {
-                cell2.setText(cell1Text);
+                targetCell.setText(sourceCell.getText());
             }
-
-            if (cell2Component != null) {
-                cell1.setComponent(cell2Component);
-            } else {
-                cell1.setText(cell2Text);
-            }
-        }
-
-        // Update layer references
-        ColumnLayer row1Layer = row1.layer;
-        if (row1 instanceof HeaderRow) {
-            row2.layer.setHeaderRow((HeaderRow) row1);
-            row1Layer.setHeaderRow((HeaderRow) row2);
-        } else {
-            row2.layer.setFooterRow((FooterRow) row1);
-            row1Layer.setFooterRow((FooterRow) row2);
         }
     }
 
