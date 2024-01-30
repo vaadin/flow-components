@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu-item")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends Component
