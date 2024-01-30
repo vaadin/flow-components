@@ -79,6 +79,8 @@
                                 <include>vite.generated.ts</include>
                                 <include>types.d.ts</include>
                                 <include>tsconfig.json</include>
+                                <include>frontend/routes.tsx</include>
+                                <include>frontend/App.tsx</include>
                             </includes>
                         </fileset>
                         <fileset>
