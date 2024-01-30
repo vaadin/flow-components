@@ -68,12 +68,12 @@ public class DetachReattachIT extends AbstractComponentIT {
         grid.getCell(1, 0).click();
 
         Assert.assertTrue("Item details are visible on cell click by default.",
-                grid.findElement(By.tagName("span")).isDisplayed());
+                grid.findElement(By.className("item-details")).isDisplayed());
 
         grid.getCell(1, 0).click();
 
         Assert.assertEquals("Item details are hidden on subsequent cell click.",
-                0, grid.findElements(By.tagName("span")).size());
+                0, grid.findElements(By.className("item-details")).size());
 
         // Do not show details on click
         $("button").id("toggle-details-visible-click-button").click();
@@ -81,7 +81,7 @@ public class DetachReattachIT extends AbstractComponentIT {
         grid.getCell(1, 0).click();
         Assert.assertEquals(
                 "Item details are hidden with setDetailsVisibleOnClick(false).",
-                0, grid.findElements(By.tagName("span")).size());
+                0, grid.findElements(By.className("item-details")).size());
 
         // Detach and re-attach
         $("button").id("detach-button").click();
@@ -93,7 +93,18 @@ public class DetachReattachIT extends AbstractComponentIT {
         grid.getCell(1, 0).click();
         Assert.assertEquals(
                 "Item details are still hidden after detach and re-attach.", 0,
-                grid.findElements(By.tagName("span")).size());
+                grid.findElements(By.className("item-details")).size());
+    }
+
+    @Test
+    public void detachAndReattach_componentRenderersRestored() {
+        open();
+        GridElement grid = $(GridElement.class).first();
+        Assert.assertEquals("Component A", grid.getCell(0, 1).getText());
+
+        $("button").id("detach-and-reattach-button").click();
+        grid = $(GridElement.class).first();
+        Assert.assertEquals("Component A", grid.getCell(0, 1).getText());
     }
 
     @Test
