@@ -1112,39 +1112,97 @@ public class HeaderFooterTest {
 
     @Test
     public void addTextHeaderRow_appendAnotherTextHeaderRow_removeAppendedHeaderRow_correctRowIsRemoved() {
-        int columnCount = grid.getColumns().size();
+        String textContent = "DEFAULT";
         HeaderRow defaultHeaderRow = grid.appendHeaderRow();
-        defaultHeaderRow.getCells().forEach(cell -> cell.setText("DEFAULT"));
+        defaultHeaderRow.getCells().forEach(cell -> cell.setText(textContent));
         HeaderRow newHeaderRow = grid.appendHeaderRow();
         newHeaderRow.getCells().forEach(cell -> cell.setText("NEW"));
         grid.removeHeaderRow(newHeaderRow);
-        List<HeaderCell> headerCells = grid.getHeaderRows().get(0).getCells();
-        Assert.assertEquals(columnCount, headerCells.size());
-        headerCells.forEach(
-                cell -> Assert.assertEquals("DEFAULT", cell.getText()));
+        assertRowTextContent(textContent, grid.getHeaderRows().get(0));
     }
 
     @Test
-    public void addComponentHeaderRow_appendAnotherComponentHeaderRow_removeAppendedHeaderRow_correctRowIsRemoved() {
-        int columnCount = grid.getColumns().size();
-        HeaderRow defaultHeaderRow = grid.appendHeaderRow();
-        List<NativeLabel> defaultHeaderRowComponents = IntStream
-                .range(0, columnCount).mapToObj(Integer::toString)
-                .map(NativeLabel::new).toList();
-        for (int i = 0; i < columnCount; i++) {
-            defaultHeaderRow.getCells().get(i)
-                    .setComponent(defaultHeaderRowComponents.get(i));
-        }
+    public void addTextHeaderRow_appendComponentHeaderRow_removeAppendedHeaderRow_correctRowIsRemoved() {
+        String textContent = "DEFAULT";
+        grid.appendHeaderRow().getCells()
+                .forEach(cell -> cell.setText(textContent));
         HeaderRow newHeaderRow = grid.appendHeaderRow();
         newHeaderRow.getCells()
                 .forEach(cell -> cell.setComponent(new NativeLabel("NEW")));
         grid.removeHeaderRow(newHeaderRow);
-        List<HeaderCell> headerCells = grid.getHeaderRows().get(0).getCells();
-        Assert.assertEquals(columnCount, headerCells.size());
-        for (int i = 0; i < columnCount; i++) {
-            Assert.assertEquals(defaultHeaderRowComponents.get(i),
-                    headerCells.get(i).getComponent());
-        }
+        assertRowTextContent(textContent, grid.getHeaderRows().get(0));
+    }
+
+    @Test
+    public void addComponentHeaderRow_appendAnotherComponentHeaderRow_removeAppendedHeaderRow_correctRowIsRemoved() {
+        HeaderRow defaultHeaderRow = grid.appendHeaderRow();
+        List<? extends Component> defaultHeaderRowComponents = setComponentsToRow(
+                defaultHeaderRow);
+        HeaderRow newHeaderRow = grid.appendHeaderRow();
+        newHeaderRow.getCells()
+                .forEach(cell -> cell.setComponent(new NativeLabel("NEW")));
+        grid.removeHeaderRow(newHeaderRow);
+        assertRowComponents(defaultHeaderRowComponents,
+                grid.getHeaderRows().get(0));
+
+    }
+
+    @Test
+    public void addComponentHeaderRow_appendTextHeaderRow_removeAppendedHeaderRow_correctRowIsRemoved() {
+        HeaderRow defaultHeaderRow = grid.appendHeaderRow();
+        List<? extends Component> defaultHeaderRowComponents = setComponentsToRow(
+                defaultHeaderRow);
+        HeaderRow newHeaderRow = grid.appendHeaderRow();
+        newHeaderRow.getCells().forEach(cell -> cell.setText("NEW"));
+        grid.removeHeaderRow(newHeaderRow);
+        assertRowComponents(defaultHeaderRowComponents,
+                grid.getHeaderRows().get(0));
+    }
+
+    @Test
+    public void addTextFooterRow_prependAnotherTextFooterRow_removePrependedFooterRow_correctRowIsRemoved() {
+        String textContent = "DEFAULT";
+        grid.appendFooterRow().getCells()
+                .forEach(cell -> cell.setText(textContent));
+        FooterRow newFooterRow = grid.prependFooterRow();
+        newFooterRow.getCells().forEach(cell -> cell.setText("NEW"));
+        grid.removeFooterRow(newFooterRow);
+        assertRowTextContent(textContent, grid.getFooterRows().get(0));
+    }
+
+    @Test
+    public void addTextFooterRow_prependComponentFooterRow_removePrependedFooterRow_correctRowIsRemoved() {
+        String textContent = "DEFAULT";
+        grid.appendFooterRow().getCells()
+                .forEach(cell -> cell.setText(textContent));
+        FooterRow newFooterRow = grid.prependFooterRow();
+        newFooterRow.getCells()
+                .forEach(cell -> cell.setComponent(new NativeLabel("NEW")));
+        grid.removeFooterRow(newFooterRow);
+        assertRowTextContent(textContent, grid.getFooterRows().get(0));
+    }
+
+    @Test
+    public void addComponentFooterRow_prependAnotherComponentFooterRow_removePrependedFooterRow_correctRowIsRemoved() {
+        FooterRow footerRow = grid.appendFooterRow();
+        List<? extends Component> footerRowComponents = setComponentsToRow(
+                footerRow);
+        FooterRow newFooterRow = grid.prependFooterRow();
+        newFooterRow.getCells()
+                .forEach(cell -> cell.setComponent(new NativeLabel("NEW")));
+        grid.removeFooterRow(newFooterRow);
+        assertRowComponents(footerRowComponents, grid.getFooterRows().get(0));
+    }
+
+    @Test
+    public void addComponentFooterRow_prependTextFooterRow_removePrependedFooterRow_correctRowIsRemoved() {
+        FooterRow footerRow = grid.appendFooterRow();
+        List<? extends Component> footerRowComponents = setComponentsToRow(
+                footerRow);
+        FooterRow newFooterRow = grid.prependFooterRow();
+        newFooterRow.getCells().forEach(cell -> cell.setText("NEW"));
+        grid.removeFooterRow(newFooterRow);
+        assertRowComponents(footerRowComponents, grid.getFooterRows().get(0));
     }
 
     @Test
@@ -1377,5 +1435,35 @@ public class HeaderFooterTest {
                 .mapToObj(index -> index % 2 == 0 ? grid.appendHeaderRow()
                         : grid.prependHeaderRow())
                 .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private void assertRowTextContent(String expectedTextContent,
+            AbstractRow<? extends AbstractRow.AbstractCell> row) {
+        List<? extends AbstractRow.AbstractCell> cells = row.getCells();
+        Assert.assertEquals(grid.getColumns().size(), cells.size());
+        cells.forEach(cell -> Assert.assertEquals(expectedTextContent,
+                cell.getText()));
+    }
+
+    private void assertRowComponents(
+            List<? extends Component> expectedRowComponents,
+            AbstractRow<? extends AbstractRow.AbstractCell> row) {
+        List<? extends AbstractRow.AbstractCell> cells = row.getCells();
+        Assert.assertEquals(grid.getColumns().size(), cells.size());
+        for (int i = 0; i < expectedRowComponents.size(); i++) {
+            Assert.assertEquals(expectedRowComponents.get(i),
+                    cells.get(i).getComponent());
+        }
+    }
+
+    private List<? extends Component> setComponentsToRow(
+            AbstractRow<? extends AbstractRow.AbstractCell> row) {
+        List<NativeLabel> rowComponents = IntStream
+                .range(0, grid.getColumns().size()).mapToObj(Integer::toString)
+                .map(NativeLabel::new).toList();
+        for (int i = 0; i < rowComponents.size(); i++) {
+            row.getCells().get(i).setComponent(rowComponents.get(i));
+        }
+        return rowComponents;
     }
 }
