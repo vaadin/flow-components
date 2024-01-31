@@ -691,6 +691,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
             cacheToClear.removeSubCache(itemIndex);
           }
           updateGridFlatSize();
+          delete lastRequestedRanges[pkey];
         });
 
         grid.$connector.reset = tryCatchWrapper(function () {
