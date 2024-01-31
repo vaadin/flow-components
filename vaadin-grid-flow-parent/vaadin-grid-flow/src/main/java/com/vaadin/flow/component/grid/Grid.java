@@ -2420,13 +2420,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see #removeHeaderRow(HeaderRow)
      */
     public void removeAllHeaderRows() {
-        List<HeaderRow> headerRows = getHeaderRows();
-        if (headerRows.isEmpty()) {
-            return;
-        }
-        int headerRowCount = headerRows.size();
-        IntStream.range(0, headerRowCount)
-                .mapToObj(index -> headerRows.get(headerRowCount - 1 - index))
+        getHeaderRows().stream()
                 .filter(headerRow -> !headerRow.equals(defaultHeaderRow))
                 .forEach(this::removeHeaderRow);
         removeDefaultHeaderRow();
