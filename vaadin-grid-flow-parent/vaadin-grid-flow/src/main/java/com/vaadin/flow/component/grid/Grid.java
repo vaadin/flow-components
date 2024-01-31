@@ -2401,7 +2401,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     private void removeNonDefaultHeaderInBottomLayer(HeaderRow headerRow) {
-        // Move content from next footer row and remove that layer
+        // Move content from next header row and remove that layer
         List<HeaderRow> headerRows = getHeaderRows();
         HeaderRow nextHeaderRow = headerRows.get(headerRows.size() - 2);
         ColumnLayer layerToRemove = nextHeaderRow.layer;
