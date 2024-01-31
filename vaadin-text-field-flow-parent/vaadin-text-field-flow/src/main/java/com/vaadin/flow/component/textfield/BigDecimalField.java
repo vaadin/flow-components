@@ -52,7 +52,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-big-decimal-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha9")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
 @Uses(TextField.class)
