@@ -2411,6 +2411,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             nextHeaderRow.layer.updateSortingIndicators(true);
         }
         layerToRemove.setHeaderRow(null);
+        clearRowContent(headerRow);
         removeColumnLayer(layerToRemove);
     }
 
@@ -2432,7 +2433,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         defaultHeaderRow.getCells()
                 .forEach(headerCell -> headerCell.setText(null));
         defaultHeaderRow.layer.setHeaderRow(null);
-        defaultHeaderRow.layer = null;
+        clearRowContent(defaultHeaderRow);
         defaultHeaderRow = null;
     }
 
@@ -2506,16 +2507,21 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             footerRow.getCells()
                     .forEach(footerCell -> footerCell.setText(null));
             footerRow.layer.setFooterRow(null);
-            footerRow.layer = null;
+            clearRowContent(footerRow);
             return;
         }
         // Move content from next footer row and remove that layer
         FooterRow nextFooterRow = footerRows
                 .get(footerRows.indexOf(footerRow) + 1);
+        if (nextFooterRow.getCells().size() != footerRow.getCells().size()) {
+            throw new UnsupportedOperationException(
+                    "Top-most footer row cannot have joined cells.");
+        }
         ColumnLayer layerToRemove = nextFooterRow.layer;
         moveRowContent(nextFooterRow, footerRow);
         footerRow.layer.setFooterRow(nextFooterRow);
         layerToRemove.setFooterRow(null);
+        clearRowContent(footerRow);
         removeColumnLayer(layerToRemove);
     }
 
@@ -2526,6 +2532,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void removeAllFooterRows() {
         getFooterRows().forEach(this::removeFooterRow);
+    }
+
+    private void clearRowContent(
+            AbstractRow<? extends AbstractRow.AbstractCell> row) {
+        row.cells.clear();
+        row.layer = null;
     }
 
     private void moveRowContent(

@@ -1307,6 +1307,78 @@ public class HeaderFooterTest {
     }
 
     @Test
+    public void addFooterRow_appendFooterRowWithJoinedCells_removeFirstFooterRow_throwsUnsupportedOperationException() {
+        var first = grid.appendFooterRow();
+        var second = grid.appendFooterRow();
+        var columns = grid.getColumns();
+        second.join(columns.get(0), columns.get(1));
+        Assert.assertThrows(UnsupportedOperationException.class,
+                () -> grid.removeFooterRow(first));
+    }
+
+    @Test
+    public void addHeaderRow_removeHeaderRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
+        var row = grid.appendHeaderRow();
+        grid.removeHeaderRow(row);
+        assertCannotSetValueOnRemovedRow(row);
+    }
+
+    @Test
+    public void addHeaderRow_prependAnotherHeaderRow_removeSecondHeaderRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
+        grid.appendHeaderRow();
+        var second = grid.prependHeaderRow();
+        grid.removeHeaderRow(second);
+        assertCannotSetValueOnRemovedRow(second);
+    }
+
+    @Test
+    public void addHeaderRow_appendAnotherHeaderRow_removeSecondHeaderRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
+        grid.appendHeaderRow();
+        var second = grid.appendHeaderRow();
+        grid.removeHeaderRow(second);
+        assertCannotSetValueOnRemovedRow(second);
+    }
+
+    @Test
+    public void addFooterRow_removeFooterRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
+        var row = grid.appendFooterRow();
+        grid.removeFooterRow(row);
+        assertCannotSetValueOnRemovedRow(row);
+    }
+
+    @Test
+    public void addFooterRow_prependAnotherFooterRow_removeFirstFooterRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
+        var first = grid.appendFooterRow();
+        grid.prependFooterRow();
+        grid.removeFooterRow(first);
+        assertCannotSetValueOnRemovedRow(first);
+    }
+
+    @Test
+    public void addFooterRow_prependAnotherFooterRow_removeSecondFooterRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
+        grid.appendFooterRow();
+        var second = grid.prependFooterRow();
+        grid.removeFooterRow(second);
+        assertCannotSetValueOnRemovedRow(second);
+    }
+
+    @Test
+    public void addFooterRow_appendAnotherFooterRow_removeFirstFooterRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
+        var first = grid.appendFooterRow();
+        grid.appendFooterRow();
+        grid.removeFooterRow(first);
+        assertCannotSetValueOnRemovedRow(first);
+    }
+
+    @Test
+    public void addFooterRow_appendAnotherFooterRow_removeSecondFooterRow_setCellValueForRemovedRow_throwsIllegalArgumentException() {
+        grid.appendFooterRow();
+        var second = grid.appendFooterRow();
+        grid.removeFooterRow(second);
+        assertCannotSetValueOnRemovedRow(second);
+    }
+
+    @Test
     public void setFooterPartName_columnGroupHasFooterPartName() {
         grid.appendFooterRow();
         var footerCell = grid.appendFooterRow().join(firstColumn, secondColumn);
@@ -1475,5 +1547,11 @@ public class HeaderFooterTest {
             row.getCells().get(i).setComponent(rowComponents.get(i));
         }
         return rowComponents;
+    }
+
+    private void assertCannotSetValueOnRemovedRow(
+            AbstractRow<? extends AbstractRow.AbstractCell> row) {
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> row.getCell(grid.getColumns().get(0)).setText("TEXT"));
     }
 }
