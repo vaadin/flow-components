@@ -2655,6 +2655,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the layer to remove, not the bottom layer
      */
     protected void removeColumnLayer(ColumnLayer layer) {
+        // This method is inadequately tested. Should be tested thoroughly if
+        // refactored. See:
+        // https://github.com/vaadin/flow-components/pull/5990#discussion_r1474599544
         if (layer.equals(columnLayers.get(0))) {
             throw new IllegalArgumentException(
                     "The bottom column layer cannot be removed");
