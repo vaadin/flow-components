@@ -117,7 +117,7 @@ public class GridHeaderFooterRowPage extends Div {
         add(grid2);
 
         IntStream.range(0, 4)
-                .forEach(i -> grid2.addColumn(ValueProvider.identity()));
+                .forEach(i -> grid2.addColumn(item -> item + "-" + (i + 1)));
 
         button = new NativeButton("Prepend header",
                 event -> grid2.prependHeaderRow().getCells()
@@ -155,6 +155,16 @@ public class GridHeaderFooterRowPage extends Div {
             b.setId("join-footers-" + i + (i + 1));
             add(b);
         });
+
+        NativeButton removeAllFooterRows = new NativeButton(
+                "removeAllFooterRows", event -> grid2.removeAllFooterRows());
+        removeAllFooterRows.setId("remove-all-footer-rows");
+        add(removeAllFooterRows);
+
+        NativeButton removeAllHeaderRows = new NativeButton(
+                "removeAllHeaderRows", event -> grid2.removeAllHeaderRows());
+        removeAllHeaderRows.setId("remove-all-header-rows");
+        add(removeAllHeaderRows);
     }
 
 }

@@ -2244,6 +2244,83 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return insertInmostColumnLayer(true, false).asHeaderRow();
     }
 
+    /**
+     * Removes the header row from the grid. Note that the default header row
+     * can be removed only if it is the only header row.
+     *
+     * @see #removeAllHeaderRows()
+     * @param headerRow
+     *            the header row to remove
+     * @throws UnsupportedOperationException
+     *             if default row is being removed while there are other header
+     *             rows
+     * @throws NoSuchElementException
+     *             if the header row cannot be found
+     */
+    public void removeHeaderRow(HeaderRow headerRow) {
+        Objects.requireNonNull(headerRow);
+        List<HeaderRow> headerRows = getHeaderRows();
+        if (headerRow.equals(defaultHeaderRow)) {
+            if (headerRows.size() != 1) {
+                throw new UnsupportedOperationException(
+                        "Default header row cannot be removed while there are other header rows.");
+            }
+            removeDefaultHeaderRow();
+        } else {
+            if (!headerRows.contains(headerRow)) {
+                throw new NoSuchElementException(
+                        "Header to remove cannot be found.");
+            }
+            if (getColumnLayers().get(0).equals(headerRow.layer)) {
+                // Bottom layer needs special handling and content manipulation
+                // because it cannot be removed.
+                removeNonDefaultHeaderInBottomLayer(headerRow);
+            } else {
+                removeColumnLayer(headerRow.layer);
+            }
+        }
+    }
+
+    private void removeNonDefaultHeaderInBottomLayer(HeaderRow headerRow) {
+        // Move content from next header row and remove that layer
+        List<HeaderRow> headerRows = getHeaderRows();
+        HeaderRow nextHeaderRow = headerRows.get(headerRows.size() - 2);
+        ColumnLayer layerToRemove = nextHeaderRow.layer;
+        moveRowContent(nextHeaderRow, headerRow);
+        headerRow.layer.setHeaderRow(nextHeaderRow);
+        if (nextHeaderRow.equals(defaultHeaderRow)) {
+            nextHeaderRow.layer.updateSortingIndicators(true);
+        }
+        layerToRemove.setHeaderRow(null);
+        clearRowContent(headerRow);
+        removeColumnLayer(layerToRemove);
+    }
+
+    /**
+     * Removes all header rows from the grid.
+     *
+     * @see #removeHeaderRow(HeaderRow)
+     */
+    public void removeAllHeaderRows() {
+        var headerRows = getHeaderRows();
+        if (headerRows.isEmpty()) {
+            return;
+        }
+        Collections.reverse(headerRows);
+        headerRows.stream()
+                .filter(headerRow -> !headerRow.equals(defaultHeaderRow))
+                .forEach(this::removeHeaderRow);
+        removeDefaultHeaderRow();
+    }
+
+    private void removeDefaultHeaderRow() {
+        defaultHeaderRow.getCells()
+                .forEach(headerCell -> headerCell.setText(null));
+        defaultHeaderRow.layer.setHeaderRow(null);
+        clearRowContent(defaultHeaderRow);
+        defaultHeaderRow = null;
+    }
+
     protected HeaderRow addFirstHeaderRow() {
         defaultHeaderRow = columnLayers.get(0).asHeaderRow();
         columnLayers.get(0).updateSortingIndicators(true);
@@ -2280,6 +2357,85 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             return columnLayers.get(0).asFooterRow();
         }
         return insertColumnLayer(getLastFooterLayerIndex() + 1).asFooterRow();
+    }
+
+    /**
+     * Removes the footer row from the grid.
+     *
+     * @see #removeAllFooterRows()
+     * @param footerRow
+     *            the footer row to remove
+     * @throws NoSuchElementException
+     *             if the footer row cannot be found
+     */
+    public void removeFooterRow(FooterRow footerRow) {
+        Objects.requireNonNull(footerRow);
+        if (!getFooterRows().contains(footerRow)) {
+            throw new NoSuchElementException(
+                    "Footer to remove cannot be found.");
+        }
+        if (getColumnLayers().get(0).equals(footerRow.layer)) {
+            // Bottom layer needs special handling and content manipulation
+            // because it cannot be removed.
+            removeFooterInBottomLayer(footerRow);
+        } else {
+            removeColumnLayer(footerRow.layer);
+        }
+    }
+
+    private void removeFooterInBottomLayer(FooterRow footerRow) {
+        List<FooterRow> footerRows = getFooterRows();
+        if (footerRows.size() == 1) {
+            // There is no other footer row to move content from. Therefore, the
+            // layer is cleared.
+            footerRow.getCells()
+                    .forEach(footerCell -> footerCell.setText(null));
+            footerRow.layer.setFooterRow(null);
+            clearRowContent(footerRow);
+            return;
+        }
+        // Move content from next footer row and remove that layer
+        FooterRow nextFooterRow = footerRows
+                .get(footerRows.indexOf(footerRow) + 1);
+        if (nextFooterRow.getCells().size() != footerRow.getCells().size()) {
+            throw new UnsupportedOperationException(
+                    "Top-most footer row cannot have joined cells.");
+        }
+        ColumnLayer layerToRemove = nextFooterRow.layer;
+        moveRowContent(nextFooterRow, footerRow);
+        footerRow.layer.setFooterRow(nextFooterRow);
+        layerToRemove.setFooterRow(null);
+        clearRowContent(footerRow);
+        removeColumnLayer(layerToRemove);
+    }
+
+    /**
+     * Removes all footer rows from the grid.
+     *
+     * @see #removeFooterRow(FooterRow)
+     */
+    public void removeAllFooterRows() {
+        getFooterRows().forEach(this::removeFooterRow);
+    }
+
+    private void clearRowContent(
+            AbstractRow<? extends AbstractRow.AbstractCell> row) {
+        row.cells.clear();
+        row.layer = null;
+    }
+
+    private void moveRowContent(
+            AbstractRow<? extends AbstractRow.AbstractCell> sourceRow,
+            AbstractRow<? extends AbstractRow.AbstractCell> targetRow) {
+        for (int i = 0; i < sourceRow.cells.size(); i++) {
+            AbstractRow.AbstractCell sourceCell = sourceRow.cells.get(i);
+            AbstractRow.AbstractCell targetCell = targetRow.cells.get(i);
+            if (sourceCell.getComponent() != null) {
+                targetCell.setComponent(sourceCell.getComponent());
+            } else {
+                targetCell.setText(sourceCell.getText());
+            }
+        }
     }
 
     protected List<ColumnLayer> getColumnLayers() {
@@ -2380,6 +2536,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the layer to remove, not the bottom layer
      */
     protected void removeColumnLayer(ColumnLayer layer) {
+        // This method is inadequately tested. Should be tested thoroughly if
+        // refactored. See:
+        // https://github.com/vaadin/flow-components/pull/5990#discussion_r1474599544
         if (layer.equals(columnLayers.get(0))) {
             throw new IllegalArgumentException(
                     "The bottom column layer cannot be removed");
