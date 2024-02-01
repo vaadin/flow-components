@@ -15,7 +15,9 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.stream.IntStream;
 
@@ -136,6 +138,62 @@ public class GridHeaderFooterRowPage extends Div {
                 event -> grid2.appendFooterRow().getCells()
                         .forEach(cell -> cell.setText("" + (counter++))));
         button.setId("append-footer-2");
+        add(button);
+
+        button = new NativeButton("Reverse column order", event -> {
+            var cols = new ArrayList<>(grid2.getColumns());
+            Collections.reverse(cols);
+            grid2.setColumnOrder(cols);
+        });
+        button.setId("reverse-column-order");
+        add(button);
+
+        button = new NativeButton("Prepend 2 footers & remove last", event -> {
+            grid2.prependFooterRow();
+            var row = grid2.prependFooterRow();
+            grid2.removeFooterRow(row);
+        });
+        button.setId("prepend-2-footers-remove-last");
+        add(button);
+
+        button = new NativeButton("Prepend 2 footers & remove first", event -> {
+            var row = grid2.prependFooterRow();
+            grid2.prependFooterRow();
+            grid2.removeFooterRow(row);
+        });
+        button.setId("prepend-2-footers-remove-first");
+        add(button);
+
+        button = new NativeButton("Append 2 footers & remove last", event -> {
+            grid2.appendFooterRow();
+            var row = grid2.appendFooterRow();
+            grid2.removeFooterRow(row);
+        });
+        button.setId("append-2-footers-remove-last");
+        add(button);
+
+        button = new NativeButton("Append 2 footers & remove first", event -> {
+            var row = grid2.appendFooterRow();
+            grid2.appendFooterRow();
+            grid2.removeFooterRow(row);
+        });
+        button.setId("append-2-footers-remove-first");
+        add(button);
+
+        button = new NativeButton("Prepend 2 headers & remove last", event -> {
+            grid2.prependHeaderRow();
+            var row = grid2.prependHeaderRow();
+            grid2.removeHeaderRow(row);
+        });
+        button.setId("prepend-2-headers-remove-last");
+        add(button);
+
+        button = new NativeButton("Append 2 headers & remove last", event -> {
+            grid2.appendHeaderRow();
+            var row = grid2.appendHeaderRow();
+            grid2.removeHeaderRow(row);
+        });
+        button.setId("append-2-headers-remove-last");
         add(button);
 
         IntStream.range(0, grid2.getColumns().size() - 1).forEach(i -> {
