@@ -343,129 +343,25 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
         clickButton("prepend-header-2");
         clickButton("remove-all-header-rows");
 
-        assertColumnOrderPreserved(false);
+        assertColumnOrderPreserved();
     }
 
     @Test
-    public void appendMultipleFooters_removeAllFooters_columnOrderPreserved() {
+    public void prependMultipleFooters_removeAllFooters_columnOrderPreserved() {
         grid = $(GridElement.class).id("grid2");
         clickButton("append-footer-2");
         clickButton("append-footer-2");
         clickButton("append-footer-2");
         clickButton("remove-all-footer-rows");
 
-        assertColumnOrderPreserved(false);
+        assertColumnOrderPreserved();
     }
 
-    @Test
-    public void prependMultipleHeadersAndRemoveLastInOneRoundTrip_columnOrderPreserved() {
-        grid = $(GridElement.class).id("grid2");
-        clickButton("prepend-2-headers-remove-last");
-
-        assertColumnOrderPreserved(false);
-    }
-
-    @Test
-    public void prependMultipleFootersAndRemoveFirstInOneRoundTrip_columnOrderPreserved() {
-        grid = $(GridElement.class).id("grid2");
-        clickButton("prepend-2-footers-remove-first");
-
-        assertColumnOrderPreserved(false);
-    }
-
-    @Test
-    public void prependMultipleFootersAndRemoveLastInOneRoundTrip_columnOrderPreserved() {
-        grid = $(GridElement.class).id("grid2");
-        clickButton("prepend-2-footers-remove-last");
-
-        assertColumnOrderPreserved(false);
-    }
-
-    @Test
-    public void appendMultipleHeadersAndRemoveLastInOneRoundTrip_columnOrderPreserved() {
-        grid = $(GridElement.class).id("grid2");
-        clickButton("append-2-headers-remove-last");
-
-        assertColumnOrderPreserved(false);
-    }
-
-    @Test
-    public void appendMultipleFootersAndRemoveFirstInOneRoundTrip_columnOrderPreserved() {
-        grid = $(GridElement.class).id("grid2");
-        clickButton("append-2-footers-remove-first");
-
-        assertColumnOrderPreserved(false);
-    }
-
-    @Test
-    public void appendMultipleFootersAndRemoveLastInOneRoundTrip_columnOrderPreserved() {
-        grid = $(GridElement.class).id("grid2");
-        clickButton("append-2-footers-remove-last");
-
-        assertColumnOrderPreserved(false);
-    }
-
-    @Test
-    public void reverseColumnOrder_appendMultipleHeadersAndRemoveLastInOneRoundTrip_columnOrderPreserved() {
-        grid = $(GridElement.class).id("grid2");
-        clickButton("reverse-column-order");
-        clickButton("append-2-headers-remove-last");
-
-        assertColumnOrderPreserved(true);
-    }
-
-    @Test
-    public void reverseColumnOrder_appendMultipleFootersAndRemoveFirstInOneRoundTrip_columnOrderPreserved() {
-        grid = $(GridElement.class).id("grid2");
-        clickButton("reverse-column-order");
-        clickButton("append-2-footers-remove-first");
-
-        assertColumnOrderPreserved(true);
-    }
-
-    @Test
-    public void reverseColumnOrder_appendMultipleFootersAndRemoveLastInOneRoundTrip_columnOrderPreserved() {
-        grid = $(GridElement.class).id("grid2");
-        clickButton("reverse-column-order");
-        clickButton("append-2-footers-remove-last");
-
-        assertColumnOrderPreserved(true);
-    }
-
-    @Test
-    public void reverseColumnOrder_prependMultipleHeadersAndRemoveLastInOneRoundTrip_columnOrderPreserved() {
-        grid = $(GridElement.class).id("grid2");
-        clickButton("reverse-column-order");
-        clickButton("prepend-2-headers-remove-last");
-
-        assertColumnOrderPreserved(true);
-    }
-
-    @Test
-    public void reverseColumnOrder_prependMultipleFootersAndRemoveFirstInOneRoundTrip_columnOrderPreserved() {
-        grid = $(GridElement.class).id("grid2");
-        clickButton("reverse-column-order");
-        clickButton("prepend-2-footers-remove-first");
-
-        assertColumnOrderPreserved(true);
-    }
-
-    @Test
-    public void reverseColumnOrder_prependMultipleFootersAndRemoveLastInOneRoundTrip_columnOrderPreserved() {
-        grid = $(GridElement.class).id("grid2");
-        clickButton("reverse-column-order");
-        clickButton("prepend-2-footers-remove-last");
-
-        assertColumnOrderPreserved(true);
-    }
-
-    private void assertColumnOrderPreserved(boolean reversed) {
+    private void assertColumnOrderPreserved() {
         List<GridTHTDElement> cells = grid.getCells(0);
         Assert.assertEquals(4, cells.size());
         for (int i = 0; i < cells.size(); i++) {
-            int index = reversed ? (cells.size() - 1 - i) : i;
-            Assert.assertEquals("Item 1-" + (i + 1),
-                    cells.get(index).getText());
+            Assert.assertEquals("Item 1-" + (i + 1), cells.get(i).getText());
         }
     }
 

@@ -2661,8 +2661,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
         layer.getColumns().forEach(column -> {
             Element parent = column.getElement().getParent();
-            parent.appendChild(((ColumnGroup) column).getChildColumns().stream()
-                    .map(HasElement::getElement).toArray(Element[]::new));
+            int insertIndex = parent.indexOfChild(column.getElement());
+            parent.insertChild(insertIndex,
+                    ((ColumnGroup) column).getChildColumns().stream()
+                            .map(HasElement::getElement)
+                            .toArray(Element[]::new));
             column.getElement().removeFromParent();
         });
         columnLayers.remove(layer);
