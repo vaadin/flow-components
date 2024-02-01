@@ -2422,6 +2422,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void removeAllHeaderRows() {
         var headerRows = getHeaderRows();
+        if (headerRows.isEmpty()) {
+            return;
+        }
         Collections.reverse(headerRows);
         headerRows.stream()
                 .filter(headerRow -> !headerRow.equals(defaultHeaderRow))
