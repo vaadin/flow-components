@@ -657,6 +657,35 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           parentRequestQueue = [];
         });
 
+        /**
+         * Ensures that the last requested page range does not include pages for data that has been cleared.
+         * The last requested range is used in `fetchPage` to skip requests to the server if the page range didn't
+         * change. However, if some pages have been cleared by data communicator, we need to adjust the range to
+         * ensure the pages get loaded again. This can happen for example when changing the requested range on the
+         * server (e.g. preload of items on scroll to index), which can cause data communicator to clear pages
+         * outside of that range, even though the grid viewport might need them.
+         * @param index start index of the cleared range
+         * @param length length of the cleared range
+         * @param parentKey key of the cache to update
+         */
+        const clearLastRequestedRange = function (index, length, parentKey) {
+          const range = lastRequestedRanges[parentKey];
+          // Range may not be set yet
+          if (!range) {
+            return;
+          }
+          let firstClearedPage = Math.floor(index / grid.pageSize);
+          let lastClearedPage = firstClearedPage + Math.ceil(length / grid.pageSize) - 1;
+
+          const [first, last] = range;
+
+          // Clear the range if it overlaps with the cleared range
+          if (firstClearedPage <= last && lastClearedPage >= first) {
+            range[0] = -1;
+            range[1] = -1;
+          }
+        };
+
         grid.$connector.clear = tryCatchWrapper(function (index, length, parentKey) {
           let pkey = parentKey || root;
           if (!cache[pkey] || Object.keys(cache[pkey]).length === 0) {
@@ -691,6 +720,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
             cacheToClear.removeSubCache(itemIndex);
           }
           updateGridFlatSize();
+          clearLastRequestedRange(index, length, pkey);
         });
 
         grid.$connector.reset = tryCatchWrapper(function () {

@@ -119,4 +119,46 @@ describe('grid connector', () => {
       expect(grid.$server.setRequestedRange).to.be.not.called;
     });
   });
+
+  describe('clear previously requested range', () => {
+    const items = Array.from({ length: 100 }, (_, i) => ({ key: `${i}`, name: `foo${i}` }));
+
+    beforeEach(async () => {
+      // Initialize with the first page of 50 items, 100 items in total
+      grid.$connector.updateSize(items.length);
+      grid.$connector.set(0, items.slice(0, 50), undefined);
+      grid.$connector.confirm(0);
+      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+      expect(grid.$server.setRequestedRange).to.have.been.calledOnceWith(0, 50);
+      grid.$server.setRequestedRange.resetHistory();
+    });
+
+    it('should reload range if part of the range was cleared', async () => {
+      // Scroll down to second page
+      grid.scrollToIndex(99);
+      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+      expect(grid.$server.setRequestedRange).to.have.been.calledOnceWith(50, 100);
+      grid.$server.setRequestedRange.resetHistory();
+
+      // Resolve the request for second page
+      grid.$connector.set(50, items.slice(50, 100));
+      grid.$connector.confirm(-1);
+
+      // Simulate changing the range on the server as part of programmatically scrolling to top
+      grid.scrollToIndex(0);
+      grid.$connector.set(0, items.slice(0, 50));
+      grid.$connector.clear(50, 50);
+      grid.$connector.confirm(-1);
+
+      // No need to reload yet, grid should have enough items to display
+      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+      expect(grid.$server.setRequestedRange).to.be.not.called;
+
+      // Scroll down again, should reload the range
+      grid.scrollToIndex(99);
+      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+      expect(grid.$server.setRequestedRange).to.have.been.calledOnce;
+      expect(grid.$server.setRequestedRange).to.have.been.calledOnceWith(50, 100);
+    });
+  });
 });
