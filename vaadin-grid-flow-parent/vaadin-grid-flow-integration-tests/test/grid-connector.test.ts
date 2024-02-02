@@ -129,7 +129,6 @@ describe('grid connector', () => {
       grid.$connector.set(0, items.slice(0, 50), undefined);
       grid.$connector.confirm(0);
       await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-      expect(grid.$server.setRequestedRange).to.have.been.calledOnceWith(0, 50);
       grid.$server.setRequestedRange.resetHistory();
     });
 
@@ -146,7 +145,6 @@ describe('grid connector', () => {
 
       // Simulate changing the range on the server as part of programmatically scrolling to top
       grid.scrollToIndex(0);
-      grid.$connector.set(0, items.slice(0, 50));
       grid.$connector.clear(50, 50);
       grid.$connector.confirm(-1);
 

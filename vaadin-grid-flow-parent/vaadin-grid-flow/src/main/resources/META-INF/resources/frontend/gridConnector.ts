@@ -66,6 +66,9 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
         const root = 'null';
         lastRequestedRanges[root] = [0, 0];
 
+        let currentUpdateClearRange = null;
+        let currentUpdateSetRange = null;
+
         const validSelectionModes = ['SINGLE', 'NONE', 'MULTI'];
         let selectedKeys = {};
         let selectionMode = 'SINGLE';
@@ -557,6 +560,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
 
           const firstPage = index / grid.pageSize;
           const updatedPageCount = Math.ceil(items.length / grid.pageSize);
+          currentUpdateSetRange = [firstPage, firstPage + updatedPageCount - 1];
 
           for (let i = 0; i < updatedPageCount; i++) {
             let page = firstPage + i;
@@ -664,23 +668,32 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
          * ensure the pages get loaded again. This can happen for example when changing the requested range on the
          * server (e.g. preload of items on scroll to index), which can cause data communicator to clear pages
          * outside of that range, even though the grid viewport might need them.
-         * @param index start index of the cleared range
-         * @param length length of the cleared range
          * @param parentKey key of the cache to update
          */
-        const clearLastRequestedRange = function (index, length, parentKey) {
+        const sanitizeLastRequestedRange = function (parentKey) {
           const range = lastRequestedRanges[parentKey];
-          // Range may not be set yet
-          if (!range) {
+          // Range may not be set yet, or nothing was cleared
+          if (!range || !currentUpdateClearRange) {
             return;
           }
-          let firstClearedPage = Math.floor(index / grid.pageSize);
-          let lastClearedPage = firstClearedPage + Math.ceil(length / grid.pageSize) - 1;
 
-          const [first, last] = range;
+          // Determine all pages that were cleared
+          const numClearedPages = currentUpdateClearRange[1] - currentUpdateClearRange[0] + 1;
+          const clearedPages = Array.from({ length: numClearedPages }, (_, i) => currentUpdateClearRange[0] + i);
 
-          // Clear the range if it overlaps with the cleared range
-          if (firstClearedPage <= last && lastClearedPage >= first) {
+          // Remove pages that have been set in same update
+          if (currentUpdateSetRange) {
+            const [first, last] = currentUpdateSetRange;
+            for (let page = first; page <= last; page++) {
+              const index = clearedPages.indexOf(page);
+              if (index >= 0) {
+                clearedPages.splice(index, 1);
+              }
+            }
+          }
+
+          // Clear the last requested range if it includes any of the cleared pages
+          if (clearedPages.some((page) => page >= range[0] && page <= range[1])) {
             range[0] = -1;
             range[1] = -1;
           }
@@ -699,6 +712,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
 
           let firstPage = Math.floor(index / grid.pageSize);
           let updatedPageCount = Math.ceil(length / grid.pageSize);
+          currentUpdateClearRange = [firstPage, firstPage + updatedPageCount - 1];
 
           for (let i = 0; i < updatedPageCount; i++) {
             let page = firstPage + i;
@@ -720,7 +734,6 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
             cacheToClear.removeSubCache(itemIndex);
           }
           updateGridFlatSize();
-          clearLastRequestedRange(index, length, pkey);
         });
 
         grid.$connector.reset = tryCatchWrapper(function () {
@@ -863,6 +876,11 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
             // any possible data requests for the same range in fetchPage.
             delete lastRequestedRanges[root];
           }
+          // Sanitize last requested range for the root level
+          sanitizeLastRequestedRange(root);
+          // Clear current update state
+          currentUpdateSetRange = null;
+          currentUpdateClearRange = null;
 
           // Let server know we're done
           grid.$server.confirmUpdate(id);
