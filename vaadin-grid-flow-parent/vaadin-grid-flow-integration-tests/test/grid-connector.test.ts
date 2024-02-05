@@ -64,99 +64,97 @@ describe('grid connector', () => {
   // A setup where the grid has requested items, and the server has successfully
   // responded with a full item set.
   describe('grid with a requested data range', () => {
-    const items = Array.from({ length: 10 }, (_, i) => ({ key: `${i}`, name: `foo${i}` }));
-
-    beforeEach(async () => {
-      // Use a smaller page size for testing
-      grid.pageSize = 5;
-      grid.$connector.reset();
-
-      // Add 10 root items
-      setRootItems(grid.$connector, items);
-
-      await nextFrame();
-      // Grid should not have requested for items yet (all the 10 items were preloaded)
-      expect(grid.$server.setRequestedRange.called).to.be.false;
-
-      // Clear the items
-      clear(grid.$connector, 0, 10);
-      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-
-      // Grid should have requested new items
-      expect(grid.$server.setRequestedRange).to.be.calledOnce;
-
-      // Add the requested items
-      setRootItems(grid.$connector, items);
-
-      grid.$server.setRequestedRange.resetHistory();
-    });
-
-    it('should request new items after incomplete confirm', async () => {
-      // Clear the items again
-      clear(grid.$connector, 0, 10);
-
-      // Add the first page items back before the request timeout (partial/incomplete preload)
-      grid.$connector.set(0, items.slice(0, grid.pageSize));
-      grid.$connector.confirm(-1);
-
-      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-
-      // Grid should have requested for the missing items
-      expect(grid.$server.setRequestedRange).to.be.calledOnce;
-    });
-
-    it('should not request for new items after complete confirm', async () => {
-      // Clear the items again
-      clear(grid.$connector, 0, 10);
-
-      // Add all the items back before the request timeout
-      grid.$connector.set(0, items);
-      grid.$connector.confirm(-1);
-
-      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-
-      // Grid should not have request for items
-      expect(grid.$server.setRequestedRange).to.be.not.called;
-    });
-  });
-
-  describe('clear previously requested range', () => {
     const items = Array.from({ length: 100 }, (_, i) => ({ key: `${i}`, name: `foo${i}` }));
 
     beforeEach(async () => {
-      // Initialize with the first page of 50 items, 100 items in total
-      grid.$connector.updateSize(items.length);
-      grid.$connector.set(0, items.slice(0, 50), undefined);
-      grid.$connector.confirm(0);
-      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-      grid.$server.setRequestedRange.resetHistory();
+      // Use a smaller page size for testing
+      grid.pageSize = 25;
+      grid.$connector.reset();
+
+      // Add all root items
+      setRootItems(grid.$connector, items);
+      await nextFrame();
     });
 
-    it('should reload range if part of the range was cleared', async () => {
-      // Scroll down to second page
-      grid.scrollToIndex(99);
-      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-      expect(grid.$server.setRequestedRange).to.have.been.calledOnceWith(50, 100);
-      grid.$server.setRequestedRange.resetHistory();
+    describe('last requested range is in viewport', () => {
+      beforeEach(async () => {
+        // Request a range of items at the top
+        clear(grid.$connector, 0, 50);
+        await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+        expect(grid.$server.setRequestedRange).to.be.calledOnceWith(0, 50);
+        setRootItems(grid.$connector, items, 0, 50);
+        grid.$server.setRequestedRange.resetHistory();
+      });
 
-      // Resolve the request for second page
-      grid.$connector.set(50, items.slice(50, 100));
-      grid.$connector.confirm(-1);
+      it('should request new items after incomplete confirm', async () => {
+        // Clear the items again
+        clear(grid.$connector, 0, 100);
 
-      // Simulate changing the range on the server as part of programmatically scrolling to top
-      grid.scrollToIndex(0);
-      grid.$connector.clear(50, 50);
-      grid.$connector.confirm(-1);
+        // Add the first page items back before the request timeout (partial/incomplete preload)
+        setRootItems(grid.$connector, items, 0, grid.pageSize);
+        await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
 
-      // No need to reload yet, grid should have enough items to display
-      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-      expect(grid.$server.setRequestedRange).to.be.not.called;
+        // Grid should have requested for the missing items
+        expect(grid.$server.setRequestedRange).to.be.calledOnceWith(0, 50);
+      });
 
-      // Scroll down again, should reload the range
-      grid.scrollToIndex(99);
-      await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-      expect(grid.$server.setRequestedRange).to.have.been.calledOnce;
-      expect(grid.$server.setRequestedRange).to.have.been.calledOnceWith(50, 100);
+      it('should not request for new items after complete confirm', async () => {
+        // Clear the items again
+        clear(grid.$connector, 0, 100);
+
+        // Add all the items back before the request timeout
+        setRootItems(grid.$connector, items);
+        await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+
+        // Grid should not have request for items
+        expect(grid.$server.setRequestedRange).to.be.not.called;
+      });
+    });
+
+    describe('last requested range is not in viewport', () => {
+      beforeEach(async () => {
+        // Request a range of items further down
+        clear(grid.$connector, 50, 50);
+        grid.scrollToIndex(50);
+        await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+        expect(grid.$server.setRequestedRange).to.have.been.calledOnceWith(25, 75);
+        setRootItems(grid.$connector, items, 25, 75);
+        grid.$server.setRequestedRange.resetHistory();
+      });
+
+      it('should request for items if part of the last range was cleared', async () => {
+        // Simulate preloading of items when scrolling to top programmatically on server-side, which may also partially clear the last requested range:
+        // - Scroll to top
+        // - Clear last requested range partially
+        // - Preload first two pages so that grid doesn't need to request a new range yet
+        grid.scrollToIndex(0);
+        clear(grid.$connector, 50, grid.pageSize);
+        setRootItems(grid.$connector, items, 0, 50);
+        await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+        expect(grid.$server.setRequestedRange).to.not.have.been.called;
+
+        // Scroll down again, should reload the range because part of it was cleared
+        grid.scrollToIndex(50);
+        await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+        expect(grid.$server.setRequestedRange).to.have.been.calledOnceWith(25, 75);
+      });
+
+      it('should not request for items if data outside of the last range was cleared', async () => {
+        // Simulate preloading of items when scrolling to top programmatically on server-side, which may also partially clear the last requested range:
+        // - Scroll to top
+        // - Clear data outside the requested range
+        // - Preload first two pages so that grid doesn't need to request a new range yet
+        grid.scrollToIndex(0);
+        clear(grid.$connector, 75, grid.pageSize);
+        grid.$connector.confirm(-1);
+        await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+        expect(grid.$server.setRequestedRange).to.not.have.been.called;
+
+        // Scroll down again, should not reload the range because nothing from it was cleared
+        grid.scrollToIndex(50);
+        await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
+        expect(grid.$server.setRequestedRange).to.not.have.been.called;
+      });
     });
   });
 });
