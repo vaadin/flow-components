@@ -523,7 +523,24 @@ class ComboBoxDataController<TItem>
                     dataGenerator, arrayUpdater,
                     data -> comboBox.getElement()
                             .callJsFunction("$connector.updateData", data),
-                    comboBox.getElement().getNode(), enableFetch);
+                    comboBox.getElement().getNode(), enableFetch) {
+
+                @Override
+                public void reset() {
+                    super.reset();
+                    if (comboBox instanceof MultiSelectComboBox) {
+                        // The data is destroyed and rebuilt on data
+                        // communicator reset. When component renderers are
+                        // used, this means that the nodeIds for the items
+                        // should also be updated. However, the "selectedItems"
+                        // property is manually set in "refreshValue()".
+                        // Therefore, the selected items can contain obsolete
+                        // nodeIds. For this reason, this value refresh is
+                        // necessary.
+                        comboBox.refreshValue();
+                    }
+                }
+            };
             dataCommunicator.setPageSize(comboBox.getPageSize());
         } else {
             // Enable/disable items fetch from data provider depending on the

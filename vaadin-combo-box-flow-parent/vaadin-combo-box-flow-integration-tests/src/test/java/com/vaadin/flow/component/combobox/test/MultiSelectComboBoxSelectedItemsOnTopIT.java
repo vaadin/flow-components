@@ -8,6 +8,7 @@ import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.Keys;
 
 @TestPath("vaadin-multi-select-combo-box/selected-items-on-top")
 public class MultiSelectComboBoxSelectedItemsOnTopIT
@@ -15,6 +16,8 @@ public class MultiSelectComboBoxSelectedItemsOnTopIT
     private MultiSelectComboBoxElement comboBox;
     private TestBenchElement setSelectedOnTop;
     private TestBenchElement unsetSelectedOnTop;
+    private TestBenchElement setComponentRenderer;
+    private TestBenchElement useCustomValueSetListener;
 
     @Before
     public void init() {
@@ -22,6 +25,9 @@ public class MultiSelectComboBoxSelectedItemsOnTopIT
         comboBox = $(MultiSelectComboBoxElement.class).waitForFirst();
         setSelectedOnTop = $("button").id("set-selected-on-top");
         unsetSelectedOnTop = $("button").id("unset-selected-on-top");
+        setComponentRenderer = $("button").id("set-component-renderer");
+        useCustomValueSetListener = $("button")
+                .id("use-custom-value-set-listener");
     }
 
     @Test
@@ -34,10 +40,7 @@ public class MultiSelectComboBoxSelectedItemsOnTopIT
         comboBox.openPopup();
         comboBox.waitForLoadingFinished();
 
-        TestBenchElement overlay = $("vaadin-multi-select-combo-box-overlay")
-                .first();
-        ElementQuery<TestBenchElement> items = overlay
-                .$("vaadin-multi-select-combo-box-item");
+        ElementQuery<TestBenchElement> items = getItems();
 
         TestBenchElement item1 = items.get(0);
         TestBenchElement item2 = items.get(1);
@@ -59,10 +62,7 @@ public class MultiSelectComboBoxSelectedItemsOnTopIT
         comboBox.openPopup();
         comboBox.waitForLoadingFinished();
 
-        TestBenchElement overlay = $("vaadin-multi-select-combo-box-overlay")
-                .first();
-        ElementQuery<TestBenchElement> items = overlay
-                .$("vaadin-multi-select-combo-box-item");
+        ElementQuery<TestBenchElement> items = getItems();
 
         TestBenchElement item1 = items.get(0);
         TestBenchElement item2 = items.get(1);
@@ -91,10 +91,7 @@ public class MultiSelectComboBoxSelectedItemsOnTopIT
         comboBox.openPopup();
         comboBox.waitForLoadingFinished();
 
-        TestBenchElement overlay = $("vaadin-multi-select-combo-box-overlay")
-                .first();
-        ElementQuery<TestBenchElement> items = overlay
-                .$("vaadin-multi-select-combo-box-item");
+        ElementQuery<TestBenchElement> items = getItems();
 
         TestBenchElement item1 = items.get(0);
         TestBenchElement item2 = items.get(1);
@@ -104,5 +101,45 @@ public class MultiSelectComboBoxSelectedItemsOnTopIT
 
         Assert.assertFalse(item1.hasAttribute("selected"));
         Assert.assertTrue(item2.hasAttribute("selected"));
+    }
+
+    @Test
+    public void componentRendererAndCustomValues_selectedItemsOnTop_addAndSelectItems_deselectFirst_itemsCorrect() {
+        setComponentRenderer.click();
+        useCustomValueSetListener.click();
+        setSelectedOnTop.click();
+
+        addCustomItem("foo");
+        addCustomItem("bar");
+
+        comboBox.deselectByText("foo");
+
+        comboBox.closePopup();
+        comboBox.openPopup();
+        comboBox.waitForLoadingFinished();
+
+        ElementQuery<TestBenchElement> items = getItems();
+
+        TestBenchElement item1 = items.get(0);
+        TestBenchElement item2 = items.get(1);
+
+        Assert.assertEquals("bar", item1.getText());
+        Assert.assertEquals("foo", item2.getText());
+
+        Assert.assertTrue(item1.hasAttribute("selected"));
+        Assert.assertFalse(item2.hasAttribute("selected"));
+    }
+
+    private ElementQuery<TestBenchElement> getItems() {
+        TestBenchElement overlay = $("vaadin-multi-select-combo-box-overlay")
+                .first();
+        return overlay.$("vaadin-multi-select-combo-box-item");
+    }
+
+    private void addCustomItem(String item) {
+        comboBox.sendKeys(item);
+        comboBox.waitForLoadingFinished();
+        comboBox.sendKeys(Keys.ENTER);
+        comboBox.waitForLoadingFinished();
     }
 }
