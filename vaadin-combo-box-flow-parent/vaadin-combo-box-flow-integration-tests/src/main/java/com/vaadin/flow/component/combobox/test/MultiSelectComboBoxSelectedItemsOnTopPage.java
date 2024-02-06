@@ -3,8 +3,11 @@ package com.vaadin.flow.component.combobox.test;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -30,7 +33,29 @@ public class MultiSelectComboBoxSelectedItemsOnTopPage extends Div {
                 });
         unsetSelectedOnTop.setId("unset-selected-on-top");
 
+        NativeButton setComponentRenderer = new NativeButton(
+                "Set component renderer", e -> comboBox.setRenderer(
+                        new ComponentRenderer<>(i -> new Span(i))));
+        setComponentRenderer.setId("set-component-renderer");
+
+        NativeButton useCustomValueSetListener = new NativeButton(
+                "Use custom value set listener", click -> {
+                    comboBox.setItems(query -> comboBox.getValue().stream()
+                            .skip(query.getOffset()).limit(query.getLimit()));
+                    comboBox.addCustomValueSetListener(event -> {
+                        String value = event.getDetail();
+                        if (value != null) {
+                            List<String> accounts = new ArrayList<>(
+                                    comboBox.getValue());
+                            accounts.add(value);
+                            comboBox.setValue(accounts);
+                        }
+                    });
+                });
+        useCustomValueSetListener.setId("use-custom-value-set-listener");
+
         add(comboBox);
-        add(new Div(setSelectedOnTop, unsetSelectedOnTop));
+        add(new Div(setSelectedOnTop, unsetSelectedOnTop, setComponentRenderer,
+                useCustomValueSetListener));
     }
 }
