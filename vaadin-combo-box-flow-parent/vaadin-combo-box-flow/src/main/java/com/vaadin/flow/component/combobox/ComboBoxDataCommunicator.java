@@ -84,8 +84,6 @@ public class ComboBoxDataCommunicator<TItem> extends DataCommunicator<TItem> {
         }
     }
 
-    private final ComboBoxBase<?, TItem, ?> comboBox;
-
     public ComboBoxDataCommunicator(ComboBoxBase<?, TItem, ?> comboBox,
             DataGenerator<TItem> dataGenerator, ArrayUpdater arrayUpdater,
             SerializableConsumer<JsonArray> dataUpdater, StateNode stateNode,
@@ -93,20 +91,7 @@ public class ComboBoxDataCommunicator<TItem> extends DataCommunicator<TItem> {
         super(dataGenerator, arrayUpdater, dataUpdater, stateNode,
                 fetchEnabled);
 
-        this.comboBox = comboBox;
         setKeyMapper(new SelectionPreservingKeyMapper<>(comboBox));
-    }
-
-    @Override
-    public void reset() {
-        super.reset();
-        // The data is destroyed and rebuilt on data communicator reset. When
-        // component renderers are used, this means that the nodeIds for the
-        // items should also be updated. However, the "selectedItems" property
-        // is manually set in "refreshValue()". Therefore, the selected items
-        // can contain obsolete nodeIds. For this reason, this value refresh is
-        // necessary.
-        comboBox.refreshValue();
     }
 
     public void notifySelectionChanged() {
