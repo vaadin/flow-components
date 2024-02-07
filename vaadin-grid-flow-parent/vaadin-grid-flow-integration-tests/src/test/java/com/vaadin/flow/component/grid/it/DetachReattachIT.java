@@ -185,4 +185,18 @@ public class DetachReattachIT extends AbstractComponentIT {
 
         checkLogsForErrors();
     }
+
+    @Test
+    public void detach_selectMultiple_reattach() {
+        open();
+
+        $("button").id("selection-mode-multi-button").click();
+        $("button").id("detach-button").click();
+        $("button").id("select-multiple-items-button").click();
+        $("button").id("attach-button").click();
+
+        GridElement grid = $(GridElement.class).first();
+        Assert.assertTrue(grid.getRow(0).isSelected());
+        Assert.assertTrue(grid.getRow(1).isSelected());
+    }
 }
