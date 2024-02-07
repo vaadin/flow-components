@@ -185,4 +185,22 @@ public class DetachReattachIT extends AbstractComponentIT {
 
         checkLogsForErrors();
     }
+
+    @Test
+    public void sort_detachAndAttach_sortDirectionPreserved() {
+        open();
+
+        GridElement grid = $(GridElement.class).first();
+        var sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter").first();
+        sorter.click();
+        var direction = sorter.getProperty("direction");
+        Assert.assertNotNull(direction);
+
+        $("button").id("detach-and-reattach-button").click();
+        $("button").id("detach-and-reattach-button").click();
+
+        grid = $(GridElement.class).first();
+        sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter").first();
+        Assert.assertEquals(direction, sorter.getProperty("direction"));
+    }
 }
