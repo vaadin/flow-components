@@ -83,6 +83,13 @@ public class DetachReattachPage extends Div {
                 });
         selectAndDetachButton.setId("select-and-detach-button");
 
+        NativeButton selectMultipleItems = new NativeButton(
+                "Select multiple items", e -> {
+                    grid.select("A");
+                    grid.select("B");
+                });
+        selectMultipleItems.setId("select-multiple-items-button");
+
         NativeButton setPageSizeAndDetachButton = new NativeButton(
                 "Set page size and detach", e -> {
                     grid.setPageSize(40);
@@ -111,6 +118,11 @@ public class DetachReattachPage extends Div {
                 e -> grid.setSelectionMode(Grid.SelectionMode.NONE));
         btnSelectionModeNone.setId("selection-mode-none-button");
 
+        NativeButton btnSelectionModeMulti = new NativeButton(
+                "Change to selection multi",
+                e -> grid.setSelectionMode(Grid.SelectionMode.MULTI));
+        btnSelectionModeMulti.setId("selection-mode-multi-button");
+
         NativeButton btnHideGrid = new NativeButton("Hide grid",
                 e -> grid.setVisible(false));
         btnHideGrid.setId("hide-grid-button");
@@ -128,9 +140,9 @@ public class DetachReattachPage extends Div {
 
         add(btnAttach, btnDetach, btnDisallowDeselect, addItemDetailsButton,
                 toggleDetailsVisibleOnClick, resetSortingButton,
-                selectAndDetachButton, setPageSizeAndDetachButton,
-                setSelectionModeAndDetachButton, sortAndDetachButton,
-                btnHideGrid, btnSelectionModeNone, btnDetachAndReattach,
-                btnShowGrid, grid);
+                selectAndDetachButton, selectMultipleItems,
+                setPageSizeAndDetachButton, setSelectionModeAndDetachButton,
+                sortAndDetachButton, btnHideGrid, btnSelectionModeNone,
+                btnSelectionModeMulti, btnDetachAndReattach, btnShowGrid, grid);
     }
 }
