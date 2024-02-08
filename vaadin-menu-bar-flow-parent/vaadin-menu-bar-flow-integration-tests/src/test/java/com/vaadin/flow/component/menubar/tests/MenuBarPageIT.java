@@ -56,14 +56,16 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void clickRootButton_subMenuRenders() {
         menuBar.getButtons().get(0).click();
         verifyOpened();
-        assertOverlayContents("sub item 1", "<p>sub item 2</p>", "<p>sub item 3</p>");
+        assertOverlayContents("sub item 1", "<p>sub item 2</p>",
+                "<p>sub item 3</p>");
     }
 
     @Test
     public void clickRootItem_subMenuRenders() {
         menuBar.getButtons().get(0).$("vaadin-menu-bar-item").first().click();
         verifyOpened();
-        assertOverlayContents("sub item 1", "<p>sub item 2</p>", "<p>sub item 3</p>");
+        assertOverlayContents("sub item 1", "<p>sub item 2</p>",
+                "<p>sub item 3</p>");
     }
 
     @Test
