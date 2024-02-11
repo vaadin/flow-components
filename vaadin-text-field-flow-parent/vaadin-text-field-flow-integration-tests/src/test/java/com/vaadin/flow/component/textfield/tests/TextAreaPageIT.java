@@ -186,18 +186,14 @@ public class TextAreaPageIT extends AbstractComponentIT {
         $(TestBenchElement.class).id("clear-helper-component-button").click();
         Assert.assertNull(textAreaElement.getHelperComponent());
     }
-    protected TestBenchElement getElementFromShadowRoot(
-        TestBenchElement shadowRootOwner, String selector) {
-        return shadowRootOwner.$(selector).first();
-    }
+
     @Test
     public void scrollToBottom() {
         TextAreaElement shortcutField = $(TextAreaElement.class)
             .id("fixed-height");
         shortcutField.setValue("LONGTEXT".repeat(30));
         $(TestBenchElement.class).id("scroll-bottom-component-button").click();
-        TestBenchElement elementFromShadowRoot = getElementFromShadowRoot(shortcutField, "vaadin-input-container");
-        Assert.assertTrue(Integer.parseInt(elementFromShadowRoot.getProperty("scrollTop").toString()) > 100);
+        Assert.assertTrue(Integer.parseInt(shortcutField.$("vaadin-input-container").first().getProperty("scrollTop").toString()) > 100);
     }
 
 }
