@@ -190,10 +190,12 @@ public class TextAreaPageIT extends AbstractComponentIT {
     @Test
     public void scrollToBottom() {
         TextAreaElement shortcutField = $(TextAreaElement.class)
-            .id("fixed-height");
+                .id("fixed-height");
         shortcutField.setValue("LONGTEXT".repeat(30));
         $(TestBenchElement.class).id("scroll-bottom-component-button").click();
-        Assert.assertTrue(Integer.parseInt(shortcutField.$("vaadin-input-container").first().getProperty("scrollTop").toString()) > 100);
+        Assert.assertTrue(
+                Integer.parseInt(shortcutField.$("vaadin-input-container")
+                        .first().getProperty("scrollTop").toString()) > 100);
     }
 
 }
