@@ -221,6 +221,14 @@ public class TextArea extends TextFieldBase<TextArea, String>
     }
 
     /**
+     * Scrolls the textarea to the bottom. Requires the textarea to be of fixed height, so it can have a scrollbar.
+     *
+     */
+    public void scrollToBottom(){
+        getElement().executeJs("(() => this.shadowRoot.querySelector(\"vaadin-input-container\").scrollTop = this.shadowRoot.querySelector(\"vaadin-input-container\").scrollHeight)()");
+    }
+
+    /**
      * Minimum number of characters (in Unicode code points) that the user can
      * enter.
      *

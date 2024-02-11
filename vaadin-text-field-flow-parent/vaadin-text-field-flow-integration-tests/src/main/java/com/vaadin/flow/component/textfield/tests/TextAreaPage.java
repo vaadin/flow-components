@@ -50,6 +50,17 @@ public class TextAreaPage extends Div {
         addMinHeightFeature();
         addHelperText();
         addHelperComponent();
+        addFixedHeightComponent();
+    }
+
+    private void addFixedHeightComponent() {
+        NativeButton scrollButton = new NativeButton("Scroll to bottom");
+        TextArea textArea = new TextArea();
+        textArea.setLabel("Fixed height");
+        textArea.setHeight("200px");
+        textArea.setId("fixed-height");
+        scrollButton.addClickListener(event -> textArea.scrollToBottom());
+        add(textArea, scrollButton);
     }
 
     private void addFocusShortcut() {
