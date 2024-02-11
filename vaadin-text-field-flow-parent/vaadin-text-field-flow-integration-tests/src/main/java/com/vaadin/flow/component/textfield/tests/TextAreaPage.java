@@ -55,9 +55,12 @@ public class TextAreaPage extends Div {
 
     private void addFixedHeightComponent() {
         NativeButton scrollButton = new NativeButton("Scroll to bottom");
+        scrollButton.setId("scroll-bottom-component-button");
+
         TextArea textArea = new TextArea();
         textArea.setLabel("Fixed height");
         textArea.setHeight("200px");
+        textArea.setWidth("200px");
         textArea.setId("fixed-height");
         scrollButton.addClickListener(event -> textArea.scrollToBottom());
         add(textArea, scrollButton);
