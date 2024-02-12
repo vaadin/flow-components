@@ -2979,7 +2979,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     protected void updateSelectionModeOnClient() {
-        callJsFunctionBeforeClientResponse("$connector.setSelectionMode",
+        getElement().executeJs(
+                "if (this.$connector) { this.$connector.setSelectionMode($0) }",
                 selectionMode.name());
     }
 
@@ -3826,7 +3827,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         if (getElement().getNode().isAttached()) {
-            callJsFunctionBeforeClientResponse("$connector.setSorterDirections",
+            getElement().executeJs(
+                    "if (this.$connector) { this.$connector.setSorterDirections($0) }",
                     directions);
         }
     }
