@@ -365,6 +365,30 @@ public class MenuBar extends Component
     }
 
     /**
+     * Sets reverse collapse order for the menu bar.
+     *
+     * @param reverseCollapseOrder
+     *            If {@code true}, the buttons will be collapsed into the
+     *            overflow menu starting from the "start" end of the bar instead
+     *            of the "end".
+     */
+    public void setReverseCollapseOrder(boolean reverseCollapseOrder) {
+        getElement().setProperty("reverseCollapse", reverseCollapseOrder);
+    }
+
+    /**
+     * Gets whether the menu bar uses reverse collapse order.
+     *
+     * @return {@code true} if the buttons will be collapsed into the overflow
+     *         menu starting from the "start" end of the bar instead of the
+     *         "end".
+     *
+     */
+    public boolean isReverseCollapseOrder() {
+        return getElement().getProperty("reverseCollapse", false);
+    }
+
+    /**
      * Gets the internationalization object previously set for this component.
      * <p>
      * Note: updating the object content that is gotten from this method will
