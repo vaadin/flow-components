@@ -56,14 +56,16 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void clickRootButton_subMenuRenders() {
         menuBar.getButtons().get(0).click();
         verifyOpened();
-        assertOverlayContents("sub item 1", "<p>sub item 2</p>");
+        assertOverlayContents("sub item 1", "<p>sub item 2</p>",
+                "<p>sub item 3</p>");
     }
 
     @Test
     public void clickRootItem_subMenuRenders() {
         menuBar.getButtons().get(0).$("vaadin-menu-bar-item").first().click();
         verifyOpened();
-        assertOverlayContents("sub item 1", "<p>sub item 2</p>");
+        assertOverlayContents("sub item 1", "<p>sub item 2</p>",
+                "<p>sub item 3</p>");
     }
 
     @Test
@@ -500,6 +502,56 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     @Test
+    public void subMenuHasClassName_callRemoveClassName_classNameIsRemoved() {
+        verifySubMenuItemClassNames(true,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+
+        click("remove-sub-item-class-name");
+        verifySubMenuItemClassNames(false,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+    }
+
+    @Test
+    public void subMenuItem_toggleMultipleClassNames_classNamesAreToggled() {
+        click("add-second-sub-item-class-name");
+        verifySubMenuItemClassNames(true,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME,
+                MenuBarTestPage.SUB_ITEM_SECOND_CLASS_NAME);
+
+        click("add-remove-multiple-sub-item-classes");
+        verifySubMenuItemClassNames(false,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME,
+                MenuBarTestPage.SUB_ITEM_SECOND_CLASS_NAME);
+
+        click("add-remove-multiple-sub-item-classes");
+        verifySubMenuItemClassNames(true,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME,
+                MenuBarTestPage.SUB_ITEM_SECOND_CLASS_NAME);
+    }
+
+    @Test
+    public void subMenuItem_toggleSingleClassName_classNameIsToggled() {
+        click("toggle-sub-item-class-name");
+        verifySubMenuItemClassNames(false,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+
+        click("toggle-sub-item-class-name");
+        verifySubMenuItemClassNames(true,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+    }
+
+    @Test
+    public void subMenuItem_classNamesAreToggleWithSet_classNamesAreToggled() {
+        click("set-unset-sub-item-class-name");
+        verifySubMenuItemClassNames(false,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+
+        click("set-unset-sub-item-class-name");
+        verifySubMenuItemClassNames(true,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+    }
+
+    @Test
     public void setMenuItemTheme_toggleVisibility_themeIsPreserved() {
         click("toggle-item-1-theme");
         click("toggle-item-1-visibility");
@@ -633,5 +685,20 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
     public void verifyOpened() {
         waitForElementPresent(By.tagName(OVERLAY_TAG));
+    }
+
+    private void verifySubMenuItemClassNames(boolean containsClassNames,
+            String... classNames) {
+        openSubSubMenu();
+        verifyOpened();
+        TestBenchElement subMenuItem = menuBar.getSubMenuItems().get(2);
+        var subMenuItemClassNames = subMenuItem.getAttribute("class");
+        for (String className : classNames) {
+            if (containsClassNames) {
+                Assert.assertTrue(subMenuItemClassNames.contains(className));
+            } else {
+                Assert.assertFalse(subMenuItemClassNames.contains(className));
+            }
+        }
     }
 }
