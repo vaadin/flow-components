@@ -69,9 +69,9 @@ import elemental.json.JsonValue;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-form-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/form-layout", version = "24.2.6")
+@NpmPackage(value = "@vaadin/form-layout", version = "24.2.7")
 @JsModule("@vaadin/form-layout/src/vaadin-form-layout.js")
 public class FormLayout extends Component
         implements HasSize, HasStyle, HasComponents, ClickNotifier<FormLayout> {
@@ -191,9 +191,9 @@ public class FormLayout extends Component
      * @author Vaadin Ltd
      */
     @Tag("vaadin-form-item")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.6")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.7")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-    @NpmPackage(value = "@vaadin/form-layout", version = "24.2.6")
+    @NpmPackage(value = "@vaadin/form-layout", version = "24.2.7")
     @JsModule("@vaadin/form-layout/src/vaadin-form-item.js")
     public static class FormItem extends Component
             implements HasComponents, HasStyle, ClickNotifier<FormItem> {
