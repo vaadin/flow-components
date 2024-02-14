@@ -185,4 +185,36 @@ public class DetachReattachIT extends AbstractComponentIT {
 
         checkLogsForErrors();
     }
+
+    @Test
+    public void detach_selectMultiple_reattach() {
+        open();
+
+        $("button").id("selection-mode-multi-button").click();
+        $("button").id("detach-button").click();
+        $("button").id("select-multiple-items-button").click();
+        $("button").id("attach-button").click();
+
+        GridElement grid = $(GridElement.class).first();
+        Assert.assertTrue(grid.getRow(0).isSelected());
+        Assert.assertTrue(grid.getRow(1).isSelected());
+    }
+
+    @Test
+    public void sort_detachAndAttach_sortDirectionPreserved() {
+        open();
+
+        GridElement grid = $(GridElement.class).first();
+        var sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter").first();
+        sorter.click();
+        var direction = sorter.getProperty("direction");
+        Assert.assertNotNull(direction);
+
+        $("button").id("detach-and-reattach-button").click();
+        $("button").id("detach-and-reattach-button").click();
+
+        grid = $(GridElement.class).first();
+        sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter").first();
+        Assert.assertEquals(direction, sorter.getProperty("direction"));
+    }
 }

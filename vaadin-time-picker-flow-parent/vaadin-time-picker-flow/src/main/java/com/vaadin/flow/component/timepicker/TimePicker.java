@@ -69,9 +69,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha12")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha13")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "24.4.0-alpha12")
+@NpmPackage(value = "@vaadin/time-picker", version = "24.4.0-alpha13")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
