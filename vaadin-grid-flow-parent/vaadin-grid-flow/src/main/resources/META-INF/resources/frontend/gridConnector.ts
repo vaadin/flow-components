@@ -560,7 +560,11 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
 
           const firstPage = index / grid.pageSize;
           const updatedPageCount = Math.ceil(items.length / grid.pageSize);
-          currentUpdateSetRange = [firstPage, firstPage + updatedPageCount - 1];
+
+          // For root cache, remember the range of pages that were set during an update
+          if (pkey === root) {
+            currentUpdateSetRange = [firstPage, firstPage + updatedPageCount - 1];
+          }
 
           for (let i = 0; i < updatedPageCount; i++) {
             let page = firstPage + i;
@@ -664,14 +668,14 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
         /**
          * Ensures that the last requested page range does not include pages for data that has been cleared.
          * The last requested range is used in `fetchPage` to skip requests to the server if the page range didn't
-         * change. However, if some pages have been cleared by data communicator, we need to adjust the range to
-         * ensure the pages get loaded again. This can happen for example when changing the requested range on the
-         * server (e.g. preload of items on scroll to index), which can cause data communicator to clear pages
-         * outside of that range, even though the grid viewport might need them.
-         * @param parentKey key of the cache to update
+         * change. However, if some pages of that range have been cleared by data communicator, we need to clear the
+         * range to ensure the pages get loaded again. This can happen for example when changing the requested range
+         * on the server (e.g. preload of items on scroll to index), which can cause data communicator to clear pages
+         * that the connector assumes are already loaded.
          */
-        const sanitizeLastRequestedRange = function (parentKey) {
-          const range = lastRequestedRanges[parentKey];
+        const sanitizeLastRequestedRange = function () {
+          // Only relevant for the root cache
+          const range = lastRequestedRanges[root];
           // Range may not be set yet, or nothing was cleared
           if (!range || !currentUpdateClearRange) {
             return;
@@ -712,7 +716,11 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
 
           let firstPage = Math.floor(index / grid.pageSize);
           let updatedPageCount = Math.ceil(length / grid.pageSize);
-          currentUpdateClearRange = [firstPage, firstPage + updatedPageCount - 1];
+
+          // For root cache, remember the range of pages that were cleared during an update
+          if (pkey === root) {
+            currentUpdateClearRange = [firstPage, firstPage + updatedPageCount - 1];
+          }
 
           for (let i = 0; i < updatedPageCount; i++) {
             let page = firstPage + i;
@@ -836,9 +844,6 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
               updateGridFlatSize();
             }
           }
-          // Clear current update state
-          currentUpdateSetRange = null;
-          currentUpdateClearRange = null;
 
           // Let server know we're done
           grid.$server.confirmParentUpdate(id, parentKey);
@@ -869,7 +874,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           });
 
           // Sanitize last requested range for the root level
-          sanitizeLastRequestedRange(root);
+          sanitizeLastRequestedRange();
           // Clear current update state
           currentUpdateSetRange = null;
           currentUpdateClearRange = null;
