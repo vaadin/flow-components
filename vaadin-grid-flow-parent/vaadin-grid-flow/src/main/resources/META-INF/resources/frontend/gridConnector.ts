@@ -524,6 +524,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
                 // Header & footer
                 const tagName = section === 'header' ? 'th' : 'td';
 
+                // The change here is for discussion and should be applied to the web component
                 let isHeaderOrFooterCell;
                 if (section === 'header' && column._customSelectionColumnHeaderHandler) {
                   const headerRowIndex = Array.from(grid.$.header.children).indexOf(row);
