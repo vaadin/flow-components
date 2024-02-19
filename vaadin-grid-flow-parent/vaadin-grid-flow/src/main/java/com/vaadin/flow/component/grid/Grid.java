@@ -2346,7 +2346,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (getHeaderRows().size() == 0) {
             return addFirstHeaderRow();
         }
-        HeaderRow newHeaderRow = insertColumnLayer(getLastHeaderLayerIndex() + 1).asHeaderRow();
+        HeaderRow newHeaderRow = insertColumnLayer(
+                getLastHeaderLayerIndex() + 1).asHeaderRow();
         syncSelectionColumnDefaultHeaderRow();
         return newHeaderRow;
     }
@@ -2362,7 +2363,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (getHeaderRows().size() == 0) {
             return addFirstHeaderRow();
         }
-        HeaderRow newHeaderRow = insertInmostColumnLayer(true, false).asHeaderRow();
+        HeaderRow newHeaderRow = insertInmostColumnLayer(true, false)
+                .asHeaderRow();
         syncSelectionColumnDefaultHeaderRow();
         return newHeaderRow;
     }
@@ -2406,8 +2408,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     private void syncSelectionColumnDefaultHeaderRow() {
+        // TODO implement and refactor
         if (getSelectionModel() instanceof AbstractGridMultiSelectionModel<T> model) {
-            model.syncDefaultHeaderRow(getHeaderRows().indexOf(defaultHeaderRow));
+            model.syncDefaultHeaderRow(
+                    getHeaderRows().indexOf(defaultHeaderRow));
         }
     }
 
