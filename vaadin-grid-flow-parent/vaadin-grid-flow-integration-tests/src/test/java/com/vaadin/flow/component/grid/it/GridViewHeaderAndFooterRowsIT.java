@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,10 +43,10 @@ public class GridViewHeaderAndFooterRowsIT extends AbstractComponentIT {
                 .id("grid-with-header-and-footer-rows");
         scrollToElement(grid);
 
-        assertRendereredHeaderCell(grid.getHeaderCell(0), "Name", true);
-        assertRendereredHeaderCell(grid.getHeaderCell(1), "Age", true);
-        assertRendereredHeaderCell(grid.getHeaderCell(2), "Street", false);
-        assertRendereredHeaderCell(grid.getHeaderCell(3), "Postal Code", false);
+        assertRenderedHeaderCell(grid.getHeaderCell(0), "Name", true);
+        assertRenderedHeaderCell(grid.getHeaderCell(1), "Age", true);
+        assertRenderedHeaderCell(grid.getHeaderCell(2), "Street", false);
+        assertRenderedHeaderCell(grid.getHeaderCell(3), "Postal Code", false);
 
         Assert.assertTrue(
                 "The first column group should have 'Basic Information' header text",
@@ -68,29 +69,57 @@ public class GridViewHeaderAndFooterRowsIT extends AbstractComponentIT {
         scrollToElement(grid);
 
         GridTHTDElement headerCell = grid.getHeaderCell(0);
-        assertRendereredHeaderCell(headerCell, "<span>Name</span>", true);
+        assertRenderedHeaderCell(headerCell, "<span>Name</span>", true);
 
         headerCell = grid.getHeaderCell(1);
-        assertRendereredHeaderCell(headerCell, "<span>Age</span>", true);
+        assertRenderedHeaderCell(headerCell, "<span>Age</span>", true);
 
         headerCell = grid.getHeaderCell(2);
-        assertRendereredHeaderCell(headerCell, "<span>Street</span>", false);
+        assertRenderedHeaderCell(headerCell, "<span>Street</span>", false);
 
         headerCell = grid.getHeaderCell(3);
-        assertRendereredHeaderCell(headerCell, "<span>Postal Code</span>",
-                false);
+        assertRenderedHeaderCell(headerCell, "<span>Postal Code</span>", false);
 
         Assert.assertTrue(
                 "There should be a cell with the renderered 'Basic Information' header",
-                hasComponentRendereredHeaderCell(grid, "span",
+                hasComponentRenderedHeaderCell(grid, "span",
                         "Basic Information"));
 
         Assert.assertTrue("There should be a cell with the renderered footer",
-                hasComponentRendereredHeaderCell(grid, "span",
+                hasComponentRenderedHeaderCell(grid, "span",
                         "Total: 500 people"));
     }
 
-    private void assertRendereredHeaderCell(GridTHTDElement headerCell,
+    @Test
+    public void setMultiSelect_appendHeader_selectAllCheckboxOnDefaultHeaderRow() {
+        GridElement grid = setupMultiSelectGrid();
+        $("button").id("append-header").click();
+        Assert.assertTrue(getHeaderCell(grid, 1, 0).getInnerHTML()
+                .contains("selectAllCheckbox"));
+        Assert.assertFalse(getHeaderCell(grid, 2, 0).getInnerHTML()
+                .contains("selectAllCheckbox"));
+    }
+
+    @Test
+    public void setMultiSelect_prependHeader_selectAllCheckboxOnDefaultHeaderRow() {
+        GridElement grid = setupMultiSelectGrid();
+        $("button").id("prepend-header").click();
+        Assert.assertTrue(getHeaderCell(grid, 2, 0).getInnerHTML()
+                .contains("selectAllCheckbox"));
+        Assert.assertFalse(getHeaderCell(grid, 1, 0).getInnerHTML()
+                .contains("selectAllCheckbox"));
+    }
+
+    @Test
+    public void setMultiSelect_removeAllHeaders_appendHeader_selectAllCheckboxOnFirstHeaderRow() {
+        GridElement grid = setupMultiSelectGrid();
+        $("button").id("remove-all-headers").click();
+        $("button").id("append-header").click();
+        Assert.assertTrue(getHeaderCell(grid, 0, 0).getInnerHTML()
+                .contains("selectAllCheckbox"));
+    }
+
+    private void assertRenderedHeaderCell(GridTHTDElement headerCell,
             String text, boolean withSorter) {
 
         String html = headerCell.getInnerHTML();
@@ -102,12 +131,12 @@ public class GridViewHeaderAndFooterRowsIT extends AbstractComponentIT {
         Assert.assertTrue(html.contains(text));
     }
 
-    private boolean hasComponentRendereredHeaderCell(WebElement grid,
+    private boolean hasComponentRenderedHeaderCell(WebElement grid,
             String tagName, String text) {
-        return hasComponentRendereredCell(grid, text, tagName);
+        return hasComponentRenderedCell(grid, text, tagName);
     }
 
-    private boolean hasComponentRendereredCell(WebElement grid, String text,
+    private boolean hasComponentRenderedCell(WebElement grid, String text,
             String componentTag) {
         List<WebElement> cells = grid
                 .findElements(By.tagName("vaadin-grid-cell-content"));
@@ -116,5 +145,21 @@ public class GridViewHeaderAndFooterRowsIT extends AbstractComponentIT {
                 .map(cell -> cell.findElements(By.tagName(componentTag)))
                 .filter(list -> !list.isEmpty()).map(list -> list.get(0))
                 .anyMatch(cell -> text.equals(cell.getAttribute("innerHTML")));
+    }
+
+    private GridElement setupMultiSelectGrid() {
+        findElement(By.id("selection-mode"))
+                .findElements(By.tagName("vaadin-radio-button")).get(1).click();
+        GridElement grid = $(GridElement.class)
+                .id("grid-with-header-and-footer-rows");
+        scrollToElement(grid);
+        return grid;
+    }
+
+    private GridTHTDElement getHeaderCell(GridElement grid, int headerRowIndex,
+            int columnIndex) {
+        return ((TestBenchElement) executeScript(
+                "return arguments[0].$.header.children[arguments[1]].children[arguments[2]]",
+                grid, headerRowIndex, columnIndex)).wrap(GridTHTDElement.class);
     }
 }

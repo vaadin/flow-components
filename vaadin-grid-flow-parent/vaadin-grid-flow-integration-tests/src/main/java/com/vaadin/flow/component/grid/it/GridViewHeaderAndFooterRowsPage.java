@@ -26,8 +26,6 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.router.Route;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Route("vaadin-grid-it-demo/header-and-footer-rows")
@@ -78,60 +76,34 @@ public class GridViewHeaderAndFooterRowsPage extends LegacyTestView {
 
         HorizontalLayout buttonsLayout = new HorizontalLayout();
 
-        List<NativeButton> removeHeaderButtons = new ArrayList<>();
-        NativeButton removeAllHeaders = new NativeButton(
-                "Remove all header rows", removeClick -> {
-                    removeHeaderButtons.forEach(
-                            GridViewHeaderAndFooterRowsPage.this::remove);
-                    removeHeaderButtons.clear();
-                    grid.removeAllHeaderRows();
-                });
-        removeAllHeaders.setId("remove-all-header-rows");
+        NativeButton removeAllHeaders = new NativeButton("Remove all headers",
+                removeClick -> grid.removeAllHeaderRows());
+        removeAllHeaders.setId("remove-all-headers");
         buttonsLayout.add(removeAllHeaders);
 
         AtomicInteger prependedHeaderIndex = new AtomicInteger();
         NativeButton prependHeader = new NativeButton("Prepend header",
                 click -> {
-                    int index = prependedHeaderIndex.incrementAndGet();
-                    String title = "Prepended header " + index;
+                    String title = "Prepended header "
+                            + prependedHeaderIndex.incrementAndGet();
                     HeaderRow headerRow = grid.prependHeaderRow();
                     headerRow.getCell(nameColumn).setText(title + " - 0");
                     headerRow.getCell(ageColumn).setText(title + " - 1");
                     headerRow.getCell(streetColumn).setText(title + " - 2");
                     headerRow.getCell(postalCodeColumn).setText(title + " - 3");
-                    NativeButton removePrependedHeader = new NativeButton(
-                            "Remove " + title, removeClick -> {
-                                grid.removeHeaderRow(headerRow);
-                                removeHeaderButtons
-                                        .remove(removeClick.getSource());
-                                buttonsLayout.remove(removeClick.getSource());
-                            });
-                    removePrependedHeader
-                            .setId("remove-prepended-header-" + index);
-                    removeHeaderButtons.add(removePrependedHeader);
-                    buttonsLayout.add(removePrependedHeader);
                 });
         prependHeader.setId("prepend-header");
         buttonsLayout.add(prependHeader);
 
         AtomicInteger appendedHeaderIndex = new AtomicInteger();
         NativeButton appendHeader = new NativeButton("Append header", click -> {
-            int index = appendedHeaderIndex.incrementAndGet();
-            String title = "Appended header " + index;
+            String title = "Appended header "
+                    + appendedHeaderIndex.incrementAndGet();
             HeaderRow headerRow = grid.appendHeaderRow();
             headerRow.getCell(nameColumn).setText(title + " - 0");
             headerRow.getCell(ageColumn).setText(title + " - 1");
             headerRow.getCell(streetColumn).setText(title + " - 2");
             headerRow.getCell(postalCodeColumn).setText(title + " - 3");
-            NativeButton removeAppendedHeader = new NativeButton(
-                    "Remove " + title, removeClick -> {
-                        grid.removeHeaderRow(headerRow);
-                        removeHeaderButtons.remove(removeClick.getSource());
-                        buttonsLayout.remove(removeClick.getSource());
-                    });
-            removeAppendedHeader.setId("remove-appended-header-" + index);
-            removeHeaderButtons.add(removeAppendedHeader);
-            buttonsLayout.add(removeAppendedHeader);
         });
         appendHeader.setId("append-header");
         buttonsLayout.add(appendHeader);
