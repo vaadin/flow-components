@@ -3,6 +3,7 @@ import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut, animationFrame } from '@polymer/polymer/lib/utils/async.js';
 import { Grid } from '@vaadin/grid/src/vaadin-grid.js';
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
+import { iterateRowCells } from '@vaadin/grid/src/vaadin-grid-helpers.js';
 import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js";
 
 (function () {
@@ -453,6 +454,119 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
         grid.collapseItem = tryCatchWrapper(function (item) {
           itemExpandedChanged(item, false);
           Grid.prototype.collapseItem.call(grid, item);
+        });
+
+        grid._updateRow = tryCatchWrapper(function (row, columns, section = 'body', isColumnRow = false, noNotify = false) {
+          const contentsFragment = document.createDocumentFragment();
+
+          iterateRowCells(row, (cell) => {
+            cell._vacant = true;
+          });
+          row.innerHTML = '';
+          if (section === 'body') {
+            // Clear the cached cell references
+            row.__cells = [];
+            row.__detailsCell = null;
+          }
+
+          columns
+            .filter((column) => !column.hidden)
+            .forEach((column, index, cols) => {
+              let cell;
+              if (section === 'body') {
+                // Body
+                if (!column._cells) {
+                  column._cells = [];
+                }
+                cell = column._cells.find((cell) => cell._vacant);
+                if (!cell) {
+                  cell = grid._createCell('td', column);
+                  column._cells.push(cell);
+                }
+                cell.setAttribute('part', 'cell body-cell');
+                cell.__parentRow = row;
+                // Cache the cell reference
+                row.__cells.push(cell);
+
+                const isSizerRow = row === grid.$.sizer;
+                if (!column._bodyContentHidden || isSizerRow) {
+                  row.appendChild(cell);
+                }
+
+                if (isSizerRow) {
+                  column._sizerCell = cell;
+                }
+
+                if (index === cols.length - 1 && grid.rowDetailsRenderer) {
+                  // Add details cell as last cell to body rows
+                  if (!grid._detailsCells) {
+                    grid._detailsCells = [];
+                  }
+                  const detailsCell = grid._detailsCells.find((cell) => cell._vacant) || grid._createCell('td');
+                  if (grid._detailsCells.indexOf(detailsCell) === -1) {
+                    grid._detailsCells.push(detailsCell);
+                  }
+                  if (!detailsCell._content.parentElement) {
+                    contentsFragment.appendChild(detailsCell._content);
+                  }
+                  grid._configureDetailsCell(detailsCell);
+                  row.appendChild(detailsCell);
+                  // Cache the details cell reference
+                  row.__detailsCell = detailsCell;
+                  grid._a11ySetRowDetailsCell(row, detailsCell);
+                  detailsCell._vacant = false;
+                }
+
+                if (!noNotify) {
+                  column._cells = [...column._cells];
+                }
+              } else {
+                // Header & footer
+                const tagName = section === 'header' ? 'th' : 'td';
+
+                let isHeaderOrFooterCell;
+                if (section === 'header' && column._customSelectionColumnHeaderHandler) {
+                  const headerRowIndex = Array.from(grid.$.header.children).indexOf(row);
+                  isHeaderOrFooterCell = column._customSelectionColumnHeaderHandler(headerRowIndex);
+                } else {
+                  isHeaderOrFooterCell = isColumnRow || column.localName === 'vaadin-grid-column-group';
+                }
+
+                if (isHeaderOrFooterCell) {
+                  cell = column[`_${section}Cell`] || grid._createCell(tagName);
+                  cell._column = column;
+                  row.appendChild(cell);
+                  column[`_${section}Cell`] = cell;
+                } else {
+                  if (!column._emptyCells) {
+                    column._emptyCells = [];
+                  }
+                  cell = column._emptyCells.find((cell) => cell._vacant) || grid._createCell(tagName);
+                  cell._column = column;
+                  row.appendChild(cell);
+                  if (column._emptyCells.indexOf(cell) === -1) {
+                    column._emptyCells.push(cell);
+                  }
+                }
+                cell.part.add('cell', `${section}-cell`);
+              }
+
+              if (!cell._content.parentElement) {
+                contentsFragment.appendChild(cell._content);
+              }
+              cell._vacant = false;
+              cell._column = column;
+            });
+
+          if (section !== 'body') {
+            grid.__debounceUpdateHeaderFooterRowVisibility(row);
+          }
+
+          // Might be empty if only cache was used
+          grid.appendChild(contentsFragment);
+
+          grid._frozenCellsChanged();
+          grid._updateFirstAndLastColumnForRow(row);
         });
 
         const itemsUpdated = function (items) {

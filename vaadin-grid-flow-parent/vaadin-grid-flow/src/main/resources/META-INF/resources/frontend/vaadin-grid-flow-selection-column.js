@@ -42,6 +42,22 @@ export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridCo
     }
   }
 
+  /**
+   * @protected
+   */
+  _syncDefaultHeaderRow(headerCellIndex) {
+    this.__defaultHeaderRowIndex = headerCellIndex;
+  }
+
+  /**
+   * @protected
+   */
+  _customSelectionColumnHeaderHandler(headerRowIndex) {
+    if (!this.__defaultHeaderRowIndex) {
+      return true;
+    }
+    return this.__defaultHeaderRowIndex === headerRowIndex;
+  }
 
   /**
    * Override a method from `GridSelectionColumnBaseMixin` to handle the user

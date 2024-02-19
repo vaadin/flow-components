@@ -127,6 +127,14 @@ public class GridSelectionColumn extends Component {
         return getElement().getProperty("dragSelect", false);
     }
 
+    void syncDefaultHeaderRow(int defaultHeaderRowIndex) {
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, context ->
+                        getElement().callJsFunction(
+                                "_syncDefaultHeaderRow", defaultHeaderRowIndex)
+                ));
+    }
+
     @ClientCallable
     private void selectAll() {
         selectAllCallback.run();

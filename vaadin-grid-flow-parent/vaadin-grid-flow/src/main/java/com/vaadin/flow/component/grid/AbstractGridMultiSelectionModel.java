@@ -400,6 +400,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
         return selectionColumn;
     }
 
+    void syncDefaultHeaderRow(int defaultHeaderRowIndex) {
+        selectionColumn.syncDefaultHeaderRow(defaultHeaderRowIndex);
+    }
+
     /**
      * Fetch all items from the given hierarchical data provider.
      *
