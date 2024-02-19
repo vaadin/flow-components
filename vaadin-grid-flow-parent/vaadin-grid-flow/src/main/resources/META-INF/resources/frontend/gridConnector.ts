@@ -525,15 +525,15 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
                 const tagName = section === 'header' ? 'th' : 'td';
 
                 // The change here is for discussion and should be applied to the web component
-                let isHeaderOrFooterCell;
-                if (section === 'header' && column._customSelectionColumnHeaderHandler) {
+                let renderAsHeaderOrFooterCell;
+                if (section === 'header' && column._customSelectionColumnHeaderCellProvider) {
                   const headerRowIndex = Array.from(grid.$.header.children).indexOf(row);
-                  isHeaderOrFooterCell = column._customSelectionColumnHeaderHandler(headerRowIndex);
+                  renderAsHeaderOrFooterCell = column._customSelectionColumnHeaderCellProvider(headerRowIndex);
                 } else {
-                  isHeaderOrFooterCell = isColumnRow || column.localName === 'vaadin-grid-column-group';
+                  renderAsHeaderOrFooterCell = isColumnRow || column.localName === 'vaadin-grid-column-group';
                 }
 
-                if (isHeaderOrFooterCell) {
+                if (renderAsHeaderOrFooterCell) {
                   cell = column[`_${section}Cell`] || grid._createCell(tagName);
                   cell._column = column;
                   row.appendChild(cell);
