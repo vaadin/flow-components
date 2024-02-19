@@ -128,11 +128,11 @@ public class GridSelectionColumn extends Component {
     }
 
     void syncDefaultHeaderRow(int defaultHeaderRowIndex) {
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, context ->
-                        getElement().callJsFunction(
-                                "_syncDefaultHeaderRow", defaultHeaderRowIndex)
-                ));
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(this,
+                        context -> getElement().callJsFunction(
+                                "_syncDefaultHeaderRow",
+                                defaultHeaderRowIndex)));
     }
 
     @ClientCallable
