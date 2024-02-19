@@ -2408,7 +2408,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     private void syncSelectionColumnDefaultHeaderRow() {
-        // TODO implement and refactor
         if (getSelectionModel() instanceof AbstractGridMultiSelectionModel<T> model) {
             model.syncDefaultHeaderRow(
                     getHeaderRows().indexOf(defaultHeaderRow));
