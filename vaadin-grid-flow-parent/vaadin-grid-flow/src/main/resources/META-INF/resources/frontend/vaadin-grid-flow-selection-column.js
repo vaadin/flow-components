@@ -53,7 +53,7 @@ export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridCo
    * @protected
    */
   _customSelectionColumnHeaderHandler(headerRowIndex) {
-    if (!this.__defaultHeaderRowIndex) {
+    if (this.__defaultHeaderRowIndex == null) {
       return true;
     }
     return this.__defaultHeaderRowIndex === headerRowIndex;
