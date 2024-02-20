@@ -64,6 +64,9 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
         const root = 'null';
         lastRequestedRanges[root] = [0, 0];
 
+        let currentUpdateClearRange = null;
+        let currentUpdateSetRange = null;
+
         const validSelectionModes = ['SINGLE', 'NONE', 'MULTI'];
         let selectedKeys = {};
         let selectionMode = 'SINGLE';
@@ -585,6 +588,11 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           const firstPage = index / grid.pageSize;
           const updatedPageCount = Math.ceil(items.length / grid.pageSize);
 
+          // For root cache, remember the range of pages that were set during an update
+          if (pkey === root) {
+            currentUpdateSetRange = [firstPage, firstPage + updatedPageCount - 1];
+          }
+
           for (let i = 0; i < updatedPageCount; i++) {
             let page = firstPage + i;
             let slice = items.slice(i * grid.pageSize, (i + 1) * grid.pageSize);
@@ -684,6 +692,44 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           parentRequestQueue = [];
         });
 
+        /**
+         * Ensures that the last requested page range does not include pages for data that has been cleared.
+         * The last requested range is used in `fetchPage` to skip requests to the server if the page range didn't
+         * change. However, if some pages of that range have been cleared by data communicator, we need to clear the
+         * range to ensure the pages get loaded again. This can happen for example when changing the requested range
+         * on the server (e.g. preload of items on scroll to index), which can cause data communicator to clear pages
+         * that the connector assumes are already loaded.
+         */
+        const sanitizeLastRequestedRange = function () {
+          // Only relevant for the root cache
+          const range = lastRequestedRanges[root];
+          // Range may not be set yet, or nothing was cleared
+          if (!range || !currentUpdateClearRange) {
+            return;
+          }
+
+          // Determine all pages that were cleared
+          const numClearedPages = currentUpdateClearRange[1] - currentUpdateClearRange[0] + 1;
+          const clearedPages = Array.from({ length: numClearedPages }, (_, i) => currentUpdateClearRange[0] + i);
+
+          // Remove pages that have been set in same update
+          if (currentUpdateSetRange) {
+            const [first, last] = currentUpdateSetRange;
+            for (let page = first; page <= last; page++) {
+              const index = clearedPages.indexOf(page);
+              if (index >= 0) {
+                clearedPages.splice(index, 1);
+              }
+            }
+          }
+
+          // Clear the last requested range if it includes any of the cleared pages
+          if (clearedPages.some((page) => page >= range[0] && page <= range[1])) {
+            range[0] = -1;
+            range[1] = -1;
+          }
+        };
+
         grid.$connector.clear = tryCatchWrapper(function (index, length, parentKey) {
           let pkey = parentKey || root;
           if (!cache[pkey] || Object.keys(cache[pkey]).length === 0) {
@@ -697,6 +743,11 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
 
           let firstPage = Math.floor(index / grid.pageSize);
           let updatedPageCount = Math.ceil(length / grid.pageSize);
+
+          // For root cache, remember the range of pages that were cleared during an update
+          if (pkey === root) {
+            currentUpdateClearRange = [firstPage, firstPage + updatedPageCount - 1];
+          }
 
           for (let i = 0; i < updatedPageCount; i++) {
             let page = firstPage + i;
@@ -877,17 +928,11 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
             }
           }
 
-          if (Object.keys(rootPageCallbacks).length) {
-            // There are still unresolved callbacks waiting for data to the root level,
-            // which means that the range grid requested items for was only partially filled.
-            //
-            // This can happen for example if you preload some items without knowing exactly
-            // how many items the grid web component is going to request.
-            //
-            // Clear the last requested range for the root level to unblock
-            // any possible data requests for the same range in fetchPage.
-            delete lastRequestedRanges[root];
-          }
+          // Sanitize last requested range for the root level
+          sanitizeLastRequestedRange();
+          // Clear current update state
+          currentUpdateSetRange = null;
+          currentUpdateClearRange = null;
 
           // Let server know we're done
           grid.$server.confirmUpdate(id);
