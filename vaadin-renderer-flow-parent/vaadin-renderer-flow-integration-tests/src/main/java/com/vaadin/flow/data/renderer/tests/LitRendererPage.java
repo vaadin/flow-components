@@ -87,6 +87,13 @@ public class LitRendererPage extends Div {
         toggleAttachedButton.setId("toggleAttachedButton");
         add(toggleAttachedButton);
 
+        NativeButton setCheckboxRenderer = new NativeButton("Set renderer with checkbox", e -> {
+            component.setRenderer(LitRenderer.<String> of(
+                    "<input type='checkbox' .checked='${live(item.checked)}'>")
+                    .withProperty("checked", "2"::equals));
+        });
+        setCheckboxRenderer.setId("setCheckboxRenderer");
+        add(setCheckboxRenderer);
     }
 
     private void setLitRenderer(LitRendererTestComponent component) {

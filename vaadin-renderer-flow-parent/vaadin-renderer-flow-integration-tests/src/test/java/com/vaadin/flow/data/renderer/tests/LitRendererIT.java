@@ -129,6 +129,16 @@ public class LitRendererIT extends AbstractComponentIT {
         Assert.assertEquals("Details: 0 (details)", details.getText());
     }
 
+    @Test
+    public void shouldBeAbleToUseLiveDirective() {
+        clickElementWithJs("setCheckboxRenderer");
+        WebElement checkbox = findElement(By.cssSelector("#item-0 input"));
+        checkbox.click();
+        clickElementWithJs("longRefreshButton");
+        checkbox = findElement(By.cssSelector("#item-0 input"));
+        Assert.assertFalse(checkbox.isSelected());
+    }
+
     private String getFirstClientCallableLogMessage() {
         return getLogEntries(Level.WARNING).stream()
                 // Discard all but event messages
