@@ -507,6 +507,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
                 MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
 
         click("remove-sub-item-class-name");
+        verifyClosed();
         verifySubMenuItemClassNames(false,
                 MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
     }
@@ -514,16 +515,19 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void subMenuItem_toggleMultipleClassNames_classNamesAreToggled() {
         click("add-second-sub-item-class-name");
+        verifyClosed();
         verifySubMenuItemClassNames(true,
                 MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME,
                 MenuBarTestPage.SUB_ITEM_SECOND_CLASS_NAME);
 
         click("add-remove-multiple-sub-item-classes");
+        verifyClosed();
         verifySubMenuItemClassNames(false,
                 MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME,
                 MenuBarTestPage.SUB_ITEM_SECOND_CLASS_NAME);
 
         click("add-remove-multiple-sub-item-classes");
+        verifyClosed();
         verifySubMenuItemClassNames(true,
                 MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME,
                 MenuBarTestPage.SUB_ITEM_SECOND_CLASS_NAME);
@@ -532,10 +536,12 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void subMenuItem_toggleSingleClassName_classNameIsToggled() {
         click("toggle-sub-item-class-name");
+        verifyClosed();
         verifySubMenuItemClassNames(false,
                 MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
 
         click("toggle-sub-item-class-name");
+        verifyClosed();
         verifySubMenuItemClassNames(true,
                 MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
     }
@@ -543,10 +549,12 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void subMenuItem_classNamesAreToggleWithSet_classNamesAreToggled() {
         click("set-unset-sub-item-class-name");
+        verifyClosed();
         verifySubMenuItemClassNames(false,
                 MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
 
         click("set-unset-sub-item-class-name");
+        verifyClosed();
         verifySubMenuItemClassNames(true,
                 MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
     }
