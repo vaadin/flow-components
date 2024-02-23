@@ -367,6 +367,9 @@
                                     </resource>
                                     <resource>
                                         <directory>src/main/webapp</directory>
+                                        <!-- shared/versions folder contains generated json files with pinned
+                                             versions for all core and pro components. Flow needs these. -->
+                                        <directory>../../shared/versions</directory>
                                         <targetPath>META-INF/resources</targetPath>
                                     </resource>
                                 </resources>

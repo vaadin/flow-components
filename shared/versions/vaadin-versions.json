@@ -1,0 +1,78 @@
+{
+    "vaadin": {
+        "board": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/board",
+            "mode": "lit"
+        },
+        "charts": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/charts",
+            "mode": "lit"
+        },
+        "cookie-consent": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/cookie-consent",
+            "mode": "lit"
+        },
+        "cookieconsent": {
+            "jsVersion": "3.1.1"
+        },
+        "crud": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/crud",
+            "mode": "lit"
+        },
+        "grid-pro": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/grid-pro",
+            "mode": "lit"
+        },
+        "map": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/map",
+            "mode": "lit"
+        },
+        "rich-text-editor": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/rich-text-editor",
+            "mode": "lit"
+        },
+        "vaadin-classic-components": {
+            "javaVersion": "24.2.1"
+        },
+        "vaadin-core": {
+            "jsVersion": "24.4-SNAPSHOT",
+            "npmName": "@vaadin/vaadin-core"
+        },
+        "vaadin-designer": {
+            "pro": true
+        },
+        "vaadin-license-checker": {
+            "javaVersion": "1.12.8"
+        },
+        "vaadin-spreadsheet": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "pro": true
+        },
+        "vaadin-testbench": {
+            "javaVersion": "9.2.2",
+            "pro": true
+        }
+    },
+    "platform": "24.4-SNAPSHOT",
+    "react": {
+        "react-components": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/react-components",
+            "mode": "react"
+        }
+    }
+}

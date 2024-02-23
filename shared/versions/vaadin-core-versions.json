@@ -1,0 +1,385 @@
+{
+    "bundles": {
+        "vaadin": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/bundles"
+        }
+    },
+    "core": {
+        "a11y-base": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/a11y-base",
+            "mode": "lit"
+        },
+        "accordion": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/accordion",
+            "mode": "lit"
+        },
+        "app-layout": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/app-layout",
+            "mode": "lit"
+        },
+        "avatar": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/avatar",
+            "mode": "lit"
+        },
+        "avatar-group": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/avatar-group",
+            "mode": "lit"
+        },
+        "button": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/button",
+            "mode": "lit"
+        },
+        "checkbox": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/checkbox",
+            "mode": "lit"
+        },
+        "checkbox-group": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/checkbox-group",
+            "mode": "lit"
+        },
+        "combo-box": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/combo-box",
+            "mode": "lit"
+        },
+        "component-base": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/component-base",
+            "mode": "lit"
+        },
+        "confirm-dialog": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/confirm-dialog",
+            "mode": "lit"
+        },
+        "context-menu": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/context-menu",
+            "mode": "lit"
+        },
+        "custom-field": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/custom-field",
+            "mode": "lit"
+        },
+        "date-picker": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/date-picker",
+            "mode": "lit"
+        },
+        "date-time-picker": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/date-time-picker",
+            "mode": "lit"
+        },
+        "details": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/details",
+            "mode": "lit"
+        },
+        "dialog": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/dialog",
+            "mode": "lit"
+        },
+        "email-field": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/email-field",
+            "mode": "lit"
+        },
+        "field-base": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/field-base",
+            "mode": "lit"
+        },
+        "field-highlighter": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/field-highlighter",
+            "mode": "lit"
+        },
+        "flow": {
+            "javaVersion": "24.4.0.alpha8"
+        },
+        "flow-cdi": {
+            "javaVersion": "15.0.1"
+        },
+        "flow-form-filler": {
+            "javaVersion": "1.1.0"
+        },
+        "form-layout": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/form-layout",
+            "mode": "lit"
+        },
+        "grid": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/grid",
+            "mode": "lit"
+        },
+        "hilla": {
+            "javaVersion": "24.4-SNAPSHOT"
+        },
+        "horizontal-layout": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/horizontal-layout",
+            "mode": "lit"
+        },
+        "icon": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/icon",
+            "mode": "lit"
+        },
+        "icons": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/icons",
+            "mode": "lit"
+        },
+        "input-container": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/input-container",
+            "mode": "lit"
+        },
+        "integer-field": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/integer-field",
+            "mode": "lit"
+        },
+        "item": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/item",
+            "mode": "lit"
+        },
+        "list-box": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/list-box",
+            "mode": "lit"
+        },
+        "lit-renderer": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/lit-renderer",
+            "mode": "lit"
+        },
+        "login": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/login",
+            "mode": "lit"
+        },
+        "menu-bar": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/menu-bar",
+            "mode": "lit"
+        },
+        "message-input": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/message-input",
+            "mode": "lit"
+        },
+        "message-list": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/message-list",
+            "mode": "lit"
+        },
+        "mpr-v7": {
+            "javaVersion": "7.0.9"
+        },
+        "mpr-v8": {
+            "javaVersion": "7.0.9"
+        },
+        "multi-select-combo-box": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/multi-select-combo-box",
+            "mode": "lit"
+        },
+        "notification": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/notification",
+            "mode": "lit"
+        },
+        "number-field": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/number-field",
+            "mode": "lit"
+        },
+        "overlay": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/overlay",
+            "mode": "lit"
+        },
+        "password-field": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/password-field",
+            "mode": "lit"
+        },
+        "polymer-legacy-adapter": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/polymer-legacy-adapter"
+        },
+        "progress-bar": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/progress-bar",
+            "mode": "lit"
+        },
+        "radio-group": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/radio-group",
+            "mode": "lit"
+        },
+        "scroller": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/scroller",
+            "mode": "lit"
+        },
+        "select": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/select",
+            "mode": "lit"
+        },
+        "side-nav": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/side-nav",
+            "mode": "lit"
+        },
+        "split-layout": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/split-layout",
+            "mode": "lit"
+        },
+        "tabs": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/tabs",
+            "mode": "lit"
+        },
+        "tabsheet": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/tabsheet",
+            "mode": "lit"
+        },
+        "text-area": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/text-area",
+            "mode": "lit"
+        },
+        "text-field": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/text-field",
+            "mode": "lit"
+        },
+        "time-picker": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/time-picker",
+            "mode": "lit"
+        },
+        "tooltip": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/tooltip",
+            "mode": "lit"
+        },
+        "upload": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/upload",
+            "mode": "lit"
+        },
+        "vaadin-development-mode-detector": {
+            "jsVersion": "2.0.6",
+            "npmName": "@vaadin/vaadin-development-mode-detector"
+        },
+        "vaadin-lumo-styles": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/vaadin-lumo-styles",
+            "releasenotes": true,
+            "mode": "lit"
+        },
+        "vaadin-lumo-theme": {
+            "javaVersion": "24.4-SNAPSHOT"
+        },
+        "vaadin-material-styles": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/vaadin-material-styles",
+            "releasenotes": true,
+            "mode": "lit"
+        },
+        "vaadin-material-theme": {
+            "javaVersion": "24.4-SNAPSHOT"
+        },
+        "vaadin-messages": {
+            "javaVersion": "24.4-SNAPSHOT"
+        },
+        "vaadin-ordered-layout": {
+            "javaVersion": "24.4-SNAPSHOT"
+        },
+        "vaadin-quarkus": {
+            "javaVersion": "2.0.1"
+        },
+        "vaadin-renderer": {
+            "javaVersion": "24.4-SNAPSHOT"
+        },
+        "vaadin-router": {
+            "jsVersion": "1.7.5",
+            "npmName": "@vaadin/router",
+            "releasenotes": true
+        },
+        "vaadin-usage-statistics": {
+            "jsVersion": "2.1.2",
+            "npmName": "@vaadin/vaadin-usage-statistics"
+        },
+        "vertical-layout": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/vertical-layout",
+            "mode": "lit"
+        },
+        "virtual-list": {
+            "javaVersion": "24.4-SNAPSHOT",
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/virtual-list",
+            "mode": "lit"
+        }
+    },
+    "platform": "24.4-SNAPSHOT",
+    "react": {
+        "react-components": {
+            "jsVersion": "24.4.0-alpha13",
+            "npmName": "@vaadin/react-components",
+            "mode": "react"
+        }
+    }
+}
