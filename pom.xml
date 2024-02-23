@@ -124,32 +124,6 @@
                                 </execution>
                             </executions>
                         </plugin>
-                        <plugin>
-                            <artifactId>maven-resources-plugin</artifactId>
-                            <version>${maven.resources.plugin.version}</version>
-                            <executions>
-                                <execution>
-                                    <id>copy-versions</id>
-                                    <phase>process-resources</phase>
-                                    <goals>
-                                        <goal>copy-resources</goal>
-                                    </goals>
-                                    <configuration>
-                                        <outputDirectory>${project.build.directory}/classes</outputDirectory>
-                                        <overwrite>true</overwrite>
-                                        <resources>
-                                            <resource>
-                                                <!-- shared/versions folder contains generated json files with pinned
-                                                     versions for all core and pro components. Flow needs these. -->
-                                                <!-- TEMPORARY: This should be removed once the versions are available in correct dependency -->
-                                                <directory>../../shared/versions</directory>
-                                                <targetPath>.</targetPath>
-                                            </resource>
-                                        </resources>
-                                    </configuration>
-                                </execution>
-                            </executions>
-                        </plugin>
                     </plugins>
                 </pluginManagement>
             </build>
@@ -393,11 +367,27 @@
                                     </resource>
                                     <resource>
                                         <directory>src/main/webapp</directory>
+                                        <targetPath>META-INF/resources</targetPath>
+                                    </resource>
+                                </resources>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>copy-versions</id>
+                            <phase>process-resources</phase>
+                            <goals>
+                                <goal>copy-resources</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${project.build.directory}/classes</outputDirectory>
+                                <overwrite>true</overwrite>
+                                <resources>
+                                    <resource>
                                         <!-- shared/versions folder contains generated json files with pinned
                                              versions for all core and pro components. Flow needs these. -->
-                                        <directory>../../shared/versions</directory>
-                                        <targetPath>META-INF/resources</targetPath>
                                         <!-- TEMPORARY: This should be removed once the versions are available in correct dependency -->
+                                        <directory>../../shared/versions</directory>
+                                        <targetPath>.</targetPath>
                                     </resource>
                                 </resources>
                             </configuration>
