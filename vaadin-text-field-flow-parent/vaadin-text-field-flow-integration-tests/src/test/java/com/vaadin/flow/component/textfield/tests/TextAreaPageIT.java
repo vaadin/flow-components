@@ -17,6 +17,7 @@ package com.vaadin.flow.component.textfield.tests;
 
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
 import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
@@ -188,14 +189,40 @@ public class TextAreaPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void scrollToBottom() {
+    public void scrollToEnd() {
         TextAreaElement shortcutField = $(TextAreaElement.class)
                 .id("fixed-height");
         shortcutField.setValue("LONGTEXT".repeat(30));
+
         $(TestBenchElement.class).id("scroll-bottom-component-button").click();
-        Assert.assertTrue(
-                Integer.parseInt(shortcutField.$("vaadin-input-container")
-                        .first().getProperty("scrollTop").toString()) > 100);
+
+        TestBenchElement inputContainer = shortcutField
+                .$("vaadin-input-container").first();
+        int scrollTop = Integer
+                .parseInt(inputContainer.getProperty("scrollTop").toString());
+        int scrollHeight = Integer.parseInt(
+                inputContainer.getProperty("scrollHeight").toString());
+        int height = Integer.parseInt(
+                inputContainer.getCssValue("height").replace("px", ""));
+
+        Assert.assertEquals(scrollTop, scrollHeight - height);
     }
 
+    @Test
+    public void scrollToStart() {
+        TextAreaElement shortcutField = $(TextAreaElement.class)
+                .id("fixed-height");
+        shortcutField.setValue("LONGTEXT".repeat(30));
+
+        TestBenchElement inputContainer = shortcutField
+                .$("vaadin-input-container").first();
+        inputContainer.setProperty("scrollTop", 100);
+
+        $(TestBenchElement.class).id("scroll-top-component-button").click();
+
+        int scrollTop = Integer
+                .parseInt(inputContainer.getProperty("scrollTop").toString());
+
+        Assert.assertEquals(0, scrollTop);
+    }
 }

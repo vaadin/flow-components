@@ -225,9 +225,20 @@ public class TextArea extends TextFieldBase<TextArea, String>
      * height, so it can have a scrollbar.
      *
      */
-    public void scrollToBottom() {
-        getElement().executeJs(
-                "(() => this.shadowRoot.querySelector(\"vaadin-input-container\").scrollTop = this.shadowRoot.querySelector(\"vaadin-input-container\").scrollHeight)()");
+    public void scrollToEnd() {
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(this,
+                        ctx -> getElement().executeJs("this.scrollToEnd()")));
+    }
+
+    /**
+     * Scrolls the textarea to the top. Requires the textarea to be of fixed
+     * height, so it can have a scrollbar.
+     */
+    public void scrollToStart() {
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(this,
+                        ctx -> getElement().executeJs("this.scrollToStart()")));
     }
 
     /**

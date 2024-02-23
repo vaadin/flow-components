@@ -20,6 +20,7 @@ import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.Route;
 
@@ -54,16 +55,22 @@ public class TextAreaPage extends Div {
     }
 
     private void addFixedHeightComponent() {
-        NativeButton scrollButton = new NativeButton("Scroll to bottom");
-        scrollButton.setId("scroll-bottom-component-button");
+
+        NativeButton scrollButtonToStart = new NativeButton("Scroll to top");
+        scrollButtonToStart.setId("scroll-top-component-button");
+
+        NativeButton scrollButtonToEnd = new NativeButton("Scroll to bottom");
+        scrollButtonToEnd.setId("scroll-bottom-component-button");
 
         TextArea textArea = new TextArea();
         textArea.setLabel("Fixed height");
         textArea.setHeight("200px");
         textArea.setWidth("200px");
         textArea.setId("fixed-height");
-        scrollButton.addClickListener(event -> textArea.scrollToBottom());
-        add(textArea, scrollButton);
+        scrollButtonToStart.addClickListener(event -> textArea.scrollToStart());
+        scrollButtonToEnd.addClickListener(event -> textArea.scrollToEnd());
+
+        add(textArea, scrollButtonToStart, scrollButtonToEnd);
     }
 
     private void addFocusShortcut() {
