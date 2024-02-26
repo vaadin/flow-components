@@ -66,6 +66,11 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
           }
 
           function isShortYearFormat(format) {
+            // Format is considered short if it includes year
+            // as "yy" or "YY", or no year specified at all.
+            if (!format.includes('y') && !format.includes('Y')) {
+              return true;
+            }
             if (format.includes('y')) {
               return !format.includes('yyy');
             }
