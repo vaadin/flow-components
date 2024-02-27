@@ -30,3 +30,4 @@ error-screenshots
 **/frontend/generated
 **/frontend/index.html
 dev-bundle
+prod.bundle
