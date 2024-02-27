@@ -16,7 +16,7 @@ describe('date-picker connector', () => {
     expect(datePicker.$connector).to.equal(connector);
   });
 
-  const DATE = new Date();
+  const DATE = new Date(2024, 0, 1);
   const DATE_OBJ = extractDateParts(DATE);
 
   [
