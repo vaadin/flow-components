@@ -15,17 +15,20 @@ describe('date-picker connector', () => {
     expect(datePicker.$connector).to.equal(connector);
   });
 
-  // Use current year to not hardcode it
-  const YYYY = new Date().getFullYear();
-  const YY = YYYY - 2000;
+  const DATE = new Date();
 
-  // Get 0 based month to not hardcode it
-  const MONTH = new Date().getMonth();
+  const D = DATE.getDate();
+  const DD = `${D}`.length == 1 ? `0${D}` : `${D}`;
+
+  const MONTH = DATE.getMonth();
 
   const M = MONTH + 1;
   const MM = `${M}`.length == 1 ? `0${M}` : `${M}`;
 
-  const DD = 15;
+  const YYYY = DATE.getFullYear();
+  const YY = `${YYYY}`.slice(2);
+
+  const DATE_OBJ = { day: D, month: MONTH, year: YYYY };
 
   [
     // Day, month, year
@@ -43,13 +46,16 @@ describe('date-picker connector', () => {
     // Day only
     ['dd', `${DD}`]
   ].forEach(([format, date]) => {
+    it(`should format date using ${format} format`, () => {
+      datePicker.$connector.updateI18n('en-US', { dateFormats: [format] });
+
+      expect(datePicker.i18n.formatDate(DATE_OBJ)).to.equal(date);
+    });
+
     it(`should parse date using ${format} format`, () => {
       datePicker.$connector.updateI18n('en-US', { dateFormats: [format] });
 
-      const { day, month, year } = datePicker.i18n.parseDate(date) as DatePickerDate;
-      expect(day).to.be.equal(DD);
-      expect(month).to.be.equal(MONTH);
-      expect(year).to.be.equal(YYYY);
+      expect(datePicker.i18n.parseDate(date)).to.eql(DATE_OBJ);
     });
   });
 });
