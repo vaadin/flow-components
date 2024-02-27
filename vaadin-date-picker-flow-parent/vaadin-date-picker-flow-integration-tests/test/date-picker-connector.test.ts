@@ -16,29 +16,40 @@ describe('date-picker connector', () => {
   });
 
   // Use current year to not hardcode it
-  const YEAR = new Date().getFullYear();
+  const YYYY = new Date().getFullYear();
+  const YY = YYYY - 2000;
+
+  // Get 0 based month to not hardcode it
+  const MONTH = new Date().getMonth();
+
+  const M = MONTH + 1;
+  const MM = `${M}`.length == 1 ? `0${M}` : `${M}`;
+
+  const DD = 15;
 
   [
     // Day, month, year
-    ['dd.MM.yyyy', `31.01.${YEAR}`],
-    ['ddMMyyyy', `3101${YEAR}`],
-    ['yyyy-MM-dd', `${YEAR}-01-31`],
-    ['MM/dd/yyyy', `01/31/${YEAR}`],
-    ['ddMMyy', `3101${YEAR - 2000}`],
+    ['dd.MM.yyyy', `${DD}.${MM}.${YYYY}`],
+    ['ddMMyyyy', `${DD}${MM}${YYYY}`],
+    ['yyyy-MM-dd', `${YYYY}-${MM}-${DD}`],
+    ['MM/dd/yyyy', `${MM}/${DD}/${YYYY}`],
+    ['ddMMyy', `${DD}${MM}${YY}`],
     // Day and month only
-    ['dd.MM', '31.01'],
-    ['ddMM', '3101'],
-    ['dd-MM', '31-01'],
-    ['MM/dd', '01/31'],
-    ['M/dd', '1/31'],
+    ['dd.MM', `${DD}.${MM}`],
+    ['ddMM', `${DD}${MM}`],
+    ['dd-MM', `${DD}-${MM}`],
+    ['MM/dd', `${MM}/${DD}`],
+    ['M/dd', `${M}/${DD}`],
+    // Day only
+    ['dd', `${DD}`]
   ].forEach(([format, date]) => {
     it(`should parse date using ${format} format`, () => {
       datePicker.$connector.updateI18n('en-US', { dateFormats: [format] });
 
       const { day, month, year } = datePicker.i18n.parseDate(date) as DatePickerDate;
-      expect(day).to.be.equal(31);
-      expect(month).to.be.equal(0);
-      expect(year).to.be.equal(YEAR);
+      expect(day).to.be.equal(DD);
+      expect(month).to.be.equal(MONTH);
+      expect(year).to.be.equal(YYYY);
     });
   });
 });

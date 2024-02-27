@@ -71,6 +71,10 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             if (!format.includes('y') && !format.includes('Y')) {
               return true;
             }
+            // Format with days only is also considered short.
+            if (!format.includes('m') && !format.includes('M')) {
+              return true;
+            }
             if (format.includes('y')) {
               return !format.includes('yyy');
             }
