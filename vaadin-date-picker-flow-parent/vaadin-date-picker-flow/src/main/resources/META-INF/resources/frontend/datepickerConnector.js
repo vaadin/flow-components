@@ -66,13 +66,8 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
           }
 
           function isShortYearFormat(format) {
-            if (format.includes('y')) {
-              return !format.includes('yyy');
-            }
-            if (format.includes('Y')) {
-              return !format.includes('YYY');
-            }
-            return false;
+            // Format is long if it includes a four-digit year.
+            return !format.includes('yyyy') && !format.includes('YYYY');
           }
 
           function correctFullYear(date) {
