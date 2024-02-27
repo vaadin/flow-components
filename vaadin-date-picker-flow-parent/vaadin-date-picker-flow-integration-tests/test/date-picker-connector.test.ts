@@ -1,5 +1,5 @@
 import { expect, fixtureSync } from '@open-wc/testing';
-import { init, datepickerConnector, type FlowDatePicker } from './shared.js';
+import { init, extractDateParts, datepickerConnector, type FlowDatePicker } from './shared.js';
 
 describe('date-picker connector', () => {
   let datePicker: FlowDatePicker;
@@ -16,19 +16,16 @@ describe('date-picker connector', () => {
   });
 
   const DATE = new Date();
+  const DATE_OBJ = extractDateParts(DATE);
 
-  const D = DATE.getDate();
+  const D = DATE_OBJ.day;
   const DD = `${D}`.length == 1 ? `0${D}` : `${D}`;
 
-  const MONTH = DATE.getMonth();
-
-  const M = MONTH + 1;
+  const M = DATE_OBJ.month + 1;
   const MM = `${M}`.length == 1 ? `0${M}` : `${M}`;
 
-  const YYYY = DATE.getFullYear();
+  const YYYY = DATE_OBJ.year;
   const YY = `${YYYY}`.slice(2);
-
-  const DATE_OBJ = { day: D, month: MONTH, year: YYYY };
 
   [
     // Day, month, year
