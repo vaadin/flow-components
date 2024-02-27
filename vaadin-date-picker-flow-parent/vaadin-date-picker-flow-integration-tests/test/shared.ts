@@ -1,20 +1,16 @@
 import './env-setup.js';
 import '@vaadin/date-picker/vaadin-date-picker.js';
 import '../frontend/generated/jar-resources/datepickerConnector.js';
-import type { DatePicker, DatePickerDate } from '@vaadin/date-picker';
+import type { DatePicker } from '@vaadin/date-picker';
 import type {} from '@web/test-runner-mocha';
 
-export type { DatePickerDate } from '@vaadin/date-picker';
-
-export type DatePickerI18n = {
+export type FlowDatePickerI18n = {
   dateFormats: string[];
-  firstDayOfWeek?: number;
-  referenceDate?: DatePickerDate;
-}
+};
 
 export type DatePickerConnector = {
   initLazy: (datePicker: DatePicker) => void;
-  updateI18n: (locale: string, i18n: DatePickerI18n) => void;
+  updateI18n: (locale: string, i18n: FlowDatePickerI18n) => void;
 };
 
 export type FlowDatePicker = DatePicker & {

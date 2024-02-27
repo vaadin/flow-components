@@ -1,5 +1,5 @@
 import { expect, fixtureSync } from '@open-wc/testing';
-import { init, datepickerConnector, type DatePickerDate, type FlowDatePicker } from './shared.js';
+import { init, datepickerConnector, type FlowDatePicker } from './shared.js';
 
 describe('date-picker connector', () => {
   let datePicker: FlowDatePicker;
