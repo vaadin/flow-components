@@ -16,7 +16,7 @@ describe('date-picker connector', () => {
     expect(datePicker.$connector).to.equal(connector);
   });
 
-  const DATE = new Date(2024, 0, 1);
+  const DATE = new Date(Date.UTC(2023, 11, 1));
   const DATE_OBJ = extractDateParts(DATE);
 
   [
@@ -36,19 +36,30 @@ describe('date-picker connector', () => {
     'dd'
   ].forEach((format) => {
     describe(`${format} format`, () => {
-      let date;
+      let dateStr;
+      let dateObj = { ...DATE_OBJ };
 
       beforeEach(() => {
-        date = dateFnsFormat(DATE, format);
+        dateStr = dateFnsFormat(DATE, format);
         datePicker.$connector.updateI18n('en-US', { dateFormats: [format] });
+
+        // No year specified assumes current year.
+        if (!format.includes('y') && !format.includes('Y')) {
+          dateObj.year = new Date().getFullYear();
+        }
+
+        // Days only format assumes current month.
+        if (format === 'dd') {
+          dateObj.month = new Date().getMonth();
+        }
       });
 
       it(`should format date using ${format} format`, () => {
-        expect(datePicker.i18n.formatDate(DATE_OBJ)).to.equal(date);
+        expect(datePicker.i18n.formatDate(dateObj)).to.equal(dateStr);
       });
 
       it(`should parse date using ${format} format`, () => {
-        expect(datePicker.i18n.parseDate(date)).to.eql(DATE_OBJ);
+        expect(datePicker.i18n.parseDate(dateStr)).to.eql(dateObj);
       });
     });
   });
