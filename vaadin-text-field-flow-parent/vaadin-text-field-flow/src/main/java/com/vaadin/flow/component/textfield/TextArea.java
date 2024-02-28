@@ -221,9 +221,7 @@ public class TextArea extends TextFieldBase<TextArea, String>
     }
 
     /**
-     * Scrolls the textarea to the bottom. Requires the textarea to be of fixed
-     * height, so it can have a scrollbar.
-     *
+     * Scrolls the textarea to the end if it has a vertical scrollbar.
      */
     public void scrollToEnd() {
         getElement().getNode()
@@ -232,8 +230,7 @@ public class TextArea extends TextFieldBase<TextArea, String>
     }
 
     /**
-     * Scrolls the textarea to the top. Requires the textarea to be of fixed
-     * height, so it can have a scrollbar.
+     * Scrolls the textarea to the start if it has a vertical scrollbar.
      */
     public void scrollToStart() {
         getElement().getNode()
