@@ -93,6 +93,21 @@ public class MenuBarTest {
                         .isAssignableFrom(new MenuBar().getClass()));
     }
 
+    @Test
+    public void isReverseCollapseOrder() {
+        Assert.assertFalse(menuBar.isReverseCollapseOrder());
+        Assert.assertFalse(
+                menuBar.getElement().getProperty("reverseCollapse", false));
+    }
+
+    @Test
+    public void setReverseCollapseOrder_isReverseCollapseOrder() {
+        menuBar.setReverseCollapseOrder(true);
+        Assert.assertTrue(menuBar.isReverseCollapseOrder());
+        Assert.assertTrue(
+                menuBar.getElement().getProperty("reverseCollapse", false));
+    }
+
     private void assertChildrenAndItems(MenuItem... expected) {
         Object[] menuItems = menuBar.getChildren().toArray();
         Assert.assertArrayEquals(expected, menuItems);

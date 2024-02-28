@@ -1,6 +1,7 @@
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable max-params */
 import { html, render } from 'lit';
+import { live } from 'lit/directives/live.js';
 
 type RenderRoot = HTMLElement & { __litRenderer?: Renderer; _$litPart$?: any };
 
@@ -39,7 +40,7 @@ _window.Vaadin.setLitRenderer = (
   const renderFunction = Function(`
     "use strict";
 
-    const [render, html, returnChannel] = arguments;
+    const [render, html, live, returnChannel] = arguments;
 
     return (root, model, itemKey) => {
       const { item, index } = model;
@@ -57,7 +58,7 @@ _window.Vaadin.setLitRenderer = (
 
       render(html\`${templateExpression}\`, root)
     }
-  `)(render, html, returnChannel);
+  `)(render, html, live, returnChannel);
 
   const renderer: Renderer = (root, _, model) => {
     const { item } = model;

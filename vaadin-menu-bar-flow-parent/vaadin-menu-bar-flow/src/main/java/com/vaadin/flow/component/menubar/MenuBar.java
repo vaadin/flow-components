@@ -54,13 +54,13 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-menu-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha12")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha15")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "24.4.0-alpha12")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.4.0-alpha12")
+@NpmPackage(value = "@vaadin/menu-bar", version = "24.4.0-alpha15")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.4.0-alpha15")
 public class MenuBar extends Component
         implements HasEnabled, HasMenuItems, HasOverlayClassName, HasSize,
         HasStyle, HasThemeVariant<MenuBarVariant> {
@@ -362,6 +362,30 @@ public class MenuBar extends Component
      */
     public boolean isOpenOnHover() {
         return getElement().getProperty("openOnHover", false);
+    }
+
+    /**
+     * Sets reverse collapse order for the menu bar.
+     *
+     * @param reverseCollapseOrder
+     *            If {@code true}, the buttons will be collapsed into the
+     *            overflow menu starting from the "start" end of the bar instead
+     *            of the "end".
+     */
+    public void setReverseCollapseOrder(boolean reverseCollapseOrder) {
+        getElement().setProperty("reverseCollapse", reverseCollapseOrder);
+    }
+
+    /**
+     * Gets whether the menu bar uses reverse collapse order.
+     *
+     * @return {@code true} if the buttons will be collapsed into the overflow
+     *         menu starting from the "start" end of the bar instead of the
+     *         "end".
+     *
+     */
+    public boolean isReverseCollapseOrder() {
+        return getElement().getProperty("reverseCollapse", false);
     }
 
     /**
