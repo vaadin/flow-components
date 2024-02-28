@@ -191,7 +191,7 @@ public class TextAreaPageIT extends AbstractComponentIT {
     @Test
     public void scrollToEnd() {
         TextAreaElement textArea = $(TextAreaElement.class)
-                .id("text-area-fixed-height");
+                .id("text-area-with-max-height");
         textArea.setValue("LONGTEXT".repeat(30));
 
         TestBenchElement inputContainer = textArea.$("vaadin-input-container")
@@ -209,7 +209,7 @@ public class TextAreaPageIT extends AbstractComponentIT {
     @Test
     public void scrollToStart() {
         TextAreaElement textArea = $(TextAreaElement.class)
-                .id("text-area-fixed-height");
+                .id("text-area-with-max-height");
         textArea.setValue("LONGTEXT".repeat(30));
 
         TestBenchElement inputContainer = textArea.$("vaadin-input-container")

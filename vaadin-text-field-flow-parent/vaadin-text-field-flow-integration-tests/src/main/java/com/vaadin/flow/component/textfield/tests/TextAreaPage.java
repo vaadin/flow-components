@@ -51,28 +51,6 @@ public class TextAreaPage extends Div {
         addMinHeightFeature();
         addHelperText();
         addHelperComponent();
-        addFixedHeightField();
-    }
-
-    private void addFixedHeightField() {
-        TextArea textArea = new TextArea();
-        textArea.setLabel("Fixed height");
-        textArea.setHeight("200px");
-        textArea.setWidth("200px");
-        textArea.setId("text-area-fixed-height");
-
-        NativeButton scrollToStart = new NativeButton("Scroll to start",
-                event -> {
-                    textArea.scrollToStart();
-                });
-        scrollToStart.setId("scroll-to-start");
-
-        NativeButton scrollToEnd = new NativeButton("Scroll to end", event -> {
-            textArea.scrollToEnd();
-        });
-        scrollToEnd.setId("scroll-to-end");
-
-        add(textArea, scrollToStart, scrollToEnd);
     }
 
     private void addFocusShortcut() {
@@ -117,7 +95,19 @@ public class TextAreaPage extends Div {
         textArea.getStyle().set("maxHeight", "125px");
         textArea.getStyle().set("padding", "0");
         textArea.setId("text-area-with-max-height");
-        add(textArea, message);
+
+        NativeButton scrollToStart = new NativeButton("Scroll to start",
+                event -> {
+                    textArea.scrollToStart();
+                });
+        scrollToStart.setId("scroll-to-start");
+
+        NativeButton scrollToEnd = new NativeButton("Scroll to end", event -> {
+            textArea.scrollToEnd();
+        });
+        scrollToEnd.setId("scroll-to-end");
+
+        add(textArea, scrollToStart, scrollToEnd, message);
     }
 
     private void addMinHeightFeature() {
