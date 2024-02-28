@@ -221,6 +221,20 @@ public class TextArea extends TextFieldBase<TextArea, String>
     }
 
     /**
+     * Scrolls the textarea to the start if it has a vertical scrollbar.
+     */
+    public void scrollToStart() {
+        getElement().callJsFunction("scrollToStart");
+    }
+
+    /**
+     * Scrolls the textarea to the end if it has a vertical scrollbar.
+     */
+    public void scrollToEnd() {
+        getElement().callJsFunction("scrollToEnd");
+    }
+
+    /**
      * Minimum number of characters (in Unicode code points) that the user can
      * enter.
      *

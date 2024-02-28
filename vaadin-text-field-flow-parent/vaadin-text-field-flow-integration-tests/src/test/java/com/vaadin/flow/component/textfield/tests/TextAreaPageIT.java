@@ -187,4 +187,37 @@ public class TextAreaPageIT extends AbstractComponentIT {
         Assert.assertNull(textAreaElement.getHelperComponent());
     }
 
+    @Test
+    public void scrollToEnd() {
+        TextAreaElement textArea = $(TextAreaElement.class)
+                .id("text-area-with-max-height");
+        textArea.setValue("LONGTEXT".repeat(30));
+
+        TestBenchElement inputContainer = textArea.$("vaadin-input-container")
+                .first();
+        inputContainer.setProperty("scrollTop", 0);
+
+        $("button").id("scroll-to-end").click();
+
+        int scrollTop = inputContainer.getPropertyInteger("scrollTop");
+        int scrollHeight = inputContainer.getPropertyInteger("scrollHeight");
+        int clientHeight = inputContainer.getPropertyInteger("clientHeight");
+        Assert.assertEquals(scrollHeight - clientHeight, scrollTop);
+    }
+
+    @Test
+    public void scrollToStart() {
+        TextAreaElement textArea = $(TextAreaElement.class)
+                .id("text-area-with-max-height");
+        textArea.setValue("LONGTEXT".repeat(30));
+
+        TestBenchElement inputContainer = textArea.$("vaadin-input-container")
+                .first();
+        inputContainer.setProperty("scrollTop", 100);
+
+        $("button").id("scroll-to-start").click();
+
+        int scrollTop = inputContainer.getPropertyInteger("scrollTop");
+        Assert.assertEquals(0, scrollTop);
+    }
 }
