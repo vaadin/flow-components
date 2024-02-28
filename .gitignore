@@ -31,3 +31,4 @@ error-screenshots
 **/frontend/index.html
 **/frontend/*.tsx
 dev-bundle
+prod.bundle
