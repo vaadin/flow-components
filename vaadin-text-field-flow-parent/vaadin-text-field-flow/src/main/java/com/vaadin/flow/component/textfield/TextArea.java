@@ -221,21 +221,17 @@ public class TextArea extends TextFieldBase<TextArea, String>
     }
 
     /**
-     * Scrolls the textarea to the end if it has a vertical scrollbar.
-     */
-    public void scrollToEnd() {
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                        ctx -> getElement().executeJs("this.scrollToEnd()")));
-    }
-
-    /**
      * Scrolls the textarea to the start if it has a vertical scrollbar.
      */
     public void scrollToStart() {
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                        ctx -> getElement().executeJs("this.scrollToStart()")));
+        getElement().callJsFunction("scrollToStart");
+    }
+
+    /**
+     * Scrolls the textarea to the end if it has a vertical scrollbar.
+     */
+    public void scrollToEnd() {
+        getElement().callJsFunction("scrollToEnd");
     }
 
     /**
