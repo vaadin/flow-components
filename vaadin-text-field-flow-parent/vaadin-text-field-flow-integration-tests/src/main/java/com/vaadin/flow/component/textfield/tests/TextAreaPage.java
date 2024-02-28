@@ -51,26 +51,28 @@ public class TextAreaPage extends Div {
         addMinHeightFeature();
         addHelperText();
         addHelperComponent();
-        addFixedHeightComponent();
+        addFixedHeightField();
     }
 
-    private void addFixedHeightComponent() {
-
-        NativeButton scrollButtonToStart = new NativeButton("Scroll to top");
-        scrollButtonToStart.setId("scroll-top-component-button");
-
-        NativeButton scrollButtonToEnd = new NativeButton("Scroll to bottom");
-        scrollButtonToEnd.setId("scroll-bottom-component-button");
-
+    private void addFixedHeightField() {
         TextArea textArea = new TextArea();
         textArea.setLabel("Fixed height");
         textArea.setHeight("200px");
         textArea.setWidth("200px");
-        textArea.setId("fixed-height");
-        scrollButtonToStart.addClickListener(event -> textArea.scrollToStart());
-        scrollButtonToEnd.addClickListener(event -> textArea.scrollToEnd());
+        textArea.setId("text-area-fixed-height");
 
-        add(textArea, scrollButtonToStart, scrollButtonToEnd);
+        NativeButton scrollToStart = new NativeButton("Scroll to start",
+                event -> {
+                    textArea.scrollToStart();
+                });
+        scrollToStart.setId("scroll-to-start");
+
+        NativeButton scrollToEnd = new NativeButton("Scroll to end", event -> {
+            textArea.scrollToEnd();
+        });
+        scrollToEnd.setId("scroll-to-end");
+
+        add(textArea, scrollToStart, scrollToEnd);
     }
 
     private void addFocusShortcut() {

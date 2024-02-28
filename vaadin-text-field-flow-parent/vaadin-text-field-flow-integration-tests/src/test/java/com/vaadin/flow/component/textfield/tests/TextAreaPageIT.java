@@ -190,39 +190,35 @@ public class TextAreaPageIT extends AbstractComponentIT {
 
     @Test
     public void scrollToEnd() {
-        TextAreaElement shortcutField = $(TextAreaElement.class)
-                .id("fixed-height");
-        shortcutField.setValue("LONGTEXT".repeat(30));
+        TextAreaElement textArea = $(TextAreaElement.class)
+                .id("text-area-fixed-height");
+        textArea.setValue("LONGTEXT".repeat(30));
 
-        $(TestBenchElement.class).id("scroll-bottom-component-button").click();
+        TestBenchElement inputContainer = textArea.$("vaadin-input-container")
+                .first();
+        inputContainer.setProperty("scrollTop", 0);
 
-        TestBenchElement inputContainer = shortcutField
-                .$("vaadin-input-container").first();
-        int scrollTop = Integer
-                .parseInt(inputContainer.getProperty("scrollTop").toString());
-        int scrollHeight = Integer.parseInt(
-                inputContainer.getProperty("scrollHeight").toString());
-        int height = Integer.parseInt(
-                inputContainer.getCssValue("height").replace("px", ""));
+        $("button").id("scroll-to-end").click();
 
-        Assert.assertEquals(scrollTop, scrollHeight - height);
+        int scrollTop = inputContainer.getPropertyInteger("scrollTop");
+        int scrollHeight = inputContainer.getPropertyInteger("scrollHeight");
+        int clientHeight = inputContainer.getPropertyInteger("clientHeight");
+        Assert.assertEquals(scrollHeight - clientHeight, scrollTop);
     }
 
     @Test
     public void scrollToStart() {
-        TextAreaElement shortcutField = $(TextAreaElement.class)
-                .id("fixed-height");
-        shortcutField.setValue("LONGTEXT".repeat(30));
+        TextAreaElement textArea = $(TextAreaElement.class)
+                .id("text-area-fixed-height");
+        textArea.setValue("LONGTEXT".repeat(30));
 
-        TestBenchElement inputContainer = shortcutField
-                .$("vaadin-input-container").first();
+        TestBenchElement inputContainer = textArea.$("vaadin-input-container")
+                .first();
         inputContainer.setProperty("scrollTop", 100);
 
-        $(TestBenchElement.class).id("scroll-top-component-button").click();
+        $("button").id("scroll-to-start").click();
 
-        int scrollTop = Integer
-                .parseInt(inputContainer.getProperty("scrollTop").toString());
-
+        int scrollTop = inputContainer.getPropertyInteger("scrollTop");
         Assert.assertEquals(0, scrollTop);
     }
 }
