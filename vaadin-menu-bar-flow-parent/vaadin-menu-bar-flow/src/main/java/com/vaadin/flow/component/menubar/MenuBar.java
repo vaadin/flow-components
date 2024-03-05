@@ -53,14 +53,14 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-menu-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.4.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.4.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "23.4.0-alpha3")
-@NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "23.4.0-alpha3")
-@NpmPackage(value = "@vaadin/tooltip", version = "23.4.0-alpha3")
+@NpmPackage(value = "@vaadin/menu-bar", version = "23.4.0-beta1")
+@NpmPackage(value = "@vaadin/vaadin-menu-bar", version = "23.4.0-beta1")
+@NpmPackage(value = "@vaadin/tooltip", version = "23.4.0-beta1")
 public class MenuBar extends Component
         implements HasMenuItems, HasSize, HasStyle, HasTheme, HasEnabled {
 
@@ -385,6 +385,30 @@ public class MenuBar extends Component
         getThemeNames().removeAll(
                 Stream.of(variants).map(MenuBarVariant::getVariantName)
                         .collect(Collectors.toList()));
+    }
+
+    /**
+     * Sets reverse collapse order for the menu bar.
+     *
+     * @param reverseCollapseOrder
+     *            If {@code true}, the buttons will be collapsed into the
+     *            overflow menu starting from the "start" end of the bar instead
+     *            of the "end".
+     */
+    public void setReverseCollapseOrder(boolean reverseCollapseOrder) {
+        getElement().setProperty("reverseCollapse", reverseCollapseOrder);
+    }
+
+    /**
+     * Gets whether the menu bar uses reverse collapse order.
+     *
+     * @return {@code true} if the buttons will be collapsed into the overflow
+     *         menu starting from the "start" end of the bar instead of the
+     *         "end".
+     *
+     */
+    public boolean isReverseCollapseOrder() {
+        return getElement().getProperty("reverseCollapse", false);
     }
 
     /**

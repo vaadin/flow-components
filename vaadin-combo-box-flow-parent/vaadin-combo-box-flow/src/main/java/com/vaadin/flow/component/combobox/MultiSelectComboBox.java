@@ -71,9 +71,9 @@ import java.util.Set;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.4.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.4.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "23.4.0-alpha3")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "23.4.0-beta1")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
@@ -504,6 +504,31 @@ public class MultiSelectComboBox<TItem>
                 autoExpandMode.getExpandHorizontally());
         getElement().setProperty("autoExpandVertically",
                 autoExpandMode.getExpandVertically());
+    }
+
+    /**
+     * Gets whether the filter is kept after selecting items. {@code false} by
+     * default.
+     *
+     * @since 23.4
+     * @return {@code true} if enabled, {@code false} otherwise
+     */
+    public boolean isKeepFilter() {
+        return getElement().getProperty("keepFilter", false);
+    }
+
+    /**
+     * Enables or disables keeping the filter after selecting items. By default,
+     * the filter is cleared after selecting an item and the overlay shows the
+     * unfiltered list of items again. Enabling this option will keep the
+     * filter, which allows to select multiple filtered items in succession.
+     *
+     * @since 23.4
+     * @param keepFilter
+     *            whether to keep the filter after selecting an item
+     */
+    public void setKeepFilter(boolean keepFilter) {
+        getElement().setProperty("keepFilter", keepFilter);
     }
 
     /**

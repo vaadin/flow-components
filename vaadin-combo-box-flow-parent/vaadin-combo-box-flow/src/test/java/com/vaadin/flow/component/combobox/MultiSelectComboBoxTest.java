@@ -312,4 +312,19 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         Assert.assertTrue(comboBox.getElement()
                 .getProperty("autoExpandVertically", true));
     }
+
+    @Test
+    public void setKeepFilter() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+
+        Assert.assertFalse(comboBox.isKeepFilter());
+        Assert.assertFalse(
+                comboBox.getElement().getProperty("keepFilter", false));
+
+        comboBox.setKeepFilter(true);
+
+        Assert.assertTrue(comboBox.isKeepFilter());
+        Assert.assertTrue(
+                comboBox.getElement().getProperty("keepFilter", true));
+    }
 }
