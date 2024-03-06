@@ -7,6 +7,7 @@ import type {} from '@web/test-runner-mocha';
 
 export type FlowDatePickerI18n = {
   dateFormats: string[];
+  referenceDate?: string;
 };
 
 export type DatePickerConnector = {
