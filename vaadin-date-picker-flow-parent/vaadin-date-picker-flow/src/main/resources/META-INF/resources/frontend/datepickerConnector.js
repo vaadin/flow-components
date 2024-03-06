@@ -132,7 +132,7 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             const refDate = isFormatWithYear(format) ? referenceDate : new Date();
             const date = dateFnsParse(dateString, format, refDate);
             if (dateFnsIsValid(date)) {
-              if (isShortYearFormat(format)) {
+              if (isFormatWithYear(format) && isShortYearFormat(format)) {
                 correctFullYear(date);
               }
               return {
