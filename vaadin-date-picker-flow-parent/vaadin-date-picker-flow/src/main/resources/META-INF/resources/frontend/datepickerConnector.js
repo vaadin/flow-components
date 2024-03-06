@@ -74,6 +74,18 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             return !format.includes('yyyy') && !format.includes('YYYY');
           }
 
+          function getExtendedFormats(formats) {
+            return formats.reduce((acc, format) => {
+              // We first try to match the date with the shorter version,
+              // as short years are supported with the long date format.
+              if (!isShortYearFormat(format)) {
+                acc.push(getShortYearFormat(format));
+              }
+              acc.push(format);
+              return acc;
+            }, []);
+          }
+
           function correctFullYear(date) {
             // The last parsed date check handles the case where a four-digit year is parsed, then formatted
             // as a two-digit year, and then parsed again. In this case we want to keep the century of the
@@ -133,17 +145,7 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
 
           function parseDate(dateString) {
             const referenceDate = _getReferenceDate();
-            for (let format of formats) {
-              const isShortFormat = isShortYearFormat(format);
-              // We first try to match the date with the shorter version.
-              if (!isShortFormat) {
-                const parsedDate = doParseDate(dateString, getShortYearFormat(format), referenceDate);
-                if (parsedDate) {
-                  datepicker.$connector._lastParseStatus = 'successful';
-                  datepicker.$connector._lastParsedDate = parsedDate;
-                  return parsedDate;
-                }
-              }
+            for (let format of getExtendedFormats(formats)) {
               const parsedDate = doParseDate(dateString, format, referenceDate);
               if (parsedDate) {
                 datepicker.$connector._lastParseStatus = 'successful';
