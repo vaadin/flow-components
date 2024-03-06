@@ -1,5 +1,6 @@
 import { expect, fixtureSync } from '@open-wc/testing';
 import dateFnsFormat from 'date-fns/format';
+import { DatePickerDate } from '@vaadin/date-picker';
 import { init, extractDateParts, datepickerConnector, type FlowDatePicker } from './shared.js';
 
 describe('date-picker connector', () => {
@@ -60,6 +61,27 @@ describe('date-picker connector', () => {
 
       it(`should parse date using ${format} format`, () => {
         expect(datePicker.i18n.parseDate(dateStr)).to.eql(dateObj);
+      });
+    });
+  });
+
+  describe('reference date', () => {
+    const DATE = '10-01-14';
+
+    [
+      { referenceDate: '1940-01-01', year: 1914 },
+      { referenceDate: '1990-01-01', year: 2014 }
+    ].forEach(({ referenceDate, year }) => {
+      it(`should use ${referenceDate} reference date with short year format`, () => {
+        datePicker.$connector.updateI18n('en-US', { dateFormats: ['dd-MM-yy'], referenceDate });
+        const result = datePicker.i18n.parseDate(DATE) as DatePickerDate;
+        expect(result.year).to.equal(year);
+      });
+
+      it(`should not use ${referenceDate} reference date with format without years`, () => {
+        datePicker.$connector.updateI18n('en-US', { dateFormats: ['dd-MM'], referenceDate });
+        const result = datePicker.i18n.parseDate(DATE.slice(0, 5)) as DatePickerDate;
+        expect(result.year).to.equal(new Date().getFullYear());
       });
     });
   });
