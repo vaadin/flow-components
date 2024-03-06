@@ -65,8 +65,8 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             return undefined;
           }
 
-          function isFormatWithoutYears(format) {
-            return !format.includes('y') && !format.includes('Y');
+          function isFormatWithYear(format) {
+            return format.includes('y') || format.includes('Y');
           }
 
           function isShortYearFormat(format) {
@@ -78,7 +78,7 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             return formats.reduce((acc, format) => {
               // We first try to match the date with the shorter version,
               // as short years are supported with the long date format.
-              if (!isShortYearFormat(format)) {
+              if (isFormatWithYear(format) && !isShortYearFormat(format)) {
                 acc.push(getShortYearFormat(format));
               }
               acc.push(format);
@@ -129,7 +129,7 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
 
           function doParseDate(dateString, format, referenceDate) {
             // When format does not contain a year, then current year should be used.
-            const refDate = isFormatWithoutYears(format) ? new Date() : referenceDate;
+            const refDate = isFormatWithYear(format) ? referenceDate : new Date();
             const date = dateFnsParse(dateString, format, refDate);
             if (dateFnsIsValid(date)) {
               if (isShortYearFormat(format)) {
