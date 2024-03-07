@@ -53,11 +53,11 @@ import java.util.Objects;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.4.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.4.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar/src/vaadin-avatar.js")
-@NpmPackage(value = "@vaadin/avatar", version = "23.4.0-beta1")
-@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.4.0-beta1")
+@NpmPackage(value = "@vaadin/avatar", version = "23.4.0")
+@NpmPackage(value = "@vaadin/vaadin-avatar", version = "23.4.0")
 public class Avatar extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarVariant> {
 
