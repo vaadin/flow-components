@@ -4,7 +4,7 @@
     <parent>
         <artifactId>vaadin-map-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>23.4-SNAPSHOT</version>
+        <version>23.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-map-testbench</artifactId>
     <packaging>jar</packaging>
