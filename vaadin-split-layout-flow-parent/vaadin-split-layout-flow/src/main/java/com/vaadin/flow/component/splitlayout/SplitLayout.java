@@ -34,8 +34,8 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @SuppressWarnings("deprecation")
-@NpmPackage(value = "@vaadin/split-layout", version = "23.3.30")
-@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.3.30")
+@NpmPackage(value = "@vaadin/split-layout", version = "23.3.31")
+@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.3.31")
 public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         implements HasSize {
 
