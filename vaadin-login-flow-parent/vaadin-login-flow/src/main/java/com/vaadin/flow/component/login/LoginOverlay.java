@@ -242,6 +242,11 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
      * overlay custom form area. This area is displayed only if there's at least
      * one component added with {@link LoginOverlayContent#add(Component...)}.
      *
+     * Fields that are part of custom form area are not automatically submitted
+     * as part of the {@link LoginForm.LoginEvent}, and are not supported when
+     * setting {@code action} as their values will not be part of the login
+     * request.
+     *
      * @since 24.2
      * @return the custom form area object
      */
