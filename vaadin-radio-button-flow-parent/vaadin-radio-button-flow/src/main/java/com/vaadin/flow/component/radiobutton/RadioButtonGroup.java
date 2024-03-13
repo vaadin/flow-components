@@ -308,7 +308,12 @@ public class RadioButtonGroup<T>
     @Override
     protected boolean hasValidValue() {
         String selectedKey = getElement().getProperty("value");
-        return itemEnabledProvider.test(keyMapper.get(selectedKey));
+        T item = keyMapper.get(selectedKey);
+        // The item enabled provider should not be invoked for null values.
+        if (item == null) {
+            return true;
+        }
+        return itemEnabledProvider.test(item);
     }
 
     /**
