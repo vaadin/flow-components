@@ -375,8 +375,11 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
                   }
                 });
 
+                // Only reset direction for sorters that no longer apply.
                 sorters.forEach((sorter) => {
-                  sorter.direction = null;
+                  if (!directions.some(({ column }) => column === sorter.getAttribute('path'))) {
+                    sorter.direction = null;
+                  }
                 });
 
                 // Apply directions in correct order, depending on configured multi-sort priority.

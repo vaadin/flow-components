@@ -17,6 +17,7 @@ package com.vaadin.flow.component.grid.it;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
@@ -43,8 +44,14 @@ public class SortingPage extends Div {
         btRm.setId("btn-detach");
         NativeButton btattach = new NativeButton("attach", evt -> add(grid));
         btattach.setId("btn-attach");
-        add(btRm, btattach, grid);
 
+        AtomicInteger sortCount = new AtomicInteger(0);
+        Div count = new Div("Sort count: " + sortCount);
+        count.setId("sort-listener-count");
+        grid.addSortListener(event -> count
+                .setText("Sort count: " + sortCount.incrementAndGet()));
+
+        add(btRm, btattach, grid, count);
     }
 
     private void createInitiallyHiddenGrid() {
@@ -108,12 +115,19 @@ public class SortingPage extends Div {
                 });
         changeHeaderTextComponent.setId("change-header-text-component");
 
+        NativeButton changeTwoColumnHeaders = new NativeButton(
+                "Change two column headers", e -> {
+                    nameColumn.setHeader("Name (changed)");
+                    ageColumn.setHeader("Age (changed)");
+                });
+        changeTwoColumnHeaders.setId("change-two-column-headers");
+
         NativeButton clearButton = new NativeButton("Clear items",
                 e -> grid.setItems(new ArrayList<Person>()));
         clearButton.setId("clear-items");
 
         add(button, reOrder, changeHeaderText, changeHeaderTextComponent,
-                clearButton);
+                changeTwoColumnHeaders, clearButton);
 
         return grid;
     }
