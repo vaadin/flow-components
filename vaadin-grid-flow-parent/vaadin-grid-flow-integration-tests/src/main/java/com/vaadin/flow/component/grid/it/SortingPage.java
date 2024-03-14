@@ -98,6 +98,14 @@ public class SortingPage extends Div {
                 });
         button.setId(sortBtnId);
 
+        NativeButton sortByTwoColumns = new NativeButton("Sort by two columns",
+                e -> {
+                    List<GridSortOrder<Person>> sortByAgeThenName = new GridSortOrderBuilder<Person>()
+                            .thenAsc(ageColumn).thenDesc(nameColumn).build();
+                    grid.sort(sortByAgeThenName);
+                });
+        sortByTwoColumns.setId("sort-by-two-columns");
+
         NativeButton reOrder = new NativeButton("Re-order", e -> {
             grid.setColumnOrder(ageColumn, nameColumn);
         });
@@ -126,8 +134,8 @@ public class SortingPage extends Div {
                 e -> grid.setItems(new ArrayList<Person>()));
         clearButton.setId("clear-items");
 
-        add(button, reOrder, changeHeaderText, changeHeaderTextComponent,
-                changeTwoColumnHeaders, clearButton);
+        add(button, sortByTwoColumns, reOrder, changeHeaderText,
+                changeHeaderTextComponent, changeTwoColumnHeaders, clearButton);
 
         return grid;
     }

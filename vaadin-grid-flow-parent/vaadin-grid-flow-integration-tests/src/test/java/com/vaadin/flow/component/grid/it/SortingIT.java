@@ -105,12 +105,36 @@ public class SortingIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setInitialSortOrder_updateTwoColumnHeaders_sortCountDoesNotGrow() {
+    public void setInitialSortOrder_sortByTwoColumns_sortCountIncreases() {
+        findElement(By.id("sort-by-age")).click();
+        WebElement count = findElement(By.id("sort-listener-count"));
+        Assert.assertEquals(count.getText(), "Sort count: 1");
+        findElement(By.id("sort-by-two-columns")).click();
+        Assert.assertEquals(count.getText(), "Sort count: 2");
+    }
+
+    @Test
+    public void setInitialSortOrder_updateTwoColumnHeaders_sortCountDoesNotIncrease() {
         findElement(By.id("sort-by-age")).click();
         WebElement count = findElement(By.id("sort-listener-count"));
         Assert.assertEquals(count.getText(), "Sort count: 1");
         findElement(By.id("change-two-column-headers")).click();
         Assert.assertEquals(count.getText(), "Sort count: 1");
+    }
+
+    @Test
+    public void setInitialSortOrder_sortByTwoColumns_sortIndicatorsUpdated() {
+        findElement(By.id("sort-by-age")).click();
+        findElement(By.id("sort-by-two-columns")).click();
+        assertTwoSorters("Name", "Age");
+    }
+
+    @Test
+    public void sortByTwoColumns_updateTwoColumnHeaders_sortIndicatorsRemain() {
+        findElement(By.id("sort-by-two-columns")).click();
+        assertTwoSorters("Name", "Age");
+        findElement(By.id("change-two-column-headers")).click();
+        assertTwoSorters("Name (changed)", "Age (changed)");
     }
 
     @Test
@@ -192,4 +216,19 @@ public class SortingIT extends AbstractComponentIT {
         Assert.assertTrue(sorter.getText().startsWith(expectedColumnHeader));
     }
 
+    private void assertTwoSorters(String firstHeader, String secondHeader) {
+        List<TestBenchElement> sorters = grid.$("vaadin-grid-sorter")
+                .hasAttribute("direction").all();
+        Assert.assertEquals("Two columns should be sorted.", 2, sorters.size());
+
+        TestBenchElement sorter1 = sorters.get(0);
+        Assert.assertEquals("Expected descending sort order.", "desc",
+                sorter1.getAttribute("direction"));
+        Assert.assertTrue(sorter1.getText().startsWith(firstHeader));
+
+        TestBenchElement sorter2 = sorters.get(1);
+        Assert.assertEquals("Expected ascending sort order.", "asc",
+                sorter2.getAttribute("direction"));
+        Assert.assertTrue(sorter2.getText().startsWith(secondHeader));
+    }
 }
