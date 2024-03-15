@@ -120,6 +120,7 @@ It expects `TBLICENSE` and `TBHUB` variables when run in the CI server.
 Optionally it's possible to run just a bunch of modules e.g. `./scripts/build.sh grid combo-box`
 
 ## Using the component in a Flow application
+
 To use the component in an application using maven,
 add the following dependency to your `pom.xml`:
 ```
@@ -130,15 +131,12 @@ add the following dependency to your `pom.xml`:
 </dependency>
 ```
 
-## Flow documentation
-Documentation for flow can be found in [Flow documentation](https://github.com/vaadin/flow-and-components-documentation/blob/main/documentation/Overview.asciidoc).
-
 ## Contributing
-- Use the coding conventions from [Flow coding conventions](https://github.com/vaadin/flow/tree/main/eclipse)
-- [Submit a pull request](https://www.digitalocean.com/community/tutorials/how-to-create-a-pull-request-on-github) with detailed title and description
-- Wait for response from one of Vaadin Flow team members
+
+For submitting pull requests to this repo please check our [contributing guidelines](https://vaadin.com/docs/latest/contributing/pr).
 
 ### Update package version for `@NpmPackage` in all files
+
 There are scripts available for updating the `@NpmPackage` annotation to its latest patch version:
 
 - `./scripts/updateNpmVer.js`
