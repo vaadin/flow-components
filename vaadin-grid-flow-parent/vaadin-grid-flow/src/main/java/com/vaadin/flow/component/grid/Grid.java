@@ -53,7 +53,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.dnd.DragSource;
-import com.vaadin.flow.component.dnd.DropTarget;
+import com.vaadin.flow.component.dnd.internal.DndUtil;
 import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
@@ -4217,11 +4217,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see GridDropEvent#getDropLocation()
      */
     public void setDropMode(GridDropMode dropMode) {
-        // We need to add DnD mobile polyfill here by invoking
-        // DndUtil.addMobileDndPolyfillIfNeeded. But, since DndUtil is in a Flow
-        // internal package, DropTarget.create is called to invoke
-        // addMobileDndPolyfillIfNeeded indirectly.
-        DropTarget.create(this).setActive(false);
+        DndUtil.addMobileDndPolyfillIfNeeded(this);
         getElement().setProperty("dropMode",
                 dropMode == null ? null : dropMode.getClientName());
     }

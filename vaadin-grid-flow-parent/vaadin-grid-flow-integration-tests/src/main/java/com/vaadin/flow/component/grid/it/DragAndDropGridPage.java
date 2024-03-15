@@ -144,6 +144,16 @@ public class DragAndDropGridPage extends Div {
         });
         multiSelectButton.setId("multiselect");
         add(multiSelectButton);
+
+        NativeButton addNavigationClickListener = new NativeButton(
+                "Add navigation click listener", e -> {
+                    grid.addItemClickListener(event -> {
+                        grid.getUI().ifPresent(
+                                ui -> ui.navigate(GridEmptyPage.class));
+                    });
+                });
+        addNavigationClickListener.setId("add-navigation-click-listener");
+        add(addNavigationClickListener);
     }
 
 }

@@ -209,6 +209,13 @@ public class DragAndDropGridIT extends AbstractComponentIT {
         assertMessages("", "", "");
     }
 
+    @Test
+    public void addNavigationClickListener_navigate_noErrorsLogged() {
+        click("add-navigation-click-listener");
+        grid.getCell(0, 0).click();
+        checkLogsForErrors();
+    }
+
     private void assertMessages(String expectedStartMessage,
             String expectedEndMessage, String expectedDropMessage) {
         Assert.assertEquals(expectedStartMessage,
