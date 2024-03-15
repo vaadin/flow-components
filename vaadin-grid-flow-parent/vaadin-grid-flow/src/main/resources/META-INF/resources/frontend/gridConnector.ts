@@ -375,17 +375,9 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
                   }
                 });
 
-                const directionsStr = JSON.stringify(directions);
-                // 1) When calling `grid.sort(null)`, directions array is empty - reset all sorters.
-                // 2) When changing header components, this method can be called multiple times with
-                // the same directions. In this case, we should avoid re-setting sorters state.
-                if (directionsStr === '[]' || directionsStr !== JSON.stringify(this._previousDirections)) {
-                  sorters.forEach((sorter) => {
-                    sorter.direction = null;
-                  });
-                }
-
-                this._previousDirections = [...directions];
+                sorters.forEach((sorter) => {
+                  sorter.direction = null;
+                });
 
                 // Apply directions in correct order, depending on configured multi-sort priority.
                 // For the default "prepend" mode, directions need to be applied in reverse, in
