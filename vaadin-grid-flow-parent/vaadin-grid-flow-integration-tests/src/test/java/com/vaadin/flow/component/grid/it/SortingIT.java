@@ -105,6 +105,24 @@ public class SortingIT extends AbstractComponentIT {
     }
 
     @Test
+    public void setInitialSortOrder_sortByTwoColumns_sortCountIncreases() {
+        findElement(By.id("sort-by-age")).click();
+        WebElement count = findElement(By.id("sort-listener-count"));
+        Assert.assertEquals(count.getText(), "Sort count: 1");
+        findElement(By.id("sort-by-two-columns")).click();
+        Assert.assertEquals(count.getText(), "Sort count: 2");
+    }
+
+    @Test
+    public void setInitialSortOrder_updateTwoColumnHeaders_sortCountDoesNotIncrease() {
+        findElement(By.id("sort-by-age")).click();
+        WebElement count = findElement(By.id("sort-listener-count"));
+        Assert.assertEquals(count.getText(), "Sort count: 1");
+        findElement(By.id("change-two-column-headers")).click();
+        Assert.assertEquals(count.getText(), "Sort count: 1");
+    }
+
+    @Test
     public void emptyGrid_sort_noClientErrors() {
         findElement(By.id("clear-items")).click();
         grid.findElements(By.tagName("vaadin-grid-sorter")).get(0).click();
