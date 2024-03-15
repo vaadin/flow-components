@@ -64,6 +64,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.grid.editor.EditorImpl;
 import com.vaadin.flow.component.grid.editor.EditorRenderer;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
@@ -1440,6 +1441,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private Registration dataProviderChangeRegistration;
 
     private SerializableFunction<T, String> tooltipGenerator = item -> null;
+
+    private PendingJavaScriptResult pendingSorterUpdate;
 
     /**
      * Creates a new instance, with page size of 50.
@@ -3535,6 +3538,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private void updateClientSideSorterIndicators(
             List<GridSortOrder<T>> order) {
+        if (pendingSorterUpdate != null
+                && !pendingSorterUpdate.isSentToBrowser()) {
+            pendingSorterUpdate.cancelExecution();
+        }
+
         JsonArray directions = Json.createArray();
 
         for (int i = 0; i < order.size(); i++) {
@@ -3561,7 +3569,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         if (getElement().getNode().isAttached()) {
-            getElement().executeJs(
+            this.pendingSorterUpdate = getElement().executeJs(
                     "if (this.$connector) { this.$connector.setSorterDirections($0) }",
                     directions);
         }
