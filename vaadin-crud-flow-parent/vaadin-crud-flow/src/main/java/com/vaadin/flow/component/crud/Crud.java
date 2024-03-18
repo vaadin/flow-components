@@ -131,6 +131,9 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
         setI18n(CrudI18n.createDefault(), false);
         registerHandlers();
 
+        // Prevent web component from creating default buttons
+        getElement().setProperty("_noDefaultButtons", true);
+
         newButton = new Button();
         newButton.getElement().setAttribute("theme", "primary");
         // Ensure the flag is set before the element is added to the slot
