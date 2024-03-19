@@ -50,6 +50,7 @@ public class ButtonView extends Div {
         createDisabledButton();
         createButtonWithDisableOnClick();
         createButtonWithDisableOnClickThatEnablesInSameRoundtrip();
+        createButtonWithDisableOnClickThatIsHidden();
         addVariantsFeature();
         createButtonsWithShortcuts();
 
@@ -260,6 +261,22 @@ public class ButtonView extends Div {
         button.setId("disable-on-click-re-enable-button");
         addCard("Button disabled on click and re-enabled in same roundtrip",
                 button);
+    }
+
+    private void createButtonWithDisableOnClickThatIsHidden() {
+        Button button = new Button("Disabled on click and hidden", event -> {
+            event.getSource().setVisible(false);
+        });
+        button.setDisableOnClick(true);
+        button.setId("disable-on-click-hidden-button");
+
+        Button enableButton = new Button("Enable hidden button", event -> {
+            button.setVisible(true);
+            button.setEnabled(true);
+        });
+        enableButton.setId("enable-hidden-button");
+
+        addCard("Button disabled on click and hidden", button, enableButton);
     }
 
     private void addCard(String title, Component... components) {

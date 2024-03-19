@@ -36,12 +36,8 @@ import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.internal.nodefeature.ElementAttributeMap;
-import com.vaadin.flow.internal.nodefeature.NodeFeature;
 import com.vaadin.flow.shared.Registration;
 
-import java.io.Serializable;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
