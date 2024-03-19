@@ -271,8 +271,8 @@ public class ButtonView extends Div {
         button.setId("disable-on-click-hidden-button");
 
         Button enableButton = new Button("Enable hidden button", event -> {
-            button.setVisible(true);
             button.setEnabled(true);
+            button.setVisible(true);
         });
         enableButton.setId("enable-hidden-button");
 
