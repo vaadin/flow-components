@@ -49,6 +49,7 @@ public class ButtonView extends Div {
         createButtonsWithTabIndex();
         createDisabledButton();
         createButtonWithDisableOnClick();
+        createButtonWithDisableOnClickThatEnablesInSameRoundtrip();
         addVariantsFeature();
         createButtonsWithShortcuts();
 
@@ -248,6 +249,17 @@ public class ButtonView extends Div {
         disableOnClickButton.setId("disable-on-click-button");
         temporarilyDisabledButton.setId("temporarily-disabled-button");
         enable.setId("enable-button");
+    }
+
+    private void createButtonWithDisableOnClickThatEnablesInSameRoundtrip() {
+        Button button = new Button(
+                "Disabled on click and re-enabled in same roundtrip", event -> {
+                    event.getSource().setEnabled(true);
+                });
+        button.setDisableOnClick(true);
+        button.setId("disable-on-click-re-enable-button");
+        addCard("Button disabled on click and re-enabled in same roundtrip",
+                button);
     }
 
     private void addCard(String title, Component... components) {

@@ -70,10 +70,10 @@ public class Button extends Component
     private PendingJavaScriptResult initDisableOnClick;
 
     // Register immediately as first listener
-    private Registration disableListener = addClickListener(
+    private final Registration disableListener = addClickListener(
             buttonClickEvent -> {
                 if (disableOnClick) {
-                    doDisableOnClick();
+                    setEnabled(false);
                 }
             });
 
@@ -374,6 +374,17 @@ public class Button extends Component
         }
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        Focusable.super.setEnabled(enabled);
+        // Force updating the disabled state on the client
+        // When using disable on click, the client side will immediately
+        // run JS to disable the button. If the button is then disabled and
+        // re-enabled during the same round trip, Flow will not detect any
+        // changes and the client side button would not be enabled again.
+        getElement().executeJs("this.disabled = $0", !enabled);
+    }
+
     private void updateIconSlot() {
         iconComponent.getElement().setAttribute("slot",
                 iconAfterText ? "suffix" : "prefix");
@@ -435,37 +446,6 @@ public class Button extends Component
             getThemeNames().add("icon");
         } else {
             getThemeNames().remove("icon");
-        }
-    }
-
-    /*
-     * https://github.com/vaadin/vaadin-button-flow/issues/115 because of the
-     * latency compensation, we need to hack the "diffstate" for the server side
-     * state, so that the disabled value can be reverted during the same
-     * roundtrip.
-     */
-    private void doDisableOnClick() {
-        ElementAttributeMap elementAttributeMap = getElement().getNode()
-                .getFeature(ElementAttributeMap.class);
-        elementAttributeMap.set("disabled", "true");
-        Map<NodeFeature, Serializable> changes = getElement().getNode()
-                .getChangeTracker(elementAttributeMap, () -> null);
-        // Remove the change, if it was applied. It should have been
-        // applied unless something else has done the exact same thing already
-        // (which is almost impossible, but ...)
-        if (changes != null) {
-            changes.remove("disabled");
-            setEnabled(false);
-            getUI().ifPresent(
-                    ui -> ui.beforeClientResponse(this, executionContext -> {
-                        // in case the disabled status was reverted,
-                        // the client might not update the value in
-                        // case it was that already
-                        if (isEnabled()) {
-                            executionContext.getUI().getPage().executeJs(
-                                    "$0.disabled = false;", getElement());
-                        }
-                    }));
         }
     }
 

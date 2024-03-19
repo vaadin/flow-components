@@ -277,6 +277,20 @@ public class ButtonIT extends AbstractComponentIT {
     }
 
     @Test
+    public void disableOnClick_enableInSameRoundtrip_clientSideButtonIsEnabled() {
+        WebElement button = layout
+                .findElement(By.id("disable-on-click-re-enable-button"));
+        for (int i = 0; i < 3; i++) {
+            Boolean disabled = (Boolean) executeScript(
+                    "arguments[0].click(); return arguments[0].disabled",
+                    button);
+            Assert.assertTrue(disabled);
+
+            waitUntil(ExpectedConditions.elementToBeClickable(button));
+        }
+    }
+
+    @Test
     public void buttonShortcuts_shortcutsWork() {
         WebElement button = findElement(By.id("shortcuts-enter-button"));
 
