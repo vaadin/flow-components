@@ -394,6 +394,28 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     /**
+     * @return true if this item should be ignored by the Vaadin router and
+     *         behave like a regular anchor.
+     */
+    public boolean isRouterIgnore() {
+        return getElement().getProperty("routerIgnore", false);
+    }
+
+    /**
+     * The routing mechanism in Vaadin by default intercepts all side nav items
+     * with relative URL. This method can be used make the router ignore this
+     * item and this way make it behave like a regular anchor and cause a full
+     * page load.
+     *
+     * @param ignore
+     *            true if this item should not be intercepted by the single-page
+     *            web application routing mechanism in Vaadin.
+     */
+    public void setRouterIgnore(boolean ignore) {
+        getElement().setProperty("routerIgnore", ignore);
+    }
+
+    /**
      * Sets whether the target URL should be opened in a new browser tab.
      * <p>
      * This is a convenience method for setting the target to
