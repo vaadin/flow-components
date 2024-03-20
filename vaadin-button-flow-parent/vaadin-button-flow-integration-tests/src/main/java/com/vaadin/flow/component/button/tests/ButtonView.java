@@ -264,13 +264,13 @@ public class ButtonView extends Div {
     }
 
     private void createButtonWithDisableOnClickThatIsHidden() {
-        Button button = new Button("Disabled on click and hidden", event -> {
+        Button button = new Button("Disabled on click and hide", event -> {
             event.getSource().setVisible(false);
         });
         button.setDisableOnClick(true);
         button.setId("disable-on-click-hidden-button");
 
-        Button enableButton = new Button("Enable hidden button", event -> {
+        Button enableButton = new Button("Enable hidden button and show", event -> {
             button.setEnabled(true);
             button.setVisible(true);
         });
