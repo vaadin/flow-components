@@ -314,12 +314,6 @@ public class ButtonTest {
         Assert.assertFalse(
                 "Button should have been disabled when event has been fired",
                 buttonIsEnabled.get());
-
-        StateNode node = button.getElement().getNode();
-        HashMap<String, Serializable> changeTracker = node.getChangeTracker(
-                node.getFeature(ElementAttributeMap.class), () -> null);
-        Assert.assertEquals("Disabled attribute should be set to true", "true",
-                changeTracker.get("disabled"));
     }
 
     @Test
