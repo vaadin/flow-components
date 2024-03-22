@@ -36,6 +36,11 @@ public class TextFieldElement extends TestBenchElement
      * Emulates the user changing the value, which in practice means setting
      * {@code value} of the {@code input} element to the given value and then
      * triggering {@code input}, {@code change} and {@code focusout} DOM events.
+     * <p>
+     * <em>Note:</em>Note: If you are using <code>ValueChangeMode.LAZY</codE> or
+     * <code>ValueChangeMode.TIMEOUT</code>, value change event is triggered
+     * also without field losing focus, and hence use of <code>sendKeys</code>
+     * may be better choice in testing.
      *
      * @param string
      *            the value to set
