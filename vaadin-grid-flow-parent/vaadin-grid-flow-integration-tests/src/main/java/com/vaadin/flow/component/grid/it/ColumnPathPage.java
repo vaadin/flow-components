@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.flow.component.grid.ColumnPathRenderer;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.TextField;
@@ -37,6 +38,10 @@ public class ColumnPathPage extends Div {
                 .setHeader("Using template");
         grid.addColumn(Person::getFirstName)
                 .setHeader("Using template because of editor")
+                .setEditorComponent(new TextField());
+        grid.addColumn(
+                new ColumnPathRenderer<>("firstName", Person::getFirstName))
+                .setHeader("Using column path renderer with editor")
                 .setEditorComponent(new TextField());
 
         add(grid);
