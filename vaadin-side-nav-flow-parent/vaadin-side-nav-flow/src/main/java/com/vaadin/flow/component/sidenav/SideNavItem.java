@@ -403,8 +403,8 @@ public class SideNavItem extends SideNavItemContainer
 
     /**
      * The routing mechanism in Vaadin by default intercepts all side nav items
-     * with relative URL. This method can be used make the router ignore this
-     * item and this way make it behave like a regular anchor and cause a full
+     * with a relative URL. This method can be used to make the router ignore
+     * this item. This makes it behave like a regular anchor, causing a full
      * page load.
      *
      * @param ignore
