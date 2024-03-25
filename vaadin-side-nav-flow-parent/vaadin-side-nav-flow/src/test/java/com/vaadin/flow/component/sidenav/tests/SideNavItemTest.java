@@ -621,6 +621,24 @@ public class SideNavItemTest {
     }
 
     @Test
+    public void isRouterIgnore_falseByDefault() {
+        Assert.assertFalse(sideNavItem.isRouterIgnore());
+    }
+
+    @Test
+    public void setRouterIgnore_hasRouterIgnore() {
+        sideNavItem.setRouterIgnore(true);
+        Assert.assertTrue(
+                sideNavItem.getElement().getProperty("routerIgnore", false));
+        Assert.assertTrue(sideNavItem.isRouterIgnore());
+
+        sideNavItem.setRouterIgnore(false);
+        Assert.assertFalse(
+                sideNavItem.getElement().getProperty("routerIgnore", false));
+        Assert.assertFalse(sideNavItem.isRouterIgnore());
+    }
+
+    @Test
     public void setOpenInNewBrowserTab_targetBlankDefinedOnProperty() {
         // call setOpenInNewTab and check that getTarget returns "_blank"
         sideNavItem.setOpenInNewBrowserTab(true);
