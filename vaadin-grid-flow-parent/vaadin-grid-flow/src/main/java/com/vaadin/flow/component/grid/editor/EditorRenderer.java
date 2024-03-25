@@ -178,15 +178,10 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
 
                 // If editing, render the editor, otherwise use the original renderer
                 "if (root.__editing) { Vaadin.FlowComponentHost.setChildNodes('" + appId + "', [model.item._" + columnInternalId + "_editor], root); }" +
-                "else if (!originalRender) { root.textContent = model.item." + getItemFieldName(container) + " }" +
+                "else if (!originalRender) { this._defaultRenderer(root, container, model); }" +
                 "else { originalRender(root, container, model); }" +
             "};");
         //@formatter:on
-    }
-
-    private String getItemFieldName(Element container) {
-        String path = container.getProperty("path");
-        return path == null ? columnInternalId : path;
     }
 
     private void runBeforeClientResponse(Element container,
