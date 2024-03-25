@@ -17,4 +17,4 @@ add the following dependency to your `pom.xml`:
 
 ## License
 
-Apache License 2.0
+Vaadin Commercial License and Service Terms
