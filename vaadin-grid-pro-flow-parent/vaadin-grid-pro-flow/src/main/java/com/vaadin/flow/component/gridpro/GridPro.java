@@ -721,8 +721,20 @@ public class GridPro<E> extends Grid<E> {
      */
     public Registration addItemPropertyChangedListener(
             ComponentEventListener<ItemPropertyChangedEvent<E>> listener) {
+        // Wrap the listener to filter out events for cells that are not
+        // editable
+        ComponentEventListener<ItemPropertyChangedEvent<E>> wrapper = event -> {
+            EditColumn<E> column = (EditColumn<E>) this.idToColumnMap
+                    .get(event.getPath());
+
+            if (column.cellEditableProvider == null
+                    || column.cellEditableProvider.test(event.getItem())) {
+                listener.onComponentEvent(event);
+            }
+        };
+
         return ComponentUtil.addListener(this, ItemPropertyChangedEvent.class,
-                (ComponentEventListener) listener);
+                (ComponentEventListener) wrapper);
     }
 
     /**
