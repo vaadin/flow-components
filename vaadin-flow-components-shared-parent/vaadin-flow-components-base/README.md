@@ -4,4 +4,4 @@ Contains common code, utilities, and mixin interfaces shared by the Vaadin Flow 
 
 ## License
 
-Apache License 2.0
+Vaadin Commercial License and Service Terms
