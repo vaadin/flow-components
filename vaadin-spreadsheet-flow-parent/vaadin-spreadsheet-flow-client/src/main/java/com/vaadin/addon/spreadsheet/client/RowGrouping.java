@@ -7,6 +7,7 @@
  * license.
  */
 package com.vaadin.addon.spreadsheet.client;
+
 import com.google.gwt.dom.client.Style.Unit;
 
 /**

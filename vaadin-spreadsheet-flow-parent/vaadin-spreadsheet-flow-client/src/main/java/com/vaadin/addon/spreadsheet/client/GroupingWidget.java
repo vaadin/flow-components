@@ -7,6 +7,7 @@
  * license.
  */
 package com.vaadin.addon.spreadsheet.client;
+
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.NativeEvent;

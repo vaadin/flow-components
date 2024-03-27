@@ -7,6 +7,7 @@
  * license.
  */
 package com.vaadin.flow.component.charts.model.style;
+
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.PlotOptionsArea;
