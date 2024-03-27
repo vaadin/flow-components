@@ -137,7 +137,7 @@ import elemental.json.JsonObject;
  */
 @Deprecated
 @Tag("vaadin-upload-file")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.4.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/upload/src/vaadin-upload-file.js")
 public abstract class GeneratedVaadinUploadFile<R extends GeneratedVaadinUploadFile<R>>
