@@ -35,8 +35,9 @@
         <sauce-connect.version>2.1.25</sauce-connect.version>
         <ci-sauce.version>1.161</ci-sauce.version>
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
-        <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
+        <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
         <osgi.export.package>default</osgi.export.package>
+        <currentYear>2024</currentYear>
         <cvdlName></cvdlName>
 
         <!-- spreadsheet -->
@@ -485,6 +486,40 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>3.1.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>2.6</version>
+                    <configuration>
+                        <header>src/license/vclst/header.txt</header>
+                        <quiet>false</quiet>
+                        <failIfMissing>true</failIfMissing>
+                        <aggregate>false</aggregate>
+                        <useDefaultExcludes>true</useDefaultExcludes>
+                        <useDefaultMapping>true</useDefaultMapping>
+                        <encoding>UTF-8</encoding>
+                        <properties>
+                            <year>${currentYear}</year>
+                        </properties>
+                        <excludes>
+                            <exclude>**/target/**</exclude>
+                            <exclude>**/*.xml</exclude>
+                            <exclude>**/*.css</exclude>
+                            <exclude>**/*.properties</exclude>
+                            <exclude>src/license/**/*</exclude>
+                            <exclude>**/*.txt</exclude>
+                            <exclude>scripts/**</exclude>
+                            <exclude>**/resources/META-INF/**</exclude>
+                            <exclude>**/demo/**</exclude>
+                            <exclude>**/tests/**</exclude>
+                            <exclude>**/test/**</exclude>
+                            <exclude>**/LICENSE/</exclude>
+                            <exclude>**/README.md/</exclude>
+                            <exclude>**/styles/**</exclude>
+                            <exclude>**/frontend/**</exclude>
+                        </excludes>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

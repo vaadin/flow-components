@@ -1,17 +1,15 @@
-package com.vaadin.flow.component.richtexteditor;
-
-import java.io.Serializable;
-import java.util.Objects;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright (C) 2000-2024 Vaadin Ltd
  *
  * This program is available under Vaadin Commercial License and Service Terms.
- *
  *
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
+package com.vaadin.flow.component.richtexteditor;
+
+import java.io.Serializable;
+import java.util.Objects;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasSize;
