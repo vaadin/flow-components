@@ -20,20 +20,7 @@ public class CellEditableProviderIT extends AbstractComponentIT {
     }
 
     @Test
-    public void noProvider_allCellsEditable() {
-        assertCellEditable(0, 0, "vaadin-grid-pro-edit-text-field", true);
-        assertCellEditable(0, 1, "vaadin-grid-pro-edit-text-field", true);
-        assertCellEditable(0, 2, "vaadin-grid-pro-edit-checkbox", true);
-
-        assertCellEditable(1, 0, "vaadin-grid-pro-edit-text-field", true);
-        assertCellEditable(1, 1, "vaadin-grid-pro-edit-text-field", true);
-        assertCellEditable(1, 2, "vaadin-grid-pro-edit-checkbox", true);
-    }
-
-    @Test
-    public void setProvider_individualCellsEditable() {
-        $("button").id("set-provider").click();
-
+    public void individualCellsEditable() {
         assertCellEditable(0, 0, "vaadin-grid-pro-edit-text-field", true);
         assertCellEditable(0, 1, "vaadin-grid-pro-edit-text-field", false);
         assertCellEditable(0, 2, "vaadin-grid-pro-edit-checkbox", false);
@@ -44,13 +31,7 @@ public class CellEditableProviderIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setProvider_updateData_editableCellsUpdated() {
-        $("button").id("set-provider").click();
-
-        assertCellEditable(0, 0, "vaadin-grid-pro-edit-text-field", true);
-        assertCellEditable(0, 1, "vaadin-grid-pro-edit-text-field", false);
-        assertCellEditable(0, 2, "vaadin-grid-pro-edit-checkbox", false);
-
+    public void updateData_editableCellsUpdated() {
         // Reverse the approved state of all transactions
         $("button").id("update-data").click();
 
@@ -64,32 +45,7 @@ public class CellEditableProviderIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setProvider_clearProvider_allCellsEditable() {
-        $("button").id("set-provider").click();
-
-        assertCellEditable(0, 0, "vaadin-grid-pro-edit-text-field", true);
-        assertCellEditable(0, 1, "vaadin-grid-pro-edit-text-field", false);
-        assertCellEditable(0, 2, "vaadin-grid-pro-edit-checkbox", false);
-
-        $("button").id("clear-provider").click();
-
-        assertCellEditable(0, 0, "vaadin-grid-pro-edit-text-field", true);
-        assertCellEditable(0, 1, "vaadin-grid-pro-edit-text-field", true);
-        assertCellEditable(0, 2, "vaadin-grid-pro-edit-checkbox", true);
-
-        assertCellEditable(1, 0, "vaadin-grid-pro-edit-text-field", true);
-        assertCellEditable(1, 1, "vaadin-grid-pro-edit-text-field", true);
-        assertCellEditable(1, 2, "vaadin-grid-pro-edit-checkbox", true);
-    }
-
-    @Test
-    public void setProvider_detach_attach_individualCellsEditable() {
-        $("button").id("set-provider").click();
-
-        assertCellEditable(0, 0, "vaadin-grid-pro-edit-text-field", true);
-        assertCellEditable(0, 1, "vaadin-grid-pro-edit-text-field", false);
-        assertCellEditable(0, 2, "vaadin-grid-pro-edit-checkbox", false);
-
+    public void detach_attach_individualCellsEditable() {
         $("button").id("detach").click();
         $("button").id("attach").click();
         grid = $(GridProElement.class).waitForFirst();
@@ -100,25 +56,7 @@ public class CellEditableProviderIT extends AbstractComponentIT {
     }
 
     @Test
-    public void detach_setProvider_attach_editableCellsUpdated() {
-        $("button").id("detach").click();
-        $("button").id("set-provider").click();
-        $("button").id("attach").click();
-        grid = $(GridProElement.class).waitForFirst();
-
-        assertCellEditable(0, 0, "vaadin-grid-pro-edit-text-field", true);
-        assertCellEditable(0, 1, "vaadin-grid-pro-edit-text-field", false);
-        assertCellEditable(0, 2, "vaadin-grid-pro-edit-checkbox", false);
-    }
-
-    @Test
-    public void setProvider_detach_updateData_attach_editableCellsUpdated() {
-        $("button").id("set-provider").click();
-
-        assertCellEditable(0, 0, "vaadin-grid-pro-edit-text-field", true);
-        assertCellEditable(0, 1, "vaadin-grid-pro-edit-text-field", false);
-        assertCellEditable(0, 2, "vaadin-grid-pro-edit-checkbox", false);
-
+    public void detach_updateData_attach_editableCellsUpdated() {
         $("button").id("detach").click();
         $("button").id("update-data").click();
         $("button").id("attach").click();

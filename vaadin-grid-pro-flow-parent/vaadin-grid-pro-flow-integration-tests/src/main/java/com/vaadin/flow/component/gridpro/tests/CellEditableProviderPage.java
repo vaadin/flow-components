@@ -12,9 +12,14 @@ public class CellEditableProviderPage extends Div {
         grid.setItems(new Transaction("Transaction 1", 100, true),
                 new Transaction("Transaction 2", 200, false));
         grid.addEditColumn(Transaction::getName).text(Transaction::setName);
-        var amount = grid.addEditColumn(Transaction::getAmount)
+        // Disable editing of amount and approved if transaction is approved
+        grid.addEditColumn(Transaction::getAmount)
+                .withCellEditableProvider(
+                        transaction -> !transaction.isApproved())
                 .text((item, value) -> item.setAmount(Integer.parseInt(value)));
-        var approved = grid.addEditColumn(Transaction::isApproved)
+        grid.addEditColumn(Transaction::isApproved)
+                .withCellEditableProvider(
+                        transaction -> !transaction.isApproved())
                 .checkbox(Transaction::setApproved);
         add(grid);
 
@@ -26,30 +31,6 @@ public class CellEditableProviderPage extends Div {
         });
         updateData.setId("update-data");
         add(updateData);
-
-        NativeButton setProvider = new NativeButton(
-                "Set cell editable provider", e -> {
-                    // Disable editing of amount and approved if transaction is
-                    // approved
-                    ((GridPro.EditColumn<Transaction>) amount)
-                            .setCellEditableProvider(
-                                    transaction -> !transaction.isApproved());
-                    ((GridPro.EditColumn<Transaction>) approved)
-                            .setCellEditableProvider(
-                                    transaction -> !transaction.isApproved());
-                });
-        setProvider.setId("set-provider");
-        add(setProvider);
-
-        NativeButton clearProvider = new NativeButton(
-                "Clear cell editable provider", e -> {
-                    ((GridPro.EditColumn<Transaction>) amount)
-                            .setCellEditableProvider(null);
-                    ((GridPro.EditColumn<Transaction>) approved)
-                            .setCellEditableProvider(null);
-                });
-        clearProvider.setId("clear-provider");
-        add(clearProvider);
 
         NativeButton detach = new NativeButton("Detach", e -> {
             remove(grid);

@@ -307,33 +307,6 @@ public class GridPro<E> extends Grid<E> {
             this.valueProvider = valueProvider;
         }
 
-        /**
-         * The current predicate for determining whether individual cells in
-         * this column are editable, or null if none is set.
-         *
-         * @return the cell editable provider
-         */
-        public SerializablePredicate<T> getCellEditableProvider() {
-            return cellEditableProvider;
-        }
-
-        /**
-         * Sets a predicate that determines whether individual cells in this
-         * column are editable. The predicate is called for each rendered item
-         * of the grid and should return a boolean indicating whether the cell
-         * is editable or not. By default, the provider is null, which means
-         * that all cells in the column are editable. Setting the provider back
-         * to null makes all cells editable again.
-         *
-         * @param cellEditableProvider
-         *            the cell editable provider
-         */
-        public void setCellEditableProvider(
-                SerializablePredicate<T> cellEditableProvider) {
-            this.cellEditableProvider = cellEditableProvider;
-            getGrid().getDataCommunicator().reset();
-        }
-
         boolean isManualRefresh() {
             return manualRefresh;
         }
@@ -342,7 +315,12 @@ public class GridPro<E> extends Grid<E> {
             this.manualRefresh = manualRefresh;
         }
 
-        // Expose protected method
+        void setCellEditableProvider(
+                SerializablePredicate<T> cellEditableProvider) {
+            this.cellEditableProvider = cellEditableProvider;
+        }
+
+        // Expose protected method from Column to GridPro
         @Override
         protected String getInternalId() {
             return super.getInternalId();
