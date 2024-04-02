@@ -15,8 +15,10 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
@@ -36,7 +38,30 @@ public class HelperPage extends Div {
         binder.bind(checkboxGroup, bean -> bean.choices,
                 (bean, value) -> bean.choices = value);
         binder.setBean(new Bean());
-        add(checkboxGroup);
+
+        Checkbox helperTextCheckbox = new Checkbox("Using helper text");
+        helperTextCheckbox.setHelperText("Helper text");
+        helperTextCheckbox.setId("checkbox-helper-text");
+
+        NativeButton emptyHelperText = new NativeButton("Clear helper text",
+                e -> helperTextCheckbox.setHelperText(""));
+        emptyHelperText.setId("empty-helper-text");
+
+        Checkbox helperComponentCheckbox = new Checkbox(
+                "Using helper component");
+        helperComponentCheckbox.setId("checkbox-helper-component");
+
+        Span helper = new Span("Helper component");
+        helper.setId("helper-component");
+        helperComponentCheckbox.setHelperComponent(helper);
+
+        NativeButton emptyHelperComponent = new NativeButton(
+                "Clear helper component",
+                e -> helperComponentCheckbox.setHelperComponent(null));
+        emptyHelperComponent.setId("empty-helper-component");
+
+        add(checkboxGroup, helperTextCheckbox, helperComponentCheckbox,
+                emptyHelperText, emptyHelperComponent);
     }
 
     public static class Bean {

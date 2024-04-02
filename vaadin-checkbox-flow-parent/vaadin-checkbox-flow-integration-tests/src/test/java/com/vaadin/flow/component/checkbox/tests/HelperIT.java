@@ -15,14 +15,21 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 @TestPath("vaadin-checkbox/helper")
 public class HelperIT extends AbstractComponentIT {
+
+    @Before
+    public void init() {
+        open();
+    }
 
     /**
      * Assert that helper component exists after setItems.
@@ -30,7 +37,6 @@ public class HelperIT extends AbstractComponentIT {
      */
     @Test
     public void assertHelperComponentExists() {
-        open();
         TestBenchElement checkboxGroup = $("vaadin-checkbox-group").first();
 
         TestBenchElement helperComponent = checkboxGroup.$("span")
@@ -38,4 +44,26 @@ public class HelperIT extends AbstractComponentIT {
         Assert.assertEquals("Helper text", helperComponent.getText());
 
     }
+
+    @Test
+    public void assertCheckboxHelperText() {
+        CheckboxElement checkboxHelperText = $(CheckboxElement.class)
+                .id("checkbox-helper-text");
+        Assert.assertEquals("Helper text", checkboxHelperText.getHelperText());
+
+        $("button").id("empty-helper-text").click();
+        Assert.assertEquals("", checkboxHelperText.getHelperText());
+    }
+
+    @Test
+    public void assertCheckboxHelperComponent() {
+        CheckboxElement checkboxHelperComponent = $(CheckboxElement.class)
+                .id("checkbox-helper-component");
+        Assert.assertEquals("helper-component", checkboxHelperComponent
+                .getHelperComponent().getAttribute("id"));
+
+        $("button").id("empty-helper-component").click();
+        Assert.assertEquals(null, checkboxHelperComponent.getHelperComponent());
+    }
+
 }
