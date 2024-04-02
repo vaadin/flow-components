@@ -37,7 +37,15 @@ public class TreeGridExpandedKeysIT extends AbstractComponentIT {
 
     private TestBenchElement expandAllButton;
 
-    private TestBenchElement showKeysButton;
+    private TestBenchElement showKeysAfterExpandButton;
+
+    private TestBenchElement scrollToButton;
+
+    private TestBenchElement showKeysAfterFirstScrollButton;
+
+    private TestBenchElement scrollToStartButton;
+
+    private TestBenchElement showKeysAfterSecondScrollButton;
 
     @Before
     public void init() {
@@ -45,7 +53,13 @@ public class TreeGridExpandedKeysIT extends AbstractComponentIT {
         waitUntil(e -> $(TreeGridElement.class).exists(), 2);
         grid = $(TreeGridElement.class).first();
         expandAllButton = $("button").id("expand-all");
-        showKeysButton = $("button").id("show-keys");
+        showKeysAfterExpandButton = $("button").id("show-keys-after-expand");
+        scrollToButton = $("button").id("scroll-to-0-250");
+        showKeysAfterFirstScrollButton = $("button")
+                .id("show-keys-after-first-scroll");
+        scrollToStartButton = $("button").id("scroll-to-0-250");
+        showKeysAfterSecondScrollButton = $("button")
+                .id("show-keys-after-second-scroll");
     }
 
     @Test
@@ -57,11 +71,24 @@ public class TreeGridExpandedKeysIT extends AbstractComponentIT {
         // Waits for TreeGrid to finish all its calls
         waitUntil(e -> grid.getRowCount() > 50, 5);
 
-        showKeysButton.click();
+        showKeysAfterExpandButton.click();
         String expandedKeys = findElement(By.id("afterExpandKeys")).getText();
-
         Assert.assertEquals("Item keys do not match after expanding all",
                 originalKeys, expandedKeys);
+
+        scrollToButton.click();
+        showKeysAfterFirstScrollButton.click();
+        String afterFirstScrollKeys = findElement(By.id("afterFirstScroll"))
+                .getText();
+        Assert.assertEquals("Item keys do not match after scrolling down",
+                originalKeys, afterFirstScrollKeys);
+
+        scrollToStartButton.click();
+        showKeysAfterSecondScrollButton.click();
+        String afterSecondScrollKeys = findElement(By.id("afterSecondScroll"))
+                .getText();
+        Assert.assertEquals("Item keys do not match after scrolling to start",
+                originalKeys, afterSecondScrollKeys);
     }
 
 }
