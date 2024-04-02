@@ -105,8 +105,6 @@ public class CheckboxGroup<T>
     private final AtomicReference<DataProvider<T, ?>> dataProvider = new AtomicReference<>(
             DataProvider.ofItems());
 
-    private boolean isReadOnly;
-
     private SerializablePredicate<T> itemEnabledProvider = item -> isEnabled();
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
@@ -461,26 +459,21 @@ public class CheckboxGroup<T>
 
     @Override
     public void onEnabledStateChanged(boolean enabled) {
-        if (isReadOnly()) {
-            setDisabled(true);
-        } else {
-            setDisabled(!enabled);
-        }
+        setDisabled(!enabled);
         getCheckboxItems().forEach(this::updateEnabled);
     }
 
     @Override
     public void setReadOnly(boolean readOnly) {
-        isReadOnly = readOnly;
+        getElement().setProperty("readonly", readOnly);
         if (isEnabled()) {
-            setDisabled(readOnly);
             refreshCheckboxes();
         }
     }
 
     @Override
     public boolean isReadOnly() {
-        return isReadOnly;
+        return getElement().getProperty("readonly", false);
     }
 
     /**

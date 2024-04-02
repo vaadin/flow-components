@@ -78,19 +78,14 @@ public class CheckboxGroupTest {
     }
 
     @Test
-    public void setReadOnlyCheckboxGroup_groupIsReadOnlyAndDisabled() {
+    public void setReadOnlyCheckboxGroup_groupIsReadOnly() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
         group.setItems("foo", "bar");
         group.setReadOnly(true);
         Assert.assertTrue(group.isReadOnly());
 
         Assert.assertEquals(Boolean.TRUE.toString(),
-                group.getElement().getProperty("disabled"));
-
-        long disabledChildCount = group.getChildren().filter(
-                child -> child.getElement().getProperty("disabled", false))
-                .count();
-        Assert.assertEquals(group.getChildren().count(), disabledChildCount);
+                group.getElement().getProperty("readonly"));
     }
 
     @Test
@@ -118,18 +113,12 @@ public class CheckboxGroupTest {
     }
 
     @Test
-    public void setReadOnlyEnabledCheckboxGroup_groupIsDisabledAndNotReadonly() {
+    public void setReadOnlyEnabledCheckboxGroup_groupIsNotDisabled() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
         group.setReadOnly(true);
         group.setEnabled(true);
 
         Assert.assertTrue(group.isReadOnly());
-        Assert.assertTrue(group.isEnabled());
-        Assert.assertEquals(Boolean.TRUE.toString(),
-                group.getElement().getProperty("disabled"));
-
-        group.setReadOnly(false);
-
         Assert.assertTrue(group.isEnabled());
         Assert.assertEquals(Boolean.FALSE.toString(),
                 group.getElement().getProperty("disabled"));
