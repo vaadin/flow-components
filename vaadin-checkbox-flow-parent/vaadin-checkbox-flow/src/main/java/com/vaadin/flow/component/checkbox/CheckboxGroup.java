@@ -68,6 +68,7 @@ import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
@@ -108,6 +109,8 @@ public class CheckboxGroup<T>
     private SerializablePredicate<T> itemEnabledProvider = item -> isEnabled();
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
+
+    private SerializableFunction<T, String> itemHelperGenerator = item -> null;
 
     private ComponentRenderer<? extends Component, T> itemRenderer;
 
@@ -519,6 +522,33 @@ public class CheckboxGroup<T>
     }
 
     /**
+     * Sets the function that is used for generating helper text strings used by
+     * the checkbox group for each item.
+     *
+     * @since 24.5
+     * @param itemHelperGenerator
+     *            the item helper generator to use, not null
+     */
+    public void setItemHelperGenerator(
+            SerializableFunction<T, String> itemHelperGenerator) {
+        Objects.requireNonNull(itemHelperGenerator,
+                "The item helper generator can not be null");
+        this.itemHelperGenerator = itemHelperGenerator;
+        refreshCheckboxes();
+    }
+
+    /**
+     * Gets the function that is used for generating helper text strings used by
+     * the checkbox group for each item.
+     *
+     * @since 24.5
+     * @return the item helper generator, not null
+     */
+    public SerializableFunction<T, String> getItemHelperGenerator() {
+        return itemHelperGenerator;
+    }
+
+    /**
      * Sets the label for the checkbox group.
      *
      * @param label
@@ -756,6 +786,13 @@ public class CheckboxGroup<T>
         } else {
             checkbox.setLabelComponent(
                     getItemRenderer().createComponent(checkbox.item));
+        }
+
+        String helper = itemHelperGenerator.apply(checkbox.item);
+        if (helper != null) {
+            checkbox.setHelperText(helper);
+        } else if (checkbox.getHelperText() != null) {
+            checkbox.setHelperText(null);
         }
 
         checkbox.setValue(getValue().stream().anyMatch(

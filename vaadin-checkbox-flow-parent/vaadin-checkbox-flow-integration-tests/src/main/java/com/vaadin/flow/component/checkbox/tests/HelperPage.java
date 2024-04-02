@@ -39,6 +39,17 @@ public class HelperPage extends Div {
                 (bean, value) -> bean.choices = value);
         binder.setBean(new Bean());
 
+        CheckboxGroup<String> groupWithHelperGenerator = new CheckboxGroup<>();
+        groupWithHelperGenerator.setItems("A", "B", "C");
+        groupWithHelperGenerator
+                .setItemHelperGenerator(item -> item + " helper");
+        groupWithHelperGenerator.setId("cbg-helper-generator");
+
+        NativeButton clearItemHelperGenerator = new NativeButton(
+                "Clear helper generator", e -> groupWithHelperGenerator
+                        .setItemHelperGenerator(item -> null));
+        clearItemHelperGenerator.setId("clear-helper-generator");
+
         Checkbox helperTextCheckbox = new Checkbox("Using helper text");
         helperTextCheckbox.setHelperText("Helper text");
         helperTextCheckbox.setId("checkbox-helper-text");
@@ -60,8 +71,9 @@ public class HelperPage extends Div {
                 e -> helperComponentCheckbox.setHelperComponent(null));
         emptyHelperComponent.setId("empty-helper-component");
 
-        add(checkboxGroup, helperTextCheckbox, helperComponentCheckbox,
-                emptyHelperText, emptyHelperComponent);
+        add(checkboxGroup, groupWithHelperGenerator, clearItemHelperGenerator,
+                helperTextCheckbox, helperComponentCheckbox, emptyHelperText,
+                emptyHelperComponent);
     }
 
     public static class Bean {
