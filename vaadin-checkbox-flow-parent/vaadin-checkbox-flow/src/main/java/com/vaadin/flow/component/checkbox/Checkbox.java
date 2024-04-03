@@ -32,8 +32,8 @@ import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
-import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.PropertyChangeListener;
 
@@ -58,7 +58,7 @@ import java.util.Optional;
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         implements ClickNotifier<Checkbox>, Focusable<Checkbox>, HasAriaLabel,
-        HasClientValidation, HasValidationProperties,
+        HasClientValidation, HasValidationProperties, HasValidator<Boolean>,
         InputField<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>, Boolean> {
 
     private final Label labelElement;
