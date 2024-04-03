@@ -66,6 +66,17 @@ public class HelperIT extends AbstractComponentIT {
     }
 
     @Test
+    public void assertCheckboxSlottedHelper() {
+        CheckboxElement checkboxHelperText = $(CheckboxElement.class)
+                .id("checkbox-helper-text");
+
+        String helperText = checkboxHelperText.$(TestBenchElement.class)
+                .attribute("slot", "helper").first().getText();
+
+        Assert.assertEquals("Helper text", helperText);
+    }
+
+    @Test
     public void assertCheckboxHelperText() {
         CheckboxElement checkboxHelperText = $(CheckboxElement.class)
                 .id("checkbox-helper-text");
