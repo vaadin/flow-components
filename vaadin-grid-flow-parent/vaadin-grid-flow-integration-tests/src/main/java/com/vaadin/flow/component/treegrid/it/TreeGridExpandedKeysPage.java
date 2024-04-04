@@ -9,8 +9,6 @@ import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.router.Route;
 
-import java.util.Arrays;
-
 @Route("vaadin-grid/treegrid-expanded-keys")
 public class TreeGridExpandedKeysPage extends Div {
 
