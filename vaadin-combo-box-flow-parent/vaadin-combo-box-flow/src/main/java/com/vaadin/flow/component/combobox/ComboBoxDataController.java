@@ -152,6 +152,8 @@ class ComboBoxDataController<TItem>
     private Registration clearFilterOnCloseRegistration;
     private Registration dataProviderListener = null;
 
+    private boolean forceResetDueToClientSideFilterChange = false;
+
     /**
      * Creates a new data controller for that combo box
      *
@@ -284,6 +286,8 @@ class ComboBoxDataController<TItem>
         }
         dataCommunicator.setRequestedRange(start, length);
         filterSlot.accept(filter);
+        forceResetDueToClientSideFilterChange = Objects.equals(filter,
+                lastFilter);
     }
 
     /**
@@ -297,9 +301,7 @@ class ComboBoxDataController<TItem>
          * handling methods. Thus, if the current client filter is not empty,
          * then we need to re-set it in the data communicator.
          */
-        if (lastFilter == null || lastFilter.isEmpty()) {
-            dataCommunicator.reset();
-        } else {
+        if (lastFilter != null && !lastFilter.isEmpty()) {
             String filter = lastFilter;
             lastFilter = null;
             /*
@@ -308,6 +310,15 @@ class ComboBoxDataController<TItem>
              * consumer, so we don't need to explicitly call it.
              */
             filterSlot.accept(filter);
+        }
+        /*
+         * The filter slot will not call 'DataCommunicator::reset' when the
+         * applied filter is the same as the previously applied filter. This has
+         * to be done manually here.
+         */
+        if (forceResetDueToClientSideFilterChange) {
+            dataCommunicator.reset();
+            forceResetDueToClientSideFilterChange = false;
         }
     }
 
