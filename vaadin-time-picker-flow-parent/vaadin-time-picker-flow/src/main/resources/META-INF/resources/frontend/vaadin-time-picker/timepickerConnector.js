@@ -91,7 +91,11 @@ import {
 
               // milliseconds not part of the time format API
               if (includeMilliSeconds()) {
-                localeTimeString = formatMilliseconds(localeTimeString, timeObject.milliseconds, amString, pmString);
+                let timeObjectMilliseconds = timeObject.milliseconds;
+                if (typeof timeObjectMilliseconds === 'string') {
+                  timeObjectMilliseconds = timeObjectMilliseconds ? parseDigitsIntoInteger(timeObjectMilliseconds.replace(separator, '')) : 0;
+                }
+                localeTimeString = formatMilliseconds(localeTimeString, timeObjectMilliseconds, amString, pmString);
               }
 
               return localeTimeString;
