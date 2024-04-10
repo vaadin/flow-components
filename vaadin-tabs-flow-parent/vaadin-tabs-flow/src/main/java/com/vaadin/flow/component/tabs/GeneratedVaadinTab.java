@@ -86,11 +86,11 @@ Tab 1
  */
 @Deprecated
 @Tag("vaadin-tab")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/tabs/src/vaadin-tab.js")
-@NpmPackage(value = "@vaadin/tabs", version = "23.5.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-tabs", version = "23.5.0-alpha1")
+@NpmPackage(value = "@vaadin/tabs", version = "23.5.0")
+@NpmPackage(value = "@vaadin/vaadin-tabs", version = "23.5.0")
 public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>
         extends Component implements HasStyle, HasTheme {
 

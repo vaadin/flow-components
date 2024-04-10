@@ -19,10 +19,10 @@ import com.vaadin.flow.function.SerializableFunction;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-integer-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/integer-field", version = "23.5.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.5.0-alpha1")
+@NpmPackage(value = "@vaadin/integer-field", version = "23.5.0")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.5.0")
 @JsModule("@vaadin/integer-field/src/vaadin-integer-field.js")
 public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
 
