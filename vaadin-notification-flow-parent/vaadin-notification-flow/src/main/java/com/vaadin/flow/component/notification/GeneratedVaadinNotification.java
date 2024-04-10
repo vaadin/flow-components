@@ -83,10 +83,10 @@ Your work has been saved
  */
 @Deprecated
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/notification", version = "23.5.0-alpha1")
-@NpmPackage(value = "@vaadin/vaadin-notification", version = "23.5.0-alpha1")
+@NpmPackage(value = "@vaadin/notification", version = "23.5.0")
+@NpmPackage(value = "@vaadin/vaadin-notification", version = "23.5.0")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 public abstract class GeneratedVaadinNotification<R extends GeneratedVaadinNotification<R>>

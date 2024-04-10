@@ -110,7 +110,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @Deprecated
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public abstract class GeneratedVaadinRadioGroup<R extends GeneratedVaadinRadioGroup<R, T>, T>
