@@ -136,6 +136,17 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
             selectElement.closePopup();
         }
 
+        void placeholderSelected(String expectedItemText) {
+            SelectElement.ItemElement selectedItem = selectElement
+                    .getSelectedItem();
+            Assert.assertEquals("Invalid placeholder text", expectedItemText,
+                    selectedItem.getText());
+            TestBenchElement valueButton = selectElement
+                    .$(TestBenchElement.class).attribute("slot", "value")
+                    .first();
+            Assert.assertTrue(valueButton.hasAttribute("placeholder"));
+        }
+
         void noItemSelected() {
             try {
                 SelectElement.ItemElement selectedItem = selectElement
