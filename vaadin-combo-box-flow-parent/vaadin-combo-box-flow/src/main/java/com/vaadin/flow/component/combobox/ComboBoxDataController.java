@@ -152,8 +152,6 @@ class ComboBoxDataController<TItem>
     private Registration clearFilterOnCloseRegistration;
     private Registration dataProviderListener = null;
 
-    private boolean dataCommunicatorNeedsReset = false;
-
     /**
      * Creates a new data controller for that combo box
      *
@@ -292,33 +290,7 @@ class ComboBoxDataController<TItem>
      * Called by the client-side connector to reset the data communicator
      */
     void resetDataCommunicator() {
-        dataCommunicatorNeedsReset = true;
-        /*
-         * The client filter from combo box will be used in the data
-         * communicator only within 'setRequestedRange' calls to data provider,
-         * and then will be erased to not affect the data view item count
-         * handling methods. Thus, if the current client filter is not empty,
-         * then we need to re-set it in the data communicator.
-         */
-        if (lastFilter != null && !lastFilter.isEmpty()) {
-            String filter = lastFilter;
-            lastFilter = null;
-            /*
-             * This filter slot will eventually call the filter consumer in data
-             * communicator and 'DataCommunicator::reset' is done inside this
-             * consumer, so we don't need to explicitly call it.
-             */
-            filterSlot.accept(filter);
-        }
-        /*
-         * The filter slot will not call 'DataCommunicator::reset' when the
-         * applied filter is the same as the previously applied filter. This has
-         * to be done manually here.
-         */
-        if (dataCommunicatorNeedsReset) {
-            dataCommunicator.reset();
-            dataCommunicatorNeedsReset = false;
-        }
+        dataCommunicator.reset();
     }
 
     // ****************************************************
@@ -538,7 +510,6 @@ class ComboBoxDataController<TItem>
                 @Override
                 public void reset() {
                     super.reset();
-                    dataCommunicatorNeedsReset = false;
                     if (comboBox instanceof MultiSelectComboBox) {
                         // The data is destroyed and rebuilt on data
                         // communicator reset. When component renderers are
