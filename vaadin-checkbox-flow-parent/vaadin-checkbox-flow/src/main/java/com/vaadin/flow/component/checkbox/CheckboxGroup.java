@@ -33,7 +33,6 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -92,8 +91,7 @@ import elemental.json.JsonArray;
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
         implements HasAriaLabel, HasClientValidation,
-        HasDataView<T, Void, CheckboxGroupDataView<T>>, HasHelper,
-        HasItemComponents<T>,
+        HasDataView<T, Void, CheckboxGroupDataView<T>>, HasItemComponents<T>,
         InputField<AbstractField.ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>, Set<T>>,
         HasListDataView<T, CheckboxGroupListDataView<T>>,
         HasThemeVariant<CheckboxGroupVariant>, HasValidationProperties,
