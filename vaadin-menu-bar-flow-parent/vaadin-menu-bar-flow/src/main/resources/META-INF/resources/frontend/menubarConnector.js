@@ -60,6 +60,13 @@ import './contextMenuConnector.js';
           return;
         }
 
+        if (!menubar._container) {
+          // Menu-bar defers first buttons render to avoid re-layout
+          // See https://github.com/vaadin/web-components/issues/7271
+          queueMicrotask(() => menubar.$connector.generateItems(nodeId));
+          return;
+        }
+
         if (nodeId) {
           menubar.__generatedItems = window.Vaadin.Flow.contextMenuConnector.generateItemsTree(appId, nodeId);
         }
