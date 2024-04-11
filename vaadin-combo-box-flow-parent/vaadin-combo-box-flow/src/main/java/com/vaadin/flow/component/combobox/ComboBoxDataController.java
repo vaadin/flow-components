@@ -152,7 +152,7 @@ class ComboBoxDataController<TItem>
     private Registration clearFilterOnCloseRegistration;
     private Registration dataProviderListener = null;
 
-    private boolean forceResetDueToClientSideFilterChange = false;
+    private boolean dataCommunicatorNeedsReset = false;
 
     /**
      * Creates a new data controller for that combo box
@@ -286,14 +286,13 @@ class ComboBoxDataController<TItem>
         }
         dataCommunicator.setRequestedRange(start, length);
         filterSlot.accept(filter);
-        forceResetDueToClientSideFilterChange = Objects.equals(filter,
-                lastFilter);
     }
 
     /**
      * Called by the client-side connector to reset the data communicator
      */
     void resetDataCommunicator() {
+        dataCommunicatorNeedsReset = true;
         /*
          * The client filter from combo box will be used in the data
          * communicator only within 'setRequestedRange' calls to data provider,
@@ -316,9 +315,9 @@ class ComboBoxDataController<TItem>
          * applied filter is the same as the previously applied filter. This has
          * to be done manually here.
          */
-        if (forceResetDueToClientSideFilterChange) {
+        if (dataCommunicatorNeedsReset) {
             dataCommunicator.reset();
-            forceResetDueToClientSideFilterChange = false;
+            dataCommunicatorNeedsReset = false;
         }
     }
 
@@ -539,6 +538,7 @@ class ComboBoxDataController<TItem>
                 @Override
                 public void reset() {
                     super.reset();
+                    dataCommunicatorNeedsReset = false;
                     if (comboBox instanceof MultiSelectComboBox) {
                         // The data is destroyed and rebuilt on data
                         // communicator reset. When component renderers are
