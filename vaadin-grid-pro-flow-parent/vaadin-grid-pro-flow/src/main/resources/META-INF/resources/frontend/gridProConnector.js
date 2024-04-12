@@ -62,6 +62,14 @@
             root.innerHTML = `<${tagName}></${tagName}>`;
           }
         });
+      })(column),
+    initCellEditableProvider: (column) =>
+      tryCatchWrapper(function(column) {
+        column.isCellEditable = function(model) {
+          // If there is no cell editable data, assume the cell is editable
+          const isEditable = model.item.cellEditable && model.item.cellEditable[column._flowId];
+          return isEditable === undefined || isEditable;
+        };
       })(column)
   };
 })();
