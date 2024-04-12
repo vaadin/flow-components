@@ -13,11 +13,12 @@ public class EmptySelectionItemIT extends AbstractSelectIT {
     @Test
     public void testEmptySelectionEnabled_userSelectsEmptySelection_nullValueInEvent() {
         page.toggleEmptySelectionEnabled(true);
+        page.setEmptySelectionCaption("empty");
 
         List<SelectElement.ItemElement> items = selectElement.getItems();
         Assert.assertEquals("invalid number of items",
                 getInitialNumberOfItems() + 1, items.size());
-        verify.emptySelectionItemInDropDown("");
+        verify.emptySelectionItemInDropDown("empty");
 
         for (int i = 1; i < items.size(); i++) {
             SelectElement.ItemElement itemElement = items.get(i);
@@ -78,13 +79,11 @@ public class EmptySelectionItemIT extends AbstractSelectIT {
     public void testEmptySelectionItem_whenSelected_correctSelectedItemText() {
         page.toggleEmptySelectionEnabled(true);
         selectElement.selectItemByIndex(0);
-        verify.emptySelectionItemSelected();
+        verify.noItemSelected();
 
         page.setPlaceholder("placeholder");
-        // the placeholder will be shown at this point, but it is impossible to
-        // verify that
-        verify.emptySelectionItemSelected();
-        verify.selectedItem("", "");
+        // the placeholder will be shown at this point
+        verify.placeholderSelected("placeholder");
 
         page.setEmptySelectionCaption("caption");
         verify.selectedItem("caption", "caption");
@@ -98,7 +97,7 @@ public class EmptySelectionItemIT extends AbstractSelectIT {
         verify.selectedItem("caption", "caption");
 
         page.setEmptySelectionCaption("");
-        verify.selectedItem("", "");
+        verify.placeholderSelected("placeholder");
     }
 
     @Override
