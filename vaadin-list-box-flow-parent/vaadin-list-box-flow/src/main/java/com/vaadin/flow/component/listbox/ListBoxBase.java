@@ -59,10 +59,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-list-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/list-box", version = "23.5.0")
-@NpmPackage(value = "@vaadin/vaadin-list-box", version = "23.5.0")
+@NpmPackage(value = "@vaadin/list-box", version = "23.5.1")
+@NpmPackage(value = "@vaadin/vaadin-list-box", version = "23.5.1")
 @JsModule("@vaadin/list-box/src/vaadin-list-box.js")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>
         extends AbstractSinglePropertyField<C, VALUE>
