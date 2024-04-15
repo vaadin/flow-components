@@ -21,6 +21,7 @@ import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -51,6 +52,7 @@ import java.util.Optional;
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         implements ClickNotifier<Checkbox>, Focusable<Checkbox>, HasAriaLabel,
+        HasHelper,
         InputField<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>, Boolean> {
 
     private final Label labelElement;
