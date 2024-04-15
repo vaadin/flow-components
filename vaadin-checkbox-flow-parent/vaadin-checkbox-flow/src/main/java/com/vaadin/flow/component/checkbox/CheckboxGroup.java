@@ -466,9 +466,6 @@ public class CheckboxGroup<T>
     @Override
     public void setReadOnly(boolean readOnly) {
         getElement().setProperty("readonly", readOnly);
-        if (isEnabled()) {
-            refreshCheckboxes();
-        }
     }
 
     @Override
