@@ -25,7 +25,6 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
-import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
@@ -89,7 +88,6 @@ import java.util.stream.Stream;
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         implements Focusable<Select<T>>, HasAriaLabel, HasClientValidation,
         HasDataView<T, Void, SelectDataView<T>>, HasItemComponents<T>,
-        HasHelper,
         InputField<AbstractField.ComponentValueChangeEvent<Select<T>, T>, T>,
         HasListDataView<T, SelectListDataView<T>>, HasOverlayClassName,
         HasPrefix, HasThemeVariant<SelectVariant>, HasValidationProperties,

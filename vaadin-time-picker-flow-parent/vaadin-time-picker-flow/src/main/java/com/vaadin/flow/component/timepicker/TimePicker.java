@@ -31,7 +31,6 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
@@ -77,7 +76,7 @@ import com.vaadin.flow.shared.Registration;
 public class TimePicker
         extends AbstractSinglePropertyField<TimePicker, LocalTime>
         implements Focusable<TimePicker>, HasAllowedCharPattern, HasAriaLabel,
-        HasAutoOpen, HasClearButton, HasClientValidation, HasHelper,
+        HasAutoOpen, HasClearButton, HasClientValidation,
         InputField<AbstractField.ComponentValueChangeEvent<TimePicker, LocalTime>, LocalTime>,
         HasPrefix, HasOverlayClassName, HasThemeVariant<TimePickerVariant>,
         HasValidationProperties, HasValidator<LocalTime>, HasPlaceholder {
