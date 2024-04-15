@@ -463,16 +463,6 @@ public class CheckboxGroup<T>
         getCheckboxItems().forEach(this::updateEnabled);
     }
 
-    @Override
-    public void setReadOnly(boolean readOnly) {
-        getElement().setProperty("readonly", readOnly);
-    }
-
-    @Override
-    public boolean isReadOnly() {
-        return getElement().getProperty("readonly", false);
-    }
-
     /**
      * Returns the item enabled predicate.
      *
