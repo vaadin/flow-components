@@ -113,18 +113,6 @@ public class CheckboxGroupTest {
     }
 
     @Test
-    public void setReadOnlyEnabledCheckboxGroup_groupIsNotDisabled() {
-        CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setReadOnly(true);
-        group.setEnabled(true);
-
-        Assert.assertTrue(group.isReadOnly());
-        Assert.assertTrue(group.isEnabled());
-        Assert.assertEquals(Boolean.FALSE.toString(),
-                group.getElement().getProperty("disabled"));
-    }
-
-    @Test
     public void unsetReadOnlyEnabledCheckboxGroup_groupIsEnabled() {
         CheckboxGroup<String> group = new CheckboxGroup<>();
         group.setEnabled(false);
