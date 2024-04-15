@@ -151,20 +151,6 @@ public class CheckboxUnitTest {
     }
 
     @Test
-    public void setRequired_isRequired() {
-        Checkbox checkbox = new Checkbox();
-
-        Assert.assertFalse(checkbox.isRequired());
-        Assert.assertFalse(
-                checkbox.getElement().getProperty("required", false));
-
-        checkbox.setRequired(true);
-
-        Assert.assertTrue(checkbox.isRequired());
-        Assert.assertTrue(checkbox.getElement().getProperty("required", false));
-    }
-
-    @Test
     public void implementsInputField() {
         Checkbox field = new Checkbox();
         Assert.assertTrue(

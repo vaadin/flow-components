@@ -68,7 +68,6 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
     private String ariaLabel;
     private String ariaLabelledBy;
 
-    private boolean required;
     private boolean manualValidationEnabled = false;
 
     /**
@@ -323,34 +322,6 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         return getElement().getProperty("indeterminate", false);
     }
 
-    /**
-     * Sets whether the checkbox is marked as input required.
-     *
-     * @since 24.5
-     * @param required
-     *            the boolean value to set
-     */
-    public void setRequired(boolean required) {
-        getElement().setProperty("required", required);
-        this.required = required;
-    }
-
-    /**
-     * Determines whether the checkbox is marked as input required.
-     *
-     * @since 24.5
-     * @return {@code true} if the input is required, {@code false} otherwise
-     */
-    public boolean isRequired() {
-        return getElement().getProperty("required", false);
-    }
-
-    @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        this.required = requiredIndicatorVisible;
-    }
-
     @Override
     public void setManualValidation(boolean enabled) {
         this.manualValidationEnabled = enabled;
@@ -373,8 +344,9 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      * constraints using browser development tools.
      */
     private boolean isInvalid(Boolean value) {
+        boolean isRequired = isRequiredIndicatorVisible();
         ValidationResult requiredValidation = ValidationUtil
-                .checkRequired(required, value, getEmptyValue());
+                .checkRequired(isRequired, value, getEmptyValue());
 
         return requiredValidation.isError();
     }
