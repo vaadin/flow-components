@@ -56,6 +56,32 @@ public class FilterDebounceIT extends AbstractComboBoxIT {
         waitForExpectedItems();
     }
 
+    @Test
+    public void withInitialFilter_clearAndReapplyFilter_doesNotHang() {
+        combo.sendKeys("a");
+        waitForExpectedItems();
+        combo.sendKeys(Keys.BACK_SPACE);
+        combo.sendKeys("a");
+        waitForExpectedItems();
+    }
+
+    @Test
+    public void withInitialFilter_updateAndReapplyFilter_doesNotHang() {
+        combo.sendKeys("a");
+        waitForExpectedItems();
+        combo.sendKeys("b");
+        combo.sendKeys(Keys.BACK_SPACE);
+        waitForExpectedItems();
+    }
+
+    public void withoutInitialFilter_updateAndClearFilter_doesNotHang() {
+        combo.openPopup();
+        waitForItems(combo, items -> items.size() == 3);
+        combo.sendKeys("a");
+        combo.sendKeys(Keys.BACK_SPACE);
+        waitForItems(combo, items -> items.size() == 3);
+    }
+
     private void tabOutAndBackFromCombo() {
         combo.sendKeys("\t");
         input.sendKeys(Keys.chord(Keys.SHIFT, Keys.TAB));
