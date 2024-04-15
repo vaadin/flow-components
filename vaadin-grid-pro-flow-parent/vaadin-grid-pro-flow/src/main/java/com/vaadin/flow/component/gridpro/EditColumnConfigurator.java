@@ -22,6 +22,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.gridpro.GridPro.EditColumn;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.Registration;
 
@@ -314,6 +315,22 @@ public class EditColumnConfigurator<T> implements Serializable {
      */
     public EditColumnConfigurator<T> withManualRefresh() {
         column.setManualRefresh(true);
+        return this;
+    }
+
+    /**
+     * Configures a predicate that determines whether individual cells in this
+     * column are editable. The predicate is called for each rendered item of
+     * the grid and should return a boolean indicating whether the cell is
+     * editable or not. By default, the provider is null, which means that all
+     * cells in the column are editable.
+     *
+     * @param cellEditableProvider
+     *            the cell editable provider
+     */
+    public EditColumnConfigurator<T> withCellEditableProvider(
+            SerializablePredicate<T> cellEditableProvider) {
+        column.setCellEditableProvider(cellEditableProvider);
         return this;
     }
 }
