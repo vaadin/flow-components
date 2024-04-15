@@ -316,10 +316,9 @@ public class ButtonIT extends AbstractComponentIT {
         executeScript("arguments[0].dispatchEvent(new MouseEvent(\"click\"));",
                 button);
 
-        String disabled = button.getAttribute("disabled");
-        Assert.assertTrue(
+        Assert.assertNotNull(
                 "The button should contain the 'disabled' attribute after click",
-                disabled != null);
+                button.getAttribute("disabled"));
     }
 
     @Test
