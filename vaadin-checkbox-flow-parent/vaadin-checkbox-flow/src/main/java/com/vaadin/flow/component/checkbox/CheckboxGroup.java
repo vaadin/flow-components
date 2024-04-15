@@ -525,7 +525,7 @@ public class CheckboxGroup<T>
      * Sets the function that is used for generating helper text strings used by
      * the checkbox group for each item.
      *
-     * @since 24.5
+     * @since 24.4
      * @param itemHelperGenerator
      *            the item helper generator to use, not null
      */
@@ -541,7 +541,7 @@ public class CheckboxGroup<T>
      * Gets the function that is used for generating helper text strings used by
      * the checkbox group for each item.
      *
-     * @since 24.5
+     * @since 24.4
      * @return the item helper generator, not null
      */
     public SerializableFunction<T, String> getItemHelperGenerator() {
