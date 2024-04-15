@@ -39,7 +39,7 @@ public class HelperIT extends AbstractComponentIT {
      * https://github.com/vaadin/vaadin-checkbox/issues/191
      */
     @Test
-    public void assertHelperComponentExists() {
+    public void checkboxGroupHelperComponent() {
         TestBenchElement checkboxGroup = $("vaadin-checkbox-group").first();
 
         TestBenchElement helperComponent = checkboxGroup.$("span")
@@ -49,7 +49,7 @@ public class HelperIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertCheckboxGroupHelperGenerator() {
+    public void checkboxGroupHelperGenerator() {
         CheckboxGroupElement group = $(CheckboxGroupElement.class)
                 .id("cbg-helper-generator");
 
@@ -66,7 +66,7 @@ public class HelperIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertCheckboxSlottedHelper() {
+    public void checkboxSlottedHelper() {
         CheckboxElement checkboxHelperText = $(CheckboxElement.class)
                 .id("checkbox-helper-text");
 
@@ -77,7 +77,7 @@ public class HelperIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertCheckboxHelperText() {
+    public void checkboxHelperText() {
         CheckboxElement checkboxHelperText = $(CheckboxElement.class)
                 .id("checkbox-helper-text");
         Assert.assertEquals("Helper text", checkboxHelperText.getHelperText());
@@ -87,7 +87,7 @@ public class HelperIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertCheckboxHelperComponent() {
+    public void checkboxHelperComponent() {
         CheckboxElement checkboxHelperComponent = $(CheckboxElement.class)
                 .id("checkbox-helper-component");
         Assert.assertEquals("helper-component", checkboxHelperComponent
