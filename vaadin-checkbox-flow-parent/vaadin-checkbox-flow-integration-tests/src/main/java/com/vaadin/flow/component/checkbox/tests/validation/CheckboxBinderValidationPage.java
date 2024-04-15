@@ -38,6 +38,6 @@ public class CheckboxBinderValidationPage
 
     @Override
     protected Checkbox createTestField() {
-        return new Checkbox();
+        return new Checkbox("Checkbox");
     }
 }

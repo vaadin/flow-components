@@ -17,7 +17,7 @@ public class CheckboxBasicValidationPage
 
     @Override
     protected Checkbox createTestField() {
-        return new Checkbox() {
+        return new Checkbox("Checkbox") {
             @Override
             protected void validate() {
                 super.validate();
