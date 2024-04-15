@@ -34,7 +34,6 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
@@ -92,7 +91,7 @@ import elemental.json.JsonType;
 public class DatePicker
         extends AbstractSinglePropertyField<DatePicker, LocalDate>
         implements Focusable<DatePicker>, HasAllowedCharPattern, HasAriaLabel,
-        HasAutoOpen, HasClearButton, HasClientValidation, HasHelper,
+        HasAutoOpen, HasClearButton, HasClientValidation,
         InputField<AbstractField.ComponentValueChangeEvent<DatePicker, LocalDate>, LocalDate>,
         HasOverlayClassName, HasPrefix, HasThemeVariant<DatePickerVariant>,
         HasValidationProperties, HasValidator<LocalDate>, HasPlaceholder {
