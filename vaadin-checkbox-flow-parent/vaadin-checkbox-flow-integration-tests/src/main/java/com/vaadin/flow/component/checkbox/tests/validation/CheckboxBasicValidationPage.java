@@ -17,14 +17,12 @@ public class CheckboxBasicValidationPage
 
     @Override
     protected Checkbox createTestField() {
-        Checkbox checkbox = new Checkbox() {
+        return new Checkbox() {
             @Override
             protected void validate() {
                 super.validate();
                 incrementServerValidationCounter();
             }
         };
-
-        return checkbox;
     }
 }
