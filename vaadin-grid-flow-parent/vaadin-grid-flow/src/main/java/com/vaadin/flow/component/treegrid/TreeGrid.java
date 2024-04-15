@@ -575,9 +575,10 @@ public class TreeGrid<T> extends Grid<T>
                         + "${item.name}</vaadin-grid-tree-toggle>")
                 .withProperty("children",
                         item -> getDataCommunicator().hasChildren(item))
-                .withProperty("name",
-                        value -> String.valueOf(valueProvider.apply(value)))
-                .withFunction("onClick", item -> {
+                .withProperty("name", value -> {
+                    Object name = valueProvider.apply(value);
+                    return name == null ? "" : String.valueOf(name);
+                }).withFunction("onClick", item -> {
                     if (getDataCommunicator().hasChildren(item)) {
                         if (isExpanded(item)) {
                             collapse(List.of(item), true);
