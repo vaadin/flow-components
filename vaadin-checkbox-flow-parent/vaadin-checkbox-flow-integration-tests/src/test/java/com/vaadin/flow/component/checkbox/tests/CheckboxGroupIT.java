@@ -127,9 +127,9 @@ public class CheckboxGroupIT extends AbstractComponentIT {
         List<CheckboxElement> checkboxes = group.getCheckboxes();
 
         Assert.assertEquals(Boolean.TRUE.toString(),
-                checkboxes.get(1).getAttribute("disabled"));
+                checkboxes.get(1).getAttribute("readonly"));
         Assert.assertEquals(Boolean.TRUE.toString(),
-                group.getAttribute("disabled"));
+                group.getAttribute("readonly"));
 
         scrollToElement(group);
         getCommandExecutor().executeScript("window.scrollBy(0,50);");
