@@ -41,10 +41,10 @@ import com.vaadin.flow.function.SerializableFunction;
  */
 @Deprecated
 @Tag("vaadin-email-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/email-field", version = "23.5.0")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.5.0")
+@NpmPackage(value = "@vaadin/email-field", version = "23.5.1")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.5.1")
 @JsModule("@vaadin/email-field/src/vaadin-email-field.js")
 public abstract class GeneratedVaadinEmailField<R extends GeneratedVaadinEmailField<R, T>, T>
         extends GeneratedVaadinTextField<R, T> implements HasStyle {

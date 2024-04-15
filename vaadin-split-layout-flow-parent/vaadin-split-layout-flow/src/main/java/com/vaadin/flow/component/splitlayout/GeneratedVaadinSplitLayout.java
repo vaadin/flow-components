@@ -185,7 +185,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @Deprecated
 @Tag("vaadin-split-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/split-layout/src/vaadin-split-layout.js")
 public abstract class GeneratedVaadinSplitLayout<R extends GeneratedVaadinSplitLayout<R>>
