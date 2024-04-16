@@ -51,6 +51,7 @@ public class ButtonView extends Div {
         createButtonWithDisableOnClick();
         createButtonWithDisableOnClickThatEnablesInSameRoundtrip();
         createButtonWithDisableOnClickThatIsHidden();
+        createButtonWithDisableOnClickAndPointerEventsAuto();
         addVariantsFeature();
         createButtonsWithShortcuts();
 
@@ -278,6 +279,17 @@ public class ButtonView extends Div {
         enableButton.setId("enable-hidden-button");
 
         addCard("Button disabled on click and hidden", button, enableButton);
+    }
+
+    private void createButtonWithDisableOnClickAndPointerEventsAuto() {
+        Button button = new Button("Disabled and pointer events auto");
+        button.setEnabled(false);
+        button.getStyle().set("pointer-events", "auto");
+        button.setDisableOnClick(true);
+        button.setDisableOnClick(false);
+        button.setId("disable-on-click-pointer-events-auto");
+
+        addCard("Button disabled on click and pointer events auto", button);
     }
 
     private void addCard(String title, Component... components) {
