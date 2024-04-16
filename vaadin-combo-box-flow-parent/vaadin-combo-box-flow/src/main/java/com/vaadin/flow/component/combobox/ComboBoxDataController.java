@@ -290,25 +290,7 @@ class ComboBoxDataController<TItem>
      * Called by the client-side connector to reset the data communicator
      */
     void resetDataCommunicator() {
-        /*
-         * The client filter from combo box will be used in the data
-         * communicator only within 'setRequestedRange' calls to data provider,
-         * and then will be erased to not affect the data view item count
-         * handling methods. Thus, if the current client filter is not empty,
-         * then we need to re-set it in the data communicator.
-         */
-        if (lastFilter == null || lastFilter.isEmpty()) {
-            dataCommunicator.reset();
-        } else {
-            String filter = lastFilter;
-            lastFilter = null;
-            /*
-             * This filter slot will eventually call the filter consumer in data
-             * communicator and 'DataCommunicator::reset' is done inside this
-             * consumer, so we don't need to explicitly call it.
-             */
-            filterSlot.accept(filter);
-        }
+        dataCommunicator.reset();
     }
 
     // ****************************************************
