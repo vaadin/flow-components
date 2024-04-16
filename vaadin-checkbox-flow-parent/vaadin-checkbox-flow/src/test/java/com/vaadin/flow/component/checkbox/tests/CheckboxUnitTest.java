@@ -17,6 +17,7 @@ package com.vaadin.flow.component.checkbox.tests;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import org.junit.Assert;
 import org.junit.Test;
@@ -154,5 +155,11 @@ public class CheckboxUnitTest {
         Checkbox field = new Checkbox();
         Assert.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>, Boolean>);
+    }
+
+    @Test
+    public void implementsHasValidationProperties() {
+        Checkbox field = new Checkbox();
+        Assert.assertTrue(field instanceof HasValidationProperties);
     }
 }
