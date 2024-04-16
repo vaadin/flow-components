@@ -765,8 +765,9 @@ public class Spreadsheet extends Component
 
         @Override
         public void updateFormulaBar(String possibleName, int col, int row) {
-            getElement().callJsFunction("updateFormulaBar", possibleName, col,
-                    row);
+            getElement().executeJs(
+                    "queueMicrotask(() => this.updateFormulaBar($0, $1, $2));",
+                    possibleName, col, row);
         }
 
         @Override
