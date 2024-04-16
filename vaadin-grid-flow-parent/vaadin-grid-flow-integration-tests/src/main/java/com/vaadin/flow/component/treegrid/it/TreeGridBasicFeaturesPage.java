@@ -51,6 +51,7 @@ public class TreeGridBasicFeaturesPage extends Div {
     private TreeDataProvider<HierarchicalTestBean> inMemoryDataProvider;
     private LazyHierarchicalDataProvider lazyDataProvider;
     private HierarchicalDataProvider<HierarchicalTestBean, ?> loggingDataProvider;
+    private TreeDataProvider<HierarchicalTestBean> dataProviderWithNullValues;
     private TextArea log;
 
     public TreeGridBasicFeaturesPage() {
@@ -58,7 +59,10 @@ public class TreeGridBasicFeaturesPage extends Div {
         grid = new TreeGrid<>(HierarchicalTestBean.class);
         grid.setWidth("100%");
         grid.setSelectionMode(SelectionMode.SINGLE);
-        grid.setColumns("id", HierarchicalTestBean::toString,
+        grid.setColumns("id",
+                hierarchicalTestBean -> hierarchicalTestBean.getIndex() < 0
+                        ? null
+                        : hierarchicalTestBean.toString(),
                 Arrays.asList("id", "depth", "index"));
         grid.setDataProvider(new LazyHierarchicalDataProvider(3, 2));
 
@@ -90,25 +94,8 @@ public class TreeGridBasicFeaturesPage extends Div {
     }
 
     private void initializeDataProviders() {
-        TreeData<HierarchicalTestBean> data = new TreeData<>();
-
-        List<Integer> ints = Arrays.asList(0, 1, 2);
-
-        ints.stream().forEach(index -> {
-            HierarchicalTestBean bean = new HierarchicalTestBean(null, 0,
-                    index);
-            data.addItem(null, bean);
-            ints.stream().forEach(childIndex -> {
-                HierarchicalTestBean childBean = new HierarchicalTestBean(
-                        bean.getId(), 1, childIndex);
-                data.addItem(bean, childBean);
-                ints.stream()
-                        .forEach(grandChildIndex -> data.addItem(childBean,
-                                new HierarchicalTestBean(childBean.getId(), 2,
-                                        grandChildIndex)));
-            });
-        });
-
+        TreeData<HierarchicalTestBean> data = getTreeData(
+                Arrays.asList(0, 1, 2));
         inMemoryDataProvider = new CustomTreeDataProvider(data);
         lazyDataProvider = new LazyHierarchicalDataProvider(3, 2);
         loggingDataProvider = new CustomTreeDataProvider(data) {
@@ -129,7 +116,27 @@ public class TreeGridBasicFeaturesPage extends Div {
                 return super.fetchChildren(query);
             }
         };
+        dataProviderWithNullValues = new CustomTreeDataProvider(
+                getTreeData(Arrays.asList(-1, 0, 1)));
+    }
 
+    private TreeData<HierarchicalTestBean> getTreeData(List<Integer> indexes) {
+        TreeData<HierarchicalTestBean> data = new TreeData<>();
+        indexes.stream().forEach(index -> {
+            HierarchicalTestBean bean = new HierarchicalTestBean(null, 0,
+                    index);
+            data.addItem(null, bean);
+            indexes.stream().forEach(childIndex -> {
+                HierarchicalTestBean childBean = new HierarchicalTestBean(
+                        bean.getId(), 1, childIndex);
+                data.addItem(bean, childBean);
+                indexes.stream()
+                        .forEach(grandChildIndex -> data.addItem(childBean,
+                                new HierarchicalTestBean(childBean.getId(), 2,
+                                        grandChildIndex)));
+            });
+        });
+        return data;
     }
 
     private void log(String txt) {
@@ -139,13 +146,15 @@ public class TreeGridBasicFeaturesPage extends Div {
     @SuppressWarnings("unchecked")
     private void createDataProviderSelect() {
         @SuppressWarnings("rawtypes")
-        LinkedHashMap<String, DataProvider> options = new LinkedHashMap<>();
+        LinkedHashMap<String, HierarchicalDataProvider> options = new LinkedHashMap<>();
         options.put("LazyHierarchicalDataProvider", lazyDataProvider);
         options.put("TreeDataProvider", inMemoryDataProvider);
         options.put("LoggingDataProvider", loggingDataProvider);
+        options.put("DataProviderWithNullValues", dataProviderWithNullValues);
 
         options.entrySet().forEach(entry -> {
-            addAction(entry.getKey(), () -> grid.setItems(entry.getValue()));
+            addAction(entry.getKey(),
+                    () -> grid.setDataProvider(entry.getValue()));
         });
     }
 
