@@ -31,7 +31,6 @@ import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
@@ -86,7 +85,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements Focusable<TComponent>, HasAllowedCharPattern, HasAriaLabel,
         HasAutoOpen, HasClearButton, HasClientValidation, HasOverlayClassName,
-        HasDataView<TItem, String, ComboBoxDataView<TItem>>, HasHelper,
+        HasDataView<TItem, String, ComboBoxDataView<TItem>>,
         InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue>,
         HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>, HasTheme,

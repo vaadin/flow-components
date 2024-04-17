@@ -33,7 +33,6 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -68,6 +67,7 @@ import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
@@ -84,15 +84,14 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha19")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha22")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "24.4.0-alpha19")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "24.4.0-alpha22")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
         implements HasAriaLabel, HasClientValidation,
-        HasDataView<T, Void, CheckboxGroupDataView<T>>, HasHelper,
-        HasItemComponents<T>,
+        HasDataView<T, Void, CheckboxGroupDataView<T>>, HasItemComponents<T>,
         InputField<AbstractField.ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>, Set<T>>,
         HasListDataView<T, CheckboxGroupListDataView<T>>,
         HasThemeVariant<CheckboxGroupVariant>, HasValidationProperties,
@@ -105,11 +104,11 @@ public class CheckboxGroup<T>
     private final AtomicReference<DataProvider<T, ?>> dataProvider = new AtomicReference<>(
             DataProvider.ofItems());
 
-    private boolean isReadOnly;
-
     private SerializablePredicate<T> itemEnabledProvider = item -> isEnabled();
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
+
+    private SerializableFunction<T, String> itemHelperGenerator = item -> null;
 
     private ComponentRenderer<? extends Component, T> itemRenderer;
 
@@ -461,26 +460,8 @@ public class CheckboxGroup<T>
 
     @Override
     public void onEnabledStateChanged(boolean enabled) {
-        if (isReadOnly()) {
-            setDisabled(true);
-        } else {
-            setDisabled(!enabled);
-        }
+        setDisabled(!enabled);
         getCheckboxItems().forEach(this::updateEnabled);
-    }
-
-    @Override
-    public void setReadOnly(boolean readOnly) {
-        isReadOnly = readOnly;
-        if (isEnabled()) {
-            setDisabled(readOnly);
-            refreshCheckboxes();
-        }
-    }
-
-    @Override
-    public boolean isReadOnly() {
-        return isReadOnly;
     }
 
     /**
@@ -536,6 +517,33 @@ public class CheckboxGroup<T>
      */
     public ItemLabelGenerator<T> getItemLabelGenerator() {
         return itemLabelGenerator;
+    }
+
+    /**
+     * Sets the function that is used for generating helper text strings used by
+     * the checkbox group for each item.
+     *
+     * @since 24.4
+     * @param itemHelperGenerator
+     *            the item helper generator to use, not null
+     */
+    public void setItemHelperGenerator(
+            SerializableFunction<T, String> itemHelperGenerator) {
+        Objects.requireNonNull(itemHelperGenerator,
+                "The item helper generator can not be null");
+        this.itemHelperGenerator = itemHelperGenerator;
+        refreshCheckboxes();
+    }
+
+    /**
+     * Gets the function that is used for generating helper text strings used by
+     * the checkbox group for each item.
+     *
+     * @since 24.4
+     * @return the item helper generator, not null
+     */
+    public SerializableFunction<T, String> getItemHelperGenerator() {
+        return itemHelperGenerator;
     }
 
     /**
@@ -776,6 +784,13 @@ public class CheckboxGroup<T>
         } else {
             checkbox.setLabelComponent(
                     getItemRenderer().createComponent(checkbox.item));
+        }
+
+        String helper = itemHelperGenerator.apply(checkbox.item);
+        if (helper != null) {
+            checkbox.setHelperText(helper);
+        } else if (checkbox.getHelperText() != null) {
+            checkbox.setHelperText(null);
         }
 
         checkbox.setValue(getValue().stream().anyMatch(

@@ -308,6 +308,20 @@ public class ButtonIT extends AbstractComponentIT {
     }
 
     @Test
+    public void disabledAndPointerEventsAuto_disableOnClick_clientSideButtonIsDisabled() {
+        WebElement button = layout
+                .findElement(By.id("disable-on-click-pointer-events-auto"));
+
+        scrollToElement(button);
+        executeScript("arguments[0].dispatchEvent(new MouseEvent(\"click\"));",
+                button);
+
+        Assert.assertNotNull(
+                "The button should contain the 'disabled' attribute after click",
+                button.getAttribute("disabled"));
+    }
+
+    @Test
     public void buttonShortcuts_shortcutsWork() {
         WebElement button = findElement(By.id("shortcuts-enter-button"));
 

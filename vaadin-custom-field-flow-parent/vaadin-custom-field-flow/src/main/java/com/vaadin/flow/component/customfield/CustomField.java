@@ -19,7 +19,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.InputField;
@@ -48,12 +47,12 @@ import com.vaadin.flow.dom.Element;
  *            field value type
  */
 @Tag("vaadin-custom-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha19")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha22")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/custom-field", version = "24.4.0-alpha19")
+@NpmPackage(value = "@vaadin/custom-field", version = "24.4.0-alpha22")
 @JsModule("@vaadin/custom-field/src/vaadin-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
-        implements Focusable<CustomField<T>>, HasHelper,
+        implements Focusable<CustomField<T>>,
         InputField<AbstractField.ComponentValueChangeEvent<CustomField<T>, T>, T>,
         HasTheme, HasValidationProperties {
 
