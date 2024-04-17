@@ -8,7 +8,7 @@ import {
   getSeparator,
   searchAmOrPmToken
 } from './helpers.js';
-import { TimePicker } from '@vaadin/time-picker';
+import { TimePicker } from '@vaadin/time-picker/src/vaadin-time-picker.js';
 
 (function () {
   const tryCatchWrapper = function (callback) {
