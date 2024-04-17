@@ -587,6 +587,25 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     @Test
+    public void menuItemWithClassNameInOverflow_menuItemLeavesOverflow_classNameCanBeChanged() {
+        click("set-width");
+        click("set-item2-class-name");
+        waitForResizeObserver();
+        menuBar.getOverflowButton().click();
+        click("reset-width");
+        waitForResizeObserver();
+        click("change-item2-class-name");
+        TestBenchElement menuItem = menuBar.getButtons().get(1);
+        Assert.assertEquals(menuItem.getAttribute("class"),
+                MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME);
+
+        click("remove-item2-class-name");
+        menuItem = menuBar.getButtons().get(1);
+        Assert.assertFalse(menuItem.getAttribute("class")
+                .contains(MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME));
+    }
+
+    @Test
     public void setMenuItemTheme_toggleVisibility_themeIsPreserved() {
         click("toggle-item-1-theme");
         click("toggle-item-1-visibility");
