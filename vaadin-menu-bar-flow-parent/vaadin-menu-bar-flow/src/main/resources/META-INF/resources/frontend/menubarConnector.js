@@ -117,8 +117,10 @@ import './contextMenuConnector.js';
   }
 
   function setClassName(component) {
-    if (component._rootItem) {
-      component._rootItem.className = component.className;
+    const item = component._rootItem || component._item;
+
+    if (item) {
+      item.className = component.className;
     }
   }
 
