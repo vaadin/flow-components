@@ -24,6 +24,20 @@ import {
     }
   }
 
+  function parseISO(text) {
+    // The default i18n parser of the web component is ISO 8601 compliant.
+    const timeObject = TimePicker.properties.i18n.value().parseTime(text);
+
+    // The web component returns an object with string values
+    // while the connector expects number values.
+    return {
+      hours: parseInt(timeObject.hours),
+      minutes: parseInt(timeObject.minutes),
+      seconds: parseInt(timeObject.seconds),
+      milliseconds: parseInt(timeObject.milliseconds)
+    }
+  };
+
   window.Vaadin.Flow.timepickerConnector = {
     initLazy: (timepicker) =>
       tryCatchWrapper(function (timepicker) {
@@ -38,7 +52,7 @@ import {
           // capture previous value if any
           let previousValueObject;
           if (timepicker.value && timepicker.value !== '') {
-            previousValueObject = timepicker.i18n.parseTime(timepicker.value);
+            previousValueObject = parseISO(timepicker.value);
           }
 
           try {
@@ -91,11 +105,7 @@ import {
 
               // milliseconds not part of the time format API
               if (includeMilliSeconds()) {
-                let timeObjectMilliseconds = timeObject.milliseconds;
-                if (typeof timeObjectMilliseconds === 'string') {
-                  timeObjectMilliseconds = timeObjectMilliseconds ? parseDigitsIntoInteger(timeObjectMilliseconds.replace(separator, '')) : 0;
-                }
-                localeTimeString = formatMilliseconds(localeTimeString, timeObjectMilliseconds, amString, pmString);
+                localeTimeString = formatMilliseconds(localeTimeString, timeObject.milliseconds, amString, pmString);
               }
 
               return localeTimeString;
