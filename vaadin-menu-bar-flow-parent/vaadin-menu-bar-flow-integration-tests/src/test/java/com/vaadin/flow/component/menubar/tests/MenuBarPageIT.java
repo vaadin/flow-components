@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
+import com.google.common.base.Strings;
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
@@ -557,6 +558,33 @@ public class MenuBarPageIT extends AbstractComponentIT {
         verifyClosed();
         verifySubMenuItemClassNames(true,
                 MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+    }
+
+    @Test
+    public void menuItemWithClassNameInOverflow_changeClassName_classNameIsChanged() {
+        click("set-width");
+        click("set-item2-class-name");
+        waitForResizeObserver();
+        menuBar.getOverflowButton().click();
+        click("change-item2-class-name");
+        menuBar.getOverflowButton().click();
+        TestBenchElement menuItem = menuBar.getSubMenuItems().get(0);
+        Assert.assertEquals(menuItem.getAttribute("class"),
+                MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME);
+    }
+
+    @Test
+    public void menuItemWithClassNameInOverflow_removeClassName_classNameIsRemoved() {
+        click("set-width");
+        click("set-item2-class-name");
+        waitForResizeObserver();
+        menuBar.getOverflowButton().click();
+        click("remove-item2-class-name");
+        menuBar.getOverflowButton().click();
+        TestBenchElement menuItem = menuBar.getSubMenuItems().get(0);
+
+        Assert.assertTrue(
+                Strings.isNullOrEmpty(menuItem.getAttribute("class")));
     }
 
     @Test

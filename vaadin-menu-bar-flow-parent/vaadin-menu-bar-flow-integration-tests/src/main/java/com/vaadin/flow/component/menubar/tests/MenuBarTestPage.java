@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.menubar.tests;
 
+import java.util.stream.IntStream;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
@@ -233,6 +234,24 @@ public class MenuBarTestPage extends Div {
                 });
         setUnsetSubItemClassNameButton.setId("set-unset-sub-item-class-name");
 
+        NativeButton setItem2ClassNameButton = new NativeButton(
+                "set item 2 class", e -> {
+                    item2.setClassName(MENU_ITEM_FIRST_CLASS_NAME);
+                });
+        setItem2ClassNameButton.setId("set-item2-class-name");
+
+        NativeButton removeItem2ClassNameButton = new NativeButton(
+                "remove item 2 class", e -> {
+                    item2.removeClassName(MENU_ITEM_FIRST_CLASS_NAME);
+                });
+        removeItem2ClassNameButton.setId("remove-item2-class-name");
+
+        NativeButton changeItem2ClassNameButton = new NativeButton(
+                "change item 2 class", e -> {
+                    item2.setClassName(MENU_ITEM_SECOND_CLASS_NAME);
+                });
+        changeItem2ClassNameButton.setId("change-item2-class-name");
+
         add(new Hr(), addRootItemButton, addSubItemButton, removeItemButton,
                 openOnHoverButton, setWidthButton, resetWidthButton,
                 disableItemButton, toggleItem1VisibilityButton,
@@ -240,10 +259,13 @@ public class MenuBarTestPage extends Div {
                 toggleAttachedButton, setI18nButton, toggleAttachedButton,
                 toggleMenuBarThemeButton, toggleItem1ThemeButton,
                 toggleSubItemThemeButton, toggleClassNameButton,
-                setItemClassNameButton, setUnsetClassNameButton,
-                addRemoveMultipleClassNames, toggleSubItemClassNameButton,
-                addSecondSubItemClassButton, removeSubItemClassNameButton,
+                setItemClassNameButton, setItem2ClassNameButton,
+                removeItem2ClassNameButton, changeItem2ClassNameButton,
+                setUnsetClassNameButton, addRemoveMultipleClassNames,
+                toggleSubItemClassNameButton, addSecondSubItemClassButton,
+                removeSubItemClassNameButton,
                 addRemoveMultipleSubItemClassNames,
                 setUnsetSubItemClassNameButton);
     }
+
 }
