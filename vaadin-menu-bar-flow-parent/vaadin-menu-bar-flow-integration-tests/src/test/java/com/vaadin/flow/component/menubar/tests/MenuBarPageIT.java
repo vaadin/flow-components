@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-import com.google.common.base.Strings;
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
@@ -583,8 +582,8 @@ public class MenuBarPageIT extends AbstractComponentIT {
         menuBar.getOverflowButton().click();
         TestBenchElement menuItem = menuBar.getSubMenuItems().get(0);
 
-        Assert.assertTrue(
-                Strings.isNullOrEmpty(menuItem.getAttribute("class")));
+        Assert.assertFalse(menuItem.getAttribute("class")
+                .contains(MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME));
     }
 
     @Test

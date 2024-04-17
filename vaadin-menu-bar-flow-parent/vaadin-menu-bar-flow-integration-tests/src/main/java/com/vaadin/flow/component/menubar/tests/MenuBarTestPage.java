@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.menubar.tests;
 
-import java.util.stream.IntStream;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
@@ -242,7 +241,7 @@ public class MenuBarTestPage extends Div {
 
         NativeButton removeItem2ClassNameButton = new NativeButton(
                 "remove item 2 class", e -> {
-                    item2.removeClassName(MENU_ITEM_FIRST_CLASS_NAME);
+                    item2.setClassName(null);
                 });
         removeItem2ClassNameButton.setId("remove-item2-class-name");
 
