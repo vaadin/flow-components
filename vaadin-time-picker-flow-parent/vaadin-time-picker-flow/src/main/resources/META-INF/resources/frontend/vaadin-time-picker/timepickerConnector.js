@@ -32,10 +32,10 @@ import { TimePicker } from '@vaadin/time-picker';
     // The web component returns an object with string values
     // while the connector expects number values.
     return {
-      hours: parseInt(timeObject.hours),
-      minutes: parseInt(timeObject.minutes),
-      seconds: parseInt(timeObject.seconds),
-      milliseconds: parseInt(timeObject.milliseconds)
+      hours: parseInt(timeObject.hours || 0),
+      minutes: parseInt(timeObject.minutes || 0),
+      seconds: parseInt(timeObject.seconds || 0),
+      milliseconds: parseInt(timeObject.milliseconds || 0)
     }
   };
 
