@@ -36,6 +36,7 @@ public class TimePickerPage extends Div {
         createTimePickerWithStepSetting();
         createTimePickerWithMinAndMaxSetting();
         createTimePickerFromRenderer();
+        createTimePickerWithSmallMs();
         createHelperText();
         createHelperComponent();
     }
@@ -123,6 +124,15 @@ public class TimePickerPage extends Div {
                     return timePicker;
                 });
         renderer.render(getElement(), null);
+    }
+
+    private void createTimePickerWithSmallMs() {
+        TimePicker timePicker = new TimePicker();
+        timePicker.setValue(LocalTime.of(0, 0, 0, 50000000));
+        timePicker.setStep(Duration.ofMillis(1));
+        timePicker.setId("picker-with-small-ms");
+        timePicker.setLabel("TimePicker with small ms");
+        add(timePicker);
     }
 
     private void createHelperText() {
