@@ -143,6 +143,14 @@ public class TimePickerIT extends AbstractComponentIT {
         Assert.assertNull(picker.getHelperComponent());
     }
 
+    @Test
+    public void timePickerWithSmallMs_msNotRoundedDownToZero() {
+        TimePickerElement picker = $(TimePickerElement.class)
+                .id("picker-with-small-ms");
+
+        validatePickerValue(picker, "00:00:00.050");
+    }
+
     private void selectStep(String step) {
         NativeSelectElement select = $(NativeSelectElement.class)
                 .id("step-picker");
