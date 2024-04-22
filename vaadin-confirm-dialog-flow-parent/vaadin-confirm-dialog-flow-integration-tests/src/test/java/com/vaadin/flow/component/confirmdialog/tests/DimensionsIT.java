@@ -18,6 +18,7 @@ public class DimensionsIT extends AbstractParallelTest {
 
     @Before
     public void init() {
+        getDriver().manage().window().setSize(WINDOW_SIZE_LARGE);
         String url = getBaseURL().replace(super.getBaseURL(),
                 super.getBaseURL() + "/vaadin-confirm-dialog") + "/Dimensions";
         getDriver().get(url);
