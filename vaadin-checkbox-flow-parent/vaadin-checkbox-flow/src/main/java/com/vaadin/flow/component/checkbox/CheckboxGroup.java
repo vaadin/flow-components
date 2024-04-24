@@ -108,7 +108,7 @@ public class CheckboxGroup<T>
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
 
-    private SerializableFunction<T, String> itemHelperGenerator = item -> null;
+    private ItemHelperGenerator<T> itemHelperGenerator = item -> null;
 
     private ComponentRenderer<? extends Component, T> itemRenderer;
 
@@ -520,15 +520,17 @@ public class CheckboxGroup<T>
     }
 
     /**
-     * Sets the function that is used for generating helper text strings used by
-     * the checkbox group for each item.
+     * Sets the {@link ItemHelperGenerator} that is used for generating helper
+     * text strings used by the checkbox group for each item.
      *
      * @since 24.4
+     * @see Checkbox#setHelperText(String)
+     * @see #setItemLabelGenerator
      * @param itemHelperGenerator
      *            the item helper generator to use, not null
      */
     public void setItemHelperGenerator(
-            SerializableFunction<T, String> itemHelperGenerator) {
+            ItemHelperGenerator<T> itemHelperGenerator) {
         Objects.requireNonNull(itemHelperGenerator,
                 "The item helper generator can not be null");
         this.itemHelperGenerator = itemHelperGenerator;
@@ -536,14 +538,39 @@ public class CheckboxGroup<T>
     }
 
     /**
-     * Gets the function that is used for generating helper text strings used by
-     * the checkbox group for each item.
+     * Gets the {@link ItemHelperGenerator} function that is used for generating
+     * helper text strings used by the checkbox group for each item.
      *
      * @since 24.4
+     * @see #getItemLabelGenerator()
      * @return the item helper generator, not null
      */
-    public SerializableFunction<T, String> getItemHelperGenerator() {
+    public ItemHelperGenerator<T> getItemHelperGenerator() {
         return itemHelperGenerator;
+    }
+
+    /**
+     * {@link ItemHelperGenerator} can be used to generate helper text strings
+     * used by the checkbox group for each checkbox.
+     *
+     * @since 24.4
+     * @see Checkbox#setHelperText(String)
+     * @param <T>
+     *            item type
+     */
+    @FunctionalInterface
+    public interface ItemHelperGenerator<T>
+            extends SerializableFunction<T, String> {
+
+        /**
+         * Gets a helper text string for the {@code item}.
+         *
+         * @param item
+         *            the item to get helper text for
+         * @return the helper text string for the item, not {@code null}
+         */
+        @Override
+        String apply(T item);
     }
 
     /**
