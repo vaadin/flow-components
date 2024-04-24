@@ -166,7 +166,7 @@ public class VerticalLayout extends Component implements ThemableLayout,
      * can be aligned by using the
      * {@link #setHorizontalComponentAlignment(Alignment, Component...)} method.
      * <p>
-     * The default alignment is {@link Alignment#STRETCH}.
+     * The default alignment is {@link Alignment#START}.
      * <p>
      * It's the same as the {@link #setAlignItems(Alignment)} method.
      *
@@ -182,7 +182,7 @@ public class VerticalLayout extends Component implements ThemableLayout,
      * Gets the default horizontal alignment used by all components without
      * individual alignments inside the layout.
      * <p>
-     * The default alignment is {@link Alignment#STRETCH}.
+     * The default alignment is {@link Alignment#START}.
      * <p>
      * It's the same as the {@link #getAlignItems()} method.
      *
@@ -219,7 +219,9 @@ public class VerticalLayout extends Component implements ThemableLayout,
         // this method is overridden to make javadocs point to the correct
         // method to be used, and since FlexComponent has different default
         // value.
-        return FlexComponent.super.getAlignItems();
+        return Alignment.toAlignment(
+                getStyle().get(FlexConstants.ALIGN_ITEMS_CSS_PROPERTY),
+                Alignment.START);
     }
 
     /**
