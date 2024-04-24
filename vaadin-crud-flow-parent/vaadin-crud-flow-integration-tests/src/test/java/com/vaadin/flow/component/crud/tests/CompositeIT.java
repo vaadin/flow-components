@@ -29,8 +29,7 @@ public class CompositeIT extends AbstractParallelTest {
                 .first().setValue("English");
 
         $(TestBenchElement.class).withId("overlay").last()
-                .$(ButtonElement.class).first()
-                .click();
+                .$(ButtonElement.class).first().click();
 
         Assert.assertTrue(
                 $(CrudElement.class).first().getEditorSaveButton().isEnabled());
