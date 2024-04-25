@@ -30,6 +30,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.List;
 
 /**
  * Integration tests for the ButtonView.
@@ -44,6 +45,91 @@ public class ButtonIT extends AbstractComponentIT {
         open();
         layout = this;
         waitForElementPresent(By.tagName("vaadin-button"));
+    }
+
+    @Test
+    public void textMatches() {
+        List<ButtonElement> buttonElements = $(ButtonElement.class)
+                .withText("Vaadin button")
+                .all();
+        Assert.assertEquals(1, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class)
+                .withText("")
+                .all();
+        Assert.assertEquals(2, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class)
+                .withText("nonexistent")
+                .all();
+        Assert.assertEquals(0, buttonElements.size());
+    }
+
+    @Test
+    public void textContains() {
+        List<ButtonElement> buttonElements = $(ButtonElement.class)
+                .withTextContaining("Vaadin")
+                .all();
+        Assert.assertEquals(1, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class)
+                .withTextContaining("button")
+                .all();
+        Assert.assertEquals(4, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class)
+                .withTextContaining("nonexistent")
+                .all();
+        Assert.assertEquals(0, buttonElements.size());
+    }
+
+    @Test
+    public void textBiPredicate() {
+        List<ButtonElement> buttonElements = $(ButtonElement.class)
+                .withText("Vaadin", String::startsWith)
+                .all();
+        Assert.assertEquals(1, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class)
+                .withText("button", String::endsWith)
+                .all();
+        Assert.assertEquals(3, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class)
+                .withText("button", ButtonIT::containsIgnoreCase)
+                .all();
+        Assert.assertEquals(5, buttonElements.size());
+    }
+
+    @Test
+    public void captionMatches() {
+        List<ButtonElement> buttonElements = $(ButtonElement.class)
+                .withCaption("Vaadin button")
+                .all();
+        Assert.assertEquals(1, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class)
+                .withCaption("nonexistent")
+                .all();
+        Assert.assertEquals(0, buttonElements.size());
+    }
+
+    @Test
+    public void captionContains() {
+        List<ButtonElement> buttonElements = $(ButtonElement.class)
+                .withCaptionContaining("Vaadin")
+                .all();
+        Assert.assertEquals(1, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class)
+                .withCaptionContaining("button")
+                .all();
+        Assert.assertEquals(4, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class)
+                .withCaptionContaining("nonexistent")
+                .all();
+        Assert.assertEquals(0, buttonElements.size());
     }
 
     @Test
@@ -376,6 +462,10 @@ public class ButtonIT extends AbstractComponentIT {
 
     private int getCenterX(WebElement element) {
         return element.getLocation().getX() + element.getSize().getWidth() / 2;
+    }
+
+    private static boolean containsIgnoreCase(String a, String b) {
+        return a.toUpperCase().contains(b.toUpperCase());
     }
 
     @Override
