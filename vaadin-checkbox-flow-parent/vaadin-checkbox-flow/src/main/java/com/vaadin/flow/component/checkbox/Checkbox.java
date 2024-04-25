@@ -52,9 +52,9 @@ import java.util.Optional;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha22")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha23")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox", version = "24.4.0-alpha22")
+@NpmPackage(value = "@vaadin/checkbox", version = "24.4.0-alpha23")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         implements ClickNotifier<Checkbox>, Focusable<Checkbox>, HasAriaLabel,
