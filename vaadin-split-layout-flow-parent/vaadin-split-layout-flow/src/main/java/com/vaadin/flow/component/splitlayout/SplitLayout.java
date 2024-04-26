@@ -312,9 +312,9 @@ public class SplitLayout extends Component
     public void remove(Component... components) {
         for (Component component : components) {
             if (getElement().equals(component.getElement().getParent())) {
-                if (component.equals(getPrimaryComponent())) {
+                if (component.equals(primaryComponent)) {
                     primaryComponent = null;
-                } else if (component.equals(getSecondaryComponent())) {
+                } else if (component.equals(secondaryComponent)) {
                     secondaryComponent = null;
                 }
                 component.getElement().removeAttribute("slot");
