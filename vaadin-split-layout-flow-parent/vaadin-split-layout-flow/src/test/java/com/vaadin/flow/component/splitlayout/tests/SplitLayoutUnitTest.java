@@ -89,7 +89,8 @@ public class SplitLayoutUnitTest {
 
         var primaryComponent = new Div();
         splitLayout.addToPrimary(primaryComponent);
-        Assert.assertEquals(primaryComponent, splitLayout.getPrimaryComponent());
+        Assert.assertEquals(primaryComponent,
+                splitLayout.getPrimaryComponent());
 
         splitLayout.remove(primaryComponent);
         Assert.assertNull(splitLayout.getPrimaryComponent());
@@ -103,7 +104,8 @@ public class SplitLayoutUnitTest {
 
         var secondaryComponent = new Div();
         splitLayout.addToSecondary(secondaryComponent);
-        Assert.assertEquals(secondaryComponent, splitLayout.getSecondaryComponent());
+        Assert.assertEquals(secondaryComponent,
+                splitLayout.getSecondaryComponent());
 
         splitLayout.remove(secondaryComponent);
         Assert.assertNull(splitLayout.getSecondaryComponent());
