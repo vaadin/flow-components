@@ -20,6 +20,8 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.formlayout.FormLayout;
 
+import java.util.List;
+
 public class FormLayoutTest {
 
     @Test
@@ -80,6 +82,23 @@ public class FormLayoutTest {
         layout.add(compUnset);
         Assert.assertEquals(layout.getColspan(compUnset), 1);
 
+    }
+
+    @Test
+    public void canSetAndGetResponsiveSteps() {
+        FormLayout formLayout = new FormLayout();
+
+        formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("1px", 1));
+
+        List<FormLayout.ResponsiveStep> responsiveSteps = formLayout.getResponsiveSteps();
+
+        Assert.assertEquals(responsiveSteps.size(), 1);
+
+        formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("1px", 1), new FormLayout.ResponsiveStep("1px", 1, FormLayout.ResponsiveStep.LabelsPosition.TOP));
+
+        responsiveSteps = formLayout.getResponsiveSteps();
+
+        Assert.assertEquals(responsiveSteps.size(), 2);
     }
 
 }
