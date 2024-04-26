@@ -34,8 +34,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -616,10 +616,11 @@ public class Upload extends Component implements HasSize, HasStyle {
      */
     public void setReceiver(Receiver receiver) {
         this.receiver = receiver;
-        if (!(receiver instanceof MultiFileReceiver)) {
-            setMaxFiles(1);
+        if (receiver instanceof MultiFileReceiver) {
+            getElement().removeProperty("maxFiles");
+            getElement().executeJs("this.maxFiles = Infinity");
         } else {
-            getElement().removeAttribute("maxFiles");
+            setMaxFiles(1);
         }
     }
 
