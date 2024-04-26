@@ -35,6 +35,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.shared.SlotUtils;
 
+import com.vaadin.flow.internal.JsonSerializer;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
@@ -115,6 +116,9 @@ public class FormLayout extends Component
         private int columns;
         private LabelsPosition labelsPosition;
 
+        public ResponsiveStep() {
+        }
+
         /**
          * Constructs a ResponsiveStep with the given minimum width and number
          * of columns.
@@ -171,8 +175,13 @@ public class FormLayout extends Component
         public ResponsiveStep readJson(JsonObject value) {
             minWidth = value.getString(MIN_WIDTH_JSON_KEY);
             columns = (int) value.getNumber(COLUMNS_JSON_KEY);
-            String labelsPositionString = value
-                    .getString(LABELS_POSITION_JSON_KEY);
+            JsonValue labelsPositionValue = value
+                    .get(LABELS_POSITION_JSON_KEY);
+            if (labelsPositionValue == null) {
+                labelsPosition = null;
+                return this;
+            }
+            String labelsPositionString = labelsPositionValue.asString();
             if ("aside".equals(labelsPositionString)) {
                 labelsPosition = LabelsPosition.ASIDE;
             } else if ("top".equals(labelsPositionString)) {
@@ -364,11 +373,7 @@ public class FormLayout extends Component
         if (stepsJsonArray == null) {
             return Collections.emptyList();
         }
-        List<ResponsiveStep> steps = new ArrayList<>();
-        for (int i = 0; i < stepsJsonArray.length(); i++) {
-            steps.add(stepsJsonArray.get(i));
-        }
-        return steps;
+        return JsonSerializer.toObjects(ResponsiveStep.class, stepsJsonArray);
     }
 
     /**
