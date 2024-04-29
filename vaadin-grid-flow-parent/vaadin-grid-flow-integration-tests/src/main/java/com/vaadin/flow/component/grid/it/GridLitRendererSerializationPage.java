@@ -83,7 +83,6 @@ public class GridLitRendererSerializationPage extends Div {
             in.readObject();
         } catch (IOException | ClassNotFoundException | ClassCastException ex) {
             exceptionMessageSpan.setText(ex.getMessage());
-            ex.printStackTrace();
         }
     }
 
