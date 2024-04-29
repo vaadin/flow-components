@@ -22,6 +22,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -49,8 +50,8 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/message-input/src/vaadin-message-input.js")
 @NpmPackage(value = "@vaadin/message-input", version = "24.5.0-alpha3")
-public class MessageInput extends Component
-        implements HasSize, HasStyle, HasEnabled, HasTooltip {
+public class MessageInput extends Component implements Focusable<MessageInput>,
+        HasSize, HasStyle, HasEnabled, HasTooltip {
 
     private MessageInputI18n i18n;
 
