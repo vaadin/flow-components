@@ -384,7 +384,9 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         // When min is not defined by user, its value is the absoluteMin
         // provided in constructor. In this case, min should not be considered
         // in the step validation.
-        double stepBasis = minSetByUser ? getMinDouble() : 0.0;
+        double stepBasis = minSetByUser && !Double.isInfinite(getMinDouble())
+                ? getMinDouble()
+                : 0.0;
 
         // (value - stepBasis) % step == 0
         return new BigDecimal(String.valueOf(value))
