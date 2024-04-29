@@ -312,6 +312,11 @@ public class SplitLayout extends Component
     public void remove(Component... components) {
         for (Component component : components) {
             if (getElement().equals(component.getElement().getParent())) {
+                if (component.equals(primaryComponent)) {
+                    primaryComponent = null;
+                } else if (component.equals(secondaryComponent)) {
+                    secondaryComponent = null;
+                }
                 component.getElement().removeAttribute("slot");
                 getElement().removeChild(component.getElement());
             } else {
@@ -328,6 +333,8 @@ public class SplitLayout extends Component
         getElement().getChildren()
                 .forEach(child -> child.removeAttribute("slot"));
         getElement().removeAllChildren();
+        primaryComponent = null;
+        secondaryComponent = null;
     }
 
     @DomEvent("splitter-dragend")
