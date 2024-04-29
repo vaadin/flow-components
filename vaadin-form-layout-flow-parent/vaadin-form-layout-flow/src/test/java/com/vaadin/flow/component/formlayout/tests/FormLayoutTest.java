@@ -19,8 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.formlayout.FormLayout;
-
-import java.util.List;
+import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 
 public class FormLayoutTest {
 
@@ -85,20 +84,19 @@ public class FormLayoutTest {
     }
 
     @Test
-    public void canSetAndGetResponsiveSteps() {
+    public void setResponsiveSteps_getResponsiveSteps() {
         FormLayout formLayout = new FormLayout();
 
-        formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("1px", 1));
+        formLayout.setResponsiveSteps(new ResponsiveStep(null, 1));
+        Assert.assertEquals(1, formLayout.getResponsiveSteps().size());
 
-        List<FormLayout.ResponsiveStep> responsiveSteps = formLayout.getResponsiveSteps();
+        formLayout.setResponsiveSteps(new ResponsiveStep(null, 1),
+                new ResponsiveStep("1px", 1));
+        Assert.assertEquals(2, formLayout.getResponsiveSteps().size());
 
-        Assert.assertEquals(responsiveSteps.size(), 1);
-
-        formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("1px", 1), new FormLayout.ResponsiveStep("1px", 1, FormLayout.ResponsiveStep.LabelsPosition.TOP));
-
-        responsiveSteps = formLayout.getResponsiveSteps();
-
-        Assert.assertEquals(responsiveSteps.size(), 2);
+        formLayout.setResponsiveSteps(new ResponsiveStep(null, 1),
+                new ResponsiveStep("1px", 1), new ResponsiveStep("1px", 1,
+                        ResponsiveStep.LabelsPosition.TOP));
+        Assert.assertEquals(3, formLayout.getResponsiveSteps().size());
     }
-
 }
