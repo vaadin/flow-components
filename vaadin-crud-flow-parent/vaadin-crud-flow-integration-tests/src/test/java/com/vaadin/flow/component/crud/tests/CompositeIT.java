@@ -28,8 +28,8 @@ public class CompositeIT extends AbstractParallelTest {
         $(TextFieldElement.class).attribute("editor-role", "language-field")
                 .first().setValue("English");
 
-        $(TestBenchElement.class).id("overlay").$(ButtonElement.class).first()
-                .click();
+        $(TestBenchElement.class).withId("overlay").last()
+                .$(ButtonElement.class).first().click();
 
         Assert.assertTrue(
                 $(CrudElement.class).first().getEditorSaveButton().isEnabled());
