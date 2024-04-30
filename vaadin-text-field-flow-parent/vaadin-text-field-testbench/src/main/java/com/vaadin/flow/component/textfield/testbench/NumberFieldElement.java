@@ -33,16 +33,16 @@ public class NumberFieldElement extends TestBenchElement
         implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
 
     /**
-     * Emulates the user setting the value and pressing Enter. In practice, this
-     * updates the value property of the input element to the given value and
-     * then triggers {@code input}, {@code keydown}, and {@code change} DOM
+     * Emulates the user setting the value and pressing Enter, which triggers
+     * server value change listeners and validation. The emulation is done by
+     * updating the value property of the input element to the given value and
+     * then triggering {@code input}, {@code keydown}, and {@code change} DOM
      * events.
      * <p>
-     * This method is intended for basic cases where you just need to get the
-     * field's value updated. If you want to simulate real user input with the
-     * keyboard, use {@link #sendKeys(CharSequence...)} instead.
+     * For more complex scenarios that require a full browser simulation of
+     * typing, use {@link #sendKeys(CharSequence...)} instead.
      * <p>
-     * WARNING: Setting values that aren't parsable into a number is not
+     * WARNING: Setting values that aren't parsable into an integer is not
      * supported. If you need to enter such values e.g. to test the validation
      * workflow, use {@link #sendKeys(CharSequence...)} instead.
      *
