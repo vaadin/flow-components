@@ -41,6 +41,7 @@ import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
+import elemental.json.JsonObject;
 
 /**
  * LitRenderer is a {@link Renderer} that uses a Lit-based template literal to
@@ -239,17 +240,23 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     }
 
     private DataGenerator<SOURCE> createDataGenerator() {
-        return (item, jsonObject) -> {
-            valueProviders.forEach((key, provider) -> {
-                jsonObject.put(
-                        // Prefix the property name with a LitRenderer
-                        // instance specific namespace to avoid property
-                        // name clashes.
-                        // Fixes https://github.com/vaadin/flow/issues/8629
-                        // in LitRenderer
-                        propertyNamespace + key,
-                        JsonSerializer.toJson(provider.apply(item)));
-            });
+        // Use an anonymous class instead of Lambda to prevent potential
+        // deserialization issues when used with Grid
+        // see https://github.com/vaadin/flow-components/issues/6256
+        return new DataGenerator<SOURCE>() {
+            @Override
+            public void generateData(SOURCE item, JsonObject jsonObject) {
+                valueProviders.forEach((key, provider) -> {
+                    jsonObject.put(
+                            // Prefix the property name with a LitRenderer
+                            // instance specific namespace to avoid property
+                            // name clashes.
+                            // Fixes https://github.com/vaadin/flow/issues/8629
+                            // in LitRenderer
+                            propertyNamespace + key,
+                            JsonSerializer.toJson(provider.apply(item)));
+                });
+            }
         };
     }
 
