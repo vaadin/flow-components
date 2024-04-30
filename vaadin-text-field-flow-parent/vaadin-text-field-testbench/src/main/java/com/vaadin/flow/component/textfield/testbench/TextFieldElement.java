@@ -40,7 +40,7 @@ public class TextFieldElement extends TestBenchElement
      * <p>
      * This method is intended for basic cases where you just need to get the
      * field's value updated. If you want to simulate real user input with the
-     * keyboard, use {@link #sendKeys(CharSequence...)}.
+     * keyboard, use {@link #sendKeys(CharSequence...)} instead.
      *
      * @param string
      *            the value to set

@@ -13,6 +13,7 @@ class TextFieldElementHelper {
         element.getCommandExecutor().executeScript("""
                 const event = new CustomEvent('keydown', { bubbles: true });
                 event.key = 'Enter';
+                event.code = 'Enter';
                 event.keyCode = 13;
                 arguments[0].dispatchEvent(event);
                 """, element);
