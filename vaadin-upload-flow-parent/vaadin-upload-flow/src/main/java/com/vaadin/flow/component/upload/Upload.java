@@ -500,7 +500,24 @@ public class Upload extends Component implements HasSize, HasStyle {
      *            bytes received so far
      * @param contentLength
      *            actual size of the file being uploaded, if known
+     *
+     * @deprecated since 24.4. Use
+     *             {@link #fireUpdateProgress(long, long, String)}
+     */
+    @Deprecated(since = "24.4")
+    protected void fireUpdateProgress(long totalBytes, long contentLength) {
+        fireEvent(
+                new ProgressUpdateEvent(this, totalBytes, contentLength, null));
+    }
+
+    /**
+     * Emit the progress event.
+     *
+     * @param totalBytes
+     *            bytes received so far
      * @param contentLength
+     *            actual size of the file being uploaded, if known
+     * @param fileName
      *            name of the file being uploaded
      */
     protected void fireUpdateProgress(long totalBytes, long contentLength,
