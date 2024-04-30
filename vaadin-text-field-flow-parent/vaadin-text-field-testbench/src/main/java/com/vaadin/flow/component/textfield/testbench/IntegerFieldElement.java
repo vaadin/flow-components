@@ -40,7 +40,7 @@ public class IntegerFieldElement extends TestBenchElement
      * <p>
      * This method is intended for basic cases where you just need to get the
      * field's value updated. If you want to simulate real user input with the
-     * keyboard, consider using {@link #sendKeys(CharSequence...)}.
+     * keyboard, use {@link #sendKeys(CharSequence...)}.
      * <p>
      * WARNING: Setting values that aren't parsable into an integer is not
      * supported. If you need to enter such values e.g. to test the validation
