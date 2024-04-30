@@ -38,9 +38,9 @@ public class IntegerFieldElement extends TestBenchElement
      * then triggers {@code input}, {@code keydown}, and {@code change} DOM
      * events.
      * <p>
-     * This method is intended for basic cases where you just need to get
-     * the field's value updated. If you want to simulate real user input with
-     * the keyboard, consider using {@link #sendKeys(CharSequence...)}.
+     * This method is intended for basic cases where you just need to get the
+     * field's value updated. If you want to simulate real user input with the
+     * keyboard, consider using {@link #sendKeys(CharSequence...)}.
      * <p>
      * Note, this method doesn't support values that aren't parsable into an
      * integer. To enter such values, use {@link #sendKeys(CharSequence...)}
