@@ -42,9 +42,9 @@ public class IntegerFieldElement extends TestBenchElement
      * field's value updated. If you want to simulate real user input with the
      * keyboard, consider using {@link #sendKeys(CharSequence...)}.
      * <p>
-     * Note, this method doesn't support values that aren't parsable into an
-     * integer. To enter such values, use {@link #sendKeys(CharSequence...)}
-     * instead.
+     * WARNING: Setting values that aren't parsable into an integer isn't
+     * supported. If you need to enter such values e.g. to test the validation
+     * workflow, use {@link #sendKeys(CharSequence...)} instead.
      *
      * @param string
      *            the value to set
