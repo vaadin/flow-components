@@ -190,6 +190,13 @@ public class NumberFieldTest extends TextFieldTest {
         assertInvalidValues(-4.5, 0.0, 1.0, 4.5);
     }
 
+    @Test
+    public void setMinNegativeInfinity_doesNotThrow() {
+        field.setStep(1.0);
+        field.setMin(Double.NEGATIVE_INFINITY);
+        field.setValue(6.0);
+    }
+
     @Override
     @Test
     public void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
