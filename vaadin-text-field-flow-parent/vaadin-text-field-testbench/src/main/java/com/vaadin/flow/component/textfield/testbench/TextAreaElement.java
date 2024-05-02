@@ -35,7 +35,7 @@ public class TextAreaElement extends TestBenchElement
      * Emulates the user setting the value. This triggers server value change
      * listeners and validation. The emulation is done by updating the value
      * property of the input element to the given value and then triggering
-     * {@code input}, {@code change}, and {@code focusout} DOM events.
+     * synthetic {@code input}, {@code change}, and {@code focusout} DOM events.
      * <p>
      * For more complex scenarios that require a full browser simulation of
      * typing, use {@link #sendKeys(CharSequence...)} instead.
