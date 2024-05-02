@@ -33,7 +33,7 @@ public class TextAreaElement extends TestBenchElement
         implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
     /**
      * Emulates the user setting the value. This triggers server value change
-     * listeners and validation. The emulation is done by updating the value
+     * listeners and validation. The emulation is done by setting the value
      * property of the input element to the given value and then triggering
      * synthetic {@code input}, {@code change}, and {@code focusout} DOM events.
      * <p>
