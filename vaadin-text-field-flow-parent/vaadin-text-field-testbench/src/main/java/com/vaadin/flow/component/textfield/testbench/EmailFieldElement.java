@@ -33,11 +33,10 @@ public class EmailFieldElement extends TestBenchElement
         implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
 
     /**
-     * Emulates the user setting the value and pressing Enter, which triggers
-     * server value change listeners and validation. The emulation is done by
-     * updating the value property of the input element to the given value and
-     * then triggering {@code input}, {@code keydown}, and {@code change} DOM
-     * events.
+     * Emulates the user setting the value. This triggers server value change
+     * listeners and validation. The emulation is done by updating the value
+     * property of the input element to the given value and then triggering
+     * {@code input}, {@code change}, and {@code focusout} DOM events.
      * <p>
      * For more complex scenarios that require a full browser simulation of
      * typing, use {@link #sendKeys(CharSequence...)} instead.
