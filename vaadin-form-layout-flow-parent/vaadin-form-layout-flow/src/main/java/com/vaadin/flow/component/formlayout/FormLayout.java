@@ -35,7 +35,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.shared.SlotUtils;
 
-import com.vaadin.flow.internal.JsonSerializer;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
@@ -116,7 +115,7 @@ public class FormLayout extends Component
         private int columns;
         private LabelsPosition labelsPosition;
 
-        public ResponsiveStep() {
+        private ResponsiveStep() {
         }
 
         /**
@@ -180,8 +179,7 @@ public class FormLayout extends Component
                 minWidth = null;
             }
             columns = (int) value.getNumber(COLUMNS_JSON_KEY);
-            JsonValue labelsPositionValue = value
-                    .get(LABELS_POSITION_JSON_KEY);
+            JsonValue labelsPositionValue = value.get(LABELS_POSITION_JSON_KEY);
             if (labelsPositionValue == null) {
                 labelsPosition = null;
                 return this;
@@ -378,7 +376,11 @@ public class FormLayout extends Component
         if (stepsJsonArray == null) {
             return Collections.emptyList();
         }
-        return JsonSerializer.toObjects(ResponsiveStep.class, stepsJsonArray);
+        List<ResponsiveStep> steps = new ArrayList<>();
+        for (int i = 0; i < stepsJsonArray.length(); i++) {
+            steps.add(new ResponsiveStep().readJson(stepsJsonArray.get(i)));
+        }
+        return steps;
     }
 
     /**
