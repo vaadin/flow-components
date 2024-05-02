@@ -41,8 +41,8 @@ public class NumberFieldElement extends TestBenchElement
      * For more complex scenarios that require a full browser simulation of
      * typing, use {@link #sendKeys(CharSequence...)} instead.
      * <p>
-     * WARNING: Setting values that aren't parsable into a number is not
-     * supported. If you need to enter such values e.g. to test the validation
+     * WARNING: This method does not support values that aren't parsable into a
+     * number. If you need to enter such values e.g. to test the validation
      * workflow, use {@link #sendKeys(CharSequence...)} instead.
      *
      * @param string
