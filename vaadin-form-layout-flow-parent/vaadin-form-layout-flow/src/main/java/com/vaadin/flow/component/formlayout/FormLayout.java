@@ -173,7 +173,12 @@ public class FormLayout extends Component
 
         @Override
         public ResponsiveStep readJson(JsonObject value) {
-            minWidth = value.getString(MIN_WIDTH_JSON_KEY);
+            JsonValue minWidthValue = value.get(MIN_WIDTH_JSON_KEY);
+            if (minWidthValue != null) {
+                minWidth = minWidthValue.asString();
+            } else {
+                minWidth = null;
+            }
             columns = (int) value.getNumber(COLUMNS_JSON_KEY);
             JsonValue labelsPositionValue = value
                     .get(LABELS_POSITION_JSON_KEY);
