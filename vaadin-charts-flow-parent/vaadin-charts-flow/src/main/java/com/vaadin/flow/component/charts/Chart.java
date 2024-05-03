@@ -70,7 +70,7 @@ import elemental.json.JsonObject;
 import elemental.json.impl.JreJsonFactory;
 
 @Tag("vaadin-chart")
-@NpmPackage(value = "@vaadin/vaadin-charts", version = "6.3.6")
+@NpmPackage(value = "@vaadin/vaadin-charts", version = "6.3.7")
 @JsModule("@vaadin/vaadin-charts/vaadin-chart.js")
 @HtmlImport("frontend://bower_components/vaadin-charts/vaadin-chart.html")
 public class Chart extends Component implements HasStyle, HasSize {
