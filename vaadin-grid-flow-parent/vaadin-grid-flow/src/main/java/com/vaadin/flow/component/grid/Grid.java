@@ -1034,6 +1034,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
+         * DO NOT USE this method unless you know what you are doing. This
+         * method sets the generated classnames in the shadow DOM, and styling 
+         * is ridiculously hard. Most likely, you are better off using 
+         * {@link Grid#setPartNameGenerator(SerializableFunction)}.
+         * <p>
          * Sets the function that is used for generating CSS class names for
          * cells in this column. Returning {@code null} from the generator
          * results in no custom class name being set. Multiple class names can
