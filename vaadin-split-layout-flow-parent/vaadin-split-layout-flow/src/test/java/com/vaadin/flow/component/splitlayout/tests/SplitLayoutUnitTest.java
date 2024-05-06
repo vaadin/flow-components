@@ -82,6 +82,50 @@ public class SplitLayoutUnitTest {
     }
 
     @Test
+    public void splitLayoutWithPrimaryComponent_primaryComponentRemoved_referenceUpdated() {
+        var ui = new UI();
+        var splitLayout = new SplitLayout();
+        ui.add(splitLayout);
+
+        var primaryComponent = new Div();
+        splitLayout.addToPrimary(primaryComponent);
+        Assert.assertEquals(primaryComponent,
+                splitLayout.getPrimaryComponent());
+
+        splitLayout.remove(primaryComponent);
+        Assert.assertNull(splitLayout.getPrimaryComponent());
+    }
+
+    @Test
+    public void splitLayoutWithSecondaryComponent_secondaryComponentRemoved_referenceUpdated() {
+        var ui = new UI();
+        var splitLayout = new SplitLayout();
+        ui.add(splitLayout);
+
+        var secondaryComponent = new Div();
+        splitLayout.addToSecondary(secondaryComponent);
+        Assert.assertEquals(secondaryComponent,
+                splitLayout.getSecondaryComponent());
+
+        splitLayout.remove(secondaryComponent);
+        Assert.assertNull(splitLayout.getSecondaryComponent());
+    }
+
+    @Test
+    public void splitLayoutTwoComponents_removeAll_bothReferencesUpdated() {
+        var ui = new UI();
+        var splitLayout = new SplitLayout();
+        ui.add(splitLayout);
+
+        splitLayout.addToPrimary(new Div());
+        splitLayout.addToSecondary(new Div());
+
+        splitLayout.removeAll();
+        Assert.assertNull(splitLayout.getPrimaryComponent());
+        Assert.assertNull(splitLayout.getSecondaryComponent());
+    }
+
+    @Test
     public void testGetSplitterPosition() {
         SplitLayout splitLayout = new SplitLayout();
         double splitterPosition = 45.66;

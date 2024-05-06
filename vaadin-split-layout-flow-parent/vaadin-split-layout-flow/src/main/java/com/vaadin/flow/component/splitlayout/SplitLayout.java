@@ -43,9 +43,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-split-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha23")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/split-layout", version = "24.4.0-alpha23")
+@NpmPackage(value = "@vaadin/split-layout", version = "24.4.0-beta1")
 @JsModule("@vaadin/split-layout/src/vaadin-split-layout.js")
 public class SplitLayout extends Component
         implements ClickNotifier<SplitLayout>, HasSize, HasStyle,
@@ -312,6 +312,11 @@ public class SplitLayout extends Component
     public void remove(Component... components) {
         for (Component component : components) {
             if (getElement().equals(component.getElement().getParent())) {
+                if (component.equals(primaryComponent)) {
+                    primaryComponent = null;
+                } else if (component.equals(secondaryComponent)) {
+                    secondaryComponent = null;
+                }
                 component.getElement().removeAttribute("slot");
                 getElement().removeChild(component.getElement());
             } else {
@@ -328,6 +333,8 @@ public class SplitLayout extends Component
         getElement().getChildren()
                 .forEach(child -> child.removeAttribute("slot"));
         getElement().removeAllChildren();
+        primaryComponent = null;
+        secondaryComponent = null;
     }
 
     @DomEvent("splitter-dragend")
