@@ -523,8 +523,8 @@ public class CheckboxGroupTest {
         Assert.assertArrayEquals(new long[] { 2L }, selectedIds);
     }
 
-    @Test
-    public void setIdentifierProviderOnId_setItemWithNullId_shouldFailToSelectExistingItemById() {
+    @Test(expected = IllegalArgumentException.class)
+    public void setIdentifierProviderOnId_setItemWithNullId_throws() {
         CustomItem first = new CustomItem(1L, "First");
         CustomItem second = new CustomItem(2L, "Second");
         CustomItem third = new CustomItem(3L, "Third");
@@ -540,8 +540,6 @@ public class CheckboxGroupTest {
 
         checkboxGroup
                 .setValue(Collections.singleton(new CustomItem(null, "First")));
-        Assert.assertNull(checkboxGroup.getSelectedItems().stream().findFirst()
-                .get().getId());
     }
 
     @Test
