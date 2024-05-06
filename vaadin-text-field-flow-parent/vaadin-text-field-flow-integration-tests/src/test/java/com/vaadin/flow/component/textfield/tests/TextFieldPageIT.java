@@ -79,17 +79,13 @@ public class TextFieldPageIT extends AbstractComponentIT {
     @Test
     public void labelMatches() {
         List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
-                .withLabel("Text field label")
-                .all();
+                .withLabel("Text field label").all();
         Assert.assertEquals(2, textFieldElements.size());
 
-        textFieldElements = $(TextFieldElement.class)
-                .withLabel("")
-                .all();
+        textFieldElements = $(TextFieldElement.class).withLabel("").all();
         Assert.assertEquals(4, textFieldElements.size());
 
-        textFieldElements = $(TextFieldElement.class)
-                .withLabel("nonexistent")
+        textFieldElements = $(TextFieldElement.class).withLabel("nonexistent")
                 .all();
         Assert.assertEquals(0, textFieldElements.size());
     }
@@ -97,80 +93,66 @@ public class TextFieldPageIT extends AbstractComponentIT {
     @Test
     public void labelContains() {
         List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
-                .withLabelContaining("should be")
-                .all();
+                .withLabelContaining("should be").all();
         Assert.assertEquals(2, textFieldElements.size());
 
         textFieldElements = $(TextFieldElement.class)
-                .withLabelContaining("nonexistent")
-                .all();
+                .withLabelContaining("nonexistent").all();
         Assert.assertEquals(0, textFieldElements.size());
     }
 
     @Test
     public void labelBiPredicate() {
         List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
-                .withLabel("Helper", String::startsWith)
-                .all();
+                .withLabel("Helper", String::startsWith).all();
         Assert.assertEquals(2, textFieldElements.size());
 
         textFieldElements = $(TextFieldElement.class)
-                .withLabel("visible", String::endsWith)
-                .all();
+                .withLabel("visible", String::endsWith).all();
         Assert.assertEquals(2, textFieldElements.size());
 
         textFieldElements = $(TextFieldElement.class)
-                .withLabel("text", TextFieldPageIT::containsIgnoreCase)
-                .all();
+                .withLabel("text", TextFieldPageIT::containsIgnoreCase).all();
         Assert.assertEquals(3, textFieldElements.size());
     }
 
     @Test
     public void placeholderMatches() {
         List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
-                .withPlaceholder("placeholder text")
-                .all();
+                .withPlaceholder("placeholder text").all();
         Assert.assertEquals(2, textFieldElements.size());
 
-        textFieldElements = $(TextFieldElement.class)
-                .withPlaceholder("")
-                .all();
+        textFieldElements = $(TextFieldElement.class).withPlaceholder("").all();
         Assert.assertEquals(7, textFieldElements.size());
 
         textFieldElements = $(TextFieldElement.class)
-                .withPlaceholder("nonexistent")
-                .all();
+                .withPlaceholder("nonexistent").all();
         Assert.assertEquals(0, textFieldElements.size());
     }
 
     @Test
     public void placeholderContains() {
         List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
-                .withPlaceholderContaining("holder")
-                .all();
+                .withPlaceholderContaining("holder").all();
         Assert.assertEquals(3, textFieldElements.size());
 
         textFieldElements = $(TextFieldElement.class)
-                .withPlaceholderContaining("nonexistent")
-                .all();
+                .withPlaceholderContaining("nonexistent").all();
         Assert.assertEquals(0, textFieldElements.size());
     }
 
     @Test
     public void placeholderBiPredicate() {
         List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
-                .withPlaceholder("Placeholder", String::startsWith)
-                .all();
+                .withPlaceholder("Placeholder", String::startsWith).all();
         Assert.assertEquals(1, textFieldElements.size());
 
         textFieldElements = $(TextFieldElement.class)
-                .withPlaceholder("text", String::endsWith)
-                .all();
+                .withPlaceholder("text", String::endsWith).all();
         Assert.assertEquals(2, textFieldElements.size());
 
-        textFieldElements = $(TextFieldElement.class)
-                .withPlaceholder("placeholder", TextFieldPageIT::containsIgnoreCase)
-                .all();
+        textFieldElements = $(TextFieldElement.class).withPlaceholder(
+                "placeholder", TextFieldPageIT::containsIgnoreCase).all();
         Assert.assertEquals(3, textFieldElements.size());
     }
 
@@ -178,28 +160,22 @@ public class TextFieldPageIT extends AbstractComponentIT {
     public void labelAndPlaceholderMatches() {
         List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
                 .withLabel("Text field label")
-                .withPlaceholder("placeholder text")
-                .all();
+                .withPlaceholder("placeholder text").all();
         Assert.assertEquals(2, textFieldElements.size());
 
         textFieldElements = $(TextFieldElement.class)
-                .withLabel("Press ALT + 1 to focus")
-                .withPlaceholder("")
-                .all();
+                .withLabel("Press ALT + 1 to focus").withPlaceholder("").all();
         Assert.assertEquals(1, textFieldElements.size());
 
-        textFieldElements = $(TextFieldElement.class)
-                .withLabel("")
-                .withPlaceholder("Placeholder caption")
-                .all();
+        textFieldElements = $(TextFieldElement.class).withLabel("")
+                .withPlaceholder("Placeholder caption").all();
         Assert.assertEquals(1, textFieldElements.size());
     }
 
     @Test
     public void labelAndPlaceholderContains() {
         List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
-                .withLabelContaining("Text")
-                .withPlaceholderContaining("text")
+                .withLabelContaining("Text").withPlaceholderContaining("text")
                 .all();
         Assert.assertEquals(2, textFieldElements.size());
     }
@@ -207,17 +183,14 @@ public class TextFieldPageIT extends AbstractComponentIT {
     @Test
     public void captionMatches() {
         List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
-                .withCaption("Text field label")
-                .all();
+                .withCaption("Text field label").all();
         Assert.assertEquals(2, textFieldElements.size());
 
         textFieldElements = $(TextFieldElement.class)
-                .withCaption("Placeholder caption")
-                .all();
+                .withCaption("Placeholder caption").all();
         Assert.assertEquals(1, textFieldElements.size());
 
-        textFieldElements = $(TextFieldElement.class)
-                .withCaption("nonexistent")
+        textFieldElements = $(TextFieldElement.class).withCaption("nonexistent")
                 .all();
         Assert.assertEquals(0, textFieldElements.size());
     }
@@ -225,18 +198,15 @@ public class TextFieldPageIT extends AbstractComponentIT {
     @Test
     public void captionContains() {
         List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
-                .withCaptionContaining("should be visible")
-                .all();
+                .withCaptionContaining("should be visible").all();
         Assert.assertEquals(2, textFieldElements.size());
 
         textFieldElements = $(TextFieldElement.class)
-                .withCaptionContaining("holder")
-                .all();
+                .withCaptionContaining("holder").all();
         Assert.assertEquals(1, textFieldElements.size());
 
         textFieldElements = $(TextFieldElement.class)
-                .withCaptionContaining("nonexistent")
-                .all();
+                .withCaptionContaining("nonexistent").all();
         Assert.assertEquals(0, textFieldElements.size());
     }
 

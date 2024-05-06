@@ -50,66 +50,53 @@ public class ButtonIT extends AbstractComponentIT {
     @Test
     public void textMatches() {
         List<ButtonElement> buttonElements = $(ButtonElement.class)
-                .withText("Vaadin button")
-                .all();
+                .withText("Vaadin button").all();
         Assert.assertEquals(1, buttonElements.size());
 
-        buttonElements = $(ButtonElement.class)
-                .withText("")
-                .all();
+        buttonElements = $(ButtonElement.class).withText("").all();
         Assert.assertEquals(2, buttonElements.size());
 
-        buttonElements = $(ButtonElement.class)
-                .withText("nonexistent")
-                .all();
+        buttonElements = $(ButtonElement.class).withText("nonexistent").all();
         Assert.assertEquals(0, buttonElements.size());
     }
 
     @Test
     public void textContains() {
         List<ButtonElement> buttonElements = $(ButtonElement.class)
-                .withTextContaining("Vaadin")
-                .all();
+                .withTextContaining("Vaadin").all();
         Assert.assertEquals(1, buttonElements.size());
 
-        buttonElements = $(ButtonElement.class)
-                .withTextContaining("button")
+        buttonElements = $(ButtonElement.class).withTextContaining("button")
                 .all();
         Assert.assertEquals(4, buttonElements.size());
 
         buttonElements = $(ButtonElement.class)
-                .withTextContaining("nonexistent")
-                .all();
+                .withTextContaining("nonexistent").all();
         Assert.assertEquals(0, buttonElements.size());
     }
 
     @Test
     public void textBiPredicate() {
         List<ButtonElement> buttonElements = $(ButtonElement.class)
-                .withText("Vaadin", String::startsWith)
-                .all();
+                .withText("Vaadin", String::startsWith).all();
         Assert.assertEquals(1, buttonElements.size());
 
         buttonElements = $(ButtonElement.class)
-                .withText("button", String::endsWith)
-                .all();
+                .withText("button", String::endsWith).all();
         Assert.assertEquals(3, buttonElements.size());
 
         buttonElements = $(ButtonElement.class)
-                .withText("button", ButtonIT::containsIgnoreCase)
-                .all();
+                .withText("button", ButtonIT::containsIgnoreCase).all();
         Assert.assertEquals(5, buttonElements.size());
     }
 
     @Test
     public void captionMatches() {
         List<ButtonElement> buttonElements = $(ButtonElement.class)
-                .withCaption("Vaadin button")
-                .all();
+                .withCaption("Vaadin button").all();
         Assert.assertEquals(1, buttonElements.size());
 
-        buttonElements = $(ButtonElement.class)
-                .withCaption("nonexistent")
+        buttonElements = $(ButtonElement.class).withCaption("nonexistent")
                 .all();
         Assert.assertEquals(0, buttonElements.size());
     }
@@ -117,18 +104,15 @@ public class ButtonIT extends AbstractComponentIT {
     @Test
     public void captionContains() {
         List<ButtonElement> buttonElements = $(ButtonElement.class)
-                .withCaptionContaining("Vaadin")
-                .all();
+                .withCaptionContaining("Vaadin").all();
         Assert.assertEquals(1, buttonElements.size());
 
-        buttonElements = $(ButtonElement.class)
-                .withCaptionContaining("button")
+        buttonElements = $(ButtonElement.class).withCaptionContaining("button")
                 .all();
         Assert.assertEquals(4, buttonElements.size());
 
         buttonElements = $(ButtonElement.class)
-                .withCaptionContaining("nonexistent")
-                .all();
+                .withCaptionContaining("nonexistent").all();
         Assert.assertEquals(0, buttonElements.size());
     }
 
