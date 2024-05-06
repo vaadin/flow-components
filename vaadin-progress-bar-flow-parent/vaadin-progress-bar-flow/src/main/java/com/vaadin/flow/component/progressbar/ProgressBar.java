@@ -33,8 +33,8 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-progress-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.11")
-@NpmPackage(value = "@vaadin/progress-bar", version = "24.3.11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.12")
+@NpmPackage(value = "@vaadin/progress-bar", version = "24.3.12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/progress-bar/src/vaadin-progress-bar.js")
 public class ProgressBar extends Component
