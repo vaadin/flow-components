@@ -116,6 +116,8 @@ public abstract class AbstractItemCountComboBoxPage extends VerticalLayout
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         comboBox.setOpened(true);
+        comboBox.getElement().executeJs(
+                "setTimeout(() => this.$.overlay._updateOverlayWidth())");
     }
 
     private void initNavigationLinks() {
