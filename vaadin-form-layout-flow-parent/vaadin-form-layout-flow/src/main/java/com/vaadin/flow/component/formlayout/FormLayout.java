@@ -115,9 +115,6 @@ public class FormLayout extends Component
         private int columns;
         private LabelsPosition labelsPosition;
 
-        private ResponsiveStep() {
-        }
-
         /**
          * Constructs a ResponsiveStep with the given minimum width and number
          * of columns.
@@ -378,7 +375,7 @@ public class FormLayout extends Component
         }
         List<ResponsiveStep> steps = new ArrayList<>();
         for (int i = 0; i < stepsJsonArray.length(); i++) {
-            steps.add(new ResponsiveStep().readJson(stepsJsonArray.get(i)));
+            steps.add(new ResponsiveStep(null, 0).readJson(stepsJsonArray.get(i)));
         }
         return steps;
     }
