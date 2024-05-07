@@ -156,8 +156,7 @@ public class FormLayout extends Component
         @Override
         public JsonObject toJson() {
             JsonObject json = Json.createObject();
-            if (minWidth != null
-                    && !minWidth.chars().allMatch(Character::isWhitespace)) {
+            if (minWidth != null && !minWidth.trim().isEmpty()) {
                 json.put(MIN_WIDTH_JSON_KEY, minWidth);
             }
             json.put(COLUMNS_JSON_KEY, columns);
@@ -175,20 +174,21 @@ public class FormLayout extends Component
             } else {
                 minWidth = null;
             }
+
             columns = (int) value.getNumber(COLUMNS_JSON_KEY);
+
             JsonValue labelsPositionValue = value.get(LABELS_POSITION_JSON_KEY);
-            if (labelsPositionValue == null) {
-                labelsPosition = null;
-                return this;
-            }
-            String labelsPositionString = labelsPositionValue.asString();
-            if ("aside".equals(labelsPositionString)) {
-                labelsPosition = LabelsPosition.ASIDE;
-            } else if ("top".equals(labelsPositionString)) {
-                labelsPosition = LabelsPosition.TOP;
+            if (labelsPositionValue != null) {
+                String labelsPositionString = labelsPositionValue.asString();
+                if ("aside".equals(labelsPositionString)) {
+                    labelsPosition = LabelsPosition.ASIDE;
+                } else if ("top".equals(labelsPositionString)) {
+                    labelsPosition = LabelsPosition.TOP;
+                }
             } else {
                 labelsPosition = null;
             }
+
             return this;
         }
     }
