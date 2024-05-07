@@ -375,7 +375,8 @@ public class FormLayout extends Component
         }
         List<ResponsiveStep> steps = new ArrayList<>();
         for (int i = 0; i < stepsJsonArray.length(); i++) {
-            steps.add(new ResponsiveStep(null, 0).readJson(stepsJsonArray.get(i)));
+            steps.add(new ResponsiveStep(null, 0)
+                    .readJson(stepsJsonArray.get(i)));
         }
         return steps;
     }
