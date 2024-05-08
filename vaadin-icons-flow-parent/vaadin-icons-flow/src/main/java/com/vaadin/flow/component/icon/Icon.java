@@ -31,14 +31,13 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 public class Icon extends AbstractIcon<Icon> {
 
     private static final String ICON_ATTRIBUTE_NAME = "icon";
-    private static final String ICON_COLLECTION_NAME = "vaadin";
+    private static final String VAADIN_ICON_COLLECTION_NAME = "vaadin";
     private static final String STYLE_FILL = "fill";
 
     /**
-     * Creates an Icon component that displays a Vaadin logo.
+     * Creates an empty Icon.
      */
     public Icon() {
-        this(VaadinIcon.VAADIN_H);
     }
 
     /**
@@ -49,8 +48,7 @@ public class Icon extends AbstractIcon<Icon> {
      *            the icon to display
      */
     public Icon(VaadinIcon icon) {
-        this(ICON_COLLECTION_NAME,
-                icon.name().toLowerCase(Locale.ENGLISH).replace('_', '-'));
+        setIcon(icon);
     }
 
     /**
@@ -61,7 +59,7 @@ public class Icon extends AbstractIcon<Icon> {
      *            the icon name
      */
     public Icon(String icon) {
-        this(ICON_COLLECTION_NAME, icon);
+        setIcon(icon);
     }
 
     /**
@@ -89,13 +87,50 @@ public class Icon extends AbstractIcon<Icon> {
     }
 
     /**
-     * Sets the icon to the given icon from the vaadin-icons collection.
+     * Sets the icon to the given icon.
+     * <p>
+     * If the icon name contains a ":", the first part is used as the collection
+     * and the second part as the icon name. If the icon name does not contain a
+     * ":", the icon is assumed to be from the "vaadin" collection.
      *
      * @param icon
      *            the icon name
      */
     public void setIcon(String icon) {
-        setIcon(ICON_COLLECTION_NAME, icon);
+        if (icon.contains(":")) {
+            String[] parts = icon.split(":", 2);
+            setIcon(parts[0], parts[1]);
+        } else {
+            String collection = getCollection();
+            if (collection == null) {
+                collection = VAADIN_ICON_COLLECTION_NAME;
+            }
+            setIcon(collection, icon);
+        }
+    }
+
+    /**
+     * /** Sets the icon to the given Vaadin icon.
+     * <p>
+     * If the icon name contains a ":", the first part is used as the collection
+     * and the second part as the icon name. If the icon name does not contain a
+     * ":", the icon is assumed to be from the "vaadin" collection.
+     *
+     * @param icon
+     *            the icon name
+     */
+    public void setIcon(VaadinIcon icon) {
+        setIcon(VAADIN_ICON_COLLECTION_NAME,
+                icon.name().toLowerCase(Locale.ENGLISH).replace('_', '-'));
+    }
+
+    /**
+     * Gets the full icon name, including the collection.
+     *
+     * @return the icon name or {@code null} if no icon is set
+     */
+    public String getIcon() {
+        return getElement().getAttribute(ICON_ATTRIBUTE_NAME);
     }
 
     /**
@@ -120,6 +155,20 @@ public class Icon extends AbstractIcon<Icon> {
      */
     public void setIcon(String collection, String icon) {
         getElement().setAttribute(ICON_ATTRIBUTE_NAME, collection + ':' + icon);
+    }
+
+    /**
+     * Gets the collection of the icon (the part before {@literal :}).
+     *
+     * @return the collection of the icon or {@code null} if no collection is
+     *         set
+     */
+    public String getCollection() {
+        String icon = getIcon();
+        if (icon != null && icon.contains(":")) {
+            return icon.substring(0, icon.indexOf(':'));
+        }
+        return null;
     }
 
     @Override
