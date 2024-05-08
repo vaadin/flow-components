@@ -4,7 +4,7 @@
     <parent>
         <artifactId>vaadin-upload-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>24.4-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-upload-testbench</artifactId>
     <packaging>jar</packaging>

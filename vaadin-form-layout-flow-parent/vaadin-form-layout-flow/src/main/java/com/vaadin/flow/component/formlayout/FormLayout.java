@@ -69,9 +69,9 @@ import elemental.json.JsonValue;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-form-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/form-layout", version = "24.4.0-beta1")
+@NpmPackage(value = "@vaadin/form-layout", version = "24.4.0-beta2")
 @JsModule("@vaadin/form-layout/src/vaadin-form-layout.js")
 public class FormLayout extends Component
         implements HasSize, HasStyle, HasComponents, ClickNotifier<FormLayout> {
@@ -156,8 +156,7 @@ public class FormLayout extends Component
         @Override
         public JsonObject toJson() {
             JsonObject json = Json.createObject();
-            if (minWidth != null
-                    && !minWidth.chars().allMatch(Character::isWhitespace)) {
+            if (minWidth != null && !minWidth.trim().isEmpty()) {
                 json.put(MIN_WIDTH_JSON_KEY, minWidth);
             }
             json.put(COLUMNS_JSON_KEY, columns);
@@ -169,17 +168,27 @@ public class FormLayout extends Component
 
         @Override
         public ResponsiveStep readJson(JsonObject value) {
-            minWidth = value.getString(MIN_WIDTH_JSON_KEY);
+            JsonValue minWidthValue = value.get(MIN_WIDTH_JSON_KEY);
+            if (minWidthValue != null) {
+                minWidth = minWidthValue.asString();
+            } else {
+                minWidth = null;
+            }
+
             columns = (int) value.getNumber(COLUMNS_JSON_KEY);
-            String labelsPositionString = value
-                    .getString(LABELS_POSITION_JSON_KEY);
-            if ("aside".equals(labelsPositionString)) {
-                labelsPosition = LabelsPosition.ASIDE;
-            } else if ("top".equals(labelsPositionString)) {
-                labelsPosition = LabelsPosition.TOP;
+
+            JsonValue labelsPositionValue = value.get(LABELS_POSITION_JSON_KEY);
+            if (labelsPositionValue != null) {
+                String labelsPositionString = labelsPositionValue.asString();
+                if ("aside".equals(labelsPositionString)) {
+                    labelsPosition = LabelsPosition.ASIDE;
+                } else if ("top".equals(labelsPositionString)) {
+                    labelsPosition = LabelsPosition.TOP;
+                }
             } else {
                 labelsPosition = null;
             }
+
             return this;
         }
     }
@@ -191,9 +200,9 @@ public class FormLayout extends Component
      * @author Vaadin Ltd
      */
     @Tag("vaadin-form-item")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta1")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-    @NpmPackage(value = "@vaadin/form-layout", version = "24.4.0-beta1")
+    @NpmPackage(value = "@vaadin/form-layout", version = "24.4.0-beta2")
     @JsModule("@vaadin/form-layout/src/vaadin-form-item.js")
     public static class FormItem extends Component
             implements HasComponents, HasStyle, ClickNotifier<FormItem> {
@@ -366,7 +375,8 @@ public class FormLayout extends Component
         }
         List<ResponsiveStep> steps = new ArrayList<>();
         for (int i = 0; i < stepsJsonArray.length(); i++) {
-            steps.add(stepsJsonArray.get(i));
+            steps.add(new ResponsiveStep(null, 0)
+                    .readJson(stepsJsonArray.get(i)));
         }
         return steps;
     }
