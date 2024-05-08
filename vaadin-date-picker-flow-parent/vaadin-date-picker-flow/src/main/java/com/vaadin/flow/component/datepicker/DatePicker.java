@@ -119,7 +119,8 @@ public class DatePicker
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
     private final Validator<LocalDate> requiredValidator = (value, context) -> {
-        if (ValidationUtil.checkRequired(required, value, getEmptyValue()).isError()) {
+        if (ValidationUtil.checkRequired(required, value, getEmptyValue())
+                .isError()) {
             return ValidationResult.error(getI18n().getRequiredErrorMessage());
         }
         return ValidationResult.ok();
@@ -569,7 +570,8 @@ public class DatePicker
                 .forEach(listener -> listener.validationStatusChanged(event));
     }
 
-    private ValidationResult checkValidity(LocalDate value, boolean withRequired) {
+    private ValidationResult checkValidity(LocalDate value,
+            boolean withRequired) {
         List<Validator<LocalDate>> validators = new ArrayList<>();
         if (withRequired) {
             validators.add(requiredValidator);
@@ -578,7 +580,8 @@ public class DatePicker
         validators.add(minValidator);
         validators.add(maxValidator);
 
-        return validators.stream().map(validator -> validator.apply(value, null))
+        return validators.stream()
+                .map(validator -> validator.apply(value, null))
                 .filter(ValidationResult::isError).findFirst()
                 .orElse(ValidationResult.ok());
     }
@@ -1151,7 +1154,8 @@ public class DatePicker
             return this;
         }
 
-        public DatePickerI18n setRequiredErrorMessage(String requiredErrorMessage) {
+        public DatePickerI18n setRequiredErrorMessage(
+                String requiredErrorMessage) {
             this.requiredErrorMessage = requiredErrorMessage;
             return this;
         }
@@ -1160,7 +1164,8 @@ public class DatePicker
             return requiredErrorMessage;
         }
 
-        public DatePickerI18n setBadInputErrorMessage(String badInputErrorMessage) {
+        public DatePickerI18n setBadInputErrorMessage(
+                String badInputErrorMessage) {
             this.badInputErrorMessage = badInputErrorMessage;
             return this;
         }
