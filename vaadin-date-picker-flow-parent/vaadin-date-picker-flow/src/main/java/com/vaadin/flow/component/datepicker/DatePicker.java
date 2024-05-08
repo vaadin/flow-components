@@ -118,6 +118,34 @@ public class DatePicker
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
+    private final Validator<LocalDate> requiredValidator = (value, context) -> {
+        if (ValidationUtil.checkRequired(required, value, getEmptyValue()).isError()) {
+            return ValidationResult.error("");
+        }
+        return ValidationResult.ok();
+    };
+
+    private final Validator<LocalDate> badInputValidator = (value, context) -> {
+        if (valueEquals(value, getEmptyValue()) && isInputValuePresent()) {
+            return ValidationResult.error("");
+        }
+        return ValidationResult.ok();
+    };
+
+    private final Validator<LocalDate> minValidator = (value, context) -> {
+        if (ValidationUtil.checkSmallerThanMin(value, getMin()).isError()) {
+            return ValidationResult.error("");
+        }
+        return ValidationResult.ok();
+    };
+
+    private final Validator<LocalDate> maxValidator = (value, context) -> {
+        if (ValidationUtil.checkGreaterThanMax(value, getMax()).isError()) {
+            return ValidationResult.error("");
+        }
+        return ValidationResult.ok();
+    };
+
     /**
      * Default constructor.
      */
@@ -518,7 +546,7 @@ public class DatePicker
 
     @Override
     public Validator<LocalDate> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        return (value, context) -> checkValidity(value, false);
     }
 
     @Override
@@ -541,38 +569,18 @@ public class DatePicker
                 .forEach(listener -> listener.validationStatusChanged(event));
     }
 
-    private ValidationResult checkValidity(LocalDate value) {
-        boolean hasNonParsableValue = valueEquals(value, getEmptyValue())
-                && isInputValuePresent();
-        if (hasNonParsableValue) {
-            return ValidationResult.error("");
+    private ValidationResult checkValidity(LocalDate value, boolean withRequired) {
+        List<Validator<LocalDate>> validators = new ArrayList<>();
+        if (withRequired) {
+            validators.add(requiredValidator);
         }
+        validators.add(badInputValidator);
+        validators.add(minValidator);
+        validators.add(maxValidator);
 
-        ValidationResult greaterThanMax = ValidationUtil
-                .checkGreaterThanMax(value, max);
-        if (greaterThanMax.isError()) {
-            return greaterThanMax;
-        }
-
-        ValidationResult smallerThanMin = ValidationUtil
-                .checkSmallerThanMin(value, min);
-        if (smallerThanMin.isError()) {
-            return smallerThanMin;
-        }
-
-        return ValidationResult.ok();
-    }
-
-    /**
-     * Performs a server-side validation of the given value. This is needed
-     * because it is possible to circumvent the client side validation
-     * constraints using browser development tools.
-     */
-    private boolean isInvalid(LocalDate value) {
-        var requiredValidation = ValidationUtil.checkRequired(required, value,
-                getEmptyValue());
-
-        return requiredValidation.isError() || checkValidity(value).isError();
+        return validators.stream().map(validator -> validator.apply(value, null))
+                .filter(ValidationResult::isError).findFirst()
+                .orElse(ValidationResult.ok());
     }
 
     /**
@@ -792,8 +800,17 @@ public class DatePicker
      * constraints using browser development tools.
      */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            setInvalid(isInvalid(getValue()));
+        if (this.manualValidationEnabled) {
+            return;
+        }
+
+        ValidationResult result = checkValidity(getValue(), true);
+        if (result.isError()) {
+            setInvalid(true);
+            setErrorMessage(result.getErrorMessage());
+        } else {
+            setInvalid(false);
+            setErrorMessage(null);
         }
     }
 
