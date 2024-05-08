@@ -118,6 +118,44 @@ public class DatePicker
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
+    private final Validator<LocalDate> requiredValidator = (value, context) -> {
+        ValidationResult result = ValidationUtil.checkRequired(required, value,
+                getEmptyValue());
+        if (result.isError()) {
+            return ValidationResult
+                    .error(i18n != null ? i18n.getRequiredErrorMessage() : "");
+        }
+        return ValidationResult.ok();
+    };
+
+    private final Validator<LocalDate> badInputValidator = (value, context) -> {
+        if (valueEquals(value, getEmptyValue()) && isInputValuePresent()) {
+            return ValidationResult
+                    .error(i18n != null ? i18n.getBadInputErrorMessage() : "");
+        }
+        return ValidationResult.ok();
+    };
+
+    private final Validator<LocalDate> minValidator = (value, context) -> {
+        ValidationResult result = ValidationUtil.checkSmallerThanMin(value,
+                getMin());
+        if (result.isError()) {
+            return ValidationResult
+                    .error(i18n != null ? i18n.getMinErrorMessage() : "");
+        }
+        return ValidationResult.ok();
+    };
+
+    private final Validator<LocalDate> maxValidator = (value, context) -> {
+        ValidationResult result = ValidationUtil.checkGreaterThanMax(value,
+                getMax());
+        if (result.isError()) {
+            return ValidationResult
+                    .error(i18n != null ? i18n.getMaxErrorMessage() : "");
+        }
+        return ValidationResult.ok();
+    };
+
     /**
      * Default constructor.
      */
@@ -553,35 +591,18 @@ public class DatePicker
 
     private ValidationResult checkValidity(LocalDate value,
             boolean withRequired) {
-        ValidationResult result;
-
-        if (valueEquals(value, getEmptyValue()) && isInputValuePresent()) {
-            return ValidationResult
-                    .error(i18n != null ? i18n.getBadInputErrorMessage() : "");
-        }
-
+        List<Validator<LocalDate>> validators = new ArrayList<>();
         if (withRequired) {
-            result = ValidationUtil.checkRequired(required, value,
-                    getEmptyValue());
-            if (result.isError()) {
-                return ValidationResult.error(
-                        i18n != null ? i18n.getRequiredErrorMessage() : "");
-            }
+            validators.add(requiredValidator);
         }
+        validators.add(badInputValidator);
+        validators.add(minValidator);
+        validators.add(maxValidator);
 
-        result = ValidationUtil.checkSmallerThanMin(value, getMin());
-        if (result.isError()) {
-            return ValidationResult
-                    .error(i18n != null ? i18n.getMinErrorMessage() : "");
-        }
-
-        result = ValidationUtil.checkGreaterThanMax(value, getMax());
-        if (result.isError()) {
-            return ValidationResult
-                    .error(i18n != null ? i18n.getMaxErrorMessage() : "");
-        }
-
-        return ValidationResult.ok();
+        return validators.stream()
+                .map(validator -> validator.apply(value, null))
+                .filter(ValidationResult::isError).findFirst()
+                .orElse(ValidationResult.ok());
     }
 
     /**
