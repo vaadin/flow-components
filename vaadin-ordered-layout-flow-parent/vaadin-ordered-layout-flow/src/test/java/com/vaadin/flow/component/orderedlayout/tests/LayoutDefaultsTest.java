@@ -102,7 +102,7 @@ public class LayoutDefaultsTest {
     @Test
     public void defaultAlignmentValues() {
         VerticalLayout verticalLayout = new VerticalLayout();
-        Assert.assertEquals(Alignment.STRETCH,
+        Assert.assertEquals(Alignment.START,
                 verticalLayout.getDefaultHorizontalComponentAlignment());
 
         HorizontalLayout horizontalLayout = new HorizontalLayout();

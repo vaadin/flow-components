@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -42,6 +42,9 @@ public class TreeGridChangingHierarchyIT extends AbstractComponentIT {
     private WebElement removeChildrenOfABtn;
     private WebElement removeChildrenOfAAABtn;
 
+    private WebElement moveCUnderABtn;
+    private WebElement checkKeyOfCBtn;
+
     @Before
     public void before() {
         open();
@@ -54,6 +57,8 @@ public class TreeGridChangingHierarchyIT extends AbstractComponentIT {
         removeABtn = buttons.get(4);
         removeChildrenOfABtn = buttons.get(5);
         removeChildrenOfAAABtn = buttons.get(6);
+        moveCUnderABtn = buttons.get(7);
+        checkKeyOfCBtn = buttons.get(8);
     }
 
     @After
@@ -136,6 +141,32 @@ public class TreeGridChangingHierarchyIT extends AbstractComponentIT {
         removeABtn.click();
         grid.expandWithClick(0);
         Assert.assertEquals("b", grid.getCell(0, 0).getText());
+    }
+
+    @Test
+    public void addChildrenToExpandedNode_childrenDisplayed() {
+        // add children to A, expand A
+        addItemsToABtn.click();
+        grid.expandWithClick(0);
+
+        // remove children from A
+        removeChildrenOfABtn.click();
+
+        // add children to A again while it is expanded
+        addItemsToABtn.click();
+
+        // verify that the children are added to the expanded node
+        Assert.assertEquals("a/a", grid.getCell(1, 0).getText());
+        Assert.assertEquals("a/b", grid.getCell(2, 0).getText());
+    }
+
+    @Test
+    public void moveRootItemAsChild_keyShouldBeInKeyMapper() {
+        moveCUnderABtn.click();
+        checkKeyOfCBtn.click();
+        Assert.assertEquals(
+                "Key of C was expected to be in KeyMapper after moving it, but was not.",
+                "true", moveCUnderABtn.getText());
     }
 
     private void runRemovalOfDeeplyNestedItems() {

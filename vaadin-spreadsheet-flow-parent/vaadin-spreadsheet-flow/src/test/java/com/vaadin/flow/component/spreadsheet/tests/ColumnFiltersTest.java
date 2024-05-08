@@ -95,4 +95,72 @@ public class ColumnFiltersTest {
         Assert.assertFalse(table.getPopupButton(2).isActive());
     }
 
+    @Test
+    public void loadFile_switchSheets_tablesRegisteredOnce() {
+        Spreadsheet spreadsheet = TestHelper
+                .createSpreadsheet("tables_on_multiple_sheets.xlsx");
+
+        // Go to Sheet2 and back to Sheet1
+        spreadsheet.setActiveSheetIndex(1);
+        spreadsheet.setActiveSheetIndex(0);
+
+        // just 2 tables, one table per sheet
+        Assert.assertEquals(2, spreadsheet.getTables().size());
+    }
+
+    @Test
+    public void loadFile_goToSheet1_popupButtonsCreatedOnTable() {
+        Spreadsheet spreadsheet = TestHelper
+                .createSpreadsheet("table_with_disabled_autofilter.xlsx");
+
+        spreadsheet.setActiveSheetIndex(0);
+
+        // filter popup buttons visible on table on Sheet1
+        var table = getFirstTableOnActiveSheet(spreadsheet);
+        Assert.assertEquals(3, table.getPopupButtons().size());
+    }
+
+    @Test
+    public void loadFile_goToSheet2_noPopupButtonsOnTable() {
+        Spreadsheet spreadsheet = TestHelper
+                .createSpreadsheet("table_with_disabled_autofilter.xlsx");
+
+        spreadsheet.setActiveSheetIndex(1);
+
+        // there are no filter popup buttons on table on Sheet2
+        var table = getFirstTableOnActiveSheet(spreadsheet);
+        Assert.assertEquals(0, table.getPopupButtons().size());
+    }
+
+    @Test
+    public void loadFile_goToSheet3_noPopupButtonsOnTable() {
+        Spreadsheet spreadsheet = TestHelper
+                .createSpreadsheet("table_with_disabled_autofilter.xlsx");
+
+        spreadsheet.setActiveSheetIndex(2);
+
+        // there are no filter popup buttons on table on Sheet3
+        var table = getFirstTableOnActiveSheet(spreadsheet);
+        Assert.assertEquals(0, table.getPopupButtons().size());
+    }
+
+    @Test
+    public void loadFile_goToSheet4_popupButtonsCreateOnWorksheet() {
+        Spreadsheet spreadsheet = TestHelper
+                .createSpreadsheet("table_with_disabled_autofilter.xlsx");
+
+        spreadsheet.setActiveSheetIndex(3);
+
+        // there is one popup button for a worksheet filter on Sheet4
+        var table = getFirstTableOnActiveSheet(spreadsheet);
+        Assert.assertEquals(1, table.getPopupButtons().size());
+    }
+
+    private SpreadsheetTable getFirstTableOnActiveSheet(
+            Spreadsheet spreadsheet) {
+        return spreadsheet.getTables().stream().filter(
+                table -> table.getSheet().equals(spreadsheet.getActiveSheet()))
+                .findFirst().orElseThrow();
+    }
+
 }

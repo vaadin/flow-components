@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,9 +28,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * parent component and its height is determined by the components it contains.
  */
 @Tag("vaadin-vertical-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vertical-layout", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/vertical-layout", version = "24.4.0-beta2")
 @JsModule("@vaadin/vertical-layout/src/vaadin-vertical-layout.js")
 public class VerticalLayout extends Component implements ThemableLayout,
         FlexComponent, ClickNotifier<VerticalLayout> {
@@ -166,7 +166,7 @@ public class VerticalLayout extends Component implements ThemableLayout,
      * can be aligned by using the
      * {@link #setHorizontalComponentAlignment(Alignment, Component...)} method.
      * <p>
-     * The default alignment is {@link Alignment#STRETCH}.
+     * The default alignment is {@link Alignment#START}.
      * <p>
      * It's the same as the {@link #setAlignItems(Alignment)} method.
      *
@@ -182,7 +182,7 @@ public class VerticalLayout extends Component implements ThemableLayout,
      * Gets the default horizontal alignment used by all components without
      * individual alignments inside the layout.
      * <p>
-     * The default alignment is {@link Alignment#STRETCH}.
+     * The default alignment is {@link Alignment#START}.
      * <p>
      * It's the same as the {@link #getAlignItems()} method.
      *
@@ -219,7 +219,9 @@ public class VerticalLayout extends Component implements ThemableLayout,
         // this method is overridden to make javadocs point to the correct
         // method to be used, and since FlexComponent has different default
         // value.
-        return FlexComponent.super.getAlignItems();
+        return Alignment.toAlignment(
+                getStyle().get(FlexConstants.ALIGN_ITEMS_CSS_PROPERTY),
+                Alignment.START);
     }
 
     /**

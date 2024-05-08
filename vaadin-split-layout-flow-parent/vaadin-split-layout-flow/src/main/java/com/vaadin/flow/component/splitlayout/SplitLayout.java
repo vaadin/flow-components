@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,15 +23,16 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
@@ -42,9 +43,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-split-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/split-layout", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/split-layout", version = "24.4.0-beta2")
 @JsModule("@vaadin/split-layout/src/vaadin-split-layout.js")
 public class SplitLayout extends Component
         implements ClickNotifier<SplitLayout>, HasSize, HasStyle,
@@ -66,9 +67,25 @@ public class SplitLayout extends Component
      * Constructs an empty SplitLayout.
      */
     public SplitLayout() {
-        setOrientation(Orientation.HORIZONTAL);
+        this(Orientation.HORIZONTAL);
+    }
+
+    /**
+     * Constructs a SplitLayout with the orientation.
+     *
+     * @param orientation
+     *            the orientation set to the layout
+     */
+    public SplitLayout(Orientation orientation) {
+        setOrientation(orientation);
         addAttachListener(
                 e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
+        addSplitterDragendListener(e -> {
+            var splitterPosition = calcNewSplitterPosition(
+                    e.primaryComponentFlexBasis, e.secondaryComponentFlexBasis);
+            setSplitterPosition(splitterPosition);
+        });
+
     }
 
     /**
@@ -82,21 +99,7 @@ public class SplitLayout extends Component
      */
     public SplitLayout(Component primaryComponent,
             Component secondaryComponent) {
-        this();
-        addToPrimary(primaryComponent);
-        addToSecondary(secondaryComponent);
-    }
-
-    /**
-     * Constructs a SplitLayout with the orientation.
-     *
-     * @param orientation
-     *            the orientation set to the layout
-     */
-    public SplitLayout(Orientation orientation) {
-        setOrientation(orientation);
-        addAttachListener(
-                e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
+        this(primaryComponent, secondaryComponent, Orientation.HORIZONTAL);
     }
 
     /**
@@ -112,8 +115,9 @@ public class SplitLayout extends Component
      */
     public SplitLayout(Component primaryComponent, Component secondaryComponent,
             Orientation orientation) {
-        this(primaryComponent, secondaryComponent);
-        setOrientation(orientation);
+        this(orientation);
+        addToPrimary(primaryComponent);
+        addToSecondary(secondaryComponent);
     }
 
     /**
@@ -163,14 +167,8 @@ public class SplitLayout extends Component
      * @see #setOrientation(Orientation)
      */
     public void addToPrimary(Component... components) {
-        if (components.length == 1) {
-            primaryComponent = components[0];
-        } else {
-            Div container = new Div();
-            container.add(components);
-            primaryComponent = container;
-        }
-        setComponents();
+        primaryComponent = getComponentOrWrap(components);
+        setComponent(primaryComponent, "primary");
     }
 
     /**
@@ -193,14 +191,8 @@ public class SplitLayout extends Component
      * @see #setOrientation(Orientation)
      */
     public void addToSecondary(Component... components) {
-        if (components.length == 1) {
-            secondaryComponent = components[0];
-        } else {
-            Div container = new Div();
-            container.add(components);
-            secondaryComponent = container;
-        }
-        setComponents();
+        secondaryComponent = getComponentOrWrap(components);
+        setComponent(secondaryComponent, "secondary");
     }
 
     /**
@@ -210,6 +202,19 @@ public class SplitLayout extends Component
      */
     public Component getSecondaryComponent() {
         return secondaryComponent;
+    }
+
+    /**
+     * Gets the relative position of the splitter as a percentage value between
+     * 0 and 100. The value will be null unless the splitter position has been
+     * explicitly set on the server-side, or the splitter has been moved on the
+     * client side. The splitter position is automatically updated when as part
+     * of the {@link SplitterDragendEvent}.
+     *
+     * @return the splitter position, may be null
+     */
+    public Double getSplitterPosition() {
+        return splitterPosition;
     }
 
     /**
@@ -279,15 +284,21 @@ public class SplitLayout extends Component
         setInnerComponentStyle(styleName, value, false);
     }
 
-    private void setComponent(Component component, String slot) {
-        Component child = component == null ? new Div() : component;
-        SlotUtils.addToSlot(this, slot, child);
+    /**
+     * Returns the component if the given components array contains only one or
+     * a wrapper div with the given components if the array contains more.
+     *
+     * @param components
+     *            the components to wrap
+     * @return the component or a wrapper div
+     */
+    private Component getComponentOrWrap(Component... components) {
+        return components.length == 1 ? components[0] : new Div(components);
     }
 
-    private void setComponents() {
-        removeAll();
-        setComponent(primaryComponent, "primary");
-        setComponent(secondaryComponent, "secondary");
+    private void setComponent(Component component, String slot) {
+        Component child = component == null ? new Div() : component;
+        SlotUtils.setSlot(this, slot, child);
     }
 
     /**
@@ -301,6 +312,11 @@ public class SplitLayout extends Component
     public void remove(Component... components) {
         for (Component component : components) {
             if (getElement().equals(component.getElement().getParent())) {
+                if (component.equals(primaryComponent)) {
+                    primaryComponent = null;
+                } else if (component.equals(secondaryComponent)) {
+                    secondaryComponent = null;
+                }
                 component.getElement().removeAttribute("slot");
                 getElement().removeChild(component.getElement());
             } else {
@@ -317,14 +333,28 @@ public class SplitLayout extends Component
         getElement().getChildren()
                 .forEach(child -> child.removeAttribute("slot"));
         getElement().removeAllChildren();
+        primaryComponent = null;
+        secondaryComponent = null;
     }
 
     @DomEvent("splitter-dragend")
     public static class SplitterDragendEvent
             extends ComponentEvent<SplitLayout> {
-        public SplitterDragendEvent(SplitLayout source, boolean fromClient) {
+
+        private static final String PRIMARY_FLEX_BASIS = "element.querySelector(':scope > [slot=\"primary\"]').style.flexBasis";
+        private static final String SECONDARY_FLEX_BASIS = "element.querySelector(':scope > [slot=\"secondary\"]').style.flexBasis";
+
+        String primaryComponentFlexBasis;
+        String secondaryComponentFlexBasis;
+
+        public SplitterDragendEvent(SplitLayout source, boolean fromClient,
+                @EventData(PRIMARY_FLEX_BASIS) String primaryComponentFlexBasis,
+                @EventData(SECONDARY_FLEX_BASIS) String secondaryComponentFlexBasis) {
             super(source, fromClient);
+            this.primaryComponentFlexBasis = primaryComponentFlexBasis;
+            this.secondaryComponentFlexBasis = secondaryComponentFlexBasis;
         }
+
     }
 
     /**
@@ -352,5 +382,41 @@ public class SplitLayout extends Component
                     "var element = this.children[$0]; if (element) { element.style[$1]=$2; }",
                     primary ? 0 : 1, styleName, value);
         }
+    }
+
+    private Double calcNewSplitterPosition(String primaryFlexBasis,
+            String secondaryFlexBasis) {
+        // set current splitter position value
+        Double splitterPositionValue = this.splitterPosition;
+
+        if (primaryFlexBasis == null || secondaryFlexBasis == null) {
+            return splitterPositionValue;
+        }
+
+        if (primaryFlexBasis.endsWith("px")) {
+            // When moving the splitter, the client side sets pixel values.
+            double pFlexBasis = Double
+                    .parseDouble(primaryFlexBasis.replace("px", ""));
+            double sFlexBasis = Double
+                    .parseDouble(secondaryFlexBasis.replace("px", ""));
+
+            splitterPositionValue = (pFlexBasis * 100)
+                    / (pFlexBasis + sFlexBasis);
+            splitterPositionValue = round(splitterPositionValue);
+        } else if (primaryFlexBasis.endsWith("%")) {
+            splitterPositionValue = Double
+                    .parseDouble(primaryFlexBasis.replace("%", ""));
+            splitterPositionValue = round(splitterPositionValue);
+        } else {
+            throw new IllegalArgumentException(
+                    "Given flex basis values are not supported: "
+                            + primaryFlexBasis + " / " + secondaryFlexBasis);
+        }
+
+        return splitterPositionValue;
+    }
+
+    private double round(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 }

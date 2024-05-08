@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,7 +15,10 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.component.shared.InputField;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -145,5 +148,18 @@ public class CheckboxUnitTest {
 
         checkbox.setAriaLabelledBy(null);
         Assert.assertTrue(checkbox.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void implementsInputField() {
+        Checkbox field = new Checkbox();
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>, Boolean>);
+    }
+
+    @Test
+    public void implementsHasValidationProperties() {
+        Checkbox field = new Checkbox();
+        Assert.assertTrue(field instanceof HasValidationProperties);
     }
 }

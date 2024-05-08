@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-dialog-flow-parent</artifactId>
-        <version>24.1-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-dialog-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Dialog</name>
+    <description>Vaadin Dialog</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

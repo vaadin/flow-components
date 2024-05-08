@@ -147,6 +147,22 @@ public class BinderValidationIT
     }
 
     @Test
+    public void setValue_clearValue_assertValidity() {
+        $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-01-01T10:00",
+                Keys.ENTER);
+
+        setInputValue(dateInput, "1/1/2000");
+        setInputValue(timeInput, "10:00");
+        assertServerValid();
+        assertClientValid();
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+    }
+
+    @Test
     public void badInput_changeValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-01-01T10:00",
                 Keys.ENTER);

@@ -40,6 +40,9 @@ public class ComboBoxBinderValidationPage
                 .withValidator(value -> value.equals(expectedValue),
                         UNEXPECTED_VALUE_ERROR_MESSAGE)
                 .bind("property");
+        binder.addStatusChangeListener(event -> {
+            incrementServerValidationCounter();
+        });
 
         add(createButton(ENABLE_CUSTOM_VALUE_BUTTON, "Enable custom values",
                 event -> {

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-flow-components</artifactId>
+        <version>24.5-SNAPSHOT</version>
+    </parent>
+    <artifactId>vaadin-side-nav-flow-parent</artifactId>
+    <packaging>pom</packaging>
+    <name>Vaadin Side Nav Parent</name>
+    <description>Vaadin Side Nav Parent</description>
+    <modules>
+        <module>vaadin-side-nav-flow</module>
+        <module>vaadin-side-nav-testbench</module>
+    </modules>
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <property>
+                    <name>!release</name>
+                </property>
+            </activation>
+            <modules>
+                <module>vaadin-side-nav-flow-integration-tests</module>
+            </modules>
+        </profile>
+    </profiles>
+    <dependencies/>
+</project>

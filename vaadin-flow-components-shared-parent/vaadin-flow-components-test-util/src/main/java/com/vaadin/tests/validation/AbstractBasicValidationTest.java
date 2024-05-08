@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,19 +19,42 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
+import com.vaadin.flow.component.shared.HasClientValidation.ClientValidatedEvent;
 
 /**
  * An abstract class that provides tests verifying that a component correctly
  * implements the {@link HasValidation} interface.
  */
-public abstract class AbstractBasicValidationTest<T extends Component & HasValidation> {
-    protected T testField;
+public abstract class AbstractBasicValidationTest<C extends AbstractField<C, V> & HasValidation, V> {
+    protected C testField;
 
     @Before
     public void setup() {
         testField = createTestField();
+    }
+
+    @Test
+    public void setRequired_setManualValidation_fireValueChangeEvent_noValidation() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setManualValidation(true);
+
+        ComponentUtil.fireEvent(testField, new ComponentValueChangeEvent<>(
+                testField, testField, testField.getEmptyValue(), false));
+        Assert.assertFalse(testField.isInvalid());
+    }
+
+    @Test
+    public void setRequired_setManualValidation_fireClientValidatedEvent_noValidation() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setManualValidation(true);
+
+        ComponentUtil.fireEvent(testField,
+                new ClientValidatedEvent(testField, false));
+        Assert.assertFalse(testField.isInvalid());
     }
 
     @Test
@@ -58,5 +81,5 @@ public abstract class AbstractBasicValidationTest<T extends Component & HasValid
         Assert.assertTrue(testField.getElement().getProperty("invalid", false));
     }
 
-    protected abstract T createTestField();
+    protected abstract C createTestField();
 }

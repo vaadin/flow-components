@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,11 +23,8 @@ import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
-import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.shared.Registration;
 
 /**
  * Text Area is an input field component for multi-line text input. Text Area is
@@ -37,9 +34,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-text-area")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/text-area", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/text-area", version = "24.4.0-beta2")
 @JsModule("@vaadin/text-area/src/vaadin-text-area.js")
 public class TextArea extends TextFieldBase<TextArea, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextAreaVariant> {
@@ -47,6 +44,8 @@ public class TextArea extends TextFieldBase<TextArea, String>
     private boolean isConnectorAttached;
 
     private TextFieldValidationSupport validationSupport;
+
+    private boolean manualValidationEnabled = false;
 
     /**
      * Constructs an empty {@code TextArea}.
@@ -77,8 +76,6 @@ public class TextArea extends TextFieldBase<TextArea, String>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
-
-        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -221,6 +218,20 @@ public class TextArea extends TextFieldBase<TextArea, String>
     }
 
     /**
+     * Scrolls the textarea to the start if it has a vertical scrollbar.
+     */
+    public void scrollToStart() {
+        getElement().callJsFunction("scrollToStart");
+    }
+
+    /**
+     * Scrolls the textarea to the end if it has a vertical scrollbar.
+     */
+    public void scrollToEnd() {
+        getElement().callJsFunction("scrollToEnd");
+    }
+
+    /**
      * Minimum number of characters (in Unicode code points) that the user can
      * enter.
      *
@@ -320,11 +331,8 @@ public class TextArea extends TextFieldBase<TextArea, String>
     }
 
     @Override
-    public Registration addValidationStatusChangeListener(
-            ValidationStatusChangeListener<String> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<>(this, !isInvalid())));
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
     }
 
     /**
@@ -333,7 +341,9 @@ public class TextArea extends TextFieldBase<TextArea, String>
      * constraints using browser development tools.
      */
     protected void validate() {
-        setInvalid(getValidationSupport().isInvalid(getValue()));
+        if (!this.manualValidationEnabled) {
+            setInvalid(getValidationSupport().isInvalid(getValue()));
+        }
     }
 
     @Override

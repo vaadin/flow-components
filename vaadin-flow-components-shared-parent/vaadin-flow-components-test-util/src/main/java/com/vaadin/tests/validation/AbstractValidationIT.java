@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,6 +26,8 @@ import static com.vaadin.tests.validation.AbstractValidationPage.ATTACH_FIELD_BU
 import static com.vaadin.tests.validation.AbstractValidationPage.DETACH_FIELD_BUTTON;
 import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
 import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON;
+import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDATION_COUNTER;
+import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDATION_COUNTER_RESET_BUTTON;
 
 public abstract class AbstractValidationIT<T extends TestBenchElement>
         extends AbstractComponentIT {
@@ -38,6 +40,18 @@ public abstract class AbstractValidationIT<T extends TestBenchElement>
     }
 
     protected abstract T getTestField();
+
+    protected void assertValidationCount(int expected) {
+        int actual = Integer
+                .parseInt($("div").id(SERVER_VALIDATION_COUNTER).getText());
+        Assert.assertEquals("The field should have validated " + expected
+                + " times on the server-side", expected, actual);
+        resetValidationCount();
+    }
+
+    protected void resetValidationCount() {
+        $("button").id(SERVER_VALIDATION_COUNTER_RESET_BUTTON).click();
+    }
 
     protected void assertErrorMessage(String expected) {
         Assert.assertEquals(expected,

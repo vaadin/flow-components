@@ -4,11 +4,12 @@
     <parent>
         <artifactId>vaadin-custom-field-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>24.1-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-custom-field-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Custom Field Testbench API</name>
+    <description>Vaadin Custom Field Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,19 +17,23 @@ package com.vaadin.flow.component.checkbox;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.PropertyChangeListener;
 
@@ -48,13 +52,14 @@ import java.util.Optional;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/checkbox", version = "24.4.0-beta2")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         implements ClickNotifier<Checkbox>, Focusable<Checkbox>, HasAriaLabel,
-        HasLabel, HasSize, HasStyle, HasTooltip {
+        HasClientValidation, HasValidationProperties, HasValidator<Boolean>,
+        InputField<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>, Boolean> {
 
     private final Label labelElement;
 
@@ -62,6 +67,8 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
     };
     private String ariaLabel;
     private String ariaLabelledBy;
+
+    private boolean manualValidationEnabled = false;
 
     /**
      * Default constructor.
@@ -83,6 +90,8 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         // Initialize custom label
         labelElement = new Label();
         labelElement.getElement().setAttribute("slot", "label");
+
+        addValueChangeListener(e -> validate());
     }
 
     /**
@@ -175,6 +184,13 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
             ValueChangeListener<ComponentValueChangeEvent<Checkbox, Boolean>> listener) {
         this(labelText, initialValue);
         addValueChangeListener(listener);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     /**
@@ -304,6 +320,35 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
     @Synchronize(property = "indeterminate", value = "indeterminate-changed")
     public boolean isIndeterminate() {
         return getElement().getProperty("indeterminate", false);
+    }
+
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
+
+    /**
+     * Performs server-side validation of the current value. This is needed
+     * because it is possible to circumvent the client-side validation
+     * constraints using browser development tools.
+     */
+    protected void validate() {
+        if (!this.manualValidationEnabled) {
+            setInvalid(isInvalid(getValue()));
+        }
+    }
+
+    /**
+     * Performs a server-side validation of the given value. This is needed
+     * because it is possible to circumvent the client side validation
+     * constraints using browser development tools.
+     */
+    private boolean isInvalid(Boolean value) {
+        boolean isRequired = isRequiredIndicatorVisible();
+        ValidationResult requiredValidation = ValidationUtil
+                .checkRequired(isRequired, value, getEmptyValue());
+
+        return requiredValidation.isError();
     }
 
     /**

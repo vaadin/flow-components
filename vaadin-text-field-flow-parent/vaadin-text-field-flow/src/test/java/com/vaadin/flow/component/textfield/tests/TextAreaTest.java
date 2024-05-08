@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,16 +15,26 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextAreaVariant;
+import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
+
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -50,10 +60,39 @@ public class TextAreaTest {
     }
 
     @Test
-    public void initialValuePropertyValue() {
+    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         TextArea textArea = new TextArea();
-        assertEquals(textArea.getEmptyValue(),
-                textArea.getElement().getProperty("value"));
+        Assert.assertEquals("", textArea.getValue());
+        Assert.assertEquals("", textArea.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void initialValueIsNull_valuePropertyHasEmptyString() {
+        TextArea textArea = new TextArea((String) null);
+        Assert.assertEquals("", textArea.getValue());
+        Assert.assertEquals("", textArea.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
+        Element element = new Element("vaadin-text-area");
+        element.setProperty("value", "test");
+        UI ui = new UI();
+        UI.setCurrent(ui);
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui.getInternals().setSession(session);
+        VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(session.getService()).thenReturn(service);
+
+        Instantiator instantiator = Mockito.mock(Instantiator.class);
+
+        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+
+        Mockito.when(instantiator.createComponent(TextArea.class))
+                .thenAnswer(invocation -> new TextArea());
+
+        TextArea textArea = Component.from(element, TextArea.class);
+        Assert.assertEquals("test", textArea.getElement().getProperty("value"));
     }
 
     @Test
@@ -168,5 +207,12 @@ public class TextAreaTest {
 
         field.setAriaLabelledBy(null);
         Assert.assertTrue(field.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void implementsInputField() {
+        TextArea field = new TextArea();
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<TextArea, String>, String>);
     }
 }

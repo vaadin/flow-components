@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -63,8 +63,22 @@ public class AvatarGroupIT extends AbstractComponentIT {
         checkLogsForErrors(); // would fail if the image wasn't hosted
     }
 
+    @Test
+    public void addClassNames_removeClassNames_avatarsUpdated() {
+        findElement(By.id("add-class-names")).click();
+        Assert.assertEquals("red", getAvatarClassName(0));
+
+        findElement(By.id("remove-class-names")).click();
+        Assert.assertEquals("", getAvatarClassName(0));
+    }
+
     private String getAvatarAbbr(int index) {
         return $(AvatarGroupElement.class).waitForFirst()
                 .getAvatarElement(index).getAbbr();
+    }
+
+    private String getAvatarClassName(int index) {
+        return $(AvatarGroupElement.class).waitForFirst()
+                .getAvatarElement(index).getAttribute("class");
     }
 }

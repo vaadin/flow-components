@@ -4,7 +4,7 @@
   <parent>
     <groupId>com.vaadin</groupId>
     <artifactId>vaadin-flow-components-shared-parent</artifactId>
-    <version>24.1-SNAPSHOT</version>
+    <version>24.5-SNAPSHOT</version>
   </parent>
   <artifactId>vaadin-flow-components-base</artifactId>
   <packaging>jar</packaging>
@@ -18,7 +18,6 @@
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>flow-data</artifactId>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Assert;
@@ -34,12 +36,10 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.notification.Notification.Position;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinSession;
-
-import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * Unit tests for the Notification.
@@ -330,5 +330,42 @@ public class NotificationTest {
         notification.close();
 
         Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void openedChangeListener_shouldWorkForAllConstructors() {
+        var listenerInvokedCount = new AtomicInteger(0);
+
+        var notifications = Stream.of(//
+                new Notification(), //
+                new Notification(new Span("text")), //
+                new Notification("text"), //
+                new Notification("text", 1000), //
+                new Notification("text", 1000, Position.MIDDLE))
+                .map(notification -> {
+                    notification.addOpenedChangeListener(e -> {
+                        listenerInvokedCount.incrementAndGet();
+                    });
+                    return notification;
+                }).toList();
+
+        notifications.forEach(notification -> {
+            notification.open();
+            notification.close();
+        });
+
+        // two invocations expected per notification - open & close
+        int expectedInvocationsCount = 2 * notifications.size();
+        Assert.assertEquals(expectedInvocationsCount,
+                listenerInvokedCount.get());
+    }
+
+    @Test
+    public void setText_notificationHasUnmodifiedText() {
+        Notification notification = new Notification();
+        notification.setText("foo > bar");
+
+        Assert.assertEquals("foo > bar",
+                notification.getElement().getProperty("text"));
     }
 }

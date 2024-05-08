@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -22,6 +22,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.gridpro.GridPro.EditColumn;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.Registration;
 
@@ -36,6 +37,8 @@ public class EditColumnConfigurator<T> implements Serializable {
 
     private final EditColumn<T> column;
     private Registration attachRegistration;
+
+    private boolean editModeRendererRequested = false;
 
     /**
      * Creates a new configurator for the given column.
@@ -150,21 +153,37 @@ public class EditColumnConfigurator<T> implements Serializable {
             attachRegistration.remove();
             attachRegistration = null;
         }
+        // Need to call on attach to make sure that the edit mode renderer is
+        // set in case the GridPro is detached and attached again
         attachRegistration = column.getElement()
                 .addAttachListener(e -> setEditModeRenderer(component));
 
-        column.getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(column,
-                        context -> setEditModeRenderer(component)));
+        // Calling setEditModeRenderer here in case the GridPro is already
+        // attached and the column is added later
+        // This is needed because in this case the attach listener is not called
+        setEditModeRenderer(component);
+
         return configureColumn(valueProvider, (item, ignore) -> itemUpdater
                 .accept(item, component.getValue()), EditorType.CUSTOM,
                 component);
     }
 
     private <V> void setEditModeRenderer(HasValueAndElement<?, V> component) {
-        UI.getCurrent().getPage().executeJs(
-                "window.Vaadin.Flow.gridProConnector.setEditModeRenderer($0, $1)",
-                column.getElement(), component.getElement());
+        if (editModeRendererRequested) {
+            return;
+        }
+        editModeRendererRequested = true;
+        column.getElement().getNode().runWhenAttached(ui -> {
+            ui.beforeClientResponse(column, context -> {
+                if (!editModeRendererRequested) {
+                    return;
+                }
+                ui.getPage().executeJs(
+                        "window.Vaadin.Flow.gridProConnector.setEditModeRenderer($0, $1)",
+                        column.getElement(), component.getElement());
+                editModeRendererRequested = false;
+            });
+        });
     }
 
     /**
@@ -285,5 +304,33 @@ public class EditColumnConfigurator<T> implements Serializable {
     public <E extends Enum<E>> Column<T> select(ItemUpdater<T, E> itemUpdater,
             Class<E> enumType) {
         return select(itemUpdater, enumType, Object::toString);
+    }
+
+    /**
+     * Configures the column to not refresh the item automatically when a
+     * property is updated. The required update and refresh operations should be
+     * performed in the provided item updater manually.
+     *
+     * @return the configurator
+     */
+    public EditColumnConfigurator<T> withManualRefresh() {
+        column.setManualRefresh(true);
+        return this;
+    }
+
+    /**
+     * Configures a predicate that determines whether individual cells in this
+     * column are editable. The predicate is called for each rendered item of
+     * the grid and should return a boolean indicating whether the cell is
+     * editable or not. By default, the provider is null, which means that all
+     * cells in the column are editable.
+     *
+     * @param cellEditableProvider
+     *            the cell editable provider
+     */
+    public EditColumnConfigurator<T> withCellEditableProvider(
+            SerializablePredicate<T> cellEditableProvider) {
+        column.setCellEditableProvider(cellEditableProvider);
+        return this;
     }
 }

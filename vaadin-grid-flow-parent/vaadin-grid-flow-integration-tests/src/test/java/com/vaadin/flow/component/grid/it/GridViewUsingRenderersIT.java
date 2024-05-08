@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,34 +15,36 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import org.hamcrest.CoreMatchers;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
 
-import static org.junit.Assert.assertThat;
-
-import java.util.List;
-
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid-it-demo/using-renderers")
 public class GridViewUsingRenderersIT extends AbstractComponentIT {
 
+    private GridElement grid;
+
     @Before
     public void init() {
         open();
+        grid = $(GridElement.class).id("grid-basic-renderers");
+        scrollToElement(grid);
+        waitUntilCellHasText(grid, "Item 1");
     }
 
     @Test
     public void basicRenderers_rowsAreRenderedAsExpected() {
-        GridElement grid = $(GridElement.class).id("grid-basic-renderers");
-        scrollToElement(grid);
-        waitUntilCellHasText(grid, "Item 1");
-
         Assert.assertEquals("Item 1", grid.getCell(0, 0).getText());
         Assert.assertEquals("$ 73.10", grid.getCell(0, 1).getText());
         Assert.assertTrue(
@@ -62,6 +64,51 @@ public class GridViewUsingRenderersIT extends AbstractComponentIT {
                 TestHelper.stripComments(grid.getCell(1, 4).getInnerHTML()));
         Assert.assertEquals("<button>Remove</button>",
                 TestHelper.stripComments(grid.getCell(1, 5).getInnerHTML()));
+    }
+
+    @Test
+    public void swapRenderer() {
+        TestBenchElement swapRenderers = $("button").id("btn-swap-renderers");
+        Assert.assertEquals("$ 73.10", grid.getCell(0, 1).getText());
+        Assert.assertEquals("$ 24.05", grid.getCell(1, 1).getText());
+        swapRenderers.click();
+        Assert.assertEquals("US$73.10", grid.getCell(0, 1).getText().trim());
+        Assert.assertEquals("US$24.05", grid.getCell(1, 1).getText().trim());
+        assertRendereredContent("<span style=\"color: red\">US$73.10</span>",
+                TestHelper.stripComments(grid.getCell(0, 1).getInnerHTML()));
+        assertRendereredContent("<span style=\"color: blue\">US$24.05</span>",
+                TestHelper.stripComments(grid.getCell(1, 1).getInnerHTML()));
+    }
+
+    @Test
+    public void setRendererAfterSettingEditorComponent() {
+        Assert.assertEquals("<b>Item 1</b>",
+                TestHelper.stripComments(grid.getCell(0, 0).getInnerHTML()));
+        ButtonElement editButton = grid.getCell(0, 6).$(ButtonElement.class)
+                .first();
+        editButton.click();
+        TextFieldElement editorComponent = grid.getCell(0, 0)
+                .$(TextFieldElement.class).first();
+        Assert.assertEquals("Item 1", editorComponent.getValue());
+    }
+
+    @Test
+    public void editorStillShowsAfterSwappingRendererDynamically() {
+        TestBenchElement swapRenderers = $("button").id("btn-swap-renderers");
+        // open editor
+        grid.getCell(0, 6).$(ButtonElement.class).first().click();
+        NumberFieldElement editorComponent = grid.getCell(0, 1)
+                .$(NumberFieldElement.class).first();
+        Assert.assertNotNull(editorComponent);
+        // close editor
+        grid.getCell(0, 6).$(ButtonElement.class).last().click();
+        swapRenderers.click();
+        Assert.assertEquals("US$73.10", grid.getCell(0, 1).getText().trim());
+        // open editor, again
+        grid.getCell(0, 6).$(ButtonElement.class).first().click();
+        editorComponent = grid.getCell(0, 1).$(NumberFieldElement.class)
+                .first();
+        Assert.assertNotNull(editorComponent);
     }
 
     private void assertRendereredContent(String expected, String content) {

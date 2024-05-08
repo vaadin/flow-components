@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -50,6 +50,11 @@ public interface HasValidationProperties extends HasElement, HasValidation {
 
     /**
      * Sets the invalid state of the component.
+     * <p>
+     * NOTE: If you need to manually control the invalid state, consider
+     * enabling manual validation mode with
+     * {@link #setManualValidation(boolean)} to avoid potential conflicts
+     * between your custom validation and the component's built-in validation.
      *
      * @param invalid
      *            {@code true} for invalid, {@code false} for valid

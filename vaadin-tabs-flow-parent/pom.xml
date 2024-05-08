@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>24.1-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-tabs-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Tabs Parent</name>
+    <description>Vaadin Tabs Parent</description>
     <modules>
         <module>vaadin-tabs-flow</module>
         <module>vaadin-tabs-testbench</module>

@@ -22,6 +22,7 @@ public class BasicValidationIT
     @Test
     public void triggerBlur_assertValidity() {
         testField.$(CheckboxElement.class).last().sendKeys(Keys.TAB);
+        assertValidationCount(0);
         assertServerValid();
         assertClientValid();
     }
@@ -31,8 +32,9 @@ public class BasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.$(CheckboxElement.class).last().sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
     }
 
     @Test
@@ -40,10 +42,12 @@ public class BasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.selectByText("foo");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
         testField.deselectByText("foo");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
     }
@@ -52,7 +56,8 @@ public class BasicValidationIT
     public void detach_attach_preservesInvalidState() {
         // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.$(CheckboxElement.class).last().sendKeys(Keys.TAB);
+        testField.selectByText("foo");
+        testField.deselectByText("foo");
 
         detachAndReattachField();
 
@@ -73,7 +78,8 @@ public class BasicValidationIT
     public void clientSideInvalidStateIsNotPropagatedToServer() {
         // Make the field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.$(CheckboxElement.class).last().sendKeys(Keys.TAB);
+        testField.selectByText("foo");
+        testField.deselectByText("foo");
 
         executeScript("arguments[0].invalid = false", testField);
 

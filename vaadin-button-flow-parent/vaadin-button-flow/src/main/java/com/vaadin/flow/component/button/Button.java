@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -36,12 +36,8 @@ import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.internal.nodefeature.ElementAttributeMap;
-import com.vaadin.flow.internal.nodefeature.NodeFeature;
 import com.vaadin.flow.shared.Registration;
 
-import java.io.Serializable;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -54,9 +50,9 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/button", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/button", version = "24.4.0-beta2")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 @JsModule("./buttonFunctions.js")
 public class Button extends Component
@@ -70,10 +66,10 @@ public class Button extends Component
     private PendingJavaScriptResult initDisableOnClick;
 
     // Register immediately as first listener
-    private Registration disableListener = addClickListener(
+    private final Registration disableListener = addClickListener(
             buttonClickEvent -> {
                 if (disableOnClick) {
-                    doDisableOnClick();
+                    setEnabled(false);
                 }
             });
 
@@ -271,15 +267,17 @@ public class Button extends Component
     }
 
     /**
-     * Simulates a click on this button on the server side. Calling this method
-     * executes all registered click listeners on the server side, but does not
-     * execute possible client side registered listeners.
+     * Simulates a click on this button on the server side if it is enabled.
+     * Calling this method executes all registered click listeners on the server
+     * side, but does not execute possible client side registered listeners.
      *
      * @see #clickInClient()
      */
     public void click() {
-        fireEvent(new ClickEvent<>(this, false, 0, 0, 0, 0, 0, 0, false, false,
-                false, false));
+        if (isEnabled()) {
+            fireEvent(new ClickEvent<>(this, false, 0, 0, 0, 0, 0, 0, false,
+                    false, false, false));
+        }
     }
 
     /**
@@ -372,6 +370,17 @@ public class Button extends Component
         }
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        Focusable.super.setEnabled(enabled);
+        // Force updating the disabled state on the client
+        // When using disable on click, the client side will immediately
+        // run JS to disable the button. If the button is then disabled and
+        // re-enabled during the same round trip, Flow will not detect any
+        // changes and the client side button would not be enabled again.
+        getElement().executeJs("this.disabled = $0", !enabled);
+    }
+
     private void updateIconSlot() {
         iconComponent.getElement().setAttribute("slot",
                 iconAfterText ? "suffix" : "prefix");
@@ -433,37 +442,6 @@ public class Button extends Component
             getThemeNames().add("icon");
         } else {
             getThemeNames().remove("icon");
-        }
-    }
-
-    /*
-     * https://github.com/vaadin/vaadin-button-flow/issues/115 because of the
-     * latency compensation, we need to hack the "diffstate" for the server side
-     * state, so that the disabled value can be reverted during the same
-     * roundtrip.
-     */
-    private void doDisableOnClick() {
-        ElementAttributeMap elementAttributeMap = getElement().getNode()
-                .getFeature(ElementAttributeMap.class);
-        elementAttributeMap.set("disabled", "true");
-        Map<NodeFeature, Serializable> changes = getElement().getNode()
-                .getChangeTracker(elementAttributeMap, () -> null);
-        // Remove the change, if it was applied. It should have been
-        // applied unless something else has done the exact same thing already
-        // (which is almost impossible, but ...)
-        if (changes != null) {
-            changes.remove("disabled");
-            setEnabled(false);
-            getUI().ifPresent(
-                    ui -> ui.beforeClientResponse(this, executionContext -> {
-                        // in case the disabled status was reverted,
-                        // the client might not update the value in
-                        // case it was that already
-                        if (isEnabled()) {
-                            executionContext.getUI().getPage().executeJs(
-                                    "$0.disabled = false;", getElement());
-                        }
-                    }));
         }
     }
 

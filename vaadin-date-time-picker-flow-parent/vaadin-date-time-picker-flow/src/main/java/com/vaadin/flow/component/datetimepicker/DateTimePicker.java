@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.datetimepicker;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,14 +23,12 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -39,8 +38,8 @@ import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.timepicker.StepsUtil;
@@ -50,6 +49,7 @@ import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
 @Tag("vaadin-date-picker")
@@ -63,7 +63,7 @@ class DateTimePickerDatePicker
     void passThroughPresentationValue(LocalDate newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
 
-        if (Objects.equals(newPresentationValue, getEmptyValue())
+        if (valueEquals(newPresentationValue, getEmptyValue())
                 && isInputValuePresent()) {
             // Clear the input element from possible bad input.
             getElement().executeJs("this.inputElement.value = ''");
@@ -88,7 +88,7 @@ class DateTimePickerTimePicker
     void passThroughPresentationValue(LocalTime newPresentationValue) {
         super.setPresentationValue(newPresentationValue);
 
-        if (Objects.equals(newPresentationValue, getEmptyValue())
+        if (valueEquals(newPresentationValue, getEmptyValue())
                 && isInputValuePresent()) {
             // Clear the input element from possible bad input.
             getElement().executeJs("this.inputElement.value = ''");
@@ -112,20 +112,22 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "24.4.0-beta2")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
         implements Focusable<DateTimePicker>, HasAutoOpen, HasClientValidation,
-        HasHelper, HasLabel, HasOverlayClassName, HasSize, HasStyle,
-        HasThemeVariant<DateTimePickerVariant>, HasTooltip,
+        InputField<AbstractField.ComponentValueChangeEvent<DateTimePicker, LocalDateTime>, LocalDateTime>,
+        HasOverlayClassName, HasThemeVariant<DateTimePickerVariant>,
         HasValidationProperties, HasValidator<LocalDateTime> {
 
     private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();
     private final DateTimePickerTimePicker timePicker = new DateTimePickerTimePicker();
     private DatePickerI18n i18n;
+
+    private DateTimePickerI18n dateTimePickerI18n;
     private Locale locale;
 
     private final static SerializableFunction<String, LocalDateTime> PARSER = s -> {
@@ -139,6 +141,8 @@ public class DateTimePicker
     private LocalDateTime max;
     private LocalDateTime min;
     private boolean required;
+
+    private boolean manualValidationEnabled = false;
 
     /**
      * Default constructor.
@@ -319,8 +323,8 @@ public class DateTimePicker
 
         boolean isInputValuePresent = timePicker.isInputValuePresent()
                 || datePicker.isInputValuePresent();
-        boolean isValueRemainedEmpty = Objects.equals(oldValue, getEmptyValue())
-                && Objects.equals(value, getEmptyValue());
+        boolean isValueRemainedEmpty = valueEquals(oldValue, getEmptyValue())
+                && valueEquals(value, getEmptyValue());
         if (isValueRemainedEmpty && isInputValuePresent) {
             // Clear the input elements from possible bad input.
             synchronizeChildComponentValues(value);
@@ -389,6 +393,120 @@ public class DateTimePicker
     @Override
     public String getLabel() {
         return getElement().getProperty("label");
+    }
+
+    /**
+     * Sets the aria-label for the component.
+     *
+     * @param ariaLabel
+     *            the value to set as aria-label
+     */
+    public void setAriaLabel(String ariaLabel) {
+        getElement().setProperty("accessibleName", ariaLabel);
+    }
+
+    /**
+     * Gets the aria-label of the component.
+     *
+     * @return an optional aria-label or an empty optional if no aria-label has
+     *         been set
+     */
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
+    }
+
+    /**
+     * Contains DateTimePicker internalization properties
+     */
+    public static class DateTimePickerI18n implements Serializable {
+        private String dateLabel;
+        private String timeLabel;
+
+        public String getDateLabel() {
+            return dateLabel;
+        }
+
+        public void setDateLabel(String dateLabel) {
+            this.dateLabel = dateLabel;
+        }
+
+        public String getTimeLabel() {
+            return timeLabel;
+        }
+
+        public void setTimeLabel(String timeLabel) {
+            this.timeLabel = timeLabel;
+        }
+    }
+
+    /**
+     * Sets the accessible label for the date picker.
+     * <p>
+     * The final value is a concatenation of the accessible label from
+     * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()} and the
+     * given accessible label.
+     *
+     * @param dateLabel
+     *            the value to be used as part of date picker aria-label.
+     */
+    public void setDateAriaLabel(String dateLabel) {
+        if (dateTimePickerI18n == null) {
+            dateTimePickerI18n = new DateTimePickerI18n();
+        }
+        dateTimePickerI18n.setDateLabel(dateLabel);
+        getElement().setPropertyJson("i18n",
+                JsonSerializer.toJson(dateTimePickerI18n));
+    }
+
+    /**
+     * Gets the accessible label of the date picker.
+     * <p>
+     * Note that this method will return the last value passed to
+     * {@link #setDateAriaLabel(String)}, not the value currently set on the
+     * `aria-label` attribute of the date picker input element.
+     *
+     * @return an optional label or an empty optional if no label has been set
+     */
+    public Optional<String> getDateAriaLabel() {
+        if (dateTimePickerI18n == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(dateTimePickerI18n.getDateLabel());
+    }
+
+    /**
+     * Sets the accessible label for the time picker.
+     * <p>
+     * The final value is a concatenation of the accessible label from
+     * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()} and the
+     * given accessible label.
+     *
+     * @param timeLabel
+     *            the value to be used as part of time picker aria-label.
+     */
+    public void setTimeAriaLabel(String timeLabel) {
+        if (dateTimePickerI18n == null) {
+            dateTimePickerI18n = new DateTimePickerI18n();
+        }
+        dateTimePickerI18n.setTimeLabel(timeLabel);
+        getElement().setPropertyJson("i18n",
+                JsonSerializer.toJson(dateTimePickerI18n));
+    }
+
+    /**
+     * Gets the accessible label of the time picker.
+     * <p>
+     * Note that this method will return the last value passed to
+     * {@link #setTimeAriaLabel(String)}, not the value currently set on the
+     * `aria-label` attribute of the time picker input element.
+     *
+     * @return an optional label or an empty optional if no label has been set
+     */
+    public Optional<String> getTimeAriaLabel() {
+        if (dateTimePickerI18n == null) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(dateTimePickerI18n.getTimeLabel());
     }
 
     /**
@@ -680,13 +798,20 @@ public class DateTimePicker
         return requiredValidation.isError() || checkValidity(value).isError();
     }
 
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
     protected void validate() {
-        setInvalid(isInvalid(getValue()));
+        if (!this.manualValidationEnabled) {
+            setInvalid(isInvalid(getValue()));
+        }
     }
 
     /**

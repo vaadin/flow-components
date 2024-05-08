@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -119,7 +119,7 @@ public class GridContextMenuTest {
         gridContextMenu.setTarget(null);
 
         Mockito.verify(registration).remove();
-        Mockito.verify(element)
-                .callJsFunction("$contextMenuTargetConnector.removeConnector");
+        Mockito.verify(element).executeJs(
+                "if (this.$contextMenuTargetConnector) { this.$contextMenuTargetConnector.removeConnector() }");
     }
 }

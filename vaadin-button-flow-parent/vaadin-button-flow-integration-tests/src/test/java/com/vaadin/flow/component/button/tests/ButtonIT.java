@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -274,6 +274,51 @@ public class ButtonIT extends AbstractComponentIT {
                 singleClick,
                 layout.findElement(By.id("disabled-message")).getText());
 
+    }
+
+    @Test
+    public void disableOnClick_enableInSameRoundtrip_clientSideButtonIsEnabled() {
+        WebElement button = layout
+                .findElement(By.id("disable-on-click-re-enable-button"));
+        for (int i = 0; i < 3; i++) {
+            Boolean disabled = (Boolean) executeScript(
+                    "arguments[0].click(); return arguments[0].disabled",
+                    button);
+            Assert.assertTrue(disabled);
+
+            waitUntil(ExpectedConditions.elementToBeClickable(button));
+        }
+    }
+
+    @Test
+    public void disableOnClick_hideWhenDisabled_showWhenEnabled_clientSideButtonIsEnabled() {
+        WebElement button = layout
+                .findElement(By.id("disable-on-click-hidden-button"));
+        for (int i = 0; i < 3; i++) {
+            button.click();
+
+            waitUntil(ExpectedConditions.invisibilityOf(button));
+            waitUntil(ExpectedConditions
+                    .not(ExpectedConditions.elementToBeClickable(button)));
+
+            layout.findElement(By.id("enable-hidden-button")).click();
+            waitUntil(ExpectedConditions.visibilityOf(button));
+            waitUntil(ExpectedConditions.elementToBeClickable(button));
+        }
+    }
+
+    @Test
+    public void disabledAndPointerEventsAuto_disableOnClick_clientSideButtonIsDisabled() {
+        WebElement button = layout
+                .findElement(By.id("disable-on-click-pointer-events-auto"));
+
+        scrollToElement(button);
+        executeScript("arguments[0].dispatchEvent(new MouseEvent(\"click\"));",
+                button);
+
+        Assert.assertNotNull(
+                "The button should contain the 'disabled' attribute after click",
+                button.getAttribute("disabled"));
     }
 
     @Test

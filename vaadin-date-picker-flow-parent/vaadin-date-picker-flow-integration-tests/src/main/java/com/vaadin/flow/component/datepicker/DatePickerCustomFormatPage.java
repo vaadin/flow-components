@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -49,6 +49,8 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
     public static final String SERVER_SIDE_VALUE_CHANGE_BUTTON = "SERVER_SIDE_VALUE_CHANGE_BUTTON";
     public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_DATE_PICKER = "CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_DATE_PICKER";
     public static final String CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_OUTPUT = "CUSTOM_REFERENCE_DATE_AND_FORMAT_OPTIONS_OUTPUT";
+    public static final String OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_DATE_PICKER = "OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_DATE_PICKER";
+    public static final String OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_OUTPUT = "OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_OUTPUT";
 
     public static final LocalDate may13 = LocalDate.of(2018, Month.MAY, 13);
 
@@ -61,6 +63,7 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
         setupSetFormatAfterLocale();
         setupServerSideValueChange();
         setupCustomReferenceDateAndFormatOptions();
+        setupOldReferenceDateWithShortFormat();
     }
 
     public void setupPrimaryFormat() {
@@ -203,6 +206,30 @@ public class DatePickerCustomFormatPage extends VerticalLayout {
         add(datePicker,
                 new Div(setShortFormat, setLongFormat, setMultipleFormats),
                 output);
+    }
+
+    private void setupOldReferenceDateWithShortFormat() {
+        LocalDate today = LocalDate.now();
+
+        DatePicker datePicker = new DatePicker(today);
+        datePicker.setId(OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_DATE_PICKER);
+        DatePickerI18n i18n = new DatePickerI18n();
+        i18n.setReferenceDate(today.minusYears(100));
+        i18n.setDateFormat("yy-MM-dd");
+        datePicker.setI18n(i18n);
+
+        Span output = new Span();
+        datePicker.addOpenedChangeListener(event -> {
+            LocalDate newValue = datePicker.getValue();
+            if (newValue != null) {
+                output.setText(newValue.format(DateTimeFormatter.ISO_DATE));
+            } else {
+                output.setText("");
+            }
+        });
+        output.setId(OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_OUTPUT);
+
+        add(datePicker, output);
     }
 
     private static Span createOutputSpan(DatePicker datePicker) {

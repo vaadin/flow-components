@@ -14,15 +14,15 @@ NOTE: a valid unix terminal with a regular shell is needed for running the utili
 
 ## Compiling all modules but excluding ITs
 
-- `mvn clean compile -Drelease -T C2`
+- `mvn clean compile -Drelease -T 2C`
 
 ## Compiling all the components and their modules including ITs
 
-- `mvn clean test-compile -DskipFrontend -T C2`
+- `mvn clean test-compile -DskipFrontend -T 2C`
 
 ## Installing all modules
 
-- `mvn clean install -DskipTests -Drelease -T C2`
+- `mvn clean install -DskipTests -Drelease -T 2C`
 
 ## Serving the IT pages of a component
 
@@ -38,7 +38,7 @@ Then navigate to `http://localhost:8080/vaadin-checkbox/checkbox-test` to see th
 
 NOTE: this takes a long while and consumes a lot of resources in your computer, it's better to run tests in the merged repo as it is indicated in the following sections
 
-- `mvn clean verify -T C2`
+- `mvn clean verify -T 2C`
 
 ## Merging ITs of all components in one module
 
@@ -80,6 +80,31 @@ For running all merged components execute:
 
 - `mvn verify -Dsauce.user=*** -Dsauce.sauceAccessKey=*** -Drun-it -pl integration-tests`
 
+## Debugging web-test-runner tests of a component
+
+Make sure the root level dependencies are installed
+
+- `npm install`
+
+Serve the IT pages of the component whose tests you want to debug
+
+- See "Serving the IT pages of a component" above
+
+Run the tests for the component once to have the necessary dependencies installed
+
+- `node ./scripts/wtr.js grid`
+
+Move to the integration tests module of the component
+
+- `cd vaadin-grid-flow-parent/vaadin-grid-flow-integration-tests`
+
+Start the test runner in watch mode
+
+- `npx web-test-runner --playwright test/**/*.test.ts --node-resolve --watch`
+
+NOTE: The tests actually import the client module under test from `..integration-tests/frontend/generated/jar-resources`.
+For faster feedback loop you can work on the generated file directly. Just be careful not to lose your changes to it since it's not under version control.
+
 ## Bumping version for all Maven modules
 
 To update the version for all modules for a new major or minor, run the following command:
@@ -95,6 +120,7 @@ It expects `TBLICENSE` and `TBHUB` variables when run in the CI server.
 Optionally it's possible to run just a bunch of modules e.g. `./scripts/build.sh grid combo-box`
 
 ## Using the component in a Flow application
+
 To use the component in an application using maven,
 add the following dependency to your `pom.xml`:
 ```
@@ -105,15 +131,12 @@ add the following dependency to your `pom.xml`:
 </dependency>
 ```
 
-## Flow documentation
-Documentation for flow can be found in [Flow documentation](https://github.com/vaadin/flow-and-components-documentation/blob/main/documentation/Overview.asciidoc).
-
 ## Contributing
-- Use the coding conventions from [Flow coding conventions](https://github.com/vaadin/flow/tree/main/eclipse)
-- [Submit a pull request](https://www.digitalocean.com/community/tutorials/how-to-create-a-pull-request-on-github) with detailed title and description
-- Wait for response from one of Vaadin Flow team members
+
+For submitting pull requests to this repo please check our [contributing guidelines](https://vaadin.com/docs/latest/contributing/pr).
 
 ### Update package version for `@NpmPackage` in all files
+
 There are scripts available for updating the `@NpmPackage` annotation to its latest patch version:
 
 - `./scripts/updateNpmVer.js`

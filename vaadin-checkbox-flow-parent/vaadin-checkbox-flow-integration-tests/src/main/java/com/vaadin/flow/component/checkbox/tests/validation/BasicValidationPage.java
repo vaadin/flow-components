@@ -19,7 +19,13 @@ public class BasicValidationPage
 
     @Override
     protected CheckboxGroup<String> createTestField() {
-        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>();
+        CheckboxGroup<String> checkboxGroup = new CheckboxGroup<>() {
+            @Override
+            protected void validate() {
+                super.validate();
+                incrementServerValidationCounter();
+            }
+        };
         checkboxGroup.setItems(List.of("foo", "bar", "baz"));
 
         return checkboxGroup;

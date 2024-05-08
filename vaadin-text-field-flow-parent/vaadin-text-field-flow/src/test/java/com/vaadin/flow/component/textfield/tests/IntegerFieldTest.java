@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,18 +15,27 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
+import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 public class IntegerFieldTest extends TextFieldTest {
@@ -57,9 +66,39 @@ public class IntegerFieldTest extends TextFieldTest {
 
     @Override
     @Test
-    public void initialValuePropertyValue() {
-        assertEquals(field.getEmptyValue(),
-                field.getElement().getProperty("value"));
+    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
+        IntegerField integerField = new IntegerField();
+        Assert.assertNull(integerField.getValue());
+        Assert.assertEquals("", integerField.getElement().getProperty("value"));
+    }
+
+    @Override
+    @Test
+    public void initialValueIsNull_valuePropertyHasEmptyString() {
+    }
+
+    @Override
+    @Test
+    public void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
+        Element element = new Element("vaadin-integer-field");
+        element.setProperty("value", "1");
+        UI ui = new UI();
+        UI.setCurrent(ui);
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui.getInternals().setSession(session);
+        VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(session.getService()).thenReturn(service);
+
+        Instantiator instantiator = Mockito.mock(Instantiator.class);
+
+        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+
+        Mockito.when(instantiator.createComponent(IntegerField.class))
+                .thenAnswer(invocation -> new IntegerField());
+
+        IntegerField integerField = Component.from(element, IntegerField.class);
+        Assert.assertEquals("1",
+                integerField.getElement().getProperty("value"));
     }
 
     @Test
@@ -212,5 +251,13 @@ public class IntegerFieldTest extends TextFieldTest {
 
         field.setAriaLabelledBy(null);
         Assert.assertTrue(field.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    @Override
+    public void implementsInputField() {
+        IntegerField field = new IntegerField();
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<IntegerField, Integer>, Integer>);
     }
 }

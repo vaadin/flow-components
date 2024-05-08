@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,7 +25,9 @@ import com.vaadin.flow.router.Route;
 public class MenuBarVisibilityPage extends Div {
     public MenuBarVisibilityPage() {
         MenuBar menuBar = new MenuBar();
-        MenuItem menuItem = menuBar.addItem("Item");
+        MenuItem menuItem = menuBar.addItem("Item 1");
+        MenuItem menuItem2 = menuBar.addItem("Item 2");
+        menuItem2.setVisible(false);
 
         NativeButton toggleMenuBarVisibility = new NativeButton(
                 "Toggle menu bar visibility", (event) -> {
@@ -34,10 +36,16 @@ public class MenuBarVisibilityPage extends Div {
         toggleMenuBarVisibility.setId("toggle-menu-bar-visibility");
 
         NativeButton toggleMenuItemVisibility = new NativeButton(
-                "Toggle menu item visibility", (event) -> {
+                "Toggle item 1 visibility", (event) -> {
                     menuItem.setVisible(!menuItem.isVisible());
                 });
         toggleMenuItemVisibility.setId("toggle-menu-item-visibility");
+
+        NativeButton toggleOtherItemVisibility = new NativeButton(
+                "Toggle item 2 visibility", (event) -> {
+                    menuItem2.setVisible(!menuItem2.isVisible());
+                });
+        toggleOtherItemVisibility.setId("toggle-other-item-visibility");
 
         NativeButton toggleMenuItemEnabled = new NativeButton(
                 "Toggle menu item enabled", (event) -> {
@@ -46,6 +54,6 @@ public class MenuBarVisibilityPage extends Div {
         toggleMenuItemEnabled.setId("toggle-menu-item-enabled");
 
         add(menuBar, toggleMenuBarVisibility, toggleMenuItemVisibility,
-                toggleMenuItemEnabled);
+                toggleOtherItemVisibility, toggleMenuItemEnabled);
     }
 }

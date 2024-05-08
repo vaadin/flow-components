@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,7 +19,7 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class BasicValidationTest
-        extends AbstractBasicValidationTest<RadioButtonGroup<String>> {
+        extends AbstractBasicValidationTest<RadioButtonGroup<String>, String> {
     protected RadioButtonGroup<String> createTestField() {
         return new RadioButtonGroup<String>();
     }

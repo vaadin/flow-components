@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -63,6 +63,15 @@ public class AvatarGroupTest {
     public void setColorIndex_getColorIndex() {
         avatarGroupItem1.setColorIndex(3);
         Assert.assertEquals(avatarGroupItem1.getColorIndex(), (Integer) 3);
+    }
+
+    @Test
+    public void addClassNames_removeClassNames_getClassNames() {
+        avatarGroupItem1.addClassNames("foo", "bar");
+        Assert.assertEquals(avatarGroupItem1.getClassName(), "foo bar");
+
+        avatarGroupItem1.removeClassNames("foo");
+        Assert.assertEquals(avatarGroupItem1.getClassName(), "bar");
     }
 
     @Test

@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-upload-flow-parent</artifactId>
-        <version>24.1-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-upload-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Upload</name>
+    <description>Vaadin Upload</description>
     <dependencies>
         <dependency>
             <groupId>jakarta.servlet</groupId>

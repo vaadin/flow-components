@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,6 +27,7 @@ public class BigDecimalFieldBinderValidationPage
         extends AbstractValidationPage<BigDecimalField> {
     public static final String REQUIRED_ERROR_MESSAGE = "The field is required";
     public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
+    public static final String RESET_BEAN_BUTTON = "reset-bean-button";
 
     public static class Bean {
         private BigDecimal property;
@@ -48,12 +49,20 @@ public class BigDecimalFieldBinderValidationPage
         binder = new Binder<>(Bean.class);
         binder.forField(testField).asRequired(REQUIRED_ERROR_MESSAGE)
                 .bind("property");
+        binder.addStatusChangeListener(event -> {
+            incrementServerValidationCounter();
+        });
 
         add(createButton(CLEAR_VALUE_BUTTON, "Clear value", event -> {
             testField.clear();
         }));
+
+        add(createButton(RESET_BEAN_BUTTON, "Reset bean", event -> {
+            binder.setBean(new Bean());
+        }));
     }
 
+    @Override
     protected BigDecimalField createTestField() {
         return new BigDecimalField();
     }

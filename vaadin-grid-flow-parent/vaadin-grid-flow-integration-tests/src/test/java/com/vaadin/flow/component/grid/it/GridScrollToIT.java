@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -36,8 +36,7 @@ public class GridScrollToIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        waitForElementPresent(By.tagName("vaadin-grid"));
-        grid = $(GridElement.class).first();
+        grid = $(GridElement.class).waitForFirst();
     }
 
     @Test
@@ -74,14 +73,76 @@ public class GridScrollToIT extends AbstractComponentIT {
         WebElement button = $("button").id("add-row-and-scroll-to-end");
         button.click();
 
-        GridElement grid = $(GridElement.class).id("scroll-to-end-grid");
-
-        Assert.assertEquals(0, grid.getFirstVisibleRowIndex());
-        Assert.assertEquals(1, grid.getLastVisibleRowIndex());
+        Assert.assertEquals(1002, grid.getLastVisibleRowIndex());
 
         button.click();
-        Assert.assertEquals(0, grid.getFirstVisibleRowIndex());
-        Assert.assertEquals(3, grid.getLastVisibleRowIndex());
+        Assert.assertEquals(1004, grid.getLastVisibleRowIndex());
+    }
+
+    @Test
+    public void grid_addItem_scrollToIndex() {
+        $("button").id("add-row-and-scroll-to-index").click();
+
+        checkLogsForErrors();
+        Assert.assertEquals(1001, grid.getLastVisibleRowIndex());
+        Assert.assertEquals("1001",
+                grid.getCell(grid.getLastVisibleRowIndex(), 0).getText());
+    }
+
+    @Test
+    public void grid_scrollToItem500() {
+        $("button").id("scroll-to-item-500").click();
+
+        checkLogsForErrors();
+        Assert.assertEquals(500, grid.getFirstVisibleRowIndex());
+        Assert.assertEquals("500",
+                grid.getCell(grid.getFirstVisibleRowIndex(), 0).getText());
+    }
+
+    @Test
+    public void grid_addItem_scrollToItem() {
+        $("button").id("add-row-and-scroll-to-item").click();
+
+        checkLogsForErrors();
+        Assert.assertEquals(1001, grid.getLastVisibleRowIndex());
+        Assert.assertEquals("1001",
+                grid.getCell(grid.getLastVisibleRowIndex(), 0).getText());
+    }
+
+    @Test
+    public void grid_addItem_scrollToIndex_twice() {
+        $("button").id("add-row-and-scroll-to-index").click();
+        // Wait until finished loading
+        waitUntil(e -> !grid.getRow(grid.getFirstVisibleRowIndex())
+                .hasAttribute("loading"));
+
+        $("button").id("add-row-and-scroll-to-index").click();
+        waitUntil(e -> !grid.getRow(grid.getFirstVisibleRowIndex())
+                .hasAttribute("loading"));
+
+        // Find the content element of the first visible row cell
+        var slot = grid.getCell(grid.getFirstVisibleRowIndex(), 0)
+                .findElement(By.tagName("slot"));
+        var content = grid
+                .findElement(By.cssSelector("vaadin-grid-cell-content[slot='"
+                        + slot.getPropertyString("name") + "']"));
+        // Expect the content element to be displayed
+        Assert.assertTrue(content.isDisplayed());
+    }
+
+    @Test
+    public void grid_smallPageSize_addItem_scrollToIndex_twice() {
+        // Set page size to 5
+        $("button").id("set-small-page-size").click();
+
+        $("button").id("add-row-and-scroll-to-index").click();
+        // Wait until finished loading
+        waitUntil(e -> !grid.getRow(grid.getFirstVisibleRowIndex())
+                .hasAttribute("loading"));
+
+        $("button").id("add-row-and-scroll-to-index").click();
+        waitUntil(e -> !grid.getRow(grid.getFirstVisibleRowIndex())
+                .hasAttribute("loading"));
     }
 
 }

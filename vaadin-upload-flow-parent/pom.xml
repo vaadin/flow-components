@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>24.1-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-upload-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Upload Parent</name>
+    <description>Vaadin Upload Parent</description>
     <modules>
         <module>vaadin-upload-flow</module>
         <module>vaadin-upload-testbench</module>

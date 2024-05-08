@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.select;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -22,11 +23,9 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -40,13 +39,11 @@ import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
-import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
-import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -83,18 +80,18 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/select", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/select", version = "24.4.0-beta2")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 @JsModule("./selectConnector.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
-        implements Focusable<Select<T>>, HasClientValidation,
+        implements Focusable<Select<T>>, HasAriaLabel, HasClientValidation,
         HasDataView<T, Void, SelectDataView<T>>, HasItemComponents<T>,
-        HasHelper, HasLabel, HasListDataView<T, SelectListDataView<T>>,
-        HasOverlayClassName, HasPrefix, HasSize, HasStyle,
-        HasThemeVariant<SelectVariant>, HasTooltip, HasValidationProperties,
-        HasValidator<T>, SingleSelect<Select<T>, T> {
+        InputField<AbstractField.ComponentValueChangeEvent<Select<T>, T>, T>,
+        HasListDataView<T, SelectListDataView<T>>, HasOverlayClassName,
+        HasPrefix, HasThemeVariant<SelectVariant>, HasValidationProperties,
+        HasValidator<T>, SingleSelect<Select<T>, T>, HasPlaceholder {
 
     public static final String LABEL_ATTRIBUTE = "label";
 
@@ -129,6 +126,8 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
     private SerializableConsumer<UI> sizeRequest;
 
+    private boolean manualValidationEnabled = false;
+
     /**
      * Constructs a select.
      */
@@ -146,8 +145,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         getElement().appendChild(listBox.getElement());
 
         addValueChangeListener(e -> validate());
-
-        addClientValidatedEventListener(e -> validate());
 
         getElement().addPropertyChangeListener("opened", event -> fireEvent(
                 new OpenedChangeEvent(this, event.isUserOriginated())));
@@ -250,7 +247,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-select-list-box")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox extends Component
             implements HasItemComponents<T> {
@@ -433,15 +430,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     }
 
     /**
-     * Gets the placeholder hint set for the user.
-     *
-     * @return the placeholder or {@code null} if none set
-     */
-    public String getPlaceholder() {
-        return getElement().getProperty("placeholder");
-    }
-
-    /**
      * Sets the placeholder hint for the user.
      * <p>
      * The placeholder will be displayed in the case that there is no item
@@ -454,8 +442,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      *            the placeholder to set, or {@code null} to remove
      */
     public void setPlaceholder(String placeholder) {
-        getElement().setProperty("placeholder",
-                placeholder == null ? "" : placeholder);
+        HasPlaceholder.super.setPlaceholder(placeholder);
     }
 
     /**
@@ -480,6 +467,27 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         return getElement().getProperty("label");
     }
 
+    @Override
+    public void setAriaLabel(String ariaLabel) {
+        getElement().setProperty("accessibleName", ariaLabel);
+    }
+
+    @Override
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
+    }
+
+    @Override
+    public void setAriaLabelledBy(String ariaLabelledBy) {
+        getElement().setProperty("accessibleNameRef", ariaLabelledBy);
+    }
+
+    @Override
+    public Optional<String> getAriaLabelledBy() {
+        return Optional
+                .ofNullable(getElement().getProperty("accessibleNameRef"));
+    }
+
     /**
      * Sets the select to have focus when the page loads.
      * <p>
@@ -501,7 +509,17 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         return getElement().getProperty("autofocus", false);
     }
 
-    private void setDataProvider(DataProvider<T, ?> dataProvider) {
+    /**
+     * Sets a generic data provider for the Select to use.
+     * <p>
+     * Use this method when none of the {@code setItems} methods are applicable,
+     * e.g. when having a data provider with filter that cannot be transformed
+     * to {@code DataProvider<T, Void>}.
+     *
+     * @param dataProvider
+     *            DataProvider instance to use, not <code>null</code>
+     */
+    public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         reset();
@@ -514,9 +532,13 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     }
 
     /**
-     * Gets the data provider.
+     * Gets the data provider used by this Select.
      *
-     * @return the data provider, not {@code null}
+     * <p>
+     * To get information and control over the items in the Select, use either
+     * {@link #getListDataView()} or {@link #getGenericDataView()} instead.
+     *
+     * @return the data provider used by this Select
      */
     public DataProvider<T, ?> getDataProvider() {
         return dataProvider.get();
@@ -642,6 +664,11 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     @Override
     public void prependComponents(T beforeItem, Component... components) {
         listBox.prependComponents(beforeItem, components);
+    }
+
+    @Override
+    public int getItemPosition(T item) {
+        return listBox.getItemPosition(item);
     }
 
     /**
@@ -992,21 +1019,20 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 
-    protected void validate() {
-        boolean isRequired = this.isRequiredIndicatorVisible();
-        boolean isInvalid = ValidationUtil
-                .checkRequired(isRequired, getValue(), getEmptyValue())
-                .isError();
-
-        setInvalid(isInvalid);
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
     }
 
-    @Override
-    public Registration addValidationStatusChangeListener(
-            ValidationStatusChangeListener<T> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<>(this, !isInvalid())));
+    protected void validate() {
+        if (!this.manualValidationEnabled) {
+            boolean isRequired = this.isRequiredIndicatorVisible();
+            boolean isInvalid = ValidationUtil
+                    .checkRequired(isRequired, getValue(), getEmptyValue())
+                    .isError();
+
+            setInvalid(isInvalid);
+        }
     }
 
     /**

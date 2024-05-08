@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>24.1-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-grid-pro-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Grid Pro Parent</name>
+    <description>Vaadin Grid Pro Parent</description>
     <licenses>
         <license>
             <name>Vaadin Commercial License and Service Terms</name>

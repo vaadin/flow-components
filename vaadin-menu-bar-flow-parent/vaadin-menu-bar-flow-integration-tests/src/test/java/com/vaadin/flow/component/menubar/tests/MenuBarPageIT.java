@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -56,14 +56,16 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void clickRootButton_subMenuRenders() {
         menuBar.getButtons().get(0).click();
         verifyOpened();
-        assertOverlayContents("sub item 1", "<p>sub item 2</p>");
+        assertOverlayContents("sub item 1", "<p>sub item 2</p>",
+                "<p>sub item 3</p>");
     }
 
     @Test
     public void clickRootItem_subMenuRenders() {
         menuBar.getButtons().get(0).$("vaadin-menu-bar-item").first().click();
         verifyOpened();
-        assertOverlayContents("sub item 1", "<p>sub item 2</p>");
+        assertOverlayContents("sub item 1", "<p>sub item 2</p>",
+                "<p>sub item 3</p>");
     }
 
     @Test
@@ -442,6 +444,168 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     @Test
+    public void toggleMenuItemClassName_classNameIsToggled() {
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("class"));
+        click("toggle-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(menuButton1.getAttribute("class"),
+                MenuBarTestPage.MENU_ITEM_FIRST_CLASS_NAME);
+        click("toggle-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("class"));
+    }
+
+    @Test
+    public void setMenuItemClassName_classNameIsSet() {
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("class"));
+        click("toggle-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(menuButton1.getAttribute("class"),
+                MenuBarTestPage.MENU_ITEM_FIRST_CLASS_NAME);
+        click("set-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(menuButton1.getAttribute("class"),
+                MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME);
+    }
+
+    @Test
+    public void toggleMenuItemClassNameWithSetClassName_classNameIsToggled() {
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("class"));
+        click("set-unset-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(menuButton1.getAttribute("class"),
+                MenuBarTestPage.MENU_ITEM_FIRST_CLASS_NAME);
+        click("set-unset-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("class"));
+    }
+
+    @Test
+    public void toggleMultipleItemClassName_classNamesAreToggled() {
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("class"));
+        click("add-remove-multiple-classes");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertTrue(menuButton1.getAttribute("class")
+                .contains(MenuBarTestPage.MENU_ITEM_FIRST_CLASS_NAME));
+        Assert.assertTrue(menuButton1.getAttribute("class")
+                .contains(MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME));
+        click("add-remove-multiple-classes");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.getAttribute("class")
+                .contains(MenuBarTestPage.MENU_ITEM_FIRST_CLASS_NAME));
+        Assert.assertFalse(menuButton1.getAttribute("class")
+                .contains(MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME));
+    }
+
+    @Test
+    public void subMenuHasClassName_callRemoveClassName_classNameIsRemoved() {
+        verifySubMenuItemClassNames(true,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+
+        click("remove-sub-item-class-name");
+        verifyClosed();
+        verifySubMenuItemClassNames(false,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+    }
+
+    @Test
+    public void subMenuItem_toggleMultipleClassNames_classNamesAreToggled() {
+        click("add-second-sub-item-class-name");
+        verifyClosed();
+        verifySubMenuItemClassNames(true,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME,
+                MenuBarTestPage.SUB_ITEM_SECOND_CLASS_NAME);
+
+        click("add-remove-multiple-sub-item-classes");
+        verifyClosed();
+        verifySubMenuItemClassNames(false,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME,
+                MenuBarTestPage.SUB_ITEM_SECOND_CLASS_NAME);
+
+        click("add-remove-multiple-sub-item-classes");
+        verifyClosed();
+        verifySubMenuItemClassNames(true,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME,
+                MenuBarTestPage.SUB_ITEM_SECOND_CLASS_NAME);
+    }
+
+    @Test
+    public void subMenuItem_toggleSingleClassName_classNameIsToggled() {
+        click("toggle-sub-item-class-name");
+        verifyClosed();
+        verifySubMenuItemClassNames(false,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+
+        click("toggle-sub-item-class-name");
+        verifyClosed();
+        verifySubMenuItemClassNames(true,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+    }
+
+    @Test
+    public void subMenuItem_classNamesAreToggleWithSet_classNamesAreToggled() {
+        click("set-unset-sub-item-class-name");
+        verifyClosed();
+        verifySubMenuItemClassNames(false,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+
+        click("set-unset-sub-item-class-name");
+        verifyClosed();
+        verifySubMenuItemClassNames(true,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+    }
+
+    @Test
+    public void menuItemWithClassNameInOverflow_changeClassName_classNameIsChanged() {
+        click("set-width");
+        click("set-item2-class-name");
+        waitForResizeObserver();
+        menuBar.getOverflowButton().click();
+        click("change-item2-class-name");
+        menuBar.getOverflowButton().click();
+        TestBenchElement menuItem = menuBar.getSubMenuItems().get(0);
+        Assert.assertEquals(menuItem.getAttribute("class"),
+                MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME);
+    }
+
+    @Test
+    public void menuItemWithClassNameInOverflow_removeClassName_classNameIsRemoved() {
+        click("set-width");
+        click("set-item2-class-name");
+        waitForResizeObserver();
+        menuBar.getOverflowButton().click();
+        click("remove-item2-class-name");
+        menuBar.getOverflowButton().click();
+        TestBenchElement menuItem = menuBar.getSubMenuItems().get(0);
+
+        Assert.assertFalse(menuItem.getAttribute("class")
+                .contains(MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME));
+    }
+
+    @Test
+    public void menuItemWithClassNameInOverflow_menuItemLeavesOverflow_classNameCanBeChanged() {
+        click("set-width");
+        click("set-item2-class-name");
+        waitForResizeObserver();
+        menuBar.getOverflowButton().click();
+        click("reset-width");
+        waitForResizeObserver();
+        click("change-item2-class-name");
+        TestBenchElement menuItem = menuBar.getButtons().get(1);
+        Assert.assertEquals(menuItem.getAttribute("class"),
+                MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME);
+
+        click("remove-item2-class-name");
+        menuItem = menuBar.getButtons().get(1);
+        Assert.assertFalse(menuItem.getAttribute("class")
+                .contains(MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME));
+    }
+
+    @Test
     public void setMenuItemTheme_toggleVisibility_themeIsPreserved() {
         click("toggle-item-1-theme");
         click("toggle-item-1-visibility");
@@ -575,5 +739,20 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
     public void verifyOpened() {
         waitForElementPresent(By.tagName(OVERLAY_TAG));
+    }
+
+    private void verifySubMenuItemClassNames(boolean containsClassNames,
+            String... classNames) {
+        openSubSubMenu();
+        verifyOpened();
+        TestBenchElement subMenuItem = menuBar.getSubMenuItems().get(2);
+        var subMenuItemClassNames = subMenuItem.getAttribute("class");
+        for (String className : classNames) {
+            if (containsClassNames) {
+                Assert.assertTrue(subMenuItemClassNames.contains(className));
+            } else {
+                Assert.assertFalse(subMenuItemClassNames.contains(className));
+            }
+        }
     }
 }

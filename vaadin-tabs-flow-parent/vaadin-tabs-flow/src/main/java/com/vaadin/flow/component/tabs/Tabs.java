@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -66,10 +66,10 @@ import org.slf4j.LoggerFactory;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabs")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/tabs/src/vaadin-tabs.js")
-@NpmPackage(value = "@vaadin/tabs", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/tabs", version = "24.4.0-beta2")
 public class Tabs extends Component
         implements HasEnabled, HasSize, HasStyle, HasThemeVariant<TabsVariant> {
 
@@ -671,7 +671,8 @@ public class Tabs extends Component
             return;
         }
 
-        if (currentlySelected == null || currentlySelected.isEnabled()) {
+        if (currentlySelected == null
+                || currentlySelected.getElement().getNode().isEnabledSelf()) {
             selectedTab = currentlySelected;
             getChildren().filter(Tab.class::isInstance).map(Tab.class::cast)
                     .forEach(tab -> tab.setSelected(false));
@@ -689,7 +690,7 @@ public class Tabs extends Component
     }
 
     private void updateEnabled(Tab tab) {
-        boolean enabled = tab.isEnabled();
+        boolean enabled = tab.getElement().getNode().isEnabledSelf();
         Serializable rawValue = tab.getElement().getPropertyRaw("disabled");
         if (rawValue instanceof Boolean) {
             // convert the boolean value to a String to force update the

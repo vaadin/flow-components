@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -302,5 +302,52 @@ public class DialogTest {
         dialog.close();
 
         Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void createDialogWithTitle() {
+        String title = "Title";
+
+        var dialog = new Dialog(title);
+        Assert.assertEquals(title, dialog.getHeaderTitle());
+
+        Span content = new Span("content");
+        Span secondContent = new Span("second_content");
+        Span thirdContent = new Span("third_content");
+
+        var dialogWithComponents = new Dialog(title, content, secondContent,
+                thirdContent);
+        Assert.assertEquals(title, dialogWithComponents.getHeaderTitle());
+        Assert.assertEquals(content,
+                dialogWithComponents.getChildren().toList().get(0));
+        Assert.assertEquals(secondContent,
+                dialogWithComponents.getChildren().toList().get(1));
+        Assert.assertEquals(thirdContent,
+                dialogWithComponents.getChildren().toList().get(2));
+    }
+
+    @Test
+    public void open_autoAttachedInBeforeClientResponse() {
+        Dialog dialog = new Dialog();
+        dialog.open();
+
+        fakeClientResponse();
+        Assert.assertNotNull(dialog.getElement().getParent());
+    }
+
+    @Test
+    public void open_close_notAutoAttachedInBeforeClientResponse() {
+        Dialog dialog = new Dialog();
+        dialog.open();
+        dialog.close();
+
+        fakeClientResponse();
+        Assert.assertNull(dialog.getElement().getParent());
+    }
+
+    private void fakeClientResponse() {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
     }
 }

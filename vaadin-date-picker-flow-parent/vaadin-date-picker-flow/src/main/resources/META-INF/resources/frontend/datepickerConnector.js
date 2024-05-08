@@ -65,14 +65,59 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             return undefined;
           }
 
+          function isFormatWithYear(format) {
+            return format.includes('y') || format.includes('Y');
+          }
+
           function isShortYearFormat(format) {
-            if (format.includes('y')) {
-              return !format.includes('yyy');
+            // Format is long if it includes a four-digit year.
+            return !format.includes('yyyy') && !format.includes('YYYY');
+          }
+
+          function getExtendedFormats(formats) {
+            return formats.reduce((acc, format) => {
+              // We first try to match the date with the shorter version,
+              // as short years are supported with the long date format.
+              if (isFormatWithYear(format) && !isShortYearFormat(format)) {
+                acc.push(getShortYearFormat(format));
+              }
+              acc.push(format);
+              return acc;
+            }, []);
+          }
+
+          function correctFullYear(date) {
+            // The last parsed date check handles the case where a four-digit year is parsed, then formatted
+            // as a two-digit year, and then parsed again. In this case we want to keep the century of the
+            // originally parsed year, instead of using the century of the reference date.
+
+            // Do not apply any correction if the previous parse attempt was failed.
+            if (datepicker.$connector._lastParseStatus === 'error') {
+              return;
             }
-            if (format.includes('Y')) {
-              return !format.includes('YYY');
+
+            // Update century if the last parsed date is the same except the century.
+            if (datepicker.$connector._lastParseStatus === 'successful') {
+              if (
+                datepicker.$connector._lastParsedDate.day === date.getDate() &&
+                datepicker.$connector._lastParsedDate.month === date.getMonth() &&
+                datepicker.$connector._lastParsedDate.year % 100 === date.getFullYear() % 100
+              ) {
+                date.setFullYear(datepicker.$connector._lastParsedDate.year);
+              }
+              return;
             }
-            return false;
+
+            // Update century if this is the first parse after overlay open.
+            const currentValue = _parseDate(datepicker.value);
+            if (
+              dateFnsIsValid(currentValue) &&
+              currentValue.getDate() === date.getDate() &&
+              currentValue.getMonth() === date.getMonth() &&
+              currentValue.getFullYear() % 100 === date.getFullYear() % 100
+            ) {
+              date.setFullYear(currentValue.getFullYear());
+            }
           }
 
           function formatDate(dateParts) {
@@ -82,52 +127,33 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
             return dateFnsFormat(date, format);
           }
 
+          function doParseDate(dateString, format, referenceDate) {
+            // When format does not contain a year, then current year should be used.
+            const refDate = isFormatWithYear(format) ? referenceDate : new Date();
+            const date = dateFnsParse(dateString, format, refDate);
+            if (dateFnsIsValid(date)) {
+              if (isFormatWithYear(format) && isShortYearFormat(format)) {
+                correctFullYear(date);
+              }
+              return {
+                day: date.getDate(),
+                month: date.getMonth(),
+                year: date.getFullYear()
+              };
+            }
+          }
+
           function parseDate(dateString) {
             const referenceDate = _getReferenceDate();
-            for (let format of formats) {
-              // We first try to match the date with the shorter version.
-              const shortYearFormat = getShortYearFormat(format);
-              if (shortYearFormat) {
-                const shortYearFormatDate = dateFnsParse(dateString, shortYearFormat, referenceDate);
-                if (dateFnsIsValid(shortYearFormatDate)) {
-                  let yearValue = shortYearFormatDate.getFullYear();
-                  // The last parsed year check handles the case where a four-digit year is parsed, then formatted
-                  // as a two-digit year, and then parsed again. In this case we want to keep the century of the
-                  // originally parsed year, instead of using the century of the reference date.
-                  if (
-                    datepicker.$connector._lastParsedYear &&
-                    yearValue === datepicker.$connector._lastParsedYear % 100
-                  ) {
-                    yearValue = datepicker.$connector._lastParsedYear;
-                  }
-                  return {
-                    day: shortYearFormatDate.getDate(),
-                    month: shortYearFormatDate.getMonth(),
-                    year: yearValue
-                  };
-                }
-              }
-              const date = dateFnsParse(dateString, format, referenceDate);
-
-              if (dateFnsIsValid(date)) {
-                let yearValue = date.getFullYear();
-                if (
-                  datepicker.$connector._lastParsedYear &&
-                  yearValue % 100 === datepicker.$connector._lastParsedYear % 100 &&
-                  isShortYearFormat(format)
-                ) {
-                  yearValue = datepicker.$connector._lastParsedYear;
-                } else {
-                  datepicker.$connector._lastParsedYear = yearValue;
-                }
-                return {
-                  day: date.getDate(),
-                  month: date.getMonth(),
-                  year: yearValue
-                };
+            for (let format of getExtendedFormats(formats)) {
+              const parsedDate = doParseDate(dateString, format, referenceDate);
+              if (parsedDate) {
+                datepicker.$connector._lastParseStatus = 'successful';
+                datepicker.$connector._lastParsedDate = parsedDate;
+                return parsedDate;
               }
             }
-            datepicker.$connector._lastParsedYear = undefined;
+            datepicker.$connector._lastParseStatus = 'error';
             return false;
           }
 
@@ -154,6 +180,8 @@ import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/s
           // Merge current web component I18N settings with new I18N settings and the formatting and parsing functions
           datepicker.i18n = Object.assign({}, datepicker.i18n, i18n, formatterAndParser);
         });
+
+        datepicker.addEventListener('opened-changed', () => (datepicker.$connector._lastParseStatus = undefined));
       })(datepicker)
   };
 })();

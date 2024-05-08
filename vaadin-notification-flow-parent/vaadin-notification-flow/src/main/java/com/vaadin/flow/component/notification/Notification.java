@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -40,9 +40,9 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
-import com.vaadin.flow.internal.HtmlUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
@@ -54,9 +54,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/notification", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/notification", version = "24.4.0-beta2")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -64,6 +64,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
 
     private static final int DEFAULT_DURATION = 5000;
     private static final Position DEFAULT_POSITION = Position.BOTTOM_START;
+    private static final String OPENED_PROPERTY = "opened";
+    private static final String OPENED_CHANGED_EVENT = "opened-changed";
 
     private boolean autoAddedToTheUi = false;
 
@@ -145,8 +147,6 @@ public class Notification extends Component implements HasComponents, HasStyle,
         initBaseElementsAndListeners();
         setPosition(DEFAULT_POSITION);
         setDuration(0);
-        getElement().addPropertyChangeListener("opened", event -> fireEvent(
-                new OpenedChangeEvent(this, event.isUserOriginated())));
     }
 
     /**
@@ -214,7 +214,11 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     private void initBaseElementsAndListeners() {
-        getElement().addEventListener("opened-changed",
+        getElement().addPropertyChangeListener(OPENED_PROPERTY,
+                event -> fireEvent(
+                        new OpenedChangeEvent(this, event.isUserOriginated())));
+
+        getElement().addEventListener(OPENED_CHANGED_EVENT,
                 event -> removeAutoAdded());
     }
 
@@ -277,8 +281,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     public void setText(String text) {
         removeAll();
-        this.getElement().setProperty("text",
-                text != null ? HtmlUtils.escape(text) : null);
+        this.getElement().setProperty("text", text);
         this.getElement().callJsFunction("requestContentUpdate");
     }
 
@@ -426,7 +429,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
                         }
                     });
         }
-        getElement().setProperty("opened", opened);
+        getElement().setProperty(OPENED_PROPERTY, opened);
     }
 
     /**
@@ -439,7 +442,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     @Synchronize(property = "opened", value = "opened-changed")
     public boolean isOpened() {
-        return getElement().getProperty("opened", false);
+        return getElement().getProperty(OPENED_PROPERTY, false);
     }
 
     /**
@@ -529,19 +532,25 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
-    private ElementDetachListener childDetachListener = e -> {
-        var child = e.getSource();
-        var childDetachedFromContainer = !getElement().getChildren().anyMatch(
-                containerChild -> Objects.equals(child, containerChild));
+    // Must not use lambda here as that would break serialization. See
+    // https://github.com/vaadin/flow-components/issues/5597
+    private ElementDetachListener childDetachListener = new ElementDetachListener() {
+        @Override
+        public void onDetach(ElementDetachEvent e) {
+            var child = e.getSource();
+            var childDetachedFromContainer = !getElement().getChildren()
+                    .anyMatch(containerChild -> Objects.equals(child,
+                            containerChild));
 
-        if (childDetachedFromContainer) {
-            // The child was removed from the notification
+            if (childDetachedFromContainer) {
+                // The child was removed from the notification
 
-            // Remove the registration for the child detach listener
-            childDetachListenerMap.get(child).remove();
-            childDetachListenerMap.remove(child);
+                // Remove the registration for the child detach listener
+                childDetachListenerMap.get(child).remove();
+                childDetachListenerMap.remove(child);
 
-            this.configureComponentRenderer();
+                configureComponentRenderer();
+            }
         }
     };
 

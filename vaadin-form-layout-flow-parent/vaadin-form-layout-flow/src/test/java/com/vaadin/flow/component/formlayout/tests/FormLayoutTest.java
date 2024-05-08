@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 
 public class FormLayoutTest {
 
@@ -82,4 +83,20 @@ public class FormLayoutTest {
 
     }
 
+    @Test
+    public void setResponsiveSteps_getResponsiveSteps() {
+        FormLayout formLayout = new FormLayout();
+
+        formLayout.setResponsiveSteps(new ResponsiveStep(null, 1));
+        Assert.assertEquals(1, formLayout.getResponsiveSteps().size());
+
+        formLayout.setResponsiveSteps(new ResponsiveStep(null, 1),
+                new ResponsiveStep("1px", 1));
+        Assert.assertEquals(2, formLayout.getResponsiveSteps().size());
+
+        formLayout.setResponsiveSteps(new ResponsiveStep(null, 1),
+                new ResponsiveStep("1px", 1), new ResponsiveStep("1px", 1,
+                        ResponsiveStep.LabelsPosition.TOP));
+        Assert.assertEquals(3, formLayout.getResponsiveSteps().size());
+    }
 }

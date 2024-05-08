@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -65,6 +65,16 @@ public class MessageListTest {
         messageList.setItems(item1, item2);
         Assert.assertEquals(Arrays.asList(item1, item2),
                 messageList.getItems());
+    }
+
+    @Test
+    public void addClassNames_removeClassNames_hasClassName() {
+        item1.addClassNames("foo", "bar");
+        Assert.assertTrue(item1.hasClassName("foo"));
+        Assert.assertTrue(item1.hasClassName("bar"));
+
+        item1.removeClassNames("foo");
+        Assert.assertFalse(item1.hasClassName("foo"));
     }
 
     @Test(expected = NullPointerException.class)

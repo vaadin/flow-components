@@ -1,0 +1,166 @@
+/*
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.icon.tests;
+
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.icon.SvgIcon;
+import com.vaadin.flow.server.StreamResource;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
+public class SvgIconTest {
+    @Test
+    public void emptyConstructor_hasNoSrc() {
+        var icon = new SvgIcon();
+        Assert.assertNull(icon.getSrc());
+        Assert.assertNull(icon.getElement().getAttribute("src"));
+    }
+
+    @Test
+    public void sourceConstructor_hasSrc() {
+        var path = "path/to/file.svg";
+        var icon = new SvgIcon(path);
+        Assert.assertEquals(path, icon.getSrc());
+        Assert.assertEquals(path, icon.getElement().getAttribute("src"));
+    }
+
+    @Test
+    public void sourceWithSymbolConstructor_hasSrcAndSymbol() {
+        var path = "path/to/file.svg";
+        var symbol = "symbol";
+        var icon = new SvgIcon(path, symbol);
+        Assert.assertEquals(path, icon.getSrc());
+        Assert.assertEquals(path, icon.getElement().getAttribute("src"));
+        Assert.assertEquals(symbol, icon.getSymbol());
+        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+    }
+
+    @Test
+    public void streamResourceConstructor_hasSrc() {
+        UI.setCurrent(new UI());
+        var resource = new StreamResource("image.svg",
+                () -> new ByteArrayInputStream(
+                        "<svg></svg>".getBytes(StandardCharsets.UTF_8)));
+        var icon = new SvgIcon(resource);
+        Assert.assertTrue(icon.getSrc().contains("image.svg"));
+        Assert.assertTrue(
+                icon.getElement().getAttribute("src").contains("image.svg"));
+    }
+
+    @Test
+    public void streamResourceConstructorWithSymbol_hasSrcAndSymbol() {
+        UI.setCurrent(new UI());
+        var resource = new StreamResource("image.svg",
+                () -> new ByteArrayInputStream(
+                        "<svg></svg>".getBytes(StandardCharsets.UTF_8)));
+        var symbol = "symbol";
+        var icon = new SvgIcon(resource, symbol);
+        Assert.assertTrue(icon.getSrc().contains("image.svg"));
+        Assert.assertTrue(
+                icon.getElement().getAttribute("src").contains("image.svg"));
+        Assert.assertEquals(symbol, icon.getSymbol());
+        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+    }
+
+    @Test
+    public void setSrc_hasSrc() {
+        var icon = new SvgIcon();
+        var path = "path/to/file.svg";
+        icon.setSrc(path);
+        Assert.assertEquals(path, icon.getSrc());
+        Assert.assertEquals(path, icon.getElement().getAttribute("src"));
+    }
+
+    @Test
+    public void setSrcWithSymbol_hasSrcAndSymbol() {
+        var icon = new SvgIcon();
+        var path = "path/to/file.svg";
+        var symbol = "symbol";
+        icon.setSrc(path, symbol);
+
+        Assert.assertEquals(path, icon.getSrc());
+        Assert.assertEquals(path, icon.getElement().getAttribute("src"));
+        Assert.assertEquals(symbol, icon.getSymbol());
+        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+    }
+
+    @Test
+    public void hasStreamResource_setSrcWithSymbol_hasSrcAndSymbol() {
+        UI.setCurrent(new UI());
+        var resource = new StreamResource("image.svg",
+                () -> new ByteArrayInputStream(
+                        "<svg></svg>".getBytes(StandardCharsets.UTF_8)));
+        var symbol = "symbol";
+        var icon = new SvgIcon();
+        icon.setSrc(resource, symbol);
+
+        Assert.assertTrue(icon.getSrc().contains("image.svg"));
+        Assert.assertTrue(
+                icon.getElement().getAttribute("src").contains("image.svg"));
+        Assert.assertEquals(symbol, icon.getSymbol());
+        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+    }
+
+    @Test
+    public void setSymbol_hasSymbol() {
+        var icon = new SvgIcon();
+        var symbol = "symbol";
+        icon.setSymbol(symbol);
+        Assert.assertEquals(symbol, icon.getSymbol());
+        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+    }
+
+    @Test
+    public void modifySrc_hasModifiedSrc() {
+        var icon = new SvgIcon("path/to/file.svg");
+        var newPath = "path/to/new/file.svg";
+        icon.setSrc(newPath);
+
+        Assert.assertEquals(newPath, icon.getSrc());
+        Assert.assertEquals(newPath, icon.getElement().getAttribute("src"));
+    }
+
+    @Test
+    public void withStreamResource_setSrc_hasSrc() {
+        UI.setCurrent(new UI());
+        var icon = new SvgIcon();
+        var resource = new StreamResource("image.svg",
+                () -> new ByteArrayInputStream(
+                        "<svg></svg>".getBytes(StandardCharsets.UTF_8)));
+        icon.setSrc(resource);
+        Assert.assertTrue(icon.getSrc().contains("image.svg"));
+    }
+
+    @Test
+    public void setColor_hasColor() {
+        var icon = new SvgIcon();
+        icon.setColor("red");
+        Assert.assertEquals("red", icon.getColor());
+        Assert.assertEquals("red", icon.getStyle().get("fill"));
+    }
+
+    @Test
+    public void removeColor_hasNoColor() {
+        var icon = new SvgIcon();
+        icon.setColor("red");
+        icon.setColor(null);
+        Assert.assertNull(icon.getColor());
+        Assert.assertNull(icon.getStyle().get("fill"));
+    }
+}

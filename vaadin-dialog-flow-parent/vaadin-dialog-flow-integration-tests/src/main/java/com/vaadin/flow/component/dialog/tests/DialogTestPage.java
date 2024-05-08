@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -79,7 +79,8 @@ public class DialogTestPage extends Div {
         dialog.addOpenedChangeListener(event -> {
             message.setText(
                     "The open state of the dialog is " + dialog.isOpened());
-            eventCounterMessage.setText("Number of event is " + eventCounter++);
+            eventCounterMessage
+                    .setText("Number of events is " + ++eventCounter);
             eventSourceMessage.setText("The event came from "
                     + (event.isFromClient() ? "client" : "server"));
         });

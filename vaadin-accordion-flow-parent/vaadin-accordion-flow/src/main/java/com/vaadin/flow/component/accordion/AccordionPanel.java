@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,9 +25,9 @@ import com.vaadin.flow.component.details.Details;
  * An accordion panel which could be opened or closed.
  */
 @Tag("vaadin-accordion-panel")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/accordion", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/accordion", version = "24.4.0-beta2")
 @JsModule("@vaadin/accordion/src/vaadin-accordion-panel.js")
 public class AccordionPanel extends Details {
 
@@ -102,14 +102,14 @@ public class AccordionPanel extends Details {
      * @param summary
      *            the summary text to set.
      * @param components
-     *            the content components to set.
+     *            the content components to add.
      *
      * @see #setSummaryText(String)
-     * @see #addContent(Component...)
+     * @see #add(Component...)
      */
     public AccordionPanel(String summary, Component... components) {
         this(summary);
-        addContent(components);
+        add(components);
     }
 
     /**
@@ -119,14 +119,14 @@ public class AccordionPanel extends Details {
      * @param summary
      *            the summary component to set.
      * @param components
-     *            the content components to set.
+     *            the content components to add.
      *
      * @see #setSummary(Component)
-     * @see #addContent(Component...)
+     * @see #add(Component...)
      */
     public AccordionPanel(Component summary, Component... components) {
         this(summary);
-        addContent(components);
+        add(components);
     }
 
     /**

@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>24.1-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-progress-bar-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Progress Bar Parent</name>
+    <description>Vaadin Progress Bar Parent</description>
     <modules>
         <module>vaadin-progress-bar-flow</module>
         <module>vaadin-progress-bar-testbench</module>

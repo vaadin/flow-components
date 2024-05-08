@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -173,6 +173,31 @@ public class DialogChildrenTest {
         newParent.remove(child);
         Assert.assertEquals(
                 dialog.getElement().getProperty("virtualChildNodeIds"), "[-1]");
+    }
+
+    @Test
+    public void headerAndFooterAddedAsVirtualChildren() {
+        dialog.getHeader().add(new Div());
+        dialog.getFooter().add(new Div());
+
+        Assert.assertEquals(0, dialog.getElement().getChildCount());
+        Assert.assertEquals(dialog.getElement(),
+                dialog.getHeader().root.getParent());
+        Assert.assertEquals(dialog.getElement(),
+                dialog.getFooter().root.getParent());
+    }
+
+    @Test
+    public void removeAll_doesNotRemoveHeaderOrFooter() {
+        dialog.getHeader().add(new Div());
+        dialog.getFooter().add(new Div());
+
+        dialog.removeAll();
+
+        Assert.assertEquals(dialog.getElement(),
+                dialog.getHeader().root.getParent());
+        Assert.assertEquals(dialog.getElement(),
+                dialog.getFooter().root.getParent());
     }
 
     private void assertVirtualChildren(Component... components) {

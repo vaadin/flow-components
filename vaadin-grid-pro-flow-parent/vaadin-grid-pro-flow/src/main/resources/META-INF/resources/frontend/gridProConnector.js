@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -44,9 +44,6 @@
         // Not needed in case of custom editor as value is set on server-side.
         // Overridden in order to avoid blinking of the cell content.
         column._setEditorValue = function (editor, value) {};
-        column._getEditorValue = function (editor) {
-          return;
-        };
       })(column, component),
 
     patchEditModeRenderer: (column) =>
@@ -65,6 +62,14 @@
             root.innerHTML = `<${tagName}></${tagName}>`;
           }
         });
+      })(column),
+    initCellEditableProvider: (column) =>
+      tryCatchWrapper(function(column) {
+        column.isCellEditable = function(model) {
+          // If there is no cell editable data, assume the cell is editable
+          const isEditable = model.item.cellEditable && model.item.cellEditable[column._flowId];
+          return isEditable === undefined || isEditable;
+        };
       })(column)
   };
 })();

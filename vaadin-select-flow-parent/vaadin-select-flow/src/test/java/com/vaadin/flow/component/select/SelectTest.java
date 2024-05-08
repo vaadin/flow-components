@@ -11,6 +11,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.shared.InputField;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -19,6 +21,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
@@ -819,6 +822,38 @@ public class SelectTest {
     }
 
     @Test
+    public void implementHasAriaLabel() {
+        Assert.assertTrue(
+                "Select should support aria-label and aria-labelledby",
+                HasAriaLabel.class.isAssignableFrom(Select.class));
+    }
+
+    @Test
+    public void setAriaLabel() {
+        Select<String> select = new Select<>();
+
+        select.setAriaLabel("aria-label");
+        Assert.assertTrue(select.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", select.getAriaLabel().get());
+
+        select.setAriaLabel(null);
+        Assert.assertTrue(select.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        Select<String> select = new Select<>();
+
+        select.setAriaLabelledBy("aria-labelledby");
+        Assert.assertTrue(select.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby",
+                select.getAriaLabelledBy().get());
+
+        select.setAriaLabelledBy(null);
+        Assert.assertTrue(select.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
     public void unregisterOpenedChangeListenerOnEvent() {
         var listenerInvokedCount = new AtomicInteger(0);
         select.addOpenedChangeListener(e -> {
@@ -844,6 +879,21 @@ public class SelectTest {
         select.setInvalid(false);
 
         Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void implementsInputField() {
+        Assert.assertTrue(
+                select instanceof InputField<AbstractField.ComponentValueChangeEvent<Select<String>, String>, String>);
+    }
+
+    @Test
+    public void getItemPosition_shouldReturnItemIndexIfItemExists() {
+        select.setItems("foo", "bar", "buzz");
+        Assert.assertEquals(0, select.getItemPosition("foo"));
+        Assert.assertEquals(1, select.getItemPosition("bar"));
+        Assert.assertEquals(2, select.getItemPosition("buzz"));
+        Assert.assertEquals(-1, select.getItemPosition("does not exist"));
     }
 
     private void validateItem(int index, String textContent, String label,

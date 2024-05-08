@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,7 +20,9 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefix;
@@ -59,9 +61,9 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/combo-box", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/combo-box", version = "24.4.0-beta2")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
@@ -325,5 +327,30 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     @Override
     public T getEmptyValue() {
         return null;
+    }
+
+    /**
+     * Sets the dropdown overlay width.
+     *
+     * @param width
+     *            the new dropdown width. Pass in null to set the dropdown width
+     *            back to the default value.
+     */
+    public void setOverlayWidth(String width) {
+        getStyle().set("--vaadin-combo-box-overlay-width", width);
+    }
+
+    /**
+     * Sets the dropdown overlay width. Negative number implies unspecified size
+     * (the dropdown width is reverted back to the default value).
+     *
+     * @param width
+     *            the width of the dropdown.
+     * @param unit
+     *            the unit used for the dropdown.
+     */
+    public void setOverlayWidth(float width, Unit unit) {
+        Objects.requireNonNull(unit, "Unit can not be null");
+        setOverlayWidth(HasSize.getCssSize(width, unit));
     }
 }

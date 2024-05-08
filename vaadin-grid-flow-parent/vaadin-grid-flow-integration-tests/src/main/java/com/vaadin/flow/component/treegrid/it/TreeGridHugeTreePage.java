@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,13 +14,6 @@
  * the License.
  */
 package com.vaadin.flow.component.treegrid.it;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
@@ -62,40 +55,9 @@ public class TreeGridHugeTreePage extends Div {
     }
 
     private TreeDataProvider<String> initializeDataProvider(int dadCount) {
-        TreeData<String> data = new TreeData<>();
-
-        final Map<String, String> parentPathMap = new HashMap<>();
-
-        addRootItems("Granddad", 3, data, parentPathMap)
-                .forEach(granddad -> addItems("Dad", dadCount, granddad, data,
-                        parentPathMap)
-                        .forEach(dad -> addItems("Son", 300, dad, data,
-                                parentPathMap)));
-
+        TreeData<String> data = new TreeGridStringDataBuilder()
+                .addLevel("Granddad", 3).addLevel("Dad", dadCount)
+                .addLevel("Son", 300).build();
         return new TreeDataProvider<>(data);
-    }
-
-    static List<String> addRootItems(String name, int numberOfItems,
-            TreeData<String> data, Map<String, String> parentPathMap) {
-        return addItems(name, numberOfItems, null, data, parentPathMap);
-    }
-
-    static List<String> addItems(String name, int numberOfItems, String parent,
-            TreeData<String> data, Map<String, String> parentPathMap) {
-        List<String> items = new ArrayList<>();
-        IntStream.range(0, numberOfItems).forEach(index -> {
-            String parentPath = parentPathMap.get(parent);
-            String thisPath = Optional.ofNullable(parentPath)
-                    .map(path -> path + "/" + index).orElse("" + index);
-            String item = addItem(name, thisPath);
-            parentPathMap.put(item, thisPath);
-            data.addItem(parent, item);
-            items.add(item);
-        });
-        return items;
-    }
-
-    private static String addItem(String name, String path) {
-        return (name + " " + path).trim();
     }
 }

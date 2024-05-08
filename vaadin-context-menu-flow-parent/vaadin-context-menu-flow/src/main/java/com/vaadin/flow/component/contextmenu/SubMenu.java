@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,6 +18,7 @@ package com.vaadin.flow.component.contextmenu;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.function.SerializableRunnable;
 
 /**
@@ -55,5 +56,12 @@ public class SubMenu extends SubMenuBase<ContextMenu, MenuItem, SubMenu>
         return new MenuManager<>(getParentMenuItem().getContextMenu(),
                 contentReset, MenuItem::new, MenuItem.class,
                 getParentMenuItem());
+    }
+
+    /**
+     * Adds a separator between items.
+     */
+    public void addSeparator() {
+        add(new Hr());
     }
 }

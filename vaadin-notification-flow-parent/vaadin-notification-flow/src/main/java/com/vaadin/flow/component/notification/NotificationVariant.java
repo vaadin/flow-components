@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,7 +22,7 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  */
 public enum NotificationVariant implements ThemeVariant {
     LUMO_PRIMARY("primary"), LUMO_CONTRAST("contrast"), LUMO_SUCCESS(
-            "success"), LUMO_ERROR("error");
+            "success"), LUMO_ERROR("error"), LUMO_WARNING("warning");
 
     private final String variant;
 

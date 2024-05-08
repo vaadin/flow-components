@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 
@@ -217,5 +218,48 @@ public class TabsTest {
 
         // assertion here just to make sure tabs were really set
         Assert.assertNotNull(tabs.getSelectedTab());
+    }
+
+    @Test
+    public void addTabsToDisabledContainer_reEnable_tabsShouldBeEnabled() {
+        var container = new Div();
+        var tabs = new Tabs();
+        container.add(tabs);
+        var tab1 = new Tab("Tab one");
+        var tab2 = new Tab("Tab two");
+
+        container.setEnabled(false);
+        tabs.add(tab1, tab2);
+        container.setEnabled(true);
+
+        Assert.assertTrue(tab1.isEnabled());
+        Assert.assertTrue(tab2.isEnabled());
+    }
+
+    @Test
+    public void addTabsToDisabledContainer_reEnable_shouldHaveSelectedTab() {
+        var container = new Div();
+        var tabs = new Tabs();
+        container.add(tabs);
+        var tab1 = new Tab("Tab one");
+        var tab2 = new Tab("Tab two");
+
+        container.setEnabled(false);
+        tabs.add(tab1, tab2);
+        container.setEnabled(true);
+
+        Assert.assertEquals(tab1, tabs.getSelectedTab());
+    }
+
+    @Test
+    public void addDisabledTab_shouldNotHaveSelectedTab() {
+        var tabs = new Tabs();
+        var tab1 = new Tab("Tab one");
+
+        tab1.setEnabled(false);
+        tabs.add(tab1);
+        tabs.setSelectedIndex(0);
+
+        Assert.assertEquals(null, tabs.getSelectedTab());
     }
 }

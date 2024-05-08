@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,12 +15,13 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.function.ValueProvider;
@@ -41,7 +42,7 @@ import com.vaadin.flow.shared.Registration;
 public class NativeButtonRenderer<SOURCE> extends BasicRenderer<SOURCE, String>
         implements ClickableRenderer<SOURCE> {
 
-    private List<ItemClickListener<SOURCE>> listeners = new ArrayList<>(1);
+    private List<ItemClickListener<SOURCE>> listeners = new CopyOnWriteArrayList<>();
 
     /**
      * Creates a new button renderer with the specified label. The label is the
@@ -130,7 +131,7 @@ public class NativeButtonRenderer<SOURCE> extends BasicRenderer<SOURCE, String>
                 .createButton(getValueProvider().apply(item));
         button.addEventListener("click", event -> getItemClickListeners()
                 .forEach(listeners -> listeners.onItemClicked(item)));
-        return ComponentUtil.componentFromElement(button, Component.class,
+        return ComponentUtil.componentFromElement(button, NativeButton.class,
                 true);
     }
 

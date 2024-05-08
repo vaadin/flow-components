@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -98,6 +98,21 @@ abstract class AbstractRow<CELL extends AbstractCell> implements Serializable {
          *            the component to set
          */
         public abstract void setComponent(Component component);
+
+        /**
+         * Sets a custom part name for the cell.
+         *
+         * @param partName
+         *            the part name to set
+         */
+        public abstract void setPartName(String partName);
+
+        /**
+         * Gets the custom part name of the cell.
+         *
+         * @return the part name
+         */
+        public abstract String getPartName();
 
     }
 

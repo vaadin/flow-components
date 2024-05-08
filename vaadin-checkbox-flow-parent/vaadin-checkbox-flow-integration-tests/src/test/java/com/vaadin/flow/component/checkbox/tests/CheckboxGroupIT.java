@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -127,9 +127,9 @@ public class CheckboxGroupIT extends AbstractComponentIT {
         List<CheckboxElement> checkboxes = group.getCheckboxes();
 
         Assert.assertEquals(Boolean.TRUE.toString(),
-                checkboxes.get(1).getAttribute("disabled"));
+                checkboxes.get(1).getAttribute("readonly"));
         Assert.assertEquals(Boolean.TRUE.toString(),
-                group.getAttribute("disabled"));
+                group.getAttribute("readonly"));
 
         scrollToElement(group);
         getCommandExecutor().executeScript("window.scrollBy(0,50);");

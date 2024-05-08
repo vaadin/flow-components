@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -43,6 +44,7 @@ import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.StateTree;
@@ -76,9 +78,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/dialog", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/dialog", version = "24.4.0-beta2")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
@@ -87,7 +89,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
 
     private boolean autoAddedToTheUi;
-    private int onCloseConfigured;
+    private int configuredCloseActionListeners;
     private String width;
     private String minWidth;
     private String maxWidth;
@@ -110,18 +112,13 @@ public class Dialog extends Component implements HasComponents, HasSize,
         getElement().getNode().addAttachListener(this::attachComponentRenderer);
 
         // Workaround for: https://github.com/vaadin/flow/issues/3496
-        setOpened(false);
+        getElement().setProperty("opened", false);
 
-        getElement().addPropertyChangeListener("opened", event -> fireEvent(
-                new OpenedChangeEvent(this, event.isUserOriginated())));
-
-        addOpenedChangeListener(event -> {
-            if (!isOpened()) {
-                setModality(false);
-            }
-            if (autoAddedToTheUi && !isOpened()) {
-                getElement().removeFromParent();
-                autoAddedToTheUi = false;
+        getElement().addPropertyChangeListener("opened", event -> {
+            // Only handle client-side changes, server-side changes are already
+            // handled by setOpened
+            if (event.isUserOriginated()) {
+                doSetOpened(this.isOpened(), event.isUserOriginated());
             }
         });
 
@@ -284,14 +281,14 @@ public class Dialog extends Component implements HasComponents, HasSize,
     public Registration addDialogCloseActionListener(
             ComponentEventListener<DialogCloseActionEvent> listener) {
         if (isOpened()) {
-            ensureOnCloseConfigured();
+            configuredCloseActionListeners++;
         }
 
         Registration openedRegistration = addOpenedChangeListener(event -> {
             if (event.isOpened()) {
-                ensureOnCloseConfigured();
+                configuredCloseActionListeners++;
             } else {
-                onCloseConfigured = 0;
+                configuredCloseActionListeners = 0;
             }
         });
 
@@ -301,7 +298,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
             if (isOpened()) {
                 // the count is decremented if the dialog is closed. So we
                 // should decrement is explicitly if listener is deregistered
-                onCloseConfigured--;
+                configuredCloseActionListeners--;
             }
             openedRegistration.remove();
             registration.remove();
@@ -335,6 +332,30 @@ public class Dialog extends Component implements HasComponents, HasSize,
     public Dialog(Component... components) {
         this();
         add(components);
+    }
+
+    /**
+     * Creates a dialog with given title.
+     *
+     * @param title
+     *            the title of the component
+     */
+    public Dialog(String title) {
+        this();
+        setHeaderTitle(title);
+    }
+
+    /**
+     * Creates a dialog with given title and components inside.
+     *
+     * @param title
+     *            the title of the component
+     * @param components
+     *            the components inside the dialog
+     */
+    public Dialog(String title, Component... components) {
+        this(components);
+        setHeaderTitle(title);
     }
 
     /**
@@ -673,7 +694,9 @@ public class Dialog extends Component implements HasComponents, HasSize,
             if (root.getChildCount() == 0) {
                 return;
             }
-            dialog.getElement().appendChild(root);
+            if (!dialog.getElement().equals(root.getParent())) {
+                dialog.getElement().appendVirtualChild(root);
+            }
             dialog.getElement().executeJs("this." + rendererFunction
                     + " = (root) => {" + "if (root.firstChild) { "
                     + "   return;" + "}" + "root.appendChild($0);" + "}", root);
@@ -738,7 +761,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
         UI ui = getCurrentUI();
         StateTree.ExecutionRegistration addToUiRegistration = ui
                 .beforeClientResponse(ui, context -> {
-                    if (getElement().getNode().getParent() == null) {
+                    if (getElement().getNode().getParent() == null
+                            && isOpened()) {
                         ui.addToModalComponent(this);
                         ui.setChildComponentModal(this, isModal());
                         autoAddedToTheUi = true;
@@ -761,30 +785,43 @@ public class Dialog extends Component implements HasComponents, HasSize,
         }
     }
 
-    private void ensureOnCloseConfigured() {
-        if (onCloseConfigured == 0) {
-            getElement().getNode()
-                    .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                            context -> doEnsureOnCloseConfigured(ui)));
-        }
-        onCloseConfigured++;
+    /**
+     * Registers event listeners on the dialog's overlay that prevent it from
+     * closing itself on outside click and escape press. Instead, the event
+     * listeners delegate to the server-side {@link #handleClientClose()}
+     * method. This serves two purposes:
+     * <ul>
+     * <li>Prevent the client overlay from closing if a custom close action
+     * listener is registered</li>
+     * <li>Prevent the client overlay from closing if the server-side dialog has
+     * become inert in the meantime, in which case the @ClientCallable call to
+     * {@link #handleClientClose()} will never be processed</li>
+     * </ul>
+     */
+    private void registerClientCloseHandler() {
+        //@formatter:off
+        getElement().executeJs("const listener = (e) => {"
+                + "  if (e.type == 'vaadin-overlay-escape-press' && !this.noCloseOnEsc ||"
+                + "      e.type == 'vaadin-overlay-outside-click' && !this.noCloseOnOutsideClick) {"
+                + "    e.preventDefault();"
+                + "    this.$server.handleClientClose();"
+                + "  }"
+                + "};"
+                + "this.$.overlay.addEventListener('vaadin-overlay-outside-click', listener);"
+                + "this.$.overlay.addEventListener('vaadin-overlay-escape-press', listener);");
+        //@formatter:on
     }
 
-    private void doEnsureOnCloseConfigured(UI ui) {
-        if (onCloseConfigured > 0) {
-            ui.getPage().executeJs("var f = function(e) {"
-                    + "  if (e.type == 'vaadin-overlay-escape-press' && !$0.noCloseOnEsc ||"
-                    + "      e.type == 'vaadin-overlay-outside-click' && !$0.noCloseOnOutsideClick) {"
-                    + "    e.preventDefault();"
-                    + "    $0.dispatchEvent(new CustomEvent('vaadin-dialog-close-action'));"
-                    + "  }" + "};"
-                    + "$0.$.overlay.addEventListener('vaadin-overlay-outside-click', f);"
-                    + "$0.$.overlay.addEventListener('vaadin-overlay-escape-press', f);"
-                    + "$0.addEventListener('opened-changed', function(){"
-                    + " if (!$0.opened) {"
-                    + " $0.$.overlay.removeEventListener('vaadin-overlay-outside-click',f);"
-                    + "$0.$.overlay.removeEventListener('vaadin-overlay-escape-press', f);"
-                    + "} });", getElement());
+    @ClientCallable
+    void handleClientClose() {
+        if (!isOpened()) {
+            return;
+        }
+
+        if (configuredCloseActionListeners > 0) {
+            fireEvent(new DialogCloseActionEvent(this, true));
+        } else {
+            doSetOpened(false, true);
         }
     }
 
@@ -800,11 +837,21 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *            {@code true} to open the dialog, {@code false} to close it
      */
     public void setOpened(boolean opened) {
+        if (opened != isOpened()) {
+            doSetOpened(opened, false);
+        }
+    }
+
+    private void doSetOpened(boolean opened, boolean fromClient) {
         if (opened) {
             ensureAttached();
+        } else if (autoAddedToTheUi) {
+            getElement().removeFromParent();
+            autoAddedToTheUi = false;
         }
         setModality(opened && isModal());
         getElement().setProperty("opened", opened);
+        fireEvent(new OpenedChangeEvent(this, fromClient));
     }
 
     /**
@@ -861,19 +908,25 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
-    private ElementDetachListener childDetachListener = e -> {
-        var child = e.getSource();
-        var childDetachedFromContainer = !getElement().getChildren().anyMatch(
-                containerChild -> Objects.equals(child, containerChild));
+    // Must not use lambda here as that would break serialization. See
+    // https://github.com/vaadin/flow-components/issues/5597
+    private ElementDetachListener childDetachListener = new ElementDetachListener() {
+        @Override
+        public void onDetach(ElementDetachEvent e) {
+            var child = e.getSource();
+            var childDetachedFromContainer = !getElement().getChildren()
+                    .anyMatch(containerChild -> Objects.equals(child,
+                            containerChild));
 
-        if (childDetachedFromContainer) {
-            // The child was removed from the dialog
+            if (childDetachedFromContainer) {
+                // The child was removed from the dialog
 
-            // Remove the registration for the child detach listener
-            childDetachListenerMap.get(child).remove();
-            childDetachListenerMap.remove(child);
+                // Remove the registration for the child detach listener
+                childDetachListenerMap.get(child).remove();
+                childDetachListenerMap.remove(child);
 
-            this.updateVirtualChildNodeIds();
+                updateVirtualChildNodeIds();
+            }
         }
     };
 
@@ -912,6 +965,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
         initHeaderFooterRenderer();
         updateVirtualChildNodeIds();
+        registerClientCloseHandler();
     }
 
     /**

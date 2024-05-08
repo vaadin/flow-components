@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -54,9 +54,9 @@ import elemental.json.JsonObject;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.4.0-beta2")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
@@ -270,13 +270,17 @@ public class RichTextEditor
     }
 
     static String sanitize(String html) {
-        return org.jsoup.Jsoup.clean(html,
+        var settings = new org.jsoup.nodes.Document.OutputSettings();
+        settings.prettyPrint(false);
+        var safeHtml = org.jsoup.Jsoup.clean(html, "",
                 org.jsoup.safety.Safelist.basic()
                         .addTags("img", "h1", "h2", "h3", "s")
                         .addAttributes("img", "align", "alt", "height", "src",
                                 "title", "width")
                         .addAttributes(":all", "style")
-                        .addProtocols("img", "src", "data"));
+                        .addProtocols("img", "src", "data"),
+                settings);
+        return safeHtml;
     }
 
     /**
@@ -1012,7 +1016,7 @@ public class RichTextEditor
         public void setValue(String value) {
             Objects.requireNonNull(value, "Delta value must not be null");
 
-            if (!Objects.equals(value, getValue())) {
+            if (!valueEquals(value, getValue())) {
                 RichTextEditor.this.getElement().setProperty("value", value);
                 // After setting delta value, manually sync back the updated
                 // HTML value, which will eventually trigger a server-side value

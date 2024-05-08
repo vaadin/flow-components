@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -55,6 +55,9 @@ public class TextAreaBinderValidationPage
                 .withValidator(value -> value.equals(expectedValue),
                         UNEXPECTED_VALUE_ERROR_MESSAGE)
                 .bind("property");
+        binder.addStatusChangeListener(event -> {
+            incrementServerValidationCounter();
+        });
 
         add(createInput(EXPECTED_VALUE_INPUT, "Set expected value", event -> {
             expectedValue = event.getValue();
@@ -75,6 +78,7 @@ public class TextAreaBinderValidationPage
         }));
     }
 
+    @Override
     protected TextArea createTestField() {
         return new TextArea();
     }

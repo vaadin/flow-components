@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -37,6 +37,11 @@ public class DragAndDropGridIT extends AbstractComponentIT {
     }
 
     @Test
+    public void dragAndDropDefined_gridLoaded_noErrors() {
+        checkLogsForErrors();
+    }
+
+    @Test
     public void startDragging_dragStartFired() {
         fireDragStart(2);
         assertMessages("2", "", "");
@@ -57,6 +62,7 @@ public class DragAndDropGridIT extends AbstractComponentIT {
 
     @Test
     public void noDropMode_dropOnRow_dropEventNotFired() {
+        click("no-drop-mode");
         fireDrop(3, "on-top");
         assertMessages("", "", "");
     }
@@ -197,9 +203,17 @@ public class DragAndDropGridIT extends AbstractComponentIT {
 
     @Test
     public void setDropFilter_undroppable_noDropMode() {
+        click("no-drop-mode");
         click("set-filters");
         fireDrop(2, "on-top");
         assertMessages("", "", "");
+    }
+
+    @Test
+    public void removeOnItemClick_noError() {
+        click("remove-on-item-click");
+        grid.getCell("0").click();
+        checkLogsForErrors();
     }
 
     private void assertMessages(String expectedStartMessage,

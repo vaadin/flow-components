@@ -60,7 +60,7 @@ public class TooltipTest {
         // Create a new UI and move the component to it (@PreserveOnRefresh)
         ui = new UI();
         UI.setCurrent(ui);
-        component.getElement().removeFromTree();
+        component.getElement().removeFromTree(false);
         ui.add(component);
 
         Assert.assertTrue(getTooltipElement().isPresent());
@@ -140,6 +140,13 @@ public class TooltipTest {
         Assert.assertEquals(true,
                 getTooltipElement().get().getProperty("opened", false));
         Assert.assertEquals(true, tooltip.isOpened());
+    }
+
+    @Test
+    public void tooltipForCompopnentTwice_sameReference() {
+        var tooltip = Tooltip.forComponent(component);
+        var tooltip2 = Tooltip.forComponent(component);
+        Assert.assertSame(tooltip, tooltip2);
     }
 
     @Test

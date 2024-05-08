@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.html.Hr;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,6 +71,15 @@ public class SubMenuTest {
     public void addItem_getChildren_returnsMenuItem() {
         MenuItem foo = subMenu.addItem("foo");
         verifyChildren(subMenu, foo);
+    }
+
+    @Test
+    public void addSeparatorAddsHr() {
+        MenuItem foo = subMenu.addItem("foo");
+        subMenu.addSeparator();
+        Hr separator = (Hr) subMenu.getChildren().skip(1).findFirst().get();
+        MenuItem bar = subMenu.addItem("foo");
+        verifyChildren(subMenu, foo, separator, bar);
     }
 
     @Test
@@ -163,6 +173,12 @@ public class SubMenuTest {
     public void setParentItemCheckable_throws() {
         subMenu.addItem("foo");
         parentItem.setCheckable(true);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void setParentItemKeepOpen_throws() {
+        subMenu.addItem("foo");
+        parentItem.setKeepOpen(true);
     }
 
     @Test

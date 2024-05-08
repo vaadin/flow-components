@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-date-picker-flow-parent</artifactId>
-        <version>24.1-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-date-picker-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Date Picker</name>
+    <description>Vaadin Date Picker</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

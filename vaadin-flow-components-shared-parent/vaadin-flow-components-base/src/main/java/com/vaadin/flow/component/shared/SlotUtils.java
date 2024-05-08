@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,15 +15,14 @@
  */
 package com.vaadin.flow.component.shared;
 
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.dom.Element;
-
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Util methods for handling child elements inside slots.
@@ -56,8 +55,10 @@ public class SlotUtils {
      *            the name of the slot to clear
      */
     public static void clearSlot(HasElement parent, String slot) {
-        getElementsInSlot(parent, slot).collect(Collectors.toList())
-                .forEach(parent.getElement()::removeChild);
+        getElementsInSlot(parent, slot).toList().forEach(element -> {
+            element.removeAttribute("slot");
+            parent.getElement().removeChild(element);
+        });
     }
 
     /**

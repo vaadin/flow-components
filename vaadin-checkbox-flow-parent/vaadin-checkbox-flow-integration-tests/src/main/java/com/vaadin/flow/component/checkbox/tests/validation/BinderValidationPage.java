@@ -6,6 +6,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.tests.validation.AbstractValidationPage;
 
 import java.util.List;
+import java.util.Set;
 
 @Route("vaadin-checkbox-group/validation/binder")
 public class BinderValidationPage
@@ -14,13 +15,13 @@ public class BinderValidationPage
     public static final String REQUIRED_ERROR_MESSAGE = "The field is required";
 
     public static class Bean {
-        private String property;
+        private Set<String> property;
 
-        public String getProperty() {
+        public Set<String> getProperty() {
             return property;
         }
 
-        public void setProperty(String property) {
+        public void setProperty(Set<String> property) {
             this.property = property;
         }
     }
@@ -33,6 +34,9 @@ public class BinderValidationPage
         binder = new Binder<>(Bean.class);
         binder.forField(testField).asRequired(REQUIRED_ERROR_MESSAGE)
                 .bind("property");
+        binder.addStatusChangeListener(event -> {
+            incrementServerValidationCounter();
+        });
     }
 
     @Override

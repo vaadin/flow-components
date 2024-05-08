@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,11 +24,9 @@ import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
-import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.shared.Registration;
 
 /**
  * Email Field is an extension of Text Field that only accepts email addresses
@@ -43,20 +41,18 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-email-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/email-field", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/email-field", version = "24.4.0-beta2")
 @JsModule("@vaadin/email-field/src/vaadin-email-field.js")
 public class EmailField extends TextFieldBase<EmailField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
-    private static final String EMAIL_PATTERN = "^" + "([a-zA-Z0-9_\\.\\-+])+" // local
-            + "@" + "[a-zA-Z0-9-.]+" // domain
-            + "\\." + "[a-zA-Z0-9-]{2,}" // tld
-            + "$";
 
     private boolean isConnectorAttached;
 
     private TextFieldValidationSupport validationSupport;
+
+    private boolean manualValidationEnabled = false;
 
     /**
      * Constructs an empty {@code EmailField}.
@@ -70,8 +66,6 @@ public class EmailField extends TextFieldBase<EmailField, String>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
-
-        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -156,7 +150,7 @@ public class EmailField extends TextFieldBase<EmailField, String>
     private TextFieldValidationSupport getValidationSupport() {
         if (validationSupport == null) {
             validationSupport = new TextFieldValidationSupport(this);
-            validationSupport.setPattern(EMAIL_PATTERN);
+            validationSupport.setPattern(EmailValidator.PATTERN);
         }
         return validationSupport;
     }
@@ -295,12 +289,8 @@ public class EmailField extends TextFieldBase<EmailField, String>
     }
 
     @Override
-    public Registration addValidationStatusChangeListener(
-            ValidationStatusChangeListener<String> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<String>(this,
-                                !isInvalid())));
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
     }
 
     /**
@@ -309,7 +299,9 @@ public class EmailField extends TextFieldBase<EmailField, String>
      * constraints using browser development tools.
      */
     protected void validate() {
-        setInvalid(getValidationSupport().isInvalid(getValue()));
+        if (!this.manualValidationEnabled) {
+            setInvalid(getValidationSupport().isInvalid(getValue()));
+        }
     }
 
     @Override

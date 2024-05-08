@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -34,7 +34,6 @@ public class TreeGridPageSizeIT extends AbstractTreeGridIT {
         setupTreeGrid();
     }
 
-    @Ignore("Fix as part of https://github.com/vaadin/flow-components/issues/3505")
     @Test
     public void treegridWithPageSize10_changeTo80_revertBackTo10() {
         TreeGridElement grid = getTreeGrid();

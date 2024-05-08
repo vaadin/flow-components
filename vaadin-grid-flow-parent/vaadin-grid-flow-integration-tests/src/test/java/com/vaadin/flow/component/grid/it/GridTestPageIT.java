@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -484,8 +484,10 @@ public class GridTestPageIT extends AbstractComponentIT {
     @SuppressWarnings("unchecked")
     public static Map<String, Map<String, ?>> getItems(WebDriver driver,
             WebElement element) {
-        Object result = ((JavascriptExecutor) driver)
-                .executeScript("return arguments[0]._cache.items;", element);
+        Object result = ((JavascriptExecutor) driver).executeScript(
+                "const items = arguments[0]._dataProviderController.rootCache.items;"
+                        + "return items.reduce((obj, item, i) => ({ ...obj, [i]: item }), {});",
+                element);
 
         return (Map<String, Map<String, ?>>) result;
     }

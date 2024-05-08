@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
@@ -31,6 +33,7 @@ import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
+import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.dom.PropertyChangeEvent;
@@ -157,10 +160,15 @@ class ComboBoxDataController<TItem>
      * @param localeSupplier
      *            supplier for the current locale of the combo box
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     ComboBoxDataController(ComboBoxBase<?, TItem, ?> comboBox,
             SerializableSupplier<Locale> localeSupplier) {
         this.comboBox = comboBox;
         this.localeSupplier = localeSupplier;
+
+        // Update client side filtering when data provider size changes
+        ComponentUtil.addListener(comboBox, ItemCountChangeEvent.class,
+                (ComponentEventListener) (e -> updateClientSideFiltering()));
     }
 
     /**
@@ -195,7 +203,8 @@ class ComboBoxDataController<TItem>
         if (dataCommunicator != null) {
             dataCommunicator.setPageSize(pageSize);
         }
-        refreshAllData(shouldForceServerSideFiltering);
+        reset();
+        updateClientSideFiltering();
     }
 
     /**
@@ -209,6 +218,8 @@ class ComboBoxDataController<TItem>
 
         clearFilterOnCloseRegistration = comboBox.getElement()
                 .addPropertyChangeListener("opened", this::clearFilterOnClose);
+
+        reset();
     }
 
     /**
@@ -279,25 +290,7 @@ class ComboBoxDataController<TItem>
      * Called by the client-side connector to reset the data communicator
      */
     void resetDataCommunicator() {
-        /*
-         * The client filter from combo box will be used in the data
-         * communicator only within 'setRequestedRange' calls to data provider,
-         * and then will be erased to not affect the data view item count
-         * handling methods. Thus, if the current client filter is not empty,
-         * then we need to re-set it in the data communicator.
-         */
-        if (lastFilter == null || lastFilter.isEmpty()) {
-            dataCommunicator.reset();
-        } else {
-            String filter = lastFilter;
-            lastFilter = null;
-            /*
-             * This filter slot will eventually call the filter consumer in data
-             * communicator and 'DataCommunicator::reset' is done inside this
-             * consumer, so we don't need to explicitly call it.
-             */
-            filterSlot.accept(filter);
-        }
+        dataCommunicator.reset();
     }
 
     // ****************************************************
@@ -512,7 +505,24 @@ class ComboBoxDataController<TItem>
                     dataGenerator, arrayUpdater,
                     data -> comboBox.getElement()
                             .callJsFunction("$connector.updateData", data),
-                    comboBox.getElement().getNode(), enableFetch);
+                    comboBox.getElement().getNode(), enableFetch) {
+
+                @Override
+                public void reset() {
+                    super.reset();
+                    if (comboBox instanceof MultiSelectComboBox) {
+                        // The data is destroyed and rebuilt on data
+                        // communicator reset. When component renderers are
+                        // used, this means that the nodeIds for the items
+                        // should also be updated. However, the "selectedItems"
+                        // property is manually set in "refreshValue()".
+                        // Therefore, the selected items can contain obsolete
+                        // nodeIds. For this reason, this value refresh is
+                        // necessary.
+                        comboBox.refreshValue();
+                    }
+                }
+            };
             dataCommunicator.setPageSize(comboBox.getPageSize());
         } else {
             // Enable/disable items fetch from data provider depending on the
@@ -546,8 +556,8 @@ class ComboBoxDataController<TItem>
 
         shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
         setupDataProviderListener(dataProvider);
-
-        refreshAllData(shouldForceServerSideFiltering);
+        reset();
+        updateClientSideFiltering();
 
         userProvidedFilter = UserProvidedFilter.UNDECIDED;
 
@@ -560,13 +570,12 @@ class ComboBoxDataController<TItem>
         }
     }
 
-    private void refreshAllData(boolean forceServerSideFiltering) {
+    private void updateClientSideFiltering() {
         if (dataCommunicator != null) {
-            setClientSideFilter(!forceServerSideFiltering && dataCommunicator
-                    .getItemCount() <= comboBox.getPageSize());
+            setClientSideFilter(
+                    !this.shouldForceServerSideFiltering && dataCommunicator
+                            .getItemCount() <= comboBox.getPageSize());
         }
-
-        reset();
     }
 
     private void setClientSideFilter(boolean clientSideFilter) {
@@ -632,7 +641,7 @@ class ComboBoxDataController<TItem>
                         .refresh(((DataChangeEvent.DataRefreshEvent<TItem>) e)
                                 .getItem());
             } else {
-                refreshAllData(shouldForceServerSideFiltering);
+                reset();
             }
         });
     }

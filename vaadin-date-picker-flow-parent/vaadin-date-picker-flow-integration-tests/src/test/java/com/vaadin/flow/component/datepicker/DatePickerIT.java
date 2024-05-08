@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
@@ -338,4 +339,19 @@ public class DatePickerIT extends AbstractComponentIT {
                 "The date picker should be enabled after parent component is enabled.",
                 picker.isEnabled());
     }
+
+    @Test
+    public void datePicker_OpenedChangeListener() {
+        WebElement message = findElement(
+                By.id("picker-with-opened-change-message"));
+
+        WebElement picker = findElement(By.id("picker-with-opened-change"));
+
+        picker.click();
+        waitUntil(drive -> "date picker was opened".equals(message.getText()));
+
+        picker.sendKeys(Keys.ESCAPE);
+        waitUntil(drive -> "date picker was closed".equals(message.getText()));
+    }
+
 }

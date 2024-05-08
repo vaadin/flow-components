@@ -4,11 +4,12 @@
     <parent>
         <artifactId>vaadin-upload-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>24.1-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-upload-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Upload Testbench API</name>
+    <description>Vaadin Upload Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

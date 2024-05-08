@@ -17,14 +17,14 @@ public class Home extends Div {
 
         Details details = new Details();
         details.setSummary(new Span("Some summary"));
-        details.setContent(new Text("Some content"));
+        details.add("Some content");
 
         Details detailsDisabled = new Details();
         detailsDisabled.setOpened(true);
         detailsDisabled.setEnabled(false);
         detailsDisabled.setSummaryText("Disabled heading");
-        detailsDisabled.addContent(new H3("Disabled content"));
-        detailsDisabled.addContent(new Span("Always visible content"));
+        detailsDisabled.add(new H3("Disabled content"));
+        detailsDisabled.add(new Span("Always visible content"));
 
         Details detailsThemed = new Details("Small Reversed Filled Summary",
                 new Span("Themed Content"));

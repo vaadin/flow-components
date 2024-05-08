@@ -22,6 +22,11 @@ public class LoginFormI18nTest {
                 "Check that you have entered the correct username and password and try again.",
                 i18n.getErrorMessage().getMessage());
 
-        Assert.assertEquals(null, i18n.getAdditionalInformation());
+        Assert.assertEquals("Username is required",
+                i18n.getErrorMessage().getUsername());
+        Assert.assertEquals("Password is required",
+                i18n.getErrorMessage().getPassword());
+
+        Assert.assertNull(i18n.getAdditionalInformation());
     }
 }

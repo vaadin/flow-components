@@ -4,11 +4,12 @@
     <parent>
         <artifactId>vaadin-grid-pro-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>24.1-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-grid-pro-testbench</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Grid Pro Testbench API</name>
+    <description>Vaadin Grid Pro Testbench API</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

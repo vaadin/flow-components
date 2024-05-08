@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -77,7 +77,7 @@ function synchronizeFeature(target, source, context) {
   target.setGeometry(context.lookup.get(source.geometry));
 
   // Define style function that is run before rendering each feature. The
-  // function supports using a fallback text style for rendering labels in case
+  // function supports using a fallback text style for rendering texts in case
   // the feature doesn't define its own text style.
   // Acquire reference to style instance outside of style function, otherwise
   // there would be no reference to the instance, and it might get garbage
@@ -87,16 +87,16 @@ function synchronizeFeature(target, source, context) {
     if (!style) {
       return undefined;
     }
-    // If feature has a label but no custom text style, then use default text
+    // If feature has a text but no custom text style, then use default text
     // style
-    if (source.label && !style.getText()) {
+    if (source.text && !style.getText()) {
       style.setText(fallbackTextStyle);
     }
-    // Set the feature's label on the text style. This is safe even when using
+    // Set the feature's text on the text style. This is safe even when using
     // the default text style instance, as for each feature using the default
     // text style, this function will be called again before rendering.
     if (style.getText()) {
-      style.getText().setText(source.label);
+      style.getText().setText(source.text);
     }
     return style;
   });

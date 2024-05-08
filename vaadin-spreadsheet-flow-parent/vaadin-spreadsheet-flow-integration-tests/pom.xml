@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-spreadsheet-flow-parent</artifactId>
-        <version>24.1-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-spreadsheet-flow-integration-tests</artifactId>
     <packaging>war</packaging>
     <name>Vaadin Spreadsheet Integration Tests</name>
+    <description>Vaadin Spreadsheet Integration Tests</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -158,6 +159,8 @@
                                 <include>vite.generated.ts</include>
                                 <include>types.d.ts</include>
                                 <include>tsconfig.json</include>
+                                <include>frontend/routes.tsx</include>
+                                <include>frontend/App.tsx</include>
                             </includes>
                         </fileset>
                         <fileset>
@@ -228,6 +231,5 @@
                 </plugins>
             </build>
         </profile>
-
     </profiles>
 </project>

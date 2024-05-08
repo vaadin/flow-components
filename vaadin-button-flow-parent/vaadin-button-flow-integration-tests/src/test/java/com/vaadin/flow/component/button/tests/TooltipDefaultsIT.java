@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,32 +26,30 @@ import com.vaadin.flow.testutil.TestPath;
 @TestPath("vaadin-button/tooltip-defaults")
 public class TooltipDefaultsIT extends AbstractComponentIT {
 
-    private ButtonElement button;
+    private ButtonElement buttonWithTooltip;
 
     @Before
     public void init() {
         open();
-        button = $(ButtonElement.class).first();
+        buttonWithTooltip = $(ButtonElement.class).first();
     }
 
     @Test
-    public void checkTooltipConfig() {
-        Assert.assertEquals(500, getActiveFocusDelay(button));
-        Assert.assertEquals(100, getActiveHoverDelay(button));
+    public void changeDefaults_checkTooltipConfig() {
+        $("button").id("set-default-delays-to-2000").click();
+        Assert.assertEquals(2000, getActiveHideDelay(buttonWithTooltip));
+        Assert.assertEquals(2000, getActiveFocusDelay(buttonWithTooltip));
+        Assert.assertEquals(2000, getActiveHoverDelay(buttonWithTooltip));
     }
 
     @Test
-    public void dynamicallyChangeDefaults_checkTooltipConfig() {
-        button.click();
-        Assert.assertEquals(1000, getActiveHideDelay(button));
-    }
-
-    @Test
-    public void refreshBrowser_checkTooltipConfig() {
+    public void changeDefaults_refreshPage_checkTooltipConfig() {
+        $("button").id("set-default-delays-to-5000").click();
         getDriver().navigate().refresh();
-        button = $(ButtonElement.class).first();
-        Assert.assertEquals(500, getActiveFocusDelay(button));
-        Assert.assertEquals(100, getActiveHoverDelay(button));
+        buttonWithTooltip = $(ButtonElement.class).first();
+        Assert.assertEquals(5000, getActiveHideDelay(buttonWithTooltip));
+        Assert.assertEquals(5000, getActiveFocusDelay(buttonWithTooltip));
+        Assert.assertEquals(5000, getActiveHoverDelay(buttonWithTooltip));
     }
 
     private int getActiveFocusDelay(ButtonElement button) {

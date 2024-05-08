@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -332,6 +333,36 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
         clickButton("join-headers-01");
         assertHeaderOrder(25, 16, 17, 0, 1, 2, 3);
         assertFooterOrder(8, 9, 10, 11, 19, 18, 24);
+    }
+
+    @Test
+    public void prependMultipleHeaders_removeAllHeaders_columnOrderPreserved() {
+        grid = $(GridElement.class).id("grid2");
+        clickButton("prepend-header-2");
+        clickButton("prepend-header-2");
+        clickButton("prepend-header-2");
+        clickButton("remove-all-header-rows");
+
+        assertColumnOrderPreserved();
+    }
+
+    @Test
+    public void prependMultipleFooters_removeAllFooters_columnOrderPreserved() {
+        grid = $(GridElement.class).id("grid2");
+        clickButton("append-footer-2");
+        clickButton("append-footer-2");
+        clickButton("append-footer-2");
+        clickButton("remove-all-footer-rows");
+
+        assertColumnOrderPreserved();
+    }
+
+    private void assertColumnOrderPreserved() {
+        List<GridTHTDElement> cells = grid.getCells(0);
+        Assert.assertEquals(4, cells.size());
+        for (int i = 0; i < cells.size(); i++) {
+            Assert.assertEquals("Item 1-" + (i + 1), cells.get(i).getText());
+        }
     }
 
     private void assertHeaderHasGridSorter(int headerIndexFromTop) {

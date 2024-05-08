@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,6 +20,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Synchronize;
@@ -27,6 +28,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.ValidationUtil;
@@ -50,9 +52,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-big-decimal-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
+@Uses(TextField.class)
 public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         implements HasThemeVariant<TextFieldVariant> {
 
@@ -78,6 +81,10 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
                     : valueFromModel.toPlainString().replace('.',
                             field.getDecimalSeparator());
 
+    private boolean manualValidationEnabled = false;
+
+    private final CopyOnWriteArrayList<ValidationStatusChangeListener<BigDecimal>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
+
     /**
      * Constructs an empty {@code BigDecimalField}.
      */
@@ -93,8 +100,6 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
-
-        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -217,22 +222,43 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     @Override
     public void setValue(BigDecimal value) {
         BigDecimal oldValue = getValue();
+        boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
+        boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
+        boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
+        boolean isInputValuePresent = isInputValuePresent();
+
+        // When the value is cleared programmatically, reset hasInputValue
+        // so that the following validation doesn't treat this as bad input.
+        if (isNewValueEmpty) {
+            getElement().setProperty("_hasInputValue", false);
+        }
 
         super.setValue(value);
 
-        if (Objects.equals(oldValue, getEmptyValue())
-                && Objects.equals(value, getEmptyValue())
-                && isInputValuePresent()) {
+        if (isValueRemainedEmpty && isInputValuePresent) {
             // Clear the input element from possible bad input.
             getElement().executeJs("this._inputElementValue = ''");
-            getElement().setProperty("_hasInputValue", false);
-            fireEvent(new ClientValidatedEvent(this, false));
+            validate();
+            fireValidationStatusChangeEvent();
         } else {
             // Restore the input element's value in case it was cleared
             // in the above branch. That can happen when setValue(null)
             // and setValue(...) are subsequently called within one round-trip
             // and there was bad input.
             getElement().executeJs("this._inputElementValue = this.value");
+        }
+    }
+
+    @Override
+    protected void setModelValue(BigDecimal newModelValue, boolean fromClient) {
+        BigDecimal oldModelValue = getValue();
+
+        super.setModelValue(newModelValue, fromClient);
+
+        if (fromClient && valueEquals(oldModelValue, getEmptyValue())
+                && valueEquals(newModelValue, getEmptyValue())) {
+            validate();
+            fireValidationStatusChangeEvent();
         }
     }
 
@@ -247,24 +273,31 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         return super.getValue();
     }
 
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
+    }
+
     /**
      * Performs server-side validation of the current value. This is needed
      * because it is possible to circumvent the client-side validation
      * constraints using browser development tools.
      */
     protected void validate() {
-        BigDecimal value = getValue();
+        if (!this.manualValidationEnabled) {
+            BigDecimal value = getValue();
 
-        boolean isRequired = isRequiredIndicatorVisible();
-        ValidationResult requiredValidation = ValidationUtil
-                .checkRequired(isRequired, value, getEmptyValue());
+            boolean isRequired = isRequiredIndicatorVisible();
+            ValidationResult requiredValidation = ValidationUtil
+                    .checkRequired(isRequired, value, getEmptyValue());
 
-        setInvalid(
-                requiredValidation.isError() || checkValidity(value).isError());
+            setInvalid(requiredValidation.isError()
+                    || checkValidity(value).isError());
+        }
     }
 
     private ValidationResult checkValidity(BigDecimal value) {
-        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
+        boolean hasNonParsableValue = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
         if (hasNonParsableValue) {
             return ValidationResult.error("");
@@ -281,10 +314,21 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<BigDecimal> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<BigDecimal>(this,
-                                !isInvalid())));
+        return Registration.addAndRemove(validationStatusChangeListeners,
+                listener);
+    }
+
+    /**
+     * Notifies Binder that it needs to revalidate the component since the
+     * component's validity state may have changed. Note, there is no need to
+     * notify Binder separately in the case of a ValueChangeEvent, as Binder
+     * already listens to this event and revalidates automatically.
+     */
+    private void fireValidationStatusChangeEvent() {
+        ValidationStatusChangeEvent<BigDecimal> event = new ValidationStatusChangeEvent<>(
+                this, !isInvalid());
+        validationStatusChangeListeners
+                .forEach(listener -> listener.validationStatusChanged(event));
     }
 
     /**

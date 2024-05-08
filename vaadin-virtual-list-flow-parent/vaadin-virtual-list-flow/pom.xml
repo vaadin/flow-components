@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-virtual-list-flow-parent</artifactId>
-        <version>24.1-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-virtual-list-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Virtual List</name>
+    <description>Vaadin Virtual List</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

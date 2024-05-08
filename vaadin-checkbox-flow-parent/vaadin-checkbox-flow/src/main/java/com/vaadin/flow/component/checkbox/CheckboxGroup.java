@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,6 +18,7 @@ package com.vaadin.flow.component.checkbox;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -26,14 +27,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -42,15 +41,15 @@ import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
-import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
-import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -68,6 +67,7 @@ import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
@@ -84,15 +84,16 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "24.4.0-beta2")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
-        extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>> implements
-        HasClientValidation, HasDataView<T, Void, CheckboxGroupDataView<T>>,
-        HasHelper, HasItemComponents<T>, HasLabel, HasSize, HasStyle,
-        HasListDataView<T, CheckboxGroupListDataView<T>>, HasTooltip,
+        extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
+        implements HasAriaLabel, HasClientValidation,
+        HasDataView<T, Void, CheckboxGroupDataView<T>>, HasItemComponents<T>,
+        InputField<AbstractField.ComponentValueChangeEvent<CheckboxGroup<T>, Set<T>>, Set<T>>,
+        HasListDataView<T, CheckboxGroupListDataView<T>>,
         HasThemeVariant<CheckboxGroupVariant>, HasValidationProperties,
         HasValidator<Set<T>>, MultiSelect<CheckboxGroup<T>, T> {
 
@@ -103,11 +104,11 @@ public class CheckboxGroup<T>
     private final AtomicReference<DataProvider<T, ?>> dataProvider = new AtomicReference<>(
             DataProvider.ofItems());
 
-    private boolean isReadOnly;
-
     private SerializablePredicate<T> itemEnabledProvider = item -> isEnabled();
 
     private ItemLabelGenerator<T> itemLabelGenerator = String::valueOf;
+
+    private ItemHelperGenerator<T> itemHelperGenerator = item -> null;
 
     private ComponentRenderer<? extends Component, T> itemRenderer;
 
@@ -119,6 +120,10 @@ public class CheckboxGroup<T>
 
     private SerializableConsumer<UI> sizeRequest;
 
+    private boolean manualValidationEnabled = false;
+
+    private SelectionPreservationHandler<T> selectionPreservationHandler;
+
     /**
      * Creates an empty checkbox group
      */
@@ -129,7 +134,7 @@ public class CheckboxGroup<T>
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        initSelectionPreservationHandler();
     }
 
     /**
@@ -287,7 +292,8 @@ public class CheckboxGroup<T>
     @Override
     public CheckboxGroupListDataView<T> getListDataView() {
         return new CheckboxGroupListDataView<>(this::getDataProvider, this,
-                this::identifierProviderChanged, (filter, sorting) -> reset());
+                this::identifierProviderChanged,
+                (filter, sorting) -> rebuild());
     }
 
     /**
@@ -302,6 +308,54 @@ public class CheckboxGroup<T>
     public CheckboxGroupDataView<T> getGenericDataView() {
         return new CheckboxGroupDataView<>(this::getDataProvider, this,
                 this::identifierProviderChanged);
+    }
+
+    private void initSelectionPreservationHandler() {
+        selectionPreservationHandler = new SelectionPreservationHandler<>(
+                SelectionPreservationMode.DISCARD) {
+
+            @Override
+            public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
+                // NO-OP
+            }
+
+            @Override
+            public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
+                Map<Object, T> deselectionCandidateIdsToItems = getSelectedItems()
+                        .stream().collect(Collectors
+                                .toMap(item -> getItemId(item), item -> item));
+                @SuppressWarnings("unchecked")
+                Stream<T> itemsStream = getDataProvider()
+                        .fetch(DataViewUtils.getQuery(CheckboxGroup.this));
+                Set<Object> existingItemIds = itemsStream
+                        .map(item -> getItemId(item))
+                        .filter(deselectionCandidateIdsToItems::containsKey)
+                        .limit(deselectionCandidateIdsToItems.size())
+                        .collect(Collectors.toSet());
+                existingItemIds.forEach(deselectionCandidateIdsToItems::remove);
+                deselect(deselectionCandidateIdsToItems.values());
+            }
+
+            @Override
+            public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
+                clear();
+            }
+        };
+    }
+
+    private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
+        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent) {
+            T otherItem = ((DataChangeEvent.DataRefreshEvent<T>) dataChangeEvent)
+                    .getItem();
+            Object otherItemId = getItemId(otherItem);
+            getCheckboxItems().filter(
+                    item -> Objects.equals(getItemId(item.item), otherItemId))
+                    .findFirst().ifPresent(this::updateCheckbox);
+        } else {
+            keyMapper.removeAll();
+            selectionPreservationHandler.handleDataChange(dataChangeEvent);
+            rebuild();
+        }
     }
 
     private static class CheckBoxItem<T> extends Checkbox
@@ -320,28 +374,28 @@ public class CheckboxGroup<T>
         }
     }
 
-    private void setDataProvider(DataProvider<T, ?> dataProvider) {
+    /**
+     * Sets a generic data provider for the CheckboxGroup to use.
+     * <p>
+     * Use this method when none of the {@code setItems} methods are applicable,
+     * e.g. when having a data provider with filter that cannot be transformed
+     * to {@code DataProvider<T, Void>}.
+     *
+     * @param dataProvider
+     *            DataProvider instance to use, not <code>null</code>
+     */
+    public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
-        reset();
+        keyMapper.removeAll();
+        clear();
+        rebuild();
 
         if (dataProviderListenerRegistration != null) {
             dataProviderListenerRegistration.remove();
         }
         dataProviderListenerRegistration = dataProvider
-                .addDataProviderListener(event -> {
-                    if (event instanceof DataChangeEvent.DataRefreshEvent) {
-                        T otherItem = ((DataChangeEvent.DataRefreshEvent<T>) event)
-                                .getItem();
-                        this.getCheckboxItems()
-                                .filter(item -> Objects.equals(
-                                        getItemId(item.item),
-                                        getItemId(otherItem)))
-                                .findFirst().ifPresent(this::updateCheckbox);
-                    } else {
-                        reset();
-                    }
-                });
+                .addDataProviderListener(this::handleDataChange);
     }
 
     @Override
@@ -388,11 +442,16 @@ public class CheckboxGroup<T>
     }
 
     /**
-     * Gets the data provider.
+     * Gets the data provider used by this CheckboxGroup.
      *
-     * @return the data provider, not {@code null}
+     * <p>
+     * To get information and control over the items in the CheckboxGroup, use
+     * either {@link #getListDataView()} or {@link #getGenericDataView()}
+     * instead.
+     *
+     * @return the data provider used by this CheckboxGroup
      */
-    private DataProvider<T, ?> getDataProvider() {
+    public DataProvider<T, ?> getDataProvider() {
         // dataProvider reference won't have been initialized before
         // calling from CheckboxGroup constructor
         return Optional.ofNullable(dataProvider).map(AtomicReference::get)
@@ -401,26 +460,8 @@ public class CheckboxGroup<T>
 
     @Override
     public void onEnabledStateChanged(boolean enabled) {
-        if (isReadOnly()) {
-            setDisabled(true);
-        } else {
-            setDisabled(!enabled);
-        }
+        setDisabled(!enabled);
         getCheckboxItems().forEach(this::updateEnabled);
-    }
-
-    @Override
-    public void setReadOnly(boolean readOnly) {
-        isReadOnly = readOnly;
-        if (isEnabled()) {
-            setDisabled(readOnly);
-            refreshCheckboxes();
-        }
-    }
-
-    @Override
-    public boolean isReadOnly() {
-        return isReadOnly;
     }
 
     /**
@@ -479,6 +520,60 @@ public class CheckboxGroup<T>
     }
 
     /**
+     * Sets the {@link ItemHelperGenerator} that is used for generating helper
+     * text strings used by the checkbox group for each item.
+     *
+     * @since 24.4
+     * @see Checkbox#setHelperText(String)
+     * @see #setItemLabelGenerator
+     * @param itemHelperGenerator
+     *            the item helper generator to use, not null
+     */
+    public void setItemHelperGenerator(
+            ItemHelperGenerator<T> itemHelperGenerator) {
+        Objects.requireNonNull(itemHelperGenerator,
+                "The item helper generator can not be null");
+        this.itemHelperGenerator = itemHelperGenerator;
+        refreshCheckboxes();
+    }
+
+    /**
+     * Gets the {@link ItemHelperGenerator} function that is used for generating
+     * helper text strings used by the checkbox group for each item.
+     *
+     * @since 24.4
+     * @see #getItemLabelGenerator()
+     * @return the item helper generator, not null
+     */
+    public ItemHelperGenerator<T> getItemHelperGenerator() {
+        return itemHelperGenerator;
+    }
+
+    /**
+     * {@link ItemHelperGenerator} can be used to generate helper text strings
+     * used by the checkbox group for each checkbox.
+     *
+     * @since 24.4
+     * @see Checkbox#setHelperText(String)
+     * @param <T>
+     *            item type
+     */
+    @FunctionalInterface
+    public interface ItemHelperGenerator<T>
+            extends SerializableFunction<T, String> {
+
+        /**
+         * Gets a helper text string for the {@code item}.
+         *
+         * @param item
+         *            the item to get helper text for
+         * @return the helper text string for the item, not {@code null}
+         */
+        @Override
+        String apply(T item);
+    }
+
+    /**
      * Sets the label for the checkbox group.
      *
      * @param label
@@ -495,6 +590,27 @@ public class CheckboxGroup<T>
      */
     public String getLabel() {
         return getElement().getProperty("label");
+    }
+
+    @Override
+    public void setAriaLabel(String ariaLabel) {
+        getElement().setProperty("accessibleName", ariaLabel);
+    }
+
+    @Override
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
+    }
+
+    @Override
+    public void setAriaLabelledBy(String labelledBy) {
+        getElement().setProperty("accessibleNameRef", labelledBy);
+    }
+
+    @Override
+    public Optional<String> getAriaLabelledBy() {
+        return Optional
+                .ofNullable(getElement().getProperty("accessibleNameRef"));
     }
 
     /**
@@ -601,11 +717,36 @@ public class CheckboxGroup<T>
         refreshCheckboxItems();
     }
 
-    @SuppressWarnings("unchecked")
-    private void reset() {
-        keyMapper.removeAll();
-        clear();
+    /**
+     * Sets the selection preservation mode. Determines what happens with the
+     * selection when {@link DataProvider#refreshAll} is called. The selection
+     * is discarded in any case when a new data provider is set. The default is
+     * {@link SelectionPreservationMode#DISCARD}.
+     *
+     * @param selectionPreservationMode
+     *            the selection preservation mode to switch to, not {@code null}
+     *
+     * @see SelectionPreservationMode
+     */
+    public void setSelectionPreservationMode(
+            SelectionPreservationMode selectionPreservationMode) {
+        selectionPreservationHandler
+                .setSelectionPreservationMode(selectionPreservationMode);
+    }
 
+    /**
+     * Gets the selection preservation mode.
+     *
+     * @return the selection preservation mode
+     *
+     * @see #setSelectionPreservationMode(SelectionPreservationMode)
+     */
+    public SelectionPreservationMode getSelectionPreservationMode() {
+        return selectionPreservationHandler.getSelectionPreservationMode();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void rebuild() {
         synchronized (dataProvider) {
             // Cache helper component before removal
             Component helperComponent = getHelperComponent();
@@ -670,6 +811,13 @@ public class CheckboxGroup<T>
         } else {
             checkbox.setLabelComponent(
                     getItemRenderer().createComponent(checkbox.item));
+        }
+
+        String helper = itemHelperGenerator.apply(checkbox.item);
+        if (helper != null) {
+            checkbox.setHelperText(helper);
+        } else if (checkbox.getHelperText() != null) {
+            checkbox.setHelperText(null);
         }
 
         checkbox.setValue(getValue().stream().anyMatch(
@@ -752,20 +900,19 @@ public class CheckboxGroup<T>
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 
-    protected void validate() {
-        boolean isRequired = isRequiredIndicatorVisible();
-        boolean isInvalid = ValidationUtil
-                .checkRequired(isRequired, getValue(), getEmptyValue())
-                .isError();
-
-        setInvalid(isInvalid);
+    @Override
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
     }
 
-    @Override
-    public Registration addValidationStatusChangeListener(
-            ValidationStatusChangeListener<Set<T>> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<>(this, !isInvalid())));
+    protected void validate() {
+        if (!this.manualValidationEnabled) {
+            boolean isRequired = isRequiredIndicatorVisible();
+            boolean isInvalid = ValidationUtil
+                    .checkRequired(isRequired, getValue(), getEmptyValue())
+                    .isError();
+
+            setInvalid(isInvalid);
+        }
     }
 }

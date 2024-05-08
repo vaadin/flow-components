@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-radio-button-flow-parent</artifactId>
-        <version>24.1-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-radio-button-flow</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Radio Button</name>
+    <description>Vaadin Radio Button</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,13 +22,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.tabs.TabSheetVariant;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.server.VaadinSession;
 
 /**
  * @author Vaadin Ltd.
@@ -38,10 +42,18 @@ public class TabSheetTest {
     private TabSheet tabSheet;
     private Tabs tabs;
 
+    private UI ui;
+
     @Before
     public void setup() {
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui = new UI();
+        ui.getInternals().setSession(session);
+
         tabSheet = new TabSheet();
         tabs = (Tabs) tabSheet.getChildren().findFirst().get();
+
+        ui.getElement().appendChild(tabSheet.getElement());
     }
 
     @Test
@@ -52,13 +64,26 @@ public class TabSheetTest {
     @Test
     public void addTab_assignsTabId() {
         var tab = tabSheet.add("Tab 0", new Span("Content 0"));
+        flushBeforeClientResponse();
         Assert.assertTrue(tab.getId().isPresent());
+    }
+
+    @Test
+    public void addTab_assignsCustomTabId() {
+        var content = new Span("Content 0");
+        var tab = tabSheet.add("Tab 0", content);
+        tab.setId("customId");
+
+        flushBeforeClientResponse();
+        Assert.assertEquals("customId",
+                content.getElement().getAttribute("tab"));
     }
 
     @Test
     public void addTab_assignsContentTab() {
         var content = new Span("Content 0");
         var tab = tabSheet.add("Tab 0", content);
+        flushBeforeClientResponse();
         Assert.assertEquals(tab.getId().get(),
                 content.getElement().getAttribute("tab"));
     }
@@ -436,5 +461,58 @@ public class TabSheetTest {
         tabSheet.setSelectedIndex(0);
 
         Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void getTab_returnsTab() {
+        var content0 = new Span("Content 0");
+        var content1 = new Span("Content 1");
+        var tab0 = tabSheet.add("Tab 0", content0);
+        var tab1 = tabSheet.add("Tab 1", content1);
+        Assert.assertEquals(tab0, tabSheet.getTab(content0));
+        Assert.assertEquals(tab1, tabSheet.getTab(content1));
+    }
+
+    @Test
+    public void getTab_unknownComponent_returnsNull() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+
+        Assert.assertNull(tabSheet.getTab(new Span("Content Unknown")));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void getTab_nullComponent_throws() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+
+        tabSheet.getTab(null);
+    }
+
+    @Test
+    public void getComponent_returnsComponent() {
+        var content0 = new Span("Content 0");
+        var content1 = new Span("Content 1");
+        var tab0 = tabSheet.add("Tab 0", content0);
+        var tab1 = tabSheet.add("Tab 1", content1);
+        Assert.assertEquals(content0, tabSheet.getComponent(tab0));
+        Assert.assertEquals(content1, tabSheet.getComponent(tab1));
+    }
+
+    @Test
+    public void getComponent_unknownTab_returnsNull() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+
+        Assert.assertNull(tabSheet.getComponent(new Tab("Tab 1")));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void getComponent_nullTab_throws() {
+        tabSheet.add("Tab 0", new Span("Content 0"));
+
+        tabSheet.getComponent(null);
+    }
+
+    private void flushBeforeClientResponse() {
+        UIInternals internals = ui.getInternals();
+        internals.getStateTree().runExecutionsBeforeClientResponse();
     }
 }

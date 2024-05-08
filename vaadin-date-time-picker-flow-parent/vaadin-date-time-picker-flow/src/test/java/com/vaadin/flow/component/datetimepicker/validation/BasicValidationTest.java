@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,11 +15,13 @@
  */
 package com.vaadin.flow.component.datetimepicker.validation;
 
+import java.time.LocalDateTime;
+
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class BasicValidationTest
-        extends AbstractBasicValidationTest<DateTimePicker> {
+        extends AbstractBasicValidationTest<DateTimePicker, LocalDateTime> {
     protected DateTimePicker createTestField() {
         return new DateTimePicker();
     }

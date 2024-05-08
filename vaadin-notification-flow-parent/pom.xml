@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>24.1-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-notification-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Notification Parent</name>
+    <description>Vaadin Notification Parent</description>
     <modules>
         <module>vaadin-notification-flow</module>
         <module>vaadin-notification-testbench</module>

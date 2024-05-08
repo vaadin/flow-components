@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -68,12 +68,12 @@ public class DetachReattachIT extends AbstractComponentIT {
         grid.getCell(1, 0).click();
 
         Assert.assertTrue("Item details are visible on cell click by default.",
-                grid.findElement(By.tagName("span")).isDisplayed());
+                grid.findElement(By.className("item-details")).isDisplayed());
 
         grid.getCell(1, 0).click();
 
         Assert.assertEquals("Item details are hidden on subsequent cell click.",
-                0, grid.findElements(By.tagName("span")).size());
+                0, grid.findElements(By.className("item-details")).size());
 
         // Do not show details on click
         $("button").id("toggle-details-visible-click-button").click();
@@ -81,7 +81,7 @@ public class DetachReattachIT extends AbstractComponentIT {
         grid.getCell(1, 0).click();
         Assert.assertEquals(
                 "Item details are hidden with setDetailsVisibleOnClick(false).",
-                0, grid.findElements(By.tagName("span")).size());
+                0, grid.findElements(By.className("item-details")).size());
 
         // Detach and re-attach
         $("button").id("detach-button").click();
@@ -93,7 +93,18 @@ public class DetachReattachIT extends AbstractComponentIT {
         grid.getCell(1, 0).click();
         Assert.assertEquals(
                 "Item details are still hidden after detach and re-attach.", 0,
-                grid.findElements(By.tagName("span")).size());
+                grid.findElements(By.className("item-details")).size());
+    }
+
+    @Test
+    public void detachAndReattach_componentRenderersRestored() {
+        open();
+        GridElement grid = $(GridElement.class).first();
+        Assert.assertEquals("Component A", grid.getCell(0, 1).getText());
+
+        $("button").id("detach-and-reattach-button").click();
+        grid = $(GridElement.class).first();
+        Assert.assertEquals("Component A", grid.getCell(0, 1).getText());
     }
 
     @Test
@@ -113,5 +124,97 @@ public class DetachReattachIT extends AbstractComponentIT {
         // Check that there are no new exceptions/errors thrown
         // after re-attaching the grid when sorting is reset
         checkLogsForErrors();
+    }
+
+    @Test
+    public void selectAndDetach_reAttach_noErrorIsThrown() {
+        open();
+
+        clickElementWithJs("select-and-detach-button");
+
+        clickElementWithJs("attach-button");
+
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void setPageSizeAndDetach_reAttach_noErrorIsThrown() {
+        open();
+
+        clickElementWithJs("set-page-size-and-detach-button");
+
+        clickElementWithJs("attach-button");
+
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void setSelectionModeAndDetach_reAttach_noErrorIsThrown() {
+        open();
+
+        clickElementWithJs("set-selection-mode-and-detach-button");
+
+        clickElementWithJs("attach-button");
+
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void sortAndDetach_reAttach_noErrorIsThrown() {
+        open();
+
+        clickElementWithJs("sort-and-detach-button");
+
+        clickElementWithJs("attach-button");
+
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void hideGridAndChangeMode_detachAndReattach_noErrorIsThrown() {
+        open();
+
+        $("button").id("hide-grid-button").click();
+        $("button").id("selection-mode-none-button").click();
+        $("button").id("detach-and-reattach-button").click();
+        $("button").id("show-grid-button").click();
+
+        GridElement grid = $(GridElement.class).first();
+        // Click on the first cell on the first row
+        grid.getCell(0, 0).click();
+
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void detach_selectMultiple_reattach() {
+        open();
+
+        $("button").id("selection-mode-multi-button").click();
+        $("button").id("detach-button").click();
+        $("button").id("select-multiple-items-button").click();
+        $("button").id("attach-button").click();
+
+        GridElement grid = $(GridElement.class).first();
+        Assert.assertTrue(grid.getRow(0).isSelected());
+        Assert.assertTrue(grid.getRow(1).isSelected());
+    }
+
+    @Test
+    public void sort_detachAndAttach_sortDirectionPreserved() {
+        open();
+
+        GridElement grid = $(GridElement.class).first();
+        var sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter").first();
+        sorter.click();
+        var direction = sorter.getProperty("direction");
+        Assert.assertNotNull(direction);
+
+        $("button").id("detach-and-reattach-button").click();
+        $("button").id("detach-and-reattach-button").click();
+
+        grid = $(GridElement.class).first();
+        sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter").first();
+        Assert.assertEquals(direction, sorter.getProperty("direction"));
     }
 }

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -83,8 +83,8 @@ export function synchronizeText(target, source, context) {
   target.setScale(source.scale);
   target.setRotation(source.rotation);
   target.setRotateWithView(source.rotateWithView);
-  target.setTextAlign(convertEnumValue(source.textAlign));
-  target.setTextBaseline(convertEnumValue(source.textBaseline));
+  target.setTextAlign(source.textAlign ? convertEnumValue(source.textAlign) : undefined);
+  target.setTextBaseline(source.textBaseline ? convertEnumValue(source.textBaseline) : undefined);
   target.setFill(source.fill ? context.lookup.get(source.fill) : undefined);
   target.setStroke(source.stroke ? context.lookup.get(source.stroke) : undefined);
   target.setBackgroundFill(source.backgroundFill ? context.lookup.get(source.backgroundFill) : undefined);

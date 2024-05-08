@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -50,10 +50,31 @@ public class LitRendererPage extends Div {
         setSimpleLitRendererButton.setId("setSimpleLitRendererButton");
         add(setSimpleLitRendererButton);
 
+        NativeButton setCheckboxRenderer = new NativeButton(
+                "Set LitRenderer with checkbox", e -> {
+                    component.setRenderer(LitRenderer.<String> of(
+                            "<input type='checkbox' .checked='${live(item.checked)}'>")
+                            .withProperty("checked", "2"::equals));
+                });
+        setCheckboxRenderer.setId("setCheckboxRenderer");
+        add(setCheckboxRenderer);
+
         NativeButton removeRendererButton = new NativeButton("Remove renderer",
                 e -> component.setRenderer(null));
         removeRendererButton.setId("removeRendererButton");
         add(removeRendererButton);
+
+        NativeButton longRefreshButton = new NativeButton("Long data refresh",
+                e -> {
+                    try {
+                        // Simulate heavy work
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ignored) { // NOSONAR
+                    }
+                    component.setItems(Arrays.asList("0", "1", "2", "3", "4"));
+                });
+        longRefreshButton.setId("longRefreshButton");
+        add(longRefreshButton);
 
         add(new Div(new Text("Details:")));
 
@@ -74,7 +95,6 @@ public class LitRendererPage extends Div {
                 });
         toggleAttachedButton.setId("toggleAttachedButton");
         add(toggleAttachedButton);
-
     }
 
     private void setLitRenderer(LitRendererTestComponent component) {

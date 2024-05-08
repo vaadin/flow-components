@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -38,15 +38,6 @@ public class RecalculateColumnWidthsPage extends VerticalLayout {
         grid1.addColumn(item -> item.c).setAutoWidth(true);
 
         add(grid1);
-
-        // Ensure _recalculateColumnWidthOnceLoadingFinished flag is cleared,
-        // otherwise the flag would trigger the column recalculation
-        // automatically when refreshing the data
-        // The web component has some flaky behaviour where the flag is not
-        // always cleared after the initial data load
-        // See https://github.com/vaadin/web-components/issues/268
-        grid1.getElement().executeJs(
-                "$0._recalculateColumnWidthOnceLoadingFinished = false");
 
         Button button = new Button("Add Text");
         button.setId("change-data-button");

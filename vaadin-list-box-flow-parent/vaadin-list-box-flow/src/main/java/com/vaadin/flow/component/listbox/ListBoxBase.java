@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -42,6 +41,7 @@ import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
+import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataChangeEvent.DataRefreshEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -67,9 +67,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-list-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/list-box", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/list-box", version = "24.4.0-beta2")
 @JsModule("@vaadin/list-box/src/vaadin-list-box.js")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>
         extends AbstractSinglePropertyField<C, VALUE>
@@ -98,7 +98,17 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
                 presentationToModel, modelToPresentation);
     }
 
-    private void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
+    /**
+     * Sets a generic data provider for the ListBox to use.
+     * <p>
+     * Use this method when none of the {@code setItems} methods are applicable,
+     * e.g. when having a data provider with filter that cannot be transformed
+     * to {@code DataProvider<T, Void>}.
+     *
+     * @param dataProvider
+     *            DataProvider instance to use, not <code>null</code>
+     */
+    public void setDataProvider(DataProvider<ITEM, ?> dataProvider) {
         this.dataProvider.set(Objects.requireNonNull(dataProvider));
         DataViewUtils.removeComponentFilterAndSortComparator(this);
         clear();
@@ -111,14 +121,16 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
             dataProviderListenerRegistration.remove();
         }
         dataProviderListenerRegistration = dataProvider
-                .addDataProviderListener(event -> {
-                    if (event instanceof DataRefreshEvent) {
-                        refresh(((DataRefreshEvent<ITEM>) event).getItem());
-                    } else {
-                        clear();
-                        rebuild();
-                    }
-                });
+                .addDataProviderListener(this::handleDataChange);
+    }
+
+    void handleDataChange(DataChangeEvent<ITEM> event) {
+        if (event instanceof DataRefreshEvent) {
+            refresh(((DataRefreshEvent<ITEM>) event).getItem());
+        } else {
+            clear();
+            rebuild();
+        }
     }
 
     @Override
@@ -139,11 +151,15 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     }
 
     /**
-     * Gets the data provider.
+     * Gets the data provider used by this ListBox.
      *
-     * @return the data provider, not {@code null}
+     * <p>
+     * To get information and control over the items in the ListBox, use either
+     * {@link #getListDataView()} or {@link #getGenericDataView()} instead.
+     *
+     * @return the data provider used by this ListBox
      */
-    private DataProvider<ITEM, ?> getDataProvider() {
+    public DataProvider<ITEM, ?> getDataProvider() {
         return dataProvider.get();
     }
 
@@ -239,7 +255,7 @@ public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, V
     }
 
     @SuppressWarnings("unchecked")
-    private void rebuild() {
+    void rebuild() {
         removeAll();
 
         synchronized (dataProvider) {

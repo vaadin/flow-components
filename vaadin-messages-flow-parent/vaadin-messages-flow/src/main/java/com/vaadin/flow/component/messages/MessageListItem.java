@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -64,6 +64,7 @@ public class MessageListItem implements Serializable {
     private AbstractStreamResource imageResource;
 
     private Set<String> themeNames = new LinkedHashSet<>();
+    private Set<String> classNames = new LinkedHashSet<>();
 
     /**
      * Creates an empty message list item. Use the setter methods to configure
@@ -339,6 +340,52 @@ public class MessageListItem implements Serializable {
             return null;
         } else {
             return themeNames.stream().collect(Collectors.joining(" "));
+        }
+    }
+
+    /**
+     * Adds one or more class names to this item. Multiple class names can be
+     * specified by using multiple parameters.
+     *
+     * @param classNames
+     *            the class name or class names to be added to the item
+     */
+    public void addClassNames(String... classNames) {
+        this.classNames.addAll(Arrays.asList(classNames));
+        propsChanged();
+    }
+
+    /**
+     * Removes one or more class names from this item. Multiple class names can
+     * be specified by using multiple parameters.
+     *
+     * @param classNames
+     *            the class name or class names to be removed from the item
+     */
+    public void removeClassNames(String... classNames) {
+        this.classNames.removeAll(Arrays.asList(classNames));
+        propsChanged();
+    }
+
+    /**
+     * Checks if the message has the given class name.
+     *
+     * @param className
+     *            the class name to check for
+     * @return <code>true</code> if the message has the given class name,
+     *         <code>false</code> otherwise
+     */
+    public boolean hasClassName(String className) {
+        return classNames.contains(className);
+    }
+
+    // Used only for Jackson serialization
+    @JsonGetter
+    private String getClassName() {
+        if (classNames.isEmpty()) {
+            return null;
+        } else {
+            return classNames.stream().collect(Collectors.joining(" "));
         }
     }
 

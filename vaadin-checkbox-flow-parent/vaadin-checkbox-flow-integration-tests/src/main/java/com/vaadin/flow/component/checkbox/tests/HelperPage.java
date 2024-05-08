@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,8 +15,10 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
@@ -36,7 +38,42 @@ public class HelperPage extends Div {
         binder.bind(checkboxGroup, bean -> bean.choices,
                 (bean, value) -> bean.choices = value);
         binder.setBean(new Bean());
-        add(checkboxGroup);
+
+        CheckboxGroup<String> groupWithHelperGenerator = new CheckboxGroup<>();
+        groupWithHelperGenerator.setItems("A", "B", "C");
+        groupWithHelperGenerator
+                .setItemHelperGenerator(item -> item + " helper");
+        groupWithHelperGenerator.setId("cbg-helper-generator");
+
+        NativeButton clearItemHelperGenerator = new NativeButton(
+                "Clear helper generator", e -> groupWithHelperGenerator
+                        .setItemHelperGenerator(item -> null));
+        clearItemHelperGenerator.setId("clear-helper-generator");
+
+        Checkbox helperTextCheckbox = new Checkbox("Using helper text");
+        helperTextCheckbox.setHelperText("Helper text");
+        helperTextCheckbox.setId("checkbox-helper-text");
+
+        NativeButton emptyHelperText = new NativeButton("Clear helper text",
+                e -> helperTextCheckbox.setHelperText(""));
+        emptyHelperText.setId("empty-helper-text");
+
+        Checkbox helperComponentCheckbox = new Checkbox(
+                "Using helper component");
+        helperComponentCheckbox.setId("checkbox-helper-component");
+
+        Span helper = new Span("Helper component");
+        helper.setId("helper-component");
+        helperComponentCheckbox.setHelperComponent(helper);
+
+        NativeButton emptyHelperComponent = new NativeButton(
+                "Clear helper component",
+                e -> helperComponentCheckbox.setHelperComponent(null));
+        emptyHelperComponent.setId("empty-helper-component");
+
+        add(checkboxGroup, groupWithHelperGenerator, clearItemHelperGenerator,
+                helperTextCheckbox, helperComponentCheckbox, emptyHelperText,
+                emptyHelperComponent);
     }
 
     public static class Bean {

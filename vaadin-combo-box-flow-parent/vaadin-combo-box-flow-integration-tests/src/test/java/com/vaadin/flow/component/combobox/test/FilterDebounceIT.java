@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -54,6 +54,32 @@ public class FilterDebounceIT extends AbstractComboBoxIT {
         waitForExpectedItems();
         tabOutAndBackFromCombo();
         waitForExpectedItems();
+    }
+
+    @Test
+    public void withInitialFilter_clearAndReapplyFilter_doesNotHang() {
+        combo.sendKeys("a");
+        waitForExpectedItems();
+        combo.sendKeys(Keys.BACK_SPACE);
+        combo.sendKeys("a");
+        waitForExpectedItems();
+    }
+
+    @Test
+    public void withInitialFilter_updateAndReapplyFilter_doesNotHang() {
+        combo.sendKeys("a");
+        waitForExpectedItems();
+        combo.sendKeys("b");
+        combo.sendKeys(Keys.BACK_SPACE);
+        waitForExpectedItems();
+    }
+
+    public void withoutInitialFilter_updateAndClearFilter_doesNotHang() {
+        combo.openPopup();
+        waitForItems(combo, items -> items.size() == 3);
+        combo.sendKeys("a");
+        combo.sendKeys(Keys.BACK_SPACE);
+        waitForItems(combo, items -> items.size() == 3);
     }
 
     private void tabOutAndBackFromCombo() {

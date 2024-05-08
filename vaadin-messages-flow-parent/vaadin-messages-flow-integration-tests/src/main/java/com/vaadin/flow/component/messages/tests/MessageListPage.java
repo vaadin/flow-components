@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -53,6 +53,8 @@ public class MessageListPage extends Div {
         addButton("setUserColorIndex", () -> foo.setUserColorIndex(2));
         addButton("addThemeNames", () -> foo.addThemeNames("foo", "bar"));
         addButton("removeThemeNames", () -> foo.removeThemeNames("foo", "bar"));
+        addButton("addClassNames", () -> foo.addClassNames("urgent", "pinned"));
+        addButton("removeClassNames", () -> foo.removeClassNames("urgent"));
 
         addButton("setItems", () -> messageList
                 .setItems(new MessageListItem(null, null, "sender3")));

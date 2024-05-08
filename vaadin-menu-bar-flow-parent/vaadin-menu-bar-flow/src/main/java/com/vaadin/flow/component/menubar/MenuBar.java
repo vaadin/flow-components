@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,7 +18,6 @@ package com.vaadin.flow.component.menubar;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -28,7 +27,6 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.contextmenu.HasMenuItems;
@@ -56,13 +54,13 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-menu-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "24.1.0-alpha8")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/menu-bar", version = "24.4.0-beta2")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.4.0-beta2")
 public class MenuBar extends Component
         implements HasEnabled, HasMenuItems, HasOverlayClassName, HasSize,
         HasStyle, HasThemeVariant<MenuBarVariant> {
@@ -210,7 +208,7 @@ public class MenuBar extends Component
      */
     public MenuItem addItem(String text, String tooltipText) {
         var item = addItem(text);
-        setTooltip(item, tooltipText);
+        setTooltipText(item, tooltipText);
         return item;
     }
 
@@ -235,7 +233,7 @@ public class MenuBar extends Component
      */
     public MenuItem addItem(Component component, String tooltipText) {
         var item = addItem(component);
-        setTooltip(item, tooltipText);
+        setTooltipText(item, tooltipText);
         return item;
     }
 
@@ -264,7 +262,7 @@ public class MenuBar extends Component
     public MenuItem addItem(String text, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
         var item = addItem(text, clickListener);
-        setTooltip(item, tooltipText);
+        setTooltipText(item, tooltipText);
         return item;
     }
 
@@ -293,7 +291,7 @@ public class MenuBar extends Component
     public MenuItem addItem(Component component, String tooltipText,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
         var item = addItem(component, clickListener);
-        setTooltip(item, tooltipText);
+        setTooltipText(item, tooltipText);
         return item;
     }
 
@@ -364,6 +362,30 @@ public class MenuBar extends Component
      */
     public boolean isOpenOnHover() {
         return getElement().getProperty("openOnHover", false);
+    }
+
+    /**
+     * Sets reverse collapse order for the menu bar.
+     *
+     * @param reverseCollapseOrder
+     *            If {@code true}, the buttons will be collapsed into the
+     *            overflow menu starting from the "start" end of the bar instead
+     *            of the "end".
+     */
+    public void setReverseCollapseOrder(boolean reverseCollapseOrder) {
+        getElement().setProperty("reverseCollapse", reverseCollapseOrder);
+    }
+
+    /**
+     * Gets whether the menu bar uses reverse collapse order.
+     *
+     * @return {@code true} if the buttons will be collapsed into the overflow
+     *         menu starting from the "start" end of the bar instead of the
+     *         "end".
+     *
+     */
+    public boolean isReverseCollapseOrder() {
+        return getElement().getProperty("reverseCollapse", false);
     }
 
     /**
@@ -492,11 +514,14 @@ public class MenuBar extends Component
     }
 
     /**
-     * Sets the tooltip property for the given menu item. A vaadin-tooltip
-     * element with a custom generator is created and added inside the menu bar
-     * in case it doesn't exist.
+     * Sets the tooltip text for the given {@link MenuItem}.
+     *
+     * @param item
+     *            the menu item to set the tooltip for
+     * @param tooltipText
+     *            the tooltip text to set for the item
      */
-    private void setTooltip(MenuItem item, String tooltipText) {
+    public void setTooltipText(MenuItem item, String tooltipText) {
         if (!getElement().getChildren().anyMatch(
                 child -> "tooltip".equals(child.getAttribute("slot")))) {
             // No <vaadin-tooltip> yet added, add one
@@ -512,5 +537,12 @@ public class MenuBar extends Component
         }
 
         item.getElement().setProperty("tooltip", tooltipText);
+    }
+
+    /**
+     * Closes the current submenu.
+     */
+    public void close() {
+        getElement().callJsFunction("close");
     }
 }

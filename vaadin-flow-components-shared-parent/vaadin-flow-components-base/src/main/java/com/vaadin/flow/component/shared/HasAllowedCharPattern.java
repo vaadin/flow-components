@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,8 +27,10 @@ import com.vaadin.flow.component.HasElement;
 public interface HasAllowedCharPattern extends HasElement {
 
     /**
-     * A regular expression that the user input is checked against. The allowed
-     * pattern must matches a single character, not the sequence of characters.
+     * A regular expression that is used on the client-side to determine which
+     * characters the user is allowed to type into the field. Each typed
+     * character is matched individually against this expression, and only added
+     * to the input if it matches.
      *
      * @return the {@code allowedCharPattern} property
      */
@@ -37,9 +39,12 @@ public interface HasAllowedCharPattern extends HasElement {
     }
 
     /**
-     * Sets a regular expression for the user input to pass on the client-side.
-     * The allowed char pattern must be a valid JavaScript Regular Expression
-     * that matches a single character, not the sequence of characters.
+     * Sets a regular expression that is used on the client-side to determine
+     * which characters the user is allowed to type into the field. Each typed
+     * character is matched individually against this expression, and only added
+     * to the input if it matches. The allowed char pattern must be a valid
+     * JavaScript Regular Expression that matches a single character, not the
+     * sequence of characters.
      * <p>
      * For example, to allow entering only numbers and slash character, use
      * {@code setAllowedCharPattern("[0-9/]")}`.

@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -17,6 +17,7 @@ import com.vaadin.flow.component.map.configuration.geometry.Point;
 import com.vaadin.flow.component.map.configuration.style.Icon;
 import com.vaadin.flow.component.map.configuration.style.Style;
 
+import java.beans.PropertyChangeListener;
 import java.util.Objects;
 
 /**
@@ -30,13 +31,27 @@ import java.util.Objects;
  */
 public class MarkerFeature extends PointBasedFeature {
 
+    static class StaticIcon extends Icon {
+
+        public StaticIcon(Options options) {
+            super(options);
+        }
+
+        @Override
+        protected void addPropertyChangeListener(
+                PropertyChangeListener listener) {
+            // Do not add listeners to static icons to avoid memory leaks
+        }
+    }
+
     /**
      * The default icon used for markers, which is a pin pointing at a location
-     * on the map
+     * on the map. This is a static icon and does not support customization.
      */
     public static final Icon PIN_ICON;
     /**
-     * An alternative icon that displays a point
+     * An alternative icon that displays a point. This is a static icon and does
+     * not support customization.
      */
     public static final Icon POINT_ICON;
 
@@ -51,7 +66,7 @@ public class MarkerFeature extends PointBasedFeature {
         // Move image slightly downwards to compensate for whitespace at
         // the bottom of the image
         pinIconOptions.setAnchor(new Icon.Anchor(0.5f, 0.12f));
-        PIN_ICON = new Icon(pinIconOptions);
+        PIN_ICON = new StaticIcon(pinIconOptions);
 
         Icon.ImageSize pointImageSize = new Icon.ImageSize(
                 Assets.POINT.getWidth(), Assets.POINT.getHeight());
@@ -61,7 +76,7 @@ public class MarkerFeature extends PointBasedFeature {
         pointIconOptions.setScale(0.25f);
         pointIconOptions.setAnchorOrigin(Icon.AnchorOrigin.TOP_LEFT);
         pointIconOptions.setAnchor(new Icon.Anchor(0.5f, 0.5f));
-        POINT_ICON = new Icon(pointIconOptions);
+        POINT_ICON = new StaticIcon(pointIconOptions);
     }
 
     /**

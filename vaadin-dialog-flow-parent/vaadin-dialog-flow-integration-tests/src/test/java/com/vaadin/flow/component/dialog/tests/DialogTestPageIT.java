@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -63,9 +63,8 @@ public class DialogTestPageIT extends AbstractComponentIT {
 
         Assert.assertEquals("The open state of the dialog is true",
                 message.getText());
-        Assert.assertEquals(
-                "There should not be initial events before opening the dialog",
-                "Number of event is 0", eventCounterMessage.getText());
+        Assert.assertEquals("There should one event from opening the dialog",
+                "Number of events is 1", eventCounterMessage.getText());
         Assert.assertEquals("The event came from server",
                 eventSourceMessage.getText());
 
@@ -76,7 +75,7 @@ public class DialogTestPageIT extends AbstractComponentIT {
         checkDialogIsClosed();
         Assert.assertEquals("The open state of the dialog is false",
                 message.getText());
-        Assert.assertEquals("Number of event is 1",
+        Assert.assertEquals("Number of events is 2",
                 eventCounterMessage.getText());
         Assert.assertEquals("The event came from server",
                 eventSourceMessage.getText());

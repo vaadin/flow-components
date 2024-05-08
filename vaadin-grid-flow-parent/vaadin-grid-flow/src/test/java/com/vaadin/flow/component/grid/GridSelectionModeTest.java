@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,7 +19,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel;
 import com.vaadin.flow.component.grid.GridNoneSelectionModel;
 import com.vaadin.flow.component.grid.GridSingleSelectionModel;
@@ -68,4 +67,14 @@ public class GridSelectionModeTest {
         grid.setSelectionMode(null);
     }
 
+    @Test
+    public void testGetSelectionMode() {
+        Assert.assertEquals(SelectionMode.SINGLE, grid.getSelectionMode());
+
+        grid.setSelectionMode(SelectionMode.MULTI);
+        Assert.assertEquals(SelectionMode.MULTI, grid.getSelectionMode());
+
+        grid.setSelectionMode(SelectionMode.NONE);
+        Assert.assertEquals(SelectionMode.NONE, grid.getSelectionMode());
+    }
 }

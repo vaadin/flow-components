@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -120,6 +120,9 @@ public final class LumoUtility {
         public static final String ERROR_50 = "bg-error-50";
         public static final String ERROR_10 = "bg-error-10";
 
+        public static final String WARNING = "bg-warning";
+        public static final String WARNING_10 = "bg-warning-10";
+
         public static final String SUCCESS = "bg-success";
         public static final String SUCCESS_50 = "bg-success-50";
         public static final String SUCCESS_10 = "bg-success-10";
@@ -171,6 +174,10 @@ public final class LumoUtility {
         public static final String ERROR = "border-error";
         public static final String ERROR_50 = "border-error-50";
         public static final String ERROR_10 = "border-error-10";
+
+        public static final String WARNING = "border-warning";
+        public static final String WARNING_10 = "border-warning-10";
+        public static final String WARNING_STRONG = "border-warning-strong";
 
         public static final String SUCCESS = "border-success";
         public static final String SUCCESS_50 = "border-success-50";
@@ -1351,6 +1358,9 @@ public final class LumoUtility {
 
         public static final String ERROR = "text-error";
         public static final String ERROR_CONTRAST = "text-error-contrast";
+
+        public static final String WARNING = "text-warning";
+        public static final String WARNING_CONTRAST = "text-warning-contrast";
 
         public static final String SUCCESS = "text-success";
         public static final String SUCCESS_CONTRAST = "text-success-contrast";

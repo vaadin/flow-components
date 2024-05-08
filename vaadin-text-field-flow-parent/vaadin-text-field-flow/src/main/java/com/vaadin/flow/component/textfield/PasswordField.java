@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,11 +24,8 @@ import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
-import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.shared.Registration;
 
 /**
  * Password Field is an input field for entering passwords. The input is masked
@@ -38,9 +35,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-password-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/password-field", version = "24.1.0-alpha8")
+@NpmPackage(value = "@vaadin/password-field", version = "24.4.0-beta2")
 @JsModule("@vaadin/password-field/src/vaadin-password-field.js")
 public class PasswordField extends TextFieldBase<PasswordField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
@@ -48,6 +45,8 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     private boolean isConnectorAttached;
 
     private TextFieldValidationSupport validationSupport;
+
+    private boolean manualValidationEnabled = false;
 
     /**
      * Constructs an empty {@code PasswordField}.
@@ -78,8 +77,6 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
-
-        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -315,12 +312,8 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     }
 
     @Override
-    public Registration addValidationStatusChangeListener(
-            ValidationStatusChangeListener<String> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<String>(this,
-                                !isInvalid())));
+    public void setManualValidation(boolean enabled) {
+        this.manualValidationEnabled = enabled;
     }
 
     /**
@@ -329,7 +322,9 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
      * constraints using browser development tools.
      */
     protected void validate() {
-        setInvalid(getValidationSupport().isInvalid(getValue()));
+        if (!this.manualValidationEnabled) {
+            setInvalid(getValidationSupport().isInvalid(getValue()));
+        }
     }
 
     @Override

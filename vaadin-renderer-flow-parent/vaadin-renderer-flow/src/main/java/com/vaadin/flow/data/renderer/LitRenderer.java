@@ -1,6 +1,6 @@
 
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -41,6 +41,7 @@ import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
+import elemental.json.JsonObject;
 
 /**
  * LitRenderer is a {@link Renderer} that uses a Lit-based template literal to
@@ -201,8 +202,9 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                     SerializableBiConsumer<SOURCE, JsonArray> handler = clientCallables
                             .get(handlerName);
                     SOURCE item = keyMapper.get(itemKey);
-
-                    handler.accept(item, args);
+                    if (item != null) {
+                        handler.accept(item, args);
+                    }
                 });
 
         JsonArray clientCallablesArray = JsonUtils
@@ -223,8 +225,10 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                     returnChannel, clientCallablesArray, propertyNamespace);
         }));
         // Call once initially
-        setElementRenderer(container, rendererName, getTemplateExpression(),
-                returnChannel, clientCallablesArray, propertyNamespace);
+        if (container.getNode().isAttached()) {
+            setElementRenderer(container, rendererName, getTemplateExpression(),
+                    returnChannel, clientCallablesArray, propertyNamespace);
+        }
 
         // Get the renderer function cleared when the LitRenderer is
         // unregistered
@@ -236,17 +240,23 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     }
 
     private DataGenerator<SOURCE> createDataGenerator() {
-        return (item, jsonObject) -> {
-            valueProviders.forEach((key, provider) -> {
-                jsonObject.put(
-                        // Prefix the property name with a LitRenderer
-                        // instance specific namespace to avoid property
-                        // name clashes.
-                        // Fixes https://github.com/vaadin/flow/issues/8629
-                        // in LitRenderer
-                        propertyNamespace + key,
-                        JsonSerializer.toJson(provider.apply(item)));
-            });
+        // Use an anonymous class instead of Lambda to prevent potential
+        // deserialization issues when used with Grid
+        // see https://github.com/vaadin/flow-components/issues/6256
+        return new DataGenerator<SOURCE>() {
+            @Override
+            public void generateData(SOURCE item, JsonObject jsonObject) {
+                valueProviders.forEach((key, provider) -> {
+                    jsonObject.put(
+                            // Prefix the property name with a LitRenderer
+                            // instance specific namespace to avoid property
+                            // name clashes.
+                            // Fixes https://github.com/vaadin/flow/issues/8629
+                            // in LitRenderer
+                            propertyNamespace + key,
+                            JsonSerializer.toJson(provider.apply(item)));
+                });
+            }
         };
     }
 

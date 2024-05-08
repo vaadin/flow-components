@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -252,6 +252,9 @@ public class LoginI18n implements Serializable {
         private String title;
         private String message;
 
+        private String username;
+        private String password;
+
         /**
          * @return current value for the title property
          */
@@ -280,6 +283,40 @@ public class LoginI18n implements Serializable {
          */
         public void setMessage(String message) {
             this.message = message;
+        }
+
+        /**
+         * @return current value for the username property
+         */
+        public String getUsername() {
+            return username;
+        }
+
+        /**
+         * Sets the error message for the username field
+         *
+         * @param username
+         *            new value for the username property
+         */
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        /**
+         * @return current value for the password property
+         */
+        public String getPassword() {
+            return password;
+        }
+
+        /**
+         * Sets the error message for the password field
+         *
+         * @param password
+         *            new value for the password property
+         */
+        public void setPassword(String password) {
+            this.password = password;
         }
     }
 

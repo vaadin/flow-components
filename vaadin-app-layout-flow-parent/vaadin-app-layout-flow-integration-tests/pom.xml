@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-app-layout-flow-parent</artifactId>
-        <version>24.1-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-app-layout-integration-tests</artifactId>
     <packaging>war</packaging>
     <name>Vaadin App Layout Integration Tests</name>
+    <description>Vaadin App Layout Integration Tests</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -17,7 +18,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>2.0.7</version>
+            <version>2.0.13</version>
         </dependency>
         <dependency>
             <groupId>jakarta.servlet</groupId>
@@ -112,6 +113,8 @@
                                 <include>vite.generated.ts</include>
                                 <include>types.d.ts</include>
                                 <include>tsconfig.json</include>
+                                <include>frontend/routes.tsx</include>
+                                <include>frontend/App.tsx</include>
                             </includes>
                         </fileset>
                         <fileset>
@@ -182,6 +185,5 @@
                 </plugins>
             </build>
         </profile>
-
     </profiles>
 </project>

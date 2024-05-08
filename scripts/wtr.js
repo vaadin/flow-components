@@ -34,6 +34,18 @@ function runTests() {
     if (fs.existsSync(`${itFolder}/${wtrTestsFolderName}`)) {
       console.log(`Installing dependencies in ${itFolder}`);
 
+      // Set up an empty node_modules and package.json before running Flow build
+      // Those will get cleaned up by `flow:build-frontend` unless they existed
+      // before, but we need them for running web-test-runner
+      const nodeModules = `${itFolder}/node_modules`;
+      const packageJson = `${itFolder}/package.json`;
+      if (!fs.existsSync(nodeModules)) {
+        fs.mkdirSync(nodeModules);
+      }
+      if (!fs.existsSync(packageJson)) {
+        fs.writeFileSync(packageJson, '{}');
+      }
+
       // Install the IT module dependencies
       execSync(`mvn -DskipTests flow:prepare-frontend flow:build-frontend`, {
         cwd: itFolder,
@@ -41,7 +53,13 @@ function runTests() {
       });
 
       // Install dependencies required to run the web-test-runner tests
-      execSync(`npm install @open-wc/testing @web/dev-server-esbuild @web/test-runner @web/test-runner-playwright sinon --save-dev`, {
+      execSync(`npm install @open-wc/testing @web/dev-server-esbuild @web/test-runner @web/test-runner-playwright @types/mocha sinon --save-dev`, {
+        cwd: itFolder,
+        stdio: 'inherit'
+      });
+
+      // Install Playwright Chromium
+      execSync(`npx playwright install chromium`, {
         cwd: itFolder,
         stdio: 'inherit'
       });

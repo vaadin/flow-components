@@ -4,11 +4,12 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>24.1-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-context-menu-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Context Menu Parent</name>
+    <description>Vaadin Context Menu Parent</description>
     <modules>
         <module>vaadin-context-menu-flow</module>
         <module>vaadin-context-menu-testbench</module>

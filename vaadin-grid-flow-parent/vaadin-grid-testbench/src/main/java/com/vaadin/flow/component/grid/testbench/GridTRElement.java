@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,6 +14,10 @@
  * the License.
  */
 package com.vaadin.flow.component.grid.testbench;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import com.vaadin.testbench.TestBenchElement;
 
@@ -30,13 +34,33 @@ public class GridTRElement extends TestBenchElement {
      * @return the cell for the given column
      */
     public GridTHTDElement getCell(GridColumnElement column) {
-        TestBenchElement e = (TestBenchElement) executeScript(
-                "const grid = arguments[0];" //
-                        + "const columnId = arguments[1];" //
-                        + "return Array.from(grid.children)."
-                        + "filter(function(cell) { return cell._column && cell._column.__generatedTbId == columnId;})[0]",
-                this, column.get__generatedId());
-        return e == null ? null : e.wrap(GridTHTDElement.class);
+        List<GridTHTDElement> cells = getCells(column);
+        return cells.size() == 1 ? cells.get(0) : null;
+    }
+
+    /**
+     * Gets the cells for the given columns in this row.
+     *
+     * @param columns
+     *            the column elements
+     * @return a {@link GridTHTDElement} list with the cells for the given
+     *         columns
+     */
+    public List<GridTHTDElement> getCells(GridColumnElement... columns) {
+        Object cells = executeScript("const row = arguments[0];" //
+                + "const columnIds = arguments[1];"
+                + "return Array.from(row.children)."
+                + "filter(function(cell) { return cell._column && columnIds.includes(cell._column.__generatedTbId);})",
+                this, Arrays.stream(columns)
+                        .map(GridColumnElement::get__generatedId).toArray());
+        if (cells != null) {
+            return ((ArrayList<?>) cells).stream()
+                    .map(elem -> ((TestBenchElement) elem)
+                            .wrap(GridTHTDElement.class))
+                    .toList();
+        } else {
+            return new ArrayList<>();
+        }
     }
 
     /**

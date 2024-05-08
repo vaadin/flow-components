@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -34,6 +34,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 
+import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.dependency.Uses;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.BaseFormulaEvaluator;
@@ -109,6 +111,9 @@ import elemental.json.JsonValue;
  */
 @Tag("vaadin-spreadsheet")
 @JsModule("./vaadin-spreadsheet/vaadin-spreadsheet.js")
+// Need an explicit reference to Chart class, since the DefaultChartCreator
+// class that references it is only accessed through reflection
+@Uses(Chart.class)
 @SuppressWarnings("serial")
 public class Spreadsheet extends Component
         implements HasSize, HasStyle, Action.Container {

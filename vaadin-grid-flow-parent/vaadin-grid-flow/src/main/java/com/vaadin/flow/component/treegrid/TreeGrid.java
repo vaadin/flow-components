@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -140,7 +140,7 @@ public class TreeGrid<T> extends Grid<T>
         private SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory;
         private int viewportRemaining = 0;
         private final List<JsonValue> queuedParents = new ArrayList<>();
-        private VaadinRequest previousRequest;
+        private transient VaadinRequest previousRequest;
 
         public TreeGridArrayUpdaterImpl(
                 SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
@@ -575,9 +575,10 @@ public class TreeGrid<T> extends Grid<T>
                         + "${item.name}</vaadin-grid-tree-toggle>")
                 .withProperty("children",
                         item -> getDataCommunicator().hasChildren(item))
-                .withProperty("name",
-                        value -> String.valueOf(valueProvider.apply(value)))
-                .withFunction("onClick", item -> {
+                .withProperty("name", value -> {
+                    Object name = valueProvider.apply(value);
+                    return name == null ? "" : String.valueOf(name);
+                }).withFunction("onClick", item -> {
                     if (getDataCommunicator().hasChildren(item)) {
                         if (isExpanded(item)) {
                             collapse(List.of(item), true);
@@ -1042,18 +1043,76 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * The effective index of an item depends on the complete hierarchy of the
-     * tree. {@link TreeGrid} uses lazy loading for performance reasons and does
-     * not know about the complete hierarchy. Without the knowledge of the
-     * complete hierarchy, {@link TreeGrid} can’t reliably calculate an exact
-     * scroll position. <b>This uncertainty makes this method unreliable and so
-     * should be avoided.</b>
+     * Scrolls to the index of an item in the root level of the tree. To scroll
+     * to a nested item, use {@link #scrollToIndex(int...)}.
+     * <p>
+     * Scrolls so that the row is shown at the start of the visible area
+     * whenever possible.
+     * <p>
+     * If the index parameter exceeds current item set size the grid will scroll
+     * to the end.
      *
      * @param rowIndex
-     *            zero based index of the item to scroll to in the current view.
+     *            zero based index of the item in the root level of the tree
+     * @see TreeGrid#scrollToIndex(int...)
      */
     @Override
     public void scrollToIndex(int rowIndex) {
         super.scrollToIndex(rowIndex);
+    }
+
+    /**
+     * Scrolls to a nested item within the tree.
+     * <p>
+     * The `indexes` parameter can be either a single number or multiple
+     * numbers. The grid will first try to scroll to the item at the first index
+     * in the root level of the tree. In case the item at the first index is
+     * expanded, the grid will then try scroll to the item at the second index
+     * within the children of the expanded first item, and so on. Each given
+     * index points to a child of the item at the previous index.
+     *
+     * @param indexes
+     *            zero based row indexes to scroll to
+     * @see TreeGrid#scrollToIndex(int)
+     */
+    public void scrollToIndex(int... indexes) {
+        if (indexes.length == 0) {
+            throw new IllegalArgumentException(
+                    "At least one index should be provided.");
+        }
+        int pageSize = getPageSize();
+        int firstRootIndex = indexes[0] - indexes[0] % pageSize;
+        getDataCommunicator().setRequestedRange(firstRootIndex, pageSize);
+        String joinedIndexes = Arrays.stream(indexes).mapToObj(String::valueOf)
+                .collect(Collectors.joining(","));
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.scrollToIndex(" + joinedIndexes + ");")));
+    }
+
+    @Override
+    public void scrollToEnd() {
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.scrollToIndex(...Array(10).fill(Infinity))")));
+    }
+
+    /**
+     * TreeGrid does not support scrolling to a given item. Use
+     * {@link #scrollToIndex(int...)} instead.
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
+     * {@link UnsupportedOperationException}.
+     *
+     * @param item
+     *            the item to scroll to
+     * @deprecated
+     */
+    @Deprecated
+    @Override
+    public void scrollToItem(T item) {
+        throw new UnsupportedOperationException(
+                "scrollToItem method is not supported in TreeGrid");
     }
 }

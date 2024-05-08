@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -91,6 +91,21 @@ public class MenuBarTest {
         Assert.assertTrue("ContextMenu should support overlay class name",
                 HasOverlayClassName.class
                         .isAssignableFrom(new MenuBar().getClass()));
+    }
+
+    @Test
+    public void isReverseCollapseOrder() {
+        Assert.assertFalse(menuBar.isReverseCollapseOrder());
+        Assert.assertFalse(
+                menuBar.getElement().getProperty("reverseCollapse", false));
+    }
+
+    @Test
+    public void setReverseCollapseOrder_isReverseCollapseOrder() {
+        menuBar.setReverseCollapseOrder(true);
+        Assert.assertTrue(menuBar.isReverseCollapseOrder());
+        Assert.assertTrue(
+                menuBar.getElement().getProperty("reverseCollapse", false));
     }
 
     private void assertChildrenAndItems(MenuItem... expected) {
