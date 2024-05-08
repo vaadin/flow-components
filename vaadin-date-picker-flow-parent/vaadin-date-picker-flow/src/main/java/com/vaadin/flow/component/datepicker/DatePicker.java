@@ -120,28 +120,28 @@ public class DatePicker
 
     private final Validator<LocalDate> requiredValidator = (value, context) -> {
         if (ValidationUtil.checkRequired(required, value, getEmptyValue()).isError()) {
-            return ValidationResult.error("");
+            return ValidationResult.error(getI18n().getRequiredErrorMessage());
         }
         return ValidationResult.ok();
     };
 
     private final Validator<LocalDate> badInputValidator = (value, context) -> {
         if (valueEquals(value, getEmptyValue()) && isInputValuePresent()) {
-            return ValidationResult.error("");
+            return ValidationResult.error(getI18n().getBadInputErrorMessage());
         }
         return ValidationResult.ok();
     };
 
     private final Validator<LocalDate> minValidator = (value, context) -> {
         if (ValidationUtil.checkSmallerThanMin(value, getMin()).isError()) {
-            return ValidationResult.error("");
+            return ValidationResult.error(getI18n().getMinErrorMessage());
         }
         return ValidationResult.ok();
     };
 
     private final Validator<LocalDate> maxValidator = (value, context) -> {
         if (ValidationUtil.checkGreaterThanMax(value, getMax()).isError()) {
-            return ValidationResult.error("");
+            return ValidationResult.error(getI18n().getMaxErrorMessage());
         }
         return ValidationResult.ok();
     };
@@ -885,6 +885,10 @@ public class DatePicker
         private String today;
         private String cancel;
         private LocalDate referenceDate;
+        private String requiredErrorMessage;
+        private String badInputErrorMessage;
+        private String minErrorMessage;
+        private String maxErrorMessage;
 
         /**
          * Gets the name of the months.
@@ -1145,6 +1149,42 @@ public class DatePicker
         public DatePickerI18n setReferenceDate(LocalDate referenceDate) {
             this.referenceDate = referenceDate;
             return this;
+        }
+
+        public DatePickerI18n setRequiredErrorMessage(String requiredErrorMessage) {
+            this.requiredErrorMessage = requiredErrorMessage;
+            return this;
+        }
+
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        public DatePickerI18n setBadInputErrorMessage(String badInputErrorMessage) {
+            this.badInputErrorMessage = badInputErrorMessage;
+            return this;
+        }
+
+        public String getBadInputErrorMessage() {
+            return badInputErrorMessage;
+        }
+
+        public DatePickerI18n setMinErrorMessage(String minErrorMessage) {
+            this.minErrorMessage = minErrorMessage;
+            return this;
+        }
+
+        public String getMinErrorMessage() {
+            return minErrorMessage;
+        }
+
+        public DatePickerI18n setMaxErrorMessage(String maxErrorMessage) {
+            this.maxErrorMessage = maxErrorMessage;
+            return this;
+        }
+
+        public String getMaxErrorMessage() {
+            return maxErrorMessage;
         }
     }
 }
