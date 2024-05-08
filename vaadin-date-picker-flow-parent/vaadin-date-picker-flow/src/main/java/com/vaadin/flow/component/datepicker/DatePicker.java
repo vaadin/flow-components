@@ -118,35 +118,6 @@ public class DatePicker
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
-    private final Validator<LocalDate> requiredValidator = (value, context) -> {
-        if (ValidationUtil.checkRequired(required, value, getEmptyValue())
-                .isError()) {
-            return ValidationResult.error(getI18n().getRequiredErrorMessage());
-        }
-        return ValidationResult.ok();
-    };
-
-    private final Validator<LocalDate> badInputValidator = (value, context) -> {
-        if (valueEquals(value, getEmptyValue()) && isInputValuePresent()) {
-            return ValidationResult.error(getI18n().getBadInputErrorMessage());
-        }
-        return ValidationResult.ok();
-    };
-
-    private final Validator<LocalDate> minValidator = (value, context) -> {
-        if (ValidationUtil.checkSmallerThanMin(value, getMin()).isError()) {
-            return ValidationResult.error(getI18n().getMinErrorMessage());
-        }
-        return ValidationResult.ok();
-    };
-
-    private final Validator<LocalDate> maxValidator = (value, context) -> {
-        if (ValidationUtil.checkGreaterThanMax(value, getMax()).isError()) {
-            return ValidationResult.error(getI18n().getMaxErrorMessage());
-        }
-        return ValidationResult.ok();
-    };
-
     /**
      * Default constructor.
      */
@@ -336,6 +307,11 @@ public class DatePicker
         this.min = min;
     }
 
+    public void setMin(LocalDate min, String errorMessage) {
+        setMin(min);
+        getI18n().setMinErrorMessage(errorMessage);
+    }
+
     /**
      * Gets the minimum date in the date picker. Dates before that will be
      * disabled in the popup.
@@ -359,6 +335,11 @@ public class DatePicker
         String maxAsString = FORMATTER.apply(max);
         getElement().setProperty("max", maxAsString == null ? "" : maxAsString);
         this.max = max;
+    }
+
+    public void setMax(LocalDate max, String errorMessage) {
+        setMax(max);
+        getI18n().setMaxErrorMessage(errorMessage);
     }
 
     /**
@@ -572,18 +553,35 @@ public class DatePicker
 
     private ValidationResult checkValidity(LocalDate value,
             boolean withRequired) {
-        List<Validator<LocalDate>> validators = new ArrayList<>();
-        if (withRequired) {
-            validators.add(requiredValidator);
-        }
-        validators.add(badInputValidator);
-        validators.add(minValidator);
-        validators.add(maxValidator);
+        ValidationResult result;
 
-        return validators.stream()
-                .map(validator -> validator.apply(value, null))
-                .filter(ValidationResult::isError).findFirst()
-                .orElse(ValidationResult.ok());
+        if (valueEquals(value, getEmptyValue()) && isInputValuePresent()) {
+            return ValidationResult
+                    .error(i18n != null ? i18n.getBadInputErrorMessage() : "");
+        }
+
+        if (withRequired) {
+            result = ValidationUtil.checkRequired(required, value,
+                    getEmptyValue());
+            if (result.isError()) {
+                return ValidationResult.error(
+                        i18n != null ? i18n.getRequiredErrorMessage() : "");
+            }
+        }
+
+        result = ValidationUtil.checkSmallerThanMin(value, getMin());
+        if (result.isError()) {
+            return ValidationResult
+                    .error(i18n != null ? i18n.getMinErrorMessage() : "");
+        }
+
+        result = ValidationUtil.checkGreaterThanMax(value, getMax());
+        if (result.isError()) {
+            return ValidationResult
+                    .error(i18n != null ? i18n.getMaxErrorMessage() : "");
+        }
+
+        return ValidationResult.ok();
     }
 
     /**
@@ -689,10 +687,22 @@ public class DatePicker
         this.required = required;
     }
 
+    public void setRequired(boolean required, String errorMessage) {
+        setRequired(required);
+        getI18n().setRequiredErrorMessage(errorMessage);
+    }
+
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
         super.setRequiredIndicatorVisible(required);
         this.required = required;
+    }
+
+    // TODO: Are we sure we want to overload this method?
+    public void setRequiredIndicatorVisible(boolean required,
+            String errorMessage) {
+        setRequiredIndicatorVisible(required);
+        getI18n().setRequiredErrorMessage(errorMessage);
     }
 
     /**
