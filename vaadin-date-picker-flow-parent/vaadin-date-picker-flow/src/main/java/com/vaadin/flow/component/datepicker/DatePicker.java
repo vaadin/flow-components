@@ -52,11 +52,13 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.data.binder.ErrorMessageProvider;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.data.binder.ValueContext;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -118,42 +120,30 @@ public class DatePicker
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
-    private final Validator<LocalDate> requiredValidator = (value, context) -> {
-        ValidationResult result = ValidationUtil.checkRequired(required, value,
-                getEmptyValue());
-        if (result.isError()) {
-            return ValidationResult
-                    .error(i18n != null ? i18n.getRequiredErrorMessage() : "");
-        }
-        return ValidationResult.ok();
+    private DatePickerValidationSupport validationSupport;
+
+    private final ErrorMessageProvider defaultRequiredErrorMessageProvider = (
+            context) -> {
+        return Optional.of(i18n).map(DatePickerI18n::getRequiredErrorMessage)
+                .orElse("");
     };
 
-    private final Validator<LocalDate> badInputValidator = (value, context) -> {
-        if (valueEquals(value, getEmptyValue()) && isInputValuePresent()) {
-            return ValidationResult
-                    .error(i18n != null ? i18n.getBadInputErrorMessage() : "");
-        }
-        return ValidationResult.ok();
+    private final ErrorMessageProvider defaultBadInputErrorMessageProvider = (
+            context) -> {
+        return Optional.of(i18n).map(DatePickerI18n::getBadInputErrorMessage)
+                .orElse("");
     };
 
-    private final Validator<LocalDate> minValidator = (value, context) -> {
-        ValidationResult result = ValidationUtil.checkSmallerThanMin(value,
-                getMin());
-        if (result.isError()) {
-            return ValidationResult
-                    .error(i18n != null ? i18n.getMinErrorMessage() : "");
-        }
-        return ValidationResult.ok();
+    private final ErrorMessageProvider defaultMinErrorMessageProvider = (
+            context) -> {
+        return Optional.of(i18n).map(DatePickerI18n::getMinErrorMessage)
+                .orElse("");
     };
 
-    private final Validator<LocalDate> maxValidator = (value, context) -> {
-        ValidationResult result = ValidationUtil.checkGreaterThanMax(value,
-                getMax());
-        if (result.isError()) {
-            return ValidationResult
-                    .error(i18n != null ? i18n.getMaxErrorMessage() : "");
-        }
-        return ValidationResult.ok();
+    private final ErrorMessageProvider defaultMaxErrorMessageProvider = (
+            context) -> {
+        return Optional.of(i18n).map(DatePickerI18n::getMaxErrorMessage)
+                .orElse("");
     };
 
     /**
@@ -347,7 +337,17 @@ public class DatePicker
 
     public void setMin(LocalDate min, String errorMessage) {
         setMin(min);
-        getI18n().setMinErrorMessage(errorMessage);
+        getValidationSupport().setMinErrorMessageProvider(
+                errorMessage != null ? context -> errorMessage
+                        : defaultMinErrorMessageProvider);
+    }
+
+    public void setMin(LocalDate min,
+            ErrorMessageProvider errorMessageProvider) {
+        setMin(min);
+        getValidationSupport().setMinErrorMessageProvider(
+                errorMessageProvider != null ? errorMessageProvider
+                        : defaultMinErrorMessageProvider);
     }
 
     /**
@@ -377,7 +377,17 @@ public class DatePicker
 
     public void setMax(LocalDate max, String errorMessage) {
         setMax(max);
-        getI18n().setMaxErrorMessage(errorMessage);
+        getValidationSupport().setMaxErrorMessageProvider(
+                errorMessage != null ? context -> errorMessage
+                        : defaultMaxErrorMessageProvider);
+    }
+
+    public void setMax(LocalDate max,
+            ErrorMessageProvider errorMessageProvider) {
+        setMax(max);
+        getValidationSupport().setMaxErrorMessageProvider(
+                errorMessageProvider != null ? errorMessageProvider
+                        : defaultMaxErrorMessageProvider);
     }
 
     /**
@@ -564,9 +574,25 @@ public class DatePicker
                 .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
+    private DatePickerValidationSupport getValidationSupport() {
+        if (validationSupport == null) {
+            validationSupport = new DatePickerValidationSupport(this);
+            validationSupport.setRequiredErrorMessageProvider(
+                    defaultRequiredErrorMessageProvider);
+            validationSupport.setBadInputErrorMessageProvider(
+                    defaultBadInputErrorMessageProvider);
+            validationSupport
+                    .setMinErrorMessageProvider(defaultMinErrorMessageProvider);
+            validationSupport
+                    .setMaxErrorMessageProvider(defaultMaxErrorMessageProvider);
+        }
+        return validationSupport;
+    }
+
     @Override
     public Validator<LocalDate> getDefaultValidator() {
-        return (value, context) -> checkValidity(value, false);
+        return (value, context) -> getValidationSupport().checkValidity(value,
+                context, false);
     }
 
     @Override
@@ -589,22 +615,6 @@ public class DatePicker
                 .forEach(listener -> listener.validationStatusChanged(event));
     }
 
-    private ValidationResult checkValidity(LocalDate value,
-            boolean withRequired) {
-        List<Validator<LocalDate>> validators = new ArrayList<>();
-        if (withRequired) {
-            validators.add(requiredValidator);
-        }
-        validators.add(badInputValidator);
-        validators.add(minValidator);
-        validators.add(maxValidator);
-
-        return validators.stream()
-                .map(validator -> validator.apply(value, null))
-                .filter(ValidationResult::isError).findFirst()
-                .orElse(ValidationResult.ok());
-    }
-
     /**
      * Returns whether the input element has a value or not.
      *
@@ -614,6 +624,11 @@ public class DatePicker
     @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
     protected boolean isInputValuePresent() {
         return getElement().getProperty("_hasInputValue", false);
+    }
+
+    @Override
+    protected boolean valueEquals(LocalDate value1, LocalDate value2) {
+        return super.valueEquals(value1, value2);
     }
 
     @Override
@@ -710,20 +725,24 @@ public class DatePicker
 
     public void setRequired(boolean required, String errorMessage) {
         setRequired(required);
-        getI18n().setRequiredErrorMessage(errorMessage);
+        getValidationSupport().setRequiredErrorMessageProvider(
+                errorMessage != null ? context -> errorMessage
+                        : defaultRequiredErrorMessageProvider);
+    }
+
+    public void setRequired(boolean required,
+            ErrorMessageProvider errorMessageProvider) {
+        setRequired(required);
+        getValidationSupport().setRequiredErrorMessageProvider(
+                errorMessageProvider != null ? errorMessageProvider
+                        : defaultRequiredErrorMessageProvider);
     }
 
     @Override
+    // TODO: Do we want to overload this method as well?
     public void setRequiredIndicatorVisible(boolean required) {
         super.setRequiredIndicatorVisible(required);
         this.required = required;
-    }
-
-    // TODO: Are we sure we want to overload this method?
-    public void setRequiredIndicatorVisible(boolean required,
-            String errorMessage) {
-        setRequiredIndicatorVisible(required);
-        getI18n().setRequiredErrorMessage(errorMessage);
     }
 
     /**
@@ -838,7 +857,9 @@ public class DatePicker
             return;
         }
 
-        ValidationResult result = checkValidity(getValue(), true);
+        ValueContext context = new ValueContext(this);
+        ValidationResult result = getValidationSupport()
+                .checkValidity(getValue(), context, true);
         if (result.isError()) {
             setInvalid(true);
             setErrorMessage(result.getErrorMessage());
