@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.richtexteditor;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
@@ -35,6 +36,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
+import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 /**
@@ -266,6 +268,32 @@ public class RichTextEditor
     @Synchronize(property = "value", value = "value-changed")
     private String getDeltaValue() {
         return getElement().getProperty("value");
+    }
+
+    /**
+     * Gets the list of colors used by the text color picker and background
+     * color picker controls of the text editor.
+     *
+     * @since 24.5
+     * @return the list of colors options
+     */
+    public List<String> getColorOptions() {
+        return JsonSerializer.toObjects(String.class,
+                (JsonArray) getElement().getPropertyRaw("colorOptions"));
+    }
+
+    /**
+     * Sets the list of colors used by the text color picker and background
+     * color picker controls of the text editor.
+     *
+     * @since 24.5
+     * @param colorOptions
+     *            the list of colors to set, not null
+     */
+    public void setColorOptions(List<String> colorOptions) {
+        Objects.requireNonNull(colorOptions, "Color options must not be null");
+        getElement().setPropertyJson("colorOptions",
+                JsonSerializer.toJson(colorOptions));
     }
 
     static String sanitize(String html) {

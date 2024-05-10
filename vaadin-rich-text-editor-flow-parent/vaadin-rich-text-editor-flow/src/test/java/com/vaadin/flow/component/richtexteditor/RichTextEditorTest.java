@@ -10,6 +10,9 @@ package com.vaadin.flow.component.richtexteditor;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
+import elemental.json.JsonArray;
+
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -229,5 +232,24 @@ public class RichTextEditorTest {
 
         RichTextEditor field = Component.from(element, RichTextEditor.class);
         Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
+    }
+
+    @Test
+    public void setColorOptions_propertyIsUpdated() {
+        RichTextEditor rte = new RichTextEditor();
+        rte.setColorOptions(
+                List.of("#000000", "#0066cc", "#008a00", "#e60000"));
+        JsonArray jsonArray = (JsonArray) rte.getElement()
+                .getPropertyRaw("colorOptions");
+        Assert.assertEquals(4, jsonArray.length());
+    }
+
+    @Test
+    public void setColorOptions_getColorOptions() {
+        RichTextEditor rte = new RichTextEditor();
+        rte.setColorOptions(
+                List.of("#000000", "#0066cc", "#008a00", "#e60000"));
+        List<String> options = rte.getColorOptions();
+        Assert.assertEquals(4, options.size());
     }
 }
