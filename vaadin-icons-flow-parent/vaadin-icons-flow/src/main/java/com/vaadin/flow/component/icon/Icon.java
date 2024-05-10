@@ -110,7 +110,7 @@ public class Icon extends AbstractIcon<Icon> {
     }
 
     /**
-     * /** Sets the icon to the given Vaadin icon.
+     * Sets the icon to the given Vaadin icon.
      *
      * @param icon
      *            the icon name
