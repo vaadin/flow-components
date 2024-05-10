@@ -91,7 +91,7 @@ public class Icon extends AbstractIcon<Icon> {
      * <p>
      * If the icon name contains a ":", the first part is used as the collection
      * and the second part as the icon name. If the icon name does not contain a
-     * ":", the icon is assumed to be from the "vaadin" collection.
+     * ":", the current collection is used (vaadin by default).
      *
      * @param icon
      *            the icon name
@@ -111,10 +111,6 @@ public class Icon extends AbstractIcon<Icon> {
 
     /**
      * /** Sets the icon to the given Vaadin icon.
-     * <p>
-     * If the icon name contains a ":", the first part is used as the collection
-     * and the second part as the icon name. If the icon name does not contain a
-     * ":", the icon is assumed to be from the "vaadin" collection.
      *
      * @param icon
      *            the icon name
