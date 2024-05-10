@@ -1052,7 +1052,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * @throws NullPointerException
          *             if {@code classNameGenerator} is {@code null}
          * @see Grid#setClassNameGenerator(SerializableFunction)
+         * @deprecated {@link #setPartNameGenerator} should be used instead.
          */
+        @Deprecated
         public Column<T> setClassNameGenerator(
                 SerializableFunction<T, String> classNameGenerator) {
             Objects.requireNonNull(classNameGenerator,
@@ -4166,7 +4168,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @throws NullPointerException
      *             if {@code classNameGenerator} is {@code null}
      * @see Column#setClassNameGenerator(SerializableFunction)
+     * @deprecated {@link #setPartNameGenerator} should be used instead.
      */
+    @Deprecated
     public void setClassNameGenerator(
             SerializableFunction<T, String> classNameGenerator) {
         Objects.requireNonNull(classNameGenerator,
