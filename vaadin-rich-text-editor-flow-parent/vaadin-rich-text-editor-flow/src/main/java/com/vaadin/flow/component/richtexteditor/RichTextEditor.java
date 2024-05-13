@@ -273,8 +273,8 @@ public class RichTextEditor
     }
 
     /**
-     * Gets the list of colors used by the text color picker and background
-     * color picker controls of the text editor.
+     * Gets the list of colors in HEX format used by the text color picker and
+     * background color picker controls of the text editor.
      *
      * @since 24.5
      * @return the list of colors options
@@ -285,8 +285,8 @@ public class RichTextEditor
     }
 
     /**
-     * Sets the list of colors used by the text color picker and background
-     * color picker controls of the text editor.
+     * Sets the list of colors in HEX format to use by the text color picker and
+     * background color picker controls of the text editor.
      *
      * @since 24.5
      * @param colorOptions
