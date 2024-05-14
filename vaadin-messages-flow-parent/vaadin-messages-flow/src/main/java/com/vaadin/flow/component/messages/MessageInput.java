@@ -45,10 +45,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-message-input")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha23")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/message-input/src/vaadin-message-input.js")
-@NpmPackage(value = "@vaadin/message-input", version = "24.4.0-alpha23")
+@NpmPackage(value = "@vaadin/message-input", version = "24.4.0-beta3")
 public class MessageInput extends Component
         implements HasSize, HasStyle, HasEnabled, HasTooltip {
 
