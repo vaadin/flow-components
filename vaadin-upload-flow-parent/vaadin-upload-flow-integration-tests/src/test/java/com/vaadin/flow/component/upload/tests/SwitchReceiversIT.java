@@ -35,21 +35,22 @@ public class SwitchReceiversIT extends AbstractUploadIT {
     }
 
     @Test
-    public void setSingleFileReceiver_setMultiFileReceiver_moreThanOneFileCanBeSelected() {
+    public void switchBetweenSingleAndMultiFileReceiver_assertMaxFilesProperty() {
         $("button").id("set-single-file-receiver").click();
-        $("button").id("set-multi-file-receiver").click();
+        Assert.assertTrue(
+                "The maxFiles property should equal 1 when single file receiver is set",
+                (boolean) executeScript("return arguments[0].maxFiles === 1",
+                        upload));
 
-        Assert.assertTrue("The maxFiles property should equal to Infinity",
+        $("button").id("set-multi-file-receiver").click();
+        Assert.assertTrue(
+                "The maxFiles property should equal Infinity when multi file receiver is set",
                 (boolean) executeScript(
                         "return arguments[0].maxFiles === Infinity", upload));
-    }
 
-    @Test
-    public void setMultiFileReceiver_setSingleFileReceiver_onlyOneFileCanBeSelected() {
-        $("button").id("set-multi-file-receiver").click();
         $("button").id("set-single-file-receiver").click();
-
-        Assert.assertTrue("The maxFiles property should equal to 1",
+        Assert.assertTrue(
+                "The maxFiles property should equal 1 when single file receiver is set again",
                 (boolean) executeScript("return arguments[0].maxFiles === 1",
                         upload));
     }
