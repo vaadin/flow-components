@@ -33,6 +33,23 @@ public class FileRejectedEvent extends ComponentEvent<Upload> {
      * Creates a new event using the given source and indicator whether the
      * event originated from the client side or the server side.
      *
+     * @deprecated since 24.4. Use
+     *             {@link #FileRejectedEvent(Upload, String, String)}
+     *
+     * @param source
+     *            the source component
+     * @param errorMessage
+     *            the error message
+     */
+    @Deprecated(since = "24.4")
+    public FileRejectedEvent(Upload source, String errorMessage) {
+        this(source, errorMessage, null);
+    }
+
+    /**
+     * Creates a new event using the given source and indicator whether the
+     * event originated from the client side or the server side.
+     *
      * @param source
      *            the source component
      * @param errorMessage

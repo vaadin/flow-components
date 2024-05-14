@@ -22,6 +22,7 @@ public class DataSeriesItemSankey extends DataSeriesItem {
 
     public DataSeriesItemSankey() {
         super();
+        makeCustomized();
     }
 
     /**
@@ -32,7 +33,7 @@ public class DataSeriesItemSankey extends DataSeriesItem {
      * @param weight
      */
     public DataSeriesItemSankey(String from, String to, Number weight) {
-        super();
+        this();
         setFrom(from);
         setTo(to);
         setWeight(weight);
