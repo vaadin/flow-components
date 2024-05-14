@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.datepicker;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.List;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -21,7 +22,7 @@ final class DatePickerValidationSupport implements Serializable {
     private ErrorMessageProvider maxErrorMessageProvider = context -> "";
 
     private final Validator<LocalDate> badInputValidator = (value, context) -> {
-        boolean isError = field.valueEquals(value, field.getEmptyValue())
+        boolean isError = Objects.equals(value, field.getEmptyValue())
                 && field.isInputValuePresent();
 
         if (isError) {

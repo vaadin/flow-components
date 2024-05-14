@@ -627,11 +627,6 @@ public class DatePicker
     }
 
     @Override
-    protected boolean valueEquals(LocalDate value1, LocalDate value2) {
-        return super.valueEquals(value1, value2);
-    }
-
-    @Override
     public void setValue(LocalDate value) {
         LocalDate oldValue = getValue();
         boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
