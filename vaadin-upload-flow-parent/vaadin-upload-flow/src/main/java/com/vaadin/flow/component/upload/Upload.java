@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.upload;
 
+import java.awt.geom.Arc2D;
 import java.io.OutputStream;
 import java.util.ArrayDeque;
 import java.util.Arrays;
