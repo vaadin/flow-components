@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.upload;
 
-import java.awt.geom.Arc2D;
 import java.io.OutputStream;
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -35,8 +34,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
