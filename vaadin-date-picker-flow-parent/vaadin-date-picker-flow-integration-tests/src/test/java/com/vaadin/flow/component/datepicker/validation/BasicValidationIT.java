@@ -57,6 +57,18 @@ public class BasicValidationIT extends AbstractValidationIT<DatePickerElement> {
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+
+        testField.setInputValue("INVALID");
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
+
+        testField.setInputValue("");
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test

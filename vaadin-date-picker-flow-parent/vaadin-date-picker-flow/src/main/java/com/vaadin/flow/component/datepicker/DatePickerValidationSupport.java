@@ -77,10 +77,10 @@ final class DatePickerValidationSupport implements Serializable {
     ValidationResult checkValidity(LocalDate value, ValueContext context,
             boolean withRequired) {
         List<Validator<LocalDate>> validators = new ArrayList<>();
+        validators.add(badInputValidator);
         if (withRequired) {
             validators.add(requiredValidator);
         }
-        validators.add(badInputValidator);
         validators.add(minValidator);
         validators.add(maxValidator);
 
