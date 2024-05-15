@@ -16,7 +16,10 @@
 package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.io.Serializable;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Synchronize;
@@ -41,6 +44,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         extends TextFieldBase<C, T> {
 
     private boolean required;
+
+    private AbstractNumberFieldI18n i18n;
 
     /*
      * Note: setters and getters for min/max/step needed to be duplicated in
@@ -327,7 +332,9 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         boolean hasNonParsableValue = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
         if (hasNonParsableValue) {
-            return ValidationResult.error("");
+            return ValidationResult.error(Optional.of(i18n)
+                    .map(AbstractNumberFieldI18n::getBadInputErrorMessage)
+                    .orElse(""));
         }
 
         Double doubleValue = value != null ? value.doubleValue() : null;
@@ -335,17 +342,23 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         ValidationResult greaterThanMax = ValidationUtil
                 .checkGreaterThanMax(doubleValue, max);
         if (greaterThanMax.isError()) {
-            return greaterThanMax;
+            return ValidationResult.error(Optional.of(i18n)
+                    .map(AbstractNumberFieldI18n::getMaxErrorMessage)
+                    .orElse(""));
         }
 
         ValidationResult smallerThanMin = ValidationUtil
                 .checkSmallerThanMin(doubleValue, min);
         if (smallerThanMin.isError()) {
-            return smallerThanMin;
+            return ValidationResult.error(Optional.of(i18n)
+                    .map(AbstractNumberFieldI18n::getMinErrorMessage)
+                    .orElse(""));
         }
 
         if (!isValidByStep(value)) {
-            return ValidationResult.error("");
+            return ValidationResult.error(Optional.of(i18n)
+                    .map(AbstractNumberFieldI18n::getStepErrorMessage)
+                    .orElse(""));
         }
 
         return ValidationResult.ok();
@@ -405,5 +418,41 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+    }
+
+    protected AbstractNumberFieldI18n getI18n() {
+        return i18n;
+    }
+
+    protected void setI18n(AbstractNumberFieldI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n);
+    }
+
+    public static abstract class AbstractNumberFieldI18n
+            implements Serializable {
+        abstract public String getRequiredErrorMessage();
+
+        abstract public AbstractNumberFieldI18n setRequiredErrorMessage(
+                String errorMessage);
+
+        abstract public String getBadInputErrorMessage();
+
+        abstract public AbstractNumberFieldI18n setBadInputErrorMessage(
+                String errorMessage);
+
+        abstract public String getMinErrorMessage();
+
+        abstract public AbstractNumberFieldI18n setMinErrorMessage(
+                String errorMessage);
+
+        abstract public String getMaxErrorMessage();
+
+        abstract public AbstractNumberFieldI18n setMaxErrorMessage(
+                String errorMessage);
+
+        abstract public String getStepErrorMessage();
+
+        abstract public AbstractNumberFieldI18n setStepErrorMessage(
+                String errorMessage);
     }
 }

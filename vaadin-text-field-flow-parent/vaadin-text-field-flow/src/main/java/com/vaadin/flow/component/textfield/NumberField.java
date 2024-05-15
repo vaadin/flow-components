@@ -197,6 +197,78 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
         return getStepDouble();
     }
 
+    public void setI18n(NumberFieldI18n i18n) {
+        super.setI18n(i18n);
+    }
+
+    @Override
+    public NumberFieldI18n getI18n() {
+        return (NumberFieldI18n) super.getI18n();
+    }
+
+    public static class NumberFieldI18n extends AbstractNumberFieldI18n {
+        private String requiredErrorMessage;
+        private String badInputErrorMessage;
+        private String minErrorMessage;
+        private String maxErrorMessage;
+        private String stepErrorMessage;
+
+        @Override
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        @Override
+        public NumberFieldI18n setRequiredErrorMessage(String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
+
+        @Override
+        public String getBadInputErrorMessage() {
+            return badInputErrorMessage;
+        }
+
+        @Override
+        public NumberFieldI18n setBadInputErrorMessage(String errorMessage) {
+            badInputErrorMessage = errorMessage;
+            return this;
+        }
+
+        @Override
+        public String getMinErrorMessage() {
+            return minErrorMessage;
+        }
+
+        @Override
+        public NumberFieldI18n setMinErrorMessage(String errorMessage) {
+            minErrorMessage = errorMessage;
+            return this;
+        }
+
+        @Override
+        public String getMaxErrorMessage() {
+            return maxErrorMessage;
+        }
+
+        @Override
+        public NumberFieldI18n setMaxErrorMessage(String errorMessage) {
+            maxErrorMessage = errorMessage;
+            return this;
+        }
+
+        @Override
+        public String getStepErrorMessage() {
+            return stepErrorMessage;
+        }
+
+        @Override
+        public NumberFieldI18n setStepErrorMessage(String errorMessage) {
+            stepErrorMessage = errorMessage;
+            return this;
+        }
+    }
+
     private static class Formatter
             implements SerializableFunction<Double, String> {
 
