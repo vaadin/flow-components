@@ -26,6 +26,9 @@ import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBind
 import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBinderValidationPage.MIN_LENGTH_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBinderValidationPage.MAX_LENGTH_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBinderValidationPage.MIN_LENGTH_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBinderValidationPage.MAX_LENGTH_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBinderValidationPage.PATTERN_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
@@ -45,6 +48,7 @@ public class TextFieldBinderValidationIT
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -55,6 +59,7 @@ public class TextFieldBinderValidationIT
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         testField.setValue("");
         assertValidationCount(1);
@@ -73,7 +78,7 @@ public class TextFieldBinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(MIN_LENGTH_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("AA");
@@ -87,6 +92,7 @@ public class TextFieldBinderValidationIT
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -99,7 +105,7 @@ public class TextFieldBinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(MAX_LENGTH_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("AA");
@@ -113,6 +119,7 @@ public class TextFieldBinderValidationIT
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -125,7 +132,7 @@ public class TextFieldBinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(PATTERN_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("12");
@@ -139,6 +146,7 @@ public class TextFieldBinderValidationIT
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Override
