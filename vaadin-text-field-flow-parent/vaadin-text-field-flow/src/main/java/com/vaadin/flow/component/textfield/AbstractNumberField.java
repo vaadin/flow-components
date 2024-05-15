@@ -16,7 +16,10 @@
 package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.io.Serializable;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Synchronize;
@@ -40,6 +43,7 @@ import com.vaadin.flow.shared.Registration;
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
         extends TextFieldBase<C, T> {
 
+    private AbstractNumberFieldI18n i18n;
     /*
      * Note: setters and getters for min/max/step needed to be duplicated in
      * NumberField and IntegerField, because they use primitive double and int
@@ -298,7 +302,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     @Override
     public Validator<T> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        return (value, context) -> checkValidity(value, false);
     }
 
     @Override
@@ -321,29 +325,41 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
                 .forEach(listener -> listener.validationStatusChanged(event));
     }
 
-    private ValidationResult checkValidity(T value) {
-        boolean hasNonParsableValue = valueEquals(value, getEmptyValue())
-                && isInputValuePresent();
-        if (hasNonParsableValue) {
-            return ValidationResult.error("");
+    private ValidationResult checkValidity(T value,
+            boolean withRequiredValidator) {
+        ValidationResult badInputResult = validateBadInputConstraint(
+                getBadInputErrorMessage(), value);
+        if (badInputResult.isError()) {
+            return badInputResult;
+        }
+
+        if (withRequiredValidator) {
+            ValidationResult requiredResult = ValidationUtil
+                    .validateRequiredConstraint(getRequiredErrorMessage(),
+                            isRequiredIndicatorVisible(), value, getEmptyValue());
+            if (requiredResult.isError()) {
+                return requiredResult;
+            }
         }
 
         Double doubleValue = value != null ? value.doubleValue() : null;
 
-        ValidationResult maxResult = ValidationUtil.validateMaxConstraint("",
-                doubleValue, max);
+        ValidationResult maxResult = ValidationUtil
+                .validateMaxConstraint(getMaxErrorMessage(), doubleValue, max);
         if (maxResult.isError()) {
             return maxResult;
         }
 
-        ValidationResult minResult = ValidationUtil.validateMinConstraint("",
-                doubleValue, min);
+        ValidationResult minResult = ValidationUtil
+                .validateMinConstraint(getMinErrorMessage(), doubleValue, min);
         if (minResult.isError()) {
             return minResult;
         }
 
-        if (!isValidByStep(value)) {
-            return ValidationResult.error("");
+        ValidationResult stepResult = validateStepConstraint(
+                getStepErrorMessage(), value);
+        if (stepResult.isError()) {
+            return stepResult;
         }
 
         return ValidationResult.ok();
@@ -355,30 +371,41 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * Performs server-side validation of the current value. This is needed
-     * because it is possible to circumvent the client-side validation
-     * constraints using browser development tools.
+     * Validates the current value against the constraints and sets the
+     * {@code invalid} property and the {@code errorMessage} property using the
+     * error messages defined in the i18n object.
+     * <p>
+     * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            T value = getValue();
+        if (this.manualValidationEnabled) {
+            return;
+        }
 
-            final var requiredValidation = ValidationUtil
-                    .validateRequiredConstraint("",
-                            isRequiredIndicatorVisible(), value,
-                            getEmptyValue());
-
-            setInvalid(requiredValidation.isError()
-                    || checkValidity(value).isError());
+        ValidationResult result = checkValidity(getValue(), true);
+        if (result.isError()) {
+            setInvalid(true);
+            setErrorMessage(result.getErrorMessage());
+        } else {
+            setInvalid(false);
+            setErrorMessage("");
         }
     }
 
-    private boolean isValidByStep(T value) {
+    private ValidationResult validateBadInputConstraint(String errorMessage,
+            T value) {
+        boolean isError = valueEquals(value, getEmptyValue())
+                && isInputValuePresent();
+        return isError ? ValidationResult.error(errorMessage)
+                : ValidationResult.ok();
+    }
 
+    private ValidationResult validateStepConstraint(String errorMessage,
+            T value) {
         if (!stepSetByUser// Don't use step in validation if it's not explicitly
                           // set by user. This follows the web component logic.
                 || value == null || step == 0) {
-            return true;
+            return ValidationResult.ok();
         }
 
         // When min is not defined by user, its value is the absoluteMin
@@ -389,15 +416,171 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
                 : 0.0;
 
         // (value - stepBasis) % step == 0
-        return new BigDecimal(String.valueOf(value))
+        boolean isError = new BigDecimal(String.valueOf(value))
                 .subtract(BigDecimal.valueOf(stepBasis))
                 .remainder(BigDecimal.valueOf(step))
                 .compareTo(BigDecimal.ZERO) == 0;
+        return isError ? ValidationResult.ok()
+                : ValidationResult.error(errorMessage);
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link AbstractNumberField#setI18n(AbstractNumberFieldI18n)}
+     *
+     * @return the i18n object. It will be {@code null}, If the i18n properties
+     *         weren't set.
+     */
+    protected AbstractNumberFieldI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization properties for this component.
+     *
+     * @param i18n
+     *            the internationalized properties, not {@code null}
+     */
+    protected void setI18n(AbstractNumberFieldI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+    }
+
+    private String getBadInputErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(AbstractNumberFieldI18n::getBadInputErrorMessage)
+                .orElse("");
+    }
+
+    private String getRequiredErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(AbstractNumberFieldI18n::getRequiredErrorMessage)
+                .orElse("");
+    }
+
+    private String getMinErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(AbstractNumberFieldI18n::getMinErrorMessage).orElse("");
+    }
+
+    private String getMaxErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(AbstractNumberFieldI18n::getMaxErrorMessage).orElse("");
+    }
+
+    private String getStepErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(AbstractNumberFieldI18n::getStepErrorMessage).orElse("");
+    }
+
+    /**
+     * The abstract internationalization properties for
+     * {@link AbstractNumberField}.
+     */
+    public static abstract class AbstractNumberFieldI18n
+            implements Serializable {
+        /**
+         * Gets the error message displayed when the field contains user input
+         * that the server is unable to convert to type {@link Number}.
+         *
+         * @return the error message or {@code null} if not set
+         */
+        public abstract String getBadInputErrorMessage();
+
+        /**
+         * Sets the error message to display when the field contains user input
+         * that the server is unable to convert to type {@link Number}.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         */
+        public abstract AbstractNumberFieldI18n setBadInputErrorMessage(
+                String errorMessage);
+
+        /**
+         * Gets the error message displayed when the field is required but
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         */
+        public abstract String getRequiredErrorMessage();
+
+        /**
+         * Sets the error message to display when the field is required but
+         * empty.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         */
+        public abstract AbstractNumberFieldI18n setRequiredErrorMessage(
+                String errorMessage);
+
+        /**
+         * Gets the error message displayed when the field value is smaller than
+         * the minimum allowed value.
+         *
+         * @return the error message or {@code null} if not set
+         */
+        public abstract String getMinErrorMessage();
+
+        /**
+         * Sets the error message to display when the field value is smaller
+         * than the minimum allowed value.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         */
+        public abstract AbstractNumberFieldI18n setMinErrorMessage(
+                String errorMessage);
+
+        /**
+         * Gets the error message displayed when the field value is greater than
+         * the maximum allowed value.
+         *
+         * @return the error message or {@code null} if not set
+         */
+        public abstract String getMaxErrorMessage();
+
+        /**
+         * Sets the error message to display when the field value is greater
+         * than the maximum allowed value.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         */
+        public abstract AbstractNumberFieldI18n setMaxErrorMessage(
+                String errorMessage);
+
+        /**
+         * Gets the error message displayed when the field value is not a
+         * multiple of the step value.
+         *
+         * @return the error message or {@code null} if not set
+         */
+        public abstract String getStepErrorMessage();
+
+        /**
+         * Sets the error message to display when the field value is not a
+         * multiple of the step value.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         */
+        public abstract AbstractNumberFieldI18n setStepErrorMessage(
+                String errorMessage);
     }
 }

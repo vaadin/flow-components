@@ -300,4 +300,16 @@ public class NumberFieldTest extends TextFieldTest {
         field.setAriaLabelledBy(null);
         Assert.assertTrue(field.getAriaLabelledBy().isEmpty());
     }
+
+    @Test
+    public void setI18n_getI18n() {
+        NumberField textField = new NumberField();
+        NumberField.NumberFieldI18n i18n = new NumberField.NumberFieldI18n()
+                .setBadInputErrorMessage("Bad input error")
+                .setRequiredErrorMessage("Required error")
+                .setMinErrorMessage("Min error").setMaxErrorMessage("Max error")
+                .setStepErrorMessage("Step error");
+        textField.setI18n(i18n);
+        Assert.assertEquals(i18n, textField.getI18n());
+    }
 }
