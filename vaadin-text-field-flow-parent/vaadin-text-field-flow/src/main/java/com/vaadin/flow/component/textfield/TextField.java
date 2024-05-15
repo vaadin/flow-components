@@ -23,6 +23,7 @@ import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
@@ -312,7 +313,8 @@ public class TextField extends TextFieldBase<TextField, String>
 
     @Override
     public Validator<String> getDefaultValidator() {
-        return (value, context) -> getValidationSupport().checkValidity(value);
+        return (value, context) -> getValidationSupport().checkValidity(value,
+                false);
     }
 
     @Override
@@ -327,8 +329,18 @@ public class TextField extends TextFieldBase<TextField, String>
      * constraints using browser development tools.
      */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            setInvalid(getValidationSupport().isInvalid(getValue()));
+        if (this.manualValidationEnabled) {
+            return;
+        }
+
+        ValidationResult result = getValidationSupport()
+                .checkValidity(getValue(), true);
+        if (result.isError()) {
+            setInvalid(true);
+            setErrorMessage(result.getErrorMessage());
+        } else {
+            setInvalid(false);
+            setErrorMessage(null);
         }
     }
 
