@@ -31,7 +31,6 @@ public class SwitchReceiversIT extends AbstractUploadIT {
     public void init() {
         open();
         upload = $(UploadElement.class).first();
-        waitUntil(_driver -> upload.isDisplayed());
     }
 
     @Test
