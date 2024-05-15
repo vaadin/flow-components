@@ -170,4 +170,72 @@ public class ValidationUtil {
         return isError ? ValidationResult.error(errorMessage)
                 : ValidationResult.ok();
     }
+
+    /**
+     * Checks if the value satisfies the minimum length constraint and returns a
+     * {@code ValidationResult.ok()} or {@code ValidationResult.error()} with
+     * the given error message depending on the result.
+     *
+     * @param errorMessage
+     *            the error message to return if the check fails
+     * @param value
+     *            the value to validate
+     * @param minLength
+     *            the minimum allowed length
+     * @return {@code ValidationResult.ok()} if the value is shorter than or
+     *         equal to the minimum length, {@code ValidationResult.error()}
+     *         otherwise
+     */
+    public static ValidationResult validateMinLengthConstraint(
+            String errorMessage, String value, Integer minLength) {
+        boolean isError = value != null && !value.isEmpty() && minLength != null
+                && value.length() < minLength;
+        return isError ? ValidationResult.error(errorMessage)
+                : ValidationResult.ok();
+    }
+
+    /**
+     * Checks if the value satisfies the maximum length constraint and returns a
+     * {@code ValidationResult.ok()} or {@code ValidationResult.error()} with
+     * the given error message depending on the result.
+     *
+     * @param errorMessage
+     *            the error message to return if the check fails
+     * @param value
+     *            the value to validate
+     * @param maxLength
+     *            the maximum allowed length
+     * @return {@code ValidationResult.ok()} if the value is longer than or
+     *         equal to the minimum length, {@code ValidationResult.error()}
+     *         otherwise
+     */
+    public static ValidationResult validateMaxLengthConstraint(
+            String errorMessage, String value, Integer maxLength) {
+        boolean isError = value != null && maxLength != null
+                && value.length() > maxLength;
+        return isError ? ValidationResult.error(errorMessage)
+                : ValidationResult.ok();
+    }
+
+    /**
+     * Checks if the value satisfies the pattern constraint and returns a
+     * {@code ValidationResult.ok()} or {@code ValidationResult.error()} with
+     * the given error message depending on the result.
+     *
+     * @param errorMessage
+     *            the error message to return if the check fails
+     * @param value
+     *            the value to validate
+     * @param pattern
+     *            the pattern to match
+     * @return {@code ValidationResult.ok()} if the value matches the pattern,
+     *         {@code ValidationResult.error()} otherwise
+     */
+    public static ValidationResult validatePatternConstraint(
+            String errorMessage, String value, String pattern) {
+        boolean isError = value != null && !value.isEmpty() && pattern != null
+                && !pattern.isEmpty() && !value.matches(pattern);
+        return isError ? ValidationResult.error(errorMessage)
+                : ValidationResult.ok();
+    }
 }

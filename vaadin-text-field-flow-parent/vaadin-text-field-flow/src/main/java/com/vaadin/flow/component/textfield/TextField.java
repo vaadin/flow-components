@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import java.io.Serializable;
+import java.util.Objects;
+import java.util.Optional;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -22,7 +26,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
@@ -40,9 +46,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 public class TextField extends TextFieldBase<TextField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
 
-    private boolean isConnectorAttached;
+    private TextFieldI18n i18n;
 
-    private TextFieldValidationSupport validationSupport;
+    private boolean isConnectorAttached;
 
     private boolean manualValidationEnabled = false;
 
@@ -175,13 +181,6 @@ public class TextField extends TextFieldBase<TextField, String>
         addValueChangeListener(listener);
     }
 
-    private TextFieldValidationSupport getValidationSupport() {
-        if (validationSupport == null) {
-            validationSupport = new TextFieldValidationSupport(this);
-        }
-        return validationSupport;
-    }
-
     /**
      * Maximum number of characters (in Unicode code points) that the user can
      * enter.
@@ -191,7 +190,6 @@ public class TextField extends TextFieldBase<TextField, String>
      */
     public void setMaxLength(int maxLength) {
         getElement().setProperty("maxlength", maxLength);
-        getValidationSupport().setMaxLength(maxLength);
     }
 
     /**
@@ -204,6 +202,10 @@ public class TextField extends TextFieldBase<TextField, String>
         return (int) getElement().getProperty("maxlength", 0.0);
     }
 
+    private boolean hasMaxLength() {
+        return getElement().getProperty("maxlength") != null;
+    }
+
     /**
      * Minimum number of characters (in Unicode code points) that the user can
      * enter.
@@ -213,7 +215,6 @@ public class TextField extends TextFieldBase<TextField, String>
      */
     public void setMinLength(int minLength) {
         getElement().setProperty("minlength", minLength);
-        getValidationSupport().setMinLength(minLength);
     }
 
     /**
@@ -224,22 +225,6 @@ public class TextField extends TextFieldBase<TextField, String>
      */
     public int getMinLength() {
         return (int) getElement().getProperty("minlength", 0.0);
-    }
-
-    /**
-     * <p>
-     * Specifies that the user must fill in a value.
-     * </p>
-     * NOTE: The required indicator will not be visible, if there is no
-     * {@code label} property set for the textfield.
-     *
-     * @param required
-     *            the boolean value to set
-     */
-    @Override
-    public void setRequired(boolean required) {
-        super.setRequired(required);
-        getValidationSupport().setRequired(required);
     }
 
     /**
@@ -259,7 +244,6 @@ public class TextField extends TextFieldBase<TextField, String>
      */
     public void setPattern(String pattern) {
         getElement().setProperty("pattern", pattern == null ? "" : pattern);
-        getValidationSupport().setPattern(pattern);
     }
 
     /**
@@ -305,14 +289,8 @@ public class TextField extends TextFieldBase<TextField, String>
     }
 
     @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        getValidationSupport().setRequired(requiredIndicatorVisible);
-    }
-
-    @Override
     public Validator<String> getDefaultValidator() {
-        return (value, context) -> getValidationSupport().checkValidity(value);
+        return (value, context) -> checkValidity(value, false);
     }
 
     @Override
@@ -320,15 +298,61 @@ public class TextField extends TextFieldBase<TextField, String>
         this.manualValidationEnabled = enabled;
     }
 
+    private ValidationResult checkValidity(String value,
+            boolean withRequiredValidator) {
+        if (withRequiredValidator) {
+            ValidationResult requiredResult = ValidationUtil
+                    .validateRequiredConstraint(getRequiredErrorMessage(),
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
+            if (requiredResult.isError()) {
+                return requiredResult;
+            }
+        }
+
+        ValidationResult maxLengthResult = ValidationUtil
+                .validateMaxLengthConstraint(getMaxLengthErrorMessage(), value,
+                        hasMaxLength() ? getMaxLength() : null);
+        if (maxLengthResult.isError()) {
+            return maxLengthResult;
+        }
+
+        ValidationResult minLengthResult = ValidationUtil
+                .validateMinLengthConstraint(getMinLengthErrorMessage(), value,
+                        getMinLength());
+        if (minLengthResult.isError()) {
+            return minLengthResult;
+        }
+
+        ValidationResult patternResult = ValidationUtil
+                .validatePatternConstraint(getPatternErrorMessage(), value,
+                        getPattern());
+        if (patternResult.isError()) {
+            return patternResult;
+        }
+
+        return ValidationResult.ok();
+    }
+
     /**
-     * Performs server-side validation of the current value and the validation
-     * constraints of the field, such as {@link #setPattern(String)}. This is
-     * needed because it is possible to circumvent the client-side validation
-     * constraints using browser development tools.
+     * Validates the current value against the constraints and sets the
+     * {@code invalid} property and the {@code errorMessage} property using the
+     * error messages defined in the i18n object.
+     * <p>
+     * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            setInvalid(getValidationSupport().isInvalid(getValue()));
+        if (this.manualValidationEnabled) {
+            return;
+        }
+
+        ValidationResult result = checkValidity(getValue(), true);
+        if (result.isError()) {
+            setInvalid(true);
+            setErrorMessage(result.getErrorMessage());
+        } else {
+            setInvalid(false);
+            setErrorMessage(null);
         }
     }
 
@@ -336,5 +360,169 @@ public class TextField extends TextFieldBase<TextField, String>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link TextField#setI18n(TextFieldI18n)}
+     *
+     * @return the i18n object. It will be {@code null}, If the i18n properties
+     *         weren't set.
+     */
+    public TextFieldI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization properties for this component.
+     *
+     * @param i18n
+     *            the internationalized properties, not {@code null}
+     */
+    public void setI18n(TextFieldI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+    }
+
+    private String getRequiredErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(TextFieldI18n::getRequiredErrorMessage).orElse("");
+    }
+
+    private String getMinLengthErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(TextFieldI18n::getMinLengthErrorMessage).orElse("");
+    }
+
+    private String getMaxLengthErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(TextFieldI18n::getMaxLengthErrorMessage).orElse("");
+    }
+
+    private String getPatternErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(TextFieldI18n::getPatternErrorMessage).orElse("");
+    }
+
+    /**
+     * The internationalization properties for {@link TextField}.
+     */
+    public static class TextFieldI18n implements Serializable {
+
+        private String requiredErrorMessage;
+        private String minLengthErrorMessage;
+        private String maxLengthErrorMessage;
+        private String patternErrorMessage;
+
+        /**
+         * Gets the error message displayed when the field is required but
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         * @see TextField#isRequiredIndicatorVisible()
+         * @see TextField#setRequiredIndicatorVisible(boolean)
+         */
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field is required but
+         * empty.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see TextField#isRequiredIndicatorVisible()
+         * @see TextField#setRequiredIndicatorVisible(boolean)
+         */
+        public TextFieldI18n setRequiredErrorMessage(String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field value is shorter than
+         * the minimum length.
+         *
+         * @return the error message or {@code null} if not set
+         * @see TextField#getMinLength()
+         * @see TextField#setMinLength(int)
+         */
+        public String getMinLengthErrorMessage() {
+            return minLengthErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field value is shorter
+         * than the minimum length.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see TextField#getMinLength()
+         * @see TextField#setMinLength(int)
+         */
+        public TextFieldI18n setMinLengthErrorMessage(String errorMessage) {
+            minLengthErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field value is longer than
+         * the maximum length.
+         *
+         * @return the error message or {@code null} if not set
+         * @see TextField#getMaxLength()
+         * @see TextField#setMaxLength(int)
+         */
+        public String getMaxLengthErrorMessage() {
+            return maxLengthErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field value is longer than
+         * the maximum length.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see TextField#getMaxLength()
+         * @see TextField#setMaxLength(int)
+         */
+        public TextFieldI18n setMaxLengthErrorMessage(String errorMessage) {
+            maxLengthErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field value does not match
+         * the pattern.
+         *
+         * @return the error message or {@code null} if not set
+         * @see TextField#getPattern()
+         * @see TextField#setPattern(String)
+         */
+        public String getPatternErrorMessage() {
+            return patternErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field value does not match
+         * the pattern.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see TextField#getPattern()
+         * @see TextField#setPattern(String)
+         */
+        public TextFieldI18n setPatternErrorMessage(String errorMessage) {
+            patternErrorMessage = errorMessage;
+            return this;
+        }
     }
 }
