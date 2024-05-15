@@ -17,6 +17,7 @@ package com.vaadin.flow.component.textfield;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Tag;
@@ -184,6 +185,24 @@ public class TextField extends TextFieldBase<TextField, String>
     private TextFieldValidationSupport getValidationSupport() {
         if (validationSupport == null) {
             validationSupport = new TextFieldValidationSupport(this);
+            validationSupport.setRequiredErrorMessageProvider(context -> {
+                return Optional.of(i18n)
+                        .map(TextFieldI18n::getRequiredErrorMessage).orElse("");
+            });
+            validationSupport.setMinLengthErrorMessageProvider(context -> {
+                return Optional.of(i18n)
+                        .map(TextFieldI18n::getMinLengthErrorMessage)
+                        .orElse("");
+            });
+            validationSupport.setMaxLengthErrorMessageProvider(context -> {
+                return Optional.of(i18n)
+                        .map(TextFieldI18n::getMaxLengthErrorMessage)
+                        .orElse("");
+            });
+            validationSupport.setPatternErrorMessageProvider(context -> {
+                return Optional.of(i18n)
+                        .map(TextFieldI18n::getPatternErrorMessage).orElse("");
+            });
         }
         return validationSupport;
     }
