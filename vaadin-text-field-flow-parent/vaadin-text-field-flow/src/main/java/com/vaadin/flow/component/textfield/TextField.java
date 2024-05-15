@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -40,6 +43,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 @JsModule("@vaadin/text-field/src/vaadin-text-field.js")
 public class TextField extends TextFieldBase<TextField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
+
+    private TextFieldI18n i18n;
 
     private boolean isConnectorAttached;
 
@@ -348,5 +353,59 @@ public class TextField extends TextFieldBase<TextField, String>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+    }
+
+    public TextFieldI18n getI18n() {
+        return i18n;
+    }
+
+    public void setI18n(TextFieldI18n i18n) {
+        Objects.requireNonNull(i18n,
+                "The I18N properties object should not be null");
+        this.i18n = i18n;
+    }
+
+    public static class TextFieldI18n implements Serializable {
+
+        private String requiredErrorMessage;
+        private String minLengthErrorMessage;
+        private String maxLengthErrorMessage;
+        private String patternErrorMessage;
+
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        public TextFieldI18n setRequiredErrorMessage(String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
+
+        public String getMinLengthErrorMessage() {
+            return minLengthErrorMessage;
+        }
+
+        public TextFieldI18n setMinLengthErrorMessage(String errorMessage) {
+            minLengthErrorMessage = errorMessage;
+            return this;
+        }
+
+        public String getMaxLengthErrorMessage() {
+            return maxLengthErrorMessage;
+        }
+
+        public TextFieldI18n setMaxLengthErrorMessage(String errorMessage) {
+            maxLengthErrorMessage = errorMessage;
+            return this;
+        }
+
+        public String getPatternErrorMessage() {
+            return patternErrorMessage;
+        }
+
+        public TextFieldI18n setPatternErrorMessage(String errorMessage) {
+            patternErrorMessage = errorMessage;
+            return this;
+        }
     }
 }
