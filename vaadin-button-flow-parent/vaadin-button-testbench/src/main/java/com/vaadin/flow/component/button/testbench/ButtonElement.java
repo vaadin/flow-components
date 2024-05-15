@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.button.testbench;
 
+import com.vaadin.testbench.HasLabelAsText;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -23,7 +24,7 @@ import com.vaadin.testbench.elementsbase.Element;
  * element.
  */
 @Element("vaadin-button")
-public class ButtonElement extends TestBenchElement {
+public class ButtonElement extends TestBenchElement implements HasLabelAsText {
     @Override
     public String getText() {
         // The default implementation seems to use innerText, which adds a lot
