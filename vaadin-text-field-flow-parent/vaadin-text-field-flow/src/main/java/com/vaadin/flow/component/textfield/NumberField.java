@@ -36,9 +36,9 @@ import com.vaadin.flow.function.SerializableFunction;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-number-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/number-field", version = "24.4.0-beta2")
+@NpmPackage(value = "@vaadin/number-field", version = "24.4.0-beta3")
 @JsModule("@vaadin/number-field/src/vaadin-number-field.js")
 public class NumberField extends AbstractNumberField<NumberField, Double>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
