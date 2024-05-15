@@ -23,7 +23,7 @@ import com.vaadin.flow.data.binder.Validator;
  */
 final class TextFieldValidationSupport implements Serializable {
 
-    private HasValue<?, String> field;
+    private final HasValue<?, String> field;
     private boolean required;
     private Integer minLength;
     private Integer maxLength;
@@ -33,54 +33,6 @@ final class TextFieldValidationSupport implements Serializable {
     private ErrorMessageProvider minLengthErrorMessageProvider = context -> "";
     private ErrorMessageProvider maxLengthErrorMessageProvider = context -> "";
     private ErrorMessageProvider patternErrorMessageProvider = context -> "";
-
-    private final Validator<String> requiredValidator = (value, context) -> {
-        ValidationResult result = ValidationUtil.checkRequired(required, value,
-                field.getEmptyValue());
-
-        if (result.isError()) {
-            return ValidationResult
-                    .error(requiredErrorMessageProvider.apply(context));
-        }
-
-        return ValidationResult.ok();
-    };
-
-    private final Validator<String> minLengthValidator = (value, context) -> {
-        boolean isError = value != null && maxLength != null
-                && value.length() > maxLength;
-
-        if (isError) {
-            return ValidationResult
-                    .error(minLengthErrorMessageProvider.apply(context));
-        }
-
-        return ValidationResult.ok();
-    };
-
-    private final Validator<String> maxLengthValidator = (value, context) -> {
-        boolean isError = value != null && !value.isEmpty() && minLength != null
-                && value.length() < minLength;
-
-        if (isError) {
-            return ValidationResult
-                    .error(maxLengthErrorMessageProvider.apply(context));
-        }
-
-        return ValidationResult.ok();
-    };
-
-    private final Validator<String> patternValidator = (value, context) -> {
-        boolean isError = value != null && !value.isEmpty() && pattern != null
-                && !pattern.matcher(value).matches();
-
-        if (isError) {
-            return ValidationResult
-                    .error(patternErrorMessageProvider.apply(context));
-        }
-
-        return ValidationResult.ok();
-    };
 
     TextFieldValidationSupport(HasValue<?, String> field) {
         this.field = field;
@@ -141,18 +93,37 @@ final class TextFieldValidationSupport implements Serializable {
 
     ValidationResult checkValidity(String value,
             boolean withRequiredValidator) {
-        List<Validator<String>> validators = new ArrayList<>();
         if (withRequiredValidator) {
-            validators.add(requiredValidator);
+            ValidationResult requiredValidation = ValidationUtil
+                    .checkRequired(required, value, field.getEmptyValue());
+            if (requiredValidation.isError()) {
+                return ValidationResult
+                        .error(requiredErrorMessageProvider.apply(null));
+            }
         }
-        validators.add(minLengthValidator);
-        validators.add(maxLengthValidator);
-        validators.add(patternValidator);
 
-        return validators.stream()
-                .map(validator -> validator.apply(value, null))
-                .filter(ValidationResult::isError).findFirst()
-                .orElse(ValidationResult.ok());
+        final boolean isMaxLengthExceeded = value != null && maxLength != null
+                && value.length() > maxLength;
+        if (isMaxLengthExceeded) {
+            return ValidationResult
+                    .error(maxLengthErrorMessageProvider.apply(null));
+        }
+
+        final boolean isMinLengthNotReached = value != null && !value.isEmpty()
+                && minLength != null && value.length() < minLength;
+        if (isMinLengthNotReached) {
+            return ValidationResult
+                    .error(minLengthErrorMessageProvider.apply(null));
+        }
+
+        final boolean valueViolatePattern = value != null && !value.isEmpty()
+                && pattern != null && !pattern.matcher(value).matches();
+        if (valueViolatePattern) {
+            return ValidationResult
+                    .error(patternErrorMessageProvider.apply(null));
+        }
+
+        return ValidationResult.ok();
     }
 
 }
