@@ -1,7 +1,5 @@
 package com.vaadin.flow.component.textfield;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -12,7 +10,6 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import java.io.Serializable;
 
 import com.vaadin.flow.data.binder.ErrorMessageProvider;
-import com.vaadin.flow.data.binder.Validator;
 
 /**
  * Utility class for performing server-side validation of string values in text
