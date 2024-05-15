@@ -28,6 +28,11 @@ public interface HasValidationProperties extends HasElement, HasValidation {
 
     /**
      * Sets the error message to show to the user when the component is invalid.
+     * <p>
+     * NOTE: If you need to manually control error messages, consider enabling
+     * manual validation mode with {@link #setManualValidation(boolean)} to
+     * avoid potential conflicts between your custom validation and the
+     * component's built-in validation.
      *
      * @param errorMessage
      *            the error message or {@code null} to clear it
