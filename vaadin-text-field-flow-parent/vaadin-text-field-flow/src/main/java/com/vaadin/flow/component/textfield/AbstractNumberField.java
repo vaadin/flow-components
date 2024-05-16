@@ -305,7 +305,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     @Override
     public Validator<T> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        return (value, context) -> checkValidity(value, false);
     }
 
     @Override
@@ -328,13 +328,24 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
                 .forEach(listener -> listener.validationStatusChanged(event));
     }
 
-    private ValidationResult checkValidity(T value) {
+    private ValidationResult checkValidity(T value,
+            boolean withRequiredValidator) {
         boolean hasNonParsableValue = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
         if (hasNonParsableValue) {
             return ValidationResult.error(Optional.of(i18n)
                     .map(AbstractNumberFieldI18n::getBadInputErrorMessage)
                     .orElse(""));
+        }
+
+        if (withRequiredValidator) {
+            ValidationResult requiredValidation = ValidationUtil
+                    .checkRequired(required, value, getEmptyValue());
+            if (requiredValidation.isError()) {
+                return ValidationResult.error(Optional.of(i18n)
+                        .map(AbstractNumberFieldI18n::getRequiredErrorMessage)
+                        .orElse(""));
+            }
         }
 
         Double doubleValue = value != null ? value.doubleValue() : null;
@@ -375,14 +386,19 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      * constraints using browser development tools.
      */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            T value = getValue();
+        if (this.manualValidationEnabled) {
+            return;
+        }
 
-            final var requiredValidation = ValidationUtil
-                    .checkRequired(required, value, getEmptyValue());
+        T value = getValue();
 
-            setInvalid(requiredValidation.isError()
-                    || checkValidity(value).isError());
+        ValidationResult result = checkValidity(value, true);
+        if (result.isError()) {
+            setInvalid(true);
+            setErrorMessage(result.getErrorMessage());
+        } else {
+            setInvalid(false);
+            setErrorMessage("");
         }
     }
 

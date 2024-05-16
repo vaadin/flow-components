@@ -38,11 +38,11 @@ public class NumberFieldBasicValidationPage
         super();
 
         testField.setI18n(new NumberField.NumberFieldI18n()
-            .setRequiredErrorMessage(REQUIRED_ERROR_MESSAGE)
-            .setBadInputErrorMessage(BAD_INPUT_ERROR_MESSAGE)
-            .setMinErrorMessage(MIN_ERROR_MESSAGE)
-            .setMaxErrorMessage(MAX_ERROR_MESSAGE)
-            .setStepErrorMessage(STEP_ERROR_MESSAGE));
+                .setRequiredErrorMessage(REQUIRED_ERROR_MESSAGE)
+                .setBadInputErrorMessage(BAD_INPUT_ERROR_MESSAGE)
+                .setMinErrorMessage(MIN_ERROR_MESSAGE)
+                .setMaxErrorMessage(MAX_ERROR_MESSAGE)
+                .setStepErrorMessage(STEP_ERROR_MESSAGE));
 
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
             testField.setRequiredIndicatorVisible(true);
