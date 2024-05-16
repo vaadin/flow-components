@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.listbox.testbench;
 
-import com.vaadin.testbench.HasLabel;
-
 import com.vaadin.testbench.HasSelectByText;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -35,7 +33,7 @@ import java.util.stream.Stream;
  */
 @Element("vaadin-list-box")
 public class ListBoxElement extends TestBenchElement
-        implements HasLabel, HasSelectByText {
+        implements HasSelectByText {
 
     @Override
     public void selectByText(String text) {
