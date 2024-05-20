@@ -18,6 +18,7 @@ package com.vaadin.flow.component.shared;
 import com.vaadin.flow.data.binder.ValidationResult;
 
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * Util methods for component validation
@@ -95,5 +96,25 @@ public class ValidationUtil {
             return ValidationResult.error("");
         }
         return ValidationResult.ok();
+    }
+
+    public static ValidationResult checkMaxLength(String value,
+            Integer maxLength) {
+        boolean isError = value != null && maxLength != null
+                && value.length() > maxLength;
+        return isError ? ValidationResult.error("") : ValidationResult.ok();
+    }
+
+    public static ValidationResult checkMinLength(String value,
+            Integer minLength) {
+        boolean isError = value != null && !value.isEmpty() && minLength != null
+                && value.length() < minLength;
+        return isError ? ValidationResult.error("") : ValidationResult.ok();
+    }
+
+    public static ValidationResult checkPattern(String value, String pattern) {
+        boolean isError = value != null && !value.isEmpty() && pattern != null
+                && !pattern.isEmpty() && !value.matches(pattern);
+        return isError ? ValidationResult.error("") : ValidationResult.ok();
     }
 }

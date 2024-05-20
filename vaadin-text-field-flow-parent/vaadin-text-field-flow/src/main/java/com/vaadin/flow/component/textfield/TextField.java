@@ -26,6 +26,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
@@ -48,8 +49,6 @@ public class TextField extends TextFieldBase<TextField, String>
     private TextFieldI18n i18n;
 
     private boolean isConnectorAttached;
-
-    private TextFieldValidationSupport validationSupport;
 
     private boolean manualValidationEnabled = false;
 
@@ -182,31 +181,6 @@ public class TextField extends TextFieldBase<TextField, String>
         addValueChangeListener(listener);
     }
 
-    private TextFieldValidationSupport getValidationSupport() {
-        if (validationSupport == null) {
-            validationSupport = new TextFieldValidationSupport(this);
-            validationSupport.setRequiredErrorMessageProvider(context -> {
-                return Optional.of(i18n)
-                        .map(TextFieldI18n::getRequiredErrorMessage).orElse("");
-            });
-            validationSupport.setMinLengthErrorMessageProvider(context -> {
-                return Optional.of(i18n)
-                        .map(TextFieldI18n::getMinLengthErrorMessage)
-                        .orElse("");
-            });
-            validationSupport.setMaxLengthErrorMessageProvider(context -> {
-                return Optional.of(i18n)
-                        .map(TextFieldI18n::getMaxLengthErrorMessage)
-                        .orElse("");
-            });
-            validationSupport.setPatternErrorMessageProvider(context -> {
-                return Optional.of(i18n)
-                        .map(TextFieldI18n::getPatternErrorMessage).orElse("");
-            });
-        }
-        return validationSupport;
-    }
-
     /**
      * Maximum number of characters (in Unicode code points) that the user can
      * enter.
@@ -216,7 +190,6 @@ public class TextField extends TextFieldBase<TextField, String>
      */
     public void setMaxLength(int maxLength) {
         getElement().setProperty("maxlength", maxLength);
-        getValidationSupport().setMaxLength(maxLength);
     }
 
     /**
@@ -229,6 +202,10 @@ public class TextField extends TextFieldBase<TextField, String>
         return (int) getElement().getProperty("maxlength", 0.0);
     }
 
+    private boolean hasMaxLength() {
+        return getElement().getProperty("maxlength") != null;
+    }
+
     /**
      * Minimum number of characters (in Unicode code points) that the user can
      * enter.
@@ -238,7 +215,6 @@ public class TextField extends TextFieldBase<TextField, String>
      */
     public void setMinLength(int minLength) {
         getElement().setProperty("minlength", minLength);
-        getValidationSupport().setMinLength(minLength);
     }
 
     /**
@@ -249,6 +225,10 @@ public class TextField extends TextFieldBase<TextField, String>
      */
     public int getMinLength() {
         return (int) getElement().getProperty("minlength", 0.0);
+    }
+
+    private boolean hasMinLength() {
+        return getElement().getProperty("minlength") != null;
     }
 
     /**
@@ -264,7 +244,6 @@ public class TextField extends TextFieldBase<TextField, String>
     @Override
     public void setRequired(boolean required) {
         super.setRequired(required);
-        getValidationSupport().setRequired(required);
     }
 
     /**
@@ -284,7 +263,6 @@ public class TextField extends TextFieldBase<TextField, String>
      */
     public void setPattern(String pattern) {
         getElement().setProperty("pattern", pattern == null ? "" : pattern);
-        getValidationSupport().setPattern(pattern);
     }
 
     /**
@@ -332,18 +310,52 @@ public class TextField extends TextFieldBase<TextField, String>
     @Override
     public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
         super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        getValidationSupport().setRequired(requiredIndicatorVisible);
     }
 
     @Override
     public Validator<String> getDefaultValidator() {
-        return (value, context) -> getValidationSupport().checkValidity(value,
-                false);
+        return (value, context) -> checkValidity(value, false);
     }
 
     @Override
     public void setManualValidation(boolean enabled) {
         this.manualValidationEnabled = enabled;
+    }
+
+    private ValidationResult checkValidity(String value,
+            boolean withRequiredValidator) {
+        if (withRequiredValidator) {
+            ValidationResult requiredResult = ValidationUtil
+                    .checkRequired(isRequired(), value, getEmptyValue());
+            if (requiredResult.isError()) {
+                return ValidationResult.error(Optional.ofNullable(i18n)
+                        .map(TextFieldI18n::getRequiredErrorMessage)
+                        .orElse(""));
+            }
+        }
+
+        ValidationResult maxLengthResult = ValidationUtil.checkMaxLength(value,
+                hasMaxLength() ? getMaxLength() : null);
+        if (maxLengthResult.isError()) {
+            return ValidationResult.error(Optional.ofNullable(i18n)
+                    .map(TextFieldI18n::getMaxLengthErrorMessage).orElse(""));
+        }
+
+        ValidationResult minLengthResult = ValidationUtil.checkMinLength(value,
+                hasMinLength() ? getMinLength() : null);
+        if (minLengthResult.isError()) {
+            return ValidationResult.error(Optional.ofNullable(i18n)
+                    .map(TextFieldI18n::getMinLengthErrorMessage).orElse(""));
+        }
+
+        ValidationResult patternResult = ValidationUtil.checkPattern(value,
+                getPattern());
+        if (patternResult.isError()) {
+            return ValidationResult.error(Optional.ofNullable(i18n)
+                    .map(TextFieldI18n::getPatternErrorMessage).orElse(""));
+        }
+
+        return ValidationResult.ok();
     }
 
     /**
@@ -357,8 +369,7 @@ public class TextField extends TextFieldBase<TextField, String>
             return;
         }
 
-        ValidationResult result = getValidationSupport()
-                .checkValidity(getValue(), true);
+        ValidationResult result = checkValidity(getValue(), true);
         if (result.isError()) {
             setInvalid(true);
             setErrorMessage(result.getErrorMessage());
