@@ -633,10 +633,11 @@ public class Upload extends Component implements HasSize, HasStyle {
      */
     public void setReceiver(Receiver receiver) {
         this.receiver = receiver;
-        if (!(receiver instanceof MultiFileReceiver)) {
-            setMaxFiles(1);
+        if (receiver instanceof MultiFileReceiver) {
+            getElement().removeProperty("maxFiles");
+            getElement().executeJs("this.maxFiles = Infinity");
         } else {
-            getElement().removeAttribute("maxFiles");
+            setMaxFiles(1);
         }
     }
 
