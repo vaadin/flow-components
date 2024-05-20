@@ -330,44 +330,42 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     private ValidationResult checkValidity(T value,
             boolean withRequiredValidator) {
-        boolean hasNonParsableValue = valueEquals(value, getEmptyValue())
+        boolean hasBadInput = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
-        if (hasNonParsableValue) {
-            return ValidationResult.error(Optional.of(i18n)
+        if (hasBadInput) {
+            return ValidationResult.error(Optional.ofNullable(i18n)
                     .map(AbstractNumberFieldI18n::getBadInputErrorMessage)
                     .orElse(""));
         }
 
         if (withRequiredValidator) {
-            ValidationResult requiredValidation = ValidationUtil
+            ValidationResult requiredResult = ValidationUtil
                     .checkRequired(required, value, getEmptyValue());
-            if (requiredValidation.isError()) {
-                return ValidationResult.error(Optional.of(i18n)
+            if (requiredResult.isError()) {
+                return ValidationResult.error(Optional.ofNullable(i18n)
                         .map(AbstractNumberFieldI18n::getRequiredErrorMessage)
                         .orElse(""));
             }
         }
 
-        Double doubleValue = value != null ? value.doubleValue() : null;
-
-        ValidationResult greaterThanMax = ValidationUtil
-                .checkGreaterThanMax(doubleValue, max);
-        if (greaterThanMax.isError()) {
-            return ValidationResult.error(Optional.of(i18n)
+        ValidationResult maxResult = ValidationUtil
+                .checkGreaterThanMax((Double) value, max);
+        if (maxResult.isError()) {
+            return ValidationResult.error(Optional.ofNullable(i18n)
                     .map(AbstractNumberFieldI18n::getMaxErrorMessage)
                     .orElse(""));
         }
 
-        ValidationResult smallerThanMin = ValidationUtil
-                .checkSmallerThanMin(doubleValue, min);
-        if (smallerThanMin.isError()) {
-            return ValidationResult.error(Optional.of(i18n)
+        ValidationResult minResult = ValidationUtil
+                .checkSmallerThanMin((Double) value, min);
+        if (minResult.isError()) {
+            return ValidationResult.error(Optional.ofNullable(i18n)
                     .map(AbstractNumberFieldI18n::getMinErrorMessage)
                     .orElse(""));
         }
 
         if (!isValidByStep(value)) {
-            return ValidationResult.error(Optional.of(i18n)
+            return ValidationResult.error(Optional.ofNullable(i18n)
                     .map(AbstractNumberFieldI18n::getStepErrorMessage)
                     .orElse(""));
         }

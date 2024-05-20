@@ -19,7 +19,6 @@ import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.BAD_INPUT_ERROR_MESSAGE;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
 
@@ -28,6 +27,7 @@ import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBa
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.STEP_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.REQUIRED_BUTTON;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.CLEAR_VALUE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.BAD_INPUT_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.MAX_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.MIN_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.REQUIRED_ERROR_MESSAGE;
