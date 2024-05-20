@@ -227,10 +227,6 @@ public class TextField extends TextFieldBase<TextField, String>
         return (int) getElement().getProperty("minlength", 0.0);
     }
 
-    private boolean hasMinLength() {
-        return getElement().getProperty("minlength") != null;
-    }
-
     /**
      * <p>
      * Specifies that the user must fill in a value.
@@ -342,7 +338,7 @@ public class TextField extends TextFieldBase<TextField, String>
         }
 
         ValidationResult minLengthResult = ValidationUtil.checkMinLength(value,
-                hasMinLength() ? getMinLength() : null);
+                getMinLength());
         if (minLengthResult.isError()) {
             return ValidationResult.error(Optional.ofNullable(i18n)
                     .map(TextFieldI18n::getMinLengthErrorMessage).orElse(""));
