@@ -21,6 +21,7 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableRunnable;
 
 /**
@@ -36,6 +37,7 @@ public class GridSelectionColumn extends Component {
 
     private final SerializableRunnable selectAllCallback;
     private final SerializableRunnable deselectAllCallback;
+    private final SerializableBiConsumer<String, String> selectRangeCallback;
 
     /**
      * Constructs a new grid selection column configured to use the given
@@ -49,9 +51,10 @@ public class GridSelectionColumn extends Component {
      *            unchecked
      */
     public GridSelectionColumn(SerializableRunnable selectAllCallback,
-            SerializableRunnable deselectAllCallback) {
+            SerializableRunnable deselectAllCallback, SerializableBiConsumer<String, String> selectRangeCallback) {
         this.selectAllCallback = selectAllCallback;
         this.deselectAllCallback = deselectAllCallback;
+        this.selectRangeCallback = selectRangeCallback;
     }
 
     /**
@@ -135,5 +138,10 @@ public class GridSelectionColumn extends Component {
     @ClientCallable
     private void deselectAll() {
         deselectAllCallback.run();
+    }
+
+    @ClientCallable
+    private void selectRange(String key0, String key1) {
+        selectRangeCallback.accept(key0, key1);
     }
 }

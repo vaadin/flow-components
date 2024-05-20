@@ -35,14 +35,17 @@ import com.vaadin.flow.component.grid.Grid.AbstractGridExtension;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
+import com.vaadin.flow.data.provider.hierarchy.HierarchyMapper;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.Range;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
@@ -72,7 +75,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
         super(grid);
         selected = new LinkedHashMap<>();
         selectionColumn = new GridSelectionColumn(this::clientSelectAll,
-                this::clientDeselectAll);
+                this::clientDeselectAll, this::clientSelectRange);
         selectAllCheckBoxVisibility = SelectAllCheckboxVisibility.DEFAULT;
 
         selectionColumn
@@ -100,6 +103,27 @@ public abstract class AbstractGridMultiSelectionModel<T>
         deselectAll();
         if (selectionColumn.getElement().getNode().isAttached()) {
             getGrid().getElement().removeChild(selectionColumn.getElement());
+        }
+    }
+
+    protected void clientSelectRange(String key0, String key1) {
+        HierarchicalDataCommunicator<T> dataCommunicator = (HierarchicalDataCommunicator) getGrid().getDataCommunicator();
+        T item0 = dataCommunicator.getKeyMapper().get(key0);
+        T item1 = dataCommunicator.getKeyMapper().get(key1);
+        int index0 = dataCommunicator.getIndex(item0);
+        int index1 = dataCommunicator.getIndex(item1);
+
+        System.out.println("clientSelectRange: " + index0 + " - " + index1);
+
+        try {
+            var field = dataCommunicator.getClass().getDeclaredField("mapper");
+            field.setAccessible(true);
+            HierarchyMapper<T, ?> mapper = (HierarchyMapper) field.get(dataCommunicator);
+            updateSelection(
+                (Set<T>) mapper.fetchHierarchyItems(Range.between(index0, index1 + 1)).collect(Collectors.toSet()),
+                Collections.emptySet());
+        } catch (Exception e) {
+            System.out.println("unable to access mapper field");
         }
     }
 

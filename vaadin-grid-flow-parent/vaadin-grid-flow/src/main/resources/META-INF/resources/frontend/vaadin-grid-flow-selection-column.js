@@ -92,6 +92,12 @@ export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridCo
     // Optimistically update select all state
     this.selectAll = false;
   }
+
+  _selectRange(item0, item1) {
+    const key0 = this._grid.getItemId(item0);
+    const key1 = this._grid.getItemId(item1);
+    this.$server.selectRange(key0, key1);
+  }
 }
 
 customElements.define(GridFlowSelectionColumn.is, GridFlowSelectionColumn);
