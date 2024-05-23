@@ -28,72 +28,140 @@ public class ValidationUtil {
     }
 
     /**
-     * Checks the required validation constraint
+     * Checks if the given value is empty and returns a ValidationResult with an
+     * empty error message if it is.
      *
+     * @param <V>
+     *            the type of the component value
      * @param required
      *            the required state of the component
      * @param value
      *            the current value set on the component
      * @param emptyValue
      *            the empty value for the component
-     * @return <code>Validation.ok()</code> if the validation passes,
-     *         <code>Validation.error()</code> otherwise
-     * @param <V>
-     *            the type of the component value
+     * @return {@code ValidationResult.ok()} if the validation passes,
+     *         {@code ValidationResult.error()} otherwise
+     * @deprecated since 24.5, use
+     *             {@link #checkRequired(String, boolean, Object, Object)}
+     *             instead.
      */
+    @Deprecated
     public static <V> ValidationResult checkRequired(boolean required, V value,
             V emptyValue) {
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(emptyValue, value);
-        if (isRequiredButEmpty) {
-            return ValidationResult.error("");
-        }
-        return ValidationResult.ok();
+        return checkRequired("", required, value, emptyValue);
     }
 
     /**
-     * Checks if the value being set to the component is greater than the max
-     * value defined
+     * Checks if the given value is empty and returns a ValidationResult with
+     * the given error message if it is.
      *
+     * @param <V>
+     *            the type of the component value
+     * @param errorMessage
+     *            the error message to use if the validation fails
+     * @param required
+     *            the required state of the component
+     * @param value
+     *            the current value set on the component
+     * @param emptyValue
+     *            the empty value for the component
+     * @return {@code ValidationResult.ok()} if the validation passes,
+     *         {@code ValidationResult.error()} otherwise
+     */
+    public static <V> ValidationResult checkRequired(String errorMessage,
+            boolean required, V value, V emptyValue) {
+        boolean isError = required && Objects.equals(emptyValue, value);
+        return isError ? ValidationResult.error(errorMessage)
+                : ValidationResult.ok();
+    }
+
+    /**
+     * Checks if the given value is greater than the maximum value and returns a
+     * ValidationResult with an empty error message if it is.
+     *
+     * @param <V>
+     *            the type of the component value
      * @param value
      *            the current value set on the component
      * @param maxValue
-     *            the max value set on the component
-     * @return <code>Validation.ok()</code> if the validation passes,
-     *         <code>Validation.error()</code> otherwise
-     * @param <V>
-     *            the type of the component value
+     *            the maximum value set on the component
+     * @return {@code ValidationResult.ok()} if the validation passes,
+     *         {@code ValidationResult.error()} otherwise
+     * @deprecated since 24.5, use
+     *            {@link #checkGreaterThanMax(String, Comparable, Comparable)}
+     *           instead.
      */
+    @Deprecated
     public static <V extends Comparable<V>> ValidationResult checkGreaterThanMax(
             V value, V maxValue) {
-        final boolean isGreaterThanMax = value != null && maxValue != null
-                && value.compareTo(maxValue) > 0;
-        if (isGreaterThanMax) {
-            return ValidationResult.error("");
-        }
-        return ValidationResult.ok();
+        return checkGreaterThanMax("", value, maxValue);
     }
 
     /**
-     * Checks if the value being set to the component is smaller than the max
-     * value defined
+     * Checks if the given value is greater than the maximum value and returns a
+     * ValidationResult with an empty error message if it is.
      *
+     * @param <V>
+     *            the type of the component value
+     * @param errorMessage
+     *            the error message to use if the validation fails
+     * @param value
+     *            the current value set on the component
+     * @param maxValue
+     *            the maximum value set on the component
+     * @return {@code ValidationResult.ok()} if the validation passes,
+     *         {@code ValidationResult.error()} otherwise
+     */
+    public static <V extends Comparable<V>> ValidationResult checkGreaterThanMax(
+            String errorMessage, V value, V maxValue) {
+        boolean isError = value != null && maxValue != null
+                && value.compareTo(maxValue) > 0;
+        return isError ? ValidationResult.error(errorMessage)
+                : ValidationResult.ok();
+    }
+
+    /**
+     * Checks if the given value is smaller than the minimum value and returns a
+     * ValidationResult with an empty error message if it is.
+     *
+     * @param <V>
+     *            the type of the component value
      * @param value
      *            the current value set on the component
      * @param minValue
-     *            the min value set on the component
-     * @return <code>Validation.ok()</code> if the validation passes,
-     *         <code>Validation.error()</code> otherwise
-     * @param <V>
-     *            the type of the component value
+     *            the minimum value set on the component
+     * @return {@code ValidationResult.ok()} if the validation passes,
+     *         {@code ValidationResult.error()} otherwise
+     * @deprecated since 24.5, use
+     *           {@link #checkSmallerThanMin(String, Comparable, Comparable)}
+     *          instead.
      */
+    @Deprecated
     public static <V extends Comparable<V>> ValidationResult checkSmallerThanMin(
             V value, V minValue) {
-        final boolean isSmallerThanMin = value != null && minValue != null
+        return checkSmallerThanMin("", value, minValue);
+    }
+
+    /**
+     * Checks if the given value is smaller than the minimum value and returns a
+     * ValidationResult with an empty error message if it is.
+     *
+     * @param <V>
+     *            the type of the component value
+     * @param errorMessage
+     *            the error message to use if the validation fails
+     * @param value
+     *            the current value set on the component
+     * @param minValue
+     *            the minimum value set on the component
+     * @return {@code ValidationResult.ok()} if the validation passes,
+     *         {@code ValidationResult.error()} otherwise
+     */
+    public static <V extends Comparable<V>> ValidationResult checkSmallerThanMin(
+            String errorMessage, V value, V minValue) {
+        boolean isError = value != null && minValue != null
                 && value.compareTo(minValue) < 0;
-        if (isSmallerThanMin) {
-            return ValidationResult.error("");
-        }
-        return ValidationResult.ok();
+        return isError ? ValidationResult.error(errorMessage)
+                : ValidationResult.ok();
     }
 }
