@@ -125,9 +125,9 @@ public class DateTimePicker
 
     private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();
     private final DateTimePickerTimePicker timePicker = new DateTimePickerTimePicker();
-    private DatePickerI18n i18n;
+    private DatePickerI18n datePickerI18n;
 
-    private DateTimePickerI18n dateTimePickerI18n;
+    private DateTimePickerI18n i18n;
     private Locale locale;
 
     private final static SerializableFunction<String, LocalDateTime> PARSER = s -> {
@@ -426,16 +426,18 @@ public class DateTimePicker
             return dateLabel;
         }
 
-        public void setDateLabel(String dateLabel) {
+        public DateTimePickerI18n setDateLabel(String dateLabel) {
             this.dateLabel = dateLabel;
+            return this;
         }
 
         public String getTimeLabel() {
             return timeLabel;
         }
 
-        public void setTimeLabel(String timeLabel) {
+        public DateTimePickerI18n setTimeLabel(String timeLabel) {
             this.timeLabel = timeLabel;
+            return this;
         }
     }
 
@@ -450,12 +452,11 @@ public class DateTimePicker
      *            the value to be used as part of date picker aria-label.
      */
     public void setDateAriaLabel(String dateLabel) {
-        if (dateTimePickerI18n == null) {
-            dateTimePickerI18n = new DateTimePickerI18n();
+        if (i18n == null) {
+            i18n = new DateTimePickerI18n();
         }
-        dateTimePickerI18n.setDateLabel(dateLabel);
-        getElement().setPropertyJson("i18n",
-                JsonSerializer.toJson(dateTimePickerI18n));
+        i18n.setDateLabel(dateLabel);
+        setI18n(i18n);
     }
 
     /**
@@ -468,10 +469,10 @@ public class DateTimePicker
      * @return an optional label or an empty optional if no label has been set
      */
     public Optional<String> getDateAriaLabel() {
-        if (dateTimePickerI18n == null) {
+        if (i18n == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable(dateTimePickerI18n.getDateLabel());
+        return Optional.ofNullable(i18n.getDateLabel());
     }
 
     /**
@@ -485,12 +486,11 @@ public class DateTimePicker
      *            the value to be used as part of time picker aria-label.
      */
     public void setTimeAriaLabel(String timeLabel) {
-        if (dateTimePickerI18n == null) {
-            dateTimePickerI18n = new DateTimePickerI18n();
+        if (i18n == null) {
+            i18n = new DateTimePickerI18n();
         }
-        dateTimePickerI18n.setTimeLabel(timeLabel);
-        getElement().setPropertyJson("i18n",
-                JsonSerializer.toJson(dateTimePickerI18n));
+        i18n.setTimeLabel(timeLabel);
+        setI18n(i18n);
     }
 
     /**
@@ -503,10 +503,10 @@ public class DateTimePicker
      * @return an optional label or an empty optional if no label has been set
      */
     public Optional<String> getTimeAriaLabel() {
-        if (dateTimePickerI18n == null) {
+        if (i18n == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable(dateTimePickerI18n.getTimeLabel());
+        return Optional.ofNullable(i18n.getTimeLabel());
     }
 
     /**
@@ -602,8 +602,8 @@ public class DateTimePicker
      * <p>
      * Set true to display ISO-8601 week numbers in the calendar.
      * <p>
-     * Note that displaying of week numbers is only supported when
-     * i18n.firstDayOfWeek is 1 (Monday).
+ Note that displaying of week numbers is only supported when
+ datePickerI18n.firstDayOfWeek is 1 (Monday).
      *
      * @param weekNumbersVisible
      *            the boolean value to set
@@ -759,15 +759,7 @@ public class DateTimePicker
     }
 
     private ValidationResult checkValidity(LocalDateTime value) {
-        boolean hasNonParsableDatePickerValue = datePicker
-                .getValue() == datePicker.getEmptyValue()
-                && datePicker.isInputValuePresent();
-
-        boolean hasNonParsableTimePickerValue = timePicker
-                .getValue() == timePicker.getEmptyValue()
-                && timePicker.isInputValuePresent();
-
-        if (hasNonParsableDatePickerValue || hasNonParsableTimePickerValue) {
+        if (isDatePickerValueUnparsable() || isTimePickerValueUnparsable()) {
             return ValidationResult.error("");
         }
 
@@ -784,6 +776,14 @@ public class DateTimePicker
         }
 
         return ValidationResult.ok();
+    }
+
+    private boolean isDatePickerValueUnparsable() {
+        return Objects.equals(datePicker.getValue(), datePicker.getEmptyValue()) && datePicker.isInputValuePresent();
+    }
+
+    private boolean isTimePickerValueUnparsable() {
+        return Objects.equals(timePicker.getValue(), timePicker.getEmptyValue()) && timePicker.isInputValuePresent();
     }
 
     /**
@@ -869,11 +869,11 @@ public class DateTimePicker
      * not update the lang on the component if not set back using
      * {@link DateTimePicker#setDatePickerI18n(DatePickerI18n)}
      *
-     * @return the i18n object. It will be <code>null</code>, If the i18n
-     *         properties weren't set.
+     * @return the datePickerI18n object. It will be <code>null</code>, If the datePickerI18n
+         properties weren't set.
      */
     public DatePickerI18n getDatePickerI18n() {
-        return i18n;
+        return datePickerI18n;
     }
 
     /**
@@ -886,8 +886,19 @@ public class DateTimePicker
     public void setDatePickerI18n(DatePickerI18n i18n) {
         Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
-        this.i18n = i18n;
+        this.datePickerI18n = i18n;
         datePicker.setI18n(i18n);
+    }
+
+    public void setI18n(DateTimePickerI18n i18n) {
+        Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+        this.i18n = i18n;
+        getElement().setPropertyJson("i18n", JsonSerializer.toJson(i18n));
+    }
+
+    public DateTimePickerI18n getI18n() {
+        return i18n;
     }
 
     /**
