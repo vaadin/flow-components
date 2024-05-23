@@ -548,14 +548,14 @@ public class DatePicker
             return ValidationResult.error("");
         }
 
-        ValidationResult greaterThanMax = ValidationUtil
-                .checkGreaterThanMax(value, max);
+        ValidationResult greaterThanMax = ValidationUtil.checkGreaterThanMax("",
+                value, max);
         if (greaterThanMax.isError()) {
             return greaterThanMax;
         }
 
-        ValidationResult smallerThanMin = ValidationUtil
-                .checkSmallerThanMin(value, min);
+        ValidationResult smallerThanMin = ValidationUtil.checkSmallerThanMin("",
+                value, min);
         if (smallerThanMin.isError()) {
             return smallerThanMin;
         }
@@ -569,8 +569,8 @@ public class DatePicker
      * constraints using browser development tools.
      */
     private boolean isInvalid(LocalDate value) {
-        var requiredValidation = ValidationUtil.checkRequired(required, value,
-                getEmptyValue());
+        var requiredValidation = ValidationUtil.checkRequired("", required,
+                value, getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
     }

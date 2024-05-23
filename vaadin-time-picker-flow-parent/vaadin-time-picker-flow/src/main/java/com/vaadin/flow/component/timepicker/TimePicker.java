@@ -353,13 +353,13 @@ public class TimePicker
         }
 
         ValidationResult greaterThanMaxValidation = ValidationUtil
-                .checkGreaterThanMax(value, max);
+                .checkGreaterThanMax("", value, max);
         if (greaterThanMaxValidation.isError()) {
             return greaterThanMaxValidation;
         }
 
         ValidationResult smallThanMinValidation = ValidationUtil
-                .checkSmallerThanMin(value, min);
+                .checkSmallerThanMin("", value, min);
         if (smallThanMinValidation.isError()) {
             return smallThanMinValidation;
         }
@@ -373,8 +373,8 @@ public class TimePicker
      * constraints using browser development tools.
      */
     private boolean isInvalid(LocalTime value) {
-        var requiredValidation = ValidationUtil.checkRequired(required, value,
-                getEmptyValue());
+        var requiredValidation = ValidationUtil.checkRequired("", required,
+                value, getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
     }

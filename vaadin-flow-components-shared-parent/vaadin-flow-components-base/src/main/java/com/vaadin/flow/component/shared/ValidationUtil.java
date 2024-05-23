@@ -88,8 +88,8 @@ public class ValidationUtil {
      * @return {@code ValidationResult.ok()} if the validation passes,
      *         {@code ValidationResult.error()} otherwise
      * @deprecated since 24.5, use
-     *            {@link #checkGreaterThanMax(String, Comparable, Comparable)}
-     *           instead.
+     *             {@link #checkGreaterThanMax(String, Comparable, Comparable)}
+     *             instead.
      */
     @Deprecated
     public static <V extends Comparable<V>> ValidationResult checkGreaterThanMax(
@@ -133,8 +133,8 @@ public class ValidationUtil {
      * @return {@code ValidationResult.ok()} if the validation passes,
      *         {@code ValidationResult.error()} otherwise
      * @deprecated since 24.5, use
-     *           {@link #checkSmallerThanMin(String, Comparable, Comparable)}
-     *          instead.
+     *             {@link #checkSmallerThanMin(String, Comparable, Comparable)}
+     *             instead.
      */
     @Deprecated
     public static <V extends Comparable<V>> ValidationResult checkSmallerThanMin(

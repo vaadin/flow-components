@@ -63,8 +63,8 @@ final class TextFieldValidationSupport implements Serializable {
      * @return <code>true</code> if the value is invalid.
      */
     boolean isInvalid(String value) {
-        var requiredValidation = ValidationUtil.checkRequired(required, value,
-                field.getEmptyValue());
+        var requiredValidation = ValidationUtil.checkRequired("", required,
+                value, field.getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
     }
