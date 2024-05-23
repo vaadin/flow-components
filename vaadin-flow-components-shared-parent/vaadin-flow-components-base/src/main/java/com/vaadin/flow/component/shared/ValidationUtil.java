@@ -18,7 +18,6 @@ package com.vaadin.flow.component.shared;
 import com.vaadin.flow.data.binder.ValidationResult;
 
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 /**
  * Util methods for component validation
@@ -42,12 +41,16 @@ public class ValidationUtil {
      * @param <V>
      *            the type of the component value
      */
-    public static <V> ValidationResult checkRequired(boolean required, V value,
+    public static <V> ValidationResult checkRequired(boolean required, V value, V emptyValue) {
+        return checkRequired("", required, value, emptyValue);
+    }
+
+    public static <V> ValidationResult checkRequired(String errorMessage, boolean required, V value,
             V emptyValue) {
         final boolean isRequiredButEmpty = required
                 && Objects.equals(emptyValue, value);
         if (isRequiredButEmpty) {
-            return ValidationResult.error("");
+            return ValidationResult.error(errorMessage);
         }
         return ValidationResult.ok();
     }
@@ -98,23 +101,23 @@ public class ValidationUtil {
         return ValidationResult.ok();
     }
 
-    public static ValidationResult checkMaxLength(String value,
+    public static ValidationResult checkMaxLength(String errorMessage, String value,
             Integer maxLength) {
         boolean isError = value != null && maxLength != null
                 && value.length() > maxLength;
-        return isError ? ValidationResult.error("") : ValidationResult.ok();
+        return isError ? ValidationResult.error(errorMessage) : ValidationResult.ok();
     }
 
-    public static ValidationResult checkMinLength(String value,
+    public static ValidationResult checkMinLength(String errorMessage, String value,
             Integer minLength) {
         boolean isError = value != null && !value.isEmpty() && minLength != null
                 && value.length() < minLength;
-        return isError ? ValidationResult.error("") : ValidationResult.ok();
+        return isError ? ValidationResult.error(errorMessage) : ValidationResult.ok();
     }
 
-    public static ValidationResult checkPattern(String value, String pattern) {
+    public static ValidationResult checkPattern(String errorMessage, String value, String pattern) {
         boolean isError = value != null && !value.isEmpty() && pattern != null
                 && !pattern.isEmpty() && !value.matches(pattern);
-        return isError ? ValidationResult.error("") : ValidationResult.ok();
+        return isError ? ValidationResult.error(errorMessage) : ValidationResult.ok();
     }
 }

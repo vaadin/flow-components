@@ -321,34 +321,31 @@ public class TextField extends TextFieldBase<TextField, String>
     private ValidationResult checkValidity(String value,
             boolean withRequiredValidator) {
         if (withRequiredValidator) {
-            ValidationResult requiredResult = ValidationUtil
-                    .checkRequired(isRequired(), value, getEmptyValue());
+            ValidationResult requiredResult = ValidationUtil.checkRequired(
+                    getRequiredErrorMessage(), isRequired(), value,
+                    getEmptyValue());
             if (requiredResult.isError()) {
-                return ValidationResult.error(Optional.ofNullable(i18n)
-                        .map(TextFieldI18n::getRequiredErrorMessage)
-                        .orElse(""));
+                return requiredResult;
             }
         }
 
-        ValidationResult maxLengthResult = ValidationUtil.checkMaxLength(value,
+        ValidationResult maxLengthResult = ValidationUtil.checkMaxLength(
+                getMaxLengthErrorMessage(), value,
                 hasMaxLength() ? getMaxLength() : null);
         if (maxLengthResult.isError()) {
-            return ValidationResult.error(Optional.ofNullable(i18n)
-                    .map(TextFieldI18n::getMaxLengthErrorMessage).orElse(""));
+            return maxLengthResult;
         }
 
-        ValidationResult minLengthResult = ValidationUtil.checkMinLength(value,
-                getMinLength());
+        ValidationResult minLengthResult = ValidationUtil.checkMinLength(
+                getMinLengthErrorMessage(), value, getMinLength());
         if (minLengthResult.isError()) {
-            return ValidationResult.error(Optional.ofNullable(i18n)
-                    .map(TextFieldI18n::getMinLengthErrorMessage).orElse(""));
+            return minLengthResult;
         }
 
-        ValidationResult patternResult = ValidationUtil.checkPattern(value,
-                getPattern());
+        ValidationResult patternResult = ValidationUtil
+                .checkPattern(getPatternErrorMessage(), value, getPattern());
         if (patternResult.isError()) {
-            return ValidationResult.error(Optional.ofNullable(i18n)
-                    .map(TextFieldI18n::getPatternErrorMessage).orElse(""));
+            return patternResult;
         }
 
         return ValidationResult.ok();
@@ -389,6 +386,26 @@ public class TextField extends TextFieldBase<TextField, String>
         Objects.requireNonNull(i18n,
                 "The I18N properties object should not be null");
         this.i18n = i18n;
+    }
+
+    private String getRequiredErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(TextFieldI18n::getRequiredErrorMessage).orElse("");
+    }
+
+    private String getMinLengthErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(TextFieldI18n::getMinLengthErrorMessage).orElse("");
+    }
+
+    private String getMaxLengthErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(TextFieldI18n::getMaxLengthErrorMessage).orElse("");
+    }
+
+    private String getPatternErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(TextFieldI18n::getPatternErrorMessage).orElse("");
     }
 
     public static class TextFieldI18n implements Serializable {
