@@ -421,6 +421,10 @@ public class DateTimePicker
     public static class DateTimePickerI18n implements Serializable {
         private String dateLabel;
         private String timeLabel;
+        private String requiredErrorMessage;
+        private String badInputErrorMessage;
+        private String minErrorMessage;
+        private String maxErrorMessage;
 
         public String getDateLabel() {
             return dateLabel;
@@ -437,6 +441,42 @@ public class DateTimePicker
 
         public DateTimePickerI18n setTimeLabel(String timeLabel) {
             this.timeLabel = timeLabel;
+            return this;
+        }
+
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        public DateTimePickerI18n setRequiredErrorMessage(String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
+
+        public String getBadInputErrorMessage() {
+            return badInputErrorMessage;
+        }
+
+        public DateTimePickerI18n setBadInputErrorMessage(String errorMessage) {
+            badInputErrorMessage = errorMessage;
+            return this;
+        }
+
+        public String getMinErrorMessage() {
+            return minErrorMessage;
+        }
+
+        public DateTimePickerI18n setMinErrorMessage(String errorMessage) {
+            minErrorMessage = errorMessage;
+            return this;
+        }
+
+        public String getMaxErrorMessage() {
+            return maxErrorMessage;
+        }
+
+        public DateTimePickerI18n setMaxErrorMessage(String errorMessage) {
+            maxErrorMessage = errorMessage;
             return this;
         }
     }
@@ -602,8 +642,8 @@ public class DateTimePicker
      * <p>
      * Set true to display ISO-8601 week numbers in the calendar.
      * <p>
- Note that displaying of week numbers is only supported when
- datePickerI18n.firstDayOfWeek is 1 (Monday).
+     * Note that displaying of week numbers is only supported when
+     * datePickerI18n.firstDayOfWeek is 1 (Monday).
      *
      * @param weekNumbersVisible
      *            the boolean value to set
@@ -747,7 +787,7 @@ public class DateTimePicker
 
     @Override
     public Validator<LocalDateTime> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        return (value, context) -> checkValidity(value, false);
     }
 
     @Override
@@ -758,44 +798,43 @@ public class DateTimePicker
                         event.isValid())));
     }
 
-    private ValidationResult checkValidity(LocalDateTime value) {
+    private ValidationResult checkValidity(LocalDateTime value,
+            boolean withRequiredValidator) {
         if (isDatePickerValueUnparsable() || isTimePickerValueUnparsable()) {
-            return ValidationResult.error("");
+            return ValidationResult.error(getBadInputErrorMessage());
         }
 
-        ValidationResult greaterThanMax = ValidationUtil
-                .checkGreaterThanMax(value, max);
-        if (greaterThanMax.isError()) {
-            return greaterThanMax;
+        if (withRequiredValidator) {
+            ValidationResult requiredResult = ValidationUtil
+                    .checkRequired(required, value, getEmptyValue());
+            if (requiredResult.isError()) {
+                return ValidationResult.error(getRequiredErrorMessage());
+            }
         }
 
-        ValidationResult smallerThanMin = ValidationUtil
-                .checkSmallerThanMin(value, min);
-        if (smallerThanMin.isError()) {
-            return smallerThanMin;
+        ValidationResult maxResult = ValidationUtil.checkGreaterThanMax(value,
+                max);
+        if (maxResult.isError()) {
+            return ValidationResult.error(getMaxErrorMessage());
+        }
+
+        ValidationResult minResult = ValidationUtil.checkSmallerThanMin(value,
+                min);
+        if (minResult.isError()) {
+            return ValidationResult.error(getMinErrorMessage());
         }
 
         return ValidationResult.ok();
     }
 
     private boolean isDatePickerValueUnparsable() {
-        return Objects.equals(datePicker.getValue(), datePicker.getEmptyValue()) && datePicker.isInputValuePresent();
+        return Objects.equals(datePicker.getValue(), datePicker.getEmptyValue())
+                && datePicker.isInputValuePresent();
     }
 
     private boolean isTimePickerValueUnparsable() {
-        return Objects.equals(timePicker.getValue(), timePicker.getEmptyValue()) && timePicker.isInputValuePresent();
-    }
-
-    /**
-     * Gets the validity of the date time picker value.
-     *
-     * @return the current validity of the value.
-     */
-    private boolean isInvalid(LocalDateTime value) {
-        var requiredValidation = ValidationUtil.checkRequired(required, value,
-                getEmptyValue());
-
-        return requiredValidation.isError() || checkValidity(value).isError();
+        return Objects.equals(timePicker.getValue(), timePicker.getEmptyValue())
+                && timePicker.isInputValuePresent();
     }
 
     @Override
@@ -809,8 +848,17 @@ public class DateTimePicker
      * constraints using browser development tools.
      */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            setInvalid(isInvalid(getValue()));
+        if (this.manualValidationEnabled) {
+            return;
+        }
+
+        ValidationResult result = checkValidity(getValue(), true);
+        if (result.isError()) {
+            setInvalid(true);
+            setErrorMessage(result.getErrorMessage());
+        } else {
+            setInvalid(false);
+            setErrorMessage(null);
         }
     }
 
@@ -869,8 +917,8 @@ public class DateTimePicker
      * not update the lang on the component if not set back using
      * {@link DateTimePicker#setDatePickerI18n(DatePickerI18n)}
      *
-     * @return the datePickerI18n object. It will be <code>null</code>, If the datePickerI18n
-         properties weren't set.
+     * @return the datePickerI18n object. It will be <code>null</code>, If the
+     *         datePickerI18n properties weren't set.
      */
     public DatePickerI18n getDatePickerI18n() {
         return datePickerI18n;
@@ -930,5 +978,25 @@ public class DateTimePicker
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+    }
+
+    private String getRequiredErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(DateTimePickerI18n::getRequiredErrorMessage).orElse("");
+    }
+
+    private String getBadInputErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(DateTimePickerI18n::getBadInputErrorMessage).orElse("");
+    }
+
+    private String getMinErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(DateTimePickerI18n::getMinErrorMessage).orElse("");
+    }
+
+    private String getMaxErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(DateTimePickerI18n::getMaxErrorMessage).orElse("");
     }
 }

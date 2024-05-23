@@ -17,6 +17,12 @@ public class BasicValidationPage
     public BasicValidationPage() {
         super();
 
+        testField.setI18n(new DateTimePicker.DateTimePickerI18n()
+            .setRequiredErrorMessage("Field is required")
+            .setBadInputErrorMessage("Date or time has incorrect format")
+            .setMinErrorMessage("Value is too small")
+            .setMaxErrorMessage("Value is too large"));
+
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
             testField.setRequiredIndicatorVisible(true);
         }));
