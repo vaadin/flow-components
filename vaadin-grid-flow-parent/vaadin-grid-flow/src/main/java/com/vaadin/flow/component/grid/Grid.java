@@ -64,6 +64,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.grid.editor.EditorImpl;
 import com.vaadin.flow.component.grid.editor.EditorRenderer;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
@@ -1456,6 +1457,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private SelectionPreservationHandler<T> selectionPreservationHandler;
 
     private PendingJavaScriptResult pendingSorterUpdate;
+
+    private static final String EMPTY_STATE_SLOT = "empty-state";
+    private Component emptyStateComponent;
+    private String emptyStateText;
 
     /**
      * Creates a new instance, with page size of 50.
@@ -5055,5 +5060,57 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return Optional.ofNullable(getUniqueKeyProvider())
                 .map(provider -> provider.apply(item))
                 .orElse(getDataCommunicator().getKeyMapper().key(item));
+    }
+
+    /**
+     * Sets the component to be displayed when the grid is empty.
+     *
+     * @param emptyStateComponent
+     *            the component to be displayed when the grid is empty
+     */
+    public void setEmptyStateComponent(Component emptyStateComponent) {
+        this.emptyStateText = null;
+        this.emptyStateComponent = emptyStateComponent;
+        updateEmptyStateContent();
+    }
+
+    /**
+     * Sets the text to be displayed when the grid is empty.
+     *
+     * @param emptyStateText
+     *            the text to be displayed when the grid is empty
+     */
+    public void setEmptyStateText(String emptyStateText) {
+        this.emptyStateComponent = null;
+        this.emptyStateText = emptyStateText;
+        updateEmptyStateContent();
+    }
+
+    /**
+     * Returns the component that is displayed when the grid is empty.
+     *
+     * @return the component that is displayed when the grid is empty
+     */
+    public Component getEmptyStateComponent() {
+        return emptyStateComponent;
+    }
+
+    /**
+     * Returns the text that is displayed when the grid is empty.
+     *
+     * @return the text that is displayed when the grid is empty
+     */
+    public String getEmptyStateText() {
+        return emptyStateText;
+    }
+
+    private void updateEmptyStateContent() {
+        if (emptyStateComponent != null) {
+            SlotUtils.setSlot(this, EMPTY_STATE_SLOT, emptyStateComponent);
+        } else if (emptyStateText != null) {
+            SlotUtils.setSlot(this, EMPTY_STATE_SLOT, new Span(emptyStateText));
+        } else {
+            SlotUtils.clearSlot(this, EMPTY_STATE_SLOT);
+        }
     }
 }
