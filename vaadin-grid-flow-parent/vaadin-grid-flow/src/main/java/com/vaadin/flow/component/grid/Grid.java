@@ -578,8 +578,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * <p>
          * Please note that using the {@code em} length unit is discouraged as
          * it might lead to misalignment issues if the header, body, and footer
-         * cells have different font sizes. Use {@code rem} instead, in case you
-         * need to use a relative to font size length unit.
+         * cells have different font sizes. Instead, use {@code rem} if you need
+         * a length unit relative to the font size.
          *
          * @see #setFlexGrow(int)
          *
