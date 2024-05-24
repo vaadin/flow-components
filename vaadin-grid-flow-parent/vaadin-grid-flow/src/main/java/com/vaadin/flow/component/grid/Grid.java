@@ -575,6 +575,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         /**
          * Sets the width of this column as a CSS-string.
+         * <p>
+         * Please note that using the {@code em} length unit is discouraged as
+         * it might lead to misalignment issues if the header, body, and footer
+         * cells have different font sizes. Use {@code rem} instead, in case you
+         * need to use a relative to font size length unit.
          *
          * @see #setFlexGrow(int)
          *
