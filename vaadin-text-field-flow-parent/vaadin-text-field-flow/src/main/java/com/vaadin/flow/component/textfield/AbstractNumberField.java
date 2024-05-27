@@ -332,16 +332,16 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
         Double doubleValue = value != null ? value.doubleValue() : null;
 
-        ValidationResult greaterThanMax = ValidationUtil.checkGreaterThanMax("",
-                doubleValue, max);
-        if (greaterThanMax.isError()) {
-            return greaterThanMax;
+        ValidationResult maxResult = ValidationUtil.checkMax("", doubleValue,
+                max);
+        if (maxResult.isError()) {
+            return maxResult;
         }
 
-        ValidationResult smallerThanMin = ValidationUtil.checkSmallerThanMin("",
-                doubleValue, min);
-        if (smallerThanMin.isError()) {
-            return smallerThanMin;
+        ValidationResult minResult = ValidationUtil.checkMin("", doubleValue,
+                min);
+        if (minResult.isError()) {
+            return minResult;
         }
 
         if (!isValidByStep(value)) {

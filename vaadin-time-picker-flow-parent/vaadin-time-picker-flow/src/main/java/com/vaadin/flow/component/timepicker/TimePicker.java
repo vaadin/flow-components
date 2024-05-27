@@ -352,16 +352,14 @@ public class TimePicker
             return ValidationResult.error("");
         }
 
-        ValidationResult greaterThanMaxValidation = ValidationUtil
-                .checkGreaterThanMax("", value, max);
-        if (greaterThanMaxValidation.isError()) {
-            return greaterThanMaxValidation;
+        ValidationResult maxResult = ValidationUtil.checkMax("", value, max);
+        if (maxResult.isError()) {
+            return maxResult;
         }
 
-        ValidationResult smallThanMinValidation = ValidationUtil
-                .checkSmallerThanMin("", value, min);
-        if (smallThanMinValidation.isError()) {
-            return smallThanMinValidation;
+        ValidationResult minResult = ValidationUtil.checkMin("", value, min);
+        if (minResult.isError()) {
+            return minResult;
         }
 
         return ValidationResult.ok();

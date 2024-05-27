@@ -548,16 +548,14 @@ public class DatePicker
             return ValidationResult.error("");
         }
 
-        ValidationResult greaterThanMax = ValidationUtil.checkGreaterThanMax("",
-                value, max);
-        if (greaterThanMax.isError()) {
-            return greaterThanMax;
+        ValidationResult resultMax = ValidationUtil.checkMax("", value, max);
+        if (resultMax.isError()) {
+            return resultMax;
         }
 
-        ValidationResult smallerThanMin = ValidationUtil.checkSmallerThanMin("",
-                value, min);
-        if (smallerThanMin.isError()) {
-            return smallerThanMin;
+        ValidationResult resultMin = ValidationUtil.checkMin("", value, min);
+        if (resultMin.isError()) {
+            return resultMin;
         }
 
         return ValidationResult.ok();
