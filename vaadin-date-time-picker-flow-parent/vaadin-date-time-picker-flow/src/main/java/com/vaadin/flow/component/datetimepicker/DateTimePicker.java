@@ -25,6 +25,9 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
+import elemental.json.JsonObject;
+import elemental.json.JsonType;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -141,6 +144,9 @@ public class DateTimePicker
     private LocalDateTime max;
     private LocalDateTime min;
     private boolean required;
+
+    private String dateAriaLabel;
+    private String timeAriaLabel;
 
     private boolean manualValidationEnabled = false;
 
@@ -419,24 +425,6 @@ public class DateTimePicker
      * Contains DateTimePicker internalization properties
      */
     public static class DateTimePickerI18n implements Serializable {
-        private String dateLabel;
-        private String timeLabel;
-
-        public String getDateLabel() {
-            return dateLabel;
-        }
-
-        public void setDateLabel(String dateLabel) {
-            this.dateLabel = dateLabel;
-        }
-
-        public String getTimeLabel() {
-            return timeLabel;
-        }
-
-        public void setTimeLabel(String timeLabel) {
-            this.timeLabel = timeLabel;
-        }
     }
 
     /**
@@ -450,12 +438,8 @@ public class DateTimePicker
      *            the value to be used as part of date picker aria-label.
      */
     public void setDateAriaLabel(String dateLabel) {
-        if (dateTimePickerI18n == null) {
-            dateTimePickerI18n = new DateTimePickerI18n();
-        }
-        dateTimePickerI18n.setDateLabel(dateLabel);
-        getElement().setPropertyJson("i18n",
-                JsonSerializer.toJson(dateTimePickerI18n));
+        dateAriaLabel = dateLabel;
+        updateI18n();
     }
 
     /**
@@ -468,10 +452,7 @@ public class DateTimePicker
      * @return an optional label or an empty optional if no label has been set
      */
     public Optional<String> getDateAriaLabel() {
-        if (dateTimePickerI18n == null) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(dateTimePickerI18n.getDateLabel());
+        return Optional.ofNullable(dateAriaLabel);
     }
 
     /**
@@ -485,12 +466,8 @@ public class DateTimePicker
      *            the value to be used as part of time picker aria-label.
      */
     public void setTimeAriaLabel(String timeLabel) {
-        if (dateTimePickerI18n == null) {
-            dateTimePickerI18n = new DateTimePickerI18n();
-        }
-        dateTimePickerI18n.setTimeLabel(timeLabel);
-        getElement().setPropertyJson("i18n",
-                JsonSerializer.toJson(dateTimePickerI18n));
+        timeAriaLabel = timeLabel;
+        updateI18n();
     }
 
     /**
@@ -503,10 +480,7 @@ public class DateTimePicker
      * @return an optional label or an empty optional if no label has been set
      */
     public Optional<String> getTimeAriaLabel() {
-        if (dateTimePickerI18n == null) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(dateTimePickerI18n.getTimeLabel());
+        return Optional.ofNullable(timeAriaLabel);
     }
 
     /**
@@ -888,6 +862,25 @@ public class DateTimePicker
                 "The i18n properties object should not be null");
         this.i18n = i18n;
         datePicker.setI18n(i18n);
+    }
+
+    private void updateI18n() {
+        DateTimePickerI18n i18n = this.dateTimePickerI18n;
+        if (i18n == null) {
+            i18n = new DateTimePickerI18n();
+        }
+
+        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(i18n);
+
+        if (dateAriaLabel != null) {
+            i18nJson.put("dateLabel", dateAriaLabel);
+        }
+
+        if (timeAriaLabel != null) {
+            i18nJson.put("timeLabel", timeAriaLabel);
+        }
+
+        getElement().setPropertyJson("i18n", i18nJson);
     }
 
     /**
