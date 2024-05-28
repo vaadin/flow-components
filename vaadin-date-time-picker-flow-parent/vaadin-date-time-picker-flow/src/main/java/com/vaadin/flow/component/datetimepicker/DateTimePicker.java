@@ -426,16 +426,18 @@ public class DateTimePicker
             return dateLabel;
         }
 
-        public void setDateLabel(String dateLabel) {
+        public DateTimePickerI18n setDateLabel(String dateLabel) {
             this.dateLabel = dateLabel;
+            return this;
         }
 
         public String getTimeLabel() {
             return timeLabel;
         }
 
-        public void setTimeLabel(String timeLabel) {
+        public DateTimePickerI18n setTimeLabel(String timeLabel) {
             this.timeLabel = timeLabel;
+            return this;
         }
     }
 
