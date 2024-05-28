@@ -209,10 +209,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.4.0-beta3")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.4.0-beta3")
+@NpmPackage(value = "@vaadin/grid", version = "24.4.0-rc1")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.4.0-rc1")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -437,7 +437,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta3")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-rc1")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -575,6 +575,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         /**
          * Sets the width of this column as a CSS-string.
+         * <p>
+         * Please note that using the {@code em} length unit is discouraged as
+         * it might lead to misalignment issues if the header, body, and footer
+         * cells have different font sizes. Instead, use {@code rem} if you need
+         * a length unit relative to the font size.
          *
          * @see #setFlexGrow(int)
          *
