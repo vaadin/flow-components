@@ -296,6 +296,8 @@ public class RichTextEditor
         private String h1;
         private String h2;
         private String h3;
+        private String color;
+        private String background;
         private String subscript;
         private String superscript;
         private String listOrdered;
@@ -495,6 +497,48 @@ public class RichTextEditor
          */
         public RichTextEditorI18n setH3(String h3) {
             this.h3 = h3;
+            return this;
+        }
+
+        /**
+         * Gets the translated word for {@code color}
+         *
+         * @return the translated word for color
+         */
+        public String getColor() {
+            return color;
+        }
+
+        /**
+         * Sets the translated word for {@code color}.
+         *
+         * @param color
+         *            the translated word for color
+         * @return this instance for method chaining
+         */
+        public RichTextEditorI18n setColor(String color) {
+            this.color = color;
+            return this;
+        }
+
+        /**
+         * Gets the translated word for {@code background}
+         *
+         * @return the translated word for background
+         */
+        public String getBackground() {
+            return background;
+        }
+
+        /**
+         * Sets the translated word for {@code background}.
+         *
+         * @param background
+         *            the translated word for background
+         * @return this instance for method chaining
+         */
+        public RichTextEditorI18n setBackground(String background) {
+            this.background = background;
             return this;
         }
 
@@ -758,12 +802,12 @@ public class RichTextEditor
         @Override
         public String toString() {
             return "[" + undo + ", " + redo + ", " + bold + ", " + italic + ", "
-                    + underline + ", " + strike + ", " + h1 + ", " + h2 + ", "
-                    + h3 + ", " + subscript + ", " + superscript + ", "
-                    + listOrdered + ", " + listBullet + ", " + alignLeft + ", "
-                    + alignCenter + ", " + alignRight + ", " + image + ", "
-                    + link + ", " + blockquote + ", " + codeBlock + ", " + clean
-                    + "]";
+                    + underline + ", " + strike + ", " + color + ", "
+                    + background + ", " + h1 + ", " + h2 + ", " + h3 + ", "
+                    + subscript + ", " + superscript + ", " + listOrdered + ", "
+                    + listBullet + ", " + alignLeft + ", " + alignCenter + ", "
+                    + alignRight + ", " + image + ", " + link + ", "
+                    + blockquote + ", " + codeBlock + ", " + clean + "]";
         }
     }
 
