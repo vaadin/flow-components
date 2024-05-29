@@ -68,6 +68,7 @@
         <module>vaadin-messages-flow-parent</module>
         <module>vaadin-notification-flow-parent</module>
         <module>vaadin-ordered-layout-flow-parent</module>
+        <module>vaadin-popover-flow-parent</module>
         <module>vaadin-progress-bar-flow-parent</module>
         <module>vaadin-radio-button-flow-parent</module>
         <module>vaadin-select-flow-parent</module>
