@@ -5064,6 +5064,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Sets the component to be displayed when the grid is empty.
+     * <p>
+     * Note: This will also override any empty state content set with
+     * {@link #setEmptyStateText(String)}.
      *
      * @param emptyStateComponent
      *            the component to be displayed when the grid is empty
@@ -5076,6 +5079,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Sets the text to be displayed when the grid is empty.
+     * <p>
+     * Note: This will also override any empty state content set with
+     * {@link #setEmptyStateComponent(Component)}.
      *
      * @param emptyStateText
      *            the text to be displayed when the grid is empty
