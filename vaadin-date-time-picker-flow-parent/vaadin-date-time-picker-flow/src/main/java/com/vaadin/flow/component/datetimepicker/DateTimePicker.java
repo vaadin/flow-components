@@ -112,9 +112,9 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-rc1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "24.4.0-rc1")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "24.5.0-alpha1")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -125,9 +125,9 @@ public class DateTimePicker
 
     private final DateTimePickerDatePicker datePicker = new DateTimePickerDatePicker();
     private final DateTimePickerTimePicker timePicker = new DateTimePickerTimePicker();
-    private DatePickerI18n i18n;
+    private DatePickerI18n datePickerI18n;
 
-    private DateTimePickerI18n dateTimePickerI18n;
+    private DateTimePickerI18n i18n;
     private Locale locale;
 
     private final static SerializableFunction<String, LocalDateTime> PARSER = s -> {
@@ -450,12 +450,11 @@ public class DateTimePicker
      *            the value to be used as part of date picker aria-label.
      */
     public void setDateAriaLabel(String dateLabel) {
-        if (dateTimePickerI18n == null) {
-            dateTimePickerI18n = new DateTimePickerI18n();
+        if (i18n == null) {
+            i18n = new DateTimePickerI18n();
         }
-        dateTimePickerI18n.setDateLabel(dateLabel);
-        getElement().setPropertyJson("i18n",
-                JsonSerializer.toJson(dateTimePickerI18n));
+        i18n.setDateLabel(dateLabel);
+        getElement().setPropertyJson("i18n", JsonSerializer.toJson(i18n));
     }
 
     /**
@@ -468,10 +467,10 @@ public class DateTimePicker
      * @return an optional label or an empty optional if no label has been set
      */
     public Optional<String> getDateAriaLabel() {
-        if (dateTimePickerI18n == null) {
+        if (i18n == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable(dateTimePickerI18n.getDateLabel());
+        return Optional.ofNullable(i18n.getDateLabel());
     }
 
     /**
@@ -485,12 +484,11 @@ public class DateTimePicker
      *            the value to be used as part of time picker aria-label.
      */
     public void setTimeAriaLabel(String timeLabel) {
-        if (dateTimePickerI18n == null) {
-            dateTimePickerI18n = new DateTimePickerI18n();
+        if (i18n == null) {
+            i18n = new DateTimePickerI18n();
         }
-        dateTimePickerI18n.setTimeLabel(timeLabel);
-        getElement().setPropertyJson("i18n",
-                JsonSerializer.toJson(dateTimePickerI18n));
+        i18n.setTimeLabel(timeLabel);
+        getElement().setPropertyJson("i18n", JsonSerializer.toJson(i18n));
     }
 
     /**
@@ -503,10 +501,10 @@ public class DateTimePicker
      * @return an optional label or an empty optional if no label has been set
      */
     public Optional<String> getTimeAriaLabel() {
-        if (dateTimePickerI18n == null) {
+        if (i18n == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable(dateTimePickerI18n.getTimeLabel());
+        return Optional.ofNullable(i18n.getTimeLabel());
     }
 
     /**
@@ -603,7 +601,7 @@ public class DateTimePicker
      * Set true to display ISO-8601 week numbers in the calendar.
      * <p>
      * Note that displaying of week numbers is only supported when
-     * i18n.firstDayOfWeek is 1 (Monday).
+     * datePickerI18n.firstDayOfWeek is 1 (Monday).
      *
      * @param weekNumbersVisible
      *            the boolean value to set
@@ -873,7 +871,7 @@ public class DateTimePicker
      *         properties weren't set.
      */
     public DatePickerI18n getDatePickerI18n() {
-        return i18n;
+        return datePickerI18n;
     }
 
     /**
@@ -886,7 +884,7 @@ public class DateTimePicker
     public void setDatePickerI18n(DatePickerI18n i18n) {
         Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
-        this.i18n = i18n;
+        this.datePickerI18n = i18n;
         datePicker.setI18n(i18n);
     }
 
