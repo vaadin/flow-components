@@ -439,7 +439,7 @@ public class DateTimePicker
     /**
      * Gets the aria-label suffix for the date picker.
      * <p>
-     * Note, this method will return the last value passed to
+     * Note: this method will return the last value passed to
      * {@link #setDateAriaLabel(String)}, not the value currently set on the
      * `aria-label` attribute of the date picker input element.
      *
@@ -471,7 +471,7 @@ public class DateTimePicker
     /**
      * Gets the aria-label suffix for the time picker.
      * <p>
-     * Note, this method will return the last value passed to
+     * Note: this method will return the last value passed to
      * {@link #setTimeAriaLabel(String)}, not the value currently set on the
      * `aria-label` attribute of the time picker input element.
      *
@@ -895,11 +895,11 @@ public class DateTimePicker
         JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(i18nObject);
 
         if (dateAriaLabel != null) {
-            i18nJson.put("dateAriaLabel", dateAriaLabel);
+            i18nJson.put("dateLabel", dateAriaLabel);
         }
 
         if (timeAriaLabel != null) {
-            i18nJson.put("timeAriaLabel", timeAriaLabel);
+            i18nJson.put("timeLabel", timeAriaLabel);
         }
 
         getElement().setPropertyJson("i18n", i18nJson);
