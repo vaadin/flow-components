@@ -41,6 +41,8 @@ public class PopoverIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
+        waitUntil(driver -> findElements(By.tagName("vaadin-popover"))
+                .size() > 0);
     }
 
     @Test
