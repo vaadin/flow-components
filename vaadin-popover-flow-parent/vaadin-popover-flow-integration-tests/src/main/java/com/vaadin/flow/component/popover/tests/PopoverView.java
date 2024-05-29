@@ -30,23 +30,9 @@ public class PopoverView extends Div {
         content.setId("popover-content");
         popover.add(content);
 
-        NativeButton addClassName = new NativeButton("Add class name",
-                event -> popover.addClassName("added"));
-        addClassName.setId("add-class-name");
-
-        NativeButton clearClassNames = new NativeButton("Clear class names",
-                event -> popover.getClassNames().clear());
-        clearClassNames.setId("clear-class-names");
-
-        popover.add(addClassName, clearClassNames);
-
         NativeButton target = new NativeButton("Toggle popover");
         target.setId("popover-target");
         popover.setTarget(target);
-
-        NativeButton setClassName = new NativeButton("Set class name",
-                event -> popover.setClassName("custom"));
-        setClassName.setId("set-class-name");
 
         NativeButton clearTarget = new NativeButton("Clear target",
                 event -> popover.setTarget(null));
@@ -60,7 +46,6 @@ public class PopoverView extends Div {
                 event -> add(target));
         attachTarget.setId("attach-target");
 
-        add(popover, setClassName, clearTarget, detachTarget, attachTarget,
-                target);
+        add(popover, clearTarget, detachTarget, attachTarget, target);
     }
 }

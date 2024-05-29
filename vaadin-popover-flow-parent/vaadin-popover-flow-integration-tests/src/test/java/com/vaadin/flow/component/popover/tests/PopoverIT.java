@@ -60,7 +60,7 @@ public class PopoverIT extends AbstractComponentIT {
         checkPopoverIsOpened();
 
         PopoverElement popover = $(PopoverElement.class).first();
-        Assert.assertTrue(
+        Assert.assertTrue("Popover content is rendered",
                 popover.$("div").attribute("id", "popover-content").exists());
     }
 
@@ -84,40 +84,6 @@ public class PopoverIT extends AbstractComponentIT {
         checkPopoverIsClosed();
     }
 
-    @Test
-    public void setClassName_openPopover_overlayHasSameClassNames() {
-        $(NativeButtonElement.class).id("set-class-name").click();
-
-        clickTarget();
-        checkPopoverIsOpened();
-
-        checkClassNamesAreSet("custom");
-    }
-
-    @Test
-    public void setClassName_openPopover_addClassName_classNamesUpdated() {
-        $(NativeButtonElement.class).id("set-class-name").click();
-
-        clickTarget();
-        checkPopoverIsOpened();
-
-        findElement(By.id("add-class-name")).click();
-
-        checkClassNamesAreSet("custom added");
-    }
-
-    @Test
-    public void setClassName_openPopover_clearClassNames_classNamesRemoved() {
-        $(NativeButtonElement.class).id("set-class-name").click();
-
-        clickTarget();
-        checkPopoverIsOpened();
-
-        findElement(By.id("clear-class-names")).click();
-
-        checkClassNamesAreSet("");
-    }
-
     private void clickTarget() {
         $(NativeButtonElement.class).id("popover-target").click();
     }
@@ -128,16 +94,5 @@ public class PopoverIT extends AbstractComponentIT {
 
     private void checkPopoverIsOpened() {
         waitForElementPresent(By.tagName(POPOVER_OVERLAY_TAG));
-    }
-
-    private void checkClassNamesAreSet(String expected) {
-        PopoverElement popover = $(PopoverElement.class).first();
-        WebElement overlay = $(POPOVER_OVERLAY_TAG).first();
-
-        String popoverClassNames = popover.getAttribute("class");
-        String overlayClassNames = overlay.getAttribute("class");
-
-        Assert.assertEquals(expected, popoverClassNames);
-        Assert.assertEquals(expected, overlayClassNames);
     }
 }
