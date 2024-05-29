@@ -147,6 +147,10 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
     public void undefinedItemCount_enterClientFilter_displaysFilteredItem() {
         open(300);
 
+        // TODO: Temporary workaround. Remove once overlay position mixin is
+        // fixed to not close the overlay for hidden target element
+        comboBoxElement.openPopup();
+
         assertLoadedItemsCount("Should be 50 items before filtering", 50,
                 comboBoxElement);
 
