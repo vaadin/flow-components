@@ -94,5 +94,9 @@ public class PopoverIT extends AbstractComponentIT {
 
     private void checkPopoverIsOpened() {
         waitForElementPresent(By.tagName(POPOVER_OVERLAY_TAG));
+
+        // Wait for the overlay rendering to complete
+        getCommandExecutor().getDriver()
+                .executeAsyncScript("requestAnimationFrame(arguments[0])");
     }
 }
