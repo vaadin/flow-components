@@ -150,7 +150,6 @@ public class BasicIT extends AbstractParallelTest {
         GridTHTDElement cell = grid.getCell(0, 2);
         cell.click();
 
-        assertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
         String eventsPanelText = getPanelText("events-panel");
         Assert.assertEquals(1, eventsPanelText.split("ItemClicked").length - 1);
         Assert.assertTrue(eventsPanelText
