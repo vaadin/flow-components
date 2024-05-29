@@ -16,6 +16,7 @@
  */
 package com.vaadin.flow.component.popover;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,6 +60,28 @@ public class Popover extends Component implements HasComponents {
      */
     public Popover() {
         getElement().getNode().addAttachListener(this::attachComponentRenderer);
+    }
+
+    /**
+     * Sets position of the popover with respect to its target.
+     *
+     * @param position
+     *            the position to set
+     */
+    public void setPosition(PopoverPosition position) {
+        getElement().setProperty("position", position.getPosition());
+    }
+
+    /**
+     * Gets position of the popover with respect to its target.
+     *
+     * @return the position
+     */
+    public PopoverPosition getPosition() {
+        var positionString = getElement().getProperty("position");
+        return Arrays.stream(PopoverPosition.values())
+                .filter(p -> p.getPosition().equals(positionString)).findFirst()
+                .orElse(null);
     }
 
     /**

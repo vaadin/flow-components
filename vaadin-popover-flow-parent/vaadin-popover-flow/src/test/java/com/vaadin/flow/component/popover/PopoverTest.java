@@ -52,4 +52,17 @@ public class PopoverTest {
         Text textNode = new Text("Text");
         popover.setTarget(textNode);
     }
+
+    @Test
+    public void setPosition_getPosition() {
+        popover.setPosition(PopoverPosition.END);
+        Assert.assertEquals("end",
+                popover.getElement().getProperty("position"));
+        Assert.assertEquals(PopoverPosition.END, popover.getPosition());
+    }
+
+    @Test
+    public void defaultPosition_equalsNull() {
+        Assert.assertEquals(null, popover.getPosition());
+    }
 }
