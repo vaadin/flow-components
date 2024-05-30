@@ -59,6 +59,8 @@ public class PopoverIT extends AbstractComponentIT {
         clickTarget();
         checkPopoverIsOpened();
 
+        waitForElementPresent(By.id("popover-content"));
+
         PopoverElement popover = $(PopoverElement.class).first();
         Assert.assertTrue("Popover content is rendered",
                 popover.$("div").attribute("id", "popover-content").exists());
