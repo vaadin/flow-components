@@ -72,7 +72,17 @@ public class PopoverIT extends AbstractComponentIT {
 
     @Test
     public void clearTarget_clickTarget_popoverDoesNotOpen() {
-         clickElementWithJs("clear-target");
+        clickElementWithJs("clear-target");
+
+        clickTarget();
+        checkPopoverIsClosed();
+    }
+
+    @Test
+    public void detachTarget_clearAndReattach_clickTarget_popoverDoesNotOpen() {
+        clickElementWithJs("detach-target");
+        clickElementWithJs("clear-target");
+        clickElementWithJs("attach-target");
 
         clickTarget();
         checkPopoverIsClosed();

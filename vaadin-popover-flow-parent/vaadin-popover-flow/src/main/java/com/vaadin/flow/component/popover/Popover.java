@@ -78,7 +78,7 @@ public class Popover extends Component implements HasComponents {
      * @return the position
      */
     public PopoverPosition getPosition() {
-        var positionString = getElement().getProperty("position");
+        String positionString = getElement().getProperty("position");
         return Arrays.stream(PopoverPosition.values())
                 .filter(p -> p.getPosition().equals(positionString)).findFirst()
                 .orElse(null);
@@ -125,8 +125,11 @@ public class Popover extends Component implements HasComponents {
     public void setTarget(Component target) {
         if (target instanceof Text) {
             throw new IllegalArgumentException(
-                    "Text as a target is not supported. "
-                            + "Consider wrapping the Text inside a Div.");
+                    "Text as a target is not supported. Consider wrapping the Text inside a Div.");
+        }
+
+        if (this.target != null) {
+            targetAttachRegistration.remove();
         }
 
         this.target = target;
@@ -145,8 +148,7 @@ public class Popover extends Component implements HasComponents {
 
     private void onTargetAttach(UI ui) {
         if (target != null) {
-            ui.getPage().executeJs("$0.target=$1", getElement(),
-                    target.getElement());
+            getElement().executeJs("this.target = $0", target.getElement());
         }
     }
 
@@ -199,7 +201,7 @@ public class Popover extends Component implements HasComponents {
     }
 
     private void attachComponentRenderer() {
-        this.getElement().executeJs(
+        getElement().executeJs(
                 "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
 
         String appId = UI.getCurrent().getInternals().getAppId();
