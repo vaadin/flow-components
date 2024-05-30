@@ -16,7 +16,6 @@
  */
 package com.vaadin.flow.component.popover.tests;
 
-import com.vaadin.flow.component.html.testbench.NativeButtonElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -40,8 +39,6 @@ public class PopoverIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        waitUntil(driver -> findElements(By.tagName("vaadin-popover"))
-                .size() > 0);
     }
 
     @Test
@@ -63,8 +60,8 @@ public class PopoverIT extends AbstractComponentIT {
 
     @Test
     public void detachAndReattachTarget_clickTarget_popoverOpensAndCloses() {
-        $(NativeButtonElement.class).id("detach-target").click();
-        $(NativeButtonElement.class).id("attach-target").click();
+        clickElementWithJs("detach-target");
+        clickElementWithJs("attach-target");
 
         clickTarget();
         checkPopoverIsOpened();
@@ -75,7 +72,7 @@ public class PopoverIT extends AbstractComponentIT {
 
     @Test
     public void clearTarget_clickTarget_popoverDoesNotOpen() {
-        $(NativeButtonElement.class).id("clear-target").click();
+         clickElementWithJs("clear-target");
 
         clickTarget();
         checkPopoverIsClosed();
