@@ -85,7 +85,7 @@ public class PopoverIT extends AbstractComponentIT {
     }
 
     private void clickTarget() {
-        $(NativeButtonElement.class).id("popover-target").click();
+        clickElementWithJs("popover-target");
     }
 
     private void checkPopoverIsClosed() {
