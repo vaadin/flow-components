@@ -203,6 +203,56 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
     }
 
     /**
+     * Gets whether this popover can be closed by pressing the Esc key or not.
+     * <p>
+     * By default, the popover is closable with esc.
+     *
+     * @return {@code true} if this popover can be closed with the Esc key,
+     *         {@code false} otherwise
+     */
+    public boolean isCloseOnEsc() {
+        return !getElement().getProperty("noCloseOnEsc", false);
+    }
+
+    /**
+     * Sets whether this popover can be closed by pressing the Esc key or not.
+     * <p>
+     * By default, the popover is closable with Esc.
+     *
+     * @param closeOnEsc
+     *            {@code true} to enable closing this popover with the Esc key,
+     *            {@code false} to disable it
+     */
+    public void setCloseOnEsc(boolean closeOnEsc) {
+        getElement().setProperty("noCloseOnEsc", !closeOnEsc);
+    }
+
+    /**
+     * Gets whether this popover can be closed by clicking outside of it or not.
+     * <p>
+     * By default, the popover is closable with an outside click.
+     *
+     * @return {@code true} if this popover can be closed by an outside click,
+     *         {@code false} otherwise
+     */
+    public boolean isCloseOnOutsideClick() {
+        return !getElement().getProperty("noCloseOnOutsideClick", false);
+    }
+
+    /**
+     * Sets whether this popover can be closed by clicking outside of it or not.
+     * <p>
+     * By default, the popover is closable with an outside click.
+     *
+     * @param closeOnOutsideClick
+     *            {@code true} to enable closing this popover with an outside
+     *            click, {@code false} to disable it
+     */
+    public void setCloseOnOutsideClick(boolean closeOnOutsideClick) {
+        getElement().setProperty("noCloseOnOutsideClick", !closeOnOutsideClick);
+    }
+
+    /**
      * Sets position of the popover with respect to its target.
      *
      * @param position
