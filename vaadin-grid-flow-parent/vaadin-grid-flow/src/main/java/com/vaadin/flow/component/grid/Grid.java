@@ -64,6 +64,7 @@ import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.grid.editor.EditorImpl;
 import com.vaadin.flow.component.grid.editor.EditorRenderer;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
@@ -209,10 +210,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-rc1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.4.0-rc1")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.4.0-rc1")
+@NpmPackage(value = "@vaadin/grid", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.5.0-alpha1")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -437,7 +438,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-rc1")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha1")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -1456,6 +1457,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private SelectionPreservationHandler<T> selectionPreservationHandler;
 
     private PendingJavaScriptResult pendingSorterUpdate;
+
+    private static final String EMPTY_STATE_SLOT = "empty-state";
+    private Component emptyStateComponent;
+    private String emptyStateText;
 
     /**
      * Creates a new instance, with page size of 50.
@@ -5055,5 +5060,63 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return Optional.ofNullable(getUniqueKeyProvider())
                 .map(provider -> provider.apply(item))
                 .orElse(getDataCommunicator().getKeyMapper().key(item));
+    }
+
+    /**
+     * Sets the component to be displayed when the grid is empty.
+     * <p>
+     * Note: This will also override any empty state content set with
+     * {@link #setEmptyStateText(String)}.
+     *
+     * @param emptyStateComponent
+     *            the component to be displayed when the grid is empty
+     */
+    public void setEmptyStateComponent(Component emptyStateComponent) {
+        this.emptyStateText = null;
+        this.emptyStateComponent = emptyStateComponent;
+        updateEmptyStateContent();
+    }
+
+    /**
+     * Sets the text to be displayed when the grid is empty.
+     * <p>
+     * Note: This will also override any empty state content set with
+     * {@link #setEmptyStateComponent(Component)}.
+     *
+     * @param emptyStateText
+     *            the text to be displayed when the grid is empty
+     */
+    public void setEmptyStateText(String emptyStateText) {
+        this.emptyStateComponent = null;
+        this.emptyStateText = emptyStateText;
+        updateEmptyStateContent();
+    }
+
+    /**
+     * Returns the component that is displayed when the grid is empty.
+     *
+     * @return the component that is displayed when the grid is empty
+     */
+    public Component getEmptyStateComponent() {
+        return emptyStateComponent;
+    }
+
+    /**
+     * Returns the text that is displayed when the grid is empty.
+     *
+     * @return the text that is displayed when the grid is empty
+     */
+    public String getEmptyStateText() {
+        return emptyStateText;
+    }
+
+    private void updateEmptyStateContent() {
+        if (emptyStateComponent != null) {
+            SlotUtils.setSlot(this, EMPTY_STATE_SLOT, emptyStateComponent);
+        } else if (emptyStateText != null) {
+            SlotUtils.setSlot(this, EMPTY_STATE_SLOT, new Span(emptyStateText));
+        } else {
+            SlotUtils.clearSlot(this, EMPTY_STATE_SLOT);
+        }
     }
 }
