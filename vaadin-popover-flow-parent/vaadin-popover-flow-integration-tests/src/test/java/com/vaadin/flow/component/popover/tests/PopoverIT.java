@@ -25,7 +25,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 /**
  * Integration tests for the {@link PopoverView}.
@@ -92,6 +94,46 @@ public class PopoverIT extends AbstractComponentIT {
 
         clickTarget();
         checkPopoverIsClosed();
+    }
+
+    @Test
+    public void clickOutside_popoverCloses() {
+        clickTarget();
+        checkPopoverIsOpened();
+
+        $("body").first().click();
+        Assert.assertFalse(popover.isOpen());
+    }
+
+    @Test
+    public void disableCloseOnOutsideClick_clickOutside_popoverDoesNotClose() {
+        clickElementWithJs("disable-close-on-outside-click");
+
+        clickTarget();
+        checkPopoverIsOpened();
+
+        $("body").first().click();
+        Assert.assertTrue(popover.isOpen());
+    }
+
+    @Test
+    public void pressEsc_popoverCloses() {
+        clickTarget();
+        checkPopoverIsOpened();
+
+        new Actions(getDriver()).sendKeys(Keys.ESCAPE).build().perform();
+        Assert.assertFalse(popover.isOpen());
+    }
+
+    @Test
+    public void disableCloseOnEsc_pressEsc_popoverDoesNotClose() {
+        clickElementWithJs("disable-close-on-esc");
+
+        clickTarget();
+        checkPopoverIsOpened();
+
+        new Actions(getDriver()).sendKeys(Keys.ESCAPE).build().perform();
+        Assert.assertTrue(popover.isOpen());
     }
 
     private void clickTarget() {
