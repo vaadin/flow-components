@@ -29,8 +29,11 @@ import elemental.json.JsonArray;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
@@ -70,8 +73,90 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
     public Popover() {
         getElement().getNode().addAttachListener(this::attachComponentRenderer);
 
+        // Workaround for: https://github.com/vaadin/flow/issues/3496
+        getElement().setProperty("opened", false);
+
+        getElement().addPropertyChangeListener("opened", event -> {
+            // Only handle client-side changes, server-side changes are already
+            // handled by setOpened
+            if (event.isUserOriginated()) {
+                doSetOpened(this.isOpened(), event.isUserOriginated());
+            }
+        });
+
         updateTrigger();
         setOverlayRole("dialog");
+    }
+
+
+    /**
+     * {@code opened-changed} event is sent when the overlay opened state
+     * changes.
+     */
+    public static class OpenedChangeEvent extends ComponentEvent<Popover> {
+        private final boolean opened;
+
+        public OpenedChangeEvent(Popover source, boolean fromClient) {
+            super(source, fromClient);
+            this.opened = source.isOpened();
+        }
+
+        public boolean isOpened() {
+            return opened;
+        }
+    }
+
+    /**
+     * Opens or closes the popover.
+     *
+     * @param opened
+     *            {@code true} to open the popover, {@code false} to close it
+     */
+    public void setOpened(boolean opened) {
+        if (opened != isOpened()) {
+            doSetOpened(opened, false);
+        }
+    }
+
+    /**
+     * Opens the popover.
+     */
+    public void open() {
+        setOpened(true);
+    }
+
+    /**
+     * Closes the popover.
+     */
+    public void close() {
+        setOpened(false);
+    }
+
+    private void doSetOpened(boolean opened, boolean fromClient) {
+        getElement().setProperty("opened", opened);
+        fireEvent(new OpenedChangeEvent(this, fromClient));
+    }
+
+    /**
+     * Gets the open state from the popover.
+     *
+     * @return the {@code opened} property from the popover
+     */
+    @Synchronize(property = "opened", value = "opened-changed")
+    public boolean isOpened() {
+        return getElement().getProperty("opened", false);
+    }
+
+    /**
+     * Add a listener for event fired by the {@code opened-changed} events.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
+     */
+    public Registration addOpenedChangeListener(
+            ComponentEventListener<OpenedChangeEvent> listener) {
+        return addListener(OpenedChangeEvent.class, listener);
     }
 
     @Override

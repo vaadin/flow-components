@@ -16,6 +16,7 @@
  */
 package com.vaadin.flow.component.popover.tests;
 
+import com.vaadin.flow.component.popover.testbench.PopoverElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -36,18 +37,23 @@ public class PopoverIT extends AbstractComponentIT {
 
     static final String POPOVER_OVERLAY_TAG = "vaadin-popover-overlay";
 
+    PopoverElement popover;
+
     @Before
     public void init() {
         open();
+        popover = $(PopoverElement.class).first();
     }
 
     @Test
     public void clickTarget_popoverOpensAndCloses() {
         clickTarget();
         checkPopoverIsOpened();
+        Assert.assertTrue(popover.isOpen());
 
         clickTarget();
         checkPopoverIsClosed();
+        Assert.assertFalse(popover.isOpen());
     }
 
     @Test
