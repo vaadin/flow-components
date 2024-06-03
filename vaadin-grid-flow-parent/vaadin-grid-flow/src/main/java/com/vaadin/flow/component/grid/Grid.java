@@ -4532,6 +4532,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void setDropMode(GridDropMode dropMode) {
         getElement().setProperty("dropMode",
                 dropMode == null ? null : dropMode.getClientName());
+        getDataCommunicator().reset();
     }
 
     /**
@@ -4556,6 +4557,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setRowsDraggable(boolean rowsDraggable) {
         getElement().setProperty("rowsDraggable", rowsDraggable);
+        getDataCommunicator().reset();
     }
 
     /**
