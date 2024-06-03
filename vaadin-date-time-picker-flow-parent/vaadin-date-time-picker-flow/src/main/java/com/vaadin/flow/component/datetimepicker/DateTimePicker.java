@@ -954,6 +954,7 @@ public class DateTimePicker
          * @param dateLabel
          *            the value to be used as a suffix in the date picker
          *            aria-label.
+         * @return this instance for method chaining
          */
         public DateTimePickerI18n setDateLabel(String dateLabel) {
             this.dateLabel = dateLabel;
@@ -982,6 +983,7 @@ public class DateTimePicker
          *
          * @param timeLabel
          *            the value to be used as a suffix in the time picker
+         * @return this instance for method chaining
          */
         public DateTimePickerI18n setTimeLabel(String timeLabel) {
             this.timeLabel = timeLabel;
