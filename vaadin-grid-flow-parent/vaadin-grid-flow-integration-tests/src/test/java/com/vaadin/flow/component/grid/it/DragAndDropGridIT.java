@@ -225,7 +225,7 @@ public class DragAndDropGridIT extends AbstractComponentIT {
 
         click("set-filters");
         click("BETWEEN");
-        fireDrop(0, "on-top");
+        fireDrop(0, "below");
         assertMessages("", "", "");
     }
 
