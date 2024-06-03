@@ -40,8 +40,8 @@ public class ValidationUtil {
      *            the value to check
      * @param emptyValue
      *            the value considered to be empty
-     * @return {@code ValidationResult.ok()} if the value does not equal to the empty value,
-     *         {@code ValidationResult.error()} otherwise
+     * @return {@code ValidationResult.ok()} if the value does not equal to the
+     *         empty value, {@code ValidationResult.error()} otherwise
      * @deprecated since 24.5, use
      *             {@link #validateRequiredConstraint(String, boolean, Object, Object)}
      *             instead.
@@ -67,8 +67,8 @@ public class ValidationUtil {
      *            the value to check
      * @param emptyValue
      *            the value considered to be empty
-     * @return {@code ValidationResult.ok()} if the value does not equal to the empty value,
-     *         {@code ValidationResult.error()} otherwise
+     * @return {@code ValidationResult.ok()} if the value does not equal to the
+     *         empty value, {@code ValidationResult.error()} otherwise
      */
     public static <V> ValidationResult validateRequiredConstraint(
             String errorMessage, boolean required, V value, V emptyValue) {
