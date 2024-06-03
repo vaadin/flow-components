@@ -210,6 +210,26 @@ public class DragAndDropGridIT extends AbstractComponentIT {
     }
 
     @Test
+    public void setDragFilter_setRowsDraggable_filtersApply() {
+        click("toggle-rows-draggable");
+
+        click("set-filters");
+        click("toggle-rows-draggable");
+        fireDragStart(0);
+        assertMessages("", "", "");
+    }
+
+    @Test
+    public void setDropFilter_setDropMode_filtersApply() {
+        click("no-drop-mode");
+
+        click("set-filters");
+        click("BETWEEN");
+        fireDrop(0, "below");
+        assertMessages("", "", "");
+    }
+
+    @Test
     public void removeOnItemClick_noError() {
         click("remove-on-item-click");
         grid.getCell("0").click();
