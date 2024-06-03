@@ -352,12 +352,14 @@ public class TimePicker
             return ValidationResult.error("");
         }
 
-        ValidationResult maxResult = ValidationUtil.checkMax("", value, max);
+        ValidationResult maxResult = ValidationUtil.validateMaxConstraint("",
+                value, max);
         if (maxResult.isError()) {
             return maxResult;
         }
 
-        ValidationResult minResult = ValidationUtil.checkMin("", value, min);
+        ValidationResult minResult = ValidationUtil.validateMinConstraint("",
+                value, min);
         if (minResult.isError()) {
             return minResult;
         }
@@ -371,8 +373,8 @@ public class TimePicker
      * constraints using browser development tools.
      */
     private boolean isInvalid(LocalTime value) {
-        var requiredValidation = ValidationUtil.checkRequired("", required,
-                value, getEmptyValue());
+        var requiredValidation = ValidationUtil.validateRequiredConstraint("",
+                required, value, getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
     }

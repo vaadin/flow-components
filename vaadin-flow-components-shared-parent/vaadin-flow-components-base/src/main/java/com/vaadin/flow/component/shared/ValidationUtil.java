@@ -43,13 +43,13 @@ public class ValidationUtil {
      * @return {@code ValidationResult.ok()} if the value is not empty,
      *         {@code ValidationResult.error()} otherwise
      * @deprecated since 24.5, use
-     *             {@link #checkRequired(String, boolean, Object, Object)}
+     *             {@link #validateRequiredConstraint(String, boolean, Object, Object)}
      *             instead.
      */
     @Deprecated
     public static <V> ValidationResult checkRequired(boolean required, V value,
             V emptyValue) {
-        return checkRequired("", required, value, emptyValue);
+        return validateRequiredConstraint("", required, value, emptyValue);
     }
 
     /**
@@ -70,8 +70,8 @@ public class ValidationUtil {
      * @return {@code ValidationResult.ok()} if the value is not empty,
      *         {@code ValidationResult.error()} otherwise
      */
-    public static <V> ValidationResult checkRequired(String errorMessage,
-            boolean required, V value, V emptyValue) {
+    public static <V> ValidationResult validateRequiredConstraint(
+            String errorMessage, boolean required, V value, V emptyValue) {
         boolean isError = required && Objects.equals(emptyValue, value);
         return isError ? ValidationResult.error(errorMessage)
                 : ValidationResult.ok();
@@ -91,12 +91,13 @@ public class ValidationUtil {
      * @return {@code ValidationResult.ok()} if the value is smaller or equal to
      *         the maximum, {@code ValidationResult.error()} otherwise
      * @deprecated since 24.5, use
-     *             {@link #checkMax(String, Comparable, Comparable)} instead.
+     *             {@link #validateMaxConstraint(String, Comparable, Comparable)}
+     *             instead.
      */
     @Deprecated
     public static <V extends Comparable<V>> ValidationResult checkGreaterThanMax(
             V value, V maxValue) {
-        return checkMax("", value, maxValue);
+        return validateMaxConstraint("", value, maxValue);
     }
 
     /**
@@ -115,7 +116,7 @@ public class ValidationUtil {
      * @return {@code ValidationResult.ok()} if the value is smaller or equal to
      *         the maximum, {@code ValidationResult.error()} otherwise
      */
-    public static <V extends Comparable<V>> ValidationResult checkMax(
+    public static <V extends Comparable<V>> ValidationResult validateMaxConstraint(
             String errorMessage, V value, V maxValue) {
         boolean isError = value != null && maxValue != null
                 && value.compareTo(maxValue) > 0;
@@ -137,12 +138,13 @@ public class ValidationUtil {
      * @return {@code ValidationResult.ok()} if the value is greater or equal to
      *         the minimum, {@code ValidationResult.error()} otherwise
      * @deprecated since 24.5, use
-     *             {@link #checkMin(String, Comparable, Comparable)} instead.
+     *             {@link #validateMinConstraint(String, Comparable, Comparable)}
+     *             instead.
      */
     @Deprecated
     public static <V extends Comparable<V>> ValidationResult checkSmallerThanMin(
             V value, V minValue) {
-        return checkMin("", value, minValue);
+        return validateMinConstraint("", value, minValue);
     }
 
     /**
@@ -161,7 +163,7 @@ public class ValidationUtil {
      * @return {@code ValidationResult.ok()} if the value is greater or equal to
      *         the minimum, {@code ValidationResult.error()} otherwise
      */
-    public static <V extends Comparable<V>> ValidationResult checkMin(
+    public static <V extends Comparable<V>> ValidationResult validateMinConstraint(
             String errorMessage, V value, V minValue) {
         boolean isError = value != null && minValue != null
                 && value.compareTo(minValue) < 0;

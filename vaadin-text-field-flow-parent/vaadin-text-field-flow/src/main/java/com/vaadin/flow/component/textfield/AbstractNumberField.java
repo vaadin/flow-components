@@ -332,14 +332,14 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
         Double doubleValue = value != null ? value.doubleValue() : null;
 
-        ValidationResult maxResult = ValidationUtil.checkMax("", doubleValue,
-                max);
+        ValidationResult maxResult = ValidationUtil.validateMaxConstraint("",
+                doubleValue, max);
         if (maxResult.isError()) {
             return maxResult;
         }
 
-        ValidationResult minResult = ValidationUtil.checkMin("", doubleValue,
-                min);
+        ValidationResult minResult = ValidationUtil.validateMinConstraint("",
+                doubleValue, min);
         if (minResult.isError()) {
             return minResult;
         }
@@ -366,7 +366,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             T value = getValue();
 
             final var requiredValidation = ValidationUtil
-                    .checkRequired(required, value, getEmptyValue());
+                    .validateRequiredConstraint("", required, value,
+                            getEmptyValue());
 
             setInvalid(requiredValidation.isError()
                     || checkValidity(value).isError());
