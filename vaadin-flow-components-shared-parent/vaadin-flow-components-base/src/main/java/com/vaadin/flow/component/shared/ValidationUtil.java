@@ -33,14 +33,14 @@ public class ValidationUtil {
      * empty error message depending on the result.
      *
      * @param <V>
-     *            the type of the component value
+     *            the type of the value
      * @param required
-     *            the required state of the component
+     *            whether the constraint is enabled
      * @param value
-     *            the current value set on the component
+     *            the value to check
      * @param emptyValue
-     *            the empty value for the component
-     * @return {@code ValidationResult.ok()} if the value is not empty,
+     *            the value considered to be empty
+     * @return {@code ValidationResult.ok()} if the value does not equal to the empty value,
      *         {@code ValidationResult.error()} otherwise
      * @deprecated since 24.5, use
      *             {@link #validateRequiredConstraint(String, boolean, Object, Object)}
@@ -58,16 +58,16 @@ public class ValidationUtil {
      * the given error message depending on the result.
      *
      * @param <V>
-     *            the type of the component value
+     *            the type of the value
      * @param errorMessage
      *            the error message to return if the check fails
      * @param required
-     *            the required state of the component
+     *            whether the constraint is enabled
      * @param value
-     *            the current value set on the component
+     *            the value to check
      * @param emptyValue
-     *            the empty value for the component
-     * @return {@code ValidationResult.ok()} if the value is not empty,
+     *            the value considered to be empty
+     * @return {@code ValidationResult.ok()} if the value does not equal to the empty value,
      *         {@code ValidationResult.error()} otherwise
      */
     public static <V> ValidationResult validateRequiredConstraint(
@@ -83,13 +83,13 @@ public class ValidationUtil {
      * empty error message depending on the result.
      *
      * @param <V>
-     *            the type of the component value
+     *            the type of the value
      * @param value
-     *            the current value set on the component
+     *            the value to check
      * @param maxValue
-     *            the maximum value set on the component
+     *            the maximum allowed value
      * @return {@code ValidationResult.ok()} if the value is smaller or equal to
-     *         the maximum, {@code ValidationResult.error()} otherwise
+     *         the maximum value, {@code ValidationResult.error()} otherwise
      * @deprecated since 24.5, use
      *             {@link #validateMaxConstraint(String, Comparable, Comparable)}
      *             instead.
@@ -106,15 +106,15 @@ public class ValidationUtil {
      * the given error message depending on the result.
      *
      * @param <V>
-     *            the type of the component value
+     *            the type of the value
      * @param errorMessage
      *            the error message to return if the check fails
      * @param value
-     *            the current value set on the component
+     *            the value to check
      * @param maxValue
-     *            the maximum value set on the component
+     *            the maximum allowed value
      * @return {@code ValidationResult.ok()} if the value is smaller or equal to
-     *         the maximum, {@code ValidationResult.error()} otherwise
+     *         the maximum value, {@code ValidationResult.error()} otherwise
      */
     public static <V extends Comparable<V>> ValidationResult validateMaxConstraint(
             String errorMessage, V value, V maxValue) {
@@ -130,13 +130,13 @@ public class ValidationUtil {
      * empty error message depending on the result.
      *
      * @param <V>
-     *            the type of the component value
+     *            the type of the value
      * @param value
-     *            the current value set on the component
+     *            the value to check
      * @param minValue
-     *            the minimum value set on the component
+     *            the minimum allowed value
      * @return {@code ValidationResult.ok()} if the value is greater or equal to
-     *         the minimum, {@code ValidationResult.error()} otherwise
+     *         the minimum value, {@code ValidationResult.error()} otherwise
      * @deprecated since 24.5, use
      *             {@link #validateMinConstraint(String, Comparable, Comparable)}
      *             instead.
@@ -153,15 +153,15 @@ public class ValidationUtil {
      * the given error message depending on the result.
      *
      * @param <V>
-     *            the type of the component value
+     *            the type of the value
      * @param errorMessage
      *            the error message to return if the check fails
      * @param value
-     *            the current value set on the component
+     *            the value to check
      * @param minValue
-     *            the minimum value set on the component
+     *            the minimum allowed value
      * @return {@code ValidationResult.ok()} if the value is greater or equal to
-     *         the minimum, {@code ValidationResult.error()} otherwise
+     *         the minimum value, {@code ValidationResult.error()} otherwise
      */
     public static <V extends Comparable<V>> ValidationResult validateMinConstraint(
             String errorMessage, V value, V minValue) {
