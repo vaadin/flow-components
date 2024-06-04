@@ -126,8 +126,8 @@ public class MessageInput extends Component
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content returned by this method will not update
-     * the component if not set back using
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
      * {@link MessageInput#setI18n(MessageInputI18n)}.
      *
      * @return the i18n object, or {@code null} if one has not been set with

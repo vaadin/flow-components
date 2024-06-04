@@ -745,16 +745,16 @@ public class DateTimePicker
             return ValidationResult.error("");
         }
 
-        ValidationResult greaterThanMax = ValidationUtil
-                .checkGreaterThanMax(value, max);
-        if (greaterThanMax.isError()) {
-            return greaterThanMax;
+        ValidationResult maxResult = ValidationUtil.validateMaxConstraint("",
+                value, max);
+        if (maxResult.isError()) {
+            return maxResult;
         }
 
-        ValidationResult smallerThanMin = ValidationUtil
-                .checkSmallerThanMin(value, min);
-        if (smallerThanMin.isError()) {
-            return smallerThanMin;
+        ValidationResult minResult = ValidationUtil.validateMinConstraint("",
+                value, min);
+        if (minResult.isError()) {
+            return minResult;
         }
 
         return ValidationResult.ok();
@@ -766,8 +766,8 @@ public class DateTimePicker
      * @return the current validity of the value.
      */
     private boolean isInvalid(LocalDateTime value) {
-        var requiredValidation = ValidationUtil.checkRequired(required, value,
-                getEmptyValue());
+        var requiredValidation = ValidationUtil.validateRequiredConstraint("",
+                required, value, getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
     }
@@ -838,9 +838,9 @@ public class DateTimePicker
 
     /**
      * Gets the internationalization object previously set for this component.
-     *
-     * Note: updating the object content that is gotten from this method will
-     * not update the lang on the component if not set back using
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
      * {@link DateTimePicker#setDatePickerI18n(DatePickerI18n)}
      *
      * @return the i18n object. It will be <code>null</code>, If the i18n

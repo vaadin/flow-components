@@ -533,8 +533,8 @@ public class MultiSelectComboBox<TItem>
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the i18n object that is returned from this method will not
-     * update the component, unless it is set again using
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
      * {@link #setI18n(MultiSelectComboBoxI18n)}
      *
      * @return the i18n object. It will be <code>null</code>, if it has not been

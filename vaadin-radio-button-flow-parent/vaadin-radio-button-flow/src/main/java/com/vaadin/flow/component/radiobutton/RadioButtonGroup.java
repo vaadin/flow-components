@@ -798,9 +798,8 @@ public class RadioButtonGroup<T>
     protected void validate() {
         if (!this.manualValidationEnabled) {
             boolean isRequired = isRequiredIndicatorVisible();
-            boolean isInvalid = ValidationUtil
-                    .checkRequired(isRequired, getValue(), getEmptyValue())
-                    .isError();
+            boolean isInvalid = ValidationUtil.validateRequiredConstraint("",
+                    isRequired, getValue(), getEmptyValue()).isError();
 
             setInvalid(isInvalid);
         }
