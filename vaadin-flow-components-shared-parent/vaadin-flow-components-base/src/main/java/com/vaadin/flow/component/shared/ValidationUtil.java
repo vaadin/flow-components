@@ -37,7 +37,7 @@ public class ValidationUtil {
      * @param required
      *            whether the constraint is enabled
      * @param value
-     *            the value to check
+     *            the value to validate
      * @param emptyValue
      *            the value considered to be empty
      * @return {@code ValidationResult.ok()} if the value does not equal to the
@@ -64,7 +64,7 @@ public class ValidationUtil {
      * @param required
      *            whether the constraint is enabled
      * @param value
-     *            the value to check
+     *            the value to validate
      * @param emptyValue
      *            the value considered to be empty
      * @return {@code ValidationResult.ok()} if the value does not equal to the
@@ -85,7 +85,7 @@ public class ValidationUtil {
      * @param <V>
      *            the type of the value
      * @param value
-     *            the value to check
+     *            the value to validate
      * @param maxValue
      *            the maximum allowed value
      * @return {@code ValidationResult.ok()} if the value is smaller or equal to
@@ -110,7 +110,7 @@ public class ValidationUtil {
      * @param errorMessage
      *            the error message to return if the check fails
      * @param value
-     *            the value to check
+     *            the value to validate
      * @param maxValue
      *            the maximum allowed value
      * @return {@code ValidationResult.ok()} if the value is smaller or equal to
@@ -132,7 +132,7 @@ public class ValidationUtil {
      * @param <V>
      *            the type of the value
      * @param value
-     *            the value to check
+     *            the value to validate
      * @param minValue
      *            the minimum allowed value
      * @return {@code ValidationResult.ok()} if the value is greater or equal to
@@ -157,7 +157,7 @@ public class ValidationUtil {
      * @param errorMessage
      *            the error message to return if the check fails
      * @param value
-     *            the value to check
+     *            the value to validate
      * @param minValue
      *            the minimum allowed value
      * @return {@code ValidationResult.ok()} if the value is greater or equal to
