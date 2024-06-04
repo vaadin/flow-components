@@ -771,16 +771,16 @@ public class DateTimePicker
             return ValidationResult.error("");
         }
 
-        ValidationResult greaterThanMax = ValidationUtil
-                .checkGreaterThanMax(value, max);
-        if (greaterThanMax.isError()) {
-            return greaterThanMax;
+        ValidationResult maxResult = ValidationUtil.validateMaxConstraint("",
+                value, max);
+        if (maxResult.isError()) {
+            return maxResult;
         }
 
-        ValidationResult smallerThanMin = ValidationUtil
-                .checkSmallerThanMin(value, min);
-        if (smallerThanMin.isError()) {
-            return smallerThanMin;
+        ValidationResult minResult = ValidationUtil.validateMinConstraint("",
+                value, min);
+        if (minResult.isError()) {
+            return minResult;
         }
 
         return ValidationResult.ok();
@@ -792,8 +792,8 @@ public class DateTimePicker
      * @return the current validity of the value.
      */
     private boolean isInvalid(LocalDateTime value) {
-        var requiredValidation = ValidationUtil.checkRequired(required, value,
-                getEmptyValue());
+        var requiredValidation = ValidationUtil.validateRequiredConstraint("",
+                required, value, getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
     }

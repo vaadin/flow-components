@@ -1027,9 +1027,8 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     protected void validate() {
         if (!this.manualValidationEnabled) {
             boolean isRequired = this.isRequiredIndicatorVisible();
-            boolean isInvalid = ValidationUtil
-                    .checkRequired(isRequired, getValue(), getEmptyValue())
-                    .isError();
+            boolean isInvalid = ValidationUtil.validateRequiredConstraint("",
+                    isRequired, getValue(), getEmptyValue()).isError();
 
             setInvalid(isInvalid);
         }
