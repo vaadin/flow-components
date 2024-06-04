@@ -289,7 +289,8 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
 
             boolean isRequired = isRequiredIndicatorVisible();
             ValidationResult requiredValidation = ValidationUtil
-                    .checkRequired(isRequired, value, getEmptyValue());
+                    .validateRequiredConstraint("", isRequired, value,
+                            getEmptyValue());
 
             setInvalid(requiredValidation.isError()
                     || checkValidity(value).isError());
