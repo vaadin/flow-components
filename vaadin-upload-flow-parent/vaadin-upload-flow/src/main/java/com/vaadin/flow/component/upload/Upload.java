@@ -714,8 +714,8 @@ public class Upload extends Component implements HasSize, HasStyle {
     /**
      * Get the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content that is gotten from this method will
-     * not update the language on the component if not set back using
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
      * {@link Upload#setI18n(UploadI18N)}
      *
      * @return the object with the i18n properties. If the i18n properties
