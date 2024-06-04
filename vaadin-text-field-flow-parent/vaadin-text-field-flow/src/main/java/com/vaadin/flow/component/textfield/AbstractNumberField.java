@@ -364,7 +364,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             T value = getValue();
 
             final var requiredValidation = ValidationUtil
-                    .validateRequiredConstraint("", isRequired(), value,
+                    .validateRequiredConstraint("", isRequiredIndicatorVisible(), value,
                             getEmptyValue());
 
             setInvalid(requiredValidation.isError()

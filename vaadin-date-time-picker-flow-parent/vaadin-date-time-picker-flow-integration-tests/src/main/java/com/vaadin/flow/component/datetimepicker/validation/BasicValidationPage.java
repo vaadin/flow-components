@@ -18,7 +18,7 @@ public class BasicValidationPage
         super();
 
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
-            testField.setRequiredIndicatorVisible(true);
+            testField.setRequired(true);
         }));
 
         add(createInput(MIN_INPUT, "Set min date time", event -> {

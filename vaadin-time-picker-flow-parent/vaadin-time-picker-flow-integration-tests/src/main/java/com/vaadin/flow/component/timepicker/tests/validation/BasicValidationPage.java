@@ -17,7 +17,7 @@ public class BasicValidationPage extends AbstractValidationPage<TimePicker> {
         super();
 
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
-            testField.setRequiredIndicatorVisible(true);
+            testField.setRequired(true);
         }));
 
         add(createInput(MIN_INPUT, "Set min time", event -> {
