@@ -40,8 +40,6 @@ import com.vaadin.flow.shared.Registration;
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
         extends TextFieldBase<C, T> {
 
-    private boolean required;
-
     /*
      * Note: setters and getters for min/max/step needed to be duplicated in
      * NumberField and IntegerField, because they use primitive double and int
@@ -366,7 +364,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             T value = getValue();
 
             final var requiredValidation = ValidationUtil
-                    .validateRequiredConstraint("", required, value,
+                    .validateRequiredConstraint("", isRequired(), value,
                             getEmptyValue());
 
             setInvalid(requiredValidation.isError()
@@ -394,12 +392,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
                 .subtract(BigDecimal.valueOf(stepBasis))
                 .remainder(BigDecimal.valueOf(step))
                 .compareTo(BigDecimal.ZERO) == 0;
-    }
-
-    @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        this.required = requiredIndicatorVisible;
     }
 
     @Override
