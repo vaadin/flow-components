@@ -864,9 +864,9 @@ public class DateTimePicker
 
     /**
      * Gets the internationalization object previously set for this component.
-     *
-     * Note: updating the object content that is gotten from this method will
-     * not update the lang on the component if not set back using
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
      * {@link DateTimePicker#setDatePickerI18n(DatePickerI18n)}
      *
      * @return the i18n object. It will be <code>null</code>, If the i18n
