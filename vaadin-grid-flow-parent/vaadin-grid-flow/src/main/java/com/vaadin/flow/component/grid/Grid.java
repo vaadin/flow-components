@@ -5071,7 +5071,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * {@link #setEmptyStateText(String)}.
      *
      * @param emptyStateComponent
-     *            the component to be displayed when the grid is empty
+     *            the component to be displayed when the grid is empty, or null
+     *            to clear the empty state content
      */
     public void setEmptyStateComponent(Component emptyStateComponent) {
         this.emptyStateText = null;
@@ -5082,11 +5083,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Sets the text to be displayed when the grid is empty.
      * <p>
+     * The text will be wrapped inside an element with "empty-state-text" class
+     * name that can be used for styling.
+     * <p>
      * Note: This will also override any empty state content set with
      * {@link #setEmptyStateComponent(Component)}.
      *
      * @param emptyStateText
-     *            the text to be displayed when the grid is empty
+     *            the text to be displayed when the grid is empty, or null to
+     *            clear the empty state content
      */
     public void setEmptyStateText(String emptyStateText) {
         this.emptyStateComponent = null;
@@ -5097,7 +5102,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Returns the component that is displayed when the grid is empty.
      *
-     * @return the component that is displayed when the grid is empty
+     * @return the component that is displayed when the grid is empty or null if
+     *         no empty state component is set
      */
     public Component getEmptyStateComponent() {
         return emptyStateComponent;
@@ -5106,7 +5112,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Returns the text that is displayed when the grid is empty.
      *
-     * @return the text that is displayed when the grid is empty
+     * @return the text that is displayed when the grid is empty or null if no
+     *         empty state text is set
      */
     public String getEmptyStateText() {
         return emptyStateText;
@@ -5116,7 +5123,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (emptyStateComponent != null) {
             SlotUtils.setSlot(this, EMPTY_STATE_SLOT, emptyStateComponent);
         } else if (emptyStateText != null) {
-            SlotUtils.setSlot(this, EMPTY_STATE_SLOT, new Span(emptyStateText));
+            var emptyStateTextElement = new Span(emptyStateText);
+            emptyStateTextElement.setClassName("empty-state-text");
+            SlotUtils.setSlot(this, EMPTY_STATE_SLOT, emptyStateTextElement);
         } else {
             SlotUtils.clearSlot(this, EMPTY_STATE_SLOT);
         }
