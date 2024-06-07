@@ -110,7 +110,6 @@ public class DatePicker
 
     private LocalDate max;
     private LocalDate min;
-    private boolean required;
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
 
@@ -569,7 +568,7 @@ public class DatePicker
      */
     private boolean isInvalid(LocalDate value) {
         var requiredValidation = ValidationUtil.validateRequiredConstraint("",
-                required, value, getEmptyValue());
+                isRequiredIndicatorVisible(), value, getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
     }
@@ -673,14 +672,7 @@ public class DatePicker
      *            the boolean value to set
      */
     public void setRequired(boolean required) {
-        getElement().setProperty("required", required);
-        this.required = required;
-    }
-
-    @Override
-    public void setRequiredIndicatorVisible(boolean required) {
-        super.setRequiredIndicatorVisible(required);
-        this.required = required;
+        setRequiredIndicatorVisible(required);
     }
 
     /**
@@ -692,7 +684,7 @@ public class DatePicker
      * @return {@code true} if the input is required, {@code false} otherwise
      */
     public boolean isRequired() {
-        return getElement().getProperty("required", false);
+        return isRequiredIndicatorVisible();
     }
 
     /**

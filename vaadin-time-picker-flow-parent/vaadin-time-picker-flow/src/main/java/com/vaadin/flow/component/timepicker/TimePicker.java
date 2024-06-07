@@ -94,7 +94,6 @@ public class TimePicker
 
     private LocalTime max;
     private LocalTime min;
-    private boolean required;
     private StateTree.ExecutionRegistration pendingLocaleUpdate;
 
     private boolean manualValidationEnabled = false;
@@ -374,7 +373,7 @@ public class TimePicker
      */
     private boolean isInvalid(LocalTime value) {
         var requiredValidation = ValidationUtil.validateRequiredConstraint("",
-                required, value, getEmptyValue());
+                isRequiredIndicatorVisible(), value, getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
     }
@@ -397,14 +396,7 @@ public class TimePicker
      *            the boolean value to set
      */
     public void setRequired(boolean required) {
-        getElement().setProperty("required", required);
-        this.required = required;
-    }
-
-    @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        this.required = requiredIndicatorVisible;
+        setRequiredIndicatorVisible(required);
     }
 
     /**
@@ -416,7 +408,7 @@ public class TimePicker
      * @return {@code true} if the input is required, {@code false} otherwise
      */
     public boolean isRequired() {
-        return getElement().getProperty("required", false);
+        return isRequiredIndicatorVisible();
     }
 
     /**

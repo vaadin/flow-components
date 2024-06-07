@@ -140,7 +140,6 @@ public class DateTimePicker
 
     private LocalDateTime max;
     private LocalDateTime min;
-    private boolean required;
 
     private boolean manualValidationEnabled = false;
 
@@ -793,7 +792,7 @@ public class DateTimePicker
      */
     private boolean isInvalid(LocalDateTime value) {
         var requiredValidation = ValidationUtil.validateRequiredConstraint("",
-                required, value, getEmptyValue());
+                isRequiredIndicatorVisible(), value, getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
     }
@@ -887,18 +886,6 @@ public class DateTimePicker
         this.datePickerI18n = Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
         datePicker.setI18n(i18n);
-    }
-
-    /**
-     * Sets whether the date time picker is marked as input required.
-     *
-     * @param requiredIndicatorVisible
-     *            the value of the requiredIndicatorVisible to be set
-     */
-    @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        this.required = requiredIndicatorVisible;
     }
 
     /**

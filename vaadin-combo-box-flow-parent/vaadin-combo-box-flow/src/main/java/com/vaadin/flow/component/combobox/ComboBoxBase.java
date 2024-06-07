@@ -339,7 +339,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @return {@code true} if the component requires a value to be valid
      */
     public boolean isRequired() {
-        return super.isRequiredIndicatorVisible();
+        return isRequiredIndicatorVisible();
     }
 
     /**
@@ -349,7 +349,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *            {@code true} if the component requires a value to be valid
      */
     public void setRequired(boolean required) {
-        super.setRequiredIndicatorVisible(required);
+        setRequiredIndicatorVisible(required);
     }
 
     @Override
@@ -1138,9 +1138,9 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     protected void validate() {
         if (!this.manualValidationEnabled) {
-            boolean isRequired = isRequiredIndicatorVisible();
             boolean isInvalid = ValidationUtil.validateRequiredConstraint("",
-                    isRequired, getValue(), getEmptyValue()).isError();
+                    isRequiredIndicatorVisible(), getValue(), getEmptyValue())
+                    .isError();
 
             setInvalid(isInvalid);
         }
