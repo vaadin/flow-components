@@ -336,7 +336,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         if (withRequiredValidator) {
             ValidationResult requiredResult = ValidationUtil
                     .validateRequiredConstraint(getRequiredErrorMessage(),
-                            isRequiredIndicatorVisible(), value, getEmptyValue());
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
             if (requiredResult.isError()) {
                 return requiredResult;
             }
