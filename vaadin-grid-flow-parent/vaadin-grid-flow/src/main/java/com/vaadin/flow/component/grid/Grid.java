@@ -5071,7 +5071,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * {@link #setEmptyStateText(String)}.
      *
      * @param emptyStateComponent
-     *            the component to be displayed when the grid is empty
+     *            the component to be displayed when the grid is empty, or null
+     *            to clear the empty state content
      */
     public void setEmptyStateComponent(Component emptyStateComponent) {
         this.emptyStateText = null;
@@ -5086,7 +5087,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * {@link #setEmptyStateComponent(Component)}.
      *
      * @param emptyStateText
-     *            the text to be displayed when the grid is empty
+     *            the text to be displayed when the grid is empty, or null to
+     *            clear the empty state content
      */
     public void setEmptyStateText(String emptyStateText) {
         this.emptyStateComponent = null;
@@ -5097,7 +5099,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Returns the component that is displayed when the grid is empty.
      *
-     * @return the component that is displayed when the grid is empty
+     * @return the component that is displayed when the grid is empty or null if
+     *         no empty state component is set
      */
     public Component getEmptyStateComponent() {
         return emptyStateComponent;
@@ -5106,7 +5109,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Returns the text that is displayed when the grid is empty.
      *
-     * @return the text that is displayed when the grid is empty
+     * @return the text that is displayed when the grid is empty or null if no
+     *         empty state text is set
      */
     public String getEmptyStateText() {
         return emptyStateText;
