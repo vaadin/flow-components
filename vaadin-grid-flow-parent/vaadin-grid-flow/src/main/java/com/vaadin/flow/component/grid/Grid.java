@@ -5083,9 +5083,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Sets the text to be displayed when the grid is empty.
      * <p>
-     * The text will be wrapped inside an element with "empty-state-text" class
-     * name that can be used for styling.
-     * <p>
      * Note: This will also override any empty state content set with
      * {@link #setEmptyStateComponent(Component)}.
      *
@@ -5123,9 +5120,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (emptyStateComponent != null) {
             SlotUtils.setSlot(this, EMPTY_STATE_SLOT, emptyStateComponent);
         } else if (emptyStateText != null) {
-            var emptyStateTextElement = new Span(emptyStateText);
-            emptyStateTextElement.setClassName("empty-state-text");
-            SlotUtils.setSlot(this, EMPTY_STATE_SLOT, emptyStateTextElement);
+            SlotUtils.setSlot(this, EMPTY_STATE_SLOT, new Span(emptyStateText));
         } else {
             SlotUtils.clearSlot(this, EMPTY_STATE_SLOT);
         }

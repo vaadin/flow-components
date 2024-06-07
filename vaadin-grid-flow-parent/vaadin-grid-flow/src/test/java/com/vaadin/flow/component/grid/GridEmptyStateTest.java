@@ -51,14 +51,6 @@ public class GridEmptyStateTest {
     }
 
     @Test
-    public void setEmptyStateText_wrapperHasClassName() {
-        grid.setEmptyStateText("empty");
-        var emptyStateElement = getEmptyStateElement();
-        Assert.assertEquals("empty-state-text",
-                emptyStateElement.getAttribute("class"));
-    }
-
-    @Test
     public void setEmptyStateComponent_overridesEmptyStateText() {
         grid.setEmptyStateText("empty");
         var content = new Div();
