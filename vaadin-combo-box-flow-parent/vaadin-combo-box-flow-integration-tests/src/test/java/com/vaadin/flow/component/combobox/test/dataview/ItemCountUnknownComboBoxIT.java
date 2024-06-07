@@ -147,6 +147,8 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
     public void undefinedItemCount_enterClientFilter_displaysFilteredItem() {
         open(300);
 
+        comboBoxElement.openPopup();
+
         assertLoadedItemsCount("Should be 50 items before filtering", 50,
                 comboBoxElement);
 
