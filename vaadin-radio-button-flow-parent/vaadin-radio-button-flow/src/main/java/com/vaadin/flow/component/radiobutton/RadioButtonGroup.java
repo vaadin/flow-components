@@ -498,7 +498,7 @@ public class RadioButtonGroup<T>
      *            the boolean value to set
      */
     public void setRequired(boolean required) {
-        getElement().setProperty("required", required);
+        setRequiredIndicatorVisible(required);
     }
 
     /**
@@ -510,7 +510,7 @@ public class RadioButtonGroup<T>
      * @return the {@code required} property from the webcomponent
      */
     public boolean isRequired() {
-        return getElement().getProperty("required", false);
+        return isRequiredIndicatorVisible();
     }
 
     /**
@@ -797,9 +797,9 @@ public class RadioButtonGroup<T>
 
     protected void validate() {
         if (!this.manualValidationEnabled) {
-            boolean isRequired = isRequiredIndicatorVisible();
             boolean isInvalid = ValidationUtil.validateRequiredConstraint("",
-                    isRequired, getValue(), getEmptyValue()).isError();
+                    isRequiredIndicatorVisible(), getValue(), getEmptyValue())
+                    .isError();
 
             setInvalid(isInvalid);
         }
