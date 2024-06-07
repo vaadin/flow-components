@@ -345,8 +345,8 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      */
     private boolean isInvalid(Boolean value) {
         ValidationResult requiredValidation = ValidationUtil
-                .validateRequiredConstraint("", isRequiredIndicatorVisible(), value,
-                        getEmptyValue());
+                .validateRequiredConstraint("", isRequiredIndicatorVisible(),
+                        value, getEmptyValue());
 
         return requiredValidation.isError();
     }

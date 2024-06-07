@@ -288,7 +288,8 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
             BigDecimal value = getValue();
 
             ValidationResult requiredValidation = ValidationUtil
-                    .validateRequiredConstraint("", isRequiredIndicatorVisible(), value,
+                    .validateRequiredConstraint("",
+                            isRequiredIndicatorVisible(), value,
                             getEmptyValue());
 
             setInvalid(requiredValidation.isError()

@@ -908,7 +908,8 @@ public class CheckboxGroup<T>
     protected void validate() {
         if (!this.manualValidationEnabled) {
             boolean isInvalid = ValidationUtil.validateRequiredConstraint("",
-                    isRequiredIndicatorVisible(), getValue(), getEmptyValue()).isError();
+                    isRequiredIndicatorVisible(), getValue(), getEmptyValue())
+                    .isError();
 
             setInvalid(isInvalid);
         }
