@@ -15,8 +15,11 @@ public class BinderValidationPage extends AbstractValidationPage<DatePicker> {
     public static final String EXPECTED_VALUE_INPUT = "expected-value-input";
     public static final String RESET_BEAN_BUTTON = "reset-bean-button";
 
-    public static final String REQUIRED_ERROR_MESSAGE = "The field is required";
-    public static final String UNEXPECTED_VALUE_ERROR_MESSAGE = "The field doesn't match the expected value";
+    public static final String REQUIRED_ERROR_MESSAGE = "Field is required";
+    public static final String BAD_INPUT_ERROR_MESSAGE = "Date has incorrect format";
+    public static final String MIN_ERROR_MESSAGE = "Date is too small";
+    public static final String MAX_ERROR_MESSAGE = "Date is too big";
+    public static final String UNEXPECTED_VALUE_ERROR_MESSAGE = "Date does not match the expected value";
 
     public static class Bean {
         private LocalDate property;
@@ -36,6 +39,11 @@ public class BinderValidationPage extends AbstractValidationPage<DatePicker> {
 
     public BinderValidationPage() {
         super();
+
+        testField.setI18n(new DatePicker.DatePickerI18n()
+                .setBadInputErrorMessage(BAD_INPUT_ERROR_MESSAGE)
+                .setMinErrorMessage(MIN_ERROR_MESSAGE)
+                .setMaxErrorMessage(MAX_ERROR_MESSAGE));
 
         binder = new Binder<>(Bean.class);
         binder.forField(testField).asRequired(REQUIRED_ERROR_MESSAGE)
