@@ -31,7 +31,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/tooltip", version = "24.5.0-alpha2")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.5.0-alpha3")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Tooltip implements Serializable {
 
