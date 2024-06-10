@@ -89,9 +89,8 @@ public class RichTextEditor
      *            the internationalized properties, not <code>null</code>
      */
     public void setI18n(RichTextEditorI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {
                 JsonObject i18nObject = (JsonObject) JsonSerializer

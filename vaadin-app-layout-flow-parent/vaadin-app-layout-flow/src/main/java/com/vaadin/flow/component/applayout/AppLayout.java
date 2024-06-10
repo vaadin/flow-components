@@ -88,9 +88,8 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      *            the internationalized properties, not <code>null</code>
      */
     public void setI18n(AppLayoutI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
 
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {
