@@ -495,6 +495,14 @@ public class DatePicker
             i18nObject.put("referenceDate",
                     i18n.getReferenceDate().format(DateTimeFormatter.ISO_DATE));
         }
+
+        // Remove the error message properties because they aren't used on
+        // the client-side.
+        i18nObject.remove("badInputErrorMessage");
+        i18nObject.remove("requiredErrorMessage");
+        i18nObject.remove("minErrorMessage");
+        i18nObject.remove("maxErrorMessage");
+
         // Remove properties with null values to prevent errors in web component
         removeNullValuesFromJsonObject(i18nObject);
         return i18nObject;
@@ -515,7 +523,7 @@ public class DatePicker
 
     @Override
     public Validator<LocalDate> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        return (value, context) -> checkValidity(value, false);
     }
 
     @Override
@@ -538,38 +546,45 @@ public class DatePicker
                 .forEach(listener -> listener.validationStatusChanged(event));
     }
 
-    private ValidationResult checkValidity(LocalDate value) {
-        boolean hasNonParsableValue = valueEquals(value, getEmptyValue())
-                && isInputValuePresent();
-        if (hasNonParsableValue) {
-            return ValidationResult.error("");
+    private ValidationResult checkValidity(LocalDate value,
+            boolean withRequiredValidator) {
+        ValidationResult badInputResult = validateBadInputConstraint(
+                getBadInputErrorMessage(), value);
+        if (badInputResult.isError()) {
+            return badInputResult;
         }
 
-        ValidationResult resultMax = ValidationUtil.validateMaxConstraint("",
-                value, max);
-        if (resultMax.isError()) {
-            return resultMax;
+        if (withRequiredValidator) {
+            ValidationResult requiredResult = ValidationUtil
+                    .validateRequiredConstraint(getRequiredErrorMessage(),
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
+            if (requiredResult.isError()) {
+                return requiredResult;
+            }
         }
 
-        ValidationResult resultMin = ValidationUtil.validateMinConstraint("",
-                value, min);
-        if (resultMin.isError()) {
-            return resultMin;
+        ValidationResult maxResult = ValidationUtil
+                .validateMaxConstraint(getMaxErrorMessage(), value, max);
+        if (maxResult.isError()) {
+            return maxResult;
+        }
+
+        ValidationResult minResult = ValidationUtil
+                .validateMinConstraint(getMinErrorMessage(), value, min);
+        if (minResult.isError()) {
+            return minResult;
         }
 
         return ValidationResult.ok();
     }
 
-    /**
-     * Performs a server-side validation of the given value. This is needed
-     * because it is possible to circumvent the client side validation
-     * constraints using browser development tools.
-     */
-    private boolean isInvalid(LocalDate value) {
-        var requiredValidation = ValidationUtil.validateRequiredConstraint("",
-                isRequiredIndicatorVisible(), value, getEmptyValue());
-
-        return requiredValidation.isError() || checkValidity(value).isError();
+    private ValidationResult validateBadInputConstraint(String errorMessage,
+            LocalDate value) {
+        boolean isError = valueEquals(value, getEmptyValue())
+                && isInputValuePresent();
+        return isError ? ValidationResult.error(errorMessage)
+                : ValidationResult.ok();
     }
 
     /**
@@ -777,13 +792,24 @@ public class DatePicker
     }
 
     /**
-     * Performs server-side validation of the current value. This is needed
-     * because it is possible to circumvent the client-side validation
-     * constraints using browser development tools.
+     * Validates the current value against the constraints and sets the
+     * {@code invalid} property and the {@code errorMessage} property using the
+     * error messages defined in the i18n object.
+     * <p>
+     * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            setInvalid(isInvalid(getValue()));
+        if (this.manualValidationEnabled) {
+            return;
+        }
+
+        ValidationResult result = checkValidity(getValue(), true);
+        if (result.isError()) {
+            setInvalid(true);
+            setErrorMessage(result.getErrorMessage());
+        } else {
+            setInvalid(false);
+            setErrorMessage("");
         }
     }
 
@@ -846,6 +872,26 @@ public class DatePicker
         return addListener(InvalidChangeEvent.class, listener);
     }
 
+    private String getBadInputErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(DatePickerI18n::getBadInputErrorMessage).orElse("");
+    }
+
+    private String getRequiredErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(DatePickerI18n::getRequiredErrorMessage).orElse("");
+    }
+
+    private String getMinErrorMessage() {
+        return Optional.ofNullable(i18n).map(DatePickerI18n::getMinErrorMessage)
+                .orElse("");
+    }
+
+    private String getMaxErrorMessage() {
+        return Optional.ofNullable(i18n).map(DatePickerI18n::getMaxErrorMessage)
+                .orElse("");
+    }
+
     /**
      * The internationalization properties for {@link DatePicker}.
      */
@@ -858,6 +904,10 @@ public class DatePicker
         private String today;
         private String cancel;
         private LocalDate referenceDate;
+        private String badInputErrorMessage;
+        private String requiredErrorMessage;
+        private String minErrorMessage;
+        private String maxErrorMessage;
 
         /**
          * Gets the name of the months.
@@ -1117,6 +1167,110 @@ public class DatePicker
          */
         public DatePickerI18n setReferenceDate(LocalDate referenceDate) {
             this.referenceDate = referenceDate;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field contains user input
+         * that the server is unable to convert to type {@link LocalDate}.
+         *
+         * @return the error message or {@code null} if not set
+         */
+        public String getBadInputErrorMessage() {
+            return badInputErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field contains user input
+         * that the server is unable to convert to type {@link LocalDate}.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         */
+        public DatePickerI18n setBadInputErrorMessage(String errorMessage) {
+            badInputErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field is required but
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         * @see DatePicker#isRequiredIndicatorVisible()
+         * @see DatePicker#setRequiredIndicatorVisible(boolean)
+         */
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field is required but
+         * empty.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see DatePicker#isRequiredIndicatorVisible()
+         * @see DatePicker#setRequiredIndicatorVisible(boolean)
+         */
+        public DatePickerI18n setRequiredErrorMessage(String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the selected date is earlier
+         * than the minimum allowed date.
+         *
+         * @return the error message or {@code null} if not set
+         * @see DatePicker#getMin()
+         * @see DatePicker#setMin(LocalDate)
+         */
+        public String getMinErrorMessage() {
+            return minErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the selected date is earlier
+         * than the minimum allowed date.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see DatePicker#getMin()
+         * @see DatePicker#setMin(LocalDate)
+         */
+        public DatePickerI18n setMinErrorMessage(String errorMessage) {
+            minErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the selected date is later than
+         * the maximum allowed date.
+         *
+         * @return the error message or {@code null} if not set
+         * @see DatePicker#getMax()
+         * @see DatePicker#setMax(LocalDate)
+         */
+        public String getMaxErrorMessage() {
+            return maxErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the selected date is later
+         * than the maximum allowed date.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see DatePicker#getMax()
+         * @see DatePicker#setMax(LocalDate)
+         */
+        public DatePickerI18n setMaxErrorMessage(String errorMessage) {
+            maxErrorMessage = errorMessage;
             return this;
         }
     }
