@@ -883,9 +883,8 @@ public class DateTimePicker
      *            the internationalized properties, not <code>null</code>
      */
     public void setDatePickerI18n(DatePickerI18n i18n) {
-        Objects.requireNonNull(i18n,
+        this.datePickerI18n = Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
-        this.datePickerI18n = i18n;
         datePicker.setI18n(i18n);
     }
 

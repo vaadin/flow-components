@@ -151,9 +151,8 @@ public class Avatar extends Component
      *            the internationalized properties, not <code>null</code>
      */
     public void setI18n(AvatarI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
         JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
         getElement().setPropertyJson("i18n", i18nObject);
     }
