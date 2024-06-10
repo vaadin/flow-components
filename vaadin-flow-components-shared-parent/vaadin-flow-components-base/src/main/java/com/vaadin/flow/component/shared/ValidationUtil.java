@@ -182,7 +182,7 @@ public class ValidationUtil {
      *            the value to validate
      * @param minLength
      *            the minimum allowed length
-     * @return {@code ValidationResult.ok()} if the value is shorter than or
+     * @return {@code ValidationResult.ok()} if the value is longer than or
      *         equal to the minimum length, {@code ValidationResult.error()}
      *         otherwise
      */
@@ -205,8 +205,8 @@ public class ValidationUtil {
      *            the value to validate
      * @param maxLength
      *            the maximum allowed length
-     * @return {@code ValidationResult.ok()} if the value is longer than or
-     *         equal to the minimum length, {@code ValidationResult.error()}
+     * @return {@code ValidationResult.ok()} if the value is shorter than or
+     *         equal to the maximum length, {@code ValidationResult.error()}
      *         otherwise
      */
     public static ValidationResult validateMaxLengthConstraint(
