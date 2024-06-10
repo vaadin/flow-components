@@ -446,7 +446,7 @@ public class TextField extends TextFieldBase<TextField, String>
 
         /**
          * Gets the error message displayed when the field value is shorter than
-         * the minimum length.
+         * the minimum allowed length.
          *
          * @return the error message or {@code null} if not set
          * @see TextField#getMinLength()
@@ -458,7 +458,7 @@ public class TextField extends TextFieldBase<TextField, String>
 
         /**
          * Sets the error message to display when the field value is shorter
-         * than the minimum length.
+         * than the minimum allowed length.
          *
          * @param errorMessage
          *            the error message or {@code null} to clear it
@@ -473,7 +473,7 @@ public class TextField extends TextFieldBase<TextField, String>
 
         /**
          * Gets the error message displayed when the field value is longer than
-         * the maximum length.
+         * the maximum allowed length.
          *
          * @return the error message or {@code null} if not set
          * @see TextField#getMaxLength()
@@ -485,7 +485,7 @@ public class TextField extends TextFieldBase<TextField, String>
 
         /**
          * Sets the error message to display when the field value is longer than
-         * the maximum length.
+         * the maximum allowed length.
          *
          * @param errorMessage
          *            the error message or {@code null} to clear it
