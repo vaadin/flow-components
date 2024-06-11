@@ -392,6 +392,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     private boolean isValidByStep(T value) {
+
         if (!stepSetByUser// Don't use step in validation if it's not explicitly
                           // set by user. This follows the web component logic.
                 || value == null || step == 0) {
