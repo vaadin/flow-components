@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.timepicker;
 
+import java.io.Serializable;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -89,6 +90,8 @@ public class TimePicker
     private static final SerializableFunction<LocalTime, String> FORMATTER = valueFromModel -> {
         return valueFromModel == null ? "" : valueFromModel.toString();
     };
+
+    private TimePickerI18n i18n;
 
     private Locale locale;
 
@@ -321,7 +324,7 @@ public class TimePicker
 
     @Override
     public Validator<LocalTime> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        return (value, context) -> checkValidity(value, false);
     }
 
     @Override
@@ -344,38 +347,37 @@ public class TimePicker
                 .forEach(listener -> listener.validationStatusChanged(event));
     }
 
-    private ValidationResult checkValidity(LocalTime value) {
-        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
+    private ValidationResult checkValidity(LocalTime value,
+            boolean withRequiredValidator) {
+        boolean hasBadInput = Objects.equals(value, getEmptyValue())
                 && isInputValuePresent();
-        if (hasNonParsableValue) {
-            return ValidationResult.error("");
+        if (hasBadInput) {
+            return ValidationResult.error(getBadInputErrorMessage());
         }
 
-        ValidationResult maxResult = ValidationUtil.validateMaxConstraint("",
-                value, max);
+        if (withRequiredValidator) {
+            ValidationResult requiredResult = ValidationUtil
+                    .validateRequiredConstraint(getRequiredErrorMessage(),
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
+            if (requiredResult.isError()) {
+                return requiredResult;
+            }
+        }
+
+        ValidationResult maxResult = ValidationUtil
+                .validateMaxConstraint(getMaxErrorMessage(), value, max);
         if (maxResult.isError()) {
             return maxResult;
         }
 
-        ValidationResult minResult = ValidationUtil.validateMinConstraint("",
-                value, min);
+        ValidationResult minResult = ValidationUtil
+                .validateMinConstraint(getMinErrorMessage(), value, min);
         if (minResult.isError()) {
             return minResult;
         }
 
         return ValidationResult.ok();
-    }
-
-    /**
-     * Performs a server-side validation of the given value. This is needed
-     * because it is possible to circumvent the client side validation
-     * constraints using browser development tools.
-     */
-    private boolean isInvalid(LocalTime value) {
-        var requiredValidation = ValidationUtil.validateRequiredConstraint("",
-                isRequiredIndicatorVisible(), value, getEmptyValue());
-
-        return requiredValidation.isError() || checkValidity(value).isError();
     }
 
     /**
@@ -496,13 +498,24 @@ public class TimePicker
     }
 
     /**
-     * Performs server-side validation of the current value. This is needed
-     * because it is possible to circumvent the client-side validation
-     * constraints using browser development tools.
+     * Validates the current value against the constraints and sets the
+     * {@code invalid} property and the {@code errorMessage} property using the
+     * error messages defined in the i18n object.
+     * <p>
+     * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            setInvalid(isInvalid(getValue()));
+        if (this.manualValidationEnabled) {
+            return;
+        }
+
+        ValidationResult result = checkValidity(getValue(), true);
+        if (result.isError()) {
+            setInvalid(true);
+            setErrorMessage(result.getErrorMessage());
+        } else {
+            setInvalid(false);
+            setErrorMessage("");
         }
     }
 
@@ -679,5 +692,165 @@ public class TimePicker
 
     private static String format(LocalTime time) {
         return time != null ? time.toString() : null;
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link TimePicker#setI18n(TimePickerI18n)}
+     *
+     * @return the i18n object. It will be {@code null}, If the i18n properties
+     *         weren't set.
+     */
+    public TimePickerI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization properties for this component.
+     *
+     * @param i18n
+     *            the internationalized properties, not {@code null}
+     */
+    public void setI18n(TimePickerI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+    }
+
+    private String getBadInputErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(TimePickerI18n::getBadInputErrorMessage).orElse("");
+    }
+
+    private String getRequiredErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(TimePickerI18n::getRequiredErrorMessage).orElse("");
+    }
+
+    private String getMinErrorMessage() {
+        return Optional.ofNullable(i18n).map(TimePickerI18n::getMinErrorMessage)
+                .orElse("");
+    }
+
+    private String getMaxErrorMessage() {
+        return Optional.ofNullable(i18n).map(TimePickerI18n::getMaxErrorMessage)
+                .orElse("");
+    }
+
+    /**
+     * The internationalization properties for {@link TimePicker}.
+     */
+    public static class TimePickerI18n implements Serializable {
+
+        private String badInputErrorMessage;
+        private String requiredErrorMessage;
+        private String minErrorMessage;
+        private String maxErrorMessage;
+
+        /**
+         * Gets the error message displayed when the field contains user input
+         * that the server is unable to convert to type {@link LocalTime}.
+         *
+         * @return the error message or {@code null} if not set
+         */
+        public String getBadInputErrorMessage() {
+            return badInputErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field contains user input
+         * that the server is unable to convert to type {@link LocalTime}.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         */
+        public TimePickerI18n setBadInputErrorMessage(String errorMessage) {
+            badInputErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field is required but
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         * @see TimePicker#isRequiredIndicatorVisible()
+         * @see TimePicker#setRequiredIndicatorVisible(boolean)
+         */
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field is required but
+         * empty.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see TimePicker#isRequiredIndicatorVisible()
+         * @see TimePicker#setRequiredIndicatorVisible(boolean)
+         */
+        public TimePickerI18n setRequiredErrorMessage(String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the selected time is earlier
+         * than the minimum allowed time.
+         *
+         * @return the error message or {@code null} if not set
+         * @see TimePicker#getMin()
+         * @see TimePicker#setMin(LocalTime)
+         */
+        public String getMinErrorMessage() {
+            return minErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the selected time is earlier
+         * than the minimum allowed time.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see TimePicker#getMin()
+         * @see TimePicker#setMin(LocalTime)
+         */
+        public TimePickerI18n setMinErrorMessage(String errorMessage) {
+            minErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the selected time is later than
+         * the maximum allowed time.
+         *
+         * @return the error message or {@code null} if not set
+         * @see TimePicker#getMax()
+         * @see TimePicker#setMax(LocalTime)
+         */
+        public String getMaxErrorMessage() {
+            return maxErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the selected time is later
+         * than the maximum allowed time.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see TimePicker#getMax()
+         * @see TimePicker#setMax(LocalTime)
+         */
+        public TimePickerI18n setMaxErrorMessage(String errorMessage) {
+            maxErrorMessage = errorMessage;
+            return this;
+        }
     }
 }
