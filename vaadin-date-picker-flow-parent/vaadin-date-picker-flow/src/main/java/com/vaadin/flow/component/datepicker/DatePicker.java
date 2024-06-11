@@ -548,10 +548,10 @@ public class DatePicker
 
     private ValidationResult checkValidity(LocalDate value,
             boolean withRequiredValidator) {
-        ValidationResult badInputResult = validateBadInputConstraint(
-                getBadInputErrorMessage(), value);
-        if (badInputResult.isError()) {
-            return badInputResult;
+        boolean hasBadInput = valueEquals(value, getEmptyValue())
+                && isInputValuePresent();
+        if (hasBadInput) {
+            return ValidationResult.error(getBadInputErrorMessage());
         }
 
         if (withRequiredValidator) {
@@ -577,14 +577,6 @@ public class DatePicker
         }
 
         return ValidationResult.ok();
-    }
-
-    private ValidationResult validateBadInputConstraint(String errorMessage,
-            LocalDate value) {
-        boolean isError = valueEquals(value, getEmptyValue())
-                && isInputValuePresent();
-        return isError ? ValidationResult.error(errorMessage)
-                : ValidationResult.ok();
     }
 
     /**
