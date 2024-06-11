@@ -327,10 +327,10 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     private ValidationResult checkValidity(T value,
             boolean withRequiredValidator) {
-        ValidationResult badInputResult = validateBadInputConstraint(
-                getBadInputErrorMessage(), value);
-        if (badInputResult.isError()) {
-            return badInputResult;
+        boolean hasBadInput = valueEquals(value, getEmptyValue())
+                && isInputValuePresent();
+        if (hasBadInput) {
+            return ValidationResult.error(getBadInputErrorMessage());
         }
 
         if (withRequiredValidator) {
@@ -357,10 +357,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             return minResult;
         }
 
-        ValidationResult stepResult = validateStepConstraint(
-                getStepErrorMessage(), value);
-        if (stepResult.isError()) {
-            return stepResult;
+        if (!isValidByStep(value)) {
+            return ValidationResult.error(getStepErrorMessage());
         }
 
         return ValidationResult.ok();
@@ -393,20 +391,11 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         }
     }
 
-    private ValidationResult validateBadInputConstraint(String errorMessage,
-            T value) {
-        boolean isError = valueEquals(value, getEmptyValue())
-                && isInputValuePresent();
-        return isError ? ValidationResult.error(errorMessage)
-                : ValidationResult.ok();
-    }
-
-    private ValidationResult validateStepConstraint(String errorMessage,
-            T value) {
+    private boolean isValidByStep(T value) {
         if (!stepSetByUser// Don't use step in validation if it's not explicitly
                           // set by user. This follows the web component logic.
                 || value == null || step == 0) {
-            return ValidationResult.ok();
+            return true;
         }
 
         // When min is not defined by user, its value is the absoluteMin
@@ -417,12 +406,10 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
                 : 0.0;
 
         // (value - stepBasis) % step == 0
-        boolean isError = new BigDecimal(String.valueOf(value))
+        return new BigDecimal(String.valueOf(value))
                 .subtract(BigDecimal.valueOf(stepBasis))
                 .remainder(BigDecimal.valueOf(step))
                 .compareTo(BigDecimal.ZERO) == 0;
-        return isError ? ValidationResult.ok()
-                : ValidationResult.error(errorMessage);
     }
 
     @Override
