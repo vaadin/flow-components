@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.messages.MessageInput;
 import com.vaadin.flow.component.messages.MessageInputI18n;
 import com.vaadin.flow.component.shared.HasTooltip;
@@ -73,5 +74,11 @@ public class MessageInputTest {
     @Test
     public void implementsHasTooltip() {
         Assert.assertTrue(messageInput instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementsFocusable() {
+        Assert.assertTrue("MessageInput should be focusable",
+                Focusable.class.isAssignableFrom(messageInput.getClass()));
     }
 }
