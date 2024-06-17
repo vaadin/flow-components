@@ -13,7 +13,7 @@
     <url>https://vaadin.com/components</url>
     <properties>
         <flow.version>24.5-SNAPSHOT</flow.version>
-        <testbench.version>9.3.0.rc1</testbench.version>
+        <testbench.version>9.3.0</testbench.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -68,6 +68,7 @@
         <module>vaadin-messages-flow-parent</module>
         <module>vaadin-notification-flow-parent</module>
         <module>vaadin-ordered-layout-flow-parent</module>
+        <module>vaadin-popover-flow-parent</module>
         <module>vaadin-progress-bar-flow-parent</module>
         <module>vaadin-radio-button-flow-parent</module>
         <module>vaadin-select-flow-parent</module>
@@ -209,7 +210,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.6.3</version>
+                    <version>3.7.0</version>
                     <executions>
                         <execution>
                             <id>attach-javadocs</id>
@@ -435,7 +436,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.4.1</version>
+                    <version>3.5.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -443,7 +444,7 @@
             <plugin>
                 <groupId>net.revelc.code.formatter</groupId>
                 <artifactId>formatter-maven-plugin</artifactId>
-                <version>2.23.0</version>
+                <version>2.24.1</version>
                 <configuration>
                     <configFile>https://raw.githubusercontent.com/vaadin/flow/main/eclipse/VaadinJavaConventions.xml</configFile>
                     <skipHtmlFormatting>true</skipHtmlFormatting>

@@ -65,10 +65,10 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/avatar-group", version = "24.5.0-alpha3")
 public class AvatarGroup extends Component implements HasOverlayClassName,
         HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
@@ -644,8 +644,8 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content that is gotten from this method will
-     * not update the lang on the component if not set back using
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
      * {@link AvatarGroup#setI18n(AvatarGroupI18n)}
      *
      * @return the i18n object. It will be <code>null</code>, If the i18n
@@ -662,9 +662,8 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
      *            the internationalized properties, not <code>null</code>
      */
     public void setI18n(AvatarGroupI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
         JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
         i18nObject.remove("manyActiveUsers");
         i18nObject.remove("oneActiveUser");

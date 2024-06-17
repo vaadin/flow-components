@@ -52,7 +52,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-big-decimal-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
 @Uses(TextField.class)
@@ -287,9 +287,10 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         if (!this.manualValidationEnabled) {
             BigDecimal value = getValue();
 
-            boolean isRequired = isRequiredIndicatorVisible();
             ValidationResult requiredValidation = ValidationUtil
-                    .checkRequired(isRequired, value, getEmptyValue());
+                    .validateRequiredConstraint("",
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
 
             setInvalid(requiredValidation.isError()
                     || checkValidity(value).isError());

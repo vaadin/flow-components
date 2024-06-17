@@ -68,9 +68,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/time-picker", version = "24.5.0-alpha3")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
@@ -94,7 +94,6 @@ public class TimePicker
 
     private LocalTime max;
     private LocalTime min;
-    private boolean required;
     private StateTree.ExecutionRegistration pendingLocaleUpdate;
 
     private boolean manualValidationEnabled = false;
@@ -352,16 +351,16 @@ public class TimePicker
             return ValidationResult.error("");
         }
 
-        ValidationResult greaterThanMaxValidation = ValidationUtil
-                .checkGreaterThanMax(value, max);
-        if (greaterThanMaxValidation.isError()) {
-            return greaterThanMaxValidation;
+        ValidationResult maxResult = ValidationUtil.validateMaxConstraint("",
+                value, max);
+        if (maxResult.isError()) {
+            return maxResult;
         }
 
-        ValidationResult smallThanMinValidation = ValidationUtil
-                .checkSmallerThanMin(value, min);
-        if (smallThanMinValidation.isError()) {
-            return smallThanMinValidation;
+        ValidationResult minResult = ValidationUtil.validateMinConstraint("",
+                value, min);
+        if (minResult.isError()) {
+            return minResult;
         }
 
         return ValidationResult.ok();
@@ -373,8 +372,8 @@ public class TimePicker
      * constraints using browser development tools.
      */
     private boolean isInvalid(LocalTime value) {
-        var requiredValidation = ValidationUtil.checkRequired(required, value,
-                getEmptyValue());
+        var requiredValidation = ValidationUtil.validateRequiredConstraint("",
+                isRequiredIndicatorVisible(), value, getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
     }
@@ -397,14 +396,7 @@ public class TimePicker
      *            the boolean value to set
      */
     public void setRequired(boolean required) {
-        getElement().setProperty("required", required);
-        this.required = required;
-    }
-
-    @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        this.required = requiredIndicatorVisible;
+        setRequiredIndicatorVisible(required);
     }
 
     /**
@@ -416,7 +408,7 @@ public class TimePicker
      * @return {@code true} if the input is required, {@code false} otherwise
      */
     public boolean isRequired() {
-        return getElement().getProperty("required", false);
+        return isRequiredIndicatorVisible();
     }
 
     /**

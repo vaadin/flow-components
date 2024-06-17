@@ -82,9 +82,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-picker", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/date-picker", version = "24.5.0-alpha3")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.29.3")
@@ -110,7 +110,6 @@ public class DatePicker
 
     private LocalDate max;
     private LocalDate min;
-    private boolean required;
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
 
@@ -418,8 +417,8 @@ public class DatePicker
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content that is gotten from this method will
-     * not update the lang on the component if not set back using
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
      * {@link DatePicker#setI18n(DatePickerI18n)}
      *
      * @return the i18n object. It will be <code>null</code>, If the i18n
@@ -436,9 +435,8 @@ public class DatePicker
      *            the internationalized properties, not <code>null</code>
      */
     public void setI18n(DatePickerI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
         requestI18nUpdate();
     }
 
@@ -548,16 +546,16 @@ public class DatePicker
             return ValidationResult.error("");
         }
 
-        ValidationResult greaterThanMax = ValidationUtil
-                .checkGreaterThanMax(value, max);
-        if (greaterThanMax.isError()) {
-            return greaterThanMax;
+        ValidationResult resultMax = ValidationUtil.validateMaxConstraint("",
+                value, max);
+        if (resultMax.isError()) {
+            return resultMax;
         }
 
-        ValidationResult smallerThanMin = ValidationUtil
-                .checkSmallerThanMin(value, min);
-        if (smallerThanMin.isError()) {
-            return smallerThanMin;
+        ValidationResult resultMin = ValidationUtil.validateMinConstraint("",
+                value, min);
+        if (resultMin.isError()) {
+            return resultMin;
         }
 
         return ValidationResult.ok();
@@ -569,8 +567,8 @@ public class DatePicker
      * constraints using browser development tools.
      */
     private boolean isInvalid(LocalDate value) {
-        var requiredValidation = ValidationUtil.checkRequired(required, value,
-                getEmptyValue());
+        var requiredValidation = ValidationUtil.validateRequiredConstraint("",
+                isRequiredIndicatorVisible(), value, getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
     }
@@ -674,14 +672,7 @@ public class DatePicker
      *            the boolean value to set
      */
     public void setRequired(boolean required) {
-        getElement().setProperty("required", required);
-        this.required = required;
-    }
-
-    @Override
-    public void setRequiredIndicatorVisible(boolean required) {
-        super.setRequiredIndicatorVisible(required);
-        this.required = required;
+        setRequiredIndicatorVisible(required);
     }
 
     /**
@@ -693,7 +684,7 @@ public class DatePicker
      * @return {@code true} if the input is required, {@code false} otherwise
      */
     public boolean isRequired() {
-        return getElement().getProperty("required", false);
+        return isRequiredIndicatorVisible();
     }
 
     /**

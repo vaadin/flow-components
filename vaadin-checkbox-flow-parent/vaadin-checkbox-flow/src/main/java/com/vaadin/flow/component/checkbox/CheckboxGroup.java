@@ -84,9 +84,9 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "24.5.0-alpha3")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
@@ -620,7 +620,7 @@ public class CheckboxGroup<T>
      *            the boolean value to set
      */
     public void setRequired(boolean required) {
-        getElement().setProperty("required", required);
+        setRequiredIndicatorVisible(required);
     }
 
     /**
@@ -632,7 +632,7 @@ public class CheckboxGroup<T>
      * @return {@code true} if the input is required, {@code false} otherwise
      */
     public boolean isRequired() {
-        return getElement().getProperty("required", false);
+        return isRequiredIndicatorVisible();
     }
 
     /**
@@ -907,9 +907,8 @@ public class CheckboxGroup<T>
 
     protected void validate() {
         if (!this.manualValidationEnabled) {
-            boolean isRequired = isRequiredIndicatorVisible();
-            boolean isInvalid = ValidationUtil
-                    .checkRequired(isRequired, getValue(), getEmptyValue())
+            boolean isInvalid = ValidationUtil.validateRequiredConstraint("",
+                    isRequiredIndicatorVisible(), getValue(), getEmptyValue())
                     .isError();
 
             setInvalid(isInvalid);

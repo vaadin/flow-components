@@ -59,9 +59,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/upload", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/upload", version = "24.5.0-alpha3")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasSize, HasStyle {
 
@@ -648,9 +648,8 @@ public class Upload extends Component implements HasSize, HasStyle {
      *            the internationalized properties, not <code>null</code>
      */
     public void setI18n(UploadI18N i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
 
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {
@@ -714,8 +713,8 @@ public class Upload extends Component implements HasSize, HasStyle {
     /**
      * Get the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content that is gotten from this method will
-     * not update the language on the component if not set back using
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
      * {@link Upload#setI18n(UploadI18N)}
      *
      * @return the object with the i18n properties. If the i18n properties

@@ -71,9 +71,9 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/radio-group", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/radio-group", version = "24.5.0-alpha3")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
@@ -498,7 +498,7 @@ public class RadioButtonGroup<T>
      *            the boolean value to set
      */
     public void setRequired(boolean required) {
-        getElement().setProperty("required", required);
+        setRequiredIndicatorVisible(required);
     }
 
     /**
@@ -510,7 +510,7 @@ public class RadioButtonGroup<T>
      * @return the {@code required} property from the webcomponent
      */
     public boolean isRequired() {
-        return getElement().getProperty("required", false);
+        return isRequiredIndicatorVisible();
     }
 
     /**
@@ -797,9 +797,8 @@ public class RadioButtonGroup<T>
 
     protected void validate() {
         if (!this.manualValidationEnabled) {
-            boolean isRequired = isRequiredIndicatorVisible();
-            boolean isInvalid = ValidationUtil
-                    .checkRequired(isRequired, getValue(), getEmptyValue())
+            boolean isInvalid = ValidationUtil.validateRequiredConstraint("",
+                    isRequiredIndicatorVisible(), getValue(), getEmptyValue())
                     .isError();
 
             setInvalid(isInvalid);

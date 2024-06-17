@@ -40,8 +40,6 @@ import com.vaadin.flow.shared.Registration;
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
         extends TextFieldBase<C, T> {
 
-    private boolean required;
-
     /*
      * Note: setters and getters for min/max/step needed to be duplicated in
      * NumberField and IntegerField, because they use primitive double and int
@@ -332,16 +330,16 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
         Double doubleValue = value != null ? value.doubleValue() : null;
 
-        ValidationResult greaterThanMax = ValidationUtil
-                .checkGreaterThanMax(doubleValue, max);
-        if (greaterThanMax.isError()) {
-            return greaterThanMax;
+        ValidationResult maxResult = ValidationUtil.validateMaxConstraint("",
+                doubleValue, max);
+        if (maxResult.isError()) {
+            return maxResult;
         }
 
-        ValidationResult smallerThanMin = ValidationUtil
-                .checkSmallerThanMin(doubleValue, min);
-        if (smallerThanMin.isError()) {
-            return smallerThanMin;
+        ValidationResult minResult = ValidationUtil.validateMinConstraint("",
+                doubleValue, min);
+        if (minResult.isError()) {
+            return minResult;
         }
 
         if (!isValidByStep(value)) {
@@ -366,7 +364,9 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             T value = getValue();
 
             final var requiredValidation = ValidationUtil
-                    .checkRequired(required, value, getEmptyValue());
+                    .validateRequiredConstraint("",
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
 
             setInvalid(requiredValidation.isError()
                     || checkValidity(value).isError());
@@ -393,12 +393,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
                 .subtract(BigDecimal.valueOf(stepBasis))
                 .remainder(BigDecimal.valueOf(step))
                 .compareTo(BigDecimal.ZERO) == 0;
-    }
-
-    @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        this.required = requiredIndicatorVisible;
     }
 
     @Override
