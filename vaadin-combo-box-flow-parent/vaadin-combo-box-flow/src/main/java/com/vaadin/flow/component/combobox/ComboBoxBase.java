@@ -118,6 +118,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     private ItemLabelGenerator<TItem> itemLabelGenerator = String::valueOf;
+    private SerializableFunction<TItem, String> classNameGenerator = item -> null;
     private final ComboBoxRenderManager<TItem> renderManager;
     private final ComboBoxDataController<TItem> dataController;
     private int customValueListenersCount;
@@ -165,6 +166,9 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         dataController = new ComboBoxDataController<>(this, localeSupplier);
         dataController.getDataGenerator().addDataGenerator((item,
                 jsonObject) -> jsonObject.put("label", generateLabel(item)));
+        dataController.getDataGenerator()
+                .addDataGenerator((item, jsonObject) -> jsonObject
+                        .put("className", generateClassName(item)));
 
         // Configure web component to use key property from the generated
         // wrapper items for identification
@@ -423,6 +427,56 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
                     "Got 'null' as a label value for the item '%s'. "
                             + "'%s' instance may not return 'null' values",
                     item, ItemLabelGenerator.class.getSimpleName()));
+        }
+        return label;
+    }
+
+    /**
+     * Sets the function that is used for generating CSS class names for the
+     * dropdown items in the ComboBox. Returning {@code null} from the generator
+     * results in no custom class name being set. Multiple class names can be
+     * returned from the generator as space-separated.
+     *
+     * @since 24.5
+     * @param classNameGenerator
+     *            the class name generator to set, not {@code null}
+     * @throws NullPointerException
+     *             if {@code classNameGenerator} is {@code null}
+     */
+    public void setClassNameGenerator(
+            SerializableFunction<TItem, String> classNameGenerator) {
+        Objects.requireNonNull(classNameGenerator,
+                "Class name generator can not be null");
+        this.classNameGenerator = classNameGenerator;
+        dataController.reset();
+    }
+
+    /**
+     * Gets the item class name generator that is used for generating CSS class
+     * names for the dropdown items in the ComboBox.
+     *
+     * @since 24.5
+     * @return the item class name generator, not null
+     */
+    public SerializableFunction<TItem, String> getItemClassNameGenerator() {
+        return classNameGenerator;
+    }
+
+    /**
+     * Generates a string class name for a data item using the current item
+     * class name generator
+     *
+     * @param item
+     *            the data item
+     * @return string class name for the data item
+     */
+    protected String generateClassName(TItem item) {
+        if (item == null) {
+            return "";
+        }
+        String label = getItemClassNameGenerator().apply(item);
+        if (label == null) {
+            return "";
         }
         return label;
     }
