@@ -53,10 +53,10 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/combo-box", version = "23.5.1")
-@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.5.1")
+@NpmPackage(value = "@vaadin/combo-box", version = "23.5.2")
+@NpmPackage(value = "@vaadin/vaadin-combo-box", version = "23.5.2")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
