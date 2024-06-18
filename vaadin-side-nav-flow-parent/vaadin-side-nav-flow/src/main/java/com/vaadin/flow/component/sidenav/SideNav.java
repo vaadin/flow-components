@@ -37,7 +37,7 @@ import java.util.Objects;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav")
-@NpmPackage(value = "@vaadin/side-nav", version = "24.3.13")
+@NpmPackage(value = "@vaadin/side-nav", version = "24.3.14")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
 public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
 
