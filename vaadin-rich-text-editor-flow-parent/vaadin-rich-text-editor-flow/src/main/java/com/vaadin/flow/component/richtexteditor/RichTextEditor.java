@@ -54,9 +54,9 @@ import elemental.json.JsonObject;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.5.0-alpha3")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
@@ -71,8 +71,8 @@ public class RichTextEditor
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content that is gotten from this method will
-     * not update the lang on the component if not set back using
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
      * {@link RichTextEditor#setI18n(RichTextEditorI18n)}
      *
      * @return the i18n object. It will be <code>null</code>, If the i18n
@@ -89,9 +89,8 @@ public class RichTextEditor
      *            the internationalized properties, not <code>null</code>
      */
     public void setI18n(RichTextEditorI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {
                 JsonObject i18nObject = (JsonObject) JsonSerializer

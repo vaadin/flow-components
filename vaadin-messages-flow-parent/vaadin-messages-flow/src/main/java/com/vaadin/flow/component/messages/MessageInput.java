@@ -22,6 +22,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -45,12 +46,12 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-message-input")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/message-input/src/vaadin-message-input.js")
-@NpmPackage(value = "@vaadin/message-input", version = "24.5.0-alpha1")
-public class MessageInput extends Component
-        implements HasSize, HasStyle, HasEnabled, HasTooltip {
+@NpmPackage(value = "@vaadin/message-input", version = "24.5.0-alpha3")
+public class MessageInput extends Component implements Focusable<MessageInput>,
+        HasSize, HasStyle, HasEnabled, HasTooltip {
 
     private MessageInputI18n i18n;
 
@@ -126,8 +127,8 @@ public class MessageInput extends Component
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content returned by this method will not update
-     * the component if not set back using
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
      * {@link MessageInput#setI18n(MessageInputI18n)}.
      *
      * @return the i18n object, or {@code null} if one has not been set with

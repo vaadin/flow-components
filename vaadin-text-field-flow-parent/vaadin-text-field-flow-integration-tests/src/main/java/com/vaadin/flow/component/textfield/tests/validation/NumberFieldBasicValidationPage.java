@@ -32,7 +32,7 @@ public class NumberFieldBasicValidationPage
         super();
 
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
-            testField.setRequiredIndicatorVisible(true);
+            testField.setRequired(true);
         }));
 
         add(createInput(STEP_INPUT, "Set step", event -> {

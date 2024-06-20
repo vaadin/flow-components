@@ -31,7 +31,7 @@ public class TextAreaBasicValidationPage
         super();
 
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
-            testField.setRequiredIndicatorVisible(true);
+            testField.setRequired(true);
         }));
 
         add(createInput(PATTERN_INPUT, "Set pattern", event -> {

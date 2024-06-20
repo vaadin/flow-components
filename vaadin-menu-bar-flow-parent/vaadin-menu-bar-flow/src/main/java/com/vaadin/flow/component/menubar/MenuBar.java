@@ -54,13 +54,13 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-menu-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "24.5.0-alpha1")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/menu-bar", version = "24.5.0-alpha3")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.5.0-alpha3")
 public class MenuBar extends Component
         implements HasEnabled, HasMenuItems, HasOverlayClassName, HasSize,
         HasStyle, HasThemeVariant<MenuBarVariant> {
@@ -391,8 +391,8 @@ public class MenuBar extends Component
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content that is gotten from this method will
-     * not update the lang on the component if not set back using
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
      * {@link MenuBar#setI18n(MenuBarI18n)}
      *
      * @return the i18n object. It will be <code>null</code>, If the i18n
@@ -409,9 +409,8 @@ public class MenuBar extends Component
      *            the internationalized properties, not <code>null</code>
      */
     public void setI18n(MenuBarI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
 
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {

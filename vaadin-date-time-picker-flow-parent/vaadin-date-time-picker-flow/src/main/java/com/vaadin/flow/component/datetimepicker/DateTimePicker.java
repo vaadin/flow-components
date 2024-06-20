@@ -112,9 +112,9 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "24.5.0-alpha3")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -140,7 +140,6 @@ public class DateTimePicker
 
     private LocalDateTime max;
     private LocalDateTime min;
-    private boolean required;
 
     private boolean manualValidationEnabled = false;
 
@@ -793,7 +792,7 @@ public class DateTimePicker
      */
     private boolean isInvalid(LocalDateTime value) {
         var requiredValidation = ValidationUtil.validateRequiredConstraint("",
-                required, value, getEmptyValue());
+                isRequiredIndicatorVisible(), value, getEmptyValue());
 
         return requiredValidation.isError() || checkValidity(value).isError();
     }
@@ -864,9 +863,9 @@ public class DateTimePicker
 
     /**
      * Gets the internationalization object previously set for this component.
-     *
-     * Note: updating the object content that is gotten from this method will
-     * not update the lang on the component if not set back using
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
      * {@link DateTimePicker#setDatePickerI18n(DatePickerI18n)}
      *
      * @return the i18n object. It will be <code>null</code>, If the i18n
@@ -884,22 +883,9 @@ public class DateTimePicker
      *            the internationalized properties, not <code>null</code>
      */
     public void setDatePickerI18n(DatePickerI18n i18n) {
-        Objects.requireNonNull(i18n,
+        this.datePickerI18n = Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
-        this.datePickerI18n = i18n;
         datePicker.setI18n(i18n);
-    }
-
-    /**
-     * Sets whether the date time picker is marked as input required.
-     *
-     * @param requiredIndicatorVisible
-     *            the value of the requiredIndicatorVisible to be set
-     */
-    @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        this.required = requiredIndicatorVisible;
     }
 
     /**

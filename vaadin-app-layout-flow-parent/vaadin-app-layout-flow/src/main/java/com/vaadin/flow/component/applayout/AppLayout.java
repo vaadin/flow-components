@@ -52,9 +52,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/app-layout", version = "24.5.0-alpha1")
+@NpmPackage(value = "@vaadin/app-layout", version = "24.5.0-alpha3")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
@@ -70,8 +70,8 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the i18n object that is returned from this method will not
-     * update the the component, unless it is set again using
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
      * {@link AppLayout#setI18n(AppLayoutI18n)}
      *
      * @return the i18n object. It will be <code>null</code>, if the i18n
@@ -88,9 +88,8 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      *            the internationalized properties, not <code>null</code>
      */
     public void setI18n(AppLayoutI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
 
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {

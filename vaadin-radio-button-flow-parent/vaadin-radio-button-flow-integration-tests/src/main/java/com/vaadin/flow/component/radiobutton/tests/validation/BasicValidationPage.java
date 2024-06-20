@@ -14,7 +14,7 @@ public class BasicValidationPage
 
     public BasicValidationPage() {
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
-            testField.setRequiredIndicatorVisible(true);
+            testField.setRequired(true);
         }));
 
         add(createButton(SET_INVALID_BUTTON, "Set invalid state", event -> {
