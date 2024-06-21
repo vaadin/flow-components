@@ -854,6 +854,17 @@ public class SelectTest {
     }
 
     @Test
+    public void setNoVerticalOverlap() {
+        Select<String> select = new Select<>();
+
+        Assert.assertFalse(select.isNoVerticalOverlap());
+        select.setNoVerticalOverlap(true);
+        Assert.assertTrue(select.isNoVerticalOverlap());
+        select.setNoVerticalOverlap(false);
+        Assert.assertFalse(select.isNoVerticalOverlap());
+    }
+
+    @Test
     public void unregisterOpenedChangeListenerOnEvent() {
         var listenerInvokedCount = new AtomicInteger(0);
         select.addOpenedChangeListener(e -> {

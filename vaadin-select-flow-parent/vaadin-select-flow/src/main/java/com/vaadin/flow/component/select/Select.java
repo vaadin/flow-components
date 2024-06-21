@@ -510,6 +510,27 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     }
 
     /**
+     * Defines whether the overlay should overlap the input element in the
+     * y-axis, or be positioned right above/below it.
+     *
+     * @param noVerticalOverlap
+     *            whether the overlay should overlap the input element
+     */
+    public void setNoVerticalOverlap(boolean noVerticalOverlap) {
+        getElement().setProperty("noVerticalOverlap", noVerticalOverlap);
+    }
+
+    /**
+     * Returns whether the overlay should overlap the input element
+     *
+     * @return {@code true} if the overlay should overlap the input element,
+     *         {@code false} otherwise
+     */
+    public boolean isNoVerticalOverlap() {
+        return getElement().getProperty("noVerticalOverlap", false);
+    }
+
+    /**
      * Sets a generic data provider for the Select to use.
      * <p>
      * Use this method when none of the {@code setItems} methods are applicable,
