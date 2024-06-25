@@ -830,6 +830,16 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         return getItemId(value1).equals(getItemId(value2));
     }
 
+    @Override
+    public void setValue(T value) {
+        if (value != null && !keyMapper.has(value)) {
+            throw new IllegalArgumentException(
+                    "Value must be one of the items in Select");
+        }
+
+        super.setValue(value);
+    }
+
     private void initConnector() {
         runBeforeClientResponse(ui -> {
             ui.getPage().executeJs(

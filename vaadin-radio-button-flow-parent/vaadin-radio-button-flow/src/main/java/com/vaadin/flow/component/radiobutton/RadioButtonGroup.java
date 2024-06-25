@@ -84,7 +84,7 @@ public class RadioButtonGroup<T>
         HasThemeVariant<RadioGroupVariant>, HasValidationProperties,
         HasValidator<T>, SingleSelect<RadioButtonGroup<T>, T> {
 
-    private final KeyMapper<T> keyMapper = new KeyMapper<>();
+    private final KeyMapper<T> keyMapper = new KeyMapper<>(this::getItemId);
 
     private final AtomicReference<DataProvider<T, ?>> dataProvider = new AtomicReference<>(
             DataProvider.ofItems());
@@ -121,6 +121,9 @@ public class RadioButtonGroup<T>
 
     private static <T> String modelToPresentation(
             RadioButtonGroup<T> radioButtonGroup, T model) {
+        if (model == null) {
+            return "";
+        }
         if (!radioButtonGroup.keyMapper.has(model)) {
             return null;
         }
@@ -374,6 +377,11 @@ public class RadioButtonGroup<T>
 
     @Override
     public void setValue(T value) {
+        if (value != null && !keyMapper.has(value)) {
+            throw new IllegalArgumentException(
+                    "Value must be one of the items in RadioButtonGroup");
+        }
+
         super.setValue(value);
         if (value == null) {
             getRadioButtons().forEach(rb -> rb.setChecked(false));

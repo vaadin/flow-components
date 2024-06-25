@@ -352,8 +352,8 @@ public class CheckboxGroup<T>
                     item -> Objects.equals(getItemId(item.item), otherItemId))
                     .findFirst().ifPresent(this::updateCheckbox);
         } else {
-            keyMapper.removeAll();
             selectionPreservationHandler.handleDataChange(dataChangeEvent);
+            keyMapper.removeAll();
             rebuild();
         }
     }
@@ -424,6 +424,12 @@ public class CheckboxGroup<T>
         Objects.requireNonNull(value,
                 "Cannot set a null value to checkbox group. "
                         + "Use the clear-method to reset the component's value to an empty set.");
+
+        if (value.stream().anyMatch(item -> !keyMapper.has(item))) {
+            throw new IllegalArgumentException(
+                    "Value must be one of the items in CheckboxGroup");
+        }
+
         super.setValue(value);
         refreshCheckboxes();
     }
