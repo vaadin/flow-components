@@ -12,7 +12,7 @@
     </parent>
     <url>https://vaadin.com/components</url>
     <properties>
-        <flow.version>2.10-SNAPSHOT</flow.version>
+        <flow.version>2.11-SNAPSHOT</flow.version>
         <testbench.version>6.5.1</testbench.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
