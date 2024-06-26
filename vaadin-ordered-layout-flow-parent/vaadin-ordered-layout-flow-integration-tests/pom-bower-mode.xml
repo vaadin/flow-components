@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-ordered-layout-flow-parent</artifactId>
-        <version>14.11-SNAPSHOT</version>
+        <version>14.12-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-ordered-layout-integration-tests-bower-mode</artifactId>
     <packaging>war</packaging>
