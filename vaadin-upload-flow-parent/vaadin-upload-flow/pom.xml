@@ -13,7 +13,7 @@
         <dependency>
             <groupId>org.webjars.bowergithub.vaadin</groupId>
             <artifactId>vaadin-upload</artifactId>
-            <version>4.4.3</version>
+            <version>4.4.4</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
