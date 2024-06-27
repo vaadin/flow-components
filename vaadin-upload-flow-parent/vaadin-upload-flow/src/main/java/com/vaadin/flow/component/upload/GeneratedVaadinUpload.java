@@ -115,7 +115,7 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/vaadin-upload", version = "4.4.3")
+@NpmPackage(value = "@vaadin/vaadin-upload", version = "4.4.4")
 @JsModule("@vaadin/vaadin-upload/src/vaadin-upload.js")
 @HtmlImport("frontend://bower_components/vaadin-upload/src/vaadin-upload.html")
 public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
