@@ -40,6 +40,11 @@ public class TextFieldElement extends TestBenchElement
      * <p>
      * For more complex scenarios that require a full browser simulation of
      * typing, use {@link #sendKeys(CharSequence...)} instead.
+     * <p>
+     * Note, if you are using {@code ValueChangeMode.LAZY} or
+     * {@code ValueChangeMode.TIMEOUT}, value change event is triggered also
+     * without field losing focus, and hence use of
+     * {@link #sendKeys(CharSequence...)} may be better choice in testing.
      *
      * @param string
      *            the value to set
