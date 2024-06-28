@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.popover.testbench;
 
 import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.StaleElementReferenceException;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -31,5 +32,21 @@ public class PopoverElement extends TestBenchElement {
     public SearchContext getContext() {
         // Find child elements inside the overlay,
         return getPropertyElement("_overlayElement");
+    }
+
+    /**
+     * Checks whether the popover is shown.
+     *
+     * @return <code>true</code> if the popover is shown, <code>false</code>
+     *         otherwise
+     */
+    public boolean isOpen() {
+        try {
+            return getPropertyBoolean("opened");
+        } catch (StaleElementReferenceException e) {
+            // The element is no longer even attached to the DOM
+            // -> it's not open
+            return false;
+        }
     }
 }
