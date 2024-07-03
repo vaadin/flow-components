@@ -451,7 +451,7 @@ public class FormLayout extends Component
     }
 
     /**
-     * Set the width of side-positioned labels.
+     * Set the width of side-positioned label.
      * 
      * @param width
      *          the value and CSS unit as a string
@@ -463,7 +463,7 @@ public class FormLayout extends Component
     }
 
     /**
-     * Get the width of side-positioned labels.
+     * Get the width of side-positioned label.
      * 
      * @return 
      *          the value and CSS unit as a string
