@@ -99,4 +99,13 @@ public class FormLayoutTest {
                         ResponsiveStep.LabelsPosition.TOP));
         Assert.assertEquals(3, formLayout.getResponsiveSteps().size());
     }
+
+    @Test
+    public void setLabelWidth_getLabelWidth() {
+        FormLayout formLayout = new FormLayout();
+        formLayout.setLabelWidth("2em");
+
+        String appliedWidth = formLayout.getStyle().get("--vaadin-form-item-label-width");
+        Assert.assertEquals(appliedWidth, "2em");
+    }
 }
