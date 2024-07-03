@@ -449,4 +449,16 @@ public class FormLayout extends Component
         add(formItem);
         return formItem;
     }
+
+    /**
+     * Set the width of the label when aside.
+     * 
+     * @param width
+     *          the value and CSS unit
+     * @see <a href=
+     *      "https://vaadin.com/docs/latest/components/form-layout#label-position">Label position</a>
+     */
+    public void setLabelWidth(String width) {
+        this.getStyle().set("--vaadin-form-item-label-width", width);
+    }
 }
