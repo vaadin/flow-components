@@ -105,7 +105,7 @@ public class FormLayoutTest {
         FormLayout formLayout = new FormLayout();
         formLayout.setLabelWidth("2em");
 
-        String appliedWidth = formLayout.getStyle().get("--vaadin-form-item-label-width");
+        String appliedWidth = formLayout.getLabelWidth();
         Assert.assertEquals(appliedWidth, "2em");
     }
 }
