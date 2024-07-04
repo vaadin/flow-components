@@ -449,4 +449,28 @@ public class FormLayout extends Component
         add(formItem);
         return formItem;
     }
+
+    /**
+     * Set the width of side-positioned label.
+     * 
+     * @param width
+     *          the value and CSS unit as a string
+     * @see <a href=
+     *      "https://vaadin.com/docs/latest/components/form-layout#label-position">Label position</a>
+     */
+    public void setLabelWidth(String width) {
+        this.getStyle().set("--vaadin-form-item-label-width", width);
+    }
+
+    /**
+     * Get the width of side-positioned label.
+     * 
+     * @return 
+     *          the value and CSS unit as a string
+     * @see <a href=
+     *      "https://vaadin.com/docs/latest/components/form-layout#label-position">Label position</a>
+     */
+    public String getLabelWidth() {
+        return this.getStyle().get("--vaadin-form-item-label-width");
+    }
 }
