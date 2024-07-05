@@ -6,12 +6,6 @@ import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js
     static get template() {
       return html`
     <template class="header" id="defaultHeaderTemplate">
-      <style>
-        /* Fix a grid web-component style that sets the font-size to small for all header contents */
-        #selectAllCheckbox {
-          font-size: var(--lumo-font-size-m);
-        }
-      </style>
       <vaadin-checkbox
         id="selectAllCheckbox"
         aria-label="Select All"
@@ -21,6 +15,12 @@ import { GridColumnElement } from '@vaadin/vaadin-grid/src/vaadin-grid-column.js
         indeterminate="[[indeterminate]]"
         focus-target
       ></vaadin-checkbox>
+      <style>
+        /* Fix a grid web-component style that sets the font-size to small for all header contents */
+        #selectAllCheckbox {
+          font-size: var(--lumo-font-size-m);
+        }
+      </style>
     </template>
     <template id="defaultBodyTemplate">
       <vaadin-checkbox aria-label="Select Row" checked="[[selected]]" on-click="_onSelectClick">

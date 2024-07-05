@@ -20,7 +20,9 @@ import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
@@ -114,6 +116,26 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
         Assert.assertNull(
                 "Select all checkbox is in indeterminate state even though no items are selected",
                 selectAllCheckbox.getAttribute("indeterminate"));
+    }
+
+    @Test
+    public void selectAllCheckbox_cellSpaceKey_toggleSelection() {
+        open();
+        GridElement grid = $(GridElement.class).id("in-memory-grid");
+        WebElement selectAllCheckbox = grid
+                .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
+
+        grid.getHeaderCell(0).focus();
+        new Actions(getDriver()).sendKeys(Keys.SPACE).perform();
+
+        Assert.assertEquals(
+                "Select all checkbox is not checked even though all items selected",
+                "true", selectAllCheckbox.getAttribute("checked"));
+
+        new Actions(getDriver()).sendKeys(Keys.SPACE).perform();
+        Assert.assertNull(
+                "Select all checkbox is checked even though no items selected",
+                selectAllCheckbox.getAttribute("checked"));
     }
 
     @Test
