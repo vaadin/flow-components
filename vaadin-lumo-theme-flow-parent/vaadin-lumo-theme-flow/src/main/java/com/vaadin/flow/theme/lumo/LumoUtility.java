@@ -171,7 +171,7 @@ public final class LumoUtility {
     }
 
     /**
-     * Classes for setting the backdrop blur of an element.
+     * Classes for setting the aspect ratio of an element.
      */
     public static final class AspectRatio {
         public static final String SQUARE = "aspect-square";
