@@ -62,7 +62,6 @@ public final class LumoUtility {
      * axis. Applies to flexbox and grid layouts.
      */
     public static final class AlignItems {
-
         public static final String BASELINE = "items-baseline";
         public static final String CENTER = "items-center";
         public static final String END = "items-end";
@@ -70,6 +69,85 @@ public final class LumoUtility {
         public static final String STRETCH = "items-stretch";
 
         private AlignItems() {
+        }
+
+        /**
+         * Set of classes for aligning items along a flexbox’s cross axis or a grid’s block axis
+         * that will be applied only for certain viewport sizes. Applies to flexbox and grid layouts.
+         */
+        public static final class Breakpoint {
+            private Breakpoint() {
+            }
+
+            /**
+             * Classes for aligning items along a flexbox’s cross axis or a grid’s block axis
+             * that will be applied when the viewport has a minimum width of 640px.
+             */
+            public static final class Small {
+                public static final String BASELINE = "sm:items-baseline";
+                public static final String CENTER = "sm:items-center";
+                public static final String END = "sm:items-end";
+                public static final String START = "sm:tems-start";
+                public static final String STRETCH = "sm:items-stretch";
+                private Small() {
+                }
+            }
+
+            /**
+             * Classes for aligning items along a flexbox’s cross axis or a grid’s block axis
+             * that will be applied when the viewport has a minimum width of 768px.
+             */
+            public static final class Medium {
+                public static final String BASELINE = "md:items-baseline";
+                public static final String CENTER = "md:items-center";
+                public static final String END = "md:items-end";
+                public static final String START = "md:tems-start";
+                public static final String STRETCH = "md:items-stretch";
+                private Medium() {
+                }
+            }
+
+            /**
+             * Classes for aligning items along a flexbox’s cross axis or a grid’s block axis
+             * that will be applied when the viewport has a minimum width of 1024px.
+             */
+            public static final class Large {
+                public static final String BASELINE = "lg:items-baseline";
+                public static final String CENTER = "lg:items-center";
+                public static final String END = "lg:items-end";
+                public static final String START = "lg:tems-start";
+                public static final String STRETCH = "lg:items-stretch";
+                private Large() {
+                }
+            }
+
+            /**
+             * Classes for aligning items along a flexbox’s cross axis or a grid’s block axis
+             * that will be applied when the viewport has a minimum width of 1280px.
+             */
+            public static final class XLarge {
+                public static final String BASELINE = "xl:items-baseline";
+                public static final String CENTER = "xl:items-center";
+                public static final String END = "xl:items-end";
+                public static final String START = "xl:tems-start";
+                public static final String STRETCH = "xl:items-stretch";
+                private XLarge() {
+                }
+            }
+
+            /**
+             * Classes for aligning items along a flexbox’s cross axis or a grid’s block axis
+             * that will be applied when the viewport has a minimum width of 1536px.
+             */
+            public static final class XXLarge {
+                public static final String BASELINE = "2xl:items-baseline";
+                public static final String CENTER = "2xl:items-center";
+                public static final String END = "2xl:items-end";
+                public static final String START = "2xl:tems-start";
+                public static final String STRETCH = "2xl:items-stretch";
+                private XXLarge() {
+                }
+            }
         }
 
     }
@@ -323,7 +401,7 @@ public final class LumoUtility {
 
             /**
              * Classes for defining the display property of an element that will
-             * be applied when the viewport has a minimum width of 640px
+             * be applied when the viewport has a minimum width of 640px.
              */
             public static final class Small {
 
@@ -342,7 +420,7 @@ public final class LumoUtility {
 
             /**
              * Classes for defining the display property of an element that will
-             * be applied when the viewport has a minimum width of 768px
+             * be applied when the viewport has a minimum width of 768px.
              */
             public static final class Medium {
 
@@ -361,7 +439,7 @@ public final class LumoUtility {
 
             /**
              * Classes for defining the display property of an element that will
-             * be applied when the viewport has a minimum width of 1024px
+             * be applied when the viewport has a minimum width of 1024px.
              */
             public static final class Large {
 
@@ -380,7 +458,7 @@ public final class LumoUtility {
 
             /**
              * Classes for defining the display property of an element that will
-             * be applied when the viewport has a minimum width of 1280px
+             * be applied when the viewport has a minimum width of 1280px.
              */
             public static final class XLarge {
 
@@ -399,7 +477,7 @@ public final class LumoUtility {
 
             /**
              * Classes for defining the display property of an element that will
-             * be applied when the viewport has a minimum width of 1536px
+             * be applied when the viewport has a minimum width of 1536px.
              */
             public static final class XXLarge {
 
@@ -1704,7 +1782,7 @@ public final class LumoUtility {
 
             /**
              * Classes for defining the position of an element that will
-             * be applied when the viewport has a minimum width of 640px
+             * be applied when the viewport has a minimum width of 640px.
              */
             public static final class Small {
 
@@ -1720,7 +1798,7 @@ public final class LumoUtility {
 
             /**
              * Classes for defining the position of an element that will
-             * be applied when the viewport has a minimum width of 768px
+             * be applied when the viewport has a minimum width of 768px.
              */
             public static final class Medium {
 
@@ -1736,7 +1814,7 @@ public final class LumoUtility {
 
             /**
              * Classes for defining the position of an element that will
-             * be applied when the viewport has a minimum width of 1024px
+             * be applied when the viewport has a minimum width of 1024px.
              */
             public static final class Large {
 
@@ -1752,7 +1830,7 @@ public final class LumoUtility {
 
             /**
              * Classes for defining the position of an element that will
-             * be applied when the viewport has a minimum width of 1280px
+             * be applied when the viewport has a minimum width of 1280px.
              */
             public static final class XLarge {
 
@@ -1768,7 +1846,7 @@ public final class LumoUtility {
 
             /**
              * Classes for defining the position of an element that will
-             * be applied when the viewport has a minimum width of 1536px
+             * be applied when the viewport has a minimum width of 1536px.
              */
             public static final class XXLarge {
 
