@@ -93,6 +93,36 @@ public final class LumoUtility {
     }
 
     /**
+     * Classes for setting the backdrop blur of an element.
+     */
+    public static final class AspectRatio {
+        public static final String SQUARE = "aspect-square";
+        public static final String VIDEO = "aspect-video";
+
+        private AspectRatio() {
+
+        }
+    }
+
+    /**
+     * Classes for setting the backdrop blur of an element.
+     */
+    public static final class BackdropBlur {
+        public static final String NONE = "backdrop-blur-none";
+        public static final String SMALL = "backdrop-blur-sm";
+        public static final String DEFAULT = "backdrop-blur";
+        public static final String MEDIUM = "backdrop-blur-md";
+        public static final String LARGE = "backdrop-blur-lg";
+        public static final String XLARGE = "backdrop-blur-xl";
+        public static final String XXLARGE = "backdrop-blur-2xl";
+        public static final String XXXLARGE = "backdrop-blur-3xl";
+
+        private BackdropBlur() {
+
+        }
+    }
+
+    /**
      * Classes for applying a background color.
      */
     public static final class Background {
@@ -111,6 +141,30 @@ public final class LumoUtility {
         public static final String CONTRAST_20 = "bg-contrast-20";
         public static final String CONTRAST_10 = "bg-contrast-10";
         public static final String CONTRAST_5 = "bg-contrast-5";
+
+        public static final String TINT = "bg-tint";
+        public static final String TINT_90 = "bg-tint-90";
+        public static final String TINT_80 = "bg-tint-80";
+        public static final String TINT_70 = "bg-tint-70";
+        public static final String TINT_60 = "bg-tint-60";
+        public static final String TINT_50 = "bg-tint-50";
+        public static final String TINT_40 = "bg-tint-40";
+        public static final String TINT_30 = "bg-tint-30";
+        public static final String TINT_20 = "bg-tint-20";
+        public static final String TINT_10 = "bg-tint-10";
+        public static final String TINT_5 = "bg-tint-5";
+
+        public static final String SHADE = "bg-shade";
+        public static final String SHADE_90 = "bg-shade-90";
+        public static final String SHADE_80 = "bg-shade-80";
+        public static final String SHADE_70 = "bg-shade-70";
+        public static final String SHADE_60 = "bg-shade-60";
+        public static final String SHADE_50 = "bg-shade-50";
+        public static final String SHADE_40 = "bg-shade-40";
+        public static final String SHADE_30 = "bg-shade-30";
+        public static final String SHADE_20 = "bg-shade-20";
+        public static final String SHADE_10 = "bg-shade-10";
+        public static final String SHADE_5 = "bg-shade-5";
 
         public static final String PRIMARY = "bg-primary";
         public static final String PRIMARY_50 = "bg-primary-50";
@@ -138,11 +192,14 @@ public final class LumoUtility {
     public static final class Border {
 
         public static final String NONE = "border-0";
-
+        public static final String DASHED = "border-dashed";
+        public static final String DOTTED = "border-dotted";
         public static final String ALL = "border";
         public static final String BOTTOM = "border-b";
+        public static final String END = "border-e";
         public static final String LEFT = "border-l";
         public static final String RIGHT = "border-r";
+        public static final String START = "border-s";
         public static final String TOP = "border-t";
 
         private Border() {
@@ -197,6 +254,7 @@ public final class LumoUtility {
         public static final String SMALL = "rounded-s";
         public static final String MEDIUM = "rounded-m";
         public static final String LARGE = "rounded-l";
+        public static final String FULL = "rounded-full";
 
         private BorderRadius() {
         }
@@ -208,6 +266,7 @@ public final class LumoUtility {
      */
     public static final class BoxShadow {
 
+        public static final String NONE = "shadow-none";
         public static final String XSMALL = "shadow-xs";
         public static final String SMALL = "shadow-s";
         public static final String MEDIUM = "shadow-m";
@@ -254,7 +313,8 @@ public final class LumoUtility {
         }
 
         /**
-         * Set of classes with styles to be used for certain viewport sizes
+         * Set of classes defining the display property of an element that will be
+         * applied only for certain viewport sizes.
          */
         public static final class Breakpoint {
 
@@ -267,8 +327,14 @@ public final class LumoUtility {
              */
             public static final class Small {
 
+                public static final String BLOCK = "sm:block";
                 public static final String FLEX = "sm:flex";
+                public static final String GRID = "sm:grid";
                 public static final String HIDDEN = "sm:hidden";
+                public static final String INLINE = "sm:inline";
+                public static final String INLINE_BLOCK = "sm:inline-block";
+                public static final String INLINE_FLEX = "sm:inline-flex";
+                public static final String INLINE_GRID = "sm:inline-grid";
 
                 private Small() {
                 }
@@ -280,8 +346,14 @@ public final class LumoUtility {
              */
             public static final class Medium {
 
+                public static final String BLOCK = "md:block";
                 public static final String FLEX = "md:flex";
+                public static final String GRID = "md:grid";
                 public static final String HIDDEN = "md:hidden";
+                public static final String INLINE = "md:inline";
+                public static final String INLINE_BLOCK = "md:inline-block";
+                public static final String INLINE_FLEX = "md:inline-flex";
+                public static final String INLINE_GRID = "md:inline-grid";
 
                 private Medium() {
                 }
@@ -293,8 +365,14 @@ public final class LumoUtility {
              */
             public static final class Large {
 
+                public static final String BLOCK = "lg:block";
                 public static final String FLEX = "lg:flex";
+                public static final String GRID = "lg:grid";
                 public static final String HIDDEN = "lg:hidden";
+                public static final String INLINE = "lg:inline";
+                public static final String INLINE_BLOCK = "lg:inline-block";
+                public static final String INLINE_FLEX = "lg:inline-flex";
+                public static final String INLINE_GRID = "lg:inline-grid";
 
                 private Large() {
                 }
@@ -306,8 +384,14 @@ public final class LumoUtility {
              */
             public static final class XLarge {
 
+                public static final String BLOCK = "xl:block";
                 public static final String FLEX = "xl:flex";
+                public static final String GRID = "xl:grid";
                 public static final String HIDDEN = "xl:hidden";
+                public static final String INLINE = "xl:inline";
+                public static final String INLINE_BLOCK = "xl:inline-block";
+                public static final String INLINE_FLEX = "xl:inline-flex";
+                public static final String INLINE_GRID = "xl:inline-grid";
 
                 private XLarge() {
                 }
@@ -319,12 +403,30 @@ public final class LumoUtility {
              */
             public static final class XXLarge {
 
+                public static final String BLOCK = "2xl:block";
                 public static final String FLEX = "2xl:flex";
+                public static final String GRID = "2xl:grid";
                 public static final String HIDDEN = "2xl:hidden";
+                public static final String INLINE = "2xl:inline";
+                public static final String INLINE_BLOCK = "2xl:inline-block";
+                public static final String INLINE_FLEX = "2xl:inline-flex";
+                public static final String INLINE_GRID = "2xl:inline-grid";
 
                 private XXLarge() {
                 }
             }
+        }
+    }
+
+    /**
+     * Classes for setting borders between elements.
+     */
+    public static final class Divide {
+        public static final String X = "divide-x";
+        public static final String Y = "divide-y";
+
+        private Divide() {
+
         }
     }
 
@@ -334,14 +436,15 @@ public final class LumoUtility {
      */
     public static final class Flex {
 
+        public static final String ONE = "flex-1";
         public static final String AUTO = "flex-auto";
         public static final String NONE = "flex-none";
 
-        public static final String GROW = "flex-grow";
-        public static final String GROW_NONE = "flex-grow-0";
+        public static final String GROW = "grow";
+        public static final String GROW_NONE = "grow-0";
 
-        public static final String SHRINK = "flex-shrink";
-        public static final String SHRINK_NONE = "flex-shrink-0";
+        public static final String SHRINK = "shrink";
+        public static final String SHRINK_NONE = "shrink-0";
 
         private Flex() {
         }
@@ -451,7 +554,6 @@ public final class LumoUtility {
 
         private FlexWrap() {
         }
-
     }
 
     /**
@@ -645,7 +747,7 @@ public final class LumoUtility {
     }
 
     /**
-     * Set of classes to define the content flow on a grid layout.
+     * Set of classes defining the content flow on a grid layout.
      */
     public static final class Grid {
 
@@ -846,9 +948,7 @@ public final class LumoUtility {
                 private XXLarge() {
                 }
             }
-
         }
-
     }
 
     /**
@@ -856,16 +956,15 @@ public final class LumoUtility {
      */
     public static final class Height {
 
-        public static final String AUTO = "h-auto";
-        public static final String FULL = "h-full";
         public static final String NONE = "h-0";
-        public static final String SCREEN = "h-screen";
-
         public static final String XSMALL = "h-xs";
         public static final String SMALL = "h-s";
         public static final String MEDIUM = "h-m";
         public static final String LARGE = "h-l";
         public static final String XLARGE = "h-xl";
+        public static final String AUTO = "h-auto";
+        public static final String FULL = "h-full";
+        public static final String SCREEN = "h-screen";
 
         private Height() {
         }
@@ -936,13 +1035,13 @@ public final class LumoUtility {
      */
     public static final class Margin {
 
-        public static final String AUTO = "m-auto";
         public static final String NONE = "m-0";
         public static final String XSMALL = "m-xs";
         public static final String SMALL = "m-s";
         public static final String MEDIUM = "m-m";
         public static final String LARGE = "m-l";
         public static final String XLARGE = "m-xl";
+        public static final String AUTO = "m-auto";
 
         private Margin() {
         }
@@ -952,13 +1051,13 @@ public final class LumoUtility {
          */
         public static final class Bottom {
 
-            public static final String AUTO = "mb-auto";
             public static final String NONE = "mb-0";
             public static final String XSMALL = "mb-xs";
             public static final String SMALL = "mb-s";
             public static final String MEDIUM = "mb-m";
             public static final String LARGE = "mb-l";
             public static final String XLARGE = "mb-xl";
+            public static final String AUTO = "mb-auto";
 
             private Bottom() {
             }
@@ -971,13 +1070,13 @@ public final class LumoUtility {
          */
         public static final class End {
 
-            public static final String AUTO = "me-auto";
             public static final String NONE = "me-0";
             public static final String XSMALL = "me-xs";
             public static final String SMALL = "me-s";
             public static final String MEDIUM = "me-m";
             public static final String LARGE = "me-l";
             public static final String XLARGE = "me-xl";
+            public static final String AUTO = "me-auto";
 
             private End() {
             }
@@ -988,13 +1087,13 @@ public final class LumoUtility {
          */
         public static final class Horizontal {
 
-            public static final String AUTO = "mx-auto";
             public static final String NONE = "mx-0";
             public static final String XSMALL = "mx-xs";
             public static final String SMALL = "mx-s";
             public static final String MEDIUM = "mx-m";
             public static final String LARGE = "mx-l";
             public static final String XLARGE = "mx-xl";
+            public static final String AUTO = "mx-auto";
 
             private Horizontal() {
             }
@@ -1005,13 +1104,13 @@ public final class LumoUtility {
          */
         public static final class Left {
 
-            public static final String AUTO = "ml-auto";
             public static final String NONE = "ml-0";
             public static final String XSMALL = "ml-xs";
             public static final String SMALL = "ml-s";
             public static final String MEDIUM = "ml-m";
             public static final String LARGE = "ml-l";
             public static final String XLARGE = "ml-xl";
+            public static final String AUTO = "ml-auto";
 
             private Left() {
             }
@@ -1022,13 +1121,13 @@ public final class LumoUtility {
          */
         public static final class Right {
 
-            public static final String AUTO = "mr-auto";
             public static final String NONE = "mr-0";
             public static final String XSMALL = "mr-xs";
             public static final String SMALL = "mr-s";
             public static final String MEDIUM = "mr-m";
             public static final String LARGE = "mr-l";
             public static final String XLARGE = "mr-xl";
+            public static final String AUTO = "mr-auto";
 
             private Right() {
             }
@@ -1041,13 +1140,13 @@ public final class LumoUtility {
          */
         public static final class Start {
 
-            public static final String AUTO = "ms-auto";
             public static final String NONE = "ms-0";
             public static final String XSMALL = "ms-xs";
             public static final String SMALL = "ms-s";
             public static final String MEDIUM = "ms-m";
             public static final String LARGE = "ms-l";
             public static final String XLARGE = "ms-xl";
+            public static final String AUTO = "ms-auto";
 
             private Start() {
             }
@@ -1058,13 +1157,13 @@ public final class LumoUtility {
          */
         public static final class Top {
 
-            public static final String AUTO = "mt-auto";
             public static final String NONE = "mt-0";
             public static final String XSMALL = "mt-xs";
             public static final String SMALL = "mt-s";
             public static final String MEDIUM = "mt-m";
             public static final String LARGE = "mt-l";
             public static final String XLARGE = "mt-xl";
+            public static final String AUTO = "mt-auto";
 
             private Top() {
             }
@@ -1076,18 +1175,151 @@ public final class LumoUtility {
          */
         public static final class Vertical {
 
-            public static final String AUTO = "my-auto";
             public static final String NONE = "my-0";
             public static final String XSMALL = "my-xs";
             public static final String SMALL = "my-s";
             public static final String MEDIUM = "my-m";
             public static final String LARGE = "my-l";
             public static final String XLARGE = "my-xl";
+            public static final String AUTO = "my-auto";
 
             private Vertical() {
             }
         }
 
+
+        /**
+         * Set of classes defining negative margins for an element.
+         */
+        public static final class Minus {
+
+            private Minus() {
+            }
+
+            /**
+             * Classes for setting a negative bottom margin for an element.
+             */
+            public static final class Bottom {
+
+                public static final String XSMALL = "-mb-xs";
+                public static final String SMALL = "-mb-s";
+                public static final String MEDIUM = "-mb-m";
+                public static final String LARGE = "-mb-l";
+                public static final String XLARGE = "-mb-xl";
+
+                private Bottom() {
+                }
+            }
+
+            /**
+             * Classes for setting a negative logical inline end margin for an element.
+             * The actual physical edge where the styles are applied depends on the text
+             * flow of the element.
+             */
+            public static final class End {
+
+                public static final String XSMALL = "-me-xs";
+                public static final String SMALL = "-me-s";
+                public static final String MEDIUM = "-me-m";
+                public static final String LARGE = "-me-l";
+                public static final String XLARGE = "-me-xl";
+
+                private End() {
+                }
+            }
+
+            /**
+             * Classes for setting negative left and right margins for an element.
+             */
+            public static final class Horizontal {
+
+                public static final String XSMALL = "-mx-xs";
+                public static final String SMALL = "-mx-s";
+                public static final String MEDIUM = "-mx-m";
+                public static final String LARGE = "-mx-l";
+                public static final String XLARGE = "-mx-xl";
+
+                private Horizontal() {
+                }
+            }
+
+            /**
+             * Classes for setting a negative left margin for an element.
+             */
+            public static final class Left {
+
+                public static final String XSMALL = "-ml-xs";
+                public static final String SMALL = "-ml-s";
+                public static final String MEDIUM = "-ml-m";
+                public static final String LARGE = "-ml-l";
+                public static final String XLARGE = "-ml-xl";
+
+                private Left() {
+                }
+            }
+
+            /**
+             * Classes for setting a negative right margin for an element.
+             */
+            public static final class Right {
+
+                public static final String XSMALL = "-mr-xs";
+                public static final String SMALL = "-mr-s";
+                public static final String MEDIUM = "-mr-m";
+                public static final String LARGE = "-mr-l";
+                public static final String XLARGE = "-mr-xl";
+
+                private Right() {
+                }
+            }
+
+            /**
+             * Classes for setting a negative logical inline start margin for an element.
+             * The actual physical edge where the styles are applied depends on the text
+             * flow of the element.
+             */
+            public static final class Start {
+
+                public static final String XSMALL = "-ms-xs";
+                public static final String SMALL = "-ms-s";
+                public static final String MEDIUM = "-ms-m";
+                public static final String LARGE = "-ms-l";
+                public static final String XLARGE = "-ms-xl";
+
+                private Start() {
+                }
+            }
+
+            /**
+             * Classes for setting a negative top margin for an element.
+             */
+            public static final class Top {
+
+                public static final String XSMALL = "-mt-xs";
+                public static final String SMALL = "-mt-s";
+                public static final String MEDIUM = "-mt-m";
+                public static final String LARGE = "-mt-l";
+                public static final String XLARGE = "-mt-xl";
+
+                private Top() {
+                }
+            }
+
+            /**
+             * Classes for setting negative top and bottom margins for an element.
+             */
+            public static final class Vertical {
+
+                public static final String XSMALL = "-my-xs";
+                public static final String SMALL = "-my-s";
+                public static final String MEDIUM = "-my-m";
+                public static final String LARGE = "-my-l";
+                public static final String XLARGE = "-my-xl";
+
+                private Vertical() {
+                }
+            }
+        }
     }
 
     /**
@@ -1125,8 +1357,8 @@ public final class LumoUtility {
      */
     public static final class MinHeight {
 
-        public static final String FULL = "min-h-full";
         public static final String NONE = "min-h-0";
+        public static final String FULL = "min-h-full";
         public static final String SCREEN = "min-h-screen";
 
         private MinHeight() {
@@ -1139,8 +1371,8 @@ public final class LumoUtility {
      */
     public static final class MinWidth {
 
-        public static final String FULL = "min-w-full";
         public static final String NONE = "min-w-0";
+        public static final String FULL = "min-w-full";
 
         private MinWidth() {
         }
@@ -1325,6 +1557,231 @@ public final class LumoUtility {
         private Position() {
         }
 
+        /**
+         * Classes for setting the bottom position of an element.
+         */
+        public static final class Bottom {
+            public static final String NONE = "bottom-0";
+            public static final String XSMALL = "bottom-xs";
+            public static final String SMALL = "bottom-s";
+            public static final String MEDIUM = "bottom-m";
+            public static final String LARGE = "bottom-l";
+            public static final String XLARGE = "bottom-xl";
+            public static final String AUTO = "bottom-auto";
+            public static final String FULL = "bottom-full";
+
+            private Bottom() {
+            }
+        }
+
+        /**
+         * Classes for setting the end position of an element.
+         */
+        public static final class End {
+            public static final String NONE = "end-0";
+            public static final String XSMALL = "end-xs";
+            public static final String SMALL = "end-s";
+            public static final String MEDIUM = "end-m";
+            public static final String LARGE = "end-l";
+            public static final String XLARGE = "end-xl";
+            public static final String AUTO = "end-auto";
+            public static final String FULL = "end-full";
+
+            private End() {
+            }
+        }
+
+        /**
+         * Classes for setting the start position of an element.
+         */
+        public static final class Start {
+            public static final String NONE = "start-0";
+            public static final String XSMALL = "start-xs";
+            public static final String SMALL = "start-s";
+            public static final String MEDIUM = "start-m";
+            public static final String LARGE = "start-l";
+            public static final String XLARGE = "start-xl";
+            public static final String AUTO = "start-auto";
+            public static final String FULL = "start-full";
+
+            private Start() {
+            }
+        }
+
+        /**
+         * Classes for setting the top position of an element.
+         */
+        public static final class Top {
+            public static final String NONE = "top-0";
+            public static final String XSMALL = "top-xs";
+            public static final String SMALL = "top-s";
+            public static final String MEDIUM = "top-m";
+            public static final String LARGE = "top-l";
+            public static final String XLARGE = "top-xl";
+            public static final String AUTO = "top-auto";
+            public static final String FULL = "top-full";
+
+            private Top() {
+            }
+        }
+
+        /**
+         * Classes for setting a negative position for an element.
+         */
+        public static final class Minus {
+
+            private Minus() {
+            }
+
+            /**
+             * Classes for setting a negative bottom position for an element.
+             */
+            public static final class Bottom {
+                public static final String XSMALL = "-bottom-xs";
+                public static final String SMALL = "-bottom-s";
+                public static final String MEDIUM = "-bottom-m";
+                public static final String LARGE = "-bottom-l";
+                public static final String XLARGE = "-bottom-xl";
+                public static final String FULL = "-bottom-full";
+
+                private Bottom() {
+                }
+            }
+
+            /**
+             * Classes for setting a negative end position for an element.
+             */
+            public static final class End {
+                public static final String XSMALL = "-end-xs";
+                public static final String SMALL = "-end-s";
+                public static final String MEDIUM = "-end-m";
+                public static final String LARGE = "-end-l";
+                public static final String XLARGE = "-end-xl";
+                public static final String FULL = "-end-full";
+
+                private End() {
+                }
+            }
+
+            /**
+             * Classes for setting a negative start position for an element.
+             */
+            public static final class Start {
+                public static final String XSMALL = "-start-xs";
+                public static final String SMALL = "-start-s";
+                public static final String MEDIUM = "-start-m";
+                public static final String LARGE = "-start-l";
+                public static final String XLARGE = "-start-xl";
+                public static final String FULL = "-start-full";
+
+                private Start() {
+                }
+            }
+
+            /**
+             * Classes for setting a negative top position for an element.
+             */
+            public static final class Top {
+                public static final String XSMALL = "-top-xs";
+                public static final String SMALL = "-top-s";
+                public static final String MEDIUM = "-top-m";
+                public static final String LARGE = "-top-l";
+                public static final String XLARGE = "-top-xl";
+                public static final String FULL = "-top-full";
+
+                private Top() {
+                }
+            }
+        }
+
+        /**
+         * Set of classes defining the position of an element that will be
+         * applied only for certain viewport sizes.
+         */
+        public static final class Breakpoint {
+            private Breakpoint() {
+            }
+
+            /**
+             * Classes for defining the position of an element that will
+             * be applied when the viewport has a minimum width of 640px
+             */
+            public static final class Small {
+
+                public static final String ABSOLUTE = "sm:absolute";
+                public static final String FIXED = "sm:fixed";
+                public static final String RELATIVE = "sm:relative";
+                public static final String STATIC = "sm:static";
+                public static final String STICKY = "sm:sticky";
+
+                private Small() {
+                }
+            }
+
+            /**
+             * Classes for defining the position of an element that will
+             * be applied when the viewport has a minimum width of 768px
+             */
+            public static final class Medium {
+
+                public static final String ABSOLUTE = "md:absolute";
+                public static final String FIXED = "md:fixed";
+                public static final String RELATIVE = "md:relative";
+                public static final String STATIC = "md:static";
+                public static final String STICKY = "md:sticky";
+
+                private Medium() {
+                }
+            }
+
+            /**
+             * Classes for defining the position of an element that will
+             * be applied when the viewport has a minimum width of 1024px
+             */
+            public static final class Large {
+
+                public static final String ABSOLUTE = "lg:absolute";
+                public static final String FIXED = "lg:fixed";
+                public static final String RELATIVE = "lg:relative";
+                public static final String STATIC = "lg:static";
+                public static final String STICKY = "lg:sticky";
+
+                private Large() {
+                }
+            }
+
+            /**
+             * Classes for defining the position of an element that will
+             * be applied when the viewport has a minimum width of 1280px
+             */
+            public static final class XLarge {
+
+                public static final String ABSOLUTE = "xl:absolute";
+                public static final String FIXED = "xl:fixed";
+                public static final String RELATIVE = "xl:relative";
+                public static final String STATIC = "xl:static";
+                public static final String STICKY = "xl:sticky";
+
+                private XLarge() {
+                }
+            }
+
+            /**
+             * Classes for defining the position of an element that will
+             * be applied when the viewport has a minimum width of 1536px
+             */
+            public static final class XXLarge {
+
+                public static final String ABSOLUTE = "2xl:absolute";
+                public static final String FIXED = "2xl:fixed";
+                public static final String RELATIVE = "2xl:relative";
+                public static final String STATIC = "2xl:static";
+                public static final String STICKY = "2xl:sticky";
+
+                private XXLarge() {
+                }
+            }
+        }
     }
 
     /**
@@ -1398,6 +1855,23 @@ public final class LumoUtility {
     }
 
     /**
+     * Classes for transitioning various properties.
+     */
+    public static final class Transition {
+        public static final String NONE = "transition-none";
+        public static final String ALL = "transition-all";
+        public static final String DEFAULT = "transition";
+        public static final String COLORS = "transition-colors";
+        public static final String OPACITY = "transition-opacity";
+        public static final String SHADOW = "transition-shadow";
+        public static final String TRANSFORM = "transition-transform";
+
+        private Transition() {
+
+        }
+    }
+
+    /**
      * Classes for setting how the white space inside an element is handled.
      */
     public static final class Whitespace {
@@ -1418,17 +1892,33 @@ public final class LumoUtility {
      */
     public static final class Width {
 
-        public static final String AUTO = "w-auto";
-        public static final String FULL = "w-full";
-
         public static final String XSMALL = "w-xs";
         public static final String SMALL = "w-s";
         public static final String MEDIUM = "w-m";
         public static final String LARGE = "w-l";
         public static final String XLARGE = "w-xl";
+        public static final String AUTO = "w-auto";
+        public static final String FULL = "w-full";
 
         private Width() {
         }
 
+    }
+
+    /**
+     * Classes for setting the z-index of an element.
+     */
+    public static final class ZIndex {
+        public static final String NONE = "z-0";
+        public static final String XSMALL = "z-10";
+        public static final String SMALL = "z-20";
+        public static final String MEDIUM = "z-30";
+        public static final String LARGE = "z-40";
+        public static final String XLARGE = "z-50";
+        public static final String AUTO = "z-auto";
+
+        private ZIndex() {
+
+        }
     }
 }
