@@ -518,11 +518,11 @@ public final class LumoUtility {
         public static final String AUTO = "flex-auto";
         public static final String NONE = "flex-none";
 
-        public static final String GROW = "grow";
-        public static final String GROW_NONE = "grow-0";
+        public static final String GROW = "flex-grow";
+        public static final String GROW_NONE = "flex-grow-0";
 
-        public static final String SHRINK = "shrink";
-        public static final String SHRINK_NONE = "shrink-0";
+        public static final String SHRINK = "flex-shrink";
+        public static final String SHRINK_NONE = "flex-shrink-0";
 
         private Flex() {
         }
