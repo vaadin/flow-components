@@ -28,6 +28,7 @@ public enum ButtonVariant implements ThemeVariant {
     LUMO_TERTIARY_INLINE("tertiary-inline"),
     LUMO_PRIMARY("primary"),
     LUMO_SUCCESS("success"),
+    LUMO_ERROR("warning"),
     LUMO_ERROR("error"),
     LUMO_CONTRAST("contrast"),
     LUMO_ICON("icon"),
