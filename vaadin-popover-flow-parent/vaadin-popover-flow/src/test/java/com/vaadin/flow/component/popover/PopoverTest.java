@@ -65,4 +65,34 @@ public class PopoverTest {
     public void defaultPosition_equalsNull() {
         Assert.assertEquals(null, popover.getPosition());
     }
+
+    @Test
+    public void setFocusDelay_getFocusDelay() {
+        Assert.assertEquals(0, popover.getFocusDelay());
+
+        popover.setFocusDelay(1000);
+        Assert.assertEquals(1000, popover.getFocusDelay());
+        Assert.assertEquals(1000,
+                popover.getElement().getProperty("focusDelay", 0));
+    }
+
+    @Test
+    public void setHoverDelay_getHoverDelay() {
+        Assert.assertEquals(0, popover.getHoverDelay());
+
+        popover.setHoverDelay(1000);
+        Assert.assertEquals(1000, popover.getHoverDelay());
+        Assert.assertEquals(1000,
+                popover.getElement().getProperty("hoverDelay", 0));
+    }
+
+    @Test
+    public void setHideDelay_getHideDelay() {
+        Assert.assertEquals(0, popover.getHideDelay());
+
+        popover.setHideDelay(1000);
+        Assert.assertEquals(1000, popover.getHideDelay());
+        Assert.assertEquals(1000,
+                popover.getElement().getProperty("hideDelay", 0));
+    }
 }
