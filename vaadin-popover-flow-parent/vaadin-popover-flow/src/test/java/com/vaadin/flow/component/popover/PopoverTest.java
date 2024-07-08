@@ -16,6 +16,10 @@
  */
 package com.vaadin.flow.component.popover;
 
+import java.util.Collections;
+import java.util.Set;
+import elemental.json.JsonArray;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -94,5 +98,63 @@ public class PopoverTest {
         Assert.assertEquals(1000, popover.getHideDelay());
         Assert.assertEquals(1000,
                 popover.getElement().getProperty("hideDelay", 0));
+    }
+
+    @Test
+    public void getTrigger_defaultValue_click() {
+        Assert.assertEquals(Set.of(PopoverTrigger.CLICK), popover.getTrigger());
+    }
+
+    @Test
+    public void getTriggerProperty_defaultValue_click() {
+        JsonArray jsonArray = (JsonArray) popover.getElement()
+                .getPropertyRaw("trigger");
+        Assert.assertEquals(1, jsonArray.length());
+        Assert.assertEquals("click", jsonArray.get(0).asString());
+    }
+
+    @Test
+    public void setTrigger_getTrigger() {
+        popover.setTrigger(Set.of(PopoverTrigger.HOVER, PopoverTrigger.FOCUS));
+        Assert.assertEquals(Set.of(PopoverTrigger.HOVER, PopoverTrigger.FOCUS),
+                popover.getTrigger());
+    }
+
+    @Test
+    public void setTrigger_getTriggerProperty() {
+        popover.setTrigger(Set.of(PopoverTrigger.HOVER, PopoverTrigger.FOCUS));
+        JsonArray jsonArray = (JsonArray) popover.getElement()
+                .getPropertyRaw("trigger");
+        Assert.assertEquals(2, jsonArray.length());
+        Assert.assertEquals("hover", jsonArray.get(0).asString());
+        Assert.assertEquals("focus", jsonArray.get(1).asString());
+    }
+
+    @Test
+    public void setTrigger_null_getTrigger_emptySet() {
+        popover.setTrigger(null);
+        Assert.assertEquals(Collections.emptySet(), popover.getTrigger());
+    }
+
+    @Test
+    public void setTrigger_null_getTriggerProperty_emptyArray() {
+        popover.setTrigger(null);
+        JsonArray jsonArray = (JsonArray) popover.getElement()
+                .getPropertyRaw("trigger");
+        Assert.assertEquals(0, jsonArray.length());
+    }
+
+    @Test
+    public void setTrigger_empty_getTrigger_emptySet() {
+        popover.setTrigger(Collections.emptySet());
+        Assert.assertEquals(Collections.emptySet(), popover.getTrigger());
+    }
+
+    @Test
+    public void setTrigger_empty_getTriggerProperty_emptyArray() {
+        popover.setTrigger(Collections.emptySet());
+        JsonArray jsonArray = (JsonArray) popover.getElement()
+                .getPropertyRaw("trigger");
+        Assert.assertEquals(0, jsonArray.length());
     }
 }

@@ -18,10 +18,17 @@ package com.vaadin.flow.component.popover;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import elemental.json.Json;
+import elemental.json.JsonArray;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -37,6 +44,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -60,6 +68,48 @@ public class Popover extends Component implements HasComponents {
      */
     public Popover() {
         getElement().getNode().addAttachListener(this::attachComponentRenderer);
+
+        setTrigger(Set.of(PopoverTrigger.CLICK));
+    }
+
+    /**
+     * Sets the popover trigger mode describing how the overlay is opened or
+     * closed on user interaction with the target.
+     *
+     * When passing null or an empty set, the popover can only be opened and
+     * closed programmatically.
+     *
+     * @param trigger
+     *            the set of trigger values to set
+     */
+    public void setTrigger(Set<PopoverTrigger> trigger) {
+        JsonArray triggerAsJson = Json.createArray();
+
+        if (!(trigger == null || trigger.isEmpty())) {
+            triggerAsJson = JsonSerializer.toJson(trigger.stream()
+                    .map(PopoverTrigger::toString).collect(Collectors.toSet()));
+        }
+
+        getElement().setPropertyJson("trigger", triggerAsJson);
+    }
+
+    /**
+     * Gets the popover trigger mode describing how the overlay is opened or
+     * closed on user interaction with the target.
+     *
+     * @return the trigger
+     */
+    public Set<PopoverTrigger> getTrigger() {
+        List<String> trigger = JsonSerializer.toObjects(String.class,
+                (JsonArray) getElement().getPropertyRaw("trigger"));
+
+        if (trigger.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        return trigger.stream()
+                .map((item) -> PopoverTrigger.valueOf(item.toUpperCase()))
+                .collect(Collectors.toSet());
     }
 
     /**
