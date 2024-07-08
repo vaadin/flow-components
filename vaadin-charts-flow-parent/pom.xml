@@ -9,12 +9,7 @@
     <artifactId>vaadin-charts-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Charts Parent</name>
-    <licenses>
-        <license>
-            <name>cval3</name>
-            <url>https://vaadin.com/license/cval-3</url>
-        </license>
-    </licenses>
+
     <modules>
         <module>vaadin-charts-flow</module>
         <module>vaadin-charts-testbench</module>

@@ -13,13 +13,6 @@
     <packaging>pom</packaging>
     <name>component Parent</name>
 
-    <licenses>
-        <license>
-            <name>cval3</name>
-            <url>https://vaadin.com/license/cval-3</url>
-        </license>
-    </licenses>
-
     <modules>
         <module>component-flow</module>
     </modules>

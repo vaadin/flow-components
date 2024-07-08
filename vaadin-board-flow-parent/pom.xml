@@ -9,12 +9,7 @@
     <artifactId>vaadin-board-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Board Parent</name>
-    <licenses>
-        <license>
-            <name>cval3</name>
-            <url>https://vaadin.com/license/cval-3</url>
-        </license>
-    </licenses>
+
     <modules>
         <module>vaadin-board-flow</module>
         <module>vaadin-board-testbench</module>

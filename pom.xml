@@ -10,6 +10,15 @@
         <artifactId>vaadin-parent</artifactId>
         <version>2.2.0</version>
     </parent>
+
+    <licenses>
+        <license>
+            <name>Vaadin Commercial License and Service Terms</name>
+            <url>https://vaadin.com/commercial-license-and-service-terms</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
     <url>https://vaadin.com/components</url>
     <properties>
         <flow.version>2.11-SNAPSHOT</flow.version>
@@ -37,7 +46,7 @@
         <osgi.bundle.import.package>*</osgi.bundle.import.package>
         <osgi.bundle.export.package>com.vaadin.flow.component.*;-noimport:=true</osgi.bundle.export.package>
         <osgi.bundle.required.execution.environment>JavaSE-1.8</osgi.bundle.required.execution.environment>
-        <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
+        <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
         <osgi.bundle.name>${project.artifactId}</osgi.bundle.name>
         <osgi.bundle.symbolic.name>${project.groupId}.flow.component.${component.package.name}</osgi.bundle.symbolic.name>
         <osgi.bundle.package.private/>

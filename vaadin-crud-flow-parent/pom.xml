@@ -9,12 +9,7 @@
     <artifactId>vaadin-crud-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Crud Parent</name>
-    <licenses>
-        <license>
-            <name>cval3</name>
-            <url>https://vaadin.com/license/cval-3</url>
-        </license>
-    </licenses>
+
     <modules>
         <module>vaadin-crud-flow</module>
         <module>vaadin-crud-testbench</module>
