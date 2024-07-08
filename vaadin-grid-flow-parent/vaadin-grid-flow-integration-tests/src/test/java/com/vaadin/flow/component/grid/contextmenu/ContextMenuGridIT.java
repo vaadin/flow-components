@@ -241,9 +241,10 @@ public class ContextMenuGridIT extends AbstractComponentIT {
         grid.getCell(23, 0).contextClick();
         assertMessage("pre-open: name=Person 23, colId=Name-Id");
 
-        // ensure closing
+        // click another cell, open another context menu
         grid.getCell(29, 1).contextClick();
-        verifyClosed();
+        waitUntil(driver -> $("span").id("message").getText()
+                .equals("pre-open: name=Person 29, colId=Born-Id"));
     }
 
     @Test
@@ -251,9 +252,10 @@ public class ContextMenuGridIT extends AbstractComponentIT {
         grid.getCell(6, 1).contextClick();
         assertMessage("pre-open: name=Person 6, colId=Born-Id");
 
-        // ensure closing
+        // click another cell, open another context menu
         grid.getCell(19, 1).contextClick();
-        verifyClosed();
+        waitUntil(driver -> $("span").id("message").getText()
+                .equals("pre-open: name=Person 19, colId=Born-Id"));
     }
 
     private void assertMessage(String expected) {

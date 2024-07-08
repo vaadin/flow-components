@@ -13,7 +13,7 @@
     <url>https://vaadin.com/components</url>
     <properties>
         <flow.version>24.5-SNAPSHOT</flow.version>
-        <testbench.version>9.3.0</testbench.version>
+        <testbench.version>9.3.2</testbench.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -416,7 +416,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.3.2</version>
+                    <version>3.4.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-war-plugin</artifactId>
