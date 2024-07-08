@@ -218,8 +218,24 @@ public class TreeGrid<T> extends Grid<T>
      * automatically sets up columns based on the type of presented data.
      */
     public TreeGrid() {
-        super(50, TreeGridUpdateQueue::new,
-                new TreeDataCommunicatorBuilder<T>());
+        this(50, new TreeDataCommunicatorBuilder<T>());
+    }
+
+    /**
+     * Creates a new {@code TreeGrid} without support for creating columns based
+     * on property names. Use an alternative constructor, such as
+     * {@link TreeGrid#TreeGrid(Class)}, to create a {@code TreeGrid} that
+     * automatically sets up columns based on the type of presented data.
+     *
+     * @param pageSize
+     *            the page size. Must be greater than zero.
+     * @param dataCommunicatorBuilder
+     *            Builder for {@link DataCommunicator} implementation this Grid
+     *            uses to handle all data communication.
+     */
+    protected TreeGrid(int pageSize,
+            DataCommunicatorBuilder<T, TreeGridArrayUpdater> dataCommunicatorBuilder) {
+        super(pageSize, TreeGridUpdateQueue::new, dataCommunicatorBuilder);
 
         setUniqueKeyProperty("key");
         getArrayUpdater().getUpdateQueueData()
@@ -251,8 +267,25 @@ public class TreeGrid<T> extends Grid<T>
      *            the bean type to use, not {@code null}
      */
     public TreeGrid(Class<T> beanType) {
-        super(beanType, TreeGridUpdateQueue::new,
-                new TreeDataCommunicatorBuilder<T>());
+        this(beanType, new TreeDataCommunicatorBuilder<T>());
+    }
+
+    /**
+     * Creates a new {@code TreeGrid} with an initial set of columns for each of
+     * the bean's properties. The property-values of the bean will be converted
+     * to Strings. Full names of the properties will be used as the
+     * {@link Column#setKey(String) column keys} and the property captions will
+     * be used as the {@link Column#setHeader(String) column headers}.
+     *
+     * @param beanType
+     *            the bean type to use, not {@code null}
+     * @param dataCommunicatorBuilder
+     *            Builder for {@link DataCommunicator} implementation this Grid
+     *            uses to handle all data communication.
+     */
+    protected TreeGrid(Class<T> beanType,
+            DataCommunicatorBuilder<T, TreeGridArrayUpdater> dataCommunicatorBuilder) {
+        super(beanType, TreeGridUpdateQueue::new, dataCommunicatorBuilder);
 
         setUniqueKeyProperty("key");
         getArrayUpdater().getUpdateQueueData()
