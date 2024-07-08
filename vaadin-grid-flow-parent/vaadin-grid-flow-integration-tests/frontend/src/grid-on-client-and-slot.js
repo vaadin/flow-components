@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2024 Vaadin Ltd
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * license.
+ */
 import { PolymerElement, html } from '@polymer/polymer/polymer-element.js';
 import '@vaadin/vaadin-grid/src/vaadin-grid.js';
 import '@vaadin/vaadin-grid/src/vaadin-grid-column.js';

@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2024 Vaadin Ltd
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * license.
+ */
 (function(i,s,o,g,r,a,m) {i['GoogleAnalyticsObject']=r;i[r]=i[r]||function()
 { (i[r].q=i[r].q||[]).push(arguments)}
     ,i[r].l=1*new Date();a=s.createElement(o),

@@ -548,7 +548,6 @@
                         </properties>
                         <excludes>
                             <exclude>scripts/**</exclude>
-                            <exclude>**/test/**</exclude>
                             <exclude>**/target/**</exclude>
                             <exclude>**/*.xml</exclude>
                             <exclude>**/*.properties</exclude>
