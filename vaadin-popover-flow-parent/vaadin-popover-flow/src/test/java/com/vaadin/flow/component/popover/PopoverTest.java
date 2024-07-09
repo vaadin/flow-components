@@ -16,8 +16,6 @@
  */
 package com.vaadin.flow.component.popover;
 
-import java.util.Collections;
-import java.util.Set;
 import elemental.json.JsonArray;
 
 import org.junit.Assert;
@@ -101,8 +99,45 @@ public class PopoverTest {
     }
 
     @Test
-    public void getTrigger_defaultValue_click() {
-        Assert.assertEquals(Set.of(PopoverTrigger.CLICK), popover.getTrigger());
+    public void isOpenOnClick_trueByDefault() {
+        Assert.assertTrue(popover.isOpenOnClick());
+    }
+
+    @Test
+    public void isOpenOnFocus_falseByDefault() {
+        Assert.assertFalse(popover.isOpenOnFocus());
+    }
+
+    @Test
+    public void isOpenOnHover_falseByDefault() {
+        Assert.assertFalse(popover.isOpenOnHover());
+    }
+
+    @Test
+    public void setOpenOnClick_isOpenOnClick() {
+        popover.setOpenOnClick(false);
+        Assert.assertFalse(popover.isOpenOnClick());
+
+        popover.setOpenOnClick(true);
+        Assert.assertTrue(popover.isOpenOnClick());
+    }
+
+    @Test
+    public void setOpenOnFocus_isOpenOnFocus() {
+        popover.setOpenOnFocus(true);
+        Assert.assertTrue(popover.isOpenOnFocus());
+
+        popover.setOpenOnFocus(false);
+        Assert.assertFalse(popover.isOpenOnFocus());
+    }
+
+    @Test
+    public void setOpenOnHover_isOpenOnHover() {
+        popover.setOpenOnHover(true);
+        Assert.assertTrue(popover.isOpenOnHover());
+
+        popover.setOpenOnHover(false);
+        Assert.assertFalse(popover.isOpenOnHover());
     }
 
     @Test
@@ -114,47 +149,33 @@ public class PopoverTest {
     }
 
     @Test
-    public void setTrigger_getTrigger() {
-        popover.setTrigger(Set.of(PopoverTrigger.HOVER, PopoverTrigger.FOCUS));
-        Assert.assertEquals(Set.of(PopoverTrigger.HOVER, PopoverTrigger.FOCUS),
-                popover.getTrigger());
+    public void setOpenOnClick_triggerPropertyUpdated() {
+        popover.setOpenOnClick(false);
+
+        JsonArray jsonArray = (JsonArray) popover.getElement()
+                .getPropertyRaw("trigger");
+        Assert.assertEquals(0, jsonArray.length());
     }
 
     @Test
-    public void setTrigger_getTriggerProperty() {
-        popover.setTrigger(Set.of(PopoverTrigger.HOVER, PopoverTrigger.FOCUS));
+    public void setOpenOnFocus_triggerPropertyUpdated() {
+        popover.setOpenOnFocus(true);
+
         JsonArray jsonArray = (JsonArray) popover.getElement()
                 .getPropertyRaw("trigger");
         Assert.assertEquals(2, jsonArray.length());
-        Assert.assertEquals("hover", jsonArray.get(0).asString());
+        Assert.assertEquals("click", jsonArray.get(0).asString());
         Assert.assertEquals("focus", jsonArray.get(1).asString());
     }
 
     @Test
-    public void setTrigger_null_getTrigger_emptySet() {
-        popover.setTrigger(null);
-        Assert.assertEquals(Collections.emptySet(), popover.getTrigger());
-    }
+    public void setOpenOnHover_triggerPropertyUpdated() {
+        popover.setOpenOnHover(true);
 
-    @Test
-    public void setTrigger_null_getTriggerProperty_emptyArray() {
-        popover.setTrigger(null);
         JsonArray jsonArray = (JsonArray) popover.getElement()
                 .getPropertyRaw("trigger");
-        Assert.assertEquals(0, jsonArray.length());
-    }
-
-    @Test
-    public void setTrigger_empty_getTrigger_emptySet() {
-        popover.setTrigger(Collections.emptySet());
-        Assert.assertEquals(Collections.emptySet(), popover.getTrigger());
-    }
-
-    @Test
-    public void setTrigger_empty_getTriggerProperty_emptyArray() {
-        popover.setTrigger(Collections.emptySet());
-        JsonArray jsonArray = (JsonArray) popover.getElement()
-                .getPropertyRaw("trigger");
-        Assert.assertEquals(0, jsonArray.length());
+        Assert.assertEquals(2, jsonArray.length());
+        Assert.assertEquals("click", jsonArray.get(0).asString());
+        Assert.assertEquals("hover", jsonArray.get(1).asString());
     }
 }
