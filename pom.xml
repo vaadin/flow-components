@@ -37,7 +37,7 @@
         <osgi.bundle.import.package>*</osgi.bundle.import.package>
         <osgi.bundle.export.package>com.vaadin.flow.component.*;-noimport:=true</osgi.bundle.export.package>
         <osgi.bundle.required.execution.environment>JavaSE-1.8</osgi.bundle.required.execution.environment>
-        <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
+        <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
         <osgi.bundle.name>${project.artifactId}</osgi.bundle.name>
         <osgi.bundle.symbolic.name>${project.groupId}.flow.component.${component.package.name}</osgi.bundle.symbolic.name>
         <osgi.bundle.package.private/>
@@ -45,6 +45,7 @@
         <osgi.bundle.description/>
         <osgi.bundle.title>${project.name}</osgi.bundle.title>
         <osgi.vaadin.package.version>1</osgi.vaadin.package.version>
+        <currentYear>2024</currentYear>
     </properties>
     <modules>
         <module>vaadin-flow-components-shared-parent</module>
@@ -516,6 +517,41 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>1.4.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>2.6</version>
+                    <configuration>
+                        <header>src/license/vclst/header.txt</header>
+                        <quiet>false</quiet>
+                        <failIfMissing>true</failIfMissing>
+                        <aggregate>false</aggregate>
+                        <useDefaultExcludes>true</useDefaultExcludes>
+                        <useDefaultMapping>true</useDefaultMapping>
+                        <encoding>UTF-8</encoding>
+                        <properties>
+                            <year>${currentYear}</year>
+                        </properties>
+                        <excludes>
+                            <exclude>**/target/**</exclude>
+                            <exclude>**/*.xml</exclude>
+                            <exclude>**/*.css</exclude>
+                            <exclude>**/*.properties</exclude>
+                            <exclude>src/license/**/*</exclude>
+                            <exclude>**/*.txt</exclude>
+                            <exclude>scripts/**</exclude>
+                            <exclude>**/resources/META-INF/**</exclude>
+                            <exclude>**/demo/**</exclude>
+                            <exclude>**/tests/**</exclude>
+                            <exclude>**/test/**</exclude>
+                            <exclude>**/LICENSE/</exclude>
+                            <exclude>**/README.md/</exclude>
+                            <exclude>**/styles/**</exclude>
+                            <exclude>**/frontend/**</exclude>
+                            <exclude>**/node_modules/**</exclude>
+                        </excludes>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>

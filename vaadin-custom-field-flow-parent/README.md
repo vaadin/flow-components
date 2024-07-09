@@ -69,5 +69,5 @@ mvn -pl vaadin-custom-field-flow-demo -Pwar jetty:run
 
 ### License
 
-Apache License 2.0
+Vaadin Commercial License and Service Terms
 

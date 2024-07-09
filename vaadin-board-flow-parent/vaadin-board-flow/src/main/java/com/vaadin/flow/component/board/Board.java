@@ -1,21 +1,12 @@
-package com.vaadin.flow.component.board;
-
-/*-
- * #%L
- * Vaadin Board for Vaadin 10
- * %%
- * Copyright (C) 2017 - 2018 Vaadin Ltd
- * %%
- * This program is available under Commercial Vaadin Add-On License 3.0
- * (CVALv3).
+/**
+ * Copyright (C) 2000-2024 Vaadin Ltd
  *
- * See the file license.html distributed with this software for more
- * information about licensing.
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * You should have received a copy of the CVALv3 along with this program.
- * If not, see <http://vaadin.com/license/cval-3>.
- * #L%
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
  */
+package com.vaadin.flow.component.board;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasOrderedComponents;

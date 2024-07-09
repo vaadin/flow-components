@@ -38,4 +38,4 @@ Documentation for Flow can be found in [Flow documentation](https://github.com/v
 
 ## License
 
-Apache License 2.0
+Vaadin Commercial License and Service Terms
