@@ -111,6 +111,67 @@ public class Popover extends Component implements HasComponents {
     }
 
     /**
+     * The delay in milliseconds before the popover is opened on target keyboard
+     * focus.
+     *
+     * @param focusDelay
+     *            the delay in milliseconds
+     */
+    public void setFocusDelay(int focusDelay) {
+        getElement().setProperty("focusDelay", focusDelay);
+    }
+
+    /**
+     * The delay in milliseconds before the popover is opened on target keyboard
+     * focus.
+     *
+     * @return the delay in milliseconds
+     */
+    public int getFocusDelay() {
+        return getElement().getProperty("focusDelay", 0);
+    }
+
+    /**
+     * The delay in milliseconds before the popover is opened on target hover.
+     *
+     * @param hoverDelay
+     *            the delay in milliseconds
+     */
+    public void setHoverDelay(int hoverDelay) {
+        getElement().setProperty("hoverDelay", hoverDelay);
+    }
+
+    /**
+     * The delay in milliseconds before the popover is opened on target hover.
+     *
+     * @return the delay in milliseconds
+     */
+    public int getHoverDelay() {
+        return getElement().getProperty("hoverDelay", 0);
+    }
+
+    /**
+     * The delay in milliseconds before the popover is closed on losing hover.
+     * On target blur, the popover is closed immediately.
+     *
+     * @param hideDelay
+     *            the delay in milliseconds
+     */
+    public void setHideDelay(int hideDelay) {
+        getElement().setProperty("hideDelay", hideDelay);
+    }
+
+    /**
+     * The delay in milliseconds before the popover is closed on losing hover.
+     * On target blur, the popover is closed immediately.
+     *
+     * @return the delay in milliseconds
+     */
+    public int getHideDelay() {
+        return getElement().getProperty("hideDelay", 0);
+    }
+
+    /**
      * Sets the target component for this popover.
      * <p>
      * By default, the popover can be opened with a click on the target
