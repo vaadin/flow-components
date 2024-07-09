@@ -178,4 +178,46 @@ public class PopoverTest {
         Assert.assertEquals("click", jsonArray.get(0).asString());
         Assert.assertEquals("hover", jsonArray.get(1).asString());
     }
+
+    @Test
+    public void setAriaLabel_getAriaLabel() {
+        popover.setAriaLabel("aria-label");
+        Assert.assertTrue(popover.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", popover.getAriaLabel().get());
+
+        popover.setAriaLabel(null);
+        Assert.assertTrue(popover.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy_getAriaLabelledBy() {
+        popover.setAriaLabelledBy("aria-labelledby");
+        Assert.assertTrue(popover.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby",
+                popover.getAriaLabelledBy().get());
+
+        popover.setAriaLabelledBy(null);
+        Assert.assertTrue(popover.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void getOverlayRole_defaultDialog() {
+        Assert.assertEquals("dialog", popover.getOverlayRole());
+        Assert.assertEquals("dialog",
+                popover.getElement().getProperty("overlayRole"));
+    }
+
+    @Test
+    public void setOverlayRole_getOverlayRole() {
+        popover.setOverlayRole("alertdialog");
+
+        Assert.assertEquals("alertdialog", popover.getOverlayRole());
+        Assert.assertEquals("alertdialog",
+                popover.getElement().getProperty("overlayRole"));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setOverlayRole_null_throws() {
+        popover.setOverlayRole(null);
+    }
 }

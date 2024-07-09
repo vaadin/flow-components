@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import elemental.json.Json;
@@ -28,6 +29,7 @@ import elemental.json.JsonArray;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
@@ -53,7 +55,7 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/popover", version = "24.5.0-alpha4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
-public class Popover extends Component implements HasComponents {
+public class Popover extends Component implements HasAriaLabel, HasComponents {
 
     private Component target;
     private Registration targetAttachRegistration;
@@ -69,6 +71,50 @@ public class Popover extends Component implements HasComponents {
         getElement().getNode().addAttachListener(this::attachComponentRenderer);
 
         updateTrigger();
+        setOverlayRole("dialog");
+    }
+
+    @Override
+    public void setAriaLabel(String ariaLabel) {
+        getElement().setProperty("accessibleName", ariaLabel);
+    }
+
+    @Override
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
+    }
+
+    @Override
+    public void setAriaLabelledBy(String labelledBy) {
+        getElement().setProperty("accessibleNameRef", labelledBy);
+    }
+
+    @Override
+    public Optional<String> getAriaLabelledBy() {
+        return Optional
+                .ofNullable(getElement().getProperty("accessibleNameRef"));
+    }
+
+    /**
+     * Sets the "role" attribute for using by screen readers.
+     *
+     * @param role
+     *            the role to set
+     */
+    public void setOverlayRole(String role) {
+        Objects.requireNonNull(role, "Role cannot be null");
+
+        getElement().setProperty("overlayRole", role);
+    }
+
+    /**
+     * Gets the "role" attribute for using by screen readers. Defaults to
+     * "dialog".
+     *
+     * @return the role
+     */
+    public String getOverlayRole() {
+        return getElement().getProperty("overlayRole");
     }
 
     /**
