@@ -25,7 +25,6 @@
             </activation>
             <modules>
                 <module>vaadin-charts-flow-integration-tests</module>
-                <module>vaadin-charts-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>

@@ -25,7 +25,6 @@
             </activation>
             <modules>
                 <module>vaadin-cookie-consent-flow-integration-tests</module>
-                <module>vaadin-cookie-consent-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>

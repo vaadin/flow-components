@@ -24,7 +24,6 @@
             </activation>
             <modules>
                 <module>vaadin-date-picker-flow-integration-tests</module>
-                <module>vaadin-date-picker-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>

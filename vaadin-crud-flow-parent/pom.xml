@@ -25,7 +25,6 @@
             </activation>
             <modules>
                 <module>vaadin-crud-flow-integration-tests</module>
-                <module>vaadin-crud-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>

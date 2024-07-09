@@ -24,7 +24,6 @@
             </activation>
             <modules>
                 <module>vaadin-iron-list-flow-integration-tests</module>
-                <module>vaadin-iron-list-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>

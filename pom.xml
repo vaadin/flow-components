@@ -126,51 +126,6 @@
                 </plugins>
             </build>
         </profile>
-        <profile>
-            <id>bower-it</id>
-            <activation>
-                <property>
-                    <name>bower-it</name>
-                </property>
-            </activation>
-            <modules>
-                <module>integration-tests/pom-bower-mode.xml</module>
-            </modules>
-            <dependencies>
-                <dependency>
-                    <groupId>com.vaadin</groupId>
-                    <artifactId>flow-server-production-mode</artifactId>
-                </dependency>
-            </dependencies>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.vaadin</groupId>
-                        <artifactId>flow-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>copy-production-files</goal>
-                                    <goal>package-for-production</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
-                        <version>${jetty.version}</version>
-                        <configuration>
-                            <webAppConfig>
-                                <resourceBases>
-                                    <resourceBase>${project.build.directory}/${project.build.finalName}/</resourceBase>
-                                </resourceBases>
-                            </webAppConfig>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
     </profiles>
     <repositories>
         <repository>
