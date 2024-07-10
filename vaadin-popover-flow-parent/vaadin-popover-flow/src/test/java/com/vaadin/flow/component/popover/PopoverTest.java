@@ -16,6 +16,8 @@
  */
 package com.vaadin.flow.component.popover;
 
+import elemental.json.JsonArray;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -116,5 +118,128 @@ public class PopoverTest {
         Assert.assertEquals(1000, popover.getHideDelay());
         Assert.assertEquals(1000,
                 popover.getElement().getProperty("hideDelay", 0));
+    }
+
+    @Test
+    public void isOpenOnClick_trueByDefault() {
+        Assert.assertTrue(popover.isOpenOnClick());
+    }
+
+    @Test
+    public void isOpenOnFocus_falseByDefault() {
+        Assert.assertFalse(popover.isOpenOnFocus());
+    }
+
+    @Test
+    public void isOpenOnHover_falseByDefault() {
+        Assert.assertFalse(popover.isOpenOnHover());
+    }
+
+    @Test
+    public void setOpenOnClick_isOpenOnClick() {
+        popover.setOpenOnClick(false);
+        Assert.assertFalse(popover.isOpenOnClick());
+
+        popover.setOpenOnClick(true);
+        Assert.assertTrue(popover.isOpenOnClick());
+    }
+
+    @Test
+    public void setOpenOnFocus_isOpenOnFocus() {
+        popover.setOpenOnFocus(true);
+        Assert.assertTrue(popover.isOpenOnFocus());
+
+        popover.setOpenOnFocus(false);
+        Assert.assertFalse(popover.isOpenOnFocus());
+    }
+
+    @Test
+    public void setOpenOnHover_isOpenOnHover() {
+        popover.setOpenOnHover(true);
+        Assert.assertTrue(popover.isOpenOnHover());
+
+        popover.setOpenOnHover(false);
+        Assert.assertFalse(popover.isOpenOnHover());
+    }
+
+    @Test
+    public void getTriggerProperty_defaultValue_click() {
+        JsonArray jsonArray = (JsonArray) popover.getElement()
+                .getPropertyRaw("trigger");
+        Assert.assertEquals(1, jsonArray.length());
+        Assert.assertEquals("click", jsonArray.get(0).asString());
+    }
+
+    @Test
+    public void setOpenOnClick_triggerPropertyUpdated() {
+        popover.setOpenOnClick(false);
+
+        JsonArray jsonArray = (JsonArray) popover.getElement()
+                .getPropertyRaw("trigger");
+        Assert.assertEquals(0, jsonArray.length());
+    }
+
+    @Test
+    public void setOpenOnFocus_triggerPropertyUpdated() {
+        popover.setOpenOnFocus(true);
+
+        JsonArray jsonArray = (JsonArray) popover.getElement()
+                .getPropertyRaw("trigger");
+        Assert.assertEquals(2, jsonArray.length());
+        Assert.assertEquals("click", jsonArray.get(0).asString());
+        Assert.assertEquals("focus", jsonArray.get(1).asString());
+    }
+
+    @Test
+    public void setOpenOnHover_triggerPropertyUpdated() {
+        popover.setOpenOnHover(true);
+
+        JsonArray jsonArray = (JsonArray) popover.getElement()
+                .getPropertyRaw("trigger");
+        Assert.assertEquals(2, jsonArray.length());
+        Assert.assertEquals("click", jsonArray.get(0).asString());
+        Assert.assertEquals("hover", jsonArray.get(1).asString());
+    }
+
+    @Test
+    public void setAriaLabel_getAriaLabel() {
+        popover.setAriaLabel("aria-label");
+        Assert.assertTrue(popover.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", popover.getAriaLabel().get());
+
+        popover.setAriaLabel(null);
+        Assert.assertTrue(popover.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy_getAriaLabelledBy() {
+        popover.setAriaLabelledBy("aria-labelledby");
+        Assert.assertTrue(popover.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby",
+                popover.getAriaLabelledBy().get());
+
+        popover.setAriaLabelledBy(null);
+        Assert.assertTrue(popover.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void getOverlayRole_defaultDialog() {
+        Assert.assertEquals("dialog", popover.getOverlayRole());
+        Assert.assertEquals("dialog",
+                popover.getElement().getProperty("overlayRole"));
+    }
+
+    @Test
+    public void setOverlayRole_getOverlayRole() {
+        popover.setOverlayRole("alertdialog");
+
+        Assert.assertEquals("alertdialog", popover.getOverlayRole());
+        Assert.assertEquals("alertdialog",
+                popover.getElement().getProperty("overlayRole"));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setOverlayRole_null_throws() {
+        popover.setOverlayRole(null);
     }
 }
