@@ -15,7 +15,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
@@ -84,7 +83,6 @@ Tab 1
  * </p>
  */
 @Tag("vaadin-tab")
-@HtmlImport("frontend://bower_components/vaadin-tabs/src/vaadin-tab.html")
 @JsModule("@vaadin/vaadin-tabs/src/vaadin-tab.js")
 @NpmPackage(value = "@vaadin/vaadin-tabs", version = "3.2.0")
 public abstract class GeneratedVaadinTab<R extends GeneratedVaadinTab<R>>

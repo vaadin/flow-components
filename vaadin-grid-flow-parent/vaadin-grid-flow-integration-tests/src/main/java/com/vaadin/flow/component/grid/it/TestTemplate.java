@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.grid.it;
 
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
@@ -23,7 +22,6 @@ import com.vaadin.flow.templatemodel.TemplateModel;
  */
 @Tag("vaadin-grid-flow-test-template")
 @JsModule("./src/vaadin-grid-flow-test-template.js")
-@HtmlImport("src/vaadin-grid-flow-test-template.html")
 public class TestTemplate extends PolymerTemplate<TemplateModel> {
 
     @Id("container")

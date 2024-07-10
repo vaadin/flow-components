@@ -13,7 +13,6 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -48,7 +47,6 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar-group")
-@HtmlImport("frontend://bower_components/vaadin-avatar/src/vaadin-avatar-group.html")
 @JsModule("@vaadin/vaadin-avatar/src/vaadin-avatar-group.js")
 @NpmPackage(value = "@vaadin/vaadin-avatar", version = "1.0.4")
 public class AvatarGroup extends Component

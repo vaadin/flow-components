@@ -34,7 +34,6 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.Grid;
@@ -79,8 +78,6 @@ import java.util.stream.Collectors;
 @NpmPackage(value = "@vaadin/vaadin-crud", version = "1.4.0")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud.js")
 @JsModule("@vaadin/vaadin-crud/src/vaadin-crud-edit-column.js")
-@HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud.html")
-@HtmlImport("frontend://bower_components/vaadin-crud/src/vaadin-crud-edit-column.html")
 public class Crud<E> extends Component implements HasSize, HasTheme {
 
     private static final String EDIT_COLUMN_KEY = "vaadin-crud-edit-column";

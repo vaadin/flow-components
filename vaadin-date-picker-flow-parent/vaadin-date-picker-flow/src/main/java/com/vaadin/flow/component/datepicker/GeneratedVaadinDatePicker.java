@@ -18,7 +18,6 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.NotSupported;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
@@ -247,7 +246,6 @@ import elemental.json.JsonObject;
  * </p>
  */
 @Tag("vaadin-date-picker")
-@HtmlImport("frontend://bower_components/vaadin-date-picker/src/vaadin-date-picker.html")
 @NpmPackage(value = "@vaadin/vaadin-date-picker", version = "4.6.0")
 @JsModule("@vaadin/vaadin-date-picker/src/vaadin-date-picker.js")
 public abstract class GeneratedVaadinDatePicker<R extends GeneratedVaadinDatePicker<R, T>, T>

@@ -11,7 +11,6 @@ package com.vaadin.flow.component.charts;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.polymertemplate.Id;
@@ -47,7 +46,6 @@ import static java.util.stream.Collectors.toMap;
 @PageTitle("Charts for Vaadin Flow")
 @Tag("charts-demo-app")
 @StyleSheet("frontend://style.css")
-@HtmlImport("frontend://src/charts-demo-app.html")
 @JavaScript("frontend://src/google-analytics.js")
 public class MainView extends PolymerTemplate<MainView.Model> implements HasUrlParameter<String> {
 

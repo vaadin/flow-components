@@ -19,7 +19,6 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Div;
@@ -29,7 +28,6 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-details")
 @NpmPackage(value = "@vaadin/vaadin-details", version = "1.2.1")
 @JsModule("@vaadin/vaadin-details/src/vaadin-details.js")
-@HtmlImport("frontend://bower_components/vaadin-details/src/vaadin-details.html")
 public class Details extends Component
         implements HasEnabled, HasTheme, HasStyle {
 

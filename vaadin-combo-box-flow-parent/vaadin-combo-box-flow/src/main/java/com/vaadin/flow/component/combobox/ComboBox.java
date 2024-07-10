@@ -26,7 +26,6 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
@@ -86,7 +85,6 @@ import elemental.json.JsonValue;
  *            the type of the items to be inserted in the combo box
  * @author Vaadin Ltd
  */
-@HtmlImport("frontend://flow-component-renderer.html")
 @JsModule("./flow-component-renderer.js")
 @JavaScript("frontend://comboBoxConnector.js")
 @JsModule("./comboBoxConnector-es6.js")

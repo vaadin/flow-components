@@ -22,7 +22,6 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.shared.Registration;
@@ -34,7 +33,6 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-accordion")
 @NpmPackage(value = "@vaadin/vaadin-accordion", version = "1.2.0")
 @JsModule("@vaadin/vaadin-accordion/src/vaadin-accordion.js")
-@HtmlImport("frontend://bower_components/vaadin-accordion/src/vaadin-accordion.html")
 public class Accordion extends Component implements HasSize, HasStyle {
 
     private static final String OPENED_PROPERTY = "opened";

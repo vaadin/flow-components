@@ -32,7 +32,6 @@ import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -60,7 +59,6 @@ import java.util.Objects;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@HtmlImport("frontend://bower_components/vaadin-rich-text-editor/src/vaadin-rich-text-editor.html")
 public class RichTextEditor
         extends GeneratedVaadinRichTextEditor<RichTextEditor, String>
         implements HasSize, HasValueChangeMode, InputNotifier, KeyNotifier,
