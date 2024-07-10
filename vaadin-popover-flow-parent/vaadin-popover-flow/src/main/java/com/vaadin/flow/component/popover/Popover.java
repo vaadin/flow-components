@@ -23,6 +23,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import elemental.json.Json;
+import elemental.json.JsonArray;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
@@ -55,11 +58,17 @@ public class Popover extends Component implements HasComponents {
     private Component target;
     private Registration targetAttachRegistration;
 
+    private boolean openOnClick = true;
+    private boolean openOnHover = false;
+    private boolean openOnFocus = false;
+
     /**
      * Constructs an empty popover.
      */
     public Popover() {
         getElement().getNode().addAttachListener(this::attachComponentRenderer);
+
+        updateTrigger();
     }
 
     /**
@@ -169,6 +178,93 @@ public class Popover extends Component implements HasComponents {
      */
     public int getHideDelay() {
         return getElement().getProperty("hideDelay", 0);
+    }
+
+    /**
+     * Sets whether the popover can be opened via target click.
+     *
+     * @param openOnClick
+     *            {@code true} to allow opening the popover via target click,
+     *            {@code false} to disallow it.
+     */
+    public void setOpenOnClick(boolean openOnClick) {
+        this.openOnClick = openOnClick;
+        updateTrigger();
+    }
+
+    /**
+     * Gets whether the popover can be opened via target click, which is
+     * {@code true} by default.
+     *
+     * @return {@code true} if the popover can be opened with target click,
+     *         {@code false} otherwise.
+     */
+    public boolean isOpenOnClick() {
+        return this.openOnClick;
+    }
+
+    /**
+     * Sets whether the popover can be opened via target focus.
+     *
+     * @param openOnFocus
+     *            {@code true} to allow opening the popover via target focus,
+     *            {@code false} to disallow it.
+     */
+    public void setOpenOnFocus(boolean openOnFocus) {
+        this.openOnFocus = openOnFocus;
+        updateTrigger();
+    }
+
+    /**
+     * Gets whether the popover can be opened via target focus, which is
+     * {@code false} by default.
+     *
+     * @return {@code true} if the popover can be opened with target focus,
+     *         {@code false} otherwise.
+     */
+    public boolean isOpenOnFocus() {
+        return this.openOnFocus;
+    }
+
+    /**
+     * Sets whether the popover can be opened via target hover.
+     *
+     * @param openOnHover
+     *            {@code true} to allow opening the popover via target hover,
+     *            {@code false} to disallow it.
+     */
+    public void setOpenOnHover(boolean openOnHover) {
+        this.openOnHover = openOnHover;
+        updateTrigger();
+    }
+
+    /**
+     * Gets whether the popover can be opened via target hover, which is
+     * {@code false} by default.
+     *
+     * @return {@code true} if the popover can be opened with target hover,
+     *         {@code false} otherwise.
+     */
+    public boolean isOpenOnHover() {
+        return this.openOnHover;
+    }
+
+    private void updateTrigger() {
+        JsonArray trigger = Json.createArray();
+
+        if (isOpenOnClick()) {
+            trigger.set(trigger.length(), "click");
+        }
+
+        if (isOpenOnHover()) {
+            trigger.set(trigger.length(), "hover");
+        }
+
+        if (isOpenOnFocus()) {
+            trigger.set(trigger.length(), "focus");
+        }
+
+        getElement().setPropertyJson("trigger", trigger);
     }
 
     /**
