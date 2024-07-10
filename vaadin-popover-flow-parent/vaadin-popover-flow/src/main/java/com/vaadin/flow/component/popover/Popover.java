@@ -367,6 +367,40 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
     }
 
     /**
+     * Sets the width of the popover overlay content area.
+     * <p>
+     * The width should be in a format understood by the browser, e.g. "100px"
+     * or "2.5em" (Using relative unit, such as percentage, will lead to
+     * unexpected results).
+     * <p>
+     * If the provided {@code width} value is {@literal null} then width is
+     * removed, and the popover overlay is auto-sized based on the content.
+     *
+     * @param width
+     *            the width to set, may be {@code null}
+     */
+    public void setWidth(String width) {
+        getElement().setProperty("contentWidth", width);
+    }
+
+    /**
+     * Sets the height of the popover overlay content area.
+     * <p>
+     * The height should be in a format understood by the browser, e.g. "100px"
+     * or "2.5em" (Using relative unit, such as percentage, will lead to
+     * unexpected results).
+     * <p>
+     * If the provided {@code height} value is {@literal null} then height is
+     * removed, and the popover overlay is auto-sized based on the content.
+     *
+     * @param height
+     *            the height to set, may be {@code null}
+     */
+    public void setHeight(String height) {
+        getElement().setProperty("contentHeight", height);
+    }
+
+    /**
      * Adds the given components into this popover.
      * <p>
      * The elements in the DOM will not be children of the

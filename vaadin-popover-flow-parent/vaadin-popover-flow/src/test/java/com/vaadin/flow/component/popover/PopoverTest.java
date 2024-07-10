@@ -69,6 +69,28 @@ public class PopoverTest {
     }
 
     @Test
+    public void setWidth_contentWidthPropertyUpdated() {
+        popover.setWidth("200px");
+        Assert.assertEquals("200px",
+                popover.getElement().getProperty("contentWidth", ""));
+
+        popover.setWidth(null);
+        Assert.assertEquals("",
+                popover.getElement().getProperty("contentWidth", ""));
+    }
+
+    @Test
+    public void setHeight_contentHeightPropertyUpdated() {
+        popover.setHeight("200px");
+        Assert.assertEquals("200px",
+                popover.getElement().getProperty("contentHeight", ""));
+
+        popover.setHeight(null);
+        Assert.assertEquals("",
+                popover.getElement().getProperty("contentHeight", ""));
+    }
+
+    @Test
     public void setFocusDelay_getFocusDelay() {
         Assert.assertEquals(0, popover.getFocusDelay());
 
