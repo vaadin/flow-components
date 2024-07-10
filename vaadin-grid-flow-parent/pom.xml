@@ -24,7 +24,7 @@
             </activation>
             <modules>
                 <module>vaadin-grid-flow-integration-tests</module>
-                            </modules>
+            </modules>
         </profile>
     </profiles>
     <dependencies/>
