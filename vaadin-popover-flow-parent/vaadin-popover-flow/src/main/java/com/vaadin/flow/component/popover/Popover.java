@@ -96,7 +96,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
     }
 
     /**
-     * Sets the "role" attribute for using by screen readers.
+     * Sets the ARIA role for the overlay element, used by screen readers.
      *
      * @param role
      *            the role to set
@@ -108,8 +108,8 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
     }
 
     /**
-     * Gets the "role" attribute for using by screen readers. Defaults to
-     * "dialog".
+     * Gets the ARIA role for the overlay element, used by screen readers.
+     * Defaults to {@code dialog}.
      *
      * @return the role
      */
