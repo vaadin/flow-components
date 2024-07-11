@@ -699,20 +699,19 @@ public class TimePicker
      * <p>
      * NOTE: Updating the instance that is returned from this method will not
      * update the component if not set again using
-     * {@link TimePicker#setI18n(TimePickerI18n)}
+     * {@link #setI18n(TimePickerI18n)}
      *
-     * @return the i18n object. It will be {@code null}, If the i18n properties
-     *         weren't set.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public TimePickerI18n getI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Sets the internationalization object for this component.
      *
      * @param i18n
-     *            the internationalized properties, not {@code null}
+     *            the i18n object, not {@code null}
      */
     public void setI18n(TimePickerI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
