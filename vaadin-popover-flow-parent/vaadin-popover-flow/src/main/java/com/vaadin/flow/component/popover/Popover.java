@@ -205,7 +205,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
     /**
      * Gets whether this popover can be closed by pressing the Esc key or not.
      * <p>
-     * By default, the popover is closable with esc.
+     * By default, the popover is closable with Esc.
      *
      * @return {@code true} if this popover can be closed with the Esc key,
      *         {@code false} otherwise
