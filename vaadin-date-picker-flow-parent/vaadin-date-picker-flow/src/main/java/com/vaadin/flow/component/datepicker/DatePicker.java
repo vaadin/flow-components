@@ -28,6 +28,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -901,8 +903,10 @@ public class DatePicker
          * @return this instance for method chaining
          */
         public DatePickerI18n setWeekdays(List<String> weekdays) {
-            if (weekdays.size() != 7) {
-                System.err.println("setWeekdays input list should have exactly 7 elements. Instead got " + weekdays.size());
+            int weekdaysSize = weekdays.size();
+            if (weekdays != null && weekdaysSize != 7) {
+                LoggerFactory.getLogger(getClass().getName()).warn("setWeekdays input list should have exactly 7 elements. Instead got " + weekdaysSize);
+                System.err.println();
             }
 
             this.weekdays = weekdays;
@@ -927,8 +931,9 @@ public class DatePicker
          * @return this instance for method chaining
          */
         public DatePickerI18n setWeekdaysShort(List<String> weekdaysShort) {
-            if (weekdaysShort.size() != 7) {
-                System.err.println("setWeekdaysShort input list should have exactly 7 elements. Instead got " + weekdaysShort.size());
+            int weekdaysShortSize = weekdaysShort.size();
+            if (weekdaysShort != null && weekdaysShortSize != 7) {
+                LoggerFactory.getLogger(getClass().getName()).warn("setWeekdaysShort input list should have exactly 7 elements. Instead got " + weekdaysShortSize);
             }
 
             this.weekdaysShort = weekdaysShort;
