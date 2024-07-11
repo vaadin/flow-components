@@ -901,6 +901,13 @@ public class DateTimePicker
             i18nJson.put("timeLabel", timeAriaLabel);
         }
 
+        // Remove the error message properties because they aren't used on
+        // the client-side.
+        i18nJson.remove("badInputErrorMessage");
+        i18nJson.remove("requiredErrorMessage");
+        i18nJson.remove("minErrorMessage");
+        i18nJson.remove("maxErrorMessage");
+
         getElement().setPropertyJson("i18n", i18nJson);
     }
 
@@ -923,12 +930,36 @@ public class DateTimePicker
         ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
+    private String getBadInputErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(DateTimePickerI18n::getBadInputErrorMessage).orElse("");
+    }
+
+    private String getRequiredErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(DateTimePickerI18n::getRequiredErrorMessage).orElse("");
+    }
+
+    private String getMinErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(DateTimePickerI18n::getMinErrorMessage).orElse("");
+    }
+
+    private String getMaxErrorMessage() {
+        return Optional.ofNullable(i18n)
+                .map(DateTimePickerI18n::getMaxErrorMessage).orElse("");
+    }
+
     /**
      * The internationalization properties for {@link DateTimePicker}.
      */
     public static class DateTimePickerI18n implements Serializable {
         private String dateLabel;
         private String timeLabel;
+        private String badInputErrorMessage;
+        private String requiredErrorMessage;
+        private String minErrorMessage;
+        private String maxErrorMessage;
 
         /**
          * Gets the aria-label suffix for the date picker.
@@ -987,6 +1018,110 @@ public class DateTimePicker
          */
         public DateTimePickerI18n setTimeLabel(String timeLabel) {
             this.timeLabel = timeLabel;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field contains user input
+         * that the server is unable to convert to type {@link LocalDateTime}.
+         *
+         * @return the error message or {@code null} if not set
+         */
+        public String getBadInputErrorMessage() {
+            return badInputErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field contains user input
+         * that the server is unable to convert to type {@link LocalDateTime}.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         */
+        public DateTimePickerI18n setBadInputErrorMessage(String errorMessage) {
+            badInputErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field is required but
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         * @see DateTimePicker#isRequiredIndicatorVisible()
+         * @see DateTimePicker#setRequiredIndicatorVisible(boolean)
+         */
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field is required but
+         * empty.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see DateTimePicker#isRequiredIndicatorVisible()
+         * @see DateTimePicker#setRequiredIndicatorVisible(boolean)
+         */
+        public DateTimePickerI18n setRequiredErrorMessage(String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the selected date and time are
+         * earlier than the minimum allowed date and time.
+         *
+         * @return the error message or {@code null} if not set
+         * @see DateTimePicker#getMin()
+         * @see DateTimePicker#setMin(LocalDateTime)
+         */
+        public String getMinErrorMessage() {
+            return minErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the selected date and time are
+         * earlier than the minimum allowed time.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see DateTimePicker#getMin()
+         * @see DateTimePicker#setMin(LocalDateTime)
+         */
+        public DateTimePickerI18n setMinErrorMessage(String errorMessage) {
+            minErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the selected date and time are
+         * later than the maximum allowed date and time.
+         *
+         * @return the error message or {@code null} if not set
+         * @see DateTimePicker#getMax()
+         * @see DateTimePicker#setMax(LocalDateTime)
+         */
+        public String getMaxErrorMessage() {
+            return maxErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the selected date and time are
+         * later than the maximum allowed date and time.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see DateTimePicker#getMax()
+         * @see DateTimePicker#setMax(LocalDateTime)
+         */
+        public DateTimePickerI18n setMaxErrorMessage(String errorMessage) {
+            maxErrorMessage = errorMessage;
             return this;
         }
     }
