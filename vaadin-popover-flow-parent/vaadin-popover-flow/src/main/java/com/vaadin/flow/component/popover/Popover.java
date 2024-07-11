@@ -31,6 +31,7 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Synchronize;
@@ -85,6 +86,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
      * {@code opened-changed} event is sent when the overlay opened state
      * changes.
      */
+    @DomEvent("opened-changed")
     public static class OpenedChangeEvent extends ComponentEvent<Popover> {
         private final boolean opened;
 
