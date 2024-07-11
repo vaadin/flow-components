@@ -537,18 +537,17 @@ public class MultiSelectComboBox<TItem>
      * update the component if not set again using
      * {@link #setI18n(MultiSelectComboBoxI18n)}
      *
-     * @return the i18n object. It will be <code>null</code>, if it has not been
-     *         set previously
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public MultiSelectComboBoxI18n getI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Sets the internationalization object for this component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(MultiSelectComboBoxI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,

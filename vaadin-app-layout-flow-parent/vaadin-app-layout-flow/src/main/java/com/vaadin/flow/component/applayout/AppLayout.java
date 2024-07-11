@@ -72,20 +72,19 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      * <p>
      * NOTE: Updating the instance that is returned from this method will not
      * update the component if not set again using
-     * {@link AppLayout#setI18n(AppLayoutI18n)}
+     * {@link #setI18n(AppLayoutI18n)}
      *
-     * @return the i18n object. It will be <code>null</code>, if the i18n
-     *         properties are not set.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public AppLayoutI18n getI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Sets the internationalization object for this component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(AppLayoutI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
