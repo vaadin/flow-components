@@ -24,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import elemental.json.JsonObject;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
@@ -129,6 +130,9 @@ public class DateTimePicker
 
     private DateTimePickerI18n i18n;
     private Locale locale;
+
+    private String dateAriaLabel;
+    private String timeAriaLabel;
 
     private final static SerializableFunction<String, LocalDateTime> PARSER = s -> {
         return s == null || s.isEmpty() ? null : LocalDateTime.parse(s);
@@ -415,97 +419,67 @@ public class DateTimePicker
     }
 
     /**
-     * Contains DateTimePicker internalization properties
-     */
-    public static class DateTimePickerI18n implements Serializable {
-        private String dateLabel;
-        private String timeLabel;
-
-        public String getDateLabel() {
-            return dateLabel;
-        }
-
-        public DateTimePickerI18n setDateLabel(String dateLabel) {
-            this.dateLabel = dateLabel;
-            return this;
-        }
-
-        public String getTimeLabel() {
-            return timeLabel;
-        }
-
-        public DateTimePickerI18n setTimeLabel(String timeLabel) {
-            this.timeLabel = timeLabel;
-            return this;
-        }
-    }
-
-    /**
-     * Sets the accessible label for the date picker.
+     * Sets the aria-label suffix for the date picker.
      * <p>
-     * The final value is a concatenation of the accessible label from
-     * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()} and the
-     * given accessible label.
+     * The suffix set with this method takes precedence over the suffix set with
+     * {@link DateTimePickerI18n#setDateLabel(String)}.
+     * <p>
+     * The date picker's final aria-label is a concatenation of DateTimePicker's
+     * {@link #getAriaLabel()} or {@link #getLabel()} and this suffix.
      *
      * @param dateLabel
-     *            the value to be used as part of date picker aria-label.
+     *            the value to be used as a suffix in the date picker
+     *            aria-label.
      */
     public void setDateAriaLabel(String dateLabel) {
-        if (i18n == null) {
-            i18n = new DateTimePickerI18n();
-        }
-        i18n.setDateLabel(dateLabel);
-        getElement().setPropertyJson("i18n", JsonSerializer.toJson(i18n));
+        dateAriaLabel = dateLabel;
+        updateI18n();
     }
 
     /**
-     * Gets the accessible label of the date picker.
+     * Gets the aria-label suffix for the date picker.
      * <p>
-     * Note that this method will return the last value passed to
+     * Note: this method will return the last value passed to
      * {@link #setDateAriaLabel(String)}, not the value currently set on the
      * `aria-label` attribute of the date picker input element.
      *
      * @return an optional label or an empty optional if no label has been set
+     *         with this method before.
      */
     public Optional<String> getDateAriaLabel() {
-        if (i18n == null) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(i18n.getDateLabel());
+        return Optional.ofNullable(dateAriaLabel);
     }
 
     /**
-     * Sets the accessible label for the time picker.
+     * Sets the aria-label suffix for the time picker.
      * <p>
-     * The final value is a concatenation of the accessible label from
-     * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()} and the
-     * given accessible label.
+     * The suffix set with this method takes precedence over the suffix set with
+     * {@link DateTimePickerI18n#setTimeLabel(String)}.
+     * <p>
+     * The time picker's final aria-label is a concatenation of DateTimePicker's
+     * {@link #getAriaLabel()} or {@link #getLabel()} and this suffix.
      *
      * @param timeLabel
-     *            the value to be used as part of time picker aria-label.
+     *            the value to be used as a suffix in the time picker
+     *            aria-label.
      */
     public void setTimeAriaLabel(String timeLabel) {
-        if (i18n == null) {
-            i18n = new DateTimePickerI18n();
-        }
-        i18n.setTimeLabel(timeLabel);
-        getElement().setPropertyJson("i18n", JsonSerializer.toJson(i18n));
+        timeAriaLabel = timeLabel;
+        updateI18n();
     }
 
     /**
-     * Gets the accessible label of the time picker.
+     * Gets the aria-label suffix for the time picker.
      * <p>
-     * Note that this method will return the last value passed to
+     * Note: this method will return the last value passed to
      * {@link #setTimeAriaLabel(String)}, not the value currently set on the
      * `aria-label` attribute of the time picker input element.
      *
      * @return an optional label or an empty optional if no label has been set
+     *         with this method before.
      */
     public Optional<String> getTimeAriaLabel() {
-        if (i18n == null) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(i18n.getTimeLabel());
+        return Optional.ofNullable(timeAriaLabel);
     }
 
     /**
@@ -888,6 +862,49 @@ public class DateTimePicker
     }
 
     /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * Note: updating the instance that is returned from this method will not
+     * update the component if not set back using
+     * {@link DateTimePicker#setI18n(DateTimePickerI18n)}
+     *
+     * @return the i18n object. It will be <code>null</code>, If the i18n
+     *         properties weren't set.
+     */
+    public DateTimePickerI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization properties for this component.
+     *
+     * @param i18n
+     *            the internationalized properties, not <code>null</code>
+     */
+    public void setI18n(DateTimePickerI18n i18n) {
+        Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+        this.i18n = i18n;
+        updateI18n();
+    }
+
+    private void updateI18n() {
+        DateTimePickerI18n i18nObject = i18n != null ? i18n
+                : new DateTimePickerI18n();
+        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(i18nObject);
+
+        if (dateAriaLabel != null) {
+            i18nJson.put("dateLabel", dateAriaLabel);
+        }
+
+        if (timeAriaLabel != null) {
+            i18nJson.put("timeLabel", timeAriaLabel);
+        }
+
+        getElement().setPropertyJson("i18n", i18nJson);
+    }
+
+    /**
      * When auto open is enabled, the dropdown will open when the field is
      * clicked.
      *
@@ -904,5 +921,73 @@ public class DateTimePicker
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+    }
+
+    /**
+     * The internationalization properties for {@link DateTimePicker}.
+     */
+    public static class DateTimePickerI18n implements Serializable {
+        private String dateLabel;
+        private String timeLabel;
+
+        /**
+         * Gets the aria-label suffix for the date picker.
+         * <p>
+         * The date picker's final aria-label is a concatanation of the
+         * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()}
+         * methods and this suffix.
+         *
+         * @return the value used as a suffix in the date picker aria-label.
+         */
+        public String getDateLabel() {
+            return dateLabel;
+        }
+
+        /**
+         * Sets the aria-label suffix for the date picker.
+         * <p>
+         * The date picker's final aria-label is a concatanation of the
+         * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()}
+         * methods and this suffix.
+         *
+         * @param dateLabel
+         *            the value to be used as a suffix in the date picker
+         *            aria-label.
+         * @return this instance for method chaining
+         */
+        public DateTimePickerI18n setDateLabel(String dateLabel) {
+            this.dateLabel = dateLabel;
+            return this;
+        }
+
+        /**
+         * Gets the aria-label suffix for the time picker.
+         * <p>
+         * The time picker's aria-label is a concatanation of the
+         * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()}
+         * methods and this suffix.
+         *
+         * @return the value used as a suffix in the time picker aria-label.
+         */
+        public String getTimeLabel() {
+            return timeLabel;
+        }
+
+        /**
+         * Sets the aria-label suffix for the time picker.
+         * <p>
+         * The time picker's aria-label is a concatanation of the
+         * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()}
+         * methods and this suffix.
+         *
+         * @param timeLabel
+         *            the value to be used as a suffix in the time picker
+         *            aria-label.
+         * @return this instance for method chaining
+         */
+        public DateTimePickerI18n setTimeLabel(String timeLabel) {
+            this.timeLabel = timeLabel;
+            return this;
+        }
     }
 }
