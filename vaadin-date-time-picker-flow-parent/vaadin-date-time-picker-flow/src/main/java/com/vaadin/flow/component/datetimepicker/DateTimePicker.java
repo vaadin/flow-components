@@ -868,8 +868,7 @@ public class DateTimePicker
      * update the component if not set again using
      * {@link DateTimePicker#setDatePickerI18n(DatePickerI18n)}
      *
-     * @return the i18n object. It will be <code>null</code>, If the i18n
-     *         properties weren't set.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public DatePickerI18n getDatePickerI18n() {
         return datePickerI18n;
@@ -880,7 +879,7 @@ public class DateTimePicker
      * component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setDatePickerI18n(DatePickerI18n i18n) {
         this.datePickerI18n = Objects.requireNonNull(i18n,

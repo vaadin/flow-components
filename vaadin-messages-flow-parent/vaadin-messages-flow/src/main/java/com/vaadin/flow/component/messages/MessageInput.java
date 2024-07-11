@@ -129,10 +129,9 @@ public class MessageInput extends Component implements Focusable<MessageInput>,
      * <p>
      * NOTE: Updating the instance that is returned from this method will not
      * update the component if not set again using
-     * {@link MessageInput#setI18n(MessageInputI18n)}.
+     * {@link #setI18n(MessageInputI18n)}.
      *
-     * @return the i18n object, or {@code null} if one has not been set with
-     *         {@link #setI18n(MessageInputI18n)}
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public MessageInputI18n getI18n() {
         return i18n;
