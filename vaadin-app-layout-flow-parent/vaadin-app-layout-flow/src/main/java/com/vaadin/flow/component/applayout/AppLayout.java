@@ -81,7 +81,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Sets the internationalization object for this component.
      *
      * @param i18n
      *            the i18n object, not {@code null}

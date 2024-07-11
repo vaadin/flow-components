@@ -138,8 +138,8 @@ public class MessageInput extends Component implements Focusable<MessageInput>,
     }
 
     /**
-     * Sets the internationalization properties for this component. It enabled
-     * you to customize and translate the language used in the message input.
+     * Sets the internationalization object for this component. It enabled you
+     * to customize and translate the language used in the message input.
      * <p>
      * Note: updating the object properties after setting the i18n will not
      * update the component. To make the changes effective, you need to set the

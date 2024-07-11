@@ -655,7 +655,7 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Sets the internationalization object for this component.
      *
      * @param i18n
      *            the i18n object, not {@code null}
