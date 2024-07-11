@@ -76,14 +76,6 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         getElement().setProperty("opened", false);
 
-        getElement().addPropertyChangeListener("opened", event -> {
-            // Only handle client-side changes, server-side changes are already
-            // handled by setOpened
-            if (event.isUserOriginated()) {
-                doSetOpened(this.isOpened(), event.isUserOriginated());
-            }
-        });
-
         updateTrigger();
         setOverlayRole("dialog");
     }
@@ -114,7 +106,8 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
      */
     public void setOpened(boolean opened) {
         if (opened != isOpened()) {
-            doSetOpened(opened, false);
+            getElement().setProperty("opened", opened);
+            fireEvent(new OpenedChangeEvent(this, false));
         }
     }
 
@@ -130,11 +123,6 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
      */
     public void close() {
         setOpened(false);
-    }
-
-    private void doSetOpened(boolean opened, boolean fromClient) {
-        getElement().setProperty("opened", opened);
-        fireEvent(new OpenedChangeEvent(this, fromClient));
     }
 
     /**
