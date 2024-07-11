@@ -29,8 +29,12 @@ import elemental.json.JsonArray;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
@@ -70,8 +74,79 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
     public Popover() {
         getElement().getNode().addAttachListener(this::attachComponentRenderer);
 
+        // Workaround for: https://github.com/vaadin/flow/issues/3496
+        getElement().setProperty("opened", false);
+
         updateTrigger();
         setOverlayRole("dialog");
+    }
+
+
+    /**
+     * {@code opened-changed} event is sent when the overlay opened state
+     * changes.
+     */
+    @DomEvent("opened-changed")
+    public static class OpenedChangeEvent extends ComponentEvent<Popover> {
+        private final boolean opened;
+
+        public OpenedChangeEvent(Popover source, boolean fromClient) {
+            super(source, fromClient);
+            this.opened = source.isOpened();
+        }
+
+        public boolean isOpened() {
+            return opened;
+        }
+    }
+
+    /**
+     * Opens or closes the popover.
+     *
+     * @param opened
+     *            {@code true} to open the popover, {@code false} to close it
+     */
+    public void setOpened(boolean opened) {
+        if (opened != isOpened()) {
+            getElement().setProperty("opened", opened);
+            fireEvent(new OpenedChangeEvent(this, false));
+        }
+    }
+
+    /**
+     * Opens the popover.
+     */
+    public void open() {
+        setOpened(true);
+    }
+
+    /**
+     * Closes the popover.
+     */
+    public void close() {
+        setOpened(false);
+    }
+
+    /**
+     * Gets the open state from the popover.
+     *
+     * @return the {@code opened} property from the popover
+     */
+    @Synchronize(property = "opened", value = "opened-changed")
+    public boolean isOpened() {
+        return getElement().getProperty("opened", false);
+    }
+
+    /**
+     * Add a listener for event fired by the {@code opened-changed} events.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
+     */
+    public Registration addOpenedChangeListener(
+            ComponentEventListener<OpenedChangeEvent> listener) {
+        return addListener(OpenedChangeEvent.class, listener);
     }
 
     @Override
@@ -115,6 +190,56 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
      */
     public String getOverlayRole() {
         return getElement().getProperty("overlayRole");
+    }
+
+    /**
+     * Gets whether this popover can be closed by pressing the Esc key or not.
+     * <p>
+     * By default, the popover is closable with Esc.
+     *
+     * @return {@code true} if this popover can be closed with the Esc key,
+     *         {@code false} otherwise
+     */
+    public boolean isCloseOnEsc() {
+        return !getElement().getProperty("noCloseOnEsc", false);
+    }
+
+    /**
+     * Sets whether this popover can be closed by pressing the Esc key or not.
+     * <p>
+     * By default, the popover is closable with Esc.
+     *
+     * @param closeOnEsc
+     *            {@code true} to enable closing this popover with the Esc key,
+     *            {@code false} to disable it
+     */
+    public void setCloseOnEsc(boolean closeOnEsc) {
+        getElement().setProperty("noCloseOnEsc", !closeOnEsc);
+    }
+
+    /**
+     * Gets whether this popover can be closed by clicking outside of it or not.
+     * <p>
+     * By default, the popover is closable with an outside click.
+     *
+     * @return {@code true} if this popover can be closed by an outside click,
+     *         {@code false} otherwise
+     */
+    public boolean isCloseOnOutsideClick() {
+        return !getElement().getProperty("noCloseOnOutsideClick", false);
+    }
+
+    /**
+     * Sets whether this popover can be closed by clicking outside of it or not.
+     * <p>
+     * By default, the popover is closable with an outside click.
+     *
+     * @param closeOnOutsideClick
+     *            {@code true} to enable closing this popover with an outside
+     *            click, {@code false} to disable it
+     */
+    public void setCloseOnOutsideClick(boolean closeOnOutsideClick) {
+        getElement().setProperty("noCloseOnOutsideClick", !closeOnOutsideClick);
     }
 
     /**
