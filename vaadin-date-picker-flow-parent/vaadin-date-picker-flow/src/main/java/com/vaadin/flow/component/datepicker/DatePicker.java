@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -900,6 +901,10 @@ public class DatePicker
          * @return this instance for method chaining
          */
         public DatePickerI18n setWeekdays(List<String> weekdays) {
+            if (weekdays.size() != 7) {
+                System.err.println("setWeekdays input list should have exactly 7 elements. Instead got " + weekdays.size());
+            }
+
             this.weekdays = weekdays;
             return this;
         }
@@ -922,6 +927,10 @@ public class DatePicker
          * @return this instance for method chaining
          */
         public DatePickerI18n setWeekdaysShort(List<String> weekdaysShort) {
+            if (weekdaysShort.size() != 7) {
+                System.err.println("setWeekdaysShort input list should have exactly 7 elements. Instead got " + weekdaysShort.size());
+            }
+
             this.weekdaysShort = weekdaysShort;
             return this;
         }
