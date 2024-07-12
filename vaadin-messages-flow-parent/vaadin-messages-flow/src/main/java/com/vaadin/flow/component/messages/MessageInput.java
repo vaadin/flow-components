@@ -129,18 +129,17 @@ public class MessageInput extends Component implements Focusable<MessageInput>,
      * <p>
      * NOTE: Updating the instance that is returned from this method will not
      * update the component if not set again using
-     * {@link MessageInput#setI18n(MessageInputI18n)}.
+     * {@link #setI18n(MessageInputI18n)}.
      *
-     * @return the i18n object, or {@code null} if one has not been set with
-     *         {@link #setI18n(MessageInputI18n)}
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public MessageInputI18n getI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization properties for this component. It enabled
-     * you to customize and translate the language used in the message input.
+     * Sets the internationalization object for this component. It enabled you
+     * to customize and translate the language used in the message input.
      * <p>
      * Note: updating the object properties after setting the i18n will not
      * update the component. To make the changes effective, you need to set the
