@@ -903,7 +903,9 @@ public class DatePicker
          */
         public DatePickerI18n setWeekdays(List<String> weekdays) {
             if (weekdays != null && weekdays.size() != 7) {
-                LoggerFactory.getLogger(getClass().getName()).warn(String.format("setWeekdays input list should have exactly 7 elements. Instead got %s", weekdays.size()));
+                LoggerFactory.getLogger(getClass()).warn(String.format(
+                        "setWeekdays parameter list should have exactly 7 elements. Instead got %d",
+                        weekdays.size()));
             }
 
             this.weekdays = weekdays;
@@ -929,7 +931,9 @@ public class DatePicker
          */
         public DatePickerI18n setWeekdaysShort(List<String> weekdaysShort) {
             if (weekdaysShort != null && weekdaysShort.size() != 7) {
-                LoggerFactory.getLogger(getClass().getName()).warn(String.format("setWeekdaysShort input list should have exactly 7 elements. Instead got %s", weekdaysShort.size()));
+                LoggerFactory.getLogger(getClass()).warn(String.format(
+                        "setWeekdaysShort parameter list should have exactly 7 elements. Instead got %d",
+                        weekdaysShort.size()));
             }
 
             this.weekdaysShort = weekdaysShort;
