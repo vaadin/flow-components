@@ -160,10 +160,10 @@ import com.vaadin.flow.dom.Element;
  */
 @Deprecated
 @Tag("vaadin-form-item")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/form-layout", version = "23.5.2")
-@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "23.5.2")
+@NpmPackage(value = "@vaadin/form-layout", version = "23.5.3")
+@NpmPackage(value = "@vaadin/vaadin-form-layout", version = "23.5.3")
 @JsModule("@vaadin/form-layout/src/vaadin-form-item.js")
 public abstract class GeneratedVaadinFormItem<R extends GeneratedVaadinFormItem<R>>
         extends Component implements HasStyle, ClickNotifier<R> {
