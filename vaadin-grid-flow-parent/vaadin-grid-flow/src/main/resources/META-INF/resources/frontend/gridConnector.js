@@ -92,7 +92,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
             return level;
           });
-          
+
           const recalculateColumnWidthsOriginal = Grid.prototype._recalculateColumnWidths;
           Grid.prototype._recalculateColumnWidths = function(cols) {
             // Flush until row count stabilizes
@@ -100,7 +100,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             let previousRowCount;
             while (previousRowCount !== this.$.items.childElementCount) {
               previousRowCount = this.$.items.childElementCount;
-              
+
               // Flush the virtualizer
               this.__virtualizer.flush();
               if (ensureSubCacheDebouncer) {
@@ -1159,13 +1159,19 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             return;
           }
 
-          const target = event.target;
-          const eventContext = grid.getEventContext(event);
-          const section = eventContext.section;
+          const path = event.composedPath();
+          const idx = path.findIndex((node) => node.localName === 'td' || node.localName === 'th');
+          const content = path.slice(0, idx);
 
-          if (isFocusable(target) || target instanceof HTMLLabelElement) {
+          // Do not fire item click event if cell content contains focusable elements.
+          // Use this instead of event.target to detect cases like icon inside button.
+          // See https://github.com/vaadin/flow-components/issues/4065
+          if (content.some((node) => isFocusable(node) || node instanceof HTMLLabelElement)) {
             return;
           }
+
+          const eventContext = grid.getEventContext(event);
+          const section = eventContext.section;
 
           if (eventContext.item && section !== 'details') {
             event.itemKey = eventContext.item.key;
