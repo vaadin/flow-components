@@ -8,10 +8,12 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
@@ -38,6 +40,9 @@ public class GridViewClickListenersPage extends LegacyTestView {
                     "$0.addEventListener('click', e => e.preventDefault())");
             return span;
         })).setHeader("Action");
+        grid.addColumn(new ComponentRenderer<>(person -> {
+            return new Button(VaadinIcon.PENCIL.create());
+        })).setHeader("Button");
 
         // Disable selection: will receive only click events instead
         grid.setSelectionMode(SelectionMode.NONE);
