@@ -905,7 +905,6 @@ public class DatePicker
             int weekdaysSize = weekdays.size();
             if (weekdays != null && weekdaysSize != 7) {
                 LoggerFactory.getLogger(getClass().getName()).warn("setWeekdays input list should have exactly 7 elements. Instead got " + weekdaysSize);
-                System.err.println();
             }
 
             this.weekdays = weekdays;
