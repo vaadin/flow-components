@@ -152,11 +152,9 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
      * Gets the internationalization object previously set for this component.
      * <p>
      * NOTE: Updating the instance that is returned from this method will not
-     * update the component if not set again using
-     * {@link SideNav#setI18n(SideNavI18n)}
+     * update the component if not set again using {@link #setI18n(SideNavI18n)}
      *
-     * @return the i18n object. It will be <code>null</code>, If the i18n
-     *         properties weren't set.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public SideNavI18n getI18n() {
         return i18n;
@@ -168,7 +166,7 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
      * web component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(SideNavI18n i18n) {
         Objects.requireNonNull(i18n,
