@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 import java.io.Serializable;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -330,12 +331,14 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         boolean hasBadInput = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
         if (hasBadInput) {
-            return ValidationResult.error(getBadInputErrorMessage());
+            return ValidationResult.error(getI18nErrorMessage(
+                    AbstractNumberFieldI18n::getBadInputErrorMessage));
         }
 
         if (withRequiredValidator) {
             ValidationResult requiredResult = ValidationUtil
-                    .validateRequiredConstraint(getRequiredErrorMessage(),
+                    .validateRequiredConstraint(getI18nErrorMessage(
+                            AbstractNumberFieldI18n::getRequiredErrorMessage),
                             isRequiredIndicatorVisible(), value,
                             getEmptyValue());
             if (requiredResult.isError()) {
@@ -345,20 +348,25 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
         Double doubleValue = value != null ? value.doubleValue() : null;
 
-        ValidationResult maxResult = ValidationUtil
-                .validateMaxConstraint(getMaxErrorMessage(), doubleValue, max);
+        ValidationResult maxResult = ValidationUtil.validateMaxConstraint(
+                getI18nErrorMessage(
+                        AbstractNumberFieldI18n::getMaxErrorMessage),
+                doubleValue, max);
         if (maxResult.isError()) {
             return maxResult;
         }
 
-        ValidationResult minResult = ValidationUtil
-                .validateMinConstraint(getMinErrorMessage(), doubleValue, min);
+        ValidationResult minResult = ValidationUtil.validateMinConstraint(
+                getI18nErrorMessage(
+                        AbstractNumberFieldI18n::getMinErrorMessage),
+                doubleValue, min);
         if (minResult.isError()) {
             return minResult;
         }
 
         if (!isValidByStep(value)) {
-            return ValidationResult.error(getStepErrorMessage());
+            return ValidationResult.error(getI18nErrorMessage(
+                    AbstractNumberFieldI18n::getStepErrorMessage));
         }
 
         return ValidationResult.ok();
@@ -443,31 +451,9 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
                 "The i18n properties object should not be null");
     }
 
-    private String getBadInputErrorMessage() {
-        return Optional.ofNullable(i18n)
-                .map(AbstractNumberFieldI18n::getBadInputErrorMessage)
-                .orElse("");
-    }
-
-    private String getRequiredErrorMessage() {
-        return Optional.ofNullable(i18n)
-                .map(AbstractNumberFieldI18n::getRequiredErrorMessage)
-                .orElse("");
-    }
-
-    private String getMinErrorMessage() {
-        return Optional.ofNullable(i18n)
-                .map(AbstractNumberFieldI18n::getMinErrorMessage).orElse("");
-    }
-
-    private String getMaxErrorMessage() {
-        return Optional.ofNullable(i18n)
-                .map(AbstractNumberFieldI18n::getMaxErrorMessage).orElse("");
-    }
-
-    private String getStepErrorMessage() {
-        return Optional.ofNullable(i18n)
-                .map(AbstractNumberFieldI18n::getStepErrorMessage).orElse("");
+    private String getI18nErrorMessage(
+            Function<AbstractNumberFieldI18n, String> getter) {
+        return Optional.ofNullable(i18n).map(getter).orElse("");
     }
 
     /**
