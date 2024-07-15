@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractField;
@@ -352,12 +353,15 @@ public class TimePicker
         boolean hasBadInput = Objects.equals(value, getEmptyValue())
                 && isInputValuePresent();
         if (hasBadInput) {
-            return ValidationResult.error(getBadInputErrorMessage());
+            return ValidationResult.error(getI18nErrorMessage(
+                    TimePickerI18n::getBadInputErrorMessage));
         }
 
         if (withRequiredValidator) {
             ValidationResult requiredResult = ValidationUtil
-                    .validateRequiredConstraint(getRequiredErrorMessage(),
+                    .validateRequiredConstraint(
+                            getI18nErrorMessage(
+                                    TimePickerI18n::getRequiredErrorMessage),
                             isRequiredIndicatorVisible(), value,
                             getEmptyValue());
             if (requiredResult.isError()) {
@@ -365,14 +369,16 @@ public class TimePicker
             }
         }
 
-        ValidationResult maxResult = ValidationUtil
-                .validateMaxConstraint(getMaxErrorMessage(), value, max);
+        ValidationResult maxResult = ValidationUtil.validateMaxConstraint(
+                getI18nErrorMessage(TimePickerI18n::getMaxErrorMessage), value,
+                max);
         if (maxResult.isError()) {
             return maxResult;
         }
 
-        ValidationResult minResult = ValidationUtil
-                .validateMinConstraint(getMinErrorMessage(), value, min);
+        ValidationResult minResult = ValidationUtil.validateMinConstraint(
+                getI18nErrorMessage(TimePickerI18n::getMinErrorMessage), value,
+                min);
         if (minResult.isError()) {
             return minResult;
         }
@@ -718,24 +724,9 @@ public class TimePicker
                 "The i18n properties object should not be null");
     }
 
-    private String getBadInputErrorMessage() {
-        return Optional.ofNullable(i18n)
-                .map(TimePickerI18n::getBadInputErrorMessage).orElse("");
-    }
-
-    private String getRequiredErrorMessage() {
-        return Optional.ofNullable(i18n)
-                .map(TimePickerI18n::getRequiredErrorMessage).orElse("");
-    }
-
-    private String getMinErrorMessage() {
-        return Optional.ofNullable(i18n).map(TimePickerI18n::getMinErrorMessage)
-                .orElse("");
-    }
-
-    private String getMaxErrorMessage() {
-        return Optional.ofNullable(i18n).map(TimePickerI18n::getMaxErrorMessage)
-                .orElse("");
+    private String getI18nErrorMessage(
+            Function<TimePickerI18n, String> getter) {
+        return Optional.ofNullable(i18n).map(getter).orElse("");
     }
 
     /**
