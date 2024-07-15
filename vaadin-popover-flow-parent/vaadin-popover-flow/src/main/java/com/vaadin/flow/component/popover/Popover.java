@@ -79,8 +79,13 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
 
         updateTrigger();
         setOverlayRole("dialog");
-    }
 
+        getElement().addPropertyChangeListener("opened", event -> {
+            if (event.isUserOriginated()) {
+                setModality(isOpened() && isModal());
+            }
+        });
+    }
 
     /**
      * {@code opened-changed} event is sent when the overlay opened state
@@ -108,6 +113,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
      */
     public void setOpened(boolean opened) {
         if (opened != isOpened()) {
+            setModality(opened && isModal());
             getElement().setProperty("opened", opened);
             fireEvent(new OpenedChangeEvent(this, false));
         }
@@ -147,6 +153,33 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
         return addListener(OpenedChangeEvent.class, listener);
+    }
+
+    /**
+     * Sets whether component will open modal or modeless popover.
+     *
+     * @param modal
+     *            {@code false} to enable popover to open as modeless modal,
+     *            {@code true} otherwise.
+     */
+    public void setModal(boolean modal) {
+        getElement().setProperty("modal", modal);
+    }
+
+    /**
+     * Gets whether component is set as modal or modeless popover. By default,
+     * the popover is non-modal.
+     *
+     * @return {@code true} if modal popover, {@code false} otherwise.
+     */
+    public boolean isModal() {
+        return getElement().getProperty("modal", false);
+    }
+
+    private void setModality(boolean modal) {
+        if (isAttached()) {
+            getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
+        }
     }
 
     @Override
