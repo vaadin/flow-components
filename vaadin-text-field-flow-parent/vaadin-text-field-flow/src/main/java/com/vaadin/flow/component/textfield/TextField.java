@@ -18,6 +18,7 @@ package com.vaadin.flow.component.textfield;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Tag;
@@ -302,7 +303,9 @@ public class TextField extends TextFieldBase<TextField, String>
             boolean withRequiredValidator) {
         if (withRequiredValidator) {
             ValidationResult requiredResult = ValidationUtil
-                    .validateRequiredConstraint(getRequiredErrorMessage(),
+                    .validateRequiredConstraint(
+                            getI18nErrorMessage(
+                                    TextFieldI18n::getRequiredErrorMessage),
                             isRequiredIndicatorVisible(), value,
                             getEmptyValue());
             if (requiredResult.isError()) {
@@ -311,22 +314,28 @@ public class TextField extends TextFieldBase<TextField, String>
         }
 
         ValidationResult maxLengthResult = ValidationUtil
-                .validateMaxLengthConstraint(getMaxLengthErrorMessage(), value,
-                        hasMaxLength() ? getMaxLength() : null);
+                .validateMaxLengthConstraint(
+                        getI18nErrorMessage(
+                                TextFieldI18n::getMaxLengthErrorMessage),
+                        value, hasMaxLength() ? getMaxLength() : null);
         if (maxLengthResult.isError()) {
             return maxLengthResult;
         }
 
         ValidationResult minLengthResult = ValidationUtil
-                .validateMinLengthConstraint(getMinLengthErrorMessage(), value,
-                        getMinLength());
+                .validateMinLengthConstraint(
+                        getI18nErrorMessage(
+                                TextFieldI18n::getMinLengthErrorMessage),
+                        value, getMinLength());
         if (minLengthResult.isError()) {
             return minLengthResult;
         }
 
         ValidationResult patternResult = ValidationUtil
-                .validatePatternConstraint(getPatternErrorMessage(), value,
-                        getPattern());
+                .validatePatternConstraint(
+                        getI18nErrorMessage(
+                                TextFieldI18n::getPatternErrorMessage),
+                        value, getPattern());
         if (patternResult.isError()) {
             return patternResult;
         }
@@ -386,24 +395,8 @@ public class TextField extends TextFieldBase<TextField, String>
                 "The i18n properties object should not be null");
     }
 
-    private String getRequiredErrorMessage() {
-        return Optional.ofNullable(i18n)
-                .map(TextFieldI18n::getRequiredErrorMessage).orElse("");
-    }
-
-    private String getMinLengthErrorMessage() {
-        return Optional.ofNullable(i18n)
-                .map(TextFieldI18n::getMinLengthErrorMessage).orElse("");
-    }
-
-    private String getMaxLengthErrorMessage() {
-        return Optional.ofNullable(i18n)
-                .map(TextFieldI18n::getMaxLengthErrorMessage).orElse("");
-    }
-
-    private String getPatternErrorMessage() {
-        return Optional.ofNullable(i18n)
-                .map(TextFieldI18n::getPatternErrorMessage).orElse("");
+    private String getI18nErrorMessage(Function<TextFieldI18n, String> getter) {
+        return Optional.ofNullable(i18n).map(getter).orElse("");
     }
 
     /**
