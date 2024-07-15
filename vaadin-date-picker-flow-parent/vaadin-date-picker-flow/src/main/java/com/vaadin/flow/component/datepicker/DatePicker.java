@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -551,12 +552,15 @@ public class DatePicker
         boolean hasBadInput = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
         if (hasBadInput) {
-            return ValidationResult.error(getBadInputErrorMessage());
+            return ValidationResult.error(getI18nErrorMessage(
+                    DatePickerI18n::getBadInputErrorMessage));
         }
 
         if (withRequiredValidator) {
             ValidationResult requiredResult = ValidationUtil
-                    .validateRequiredConstraint(getRequiredErrorMessage(),
+                    .validateRequiredConstraint(
+                            getI18nErrorMessage(
+                                    DatePickerI18n::getRequiredErrorMessage),
                             isRequiredIndicatorVisible(), value,
                             getEmptyValue());
             if (requiredResult.isError()) {
@@ -564,14 +568,16 @@ public class DatePicker
             }
         }
 
-        ValidationResult maxResult = ValidationUtil
-                .validateMaxConstraint(getMaxErrorMessage(), value, max);
+        ValidationResult maxResult = ValidationUtil.validateMaxConstraint(
+                getI18nErrorMessage(DatePickerI18n::getMaxErrorMessage), value,
+                max);
         if (maxResult.isError()) {
             return maxResult;
         }
 
-        ValidationResult minResult = ValidationUtil
-                .validateMinConstraint(getMinErrorMessage(), value, min);
+        ValidationResult minResult = ValidationUtil.validateMinConstraint(
+                getI18nErrorMessage(DatePickerI18n::getMinErrorMessage), value,
+                min);
         if (minResult.isError()) {
             return minResult;
         }
@@ -864,24 +870,9 @@ public class DatePicker
         return addListener(InvalidChangeEvent.class, listener);
     }
 
-    private String getBadInputErrorMessage() {
-        return Optional.ofNullable(i18n)
-                .map(DatePickerI18n::getBadInputErrorMessage).orElse("");
-    }
-
-    private String getRequiredErrorMessage() {
-        return Optional.ofNullable(i18n)
-                .map(DatePickerI18n::getRequiredErrorMessage).orElse("");
-    }
-
-    private String getMinErrorMessage() {
-        return Optional.ofNullable(i18n).map(DatePickerI18n::getMinErrorMessage)
-                .orElse("");
-    }
-
-    private String getMaxErrorMessage() {
-        return Optional.ofNullable(i18n).map(DatePickerI18n::getMaxErrorMessage)
-                .orElse("");
+    private String getI18nErrorMessage(
+            Function<DatePickerI18n, String> getter) {
+        return Optional.ofNullable(i18n).map(getter).orElse("");
     }
 
     /**
