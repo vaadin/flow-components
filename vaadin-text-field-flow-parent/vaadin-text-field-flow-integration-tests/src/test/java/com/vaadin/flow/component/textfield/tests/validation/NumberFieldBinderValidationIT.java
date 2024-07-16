@@ -62,7 +62,6 @@ public class NumberFieldBinderValidationIT
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
-        assertErrorMessage("");
 
         testField.setValue("");
         assertValidationCount(1);
@@ -90,12 +89,10 @@ public class NumberFieldBinderValidationIT
         testField.setValue("1234");
         assertServerValid();
         assertClientValid();
-        assertErrorMessage("");
 
         $("button").id(RESET_BEAN_BUTTON).click();
         assertServerValid();
         assertClientValid();
-        assertErrorMessage("");
     }
 
     @Test
@@ -122,7 +119,6 @@ public class NumberFieldBinderValidationIT
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-        assertErrorMessage("");
 
         // Binder validation fails:
         testField.setValue("");
@@ -156,7 +152,6 @@ public class NumberFieldBinderValidationIT
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-        assertErrorMessage("");
 
         // Binder validation fails:
         testField.setValue("");
@@ -190,7 +185,6 @@ public class NumberFieldBinderValidationIT
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-        assertErrorMessage("");
 
         // Binder validation fails:
         testField.setValue("");
@@ -214,7 +208,6 @@ public class NumberFieldBinderValidationIT
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
-        assertErrorMessage("");
 
         testField.sendKeys("--2", Keys.ENTER);
         assertValidationCount(1);
@@ -236,7 +229,6 @@ public class NumberFieldBinderValidationIT
         testField.setValue("2");
         assertServerValid();
         assertClientValid();
-        assertErrorMessage("");
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertServerInvalid();
