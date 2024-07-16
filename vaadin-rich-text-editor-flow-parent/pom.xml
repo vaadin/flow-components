@@ -9,12 +9,7 @@
     <artifactId>vaadin-rich-text-editor-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Rich Text Editor Parent</name>
-    <licenses>
-        <license>
-            <name>cval3</name>
-            <url>https://vaadin.com/license/cval-3</url>
-        </license>
-    </licenses>
+
     <modules>
         <module>vaadin-rich-text-editor-flow</module>
         <module>vaadin-rich-text-editor-testbench</module>

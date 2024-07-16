@@ -10,6 +10,15 @@
         <artifactId>vaadin-parent</artifactId>
         <version>2.2.0</version>
     </parent>
+
+    <licenses>
+        <license>
+            <name>Vaadin Commercial License and Service Terms</name>
+            <url>https://vaadin.com/commercial-license-and-service-terms</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
     <url>https://vaadin.com/components</url>
     <properties>
         <flow.version>2.11-SNAPSHOT</flow.version>
@@ -37,7 +46,7 @@
         <osgi.bundle.import.package>*</osgi.bundle.import.package>
         <osgi.bundle.export.package>com.vaadin.flow.component.*;-noimport:=true</osgi.bundle.export.package>
         <osgi.bundle.required.execution.environment>JavaSE-1.8</osgi.bundle.required.execution.environment>
-        <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
+        <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
         <osgi.bundle.name>${project.artifactId}</osgi.bundle.name>
         <osgi.bundle.symbolic.name>${project.groupId}.flow.component.${component.package.name}</osgi.bundle.symbolic.name>
         <osgi.bundle.package.private/>
@@ -521,6 +530,31 @@
                     <groupId>org.sonatype.plugins</groupId>
                     <artifactId>nexus-staging-maven-plugin</artifactId>
                     <version>1.6.8</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>4.5</version>
+                    <configuration>
+                        <header>scripts/header.txt</header>
+                        <quiet>false</quiet>
+                        <failIfMissing>true</failIfMissing>
+                        <aggregate>false</aggregate>
+                        <useDefaultExcludes>true</useDefaultExcludes>
+                        <useDefaultMapping>true</useDefaultMapping>
+                        <encoding>UTF-8</encoding>
+                        <properties>
+                            <year>2024</year>
+                        </properties>
+                        <excludes>
+                            <exclude>scripts/**</exclude>
+                            <exclude>**/target/**</exclude>
+                            <exclude>**/*.xml</exclude>
+                            <exclude>**/*.properties</exclude>
+                            <exclude>src/license/**/*</exclude>
+                            <exclude>**/*.txt</exclude>
+                        </excludes>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

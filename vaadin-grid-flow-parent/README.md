@@ -52,4 +52,4 @@ Documentation for Flow can be found on [vaadin.com website](https://vaadin.com/d
 
 ## License
 
-Apache License 2.0
+This program is available under Vaadin Commercial License and Service Terms.

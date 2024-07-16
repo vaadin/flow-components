@@ -9,12 +9,7 @@
     <artifactId>vaadin-confirm-dialog-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Confirm Dialog Parent</name>
-    <licenses>
-        <license>
-            <name>cval3</name>
-            <url>https://vaadin.com/license/cval-3</url>
-        </license>
-    </licenses>
+
     <modules>
         <module>vaadin-confirm-dialog-flow</module>
         <module>vaadin-confirm-dialog-testbench</module>

@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2024 Vaadin Ltd
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * license.
+ */
 // Not using ES6 imports in this file yet because the connector in V14 must
 // still work in Legacy bower projects. See: `contextMenuConnector-es6.js` for
 // the Polymer3 approach.

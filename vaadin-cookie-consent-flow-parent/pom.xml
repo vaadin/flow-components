@@ -9,12 +9,7 @@
     <artifactId>vaadin-cookie-consent-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Cookie Consent Parent</name>
-    <licenses>
-        <license>
-            <name>cval3</name>
-            <url>https://vaadin.com/license/cval-3</url>
-        </license>
-    </licenses>
+
     <modules>
         <module>vaadin-cookie-consent-flow</module>
         <module>vaadin-cookie-consent-testbench</module>
