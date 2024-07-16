@@ -81,7 +81,6 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
         setOverlayRole("dialog");
     }
 
-
     /**
      * {@code opened-changed} event is sent when the overlay opened state
      * changes.
@@ -147,6 +146,53 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
         return addListener(OpenedChangeEvent.class, listener);
+    }
+
+    /**
+     * Sets whether component should open modal or modeless popover. When the
+     * popover is modal, interacting with elements behind it will be prevented
+     * until the popover is closed.
+     * <p>
+     * By default, the popover is non-modal.
+     *
+     * @param modal
+     *            {@code true} to enable popover to open as modal, {@code false}
+     *            otherwise.
+     */
+    public void setModal(boolean modal) {
+        getElement().setProperty("modal", modal);
+    }
+
+    /**
+     * Gets whether component is set as modal or modeless popover. By default,
+     * the popover is non-modal.
+     *
+     * @return {@code true} if modal popover, {@code false} otherwise.
+     */
+    public boolean isModal() {
+        return getElement().getProperty("modal", false);
+    }
+
+    /**
+     * Sets whether component should show a backdrop (modality curtain) when
+     * opened.
+     * <p>
+     * By default, the backdrop is not shown.
+     *
+     * @param backdropVisible
+     *            {@code true} to show the backdrop, {@code false} otherwise.
+     */
+    public void setBackdropVisible(boolean backdropVisible) {
+        getElement().setProperty("withBackdrop", backdropVisible);
+    }
+
+    /**
+     * Gets whether component shows a backdrop (modality curtain) when opened.
+     *
+     * @return {@code true} if backdrop is visible, {@code false} otherwise.
+     */
+    public boolean isBackdropVisible() {
+        return getElement().getProperty("withBackdrop", false);
     }
 
     @Override
