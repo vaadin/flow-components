@@ -153,6 +153,10 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
      * popover is modal, interacting with elements behind it will be prevented
      * until the popover is closed.
      * <p>
+     * NOTE: this setting does not involve server-side modality, as the modal
+     * popover is typically not used to prevent anything else from happening
+     * while it's open.
+     * <p>
      * By default, the popover is non-modal.
      *
      * @param modal
