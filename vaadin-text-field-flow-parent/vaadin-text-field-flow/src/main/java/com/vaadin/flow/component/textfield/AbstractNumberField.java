@@ -64,6 +64,9 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<T>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
+    private String customErrorMessage;
+    private String constraintErrorMessage;
+
     /**
      * Sets up the common logic for number fields.
      *
@@ -102,6 +105,30 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             validate();
             fireValidationStatusChangeEvent();
         });
+    }
+
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        customErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    @Override
+    public String getErrorMessage() {
+        return customErrorMessage;
+    }
+
+    private void setConstraintErrorMessage(String errorMessage) {
+        constraintErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    private void updateErrorMessage() {
+        String errorMessage = constraintErrorMessage;
+        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
+            errorMessage = customErrorMessage;
+        }
+        getElement().setProperty("errorMessage", errorMessage);
     }
 
     @Override
@@ -392,10 +419,10 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         ValidationResult result = checkValidity(getValue(), true);
         if (result.isError()) {
             setInvalid(true);
-            setErrorMessage(result.getErrorMessage());
+            setConstraintErrorMessage(result.getErrorMessage());
         } else {
             setInvalid(false);
-            setErrorMessage("");
+            setConstraintErrorMessage("");
         }
     }
 

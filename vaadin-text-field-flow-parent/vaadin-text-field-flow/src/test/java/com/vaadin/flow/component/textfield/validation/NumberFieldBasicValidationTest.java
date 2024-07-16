@@ -43,7 +43,7 @@ public class NumberFieldBasicValidationTest
     public void badInput_validate_emptyErrorMessageDisplayed() {
         testField.getElement().setProperty("_hasInputValue", true);
         fireUnparsableChangeDomEvent();
-        Assert.assertEquals("", testField.getErrorMessage());
+        Assert.assertEquals("", getErrorMessageProperty());
     }
 
     @Test
@@ -53,7 +53,7 @@ public class NumberFieldBasicValidationTest
         testField.getElement().setProperty("_hasInputValue", true);
         fireUnparsableChangeDomEvent();
         Assert.assertEquals("Value has invalid format",
-                testField.getErrorMessage());
+                getErrorMessageProperty());
     }
 
     @Test
@@ -61,7 +61,7 @@ public class NumberFieldBasicValidationTest
         testField.setRequiredIndicatorVisible(true);
         testField.setValue(1.0);
         testField.setValue(null);
-        Assert.assertEquals("", testField.getErrorMessage());
+        Assert.assertEquals("", getErrorMessageProperty());
     }
 
     @Test
@@ -71,14 +71,14 @@ public class NumberFieldBasicValidationTest
                 .setRequiredErrorMessage("Field is required"));
         testField.setValue(1.0);
         testField.setValue(null);
-        Assert.assertEquals("Field is required", testField.getErrorMessage());
+        Assert.assertEquals("Field is required", getErrorMessageProperty());
     }
 
     @Test
     public void min_validate_emptyErrorMessageDisplayed() {
         testField.setMin(3.0);
         testField.setValue(1.0);
-        Assert.assertEquals("", testField.getErrorMessage());
+        Assert.assertEquals("", getErrorMessageProperty());
     }
 
     @Test
@@ -87,14 +87,14 @@ public class NumberFieldBasicValidationTest
         testField.setI18n(new NumberField.NumberFieldI18n()
                 .setMinErrorMessage("Value is too small"));
         testField.setValue(1.0);
-        Assert.assertEquals("Value is too small", testField.getErrorMessage());
+        Assert.assertEquals("Value is too small", getErrorMessageProperty());
     }
 
     @Test
     public void max_validate_emptyErrorMessageDisplayed() {
         testField.setMax(1.0);
         testField.setValue(3.0);
-        Assert.assertEquals("", testField.getErrorMessage());
+        Assert.assertEquals("", getErrorMessageProperty());
     }
 
     @Test
@@ -103,7 +103,30 @@ public class NumberFieldBasicValidationTest
         testField.setI18n(new NumberField.NumberFieldI18n()
                 .setMaxErrorMessage("Value is too big"));
         testField.setValue(3.0);
-        Assert.assertEquals("Value is too big", testField.getErrorMessage());
+        Assert.assertEquals("Value is too big", getErrorMessageProperty());
+    }
+
+    @Test
+    public void setI18nAndCustomErrorMessage_validate_customErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new NumberField.NumberFieldI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setErrorMessage("Custom error message");
+        testField.setValue(1.0);
+        testField.setValue(null);
+        Assert.assertEquals("Custom error message", getErrorMessageProperty());
+    }
+
+    @Test
+    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_i18nErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new NumberField.NumberFieldI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setErrorMessage("Custom error message");
+        testField.setValue(1.0);
+        testField.setValue(null);
+        testField.setErrorMessage("");
+        Assert.assertEquals("Field is required", getErrorMessageProperty());
     }
 
     @Override
@@ -116,5 +139,9 @@ public class NumberFieldBasicValidationTest
                 "unparsable-change", Json.createObject());
         testField.getElement().getNode().getFeature(ElementListenerMap.class)
                 .fireEvent(unparsableChangeDomEvent);
+    }
+
+    private String getErrorMessageProperty() {
+        return testField.getElement().getProperty("errorMessage");
     }
 }
