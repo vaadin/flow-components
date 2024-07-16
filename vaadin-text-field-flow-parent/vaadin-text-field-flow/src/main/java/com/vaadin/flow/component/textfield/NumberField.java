@@ -224,7 +224,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
     /**
      * The abstract internationalization properties for {@link NumberField}.
      */
-    public static class NumberFieldI18n extends AbstractNumberFieldI18n {
+    public static class NumberFieldI18n implements AbstractNumberFieldI18n {
         private String requiredErrorMessage;
         private String badInputErrorMessage;
         private String minErrorMessage;
@@ -250,7 +250,6 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
          *            the error message to set, or {@code null} to clear
          * @return this instance for method chaining
          */
-        @Override
         public NumberFieldI18n setBadInputErrorMessage(String errorMessage) {
             badInputErrorMessage = errorMessage;
             return this;
@@ -279,7 +278,6 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
          * @see NumberField#isRequired()
          * @see NumberField#setRequired(boolean)
          */
-        @Override
         public NumberFieldI18n setRequiredErrorMessage(String errorMessage) {
             requiredErrorMessage = errorMessage;
             return this;
@@ -308,7 +306,6 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
          * @see NumberField#setMin(double)
          * @see NumberField#getMin()
          */
-        @Override
         public NumberFieldI18n setMinErrorMessage(String errorMessage) {
             minErrorMessage = errorMessage;
             return this;
@@ -337,7 +334,6 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
          * @see NumberField#setMax(double)
          * @see NumberField#getMax()
          */
-        @Override
         public NumberFieldI18n setMaxErrorMessage(String errorMessage) {
             maxErrorMessage = errorMessage;
             return this;
@@ -366,7 +362,6 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
          * @see NumberField#setStep(double)
          * @see NumberField#getStep()
          */
-        @Override
         public NumberFieldI18n setStepErrorMessage(String errorMessage) {
             stepErrorMessage = errorMessage;
             return this;
