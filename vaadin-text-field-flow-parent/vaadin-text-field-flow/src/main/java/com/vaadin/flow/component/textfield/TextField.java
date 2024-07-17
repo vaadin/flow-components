@@ -400,7 +400,7 @@ public class TextField extends TextFieldBase<TextField, String>
             setConstraintErrorMessage(result.getErrorMessage());
         } else {
             setInvalid(false);
-            setConstraintErrorMessage(null);
+            setConstraintErrorMessage("");
         }
     }
 
