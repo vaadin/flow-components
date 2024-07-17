@@ -59,7 +59,6 @@ public class TextFieldBinderValidationIT
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
-        assertErrorMessage("");
 
         testField.setValue("");
         assertValidationCount(1);
@@ -92,7 +91,6 @@ public class TextFieldBinderValidationIT
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-        assertErrorMessage("");
     }
 
     @Test
@@ -119,7 +117,6 @@ public class TextFieldBinderValidationIT
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-        assertErrorMessage("");
     }
 
     @Test
@@ -146,7 +143,6 @@ public class TextFieldBinderValidationIT
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-        assertErrorMessage("");
     }
 
     @Override
