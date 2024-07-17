@@ -222,7 +222,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
     }
 
     /**
-     * The abstract internationalization properties for {@link NumberField}.
+     * The internationalization properties for {@link NumberField}.
      */
     public static class NumberFieldI18n implements AbstractNumberFieldI18n {
         private String requiredErrorMessage;
@@ -245,6 +245,10 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
         /**
          * Sets the error message to display when the field contains user input
          * that the server is unable to convert to type {@link Number}.
+         * <p>
+         * Note, custom error messages set with
+         * {@link NumberField#setErrorMessage(String)} take priority over i18n
+         * error messages.
          *
          * @param errorMessage
          *            the error message to set, or {@code null} to clear
@@ -271,6 +275,10 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
         /**
          * Sets the error message to display when the field is required but
          * empty.
+         * <p>
+         * Note, custom error messages set with
+         * {@link NumberField#setErrorMessage(String)} take priority over i18n
+         * error messages.
          *
          * @param errorMessage
          *            the error message to set, or {@code null} to clear
@@ -299,6 +307,10 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
         /**
          * Sets the error message to display when the field value is smaller
          * than the minimum allowed value.
+         * <p>
+         * Note, custom error messages set with
+         * {@link NumberField#setErrorMessage(String)} take priority over i18n
+         * error messages.
          *
          * @param errorMessage
          *            the error message to set, or {@code null} to clear
@@ -327,6 +339,10 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
         /**
          * Sets the error message to display when the field value is greater
          * than the maximum allowed value.
+         * <p>
+         * Note, custom error messages set with
+         * {@link NumberField#setErrorMessage(String)} take priority over i18n
+         * error messages.
          *
          * @param errorMessage
          *            the error message to set, or {@code null} to clear
@@ -355,6 +371,10 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
         /**
          * Sets the error message to display when the field value is not a
          * multiple of the step value.
+         * <p>
+         * Note, custom error messages set with
+         * {@link NumberField#setErrorMessage(String)} take priority over i18n
+         * error messages.
          *
          * @param errorMessage
          *            the error message to set, or {@code null} to clear

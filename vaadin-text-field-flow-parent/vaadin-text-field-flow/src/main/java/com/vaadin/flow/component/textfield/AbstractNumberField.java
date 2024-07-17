@@ -20,7 +20,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
-import java.io.Serializable;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Synchronize;
@@ -107,12 +106,27 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         });
     }
 
+    /**
+     * Sets an error message to display for all constraint violations.
+     * <p>
+     * This error message takes priority over i18n error messages when both are
+     * set.
+     *
+     * @param errorMessage
+     *            the error message to set, or {@code null} to clear
+     *
+     */
     @Override
     public void setErrorMessage(String errorMessage) {
         customErrorMessage = errorMessage;
         updateErrorMessage();
     }
 
+    /**
+     * Gets the error message displayed for all constraint violations.
+     *
+     * @return the error message
+     */
     @Override
     public String getErrorMessage() {
         return customErrorMessage;
