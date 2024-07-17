@@ -175,4 +175,21 @@ public class Scroller extends Component implements Focusable<Scroller>, HasSize,
                     : BOTH;
         }
     }
+
+    /**
+     * Scrolls the scroller to the start if it has a vertical or horizontal
+     * scrollbar.
+     */
+    public void scrollToStart() {
+        getElement().callJsFunction("scrollToStart");
+    }
+
+    /**
+     * Scrolls the scroller to the end if it has a vertical or horizontal
+     * scrollbar.
+     */
+    public void scrollToEnd() {
+        getElement().callJsFunction("scrollToEnd");
+    }
+
 }
