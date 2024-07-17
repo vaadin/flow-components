@@ -72,6 +72,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     private Registration targetBeforeOpenRegistration;
     private Registration targetAttachRegistration;
     private PendingJavaScriptResult targetJsRegistration;
+    private boolean closedProgrammatically;
 
     private boolean autoAddedToTheUi;
 
@@ -94,8 +95,13 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         });
 
         getElement().addPropertyChangeListener("opened", event -> {
-            fireEvent(new OpenedChangeEvent<>((C) this,
-                    event.isUserOriginated()));
+            boolean isFromClient = event.isUserOriginated();
+            // Do not consider calling close() as user-originated.
+            if (closedProgrammatically) {
+                isFromClient = false;
+                closedProgrammatically = false;
+            }
+            fireEvent(new OpenedChangeEvent<>((C) this, isFromClient));
         });
 
         menuItemsArrayGenerator = new MenuItemsArrayGenerator<>(this);
@@ -194,6 +200,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * Closes this context menu if it is currently open.
      */
     public void close() {
+        closedProgrammatically = true;
         getElement().callJsFunction("close");
     }
 
