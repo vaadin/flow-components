@@ -27,6 +27,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -82,9 +84,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-picker", version = "24.5.0-alpha4")
+@NpmPackage(value = "@vaadin/date-picker", version = "24.5.0-alpha5")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.29.3")
@@ -899,6 +901,12 @@ public class DatePicker
          * @return this instance for method chaining
          */
         public DatePickerI18n setWeekdays(List<String> weekdays) {
+            if (weekdays != null && weekdays.size() != 7) {
+                LoggerFactory.getLogger(getClass()).warn(String.format(
+                        "setWeekdays parameter list should have exactly 7 elements. Instead got %d",
+                        weekdays.size()));
+            }
+
             this.weekdays = weekdays;
             return this;
         }
@@ -921,6 +929,12 @@ public class DatePicker
          * @return this instance for method chaining
          */
         public DatePickerI18n setWeekdaysShort(List<String> weekdaysShort) {
+            if (weekdaysShort != null && weekdaysShort.size() != 7) {
+                LoggerFactory.getLogger(getClass()).warn(String.format(
+                        "setWeekdaysShort parameter list should have exactly 7 elements. Instead got %d",
+                        weekdaysShort.size()));
+            }
+
             this.weekdaysShort = weekdaysShort;
             return this;
         }
