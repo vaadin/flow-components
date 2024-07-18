@@ -242,4 +242,26 @@ public class PopoverTest {
     public void setOverlayRole_null_throws() {
         popover.setOverlayRole(null);
     }
+
+    @Test
+    public void setModal_isModal() {
+        Assert.assertFalse(popover.isModal());
+        Assert.assertFalse(popover.getElement().getProperty("modal", false));
+
+        popover.setModal(true);
+        Assert.assertTrue(popover.isModal());
+        Assert.assertTrue(popover.getElement().getProperty("modal", false));
+    }
+
+    @Test
+    public void setBackdropVisible_isBackdropVisible() {
+        Assert.assertFalse(popover.isBackdropVisible());
+        Assert.assertFalse(
+                popover.getElement().getProperty("withBackdrop", false));
+
+        popover.setBackdropVisible(true);
+        Assert.assertTrue(popover.isBackdropVisible());
+        Assert.assertTrue(
+                popover.getElement().getProperty("withBackdrop", false));
+    }
 }
