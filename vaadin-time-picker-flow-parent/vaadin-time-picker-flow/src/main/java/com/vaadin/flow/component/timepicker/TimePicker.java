@@ -102,6 +102,9 @@ public class TimePicker
 
     private boolean manualValidationEnabled = false;
 
+    private String customErrorMessage;
+    private String constraintErrorMessage;
+
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalTime>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
     /**
@@ -230,6 +233,44 @@ public class TimePicker
         this(time);
         setLabel(label);
         addValueChangeListener(listener);
+    }
+
+    /**
+     * Sets an error message to display for all constraint violations.
+     * <p>
+     * This error message takes priority over i18n error messages when both are
+     * set.
+     *
+     * @param errorMessage
+     *            the error message to set, or {@code null} to clear
+     */
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        customErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    /**
+     * Gets the error message displayed for all constraint violations.
+     *
+     * @return the error message
+     */
+    @Override
+    public String getErrorMessage() {
+        return customErrorMessage;
+    }
+
+    private void setConstraintErrorMessage(String errorMessage) {
+        constraintErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    private void updateErrorMessage() {
+        String errorMessage = constraintErrorMessage;
+        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
+            errorMessage = customErrorMessage;
+        }
+        getElement().setProperty("errorMessage", errorMessage);
     }
 
     /**
@@ -518,10 +559,10 @@ public class TimePicker
         ValidationResult result = checkValidity(getValue(), true);
         if (result.isError()) {
             setInvalid(true);
-            setErrorMessage(result.getErrorMessage());
+            setConstraintErrorMessage(result.getErrorMessage());
         } else {
             setInvalid(false);
-            setErrorMessage("");
+            setConstraintErrorMessage("");
         }
     }
 
@@ -752,6 +793,10 @@ public class TimePicker
         /**
          * Sets the error message to display when the field contains user input
          * that the server is unable to convert to type {@link LocalTime}.
+         * <p>
+         * Note, custom error messages set with
+         * {@link TimePicker#setErrorMessage(String)} take priority over i18n
+         * error messages.
          *
          * @param errorMessage
          *            the error message to set, or {@code null} to clear
@@ -777,6 +822,10 @@ public class TimePicker
         /**
          * Sets the error message to display when the field is required but
          * empty.
+         * <p>
+         * Note, custom error messages set with
+         * {@link TimePicker#setErrorMessage(String)} take priority over i18n
+         * error messages.
          *
          * @param errorMessage
          *            the error message or {@code null} to clear it
@@ -804,6 +853,10 @@ public class TimePicker
         /**
          * Sets the error message to display when the selected time is earlier
          * than the minimum allowed time.
+         * <p>
+         * Note, custom error messages set with
+         * {@link TimePicker#setErrorMessage(String)} take priority over i18n
+         * error messages.
          *
          * @param errorMessage
          *            the error message or {@code null} to clear it
@@ -831,6 +884,10 @@ public class TimePicker
         /**
          * Sets the error message to display when the selected time is later
          * than the maximum allowed time.
+         * <p>
+         * Note, custom error messages set with
+         * {@link TimePicker#setErrorMessage(String)} take priority over i18n
+         * error messages.
          *
          * @param errorMessage
          *            the error message or {@code null} to clear it
