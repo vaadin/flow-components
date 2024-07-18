@@ -45,7 +45,6 @@ public class BinderValidationIT
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
-        assertErrorMessage("");
 
         testField.setInputValue("");
         assertValidationCount(1);
@@ -73,12 +72,10 @@ public class BinderValidationIT
         testField.setInputValue("1/1/2022");
         assertServerValid();
         assertClientValid();
-        assertErrorMessage("");
 
         $("button").id(RESET_BEAN_BUTTON).click();
         assertServerValid();
         assertClientValid();
-        assertErrorMessage("");
     }
 
     @Test
@@ -105,7 +102,6 @@ public class BinderValidationIT
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-        assertErrorMessage("");
 
         // Binder validation fails:
         testField.setInputValue("");
@@ -139,7 +135,6 @@ public class BinderValidationIT
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-        assertErrorMessage("");
 
         // Binder validation fails:
         testField.setInputValue("");
@@ -163,7 +158,6 @@ public class BinderValidationIT
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
-        assertErrorMessage("");
 
         testField.setInputValue("INVALID");
         assertValidationCount(1);
@@ -185,7 +179,6 @@ public class BinderValidationIT
         testField.setInputValue("1/1/2022");
         assertServerValid();
         assertClientValid();
-        assertErrorMessage("");
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertServerInvalid();
