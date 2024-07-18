@@ -384,8 +384,10 @@ public class TextField extends TextFieldBase<TextField, String>
 
     /**
      * Validates the current value against the constraints and sets the
-     * {@code invalid} property and the {@code errorMessage} property using the
-     * error messages defined in the i18n object.
+     * {@code invalid} property and the {@code errorMessage} property based on
+     * the result. If a custom error message is provided with
+     * {@link #setErrorMessage(String)}, it is used. Otherwise,
+     * the error message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
      */
