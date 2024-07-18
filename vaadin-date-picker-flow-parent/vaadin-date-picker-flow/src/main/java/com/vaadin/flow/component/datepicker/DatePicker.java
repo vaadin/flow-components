@@ -27,6 +27,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -82,9 +84,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-picker", version = "24.5.0-alpha3")
+@NpmPackage(value = "@vaadin/date-picker", version = "24.5.0-alpha5")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.29.3")
@@ -419,20 +421,19 @@ public class DatePicker
      * <p>
      * NOTE: Updating the instance that is returned from this method will not
      * update the component if not set again using
-     * {@link DatePicker#setI18n(DatePickerI18n)}
+     * {@link #setI18n(DatePickerI18n)}
      *
-     * @return the i18n object. It will be <code>null</code>, If the i18n
-     *         properties weren't set.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public DatePickerI18n getI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Sets the internationalization object for this component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(DatePickerI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
@@ -900,6 +901,12 @@ public class DatePicker
          * @return this instance for method chaining
          */
         public DatePickerI18n setWeekdays(List<String> weekdays) {
+            if (weekdays != null && weekdays.size() != 7) {
+                LoggerFactory.getLogger(getClass()).warn(String.format(
+                        "setWeekdays parameter list should have exactly 7 elements. Instead got %d",
+                        weekdays.size()));
+            }
+
             this.weekdays = weekdays;
             return this;
         }
@@ -922,6 +929,12 @@ public class DatePicker
          * @return this instance for method chaining
          */
         public DatePickerI18n setWeekdaysShort(List<String> weekdaysShort) {
+            if (weekdaysShort != null && weekdaysShort.size() != 7) {
+                LoggerFactory.getLogger(getClass()).warn(String.format(
+                        "setWeekdaysShort parameter list should have exactly 7 elements. Instead got %d",
+                        weekdaysShort.size()));
+            }
+
             this.weekdaysShort = weekdaysShort;
             return this;
         }

@@ -80,9 +80,9 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/select", version = "24.5.0-alpha3")
+@NpmPackage(value = "@vaadin/select", version = "24.5.0-alpha5")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 @JsModule("./selectConnector.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
@@ -247,7 +247,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-select-list-box")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha3")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha5")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox extends Component
             implements HasItemComponents<T> {
@@ -507,6 +507,27 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      */
     public boolean isAutofocus() {
         return getElement().getProperty("autofocus", false);
+    }
+
+    /**
+     * Defines whether the overlay should overlap the input element in the
+     * y-axis, or be positioned right above/below it.
+     *
+     * @param noVerticalOverlap
+     *            whether the overlay should overlap the input element
+     */
+    public void setNoVerticalOverlap(boolean noVerticalOverlap) {
+        getElement().setProperty("noVerticalOverlap", noVerticalOverlap);
+    }
+
+    /**
+     * Returns whether the overlay should overlap the input element
+     *
+     * @return {@code true} if the overlay should overlap the input element,
+     *         {@code false} otherwise
+     */
+    public boolean isNoVerticalOverlap() {
+        return getElement().getProperty("noVerticalOverlap", false);
     }
 
     /**
