@@ -24,12 +24,15 @@ import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+
 import elemental.json.JsonObject;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -146,6 +149,9 @@ public class DateTimePicker
     private LocalDateTime min;
 
     private boolean manualValidationEnabled = false;
+
+    private String customErrorMessage;
+    private String constraintErrorMessage;
 
     /**
      * Default constructor.
@@ -301,6 +307,44 @@ public class DateTimePicker
     public DateTimePicker(LocalDateTime initialDateTime, Locale locale) {
         this(initialDateTime);
         setLocale(locale);
+    }
+
+    /**
+     * Sets an error message to display for all constraint violations.
+     * <p>
+     * This error message takes priority over i18n error messages when both are
+     * set.
+     *
+     * @param errorMessage
+     *            the error message to set, or {@code null} to clear
+     */
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        customErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    /**
+     * Gets the error message displayed for all constraint violations.
+     *
+     * @return the error message
+     */
+    @Override
+    public String getErrorMessage() {
+        return customErrorMessage;
+    }
+
+    private void setConstraintErrorMessage(String errorMessage) {
+        constraintErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    private void updateErrorMessage() {
+        String errorMessage = constraintErrorMessage;
+        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
+            errorMessage = customErrorMessage;
+        }
+        getElement().setProperty("errorMessage", errorMessage);
     }
 
     /**
@@ -720,7 +764,7 @@ public class DateTimePicker
 
     @Override
     public Validator<LocalDateTime> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        return (value, context) -> checkValidity(value, false);
     }
 
     @Override
@@ -731,26 +775,37 @@ public class DateTimePicker
                         event.isValid())));
     }
 
-    private ValidationResult checkValidity(LocalDateTime value) {
-        boolean hasNonParsableDatePickerValue = datePicker
-                .getValue() == datePicker.getEmptyValue()
-                && datePicker.isInputValuePresent();
-
-        boolean hasNonParsableTimePickerValue = timePicker
-                .getValue() == timePicker.getEmptyValue()
-                && timePicker.isInputValuePresent();
-
-        if (hasNonParsableDatePickerValue || hasNonParsableTimePickerValue) {
-            return ValidationResult.error("");
+    private ValidationResult checkValidity(LocalDateTime value,
+            boolean withRequiredValidator) {
+        boolean hasBadDatePickerInput = Objects.equals(datePicker.getValue(),
+                datePicker.getEmptyValue()) && datePicker.isInputValuePresent();
+        boolean hasBadTimePickerInput = Objects.equals(timePicker.getValue(),
+                timePicker.getEmptyValue()) && timePicker.isInputValuePresent();
+        if (hasBadDatePickerInput || hasBadTimePickerInput) {
+            return ValidationResult.error(getI18nErrorMessage(
+                    DateTimePickerI18n::getBadInputErrorMessage));
         }
 
-        ValidationResult maxResult = ValidationUtil.validateMaxConstraint("",
+        if (withRequiredValidator) {
+            ValidationResult requiredResult = ValidationUtil
+                    .validateRequiredConstraint(getI18nErrorMessage(
+                            DateTimePickerI18n::getRequiredErrorMessage),
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
+            if (requiredResult.isError()) {
+                return requiredResult;
+            }
+        }
+
+        ValidationResult maxResult = ValidationUtil.validateMaxConstraint(
+                getI18nErrorMessage(DateTimePickerI18n::getMaxErrorMessage),
                 value, max);
         if (maxResult.isError()) {
             return maxResult;
         }
 
-        ValidationResult minResult = ValidationUtil.validateMinConstraint("",
+        ValidationResult minResult = ValidationUtil.validateMinConstraint(
+                getI18nErrorMessage(DateTimePickerI18n::getMinErrorMessage),
                 value, min);
         if (minResult.isError()) {
             return minResult;
@@ -759,31 +814,32 @@ public class DateTimePicker
         return ValidationResult.ok();
     }
 
-    /**
-     * Gets the validity of the date time picker value.
-     *
-     * @return the current validity of the value.
-     */
-    private boolean isInvalid(LocalDateTime value) {
-        var requiredValidation = ValidationUtil.validateRequiredConstraint("",
-                isRequiredIndicatorVisible(), value, getEmptyValue());
-
-        return requiredValidation.isError() || checkValidity(value).isError();
-    }
-
     @Override
     public void setManualValidation(boolean enabled) {
         this.manualValidationEnabled = enabled;
     }
 
     /**
-     * Performs server-side validation of the current value. This is needed
-     * because it is possible to circumvent the client-side validation
-     * constraints using browser development tools.
+     * Validates the current value against the constraints and sets the
+     * {@code invalid} property and the {@code errorMessage} property based on
+     * the result. If a custom error message is provided with
+     * {@link #setErrorMessage(String)}, it is used. Otherwise, the error
+     * message defined in the i18n object is used.
+     * <p>
+     * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            setInvalid(isInvalid(getValue()));
+        if (this.manualValidationEnabled) {
+            return;
+        }
+
+        ValidationResult result = checkValidity(getValue(), true);
+        if (result.isError()) {
+            setInvalid(true);
+            setConstraintErrorMessage(result.getErrorMessage());
+        } else {
+            setInvalid(false);
+            setConstraintErrorMessage("");
         }
     }
 
@@ -930,24 +986,9 @@ public class DateTimePicker
         ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
-    private String getBadInputErrorMessage() {
-        return Optional.ofNullable(i18n)
-                .map(DateTimePickerI18n::getBadInputErrorMessage).orElse("");
-    }
-
-    private String getRequiredErrorMessage() {
-        return Optional.ofNullable(i18n)
-                .map(DateTimePickerI18n::getRequiredErrorMessage).orElse("");
-    }
-
-    private String getMinErrorMessage() {
-        return Optional.ofNullable(i18n)
-                .map(DateTimePickerI18n::getMinErrorMessage).orElse("");
-    }
-
-    private String getMaxErrorMessage() {
-        return Optional.ofNullable(i18n)
-                .map(DateTimePickerI18n::getMaxErrorMessage).orElse("");
+    private String getI18nErrorMessage(
+            Function<DateTimePickerI18n, String> getter) {
+        return Optional.ofNullable(i18n).map(getter).orElse("");
     }
 
     /**
