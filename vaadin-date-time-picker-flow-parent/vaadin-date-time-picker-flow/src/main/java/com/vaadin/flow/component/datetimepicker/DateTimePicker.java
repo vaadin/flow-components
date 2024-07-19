@@ -1075,6 +1075,10 @@ public class DateTimePicker
         /**
          * Sets the error message to display when the field contains user input
          * that the server is unable to convert to type {@link LocalDateTime}.
+         * <p>
+         * Note, custom error messages set with
+         * {@link DateTimePicker#setErrorMessage(String)} take priority over
+         * i18n error messages.
          *
          * @param errorMessage
          *            the error message to set, or {@code null} to clear
@@ -1100,6 +1104,10 @@ public class DateTimePicker
         /**
          * Sets the error message to display when the field is required but
          * empty.
+         * <p>
+         * Note, custom error messages set with
+         * {@link DateTimePicker#setErrorMessage(String)} take priority over
+         * i18n error messages.
          *
          * @param errorMessage
          *            the error message or {@code null} to clear it
@@ -1127,6 +1135,10 @@ public class DateTimePicker
         /**
          * Sets the error message to display when the selected date and time are
          * earlier than the minimum allowed time.
+         * <p>
+         * Note, custom error messages set with
+         * {@link DateTimePicker#setErrorMessage(String)} take priority over
+         * i18n error messages.
          *
          * @param errorMessage
          *            the error message or {@code null} to clear it
@@ -1154,6 +1166,10 @@ public class DateTimePicker
         /**
          * Sets the error message to display when the selected date and time are
          * later than the maximum allowed date and time.
+         * <p>
+         * Note, custom error messages set with
+         * {@link DateTimePicker#setErrorMessage(String)} take priority over
+         * i18n error messages.
          *
          * @param errorMessage
          *            the error message or {@code null} to clear it
