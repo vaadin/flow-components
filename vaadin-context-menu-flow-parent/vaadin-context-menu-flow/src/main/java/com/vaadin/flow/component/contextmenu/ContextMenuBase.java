@@ -194,6 +194,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * Closes this context menu if it is currently open.
      */
     public void close() {
+        // See https://github.com/vaadin/flow-components/issues/6449
+        getElement().setProperty("opened", false);
         getElement().callJsFunction("close");
     }
 
