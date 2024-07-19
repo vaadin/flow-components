@@ -159,6 +159,8 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
 
     /**
      * Specifies that the user must fill in a value.
+     * <p>
+     * NOTE: The required indicator is only visible when the field has a label.
      *
      * @param required
      *            the boolean value to set
