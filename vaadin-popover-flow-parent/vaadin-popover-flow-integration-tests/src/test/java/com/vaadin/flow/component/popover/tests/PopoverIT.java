@@ -16,6 +16,7 @@
  */
 package com.vaadin.flow.component.popover.tests;
 
+import com.vaadin.flow.component.popover.testbench.PopoverElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -24,7 +25,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 /**
  * Integration tests for the {@link PopoverView}.
@@ -36,18 +39,23 @@ public class PopoverIT extends AbstractComponentIT {
 
     static final String POPOVER_OVERLAY_TAG = "vaadin-popover-overlay";
 
+    PopoverElement popover;
+
     @Before
     public void init() {
         open();
+        popover = $(PopoverElement.class).first();
     }
 
     @Test
     public void clickTarget_popoverOpensAndCloses() {
         clickTarget();
         checkPopoverIsOpened();
+        Assert.assertTrue(popover.isOpen());
 
         clickTarget();
         checkPopoverIsClosed();
+        Assert.assertFalse(popover.isOpen());
     }
 
     @Test
@@ -86,6 +94,46 @@ public class PopoverIT extends AbstractComponentIT {
 
         clickTarget();
         checkPopoverIsClosed();
+    }
+
+    @Test
+    public void clickOutside_popoverCloses() {
+        clickTarget();
+        checkPopoverIsOpened();
+
+        $("body").first().click();
+        Assert.assertFalse(popover.isOpen());
+    }
+
+    @Test
+    public void disableCloseOnOutsideClick_clickOutside_popoverDoesNotClose() {
+        clickElementWithJs("disable-close-on-outside-click");
+
+        clickTarget();
+        checkPopoverIsOpened();
+
+        $("body").first().click();
+        Assert.assertTrue(popover.isOpen());
+    }
+
+    @Test
+    public void pressEsc_popoverCloses() {
+        clickTarget();
+        checkPopoverIsOpened();
+
+        new Actions(getDriver()).sendKeys(Keys.ESCAPE).build().perform();
+        Assert.assertFalse(popover.isOpen());
+    }
+
+    @Test
+    public void disableCloseOnEsc_pressEsc_popoverDoesNotClose() {
+        clickElementWithJs("disable-close-on-esc");
+
+        clickTarget();
+        checkPopoverIsOpened();
+
+        new Actions(getDriver()).sendKeys(Keys.ESCAPE).build().perform();
+        Assert.assertTrue(popover.isOpen());
     }
 
     private void clickTarget() {

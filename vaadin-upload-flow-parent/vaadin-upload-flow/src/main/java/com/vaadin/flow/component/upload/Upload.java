@@ -59,9 +59,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/upload", version = "24.5.0-alpha4")
+@NpmPackage(value = "@vaadin/upload", version = "24.5.0-alpha5")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasSize, HasStyle {
 
@@ -645,7 +645,7 @@ public class Upload extends Component implements HasSize, HasStyle {
      * Set the internationalization properties for this component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(UploadI18N i18n) {
         this.i18n = Objects.requireNonNull(i18n,
@@ -714,11 +714,9 @@ public class Upload extends Component implements HasSize, HasStyle {
      * Get the internationalization object previously set for this component.
      * <p>
      * NOTE: Updating the instance that is returned from this method will not
-     * update the component if not set again using
-     * {@link Upload#setI18n(UploadI18N)}
+     * update the component if not set again using {@link #setI18n(UploadI18N)}
      *
-     * @return the object with the i18n properties. If the i18n properties
-     *         weren't set, the object will return <code>null</code>.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public UploadI18N getI18n() {
         return i18n;

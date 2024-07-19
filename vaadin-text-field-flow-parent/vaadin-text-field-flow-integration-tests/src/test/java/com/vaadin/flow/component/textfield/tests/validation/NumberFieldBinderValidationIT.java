@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.BAD_INPUT_ERROR_MESSAGE;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
 
@@ -27,8 +28,11 @@ import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBi
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.MAX_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.CLEAR_VALUE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.MAX_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.MIN_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.RESET_BEAN_BUTTON;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.STEP_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
 @TestPath("vaadin-number-field/validation/binder")
@@ -47,6 +51,7 @@ public class NumberFieldBinderValidationIT
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -57,6 +62,18 @@ public class NumberFieldBinderValidationIT
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+
+        testField.setValue("");
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         testField.setValue("");
         assertValidationCount(1);
@@ -88,7 +105,7 @@ public class NumberFieldBinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(MIN_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("2");
@@ -121,7 +138,7 @@ public class NumberFieldBinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(MAX_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("2");
@@ -154,7 +171,7 @@ public class NumberFieldBinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(STEP_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("1.5");
@@ -185,7 +202,7 @@ public class NumberFieldBinderValidationIT
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         testField.setValue("2");
         assertValidationCount(1);
@@ -196,7 +213,7 @@ public class NumberFieldBinderValidationIT
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         testField.setValue("");
         assertValidationCount(1);
@@ -225,7 +242,7 @@ public class NumberFieldBinderValidationIT
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertValidationCount(1);
