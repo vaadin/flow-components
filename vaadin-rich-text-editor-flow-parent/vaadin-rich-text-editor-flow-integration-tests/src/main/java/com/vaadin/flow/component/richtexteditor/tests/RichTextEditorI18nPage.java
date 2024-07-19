@@ -21,10 +21,11 @@ public class RichTextEditorI18nPage extends Div {
     private RichTextEditor.RichTextEditorI18n createCustomI18n() {
         return new RichTextEditor.RichTextEditorI18n().setUndo("1").setRedo("2")
                 .setBold("3").setItalic("4").setUnderline("5").setStrike("6")
-                .setH1("7").setH2("8").setH3("9").setSubscript("10")
-                .setSuperscript("11").setListOrdered("12").setListBullet("13")
-                .setAlignLeft("14").setAlignCenter("15").setAlignRight("16")
-                .setImage("17").setLink("18").setBlockquote("19")
-                .setCodeBlock("20").setClean("21");
+                .setColor("7").setBackground("8").setH1("9").setH2("10")
+                .setH3("11").setSubscript("12").setSuperscript("13")
+                .setListOrdered("14").setListBullet("15").setAlignLeft("16")
+                .setAlignCenter("17").setAlignRight("18").setImage("19")
+                .setLink("20").setBlockquote("21").setCodeBlock("22")
+                .setClean("23");
     }
 }

@@ -277,6 +277,10 @@ import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-plac
           'custom-value-set',
           tryCatchWrapper((e) => e.preventDefault())
         );
+
+        comboBox.itemClassNameGenerator = tryCatchWrapper(function (item) {
+          return item.className || '';
+        });
       })(comboBox)
   };
 })();

@@ -57,9 +57,9 @@ import elemental.json.JsonObject;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-beta2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.4.0-beta2")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.5.0-alpha5")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
@@ -74,27 +74,25 @@ public class RichTextEditor
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content that is gotten from this method will
-     * not update the lang on the component if not set back using
-     * {@link RichTextEditor#setI18n(RichTextEditorI18n)}
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(RichTextEditorI18n)}
      *
-     * @return the i18n object. It will be <code>null</code>, If the i18n
-     *         properties weren't set.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public RichTextEditorI18n getI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Sets the internationalization object for this component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(RichTextEditorI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {
                 JsonObject i18nObject = (JsonObject) JsonSerializer
@@ -831,12 +829,12 @@ public class RichTextEditor
         @Override
         public String toString() {
             return "[" + undo + ", " + redo + ", " + bold + ", " + italic + ", "
-                    + underline + ", " + strike + ", " + h1 + ", " + h2 + ", "
-                    + h3 + ", " + subscript + ", " + superscript + ", "
-                    + listOrdered + ", " + listBullet + ", " + alignLeft + ", "
-                    + alignCenter + ", " + alignRight + ", " + image + ", "
-                    + link + ", " + blockquote + ", " + codeBlock + ", " + clean
-                    + "]";
+                    + underline + ", " + strike + ", " + color + ", "
+                    + background + ", " + h1 + ", " + h2 + ", " + h3 + ", "
+                    + subscript + ", " + superscript + ", " + listOrdered + ", "
+                    + listBullet + ", " + alignLeft + ", " + alignCenter + ", "
+                    + alignRight + ", " + image + ", " + link + ", "
+                    + blockquote + ", " + codeBlock + ", " + clean + "]";
         }
     }
 

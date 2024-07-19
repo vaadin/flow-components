@@ -24,8 +24,12 @@ import com.vaadin.tests.validation.AbstractValidationIT;
 
 import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.MIN_LENGTH_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.MIN_LENGTH_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.MAX_LENGTH_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.PATTERN_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.PATTERN_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.REQUIRED_ERROR_MESSAGE;
 
 @TestPath("vaadin-text-field/validation/basic")
 public class TextFieldBasicValidationIT
@@ -34,6 +38,7 @@ public class TextFieldBasicValidationIT
     public void fieldIsInitiallyValid() {
         assertClientValid();
         assertServerValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -42,6 +47,7 @@ public class TextFieldBasicValidationIT
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -52,6 +58,7 @@ public class TextFieldBasicValidationIT
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -62,11 +69,13 @@ public class TextFieldBasicValidationIT
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         testField.setValue("");
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -77,16 +86,19 @@ public class TextFieldBasicValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(MIN_LENGTH_ERROR_MESSAGE);
 
         testField.setValue("AA");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         testField.setValue("AAA");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -97,16 +109,19 @@ public class TextFieldBasicValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(MAX_LENGTH_ERROR_MESSAGE);
 
         testField.setValue("AA");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         testField.setValue("A");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -117,11 +132,13 @@ public class TextFieldBasicValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(PATTERN_ERROR_MESSAGE);
 
         testField.setValue("1234");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test

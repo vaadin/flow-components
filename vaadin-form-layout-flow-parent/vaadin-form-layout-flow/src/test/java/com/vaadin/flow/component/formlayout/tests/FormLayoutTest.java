@@ -99,4 +99,13 @@ public class FormLayoutTest {
                         ResponsiveStep.LabelsPosition.TOP));
         Assert.assertEquals(3, formLayout.getResponsiveSteps().size());
     }
+
+    @Test
+    public void setLabelWidth_getLabelWidth() {
+        FormLayout formLayout = new FormLayout();
+        formLayout.setLabelWidth("2em");
+
+        String appliedWidth = formLayout.getLabelWidth();
+        Assert.assertEquals(appliedWidth, "2em");
+    }
 }

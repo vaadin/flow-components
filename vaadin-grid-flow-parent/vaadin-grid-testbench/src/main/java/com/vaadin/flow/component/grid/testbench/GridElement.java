@@ -499,4 +499,19 @@ public class GridElement extends TestBenchElement {
                 getAllColumns().toArray(new GridColumnElement[0]));
     }
 
+    /**
+     * Gets the empty state content.
+     *
+     * @return the empty state content
+     * @throws NoSuchElementException
+     *             if no empty state content was found
+     */
+    public TestBenchElement getEmptyStateContent() {
+        try {
+            return findElement(By.cssSelector("[slot='empty-state']"));
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException(
+                    "No empty state content was found");
+        }
+    }
 }

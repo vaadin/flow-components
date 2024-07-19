@@ -29,7 +29,7 @@ public class BigDecimalFieldBasicValidationPage
         super();
 
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
-            testField.setRequiredIndicatorVisible(true);
+            testField.setRequired(true);
         }));
 
         add(createButton(CLEAR_VALUE_BUTTON, "Clear value", event -> {

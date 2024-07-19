@@ -45,6 +45,8 @@ public class MainView extends VerticalLayout {
         mapLists(personList, cityList);
         grid.setItems(personList);
 
+        grid.addItemClickListener(e -> eventsPanel
+                .add("ItemClicked - " + e.getItem().toString()));
         grid.addCellEditStartedListener(e -> eventsPanel
                 .add("CellEditStarted - " + e.getItem().toString()));
         grid.addItemPropertyChangedListener(e -> eventsPanel

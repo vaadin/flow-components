@@ -159,12 +159,14 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
 
     /**
      * Specifies that the user must fill in a value.
+     * <p>
+     * NOTE: The required indicator is only visible when the field has a label.
      *
      * @param required
      *            the boolean value to set
      */
     public void setRequired(boolean required) {
-        getElement().setProperty("required", required);
+        setRequiredIndicatorVisible(required);
     }
 
     /**
@@ -173,7 +175,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
      * @return {@code true} if the input is required, {@code false} otherwise
      */
     public boolean isRequired() {
-        return getElement().getProperty("required", false);
+        return isRequiredIndicatorVisible();
     }
 
     @Override

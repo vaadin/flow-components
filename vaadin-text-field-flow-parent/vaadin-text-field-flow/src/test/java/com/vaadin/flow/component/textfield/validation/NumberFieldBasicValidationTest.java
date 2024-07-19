@@ -15,9 +15,14 @@
  */
 package com.vaadin.flow.component.textfield.validation;
 
+import org.junit.Assert;
 import org.junit.Test;
 
+import elemental.json.Json;
+
 import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class NumberFieldBasicValidationTest
@@ -34,7 +39,109 @@ public class NumberFieldBasicValidationTest
         testField.clear();
     }
 
+    @Test
+    public void badInput_validate_emptyErrorMessageDisplayed() {
+        testField.getElement().setProperty("_hasInputValue", true);
+        fireUnparsableChangeDomEvent();
+        Assert.assertEquals("", getErrorMessageProperty());
+    }
+
+    @Test
+    public void badInput_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setI18n(new NumberField.NumberFieldI18n()
+                .setBadInputErrorMessage("Value has invalid format"));
+        testField.getElement().setProperty("_hasInputValue", true);
+        fireUnparsableChangeDomEvent();
+        Assert.assertEquals("Value has invalid format",
+                getErrorMessageProperty());
+    }
+
+    @Test
+    public void required_validate_emptyErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setValue(1.0);
+        testField.setValue(null);
+        Assert.assertEquals("", getErrorMessageProperty());
+    }
+
+    @Test
+    public void required_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new NumberField.NumberFieldI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setValue(1.0);
+        testField.setValue(null);
+        Assert.assertEquals("Field is required", getErrorMessageProperty());
+    }
+
+    @Test
+    public void min_validate_emptyErrorMessageDisplayed() {
+        testField.setMin(3.0);
+        testField.setValue(1.0);
+        Assert.assertEquals("", getErrorMessageProperty());
+    }
+
+    @Test
+    public void min_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setMin(3.0);
+        testField.setI18n(new NumberField.NumberFieldI18n()
+                .setMinErrorMessage("Value is too small"));
+        testField.setValue(1.0);
+        Assert.assertEquals("Value is too small", getErrorMessageProperty());
+    }
+
+    @Test
+    public void max_validate_emptyErrorMessageDisplayed() {
+        testField.setMax(1.0);
+        testField.setValue(3.0);
+        Assert.assertEquals("", getErrorMessageProperty());
+    }
+
+    @Test
+    public void max_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setMax(1.0);
+        testField.setI18n(new NumberField.NumberFieldI18n()
+                .setMaxErrorMessage("Value is too big"));
+        testField.setValue(3.0);
+        Assert.assertEquals("Value is too big", getErrorMessageProperty());
+    }
+
+    @Test
+    public void setI18nAndCustomErrorMessage_validate_customErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new NumberField.NumberFieldI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setErrorMessage("Custom error message");
+        testField.setValue(1.0);
+        testField.setValue(null);
+        Assert.assertEquals("Custom error message", getErrorMessageProperty());
+    }
+
+    @Test
+    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_i18nErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new NumberField.NumberFieldI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setErrorMessage("Custom error message");
+        testField.setValue(1.0);
+        testField.setValue(null);
+        testField.setErrorMessage("");
+        Assert.assertEquals("Field is required", getErrorMessageProperty());
+    }
+
+    @Override
     protected NumberField createTestField() {
         return new NumberField();
+    }
+
+    private void fireUnparsableChangeDomEvent() {
+        DomEvent unparsableChangeDomEvent = new DomEvent(testField.getElement(),
+                "unparsable-change", Json.createObject());
+        testField.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(unparsableChangeDomEvent);
+    }
+
+    private String getErrorMessageProperty() {
+        return testField.getElement().getProperty("errorMessage");
     }
 }
