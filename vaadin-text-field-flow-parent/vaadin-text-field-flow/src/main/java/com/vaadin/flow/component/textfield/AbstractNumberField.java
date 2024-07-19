@@ -16,7 +16,10 @@
 package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Synchronize;
@@ -40,6 +43,7 @@ import com.vaadin.flow.shared.Registration;
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
         extends TextFieldBase<C, T> {
 
+    private AbstractNumberFieldI18n i18n;
     /*
      * Note: setters and getters for min/max/step needed to be duplicated in
      * NumberField and IntegerField, because they use primitive double and int
@@ -58,6 +62,9 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     private DomListenerRegistration inputListenerRegistration;
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<T>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
+
+    private String customErrorMessage;
+    private String constraintErrorMessage;
 
     /**
      * Sets up the common logic for number fields.
@@ -97,6 +104,45 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             validate();
             fireValidationStatusChangeEvent();
         });
+    }
+
+    /**
+     * Sets an error message to display for all constraint violations.
+     * <p>
+     * This error message takes priority over i18n error messages when both are
+     * set.
+     *
+     * @param errorMessage
+     *            the error message to set, or {@code null} to clear
+     *
+     */
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        customErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    /**
+     * Gets the error message displayed for all constraint violations.
+     *
+     * @return the error message
+     */
+    @Override
+    public String getErrorMessage() {
+        return customErrorMessage;
+    }
+
+    private void setConstraintErrorMessage(String errorMessage) {
+        constraintErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    private void updateErrorMessage() {
+        String errorMessage = constraintErrorMessage;
+        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
+            errorMessage = customErrorMessage;
+        }
+        getElement().setProperty("errorMessage", errorMessage);
     }
 
     @Override
@@ -298,7 +344,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     @Override
     public Validator<T> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        return (value, context) -> checkValidity(value, false);
     }
 
     @Override
@@ -321,29 +367,47 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
                 .forEach(listener -> listener.validationStatusChanged(event));
     }
 
-    private ValidationResult checkValidity(T value) {
-        boolean hasNonParsableValue = valueEquals(value, getEmptyValue())
+    private ValidationResult checkValidity(T value,
+            boolean withRequiredValidator) {
+        boolean hasBadInput = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
-        if (hasNonParsableValue) {
-            return ValidationResult.error("");
+        if (hasBadInput) {
+            return ValidationResult.error(getI18nErrorMessage(
+                    AbstractNumberFieldI18n::getBadInputErrorMessage));
+        }
+
+        if (withRequiredValidator) {
+            ValidationResult requiredResult = ValidationUtil
+                    .validateRequiredConstraint(getI18nErrorMessage(
+                            AbstractNumberFieldI18n::getRequiredErrorMessage),
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
+            if (requiredResult.isError()) {
+                return requiredResult;
+            }
         }
 
         Double doubleValue = value != null ? value.doubleValue() : null;
 
-        ValidationResult maxResult = ValidationUtil.validateMaxConstraint("",
+        ValidationResult maxResult = ValidationUtil.validateMaxConstraint(
+                getI18nErrorMessage(
+                        AbstractNumberFieldI18n::getMaxErrorMessage),
                 doubleValue, max);
         if (maxResult.isError()) {
             return maxResult;
         }
 
-        ValidationResult minResult = ValidationUtil.validateMinConstraint("",
+        ValidationResult minResult = ValidationUtil.validateMinConstraint(
+                getI18nErrorMessage(
+                        AbstractNumberFieldI18n::getMinErrorMessage),
                 doubleValue, min);
         if (minResult.isError()) {
             return minResult;
         }
 
         if (!isValidByStep(value)) {
-            return ValidationResult.error("");
+            return ValidationResult.error(getI18nErrorMessage(
+                    AbstractNumberFieldI18n::getStepErrorMessage));
         }
 
         return ValidationResult.ok();
@@ -355,21 +419,26 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * Performs server-side validation of the current value. This is needed
-     * because it is possible to circumvent the client-side validation
-     * constraints using browser development tools.
+     * Validates the current value against the constraints and sets the
+     * {@code invalid} property and the {@code errorMessage} property based on
+     * the result. If a custom error message is provided with
+     * {@link #setErrorMessage(String)}, it is used. Otherwise, the error
+     * message defined in the i18n object is used.
+     * <p>
+     * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            T value = getValue();
+        if (this.manualValidationEnabled) {
+            return;
+        }
 
-            final var requiredValidation = ValidationUtil
-                    .validateRequiredConstraint("",
-                            isRequiredIndicatorVisible(), value,
-                            getEmptyValue());
-
-            setInvalid(requiredValidation.isError()
-                    || checkValidity(value).isError());
+        ValidationResult result = checkValidity(getValue(), true);
+        if (result.isError()) {
+            setInvalid(true);
+            setConstraintErrorMessage(result.getErrorMessage());
+        } else {
+            setInvalid(false);
+            setConstraintErrorMessage("");
         }
     }
 
@@ -399,5 +468,34 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(AbstractNumberFieldI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    protected AbstractNumberFieldI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    protected void setI18n(AbstractNumberFieldI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+    }
+
+    private String getI18nErrorMessage(
+            Function<AbstractNumberFieldI18n, String> getter) {
+        return Optional.ofNullable(i18n).map(getter).orElse("");
     }
 }

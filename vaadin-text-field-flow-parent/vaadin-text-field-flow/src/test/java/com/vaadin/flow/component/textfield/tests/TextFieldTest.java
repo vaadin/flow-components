@@ -207,4 +207,16 @@ public class TextFieldTest {
         Assert.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<TextField, String>, String>);
     }
+
+    @Test
+    public void setI18n_getI18n() {
+        TextField textField = new TextField();
+        TextField.TextFieldI18n i18n = new TextField.TextFieldI18n()
+                .setRequiredErrorMessage("Required error")
+                .setMinLengthErrorMessage("Min length error")
+                .setMaxLengthErrorMessage("Max length error")
+                .setPatternErrorMessage("Pattern error");
+        textField.setI18n(i18n);
+        Assert.assertEquals(i18n, textField.getI18n());
+    }
 }
