@@ -36,9 +36,9 @@ import com.vaadin.flow.function.SerializableFunction;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-number-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/number-field", version = "24.5.0-alpha4")
+@NpmPackage(value = "@vaadin/number-field", version = "24.5.0-alpha5")
 @JsModule("@vaadin/number-field/src/vaadin-number-field.js")
 public class NumberField extends AbstractNumberField<NumberField, Double>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
@@ -195,6 +195,197 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
      */
     public double getStep() {
         return getStepDouble();
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(NumberFieldI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    @Override
+    public NumberFieldI18n getI18n() {
+        return (NumberFieldI18n) super.getI18n();
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(NumberFieldI18n i18n) {
+        super.setI18n(i18n);
+    }
+
+    /**
+     * The internationalization properties for {@link NumberField}.
+     */
+    public static class NumberFieldI18n implements AbstractNumberFieldI18n {
+        private String requiredErrorMessage;
+        private String badInputErrorMessage;
+        private String minErrorMessage;
+        private String maxErrorMessage;
+        private String stepErrorMessage;
+
+        /**
+         * Gets the error message displayed when the field contains user input
+         * that the server is unable to convert to type {@link Number}.
+         *
+         * @return the error message or {@code null} if not set
+         */
+        @Override
+        public String getBadInputErrorMessage() {
+            return badInputErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field contains user input
+         * that the server is unable to convert to type {@link Number}.
+         * <p>
+         * Note, custom error messages set with
+         * {@link NumberField#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         */
+        public NumberFieldI18n setBadInputErrorMessage(String errorMessage) {
+            badInputErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field is required but
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         * @see NumberField#isRequired()
+         * @see NumberField#setRequired(boolean)
+         */
+        @Override
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field is required but
+         * empty.
+         * <p>
+         * Note, custom error messages set with
+         * {@link NumberField#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         * @see NumberField#isRequired()
+         * @see NumberField#setRequired(boolean)
+         */
+        public NumberFieldI18n setRequiredErrorMessage(String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field value is smaller than
+         * the minimum allowed value.
+         *
+         * @return the error message or {@code null} if not set
+         * @see NumberField#setMin(double)
+         * @see NumberField#getMin()
+         */
+        @Override
+        public String getMinErrorMessage() {
+            return minErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field value is smaller
+         * than the minimum allowed value.
+         * <p>
+         * Note, custom error messages set with
+         * {@link NumberField#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         * @see NumberField#setMin(double)
+         * @see NumberField#getMin()
+         */
+        public NumberFieldI18n setMinErrorMessage(String errorMessage) {
+            minErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field value is greater than
+         * the maximum allowed value.
+         *
+         * @return the error message or {@code null} if not set
+         * @see NumberField#setMax(double)
+         * @see NumberField#getMax()
+         */
+        @Override
+        public String getMaxErrorMessage() {
+            return maxErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field value is greater
+         * than the maximum allowed value.
+         * <p>
+         * Note, custom error messages set with
+         * {@link NumberField#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         * @see NumberField#setMax(double)
+         * @see NumberField#getMax()
+         */
+        public NumberFieldI18n setMaxErrorMessage(String errorMessage) {
+            maxErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field value is not a
+         * multiple of the step value.
+         *
+         * @return the error message or {@code null} if not set
+         * @see NumberField#setStep(double)
+         * @see NumberField#getStep()
+         */
+        @Override
+        public String getStepErrorMessage() {
+            return stepErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field value is not a
+         * multiple of the step value.
+         * <p>
+         * Note, custom error messages set with
+         * {@link NumberField#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         * @see NumberField#setStep(double)
+         * @see NumberField#getStep()
+         */
+        public NumberFieldI18n setStepErrorMessage(String errorMessage) {
+            stepErrorMessage = errorMessage;
+            return this;
+        }
     }
 
     private static class Formatter

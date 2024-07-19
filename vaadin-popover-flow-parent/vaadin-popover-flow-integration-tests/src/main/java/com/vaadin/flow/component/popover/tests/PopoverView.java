@@ -46,6 +46,16 @@ public class PopoverView extends Div {
                 event -> add(target));
         attachTarget.setId("attach-target");
 
-        add(popover, clearTarget, detachTarget, attachTarget, target);
+        NativeButton disableCloseOnEsc = new NativeButton(
+                "Disable close on Esc", event -> popover.setCloseOnEsc(false));
+        disableCloseOnEsc.setId("disable-close-on-esc");
+
+        NativeButton disableCloseOnOutsideClick = new NativeButton(
+                "Disable close on outside click",
+                event -> popover.setCloseOnOutsideClick(false));
+        disableCloseOnOutsideClick.setId("disable-close-on-outside-click");
+
+        add(popover, clearTarget, detachTarget, attachTarget, disableCloseOnEsc,
+                disableCloseOnOutsideClick, target);
     }
 }

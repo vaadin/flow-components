@@ -69,9 +69,9 @@ import elemental.json.JsonValue;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-form-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/form-layout", version = "24.5.0-alpha4")
+@NpmPackage(value = "@vaadin/form-layout", version = "24.5.0-alpha5")
 @JsModule("@vaadin/form-layout/src/vaadin-form-layout.js")
 public class FormLayout extends Component
         implements HasSize, HasStyle, HasComponents, ClickNotifier<FormLayout> {
@@ -200,9 +200,9 @@ public class FormLayout extends Component
      * @author Vaadin Ltd
      */
     @Tag("vaadin-form-item")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha4")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha5")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-    @NpmPackage(value = "@vaadin/form-layout", version = "24.5.0-alpha4")
+    @NpmPackage(value = "@vaadin/form-layout", version = "24.5.0-alpha5")
     @JsModule("@vaadin/form-layout/src/vaadin-form-item.js")
     public static class FormItem extends Component
             implements HasComponents, HasStyle, ClickNotifier<FormItem> {
@@ -452,11 +452,12 @@ public class FormLayout extends Component
 
     /**
      * Set the width of side-positioned label.
-     * 
+     *
      * @param width
-     *          the value and CSS unit as a string
+     *            the value and CSS unit as a string
      * @see <a href=
-     *      "https://vaadin.com/docs/latest/components/form-layout#label-position">Label position</a>
+     *      "https://vaadin.com/docs/latest/components/form-layout#label-position">Label
+     *      position</a>
      */
     public void setLabelWidth(String width) {
         this.getStyle().set("--vaadin-form-item-label-width", width);
@@ -464,11 +465,11 @@ public class FormLayout extends Component
 
     /**
      * Get the width of side-positioned label.
-     * 
-     * @return 
-     *          the value and CSS unit as a string
+     *
+     * @return the value and CSS unit as a string
      * @see <a href=
-     *      "https://vaadin.com/docs/latest/components/form-layout#label-position">Label position</a>
+     *      "https://vaadin.com/docs/latest/components/form-layout#label-position">Label
+     *      position</a>
      */
     public String getLabelWidth() {
         return this.getStyle().get("--vaadin-form-item-label-width");

@@ -52,9 +52,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/app-layout", version = "24.5.0-alpha4")
+@NpmPackage(value = "@vaadin/app-layout", version = "24.5.0-alpha5")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
@@ -72,20 +72,19 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      * <p>
      * NOTE: Updating the instance that is returned from this method will not
      * update the component if not set again using
-     * {@link AppLayout#setI18n(AppLayoutI18n)}
+     * {@link #setI18n(AppLayoutI18n)}
      *
-     * @return the i18n object. It will be <code>null</code>, if the i18n
-     *         properties are not set.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public AppLayoutI18n getI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Sets the internationalization object for this component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(AppLayoutI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
