@@ -346,7 +346,8 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         }
     }
 
-    private ValidationResult checkValidity(BigDecimal value, boolean withRequiredValidator) {
+    private ValidationResult checkValidity(BigDecimal value,
+            boolean withRequiredValidator) {
         boolean hasBadInput = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
         if (hasBadInput) {
@@ -503,14 +504,15 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
          * that the server is unable to convert to type {@link BigDecimal}.
          * <p>
          * Note, custom error messages set with
-         * {@link BigDecimalField#setErrorMessage(String)} take priority over i18n
-         * error messages.
+         * {@link BigDecimalField#setErrorMessage(String)} take priority over
+         * i18n error messages.
          *
          * @param errorMessage
          *            the error message to set, or {@code null} to clear
          * @return this instance for method chaining
          */
-        public BigDecimalFieldI18n setBadInputErrorMessage(String errorMessage) {
+        public BigDecimalFieldI18n setBadInputErrorMessage(
+                String errorMessage) {
             badInputErrorMessage = errorMessage;
             return this;
         }
@@ -532,8 +534,8 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
          * empty.
          * <p>
          * Note, custom error messages set with
-         * {@link BigDecimalField#setErrorMessage(String)} take priority over i18n
-         * error messages.
+         * {@link BigDecimalField#setErrorMessage(String)} take priority over
+         * i18n error messages.
          *
          * @param errorMessage
          *            the error message or {@code null} to clear it
@@ -541,7 +543,8 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
          * @see BigDecimalField#isRequiredIndicatorVisible()
          * @see BigDecimalField#setRequiredIndicatorVisible(boolean)
          */
-        public BigDecimalFieldI18n setRequiredErrorMessage(String errorMessage) {
+        public BigDecimalFieldI18n setRequiredErrorMessage(
+                String errorMessage) {
             requiredErrorMessage = errorMessage;
             return this;
         }
