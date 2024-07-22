@@ -244,7 +244,7 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer>
 
         /**
          * Gets the error message displayed when the field contains user input
-         * that the server is unable to convert to type {@link Number}.
+         * that the server is unable to convert to type {@link Integer}.
          *
          * @return the error message or {@code null} if not set
          */
@@ -255,7 +255,7 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer>
 
         /**
          * Sets the error message to display when the field contains user input
-         * that the server is unable to convert to type {@link Number}.
+         * that the server is unable to convert to type {@link Integer}.
          * <p>
          * Note, custom error messages set with
          * {@link IntegerField#setErrorMessage(String)} take priority over i18n
