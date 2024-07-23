@@ -31,6 +31,7 @@ import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.data.binder.ValueContext;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 /**
@@ -49,10 +50,52 @@ public class TextField extends TextFieldBase<TextField, String>
 
     private TextFieldI18n i18n;
 
-    private boolean manualValidationEnabled = false;
+    private ValidationController<String> validationController = new ValidationController<>(
+            this) {
+        @Override
+        protected ValidationResult checkValidity(String value, ValueContext context) {
+            if (context == null || context.getBinder() == null) {
+                ValidationResult requiredResult = ValidationUtil
+                        .validateRequiredConstraint(
+                                getI18nErrorMessage(
+                                        TextFieldI18n::getRequiredErrorMessage),
+                                isRequiredIndicatorVisible(), value,
+                                getEmptyValue());
+                if (requiredResult.isError()) {
+                    return requiredResult;
+                }
+            }
 
-    private String customErrorMessage;
-    private String constraintErrorMessage;
+            ValidationResult maxLengthResult = ValidationUtil
+                    .validateMaxLengthConstraint(
+                            getI18nErrorMessage(
+                                    TextFieldI18n::getMaxLengthErrorMessage),
+                            value, hasMaxLength() ? getMaxLength() : null);
+            if (maxLengthResult.isError()) {
+                return maxLengthResult;
+            }
+
+            ValidationResult minLengthResult = ValidationUtil
+                    .validateMinLengthConstraint(
+                            getI18nErrorMessage(
+                                    TextFieldI18n::getMinLengthErrorMessage),
+                            value, getMinLength());
+            if (minLengthResult.isError()) {
+                return minLengthResult;
+            }
+
+            ValidationResult patternResult = ValidationUtil
+                    .validatePatternConstraint(
+                            getI18nErrorMessage(
+                                    TextFieldI18n::getPatternErrorMessage),
+                            value, getPattern());
+            if (patternResult.isError()) {
+                return patternResult;
+            }
+
+            return ValidationResult.ok();
+        }
+    };
 
     /**
      * Constructs an empty {@code TextField}.
@@ -194,8 +237,7 @@ public class TextField extends TextFieldBase<TextField, String>
      */
     @Override
     public void setErrorMessage(String errorMessage) {
-        customErrorMessage = errorMessage;
-        updateErrorMessage();
+        validationController.setCustomErrorMessage(errorMessage);
     }
 
     /**
@@ -205,20 +247,17 @@ public class TextField extends TextFieldBase<TextField, String>
      */
     @Override
     public String getErrorMessage() {
-        return customErrorMessage;
+        return validationController.getCustomErrorMessage();
     }
 
-    private void setConstraintErrorMessage(String errorMessage) {
-        constraintErrorMessage = errorMessage;
-        updateErrorMessage();
+    @Override
+    public void setInvalid(boolean invalid) {
+        validationController.setInvalid(invalid);
     }
 
-    private void updateErrorMessage() {
-        String errorMessage = constraintErrorMessage;
-        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
-            errorMessage = customErrorMessage;
-        }
-        getElement().setProperty("errorMessage", errorMessage);
+    @Override
+    public boolean isInvalid() {
+        return validationController.isInvalid();
     }
 
     /**
@@ -330,80 +369,25 @@ public class TextField extends TextFieldBase<TextField, String>
 
     @Override
     public Validator<String> getDefaultValidator() {
-        return (value, context) -> checkValidity(value, false);
+        return validationController.getDefaultValidator();
     }
 
     @Override
     public void setManualValidation(boolean enabled) {
-        this.manualValidationEnabled = enabled;
-    }
-
-    private ValidationResult checkValidity(String value,
-            boolean withRequiredValidator) {
-        if (withRequiredValidator) {
-            ValidationResult requiredResult = ValidationUtil
-                    .validateRequiredConstraint(
-                            getI18nErrorMessage(
-                                    TextFieldI18n::getRequiredErrorMessage),
-                            isRequiredIndicatorVisible(), value,
-                            getEmptyValue());
-            if (requiredResult.isError()) {
-                return requiredResult;
-            }
-        }
-
-        ValidationResult maxLengthResult = ValidationUtil
-                .validateMaxLengthConstraint(
-                        getI18nErrorMessage(
-                                TextFieldI18n::getMaxLengthErrorMessage),
-                        value, hasMaxLength() ? getMaxLength() : null);
-        if (maxLengthResult.isError()) {
-            return maxLengthResult;
-        }
-
-        ValidationResult minLengthResult = ValidationUtil
-                .validateMinLengthConstraint(
-                        getI18nErrorMessage(
-                                TextFieldI18n::getMinLengthErrorMessage),
-                        value, getMinLength());
-        if (minLengthResult.isError()) {
-            return minLengthResult;
-        }
-
-        ValidationResult patternResult = ValidationUtil
-                .validatePatternConstraint(
-                        getI18nErrorMessage(
-                                TextFieldI18n::getPatternErrorMessage),
-                        value, getPattern());
-        if (patternResult.isError()) {
-            return patternResult;
-        }
-
-        return ValidationResult.ok();
+        validationController.setManualValidation(enabled);
     }
 
     /**
      * Validates the current value against the constraints and sets the
      * {@code invalid} property and the {@code errorMessage} property based on
      * the result. If a custom error message is provided with
-     * {@link #setErrorMessage(String)}, it is used. Otherwise,
-     * the error message defined in the i18n object is used.
+     * {@link #setErrorMessage(String)}, it is used. Otherwise, the error
+     * message defined in the i18n object is used.
      * <p>
      * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (this.manualValidationEnabled) {
-            return;
-        }
-
-        ValidationResult result = checkValidity(getValue(), true);
-        if (result.isError()) {
-            setInvalid(true);
-            setConstraintErrorMessage(result.getErrorMessage());
-        } else {
-            setInvalid(false);
-            setConstraintErrorMessage("");
-        }
+        validationController.validate(getValue());
     }
 
     @Override
