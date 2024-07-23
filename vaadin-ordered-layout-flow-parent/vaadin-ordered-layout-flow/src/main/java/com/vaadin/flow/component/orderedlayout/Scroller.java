@@ -44,7 +44,6 @@ public class Scroller extends Component implements Focusable<Scroller>, HasSize,
         HasStyle, HasThemeVariant<ScrollerVariant> {
 
     private static final String SCROLL_DIRECTION_PROPERTY = "scrollDirection";
-    private static final String SCROLL_TOP_PROPERTY = "scrollTop";
 
     private Component content;
 

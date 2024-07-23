@@ -23,8 +23,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 /**
- * View for the ordered layouts {@link HorizontalLayout} and
- * {@link VerticalLayout}.
+ * View for the ordered layouts {@link HorizontalLayout}, 
+ * {@link VerticalLayout} and {@link Scroller}.
  *
  * @author Vaadin Ltd
  */
@@ -38,15 +38,15 @@ public class ScrollerPage extends AbstractLayout {
                 });
         scrollBottomButton.setId("scroll-to-bottom-button");
 
-        NativeButton scrollStartButton = new NativeButton("scroll to top",
+        NativeButton scrollTopButton = new NativeButton("scroll to top",
                 (e) -> {
                     scroller.scrollToTop();
                 });
-        scrollStartButton.setId("scroll-to-top-button");
+        scrollTopButton.setId("scroll-to-top-button");
 
         Div content = new Div("Text ".repeat(30));
 
         scroller.setContent(content);
-        add(scrollBottomButton, scrollStartButton, scroller);
+        add(scrollBottomButton, scrollTopButton, scroller);
     }
 }
