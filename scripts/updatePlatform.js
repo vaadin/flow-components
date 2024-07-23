@@ -14,7 +14,7 @@
 
 const fs = require('fs');
 const https = require('https');
-const {checkoutPlatorm, currentBranch, run, getLatestBowerVersion, getLatestNpmVersion, getAnnotations} = require('./lib/versions.js');
+const {checkoutPlatorm, currentBranch, run, getLatestNpmVersion, getAnnotations} = require('./lib/versions.js');
 
 async function computeNextVersions(byName) {
   const names = Object.keys(byName);
@@ -27,12 +27,6 @@ async function computeNextVersions(byName) {
       let nextVersion = await getLatestNpmVersion(pkg.org.npmName, o.version, o.major, o.minor);
       o = pkg.nextVersion = {version: nextVersion };
       [o.major, o.minor, o.patch, o.extra] = nextVersion.split(/[\.\-]+/);
-
-      if (pkg.org.jsVersion && pkg.org.npmVersion) {
-        o = pkg.bowerVersion = {version: pkg.org.jsVersion};
-        [o.major, o.minor, o.patch, o.extra] = o.version.split(/[\.\-]+/);
-        o.nextVersion = await getLatestBowerVersion(names[i], o.version, o.major, o.minor);
-      }
     }
   }
 }
@@ -46,11 +40,6 @@ async function updateNextVersions(byName) {
       modified = true;
       console.log(`Bumping ${names[i]} from ${pkg.currentVersion.version} to ${pkg.nextVersion.version}`);
       pkg.org.npmVersion && (pkg.org.npmVersion = pkg.nextVersion.version) || (pkg.org.jsVersion = pkg.nextVersion.version);
-    }
-    if (pkg.bowerVersion && pkg.bowerVersion.version != pkg.bowerVersion.nextVersion) {
-      modified = true;
-      console.log(`Bumping ${names[i]} (bower) from ${pkg.org.jsVersion} to ${pkg.bowerVersion.nextVersion}`);
-      pkg.org.jsVersion = pkg.bowerVersion.nextVersion;
     }
   }
   return modified;

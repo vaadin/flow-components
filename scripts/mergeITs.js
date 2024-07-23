@@ -64,12 +64,7 @@ async function createPom(pomFile, pomTemplateFile, artifactID, excludedTests) {
    const dependency = await modules.reduce(async (prevP, name) => {
     const prev = await prevP;
     const id = name.replace('-flow-parent', '');
-    //vaadin-messages doesn't have the bower mode pom
-    if (pomFile.includes('bower') && id.includes('messages')){
-      pomFileTemp = "pom.xml";
-    } else {
-      pomFileTemp = pomFile;
-    }
+
     // Add component-flow and component-testbench dependencies
     const componentVersion = /^(14\.[3-4]|17\.0)/.test(version) ? `\$\{${id.replace(/-/g, '.')}.version\}` : '${project.version}'
 
@@ -234,9 +229,6 @@ async function main() {
   await copySources();
   await createFrontendIndex();
   await createPom('pom.xml', 'pom-integration-tests.xml', 'vaadin-flow-components-integration-tests', exclude);
-  //V14.X needs to validate the bower Mode
-  exclude = ['%regex[com.vaadin.flow.component.messages.*]']
-  await createPom('pom-bower-mode.xml', 'pom-bower-mode.xml','vaadin-flow-components-integration-tests-bower-mode', exclude);
 }
 
 main();

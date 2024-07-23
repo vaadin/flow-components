@@ -8,8 +8,6 @@
 [ -n "$FORKS" ] && args="-Dfailsafe.forkCount=$FORKS";
 ## bu default local tests are runn in headless, but can be disabled
 [ "$HEADLESS" = false ] && args="$args -DdisableHeadless" && quiet="" || quiet="-q"
-## run bower mode or npm
-[ -n "$BOWER" ] && it=bower-it || it=npm-it
 
 ## List all modules and ask for one to the user
 askModule() {
