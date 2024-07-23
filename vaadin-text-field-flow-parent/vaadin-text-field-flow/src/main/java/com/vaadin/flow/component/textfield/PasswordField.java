@@ -42,8 +42,6 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 public class PasswordField extends TextFieldBase<PasswordField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
 
-    private boolean isConnectorAttached;
-
     private TextFieldValidationSupport validationSupport;
 
     private boolean manualValidationEnabled = false;

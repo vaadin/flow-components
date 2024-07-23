@@ -41,8 +41,6 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 public class TextArea extends TextFieldBase<TextArea, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextAreaVariant> {
 
-    private boolean isConnectorAttached;
-
     private TextFieldValidationSupport validationSupport;
 
     private boolean manualValidationEnabled = false;

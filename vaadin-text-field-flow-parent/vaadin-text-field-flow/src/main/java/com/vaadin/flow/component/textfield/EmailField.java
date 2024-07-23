@@ -48,8 +48,6 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 public class EmailField extends TextFieldBase<EmailField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
 
-    private boolean isConnectorAttached;
-
     private TextFieldValidationSupport validationSupport;
 
     private boolean manualValidationEnabled = false;
