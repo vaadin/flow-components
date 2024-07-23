@@ -1,17 +1,18 @@
 package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.binder.ValueContext;
 
-public class ValidationController<T> {
-    private Component component;
+public class ValidationController<C extends Component & HasValidator<V>, V> {
+    private C component;
     private boolean manualValidationEnabled;
     private String customErrorMessage;
-    private String constraintErrorMessage;
+    private String validationResultErrorMessage;
 
-    public ValidationController(Component component) {
+    public ValidationController(C component) {
         this.component = component;
     }
 
@@ -28,48 +29,44 @@ public class ValidationController<T> {
     }
 
     public void setCustomErrorMessage(String errorMessage) {
-        this.customErrorMessage = errorMessage;
-        updateErrorMessageProperty();
+        customErrorMessage = errorMessage;
+        updateErrorMessage();
     }
 
     public String getCustomErrorMessage() {
         return customErrorMessage;
     }
 
-    private void setConstraintErrorMessage(String errorMessage) {
-        this.constraintErrorMessage = errorMessage;
-        updateErrorMessageProperty();
+    private void setValidationResultErrorMessage(String errorMessage) {
+        validationResultErrorMessage = errorMessage;
+        updateErrorMessage();
     }
 
-    private void updateErrorMessageProperty() {
+    private void updateErrorMessage() {
         String errorMessage = customErrorMessage;
         if (errorMessage == null || errorMessage.isEmpty()) {
-            errorMessage = constraintErrorMessage;
+            errorMessage = validationResultErrorMessage;
         }
         component.getElement().setProperty("errorMessage", errorMessage);
     }
 
-    protected ValidationResult checkValidity(T value, ValueContext context) {
-        return ValidationResult.ok();
-    }
-
-    public void validate(T value) {
+    public void validate(V value) {
         if (manualValidationEnabled) {
             return;
         }
 
         ValueContext context = new ValueContext(null, component);
-        ValidationResult result = checkValidity(value, context);
+        ValidationResult result = getDefaultValidator().apply(value, context);
         if (result.isError()) {
             setInvalid(true);
-            setConstraintErrorMessage(result.getErrorMessage());
+            setValidationResultErrorMessage(result.getErrorMessage());
         } else {
             setInvalid(false);
-            setConstraintErrorMessage("");
+            setValidationResultErrorMessage("");
         }
     }
 
-    public Validator<T> getDefaultValidator() {
-        return (value, context) -> checkValidity(value, context);
+    private Validator<V> getDefaultValidator() {
+        return component.getDefaultValidator();
     }
 }

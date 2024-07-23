@@ -31,7 +31,6 @@ import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
-import com.vaadin.flow.data.binder.ValueContext;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
 /**
@@ -50,52 +49,51 @@ public class TextField extends TextFieldBase<TextField, String>
 
     private TextFieldI18n i18n;
 
-    private ValidationController<String> validationController = new ValidationController<>(
-            this) {
-        @Override
-        protected ValidationResult checkValidity(String value, ValueContext context) {
-            if (context == null || context.getBinder() == null) {
-                ValidationResult requiredResult = ValidationUtil
-                        .validateRequiredConstraint(
-                                getI18nErrorMessage(
-                                        TextFieldI18n::getRequiredErrorMessage),
-                                isRequiredIndicatorVisible(), value,
-                                getEmptyValue());
-                if (requiredResult.isError()) {
-                    return requiredResult;
-                }
-            }
-
-            ValidationResult maxLengthResult = ValidationUtil
-                    .validateMaxLengthConstraint(
+    private Validator<String> defaultValidator = (value, context) -> {
+        if (context == null || context.getBinder() == null) {
+            ValidationResult requiredResult = ValidationUtil
+                    .validateRequiredConstraint(
                             getI18nErrorMessage(
-                                    TextFieldI18n::getMaxLengthErrorMessage),
-                            value, hasMaxLength() ? getMaxLength() : null);
-            if (maxLengthResult.isError()) {
-                return maxLengthResult;
+                                    TextFieldI18n::getRequiredErrorMessage),
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
+            if (requiredResult.isError()) {
+                return requiredResult;
             }
-
-            ValidationResult minLengthResult = ValidationUtil
-                    .validateMinLengthConstraint(
-                            getI18nErrorMessage(
-                                    TextFieldI18n::getMinLengthErrorMessage),
-                            value, getMinLength());
-            if (minLengthResult.isError()) {
-                return minLengthResult;
-            }
-
-            ValidationResult patternResult = ValidationUtil
-                    .validatePatternConstraint(
-                            getI18nErrorMessage(
-                                    TextFieldI18n::getPatternErrorMessage),
-                            value, getPattern());
-            if (patternResult.isError()) {
-                return patternResult;
-            }
-
-            return ValidationResult.ok();
         }
+
+        ValidationResult maxLengthResult = ValidationUtil
+                .validateMaxLengthConstraint(
+                        getI18nErrorMessage(
+                                TextFieldI18n::getMaxLengthErrorMessage),
+                        value, hasMaxLength() ? getMaxLength() : null);
+        if (maxLengthResult.isError()) {
+            return maxLengthResult;
+        }
+
+        ValidationResult minLengthResult = ValidationUtil
+                .validateMinLengthConstraint(
+                        getI18nErrorMessage(
+                                TextFieldI18n::getMinLengthErrorMessage),
+                        value, getMinLength());
+        if (minLengthResult.isError()) {
+            return minLengthResult;
+        }
+
+        ValidationResult patternResult = ValidationUtil
+                .validatePatternConstraint(
+                        getI18nErrorMessage(
+                                TextFieldI18n::getPatternErrorMessage),
+                        value, getPattern());
+        if (patternResult.isError()) {
+            return patternResult;
+        }
+
+        return ValidationResult.ok();
     };
+
+    private ValidationController<TextField, String> validationController = new ValidationController<>(
+            this);
 
     /**
      * Constructs an empty {@code TextField}.
@@ -369,7 +367,7 @@ public class TextField extends TextFieldBase<TextField, String>
 
     @Override
     public Validator<String> getDefaultValidator() {
-        return validationController.getDefaultValidator();
+        return defaultValidator;
     }
 
     @Override
