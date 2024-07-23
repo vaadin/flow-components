@@ -59,8 +59,6 @@ import com.vaadin.flow.shared.Registration;
 public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         implements HasThemeVariant<TextFieldVariant> {
 
-    private boolean isConnectorAttached;
-
     private Locale locale;
 
     private static final SerializableBiFunction<BigDecimalField, String, BigDecimal> PARSER = (

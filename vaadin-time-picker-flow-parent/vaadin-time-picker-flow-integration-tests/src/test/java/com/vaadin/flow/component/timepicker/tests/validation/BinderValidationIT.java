@@ -11,6 +11,9 @@ import static com.vaadin.flow.component.timepicker.tests.validation.BinderValida
 import static com.vaadin.flow.component.timepicker.tests.validation.BinderValidationPage.MAX_INPUT;
 import static com.vaadin.flow.component.timepicker.tests.validation.BinderValidationPage.EXPECTED_VALUE_INPUT;
 import static com.vaadin.flow.component.timepicker.tests.validation.BinderValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.timepicker.tests.validation.BinderValidationPage.BAD_INPUT_ERROR_MESSAGE;
+import static com.vaadin.flow.component.timepicker.tests.validation.BinderValidationPage.MAX_ERROR_MESSAGE;
+import static com.vaadin.flow.component.timepicker.tests.validation.BinderValidationPage.MIN_ERROR_MESSAGE;
 import static com.vaadin.flow.component.timepicker.tests.validation.BinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 import static com.vaadin.flow.component.timepicker.tests.validation.BinderValidationPage.CLEAR_VALUE_BUTTON;
 import static com.vaadin.flow.component.timepicker.tests.validation.BinderValidationPage.RESET_BEAN_BUTTON;
@@ -47,6 +50,18 @@ public class BinderValidationIT
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+
+        testField.selectByText("INVALID");
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
+
+        testField.selectByText("");
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -72,7 +87,7 @@ public class BinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(MIN_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.selectByText("11:00");
@@ -105,7 +120,7 @@ public class BinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(MAX_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.selectByText("11:00");
@@ -136,7 +151,7 @@ public class BinderValidationIT
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         testField.selectByText("10:00");
         assertValidationCount(1);
@@ -147,7 +162,7 @@ public class BinderValidationIT
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         testField.selectByText("");
         assertValidationCount(1);
@@ -176,7 +191,7 @@ public class BinderValidationIT
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertValidationCount(1);
