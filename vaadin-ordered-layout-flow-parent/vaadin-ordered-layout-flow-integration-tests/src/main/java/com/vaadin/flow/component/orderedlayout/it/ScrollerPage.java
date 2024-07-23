@@ -32,25 +32,21 @@ import com.vaadin.flow.router.Route;
 public class ScrollerPage extends AbstractLayout {
     public ScrollerPage() {
         Scroller scroller = new Scroller();
-        NativeButton scrollEndButton = new NativeButton("scroll to end",
+        NativeButton scrollBottomButton = new NativeButton("scroll to bottom",
                 (e) -> {
-                    scroller.scrollToEnd();
+                    scroller.scrollToBottom();
                 });
-        scrollEndButton.setId("scroll-to-end-button");
+        scrollBottomButton.setId("scroll-to-bottom-button");
 
-        NativeButton scrollStartButton = new NativeButton("scroll to start",
+        NativeButton scrollStartButton = new NativeButton("scroll to top",
                 (e) -> {
-                    scroller.scrollToStart();
+                    scroller.scrollToTop();
                 });
-        scrollStartButton.setId("scroll-to-start-button");
+        scrollStartButton.setId("scroll-to-top-button");
 
         Div content = new Div("Text ".repeat(30));
 
-        scroller.setScrollDirection(Scroller.ScrollDirection.VERTICAL);
-        scroller.setHeight("100px");
-        scroller.setWidth("100px");
-
         scroller.setContent(content);
-        add(scrollEndButton, scrollStartButton, scroller);
+        add(scrollBottomButton, scrollStartButton, scroller);
     }
 }

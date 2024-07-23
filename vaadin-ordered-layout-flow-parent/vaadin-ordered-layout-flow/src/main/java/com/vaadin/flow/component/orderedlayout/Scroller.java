@@ -44,6 +44,7 @@ public class Scroller extends Component implements Focusable<Scroller>, HasSize,
         HasStyle, HasThemeVariant<ScrollerVariant> {
 
     private static final String SCROLL_DIRECTION_PROPERTY = "scrollDirection";
+    private static final String SCROLL_TOP_PROPERTY = "scrollTop";
 
     private Component content;
 
@@ -177,19 +178,19 @@ public class Scroller extends Component implements Focusable<Scroller>, HasSize,
     }
 
     /**
-     * Scrolls the scroller to the start if it has a vertical or horizontal
-     * scrollbar.
+     * Scrolls the scroller to the top.
      */
-    public void scrollToStart() {
-        getElement().callJsFunction("scrollToStart");
+    public void scrollToTop() {
+        getElement().executeJs("this.scrollTop = 0");
     }
 
     /**
-     * Scrolls the scroller to the end if it has a vertical or horizontal
-     * scrollbar.
+     * Scrolls the scroller to the bottom.
      */
-    public void scrollToEnd() {
-        getElement().callJsFunction("scrollToEnd");
+    public void scrollToBottom() {
+
+        getElement().executeJs(
+                "this.scrollTop = this.scrollHeight - this.clientHeight");
     }
 
 }
