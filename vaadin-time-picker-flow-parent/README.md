@@ -13,7 +13,7 @@ Then navigate to `http://localhost:9998/vaadin-time-picker` to view the demo.
 
 For running integration tests demos execute one of the following lines depending on the desired mode
 - `mvn -pl vaadin-time-picker-flow-integration-tests clean jetty:run`
-- `mvn -pl vaadin-time-picker-flow-integration-tests clean jetty:run -Dvaadin.bowerMode`
+
 
 Then navigate to integration tests URLs for see integration tests views.
 

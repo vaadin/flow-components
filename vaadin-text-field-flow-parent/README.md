@@ -22,7 +22,7 @@ to `http://localhost:9998/vaadin-password-field` for the demo of PasswordField a
 
 For running integration tests demos execute one of the following lines depending on the desired mode
 - `mvn -pl vaadin-text-field-flow-integration-tests clean jetty:run`
-- `mvn -pl vaadin-text-field-flow-integration-tests clean jetty:run -Dvaadin.bowerMode`
+
 
 Then navigate to integration tests URLs for see integration tests views.
 
