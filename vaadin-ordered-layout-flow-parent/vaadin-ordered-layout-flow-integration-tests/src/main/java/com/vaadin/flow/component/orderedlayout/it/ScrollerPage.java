@@ -30,7 +30,7 @@ import com.vaadin.flow.router.Route;
  */
 @Route("vaadin-ordered-layout/scroller")
 public class ScrollerPage extends AbstractLayout {
-    
+
     public ScrollerPage() {
         Scroller scroller = new Scroller();
         NativeButton scrollBottomButton = new NativeButton("scroll to bottom",
