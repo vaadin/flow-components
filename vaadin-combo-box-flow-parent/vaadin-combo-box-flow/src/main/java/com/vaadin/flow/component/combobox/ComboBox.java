@@ -360,7 +360,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      * Gets the internationalization object previously set for this component.
      * <p>
      * NOTE: Updating the instance that is returned from this method will not
-     * update the component if not set again using {@link #setI18n(ComboBoxI18n)}
+     * update the component if not set again using
+     * {@link #setI18n(ComboBoxI18n)}
      *
      * @return the i18n object or {@code null} if no i18n object has been set
      */
@@ -402,8 +403,8 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
          * empty.
          * <p>
          * Note, custom error messages set with
-         * {@link ComboBox#setErrorMessage(String)} take priority over i18n error
-         * messages.
+         * {@link ComboBox#setErrorMessage(String)} take priority over i18n
+         * error messages.
          *
          * @param errorMessage
          *            the error message or {@code null} to clear it
