@@ -17,10 +17,15 @@ package com.vaadin.flow.component.timepicker.tests.validation;
 
 import java.time.LocalTime;
 
+import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
+
+import elemental.json.Json;
 
 public class BasicValidationTest
         extends AbstractBasicValidationTest<TimePicker, LocalTime> {
@@ -36,7 +41,108 @@ public class BasicValidationTest
         testField.clear();
     }
 
+    @Test
+    public void badInput_validate_emptyErrorMessageDisplayed() {
+        testField.getElement().setProperty("_hasInputValue", true);
+        fireUnparsableChangeDomEvent();
+        Assert.assertEquals("", getErrorMessageProperty());
+    }
+
+    @Test
+    public void badInput_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setI18n(new TimePicker.TimePickerI18n()
+                .setBadInputErrorMessage("Time has invalid format"));
+        testField.getElement().setProperty("_hasInputValue", true);
+        fireUnparsableChangeDomEvent();
+        Assert.assertEquals("Time has invalid format",
+                getErrorMessageProperty());
+    }
+
+    @Test
+    public void required_validate_emptyErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setValue(LocalTime.now());
+        testField.setValue(null);
+        Assert.assertEquals("", getErrorMessageProperty());
+    }
+
+    @Test
+    public void required_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new TimePicker.TimePickerI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setValue(LocalTime.now());
+        testField.setValue(null);
+        Assert.assertEquals("Field is required", getErrorMessageProperty());
+    }
+
+    @Test
+    public void min_validate_emptyErrorMessageDisplayed() {
+        testField.setMin(LocalTime.now());
+        testField.setValue(LocalTime.now().minusHours(1));
+        Assert.assertEquals("", getErrorMessageProperty());
+    }
+
+    @Test
+    public void min_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setMin(LocalTime.now());
+        testField.setI18n(new TimePicker.TimePickerI18n()
+                .setMinErrorMessage("Time is too small"));
+        testField.setValue(LocalTime.now().minusHours(1));
+        Assert.assertEquals("Time is too small", getErrorMessageProperty());
+    }
+
+    @Test
+    public void max_validate_emptyErrorMessageDisplayed() {
+        testField.setMax(LocalTime.now());
+        testField.setValue(LocalTime.now().plusHours(1));
+        Assert.assertEquals("", getErrorMessageProperty());
+    }
+
+    @Test
+    public void max_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setMax(LocalTime.now());
+        testField.setI18n(new TimePicker.TimePickerI18n()
+                .setMaxErrorMessage("Time is too big"));
+        testField.setValue(LocalTime.now().plusHours(1));
+        Assert.assertEquals("Time is too big", getErrorMessageProperty());
+    }
+
+    @Test
+    public void setI18nAndCustomErrorMessage_validate_customErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new TimePicker.TimePickerI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setErrorMessage("Custom error message");
+        testField.setValue(LocalTime.now());
+        testField.setValue(null);
+        Assert.assertEquals("Custom error message", getErrorMessageProperty());
+    }
+
+    @Test
+    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_i18nErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new TimePicker.TimePickerI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setErrorMessage("Custom error message");
+        testField.setValue(LocalTime.now());
+        testField.setValue(null);
+        testField.setErrorMessage("");
+        Assert.assertEquals("Field is required", getErrorMessageProperty());
+    }
+
     protected TimePicker createTestField() {
         return new TimePicker();
+    }
+
+    private void fireUnparsableChangeDomEvent() {
+        DomEvent unparsableChangeDomEvent = new DomEvent(testField.getElement(),
+                "unparsable-change", Json.createObject());
+        testField.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(unparsableChangeDomEvent);
+    }
+
+    private String getErrorMessageProperty() {
+        return testField.getElement().getProperty("errorMessage");
     }
 }
