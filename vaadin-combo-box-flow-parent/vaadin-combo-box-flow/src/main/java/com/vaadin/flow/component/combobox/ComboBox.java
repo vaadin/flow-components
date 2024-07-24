@@ -18,6 +18,8 @@ package com.vaadin.flow.component.combobox;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasSize;
@@ -352,5 +354,66 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     public void setOverlayWidth(float width, Unit unit) {
         Objects.requireNonNull(unit, "Unit can not be null");
         setOverlayWidth(HasSize.getCssSize(width, unit));
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using {@link #setI18n(ComboBoxI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public ComboBoxI18n getI18n() {
+        return (ComboBoxI18n) super.getI18n();
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(ComboBoxI18n i18n) {
+        super.setI18n(i18n);
+    }
+
+    /**
+     * The internationalization properties for {@link ComboBox}.
+     */
+    public static class ComboBoxI18n implements ComboBoxBaseI18n {
+
+        private String requiredErrorMessage;
+
+        /**
+         * Gets the error message displayed when the field is required but
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         * @see ComboBox#isRequiredIndicatorVisible()
+         * @see ComboBox#setRequiredIndicatorVisible(boolean)
+         */
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field is required but
+         * empty.
+         * <p>
+         * Note, custom error messages set with
+         * {@link ComboBox#setErrorMessage(String)} take priority over i18n error
+         * messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see ComboBox#isRequiredIndicatorVisible()
+         * @see ComboBox#setRequiredIndicatorVisible(boolean)
+         */
+        public ComboBoxI18n setRequiredErrorMessage(String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
     }
 }
