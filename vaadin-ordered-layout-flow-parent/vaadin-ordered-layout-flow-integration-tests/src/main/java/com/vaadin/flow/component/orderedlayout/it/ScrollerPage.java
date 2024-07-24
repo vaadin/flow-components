@@ -17,14 +17,11 @@ package com.vaadin.flow.component.orderedlayout.it;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 /**
- * View for the ordered layouts {@link HorizontalLayout}, {@link VerticalLayout}
- * and {@link Scroller}.
+ * View for the {@link Scroller}.
  *
  * @author Vaadin Ltd
  */
@@ -42,6 +39,9 @@ public class ScrollerPage extends Div {
         scrollTopButton.setId("scroll-to-top-button");
 
         Div content = new Div("Text ".repeat(30));
+
+        scroller.setWidth("100px");
+        scroller.setHeight("100px");
 
         scroller.setContent(content);
         add(scrollBottomButton, scrollTopButton, scroller);
