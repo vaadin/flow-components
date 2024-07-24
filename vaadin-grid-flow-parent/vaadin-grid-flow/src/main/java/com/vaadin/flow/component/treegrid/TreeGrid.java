@@ -35,6 +35,7 @@ import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
+import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.data.binder.PropertyDefinition;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -778,6 +779,7 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
+    @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setParentRequestedRange(int start, int length,
             String parentKey) {
@@ -787,6 +789,7 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
+    @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setParentRequestedRanges(JsonArray array) {
         for (int index = 0; index < array.length(); index++) {
@@ -809,6 +812,7 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
+    @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void confirmParentUpdate(int id, String parentKey) {
         getDataCommunicator().confirmUpdate(id, parentKey);
