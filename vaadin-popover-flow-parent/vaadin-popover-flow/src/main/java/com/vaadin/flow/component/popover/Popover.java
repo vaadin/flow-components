@@ -21,11 +21,20 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import elemental.json.Json;
+import elemental.json.JsonArray;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
@@ -46,20 +55,241 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-popover")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha4")
-@NpmPackage(value = "@vaadin/popover", version = "24.5.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha5")
+@NpmPackage(value = "@vaadin/popover", version = "24.5.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
-public class Popover extends Component implements HasComponents {
+public class Popover extends Component implements HasAriaLabel, HasComponents {
 
     private Component target;
     private Registration targetAttachRegistration;
+
+    private boolean openOnClick = true;
+    private boolean openOnHover = false;
+    private boolean openOnFocus = false;
 
     /**
      * Constructs an empty popover.
      */
     public Popover() {
         getElement().getNode().addAttachListener(this::attachComponentRenderer);
+
+        // Workaround for: https://github.com/vaadin/flow/issues/3496
+        getElement().setProperty("opened", false);
+
+        updateTrigger();
+        setOverlayRole("dialog");
+    }
+
+    /**
+     * {@code opened-changed} event is sent when the overlay opened state
+     * changes.
+     */
+    @DomEvent("opened-changed")
+    public static class OpenedChangeEvent extends ComponentEvent<Popover> {
+        private final boolean opened;
+
+        public OpenedChangeEvent(Popover source, boolean fromClient) {
+            super(source, fromClient);
+            this.opened = source.isOpened();
+        }
+
+        public boolean isOpened() {
+            return opened;
+        }
+    }
+
+    /**
+     * Opens or closes the popover.
+     *
+     * @param opened
+     *            {@code true} to open the popover, {@code false} to close it
+     */
+    public void setOpened(boolean opened) {
+        if (opened != isOpened()) {
+            getElement().setProperty("opened", opened);
+            fireEvent(new OpenedChangeEvent(this, false));
+        }
+    }
+
+    /**
+     * Opens the popover.
+     */
+    public void open() {
+        setOpened(true);
+    }
+
+    /**
+     * Closes the popover.
+     */
+    public void close() {
+        setOpened(false);
+    }
+
+    /**
+     * Gets the open state from the popover.
+     *
+     * @return the {@code opened} property from the popover
+     */
+    @Synchronize(property = "opened", value = "opened-changed")
+    public boolean isOpened() {
+        return getElement().getProperty("opened", false);
+    }
+
+    /**
+     * Add a listener for event fired by the {@code opened-changed} events.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
+     */
+    public Registration addOpenedChangeListener(
+            ComponentEventListener<OpenedChangeEvent> listener) {
+        return addListener(OpenedChangeEvent.class, listener);
+    }
+
+    /**
+     * Sets whether component should open modal or modeless popover. When the
+     * popover is modal, interacting with elements behind it will be prevented
+     * until the popover is closed.
+     * <p>
+     * NOTE: this setting does not involve server-side modality, as the modal
+     * popover is typically not used to prevent anything else from happening
+     * while it's open.
+     * <p>
+     * By default, the popover is non-modal.
+     *
+     * @param modal
+     *            {@code true} to enable popover to open as modal, {@code false}
+     *            otherwise.
+     */
+    public void setModal(boolean modal) {
+        getElement().setProperty("modal", modal);
+    }
+
+    /**
+     * Gets whether component is set as modal or modeless popover. By default,
+     * the popover is non-modal.
+     *
+     * @return {@code true} if modal popover, {@code false} otherwise.
+     */
+    public boolean isModal() {
+        return getElement().getProperty("modal", false);
+    }
+
+    /**
+     * Sets whether component should show a backdrop (modality curtain) when
+     * opened.
+     * <p>
+     * By default, the backdrop is not shown.
+     *
+     * @param backdropVisible
+     *            {@code true} to show the backdrop, {@code false} otherwise.
+     */
+    public void setBackdropVisible(boolean backdropVisible) {
+        getElement().setProperty("withBackdrop", backdropVisible);
+    }
+
+    /**
+     * Gets whether component shows a backdrop (modality curtain) when opened.
+     *
+     * @return {@code true} if backdrop is visible, {@code false} otherwise.
+     */
+    public boolean isBackdropVisible() {
+        return getElement().getProperty("withBackdrop", false);
+    }
+
+    @Override
+    public void setAriaLabel(String ariaLabel) {
+        getElement().setProperty("accessibleName", ariaLabel);
+    }
+
+    @Override
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
+    }
+
+    @Override
+    public void setAriaLabelledBy(String labelledBy) {
+        getElement().setProperty("accessibleNameRef", labelledBy);
+    }
+
+    @Override
+    public Optional<String> getAriaLabelledBy() {
+        return Optional
+                .ofNullable(getElement().getProperty("accessibleNameRef"));
+    }
+
+    /**
+     * Sets the ARIA role for the overlay element, used by screen readers.
+     *
+     * @param role
+     *            the role to set
+     */
+    public void setOverlayRole(String role) {
+        Objects.requireNonNull(role, "Role cannot be null");
+
+        getElement().setProperty("overlayRole", role);
+    }
+
+    /**
+     * Gets the ARIA role for the overlay element, used by screen readers.
+     * Defaults to {@code dialog}.
+     *
+     * @return the role
+     */
+    public String getOverlayRole() {
+        return getElement().getProperty("overlayRole");
+    }
+
+    /**
+     * Gets whether this popover can be closed by pressing the Esc key or not.
+     * <p>
+     * By default, the popover is closable with Esc.
+     *
+     * @return {@code true} if this popover can be closed with the Esc key,
+     *         {@code false} otherwise
+     */
+    public boolean isCloseOnEsc() {
+        return !getElement().getProperty("noCloseOnEsc", false);
+    }
+
+    /**
+     * Sets whether this popover can be closed by pressing the Esc key or not.
+     * <p>
+     * By default, the popover is closable with Esc.
+     *
+     * @param closeOnEsc
+     *            {@code true} to enable closing this popover with the Esc key,
+     *            {@code false} to disable it
+     */
+    public void setCloseOnEsc(boolean closeOnEsc) {
+        getElement().setProperty("noCloseOnEsc", !closeOnEsc);
+    }
+
+    /**
+     * Gets whether this popover can be closed by clicking outside of it or not.
+     * <p>
+     * By default, the popover is closable with an outside click.
+     *
+     * @return {@code true} if this popover can be closed by an outside click,
+     *         {@code false} otherwise
+     */
+    public boolean isCloseOnOutsideClick() {
+        return !getElement().getProperty("noCloseOnOutsideClick", false);
+    }
+
+    /**
+     * Sets whether this popover can be closed by clicking outside of it or not.
+     * <p>
+     * By default, the popover is closable with an outside click.
+     *
+     * @param closeOnOutsideClick
+     *            {@code true} to enable closing this popover with an outside
+     *            click, {@code false} to disable it
+     */
+    public void setCloseOnOutsideClick(boolean closeOnOutsideClick) {
+        getElement().setProperty("noCloseOnOutsideClick", !closeOnOutsideClick);
     }
 
     /**
@@ -108,6 +338,154 @@ public class Popover extends Component implements HasComponents {
      */
     public String getFor() {
         return getElement().getProperty("for");
+    }
+
+    /**
+     * The delay in milliseconds before the popover is opened on target keyboard
+     * focus.
+     *
+     * @param focusDelay
+     *            the delay in milliseconds
+     */
+    public void setFocusDelay(int focusDelay) {
+        getElement().setProperty("focusDelay", focusDelay);
+    }
+
+    /**
+     * The delay in milliseconds before the popover is opened on target keyboard
+     * focus.
+     *
+     * @return the delay in milliseconds
+     */
+    public int getFocusDelay() {
+        return getElement().getProperty("focusDelay", 0);
+    }
+
+    /**
+     * The delay in milliseconds before the popover is opened on target hover.
+     *
+     * @param hoverDelay
+     *            the delay in milliseconds
+     */
+    public void setHoverDelay(int hoverDelay) {
+        getElement().setProperty("hoverDelay", hoverDelay);
+    }
+
+    /**
+     * The delay in milliseconds before the popover is opened on target hover.
+     *
+     * @return the delay in milliseconds
+     */
+    public int getHoverDelay() {
+        return getElement().getProperty("hoverDelay", 0);
+    }
+
+    /**
+     * The delay in milliseconds before the popover is closed on losing hover.
+     * On target blur, the popover is closed immediately.
+     *
+     * @param hideDelay
+     *            the delay in milliseconds
+     */
+    public void setHideDelay(int hideDelay) {
+        getElement().setProperty("hideDelay", hideDelay);
+    }
+
+    /**
+     * The delay in milliseconds before the popover is closed on losing hover.
+     * On target blur, the popover is closed immediately.
+     *
+     * @return the delay in milliseconds
+     */
+    public int getHideDelay() {
+        return getElement().getProperty("hideDelay", 0);
+    }
+
+    /**
+     * Sets whether the popover can be opened via target click.
+     *
+     * @param openOnClick
+     *            {@code true} to allow opening the popover via target click,
+     *            {@code false} to disallow it.
+     */
+    public void setOpenOnClick(boolean openOnClick) {
+        this.openOnClick = openOnClick;
+        updateTrigger();
+    }
+
+    /**
+     * Gets whether the popover can be opened via target click, which is
+     * {@code true} by default.
+     *
+     * @return {@code true} if the popover can be opened with target click,
+     *         {@code false} otherwise.
+     */
+    public boolean isOpenOnClick() {
+        return this.openOnClick;
+    }
+
+    /**
+     * Sets whether the popover can be opened via target focus.
+     *
+     * @param openOnFocus
+     *            {@code true} to allow opening the popover via target focus,
+     *            {@code false} to disallow it.
+     */
+    public void setOpenOnFocus(boolean openOnFocus) {
+        this.openOnFocus = openOnFocus;
+        updateTrigger();
+    }
+
+    /**
+     * Gets whether the popover can be opened via target focus, which is
+     * {@code false} by default.
+     *
+     * @return {@code true} if the popover can be opened with target focus,
+     *         {@code false} otherwise.
+     */
+    public boolean isOpenOnFocus() {
+        return this.openOnFocus;
+    }
+
+    /**
+     * Sets whether the popover can be opened via target hover.
+     *
+     * @param openOnHover
+     *            {@code true} to allow opening the popover via target hover,
+     *            {@code false} to disallow it.
+     */
+    public void setOpenOnHover(boolean openOnHover) {
+        this.openOnHover = openOnHover;
+        updateTrigger();
+    }
+
+    /**
+     * Gets whether the popover can be opened via target hover, which is
+     * {@code false} by default.
+     *
+     * @return {@code true} if the popover can be opened with target hover,
+     *         {@code false} otherwise.
+     */
+    public boolean isOpenOnHover() {
+        return this.openOnHover;
+    }
+
+    private void updateTrigger() {
+        JsonArray trigger = Json.createArray();
+
+        if (isOpenOnClick()) {
+            trigger.set(trigger.length(), "click");
+        }
+
+        if (isOpenOnHover()) {
+            trigger.set(trigger.length(), "hover");
+        }
+
+        if (isOpenOnFocus()) {
+            trigger.set(trigger.length(), "focus");
+        }
+
+        getElement().setPropertyJson("trigger", trigger);
     }
 
     /**
@@ -161,6 +539,40 @@ public class Popover extends Component implements HasComponents {
      */
     public Component getTarget() {
         return target;
+    }
+
+    /**
+     * Sets the width of the popover overlay content area.
+     * <p>
+     * The width should be in a format understood by the browser, e.g. "100px"
+     * or "2.5em" (Using relative unit, such as percentage, will lead to
+     * unexpected results).
+     * <p>
+     * If the provided {@code width} value is {@literal null} then width is
+     * removed, and the popover overlay is auto-sized based on the content.
+     *
+     * @param width
+     *            the width to set, may be {@code null}
+     */
+    public void setWidth(String width) {
+        getElement().setProperty("contentWidth", width);
+    }
+
+    /**
+     * Sets the height of the popover overlay content area.
+     * <p>
+     * The height should be in a format understood by the browser, e.g. "100px"
+     * or "2.5em" (Using relative unit, such as percentage, will lead to
+     * unexpected results).
+     * <p>
+     * If the provided {@code height} value is {@literal null} then height is
+     * removed, and the popover overlay is auto-sized based on the content.
+     *
+     * @param height
+     *            the height to set, may be {@code null}
+     */
+    public void setHeight(String height) {
+        getElement().setProperty("contentHeight", height);
     }
 
     /**
