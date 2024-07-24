@@ -1,6 +1,7 @@
 package com.vaadin.flow.component.combobox.test.validation;
 
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
+import com.vaadin.flow.component.combobox.MultiSelectComboBoxI18n;
 import com.vaadin.flow.router.Route;
 import com.vaadin.tests.validation.AbstractValidationPage;
 
@@ -10,9 +11,13 @@ import java.util.List;
 public class MultiSelectComboBoxBasicValidationPage
         extends AbstractValidationPage<MultiSelectComboBox<String>> {
     public static final String REQUIRED_BUTTON = "required-button";
+    public static final String REQUIRED_ERROR_MESSAGE = "Field is required";
     public static final String ENABLE_CUSTOM_VALUE_BUTTON = "enable-custom-value-button";
 
     public MultiSelectComboBoxBasicValidationPage() {
+        testField.setI18n(new MultiSelectComboBoxI18n()
+                .setRequiredErrorMessage(REQUIRED_ERROR_MESSAGE));
+
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
             testField.setRequired(true);
         }));
