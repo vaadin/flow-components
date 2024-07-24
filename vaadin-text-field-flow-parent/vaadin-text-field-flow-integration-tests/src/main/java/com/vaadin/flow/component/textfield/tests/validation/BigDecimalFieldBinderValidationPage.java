@@ -25,9 +25,11 @@ import com.vaadin.tests.validation.AbstractValidationPage;
 @Route("vaadin-big-decimal-field/validation/binder")
 public class BigDecimalFieldBinderValidationPage
         extends AbstractValidationPage<BigDecimalField> {
-    public static final String REQUIRED_ERROR_MESSAGE = "The field is required";
     public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
     public static final String RESET_BEAN_BUTTON = "reset-bean-button";
+
+    public static final String REQUIRED_ERROR_MESSAGE = "Field is required";
+    public static final String BAD_INPUT_ERROR_MESSAGE = "Number has incorrect format";
 
     public static class Bean {
         private BigDecimal property;
@@ -52,6 +54,9 @@ public class BigDecimalFieldBinderValidationPage
         binder.addStatusChangeListener(event -> {
             incrementServerValidationCounter();
         });
+
+        testField.setI18n(new BigDecimalField.BigDecimalFieldI18n()
+                .setBadInputErrorMessage(BAD_INPUT_ERROR_MESSAGE));
 
         add(createButton(CLEAR_VALUE_BUTTON, "Clear value", event -> {
             testField.clear();
