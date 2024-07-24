@@ -6,6 +6,10 @@
  * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
+import format from 'date-fns/format';
+import parse from 'date-fns/parse';
+import isValid from 'date-fns/isValid';
+
 (function () {
     const tryCatchWrapper = function (callback) {
         return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Date Picker', 'vaadin-date-picker-flow');
@@ -68,11 +72,6 @@
                     })
                 );
 
-                const dateFns = window.Vaadin.Flow.datepickerDateFns;
-                if (!dateFns) {
-                    throw new Error("Custom date-fns bundle for date picker is not registered at window.Vaadin.Flow.datepickerDateFns");
-                }
-
                 const createLocaleBasedDateFormat = function (locale) {
                     try {
                         // Check whether the locale is supported or not
@@ -131,10 +130,8 @@
                     }
 
                     function formatDate(dateParts) {
-                        const format = formats[0];
                         const date = vaadinDatePickerHelpers.parseDate(`${dateParts.year}-${dateParts.month + 1}-${dateParts.day}`);
-
-                        return dateFns.format(date, format);
+                        return format(date, formats[0]);
                     }
 
                     function parseDate(dateString) {
@@ -143,8 +140,8 @@
                             // We first try to match the date with the shorter version.
                             const shortYearFormat = getShortYearFormat(format);
                             if (shortYearFormat) {
-                                const shortYearFormatDate = dateFns.parse(dateString, shortYearFormat, referenceDate);
-                                if (dateFns.isValid(shortYearFormatDate)) {
+                                const shortYearFormatDate = parse(dateString, shortYearFormat, referenceDate);
+                                if (isValid(shortYearFormatDate)) {
                                     let yearValue = shortYearFormatDate.getFullYear();
                                     // The last parsed year check handles the case where a four-digit year is parsed, then formatted
                                     // as a two-digit year, and then parsed again. In this case we want to keep the century of the
@@ -162,9 +159,9 @@
                                     };
                                 }
                             }
-                            const date = dateFns.parse(dateString, format, referenceDate);
+                            const date = parse(dateString, format, referenceDate);
 
-                            if (dateFns.isValid(date)) {
+                            if (isValid(date)) {
                                 let yearValue = date.getFullYear();
                                 if (
                                     datepicker.$connector._lastParsedYear &&

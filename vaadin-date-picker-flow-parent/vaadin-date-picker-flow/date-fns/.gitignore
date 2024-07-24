@@ -1,7 +1,0 @@
-node
-output
-node_modules
-
-# Include package.json, which is excluded by outer .gitignore
-!package.json
-!package-lock.json
