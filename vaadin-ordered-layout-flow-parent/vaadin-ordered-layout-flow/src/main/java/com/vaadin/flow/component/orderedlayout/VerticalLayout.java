@@ -12,7 +12,6 @@ import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
@@ -24,7 +23,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @Tag("vaadin-vertical-layout")
 @NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "1.4.0")
 @JsModule("@vaadin/vaadin-ordered-layout/src/vaadin-vertical-layout.js")
-@HtmlImport("frontend://bower_components/vaadin-ordered-layout/src/vaadin-vertical-layout.html")
 public class VerticalLayout extends Component implements ThemableLayout,
         FlexComponent<VerticalLayout>, ClickNotifier<VerticalLayout> {
 

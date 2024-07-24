@@ -14,7 +14,6 @@ import com.vaadin.flow.component.PropertyDescriptor;
 import com.vaadin.flow.component.PropertyDescriptors;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.router.RouterLayout;
@@ -26,7 +25,6 @@ import java.util.Objects;
  * quick and easy way to get a common application layout.
  */
 @Tag("vaadin-app-layout")
-@HtmlImport("frontend://bower_components/vaadin-app-layout/src/vaadin-app-layout.html")
 @NpmPackage(value = "@vaadin/vaadin-app-layout", version = "2.2.0")
 @JsModule("@vaadin/vaadin-app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout {

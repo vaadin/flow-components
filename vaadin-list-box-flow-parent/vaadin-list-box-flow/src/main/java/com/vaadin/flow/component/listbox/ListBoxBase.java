@@ -18,7 +18,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.binder.HasDataProvider;
@@ -40,7 +39,6 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-list-box")
 @NpmPackage(value = "@vaadin/vaadin-list-box", version = "1.4.0")
 @JsModule("@vaadin/vaadin-list-box/src/vaadin-list-box.js")
-@HtmlImport("frontend://bower_components/vaadin-list-box/src/vaadin-list-box.html")
 public abstract class ListBoxBase<C extends ListBoxBase<C, ITEM, VALUE>, ITEM, VALUE>
         extends AbstractSinglePropertyField<C, VALUE>
         implements HasItemsAndComponents<ITEM>, HasDataProvider<ITEM>, HasSize {

@@ -42,7 +42,6 @@ import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -129,11 +128,6 @@ import org.slf4j.LoggerFactory;
 @JsModule("./flow-component-renderer.js")
 @JsModule("./gridConnector-es6.js")
 
-@HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid.html")
-@HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-column.html")
-@HtmlImport("frontend://bower_components/vaadin-grid/src/vaadin-grid-sorter.html")
-@HtmlImport("frontend://bower_components/vaadin-checkbox/src/vaadin-checkbox.html")
-@HtmlImport("frontend://flow-component-renderer.html")
 @JavaScript("frontend://gridConnector.js")
 public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         HasSize, Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>,

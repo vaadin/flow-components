@@ -11,7 +11,6 @@ package com.vaadin.flow.component.listbox;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.data.binder.HasItemsAndComponents.ItemComponent;
@@ -26,7 +25,6 @@ import com.vaadin.flow.data.binder.HasItemsAndComponents.ItemComponent;
  *            type of the item represented by this component
  */
 @Tag("vaadin-item")
-@HtmlImport("frontend://bower_components/vaadin-item/vaadin-item.html")
 @NpmPackage(value = "@vaadin/vaadin-item", version = "2.3.0")
 @JsModule("@vaadin/vaadin-item/src/vaadin-item.js")
 class VaadinItem<T> extends Component

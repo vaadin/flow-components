@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.radiobutton.tests;
 
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.polymertemplate.Id;
 import com.vaadin.flow.component.polymertemplate.PolymerTemplate;
@@ -17,7 +16,6 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.templatemodel.TemplateModel;
 
 @JsModule("./src/detach-reattach.js")
-@HtmlImport("src/detach-reattach.html")
 @Tag("detach-reattach")
 public class DetachReattachTemplate extends PolymerTemplate<TemplateModel> {
     @Id("testGroup")

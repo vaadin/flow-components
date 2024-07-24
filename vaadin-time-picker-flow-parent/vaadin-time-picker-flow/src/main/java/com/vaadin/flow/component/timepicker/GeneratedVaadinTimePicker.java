@@ -16,7 +16,6 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.NotSupported;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableBiFunction;
@@ -121,7 +120,6 @@ import elemental.json.JsonObject;
 @Tag("vaadin-time-picker")
 @NpmPackage(value = "@vaadin/vaadin-time-picker", version = "3.1.0")
 @JsModule("@vaadin/vaadin-time-picker/src/vaadin-time-picker.js")
-@HtmlImport("frontend://bower_components/vaadin-time-picker/src/vaadin-time-picker.html")
 public abstract class GeneratedVaadinTimePicker<R extends GeneratedVaadinTimePicker<R, T>, T>
         extends AbstractSinglePropertyField<R, T>
         implements HasStyle, Focusable<R> {

@@ -11,7 +11,6 @@ package com.vaadin.flow.component.accordion.examples;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.accordion.Accordion;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -23,7 +22,6 @@ import com.vaadin.flow.templatemodel.TemplateModel;
 @Route(value = "vaadin-accordion/accordionintemplate")
 @Tag("accordion-app")
 @JsModule("./accordion-in-template.js")
-@HtmlImport("frontend://src/accordion-in-template.html")
 public class AccordionInTemplate extends PolymerTemplate<TemplateModel> {
 
     @Id

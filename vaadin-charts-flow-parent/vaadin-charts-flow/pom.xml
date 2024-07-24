@@ -14,16 +14,6 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.vaadin.webjar</groupId>
-            <artifactId>vaadin-charts</artifactId>
-            <version>6.3.7</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.bowergithub.vaadin</groupId>
-            <artifactId>vaadin-themable-mixin</artifactId>
-            <version>1.5.2</version>
-        </dependency>
-        <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>flow-data</artifactId>
             <version>${flow.version}</version>

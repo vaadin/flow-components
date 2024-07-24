@@ -12,7 +12,6 @@ import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
@@ -160,7 +159,6 @@ import com.vaadin.flow.dom.Element;
 @Tag("vaadin-form-item")
 @NpmPackage(value = "@vaadin/vaadin-form-layout", version = "2.3.0")
 @JsModule("@vaadin/vaadin-form-layout/src/vaadin-form-item.js")
-@HtmlImport("frontend://bower_components/vaadin-form-layout/src/vaadin-form-item.html")
 public abstract class GeneratedVaadinFormItem<R extends GeneratedVaadinFormItem<R>>
         extends Component implements HasStyle, ClickNotifier<R> {
 

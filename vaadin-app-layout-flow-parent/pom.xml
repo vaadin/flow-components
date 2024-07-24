@@ -24,7 +24,6 @@
             </activation>
             <modules>
                 <module>vaadin-app-layout-flow-integration-tests</module>
-                <module>vaadin-app-layout-flow-integration-tests/pom-bower-mode.xml</module>
             </modules>
         </profile>
     </profiles>

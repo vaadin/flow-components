@@ -31,7 +31,6 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.board.internal.FunctionCaller;
-import com.vaadin.flow.component.dependency.HtmlImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
@@ -57,7 +56,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @Tag("vaadin-board")
 @NpmPackage(value = "@vaadin/vaadin-board", version = "2.2.2")
 @JsModule("@vaadin/vaadin-board/vaadin-board.js")
-@HtmlImport("frontend://bower_components/vaadin-board/vaadin-board.html")
 public class Board extends Component
         implements HasSize, HasStyle, HasOrderedComponents<Board> {
 
