@@ -91,7 +91,7 @@ read option
 case $option in
    1) askModule; cmd="mvn clean test-compile -amd -B $quiet -DskipFrontend -pl $module-flow-parent";;
    2) askModule; cmd="mvn jetty:run -am -B $quiet -DskipTests -pl $module-flow-parent/$module-flow-demo -Pwar"; browser=true;;
-   3) askModule; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify $quiet -am -B -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $args";;
+   3) askModule; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify $quiet -am -B -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $args -Dsurefire.failIfNoSpecifiedTests=false";;
    4) askModule; cmd="mvn jetty:run -am -B $quiet -DskipTests -pl $module-flow-parent/$module-flow-integration-tests"; browser=true;;
    5) askSauce; askModule; askITests; askUTests; askJetty; runFrontend; cmd="mvn verify -am -B $quiet -pl $module-flow-parent/$module-flow-integration-tests $utests $itests $frontend $jetty $args -Dtest.use.hub=true -Psaucelabs -Dsauce.user=$SAUCE_USER -Dsauce.sauceAccessKey=$SAUCE_ACCESS_KEY";;
    6) cmd="mvn clean test-compile -DskipFrontend -B $quiet -T 1C";;
