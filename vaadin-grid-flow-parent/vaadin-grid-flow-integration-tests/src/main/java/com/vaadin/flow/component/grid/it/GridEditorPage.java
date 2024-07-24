@@ -55,13 +55,14 @@ public class GridEditorPage extends Div {
                 items.add(new Person("foo" + i, 10 + i));
             }
             grid.getDataProvider().refreshAll();
-            
+
         });
         add100Items.setId("add-100-items");
 
-        NativeButton editLastItem = new NativeButton("Edit last item", event -> {
-            editor.editItem(items.get(items.size() - 1));
-        });
+        NativeButton editLastItem = new NativeButton("Edit last item",
+                event -> {
+                    editor.editItem(items.get(items.size() - 1));
+                });
         editLastItem.setId("edit-last-item");
 
         add(grid, subsequentEditRequests, add100Items, editLastItem);
