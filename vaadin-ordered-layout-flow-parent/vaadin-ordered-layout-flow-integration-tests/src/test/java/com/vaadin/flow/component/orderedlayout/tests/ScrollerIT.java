@@ -27,6 +27,7 @@ public class ScrollerIT extends AbstractComponentIT {
         int scrollHeight = scroller.getPropertyInteger("scrollHeight");
         int clientHeight = scroller.getPropertyInteger("clientHeight");
         Assert.assertEquals(scrollHeight - clientHeight, scrollTop);
+        Assert.assertNotEquals(0, scrollTop);
     }
 
     @Test
