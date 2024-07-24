@@ -11,6 +11,10 @@ import static com.vaadin.flow.component.timepicker.tests.validation.BasicValidat
 import static com.vaadin.flow.component.timepicker.tests.validation.BasicValidationPage.MAX_INPUT;
 import static com.vaadin.flow.component.timepicker.tests.validation.BasicValidationPage.REQUIRED_BUTTON;
 import static com.vaadin.flow.component.timepicker.tests.validation.BasicValidationPage.CLEAR_VALUE_BUTTON;
+import static com.vaadin.flow.component.timepicker.tests.validation.BasicValidationPage.BAD_INPUT_ERROR_MESSAGE;
+import static com.vaadin.flow.component.timepicker.tests.validation.BasicValidationPage.MAX_ERROR_MESSAGE;
+import static com.vaadin.flow.component.timepicker.tests.validation.BasicValidationPage.MIN_ERROR_MESSAGE;
+import static com.vaadin.flow.component.timepicker.tests.validation.BasicValidationPage.REQUIRED_ERROR_MESSAGE;
 
 @TestPath("vaadin-time-picker/validation/basic")
 public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
@@ -18,6 +22,7 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
     public void fieldIsInitiallyValid() {
         assertClientValid();
         assertServerValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -26,6 +31,7 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -36,6 +42,7 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -46,11 +53,25 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         testField.selectByText("");
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+
+        testField.selectByText("INVALID");
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
+
+        testField.selectByText("");
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -61,21 +82,25 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(MIN_ERROR_MESSAGE);
 
         testField.selectByText("11:00");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         testField.selectByText("12:00");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         testField.selectByText("");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -86,21 +111,25 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(MAX_ERROR_MESSAGE);
 
         testField.selectByText("11:00");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         testField.selectByText("10:00");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         testField.selectByText("");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -109,21 +138,25 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         testField.selectByText("10:00");
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         testField.selectByText("INVALID");
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         testField.selectByText("");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -131,10 +164,12 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         testField.selectByText("10:00");
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -143,11 +178,13 @@ public class BasicValidationIT extends AbstractValidationIT<TimePickerElement> {
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
     }
 
     @Test
