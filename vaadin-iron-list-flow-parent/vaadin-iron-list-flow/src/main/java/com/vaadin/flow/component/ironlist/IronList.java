@@ -74,9 +74,6 @@ import elemental.json.JsonValue;
 @JsModule("./flow-component-renderer.js")
 @JsModule("./ironListConnector-es6.js")
 @JsModule("./ironListStyles.js")
-// BOWER MODE
-@JavaScript("frontend://ironListConnector.js")
-@StyleSheet("frontend://ironListStyles.css")
 public class IronList<T> extends Component implements HasDataProvider<T>,
         HasStyle, HasSize, Focusable<IronList<T>> {
 
