@@ -15,12 +15,14 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Synchronize;
@@ -59,7 +61,7 @@ import com.vaadin.flow.shared.Registration;
 public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         implements HasThemeVariant<TextFieldVariant> {
 
-    private boolean isConnectorAttached;
+    private BigDecimalFieldI18n i18n;
 
     private Locale locale;
 
@@ -84,6 +86,9 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     private boolean manualValidationEnabled = false;
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<BigDecimal>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
+
+    private String customErrorMessage;
+    private String constraintErrorMessage;
 
     /**
      * Constructs an empty {@code BigDecimalField}.
@@ -198,6 +203,45 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         addValueChangeListener(listener);
     }
 
+    /**
+     * Sets an error message to display for all constraint violations.
+     * <p>
+     * This error message takes priority over i18n error messages when both are
+     * set.
+     *
+     * @param errorMessage
+     *            the error message to set, or {@code null} to clear
+     *
+     */
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        customErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    /**
+     * Gets the error message displayed for all constraint violations.
+     *
+     * @return the error message
+     */
+    @Override
+    public String getErrorMessage() {
+        return customErrorMessage;
+    }
+
+    private void setConstraintErrorMessage(String errorMessage) {
+        constraintErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    private void updateErrorMessage() {
+        String errorMessage = constraintErrorMessage;
+        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
+            errorMessage = customErrorMessage;
+        }
+        getElement().setProperty("errorMessage", errorMessage);
+    }
+
     @Override
     public BigDecimal getEmptyValue() {
         return null;
@@ -279,29 +323,47 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     }
 
     /**
-     * Performs server-side validation of the current value. This is needed
-     * because it is possible to circumvent the client-side validation
-     * constraints using browser development tools.
+     * Validates the current value against the constraints and sets the
+     * {@code invalid} property and the {@code errorMessage} property based on
+     * the result. If a custom error message is provided with
+     * {@link #setErrorMessage(String)}, it is used. Otherwise, the error
+     * message defined in the i18n object is used.
+     * <p>
+     * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            BigDecimal value = getValue();
+        if (this.manualValidationEnabled) {
+            return;
+        }
 
-            ValidationResult requiredValidation = ValidationUtil
-                    .validateRequiredConstraint("",
-                            isRequiredIndicatorVisible(), value,
-                            getEmptyValue());
-
-            setInvalid(requiredValidation.isError()
-                    || checkValidity(value).isError());
+        ValidationResult result = checkValidity(getValue(), true);
+        if (result.isError()) {
+            setInvalid(true);
+            setConstraintErrorMessage(result.getErrorMessage());
+        } else {
+            setInvalid(false);
+            setConstraintErrorMessage("");
         }
     }
 
-    private ValidationResult checkValidity(BigDecimal value) {
-        boolean hasNonParsableValue = valueEquals(value, getEmptyValue())
+    private ValidationResult checkValidity(BigDecimal value,
+            boolean withRequiredValidator) {
+        boolean hasBadInput = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
-        if (hasNonParsableValue) {
-            return ValidationResult.error("");
+        if (hasBadInput) {
+            return ValidationResult.error(getI18nErrorMessage(
+                    BigDecimalFieldI18n::getBadInputErrorMessage));
+        }
+
+        if (withRequiredValidator) {
+            ValidationResult requiredResult = ValidationUtil
+                    .validateRequiredConstraint(getI18nErrorMessage(
+                            BigDecimalFieldI18n::getRequiredErrorMessage),
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
+            if (requiredResult.isError()) {
+                return requiredResult;
+            }
         }
 
         return ValidationResult.ok();
@@ -309,7 +371,7 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
 
     @Override
     public Validator<BigDecimal> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        return (value, context) -> checkValidity(value, false);
     }
 
     @Override
@@ -388,5 +450,103 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(BigDecimalFieldI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public BigDecimalFieldI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(BigDecimalFieldI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+    }
+
+    private String getI18nErrorMessage(
+            Function<BigDecimalFieldI18n, String> getter) {
+        return Optional.ofNullable(i18n).map(getter).orElse("");
+    }
+
+    /**
+     * The internationalization properties for {@link BigDecimalField}.
+     */
+    public static class BigDecimalFieldI18n implements Serializable {
+
+        private String requiredErrorMessage;
+        private String badInputErrorMessage;
+
+        /**
+         * Gets the error message displayed when the field contains user input
+         * that the server is unable to convert to type {@link BigDecimal}.
+         *
+         * @return the error message or {@code null} if not set
+         */
+        public String getBadInputErrorMessage() {
+            return badInputErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field contains user input
+         * that the server is unable to convert to type {@link BigDecimal}.
+         * <p>
+         * Note, custom error messages set with
+         * {@link BigDecimalField#setErrorMessage(String)} take priority over
+         * i18n error messages.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         */
+        public BigDecimalFieldI18n setBadInputErrorMessage(
+                String errorMessage) {
+            badInputErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field is required but
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         * @see BigDecimalField#isRequiredIndicatorVisible()
+         * @see BigDecimalField#setRequiredIndicatorVisible(boolean)
+         */
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field is required but
+         * empty.
+         * <p>
+         * Note, custom error messages set with
+         * {@link BigDecimalField#setErrorMessage(String)} take priority over
+         * i18n error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see BigDecimalField#isRequiredIndicatorVisible()
+         * @see BigDecimalField#setRequiredIndicatorVisible(boolean)
+         */
+        public BigDecimalFieldI18n setRequiredErrorMessage(
+                String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
     }
 }
