@@ -207,4 +207,195 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer>
     public int getStep() {
         return (int) getStepDouble();
     }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(IntegerFieldI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    @Override
+    public IntegerFieldI18n getI18n() {
+        return (IntegerFieldI18n) super.getI18n();
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(IntegerFieldI18n i18n) {
+        super.setI18n(i18n);
+    }
+
+    /**
+     * The internationalization properties for {@link IntegerField}.
+     */
+    public static class IntegerFieldI18n implements AbstractNumberFieldI18n {
+        private String requiredErrorMessage;
+        private String badInputErrorMessage;
+        private String minErrorMessage;
+        private String maxErrorMessage;
+        private String stepErrorMessage;
+
+        /**
+         * Gets the error message displayed when the field contains user input
+         * that the server is unable to convert to type {@link Integer}.
+         *
+         * @return the error message or {@code null} if not set
+         */
+        @Override
+        public String getBadInputErrorMessage() {
+            return badInputErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field contains user input
+         * that the server is unable to convert to type {@link Integer}.
+         * <p>
+         * Note, custom error messages set with
+         * {@link IntegerField#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         */
+        public IntegerFieldI18n setBadInputErrorMessage(String errorMessage) {
+            badInputErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field is required but
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         * @see IntegerField#isRequired()
+         * @see IntegerField#setRequired(boolean)
+         */
+        @Override
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field is required but
+         * empty.
+         * <p>
+         * Note, custom error messages set with
+         * {@link IntegerField#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         * @see IntegerField#isRequired()
+         * @see IntegerField#setRequired(boolean)
+         */
+        public IntegerFieldI18n setRequiredErrorMessage(String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field value is smaller than
+         * the minimum allowed value.
+         *
+         * @return the error message or {@code null} if not set
+         * @see IntegerField#setMin(int)
+         * @see IntegerField#getMin()
+         */
+        @Override
+        public String getMinErrorMessage() {
+            return minErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field value is smaller
+         * than the minimum allowed value.
+         * <p>
+         * Note, custom error messages set with
+         * {@link IntegerField#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         * @see IntegerField#setMin(int)
+         * @see IntegerField#getMin()
+         */
+        public IntegerFieldI18n setMinErrorMessage(String errorMessage) {
+            minErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field value is greater than
+         * the maximum allowed value.
+         *
+         * @return the error message or {@code null} if not set
+         * @see IntegerField#setMax(int)
+         * @see IntegerField#getMax()
+         */
+        @Override
+        public String getMaxErrorMessage() {
+            return maxErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field value is greater
+         * than the maximum allowed value.
+         * <p>
+         * Note, custom error messages set with
+         * {@link IntegerField#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         * @see IntegerField#setMax(int)
+         * @see IntegerField#getMax()
+         */
+        public IntegerFieldI18n setMaxErrorMessage(String errorMessage) {
+            maxErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field value is not a
+         * multiple of the step value.
+         *
+         * @return the error message or {@code null} if not set
+         * @see IntegerField#setStep(int)
+         * @see IntegerField#getStep()
+         */
+        @Override
+        public String getStepErrorMessage() {
+            return stepErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field value is not a
+         * multiple of the step value.
+         * <p>
+         * Note, custom error messages set with
+         * {@link IntegerField#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         * @see IntegerField#setStep(int)
+         * @see IntegerField#getStep()
+         */
+        public IntegerFieldI18n setStepErrorMessage(String errorMessage) {
+            stepErrorMessage = errorMessage;
+            return this;
+        }
+    }
 }
