@@ -26,10 +26,12 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasPlaceholder;
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.select.data.SelectDataView;
@@ -779,6 +781,31 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         // Also do not remove the list box but remove any slotted components
         // (see add())
         getChildren().forEach(this::remove);
+    }
+
+    /**
+     * Sets the dropdown overlay width.
+     *
+     * @param width
+     *            the new dropdown width. Pass in null to set the dropdown width
+     *            back to the default value.
+     */
+    public void setOverlayWidth(String width) {
+        getStyle().set("--vaadin-select-overlay-width", width);
+    }
+
+    /**
+     * Sets the dropdown overlay width. Negative number implies unspecified size
+     * (the dropdown width is reverted back to the default value).
+     *
+     * @param width
+     *            the width of the dropdown.
+     * @param unit
+     *            the unit used for the dropdown.
+     */
+    public void setOverlayWidth(float width, Unit unit) {
+        Objects.requireNonNull(unit, "Unit can not be null");
+        setOverlayWidth(HasSize.getCssSize(width, unit));
     }
 
     /**
