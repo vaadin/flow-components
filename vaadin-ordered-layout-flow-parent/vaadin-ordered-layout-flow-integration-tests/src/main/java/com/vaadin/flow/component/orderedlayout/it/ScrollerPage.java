@@ -29,7 +29,7 @@ import com.vaadin.flow.router.Route;
  * @author Vaadin Ltd
  */
 @Route("vaadin-ordered-layout/scroller")
-public class ScrollerPage extends AbstractLayout {
+public class ScrollerPage extends Div {
 
     public ScrollerPage() {
         Scroller scroller = new Scroller();
