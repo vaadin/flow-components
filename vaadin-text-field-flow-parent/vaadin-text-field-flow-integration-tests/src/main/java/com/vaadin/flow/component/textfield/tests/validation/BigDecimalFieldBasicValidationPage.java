@@ -25,8 +25,15 @@ public class BigDecimalFieldBasicValidationPage
     public static final String REQUIRED_BUTTON = "required-button";
     public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
 
+    public static final String REQUIRED_ERROR_MESSAGE = "Field is required";
+    public static final String BAD_INPUT_ERROR_MESSAGE = "Number has incorrect format";
+
     public BigDecimalFieldBasicValidationPage() {
         super();
+
+        testField.setI18n(new BigDecimalField.BigDecimalFieldI18n()
+                .setRequiredErrorMessage(REQUIRED_ERROR_MESSAGE)
+                .setBadInputErrorMessage(BAD_INPUT_ERROR_MESSAGE));
 
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
             testField.setRequired(true);
