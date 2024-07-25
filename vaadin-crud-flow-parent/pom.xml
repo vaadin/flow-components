@@ -9,7 +9,6 @@
     <artifactId>vaadin-crud-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Crud Parent</name>
-
     <modules>
         <module>vaadin-crud-flow</module>
         <module>vaadin-crud-testbench</module>

@@ -9,7 +9,6 @@
     <artifactId>vaadin-charts-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Charts Parent</name>
-
     <modules>
         <module>vaadin-charts-flow</module>
         <module>vaadin-charts-testbench</module>

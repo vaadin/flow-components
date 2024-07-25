@@ -96,22 +96,11 @@ async function consolidatePomParent() {
     if (fs.existsSync(`${mod}/${name}-flow-demo/pom.xml`)) {
       modules.push(`${name}-flow-demo`);
     }
-    // add bower it's if module exists
-    const bowerItModule = `${name}-flow-integration-tests/pom-bower-mode.xml`;
-    if (fs.existsSync(`${mod}/${bowerItModule}`)) {
-      itModules.indexOf(bowerItModule) < 0 && itModules.push(bowerItModule);
-    }
-
     // add other modules present in original pom
     org.project.modules[0].module.forEach(
       mod => !/(flow|flow-demo|testbench|flow-integration-test)$/.test(mod) && modules.push(mod));
 
   });
-}
-
-async function consolidatePomBowerIT() {
- const bowerITPom = `${mod}/${name}-flow-integration-tests/pom-bower-mode.xml`;
- fs.existsSync(bowerITPom) && consolidate('pom-bower-mode.xml', bowerITPom);
 }
 
 async function consolidatePomFlow() {
@@ -138,4 +127,3 @@ consolidatePomFlow();
 consolidatePomTB();
 consolidatePomDemo();
 consolidatePomIT();
-consolidatePomBowerIT();

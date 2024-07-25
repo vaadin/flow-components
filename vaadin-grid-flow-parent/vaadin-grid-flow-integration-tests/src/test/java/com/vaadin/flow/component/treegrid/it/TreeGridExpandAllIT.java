@@ -59,9 +59,7 @@ public class TreeGridExpandAllIT extends AbstractTreeGridIT {
         grid.collapseWithClick(1);
         waitUntil(e -> {
             int widthAfterCollapse = grid.getCell(1, 0).getSize().getWidth();
-            // accept a delta of 2 pixels to avoid failing when running
-            // in bower mode in the CI
-            return Math.abs(widthBeforeExpend - widthAfterCollapse) <= 2;
+            return Math.abs(widthBeforeExpend - widthAfterCollapse) == 0;
         }, 200);
     }
 

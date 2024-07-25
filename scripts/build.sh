@@ -12,8 +12,6 @@ then
         TESTS_IN_PARALLEL=`echo $i | cut -d = -f2`;;
       pr=*)
         PR=`echo $i | cut -d = -f2`;;
-      testMode=*)
-        TEST_MODE=`echo $i | cut -d = -f2`;;
       quiet)
         quiet="-q";;
       hub=*)
@@ -21,7 +19,7 @@ then
       image=*)
         SELENIUM_IMAGE=`echo $i | cut -d = -f2`;;
       *)
-        modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests/pom-bower-mode.xml,$modules
+        modules=vaadin-$i-flow-parent/vaadin-$i-flow-integration-tests,$modules
         elements="$elements $i"
        ;;
      esac
@@ -178,14 +176,7 @@ reuse_browser() {
     [ -z "$1" ] || echo "-Dcom.vaadin.tests.SharedBrowser.reuseBrowser=$1"
 }
 
-testMode=$TEST_MODE
-if [ "$testMode" = "bower-it" ]
-then
-  pomFile="pom-bower-mode.xml"
-elif [ "$testMode" = "npm-it" ]
-then
-  pomFile="pom.xml"
-fi
+pomFile="pom.xml"
 
 if [ -n "$modules" ] && [ -z "$USE_MERGED_MODULE" ]
 then
@@ -204,7 +195,7 @@ else
   error=$?
 
   [ ! -d integration-tests/target/failsafe-reports ] && return 1
-  saveFailedTests run-1-$testMode
+  saveFailedTests run-1
 
   if [ "$nfailed" -gt 0 ]
   then
@@ -223,7 +214,7 @@ else
         $cmd
         error=$?
         tcLog "Re-Run exited with code $error"
-        saveFailedTests run-2-$testMode
+        saveFailedTests run-2
         tcStatus $error "(IT2)Test failed: $nfailed" "(IT2)Tests passed: $ncompleted ($rerunFailed retried, $nfailed failed), ignored: $nskipped"
       else
         tcStatus $error "(IT1)Test failed: $nfailed" "(IT1)Tests passed: $ncompleted (more than 15 failed), ignored: $nskipped"

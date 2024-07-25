@@ -29,6 +29,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -56,10 +57,9 @@ import elemental.json.JsonType;
  * {@link DatePickerI18n} object.
  *
  */
-@JsModule("./date-picker-datefns.js")
 @JsModule("./datepickerConnector.js")
-@JavaScript("frontend://date-picker-datefns.js")
 @JavaScript("frontend://datepickerConnector.js")
+@NpmPackage(value = "date-fns", version = "2.29.3")
 public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
         implements HasSize, HasValidation, HasHelper, HasLabel,
         HasValidator<LocalDate>, HasClientValidation {

@@ -11,7 +11,6 @@ package com.vaadin.flow.component.combobox.test;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -23,7 +22,6 @@ public class ComboBoxInLitTemplateIT extends AbstractComboBoxIT {
     @Before
     public void init() {
         open();
-        Assume.assumeFalse(isBower());
     }
 
     /**
@@ -46,10 +44,5 @@ public class ComboBoxInLitTemplateIT extends AbstractComboBoxIT {
         comboBox.closePopup();
 
         Assert.assertEquals(labelValue, comboBox.getSelectedText());
-    }
-
-    private boolean isBower() {
-        return (Boolean) $("html").first().getCommandExecutor()
-                .executeScript("return !!window.Vaadin.Lumo");
     }
 }
