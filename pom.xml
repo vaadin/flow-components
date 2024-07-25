@@ -23,7 +23,7 @@
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
         <karaf-maven-plugin.version>4.4.6</karaf-maven-plugin.version>
-        <maven.surefire.plugin.version>3.3.0</maven.surefire.plugin.version>
+        <maven.surefire.plugin.version>3.3.1</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.3.0</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
         <failsafe.forkCount>4</failsafe.forkCount>
