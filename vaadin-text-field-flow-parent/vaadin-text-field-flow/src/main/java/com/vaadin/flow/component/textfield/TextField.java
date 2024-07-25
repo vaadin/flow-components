@@ -27,6 +27,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.ValidationController;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -50,7 +51,7 @@ public class TextField extends TextFieldBase<TextField, String>
     private TextFieldI18n i18n;
 
     private Validator<String> defaultValidator = (value, context) -> {
-        if (context == null || context.getBinder() == null) {
+        if (context == null) {
             ValidationResult requiredResult = ValidationUtil
                     .validateRequiredConstraint(
                             getI18nErrorMessage(

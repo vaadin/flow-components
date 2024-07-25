@@ -28,6 +28,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.ValidationController;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -57,10 +58,52 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
     private EmailFieldI18n i18n;
 
-    private boolean manualValidationEnabled = false;
+    private Validator<String> defaultValidator = (value, context) -> {
+        if (context == null) {
+            ValidationResult requiredResult = ValidationUtil
+                    .validateRequiredConstraint(
+                            getI18nErrorMessage(
+                                    EmailFieldI18n::getRequiredErrorMessage),
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
+            if (requiredResult.isError()) {
+                return requiredResult;
+            }
+        }
 
-    private String customErrorMessage;
-    private String constraintErrorMessage;
+        ValidationResult maxLengthResult = ValidationUtil
+                .validateMaxLengthConstraint(
+                        getI18nErrorMessage(
+                                EmailFieldI18n::getMaxLengthErrorMessage),
+                        value, hasMaxLength() ? getMaxLength() : null);
+        if (maxLengthResult.isError()) {
+            return maxLengthResult;
+        }
+
+        ValidationResult minLengthResult = ValidationUtil
+                .validateMinLengthConstraint(
+                        getI18nErrorMessage(
+                                EmailFieldI18n::getMinLengthErrorMessage),
+                        value, getMinLength());
+        if (minLengthResult.isError()) {
+            return minLengthResult;
+        }
+
+        ValidationResult patternResult = ValidationUtil
+                .validatePatternConstraint(
+                        getI18nErrorMessage(
+                                EmailFieldI18n::getPatternErrorMessage),
+                        value,
+                        hasPattern() ? getPattern() : EmailValidator.PATTERN);
+        if (patternResult.isError()) {
+            return patternResult;
+        }
+
+        return ValidationResult.ok();
+    };
+
+    private ValidationController<EmailField, String> validationController = new ValidationController<>(
+            this);
 
     /**
      * Constructs an empty {@code EmailField}.
@@ -166,8 +209,7 @@ public class EmailField extends TextFieldBase<EmailField, String>
      */
     @Override
     public void setErrorMessage(String errorMessage) {
-        customErrorMessage = errorMessage;
-        updateErrorMessage();
+        validationController.setCustomErrorMessage(errorMessage);
     }
 
     /**
@@ -177,20 +219,7 @@ public class EmailField extends TextFieldBase<EmailField, String>
      */
     @Override
     public String getErrorMessage() {
-        return customErrorMessage;
-    }
-
-    private void setConstraintErrorMessage(String errorMessage) {
-        constraintErrorMessage = errorMessage;
-        updateErrorMessage();
-    }
-
-    private void updateErrorMessage() {
-        String errorMessage = constraintErrorMessage;
-        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
-            errorMessage = customErrorMessage;
-        }
-        getElement().setProperty("errorMessage", errorMessage);
+        return validationController.getCustomErrorMessage();
     }
 
     /**
@@ -306,57 +335,12 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
     @Override
     public Validator<String> getDefaultValidator() {
-        return (value, context) -> checkValidity(value, false);
+        return defaultValidator;
     }
 
     @Override
     public void setManualValidation(boolean enabled) {
-        this.manualValidationEnabled = enabled;
-    }
-
-    private ValidationResult checkValidity(String value,
-            boolean withRequiredValidator) {
-        if (withRequiredValidator) {
-            ValidationResult requiredResult = ValidationUtil
-                    .validateRequiredConstraint(
-                            getI18nErrorMessage(
-                                    EmailFieldI18n::getRequiredErrorMessage),
-                            isRequiredIndicatorVisible(), value,
-                            getEmptyValue());
-            if (requiredResult.isError()) {
-                return requiredResult;
-            }
-        }
-
-        ValidationResult maxLengthResult = ValidationUtil
-                .validateMaxLengthConstraint(
-                        getI18nErrorMessage(
-                                EmailFieldI18n::getMaxLengthErrorMessage),
-                        value, hasMaxLength() ? getMaxLength() : null);
-        if (maxLengthResult.isError()) {
-            return maxLengthResult;
-        }
-
-        ValidationResult minLengthResult = ValidationUtil
-                .validateMinLengthConstraint(
-                        getI18nErrorMessage(
-                                EmailFieldI18n::getMinLengthErrorMessage),
-                        value, getMinLength());
-        if (minLengthResult.isError()) {
-            return minLengthResult;
-        }
-
-        ValidationResult patternResult = ValidationUtil
-                .validatePatternConstraint(
-                        getI18nErrorMessage(
-                                EmailFieldI18n::getPatternErrorMessage),
-                        value,
-                        hasPattern() ? getPattern() : EmailValidator.PATTERN);
-        if (patternResult.isError()) {
-            return patternResult;
-        }
-
-        return ValidationResult.ok();
+        validationController.setManualValidation(enabled);
     }
 
     /**
@@ -369,18 +353,7 @@ public class EmailField extends TextFieldBase<EmailField, String>
      * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (this.manualValidationEnabled) {
-            return;
-        }
-
-        ValidationResult result = checkValidity(getValue(), true);
-        if (result.isError()) {
-            setInvalid(true);
-            setConstraintErrorMessage(result.getErrorMessage());
-        } else {
-            setInvalid(false);
-            setConstraintErrorMessage("");
-        }
+        validationController.validate(getValue());
     }
 
     @Override
