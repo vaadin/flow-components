@@ -23,9 +23,13 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
 
 import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.PATTERN_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.MAX_LENGTH_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.MIN_LENGTH_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.PATTERN_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.REQUIRED_ERROR_MESSAGE;
 
 @TestPath("vaadin-email-field/validation/basic")
 public class EmailFieldBasicValidationIT
@@ -34,6 +38,7 @@ public class EmailFieldBasicValidationIT
     public void fieldIsInitiallyValid() {
         assertClientValid();
         assertServerValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -42,6 +47,7 @@ public class EmailFieldBasicValidationIT
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -52,6 +58,7 @@ public class EmailFieldBasicValidationIT
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -62,11 +69,13 @@ public class EmailFieldBasicValidationIT
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         testField.setValue("");
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -77,16 +86,19 @@ public class EmailFieldBasicValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(MIN_LENGTH_ERROR_MESSAGE);
 
         testField.setValue("aa@vaadin.com");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         testField.setValue("aaa@vaadin.com");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -97,16 +109,19 @@ public class EmailFieldBasicValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(MAX_LENGTH_ERROR_MESSAGE);
 
         testField.setValue("aa@vaadin.com");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         testField.setValue("a@vaadin.com");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -115,11 +130,13 @@ public class EmailFieldBasicValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(PATTERN_ERROR_MESSAGE);
 
         testField.setValue("john@vaadin.com");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -131,11 +148,13 @@ public class EmailFieldBasicValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(PATTERN_ERROR_MESSAGE);
 
         testField.setValue("john@vaadin.com");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test

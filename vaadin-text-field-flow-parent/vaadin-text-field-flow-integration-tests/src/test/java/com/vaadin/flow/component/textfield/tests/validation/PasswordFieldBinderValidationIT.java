@@ -24,8 +24,11 @@ import com.vaadin.tests.validation.AbstractValidationIT;
 
 import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.PATTERN_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.PATTERN_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.MIN_LENGTH_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.MAX_LENGTH_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
@@ -48,6 +51,7 @@ public class PasswordFieldBinderValidationIT
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -76,7 +80,7 @@ public class PasswordFieldBinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(MIN_LENGTH_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("AA");
@@ -102,7 +106,7 @@ public class PasswordFieldBinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(MAX_LENGTH_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("AA");
@@ -128,7 +132,7 @@ public class PasswordFieldBinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(PATTERN_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("12");
