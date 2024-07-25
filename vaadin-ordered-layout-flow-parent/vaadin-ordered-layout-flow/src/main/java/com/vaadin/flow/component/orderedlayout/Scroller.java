@@ -175,4 +175,21 @@ public class Scroller extends Component implements Focusable<Scroller>, HasSize,
                     : BOTH;
         }
     }
+
+    /**
+     * Scrolls the scroller to the top.
+     */
+    public void scrollToTop() {
+        getElement().executeJs("this.scrollTop = 0");
+    }
+
+    /**
+     * Scrolls the scroller to the bottom.
+     */
+    public void scrollToBottom() {
+
+        getElement().executeJs(
+                "this.scrollTop = this.scrollHeight - this.clientHeight");
+    }
+
 }
