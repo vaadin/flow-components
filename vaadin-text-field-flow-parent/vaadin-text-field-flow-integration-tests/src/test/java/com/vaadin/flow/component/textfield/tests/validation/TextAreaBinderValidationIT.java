@@ -22,8 +22,11 @@ import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.MAX_LENGTH_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.MIN_LENGTH_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.PATTERN_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.PATTERN_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.REQUIRED_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
@@ -44,6 +47,7 @@ public class TextAreaBinderValidationIT
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -72,7 +76,7 @@ public class TextAreaBinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(MIN_LENGTH_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("AA");
@@ -98,7 +102,7 @@ public class TextAreaBinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(MAX_LENGTH_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("AA");
@@ -124,7 +128,7 @@ public class TextAreaBinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(PATTERN_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("12");
