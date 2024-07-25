@@ -1,5 +1,7 @@
 package com.vaadin.flow.component.shared;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -14,7 +16,8 @@ import com.vaadin.flow.data.binder.Validator;
  * @param <V>
  *            Type of the value of the extending component.
  */
-public class ValidationController<C extends Component & HasValidator<V>, V> {
+public class ValidationController<C extends Component & HasValidator<V>, V>
+        implements Serializable {
     private C component;
     private boolean manualValidationEnabled;
     private String customErrorMessage;
