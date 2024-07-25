@@ -13,6 +13,10 @@ import static com.vaadin.flow.component.datetimepicker.validation.BasicValidatio
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.MAX_INPUT;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.REQUIRED_BUTTON;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.CLEAR_VALUE_BUTTON;
+import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.BAD_INPUT_ERROR_MESSAGE;
+import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.MAX_ERROR_MESSAGE;
+import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.MIN_ERROR_MESSAGE;
+import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.REQUIRED_ERROR_MESSAGE;
 
 @TestPath("vaadin-date-time-picker/validation/basic")
 public class BasicValidationIT
@@ -31,6 +35,7 @@ public class BasicValidationIT
     public void fieldIsInitiallyValid() {
         assertClientValid();
         assertServerValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -39,6 +44,7 @@ public class BasicValidationIT
         timeInput.sendKeys(Keys.TAB);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -49,6 +55,7 @@ public class BasicValidationIT
         timeInput.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -59,14 +66,30 @@ public class BasicValidationIT
         setInputValue(timeInput, "12:00");
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         setInputValue(dateInput, "");
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
 
         setInputValue(timeInput, "");
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+
+        setInputValue(dateInput, "INVALID");
+        setInputValue(timeInput, "INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
+
+        setInputValue(dateInput, "");
+        setInputValue(timeInput, "");
+        timeInput.sendKeys(Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -77,26 +100,31 @@ public class BasicValidationIT
         setInputValue(timeInput, "11:00");
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(MIN_ERROR_MESSAGE);
 
         setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "11:00");
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(MIN_ERROR_MESSAGE);
 
         setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "12:00");
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "13:00");
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         setInputValue(dateInput, "3/3/2000");
         setInputValue(timeInput, "11:00");
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -107,26 +135,31 @@ public class BasicValidationIT
         setInputValue(timeInput, "13:00");
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(MAX_ERROR_MESSAGE);
 
         setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "13:00");
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(MAX_ERROR_MESSAGE);
 
         setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "12:00");
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         setInputValue(dateInput, "2/2/2000");
         setInputValue(timeInput, "11:00");
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         setInputValue(dateInput, "1/1/2000");
         setInputValue(timeInput, "13:00");
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -135,10 +168,12 @@ public class BasicValidationIT
         setInputValue(timeInput, "10:00");
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -147,16 +182,19 @@ public class BasicValidationIT
         setInputValue(timeInput, "INVALID");
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         setInputValue(dateInput, "1/1/2000");
         setInputValue(timeInput, "10:00");
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         setInputValue(dateInput, "INVALID");
         setInputValue(timeInput, "INVALID");
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
     }
 
     @Test
@@ -166,6 +204,7 @@ public class BasicValidationIT
         timeInput.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
     }
 
     @Test
@@ -174,6 +213,7 @@ public class BasicValidationIT
         timeInput.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
     }
 
     @Test
@@ -182,10 +222,12 @@ public class BasicValidationIT
         setInputValue(timeInput, "INVALID");
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -195,10 +237,12 @@ public class BasicValidationIT
         timeInput.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -207,10 +251,12 @@ public class BasicValidationIT
         timeInput.sendKeys(Keys.TAB);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
     }
 
     @Test

@@ -16,6 +16,11 @@
 
 package com.vaadin.flow.component.textfield;
 
+import java.io.Serializable;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -23,7 +28,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
@@ -42,9 +49,12 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 public class PasswordField extends TextFieldBase<PasswordField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
 
-    private TextFieldValidationSupport validationSupport;
+    private PasswordFieldI18n i18n;
 
     private boolean manualValidationEnabled = false;
+
+    private String customErrorMessage;
+    private String constraintErrorMessage;
 
     /**
      * Constructs an empty {@code PasswordField}.
@@ -156,11 +166,42 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
         addValueChangeListener(listener);
     }
 
-    private TextFieldValidationSupport getValidationSupport() {
-        if (validationSupport == null) {
-            validationSupport = new TextFieldValidationSupport(this);
+    /**
+     * Sets an error message to display for all constraint violations.
+     * <p>
+     * This error message takes priority over i18n error messages when both are
+     * set.
+     *
+     * @param errorMessage
+     *            the error message to set, or {@code null} to clear
+     */
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        customErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    /**
+     * Gets the error message displayed for all constraint violations.
+     *
+     * @return the error message
+     */
+    @Override
+    public String getErrorMessage() {
+        return customErrorMessage;
+    }
+
+    private void setConstraintErrorMessage(String errorMessage) {
+        constraintErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    private void updateErrorMessage() {
+        String errorMessage = constraintErrorMessage;
+        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
+            errorMessage = customErrorMessage;
         }
-        return validationSupport;
+        getElement().setProperty("errorMessage", errorMessage);
     }
 
     /**
@@ -172,7 +213,6 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
      */
     public void setMaxLength(int maxLength) {
         getElement().setProperty("maxlength", maxLength);
-        getValidationSupport().setMaxLength(maxLength);
     }
 
     /**
@@ -185,6 +225,10 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
         return (int) getElement().getProperty("maxlength", 0.0);
     }
 
+    private boolean hasMaxLength() {
+        return getElement().getProperty("maxlength") != null;
+    }
+
     /**
      * Minimum number of characters (in Unicode code points) that the user can
      * enter.
@@ -194,7 +238,6 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
      */
     public void setMinLength(int minLength) {
         getElement().setProperty("minlength", minLength);
-        getValidationSupport().setMinLength(minLength);
     }
 
     /**
@@ -205,12 +248,6 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
      */
     public int getMinLength() {
         return (int) getElement().getProperty("minlength", 0.0);
-    }
-
-    @Override
-    public void setRequired(boolean required) {
-        super.setRequired(required);
-        getValidationSupport().setRequired(required);
     }
 
     /**
@@ -230,7 +267,6 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
      */
     public void setPattern(String pattern) {
         getElement().setProperty("pattern", pattern == null ? "" : pattern);
-        getValidationSupport().setPattern(pattern);
     }
 
     /**
@@ -299,14 +335,8 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     }
 
     @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        getValidationSupport().setRequired(requiredIndicatorVisible);
-    }
-
-    @Override
     public Validator<String> getDefaultValidator() {
-        return (value, context) -> getValidationSupport().checkValidity(value);
+        return (value, context) -> checkValidity(value, false);
     }
 
     @Override
@@ -314,14 +344,71 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
         this.manualValidationEnabled = enabled;
     }
 
+    private ValidationResult checkValidity(String value,
+            boolean withRequiredValidator) {
+        if (withRequiredValidator) {
+            ValidationResult requiredResult = ValidationUtil
+                    .validateRequiredConstraint(
+                            getI18nErrorMessage(
+                                    PasswordFieldI18n::getRequiredErrorMessage),
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
+            if (requiredResult.isError()) {
+                return requiredResult;
+            }
+        }
+
+        ValidationResult maxLengthResult = ValidationUtil
+                .validateMaxLengthConstraint(
+                        getI18nErrorMessage(
+                                PasswordFieldI18n::getMaxLengthErrorMessage),
+                        value, hasMaxLength() ? getMaxLength() : null);
+        if (maxLengthResult.isError()) {
+            return maxLengthResult;
+        }
+
+        ValidationResult minLengthResult = ValidationUtil
+                .validateMinLengthConstraint(
+                        getI18nErrorMessage(
+                                PasswordFieldI18n::getMinLengthErrorMessage),
+                        value, getMinLength());
+        if (minLengthResult.isError()) {
+            return minLengthResult;
+        }
+
+        ValidationResult patternResult = ValidationUtil
+                .validatePatternConstraint(
+                        getI18nErrorMessage(
+                                PasswordFieldI18n::getPatternErrorMessage),
+                        value, getPattern());
+        if (patternResult.isError()) {
+            return patternResult;
+        }
+
+        return ValidationResult.ok();
+    }
+
     /**
-     * Performs server-side validation of the current value. This is needed
-     * because it is possible to circumvent the client-side validation
-     * constraints using browser development tools.
+     * Validates the current value against the constraints and sets the
+     * {@code invalid} property and the {@code errorMessage} property based on
+     * the result. If a custom error message is provided with
+     * {@link #setErrorMessage(String)}, it is used. Otherwise, the error
+     * message defined in the i18n object is used.
+     * <p>
+     * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            setInvalid(getValidationSupport().isInvalid(getValue()));
+        if (this.manualValidationEnabled) {
+            return;
+        }
+
+        ValidationResult result = checkValidity(getValue(), true);
+        if (result.isError()) {
+            setInvalid(true);
+            setConstraintErrorMessage(result.getErrorMessage());
+        } else {
+            setInvalid(false);
+            setConstraintErrorMessage("");
         }
     }
 
@@ -329,5 +416,169 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(PasswordFieldI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public PasswordFieldI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(PasswordFieldI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+    }
+
+    private String getI18nErrorMessage(
+            Function<PasswordFieldI18n, String> getter) {
+        return Optional.ofNullable(i18n).map(getter).orElse("");
+    }
+
+    /**
+     * The internationalization properties for {@link PasswordField}.
+     */
+    public static class PasswordFieldI18n implements Serializable {
+
+        private String requiredErrorMessage;
+        private String minLengthErrorMessage;
+        private String maxLengthErrorMessage;
+        private String patternErrorMessage;
+
+        /**
+         * Gets the error message displayed when the field is required but
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         * @see PasswordField#isRequiredIndicatorVisible()
+         * @see PasswordField#setRequiredIndicatorVisible(boolean)
+         */
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field is required but
+         * empty.
+         * <p>
+         * Note, custom error messages set with
+         * {@link PasswordField#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see PasswordField#isRequiredIndicatorVisible()
+         * @see PasswordField#setRequiredIndicatorVisible(boolean)
+         */
+        public PasswordFieldI18n setRequiredErrorMessage(String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field value is shorter than
+         * the minimum allowed length.
+         *
+         * @return the error message or {@code null} if not set
+         * @see PasswordField#getMinLength()
+         * @see PasswordField#setMinLength(int)
+         */
+        public String getMinLengthErrorMessage() {
+            return minLengthErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field value is shorter
+         * than the minimum allowed length.
+         * <p>
+         * Note, custom error messages set with
+         * {@link PasswordField#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see PasswordField#getMinLength()
+         * @see PasswordField#setMinLength(int)
+         */
+        public PasswordFieldI18n setMinLengthErrorMessage(String errorMessage) {
+            minLengthErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field value is longer than
+         * the maximum allowed length.
+         *
+         * @return the error message or {@code null} if not set
+         * @see PasswordField#getMaxLength()
+         * @see PasswordField#setMaxLength(int)
+         */
+        public String getMaxLengthErrorMessage() {
+            return maxLengthErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field value is longer than
+         * the maximum allowed length.
+         * <p>
+         * Note, custom error messages set with
+         * {@link PasswordField#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see PasswordField#getMaxLength()
+         * @see PasswordField#setMaxLength(int)
+         */
+        public PasswordFieldI18n setMaxLengthErrorMessage(String errorMessage) {
+            maxLengthErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field value does not match
+         * the pattern.
+         *
+         * @return the error message or {@code null} if not set
+         * @see PasswordField#getPattern()
+         * @see PasswordField#setPattern(String)
+         */
+        public String getPatternErrorMessage() {
+            return patternErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field value does not match
+         * the pattern.
+         * <p>
+         * Note, custom error messages set with
+         * {@link PasswordField#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see PasswordField#getPattern()
+         * @see PasswordField#setPattern(String)
+         */
+        public PasswordFieldI18n setPatternErrorMessage(String errorMessage) {
+            patternErrorMessage = errorMessage;
+            return this;
+        }
     }
 }
