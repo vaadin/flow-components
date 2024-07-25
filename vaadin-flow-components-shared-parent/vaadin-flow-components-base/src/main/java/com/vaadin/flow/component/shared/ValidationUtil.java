@@ -16,7 +16,10 @@
 package com.vaadin.flow.component.shared;
 
 import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.data.binder.ValueContext;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -237,5 +240,13 @@ public class ValidationUtil {
                 && !pattern.isEmpty() && !value.matches(pattern);
         return isError ? ValidationResult.error(errorMessage)
                 : ValidationResult.ok();
+    }
+
+    public static <T> ValidationResult runValidators(
+            List<Validator<T>> validators, T value, ValueContext context) {
+        return validators.stream()
+                .map(validator -> validator.apply(value, context))
+                .filter(ValidationResult::isError).findFirst()
+                .orElse(ValidationResult.ok());
     }
 }

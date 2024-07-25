@@ -16,6 +16,8 @@
 package com.vaadin.flow.component.textfield;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -50,47 +52,41 @@ public class TextField extends TextFieldBase<TextField, String>
 
     private TextFieldI18n i18n;
 
-    private Validator<String> defaultValidator = (value, context) -> {
+    private Validator<String> requiredValidator = (value, context) -> {
         if (context == null) {
-            ValidationResult requiredResult = ValidationUtil
-                    .validateRequiredConstraint(
-                            getI18nErrorMessage(
-                                    TextFieldI18n::getRequiredErrorMessage),
-                            isRequiredIndicatorVisible(), value,
-                            getEmptyValue());
-            if (requiredResult.isError()) {
-                return requiredResult;
-            }
+            return ValidationResult.ok();
         }
 
-        ValidationResult maxLengthResult = ValidationUtil
-                .validateMaxLengthConstraint(
-                        getI18nErrorMessage(
-                                TextFieldI18n::getMaxLengthErrorMessage),
-                        value, hasMaxLength() ? getMaxLength() : null);
-        if (maxLengthResult.isError()) {
-            return maxLengthResult;
-        }
+        return ValidationUtil.validateRequiredConstraint(
+                getI18nErrorMessage(TextFieldI18n::getRequiredErrorMessage),
+                isRequiredIndicatorVisible(), value, getEmptyValue());
+    };
 
-        ValidationResult minLengthResult = ValidationUtil
-                .validateMinLengthConstraint(
-                        getI18nErrorMessage(
-                                TextFieldI18n::getMinLengthErrorMessage),
-                        value, getMinLength());
-        if (minLengthResult.isError()) {
-            return minLengthResult;
-        }
+    private Validator<String> maxLengthValidator = (value, context) -> {
+        return ValidationUtil.validateMaxLengthConstraint(
+                getI18nErrorMessage(TextFieldI18n::getMaxLengthErrorMessage),
+                value, hasMaxLength() ? getMaxLength() : null);
+    };
 
-        ValidationResult patternResult = ValidationUtil
-                .validatePatternConstraint(
-                        getI18nErrorMessage(
-                                TextFieldI18n::getPatternErrorMessage),
-                        value, getPattern());
-        if (patternResult.isError()) {
-            return patternResult;
-        }
+    private Validator<String> minLengthValidator = (value, context) -> {
+        return ValidationUtil.validateMinLengthConstraint(
+                getI18nErrorMessage(TextFieldI18n::getMinLengthErrorMessage),
+                value, getMinLength());
+    };
 
-        return ValidationResult.ok();
+    private Validator<String> patternValidator = (value, context) -> {
+        return ValidationUtil.validatePatternConstraint(
+                getI18nErrorMessage(TextFieldI18n::getPatternErrorMessage),
+                value, getPattern());
+    };
+
+    private Validator<String> defaultValidator = (value, context) -> {
+        ArrayList<Validator<String>> validators = new ArrayList<>();
+        validators.add(requiredValidator);
+        validators.add(maxLengthValidator);
+        validators.add(minLengthValidator);
+        validators.add(patternValidator);
+        return ValidationUtil.runValidators(validators, value, context);
     };
 
     private ValidationController<TextField, String> validationController = new ValidationController<>(
