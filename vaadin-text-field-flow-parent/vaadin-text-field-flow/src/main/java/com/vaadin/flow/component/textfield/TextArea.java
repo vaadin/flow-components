@@ -456,7 +456,7 @@ public class TextArea extends TextFieldBase<TextArea, String>
     }
 
     /**
-     * The internationalization properties for {@link TextField}.
+     * The internationalization properties for {@link TextArea}.
      */
     public static class TextAreaI18n implements Serializable {
 
