@@ -222,6 +222,16 @@ public class EmailField extends TextFieldBase<EmailField, String>
         return validationController.getCustomErrorMessage();
     }
 
+    @Override
+    public void setInvalid(boolean invalid) {
+        validationController.setInvalid(invalid);
+    }
+
+    @Override
+    public boolean isInvalid() {
+        return validationController.isInvalid();
+    }
+
     /**
      * Maximum number of characters (in Unicode code points) that the user can
      * enter.

@@ -176,6 +176,16 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     @Override
+    public void setInvalid(boolean invalid) {
+        validationController.setInvalid(invalid);
+    }
+
+    @Override
+    public boolean isInvalid() {
+        return validationController.isInvalid();
+    }
+
+    @Override
     public void setValueChangeMode(ValueChangeMode valueChangeMode) {
         if (inputListenerRegistration != null) {
             inputListenerRegistration.remove();
