@@ -86,7 +86,9 @@ public class GridEditorIT extends AbstractComponentIT {
     }
 
     private void assertEditorOpenedOnRow(int rowIndex) {
-        Assert.assertTrue(getEditor(rowIndex).isDisplayed());
+        var editor = getEditor(rowIndex);
+        Assert.assertNotNull(editor);
+        Assert.assertTrue(editor.isDisplayed());
     }
 
     private GridTHTDElement getNameCellForRow(int rowIndex) {
