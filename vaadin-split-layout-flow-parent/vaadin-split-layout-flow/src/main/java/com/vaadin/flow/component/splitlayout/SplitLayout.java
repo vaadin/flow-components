@@ -27,13 +27,11 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
-import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -53,8 +51,9 @@ public class SplitLayout extends Component
 
     private Component primaryComponent;
     private Component secondaryComponent;
-    private StateTree.ExecutionRegistration updateStylesRegistration;
     private Double splitterPosition;
+    private String primaryFlexStyle;
+    private String secondaryFlexStyle;
 
     /**
      * numeration of all available orientation for VaadinSplitLayout component
@@ -78,16 +77,15 @@ public class SplitLayout extends Component
      */
     public SplitLayout(Orientation orientation) {
         setOrientation(orientation);
-        addAttachListener(
-                e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
         addSplitterDragendListener(e -> {
             splitterPosition = calcNewSplitterPosition(
                     e.primaryComponentFlexBasis, e.secondaryComponentFlexBasis);
 
-            setPrimaryStyle("flex",
-                    String.format("1 1 %s", e.primaryComponentFlexBasis));
-            setSecondaryStyle("flex",
-                    String.format("1 1 %s", e.secondaryComponentFlexBasis));
+            primaryFlexStyle = String.format("1 1 %s",
+                    e.primaryComponentFlexBasis);
+            secondaryFlexStyle = String.format("1 1 %s",
+                    e.secondaryComponentFlexBasis);
+            applyFlexStyles();
         });
     }
 
@@ -172,6 +170,7 @@ public class SplitLayout extends Component
     public void addToPrimary(Component... components) {
         primaryComponent = getComponentOrWrap(components);
         setComponent(primaryComponent, "primary");
+        applyFlexStyles();
     }
 
     /**
@@ -196,6 +195,7 @@ public class SplitLayout extends Component
     public void addToSecondary(Component... components) {
         secondaryComponent = getComponentOrWrap(components);
         setComponent(secondaryComponent, "secondary");
+        applyFlexStyles();
     }
 
     /**
@@ -237,30 +237,24 @@ public class SplitLayout extends Component
      */
     public void setSplitterPosition(double position) {
         this.splitterPosition = position;
-        getUI().ifPresent(this::requestStylesUpdatesForSplitterPosition);
-    }
 
-    private void requestStylesUpdatesForSplitterPosition(UI ui) {
-        if (this.updateStylesRegistration != null) {
-            updateStylesRegistration.remove();
-        }
-        this.updateStylesRegistration = ui.beforeClientResponse(this,
-                context -> {
-                    // Update width or height if splitter position is set.
-                    updateStylesForSplitterPosition();
-
-                    this.updateStylesRegistration = null;
-                });
-    }
-
-    private void updateStylesForSplitterPosition() {
-        if (this.splitterPosition == null) {
-            return;
-        }
         double primary = Math.min(Math.max(this.splitterPosition, 0), 100);
         double secondary = 100 - primary;
-        setPrimaryStyle("flex", String.format("1 1 %s%%", primary));
-        setSecondaryStyle("flex", String.format("1 1 %s%%", secondary));
+
+        primaryFlexStyle = String.format("1 1 %s%%", primary);
+        secondaryFlexStyle = String.format("1 1 %s%%", secondary);
+        applyFlexStyles();
+    }
+
+    private void applyFlexStyles() {
+        if (primaryComponent != null && primaryFlexStyle != null) {
+            primaryComponent.getElement().getStyle().set("flex",
+                    primaryFlexStyle);
+        }
+        if (secondaryComponent != null && secondaryFlexStyle != null) {
+            secondaryComponent.getElement().getStyle().set("flex",
+                    secondaryFlexStyle);
+        }
     }
 
     /**

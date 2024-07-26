@@ -126,6 +126,127 @@ public class SplitLayoutUnitTest {
     }
 
     @Test
+    public void withoutSplitterPosition_addComponents_noFlexStyle() {
+        SplitLayout splitLayout = new SplitLayout();
+        splitLayout.addToPrimary(new Div());
+        splitLayout.addToSecondary(new Div());
+
+        Assert.assertNull(
+                splitLayout.getPrimaryComponent().getStyle().get("flex"));
+        Assert.assertNull(
+                splitLayout.getSecondaryComponent().getStyle().get("flex"));
+    }
+
+    @Test
+    public void addComponents_setSplitterPosition_appliesFlexStyle() {
+        SplitLayout splitLayout = new SplitLayout();
+        splitLayout.addToPrimary(new Div());
+        splitLayout.addToSecondary(new Div());
+
+        splitLayout.setSplitterPosition(75);
+        Assert.assertEquals("1 1 75.0%",
+                splitLayout.getPrimaryComponent().getStyle().get("flex"));
+        Assert.assertEquals("1 1 25.0%",
+                splitLayout.getSecondaryComponent().getStyle().get("flex"));
+    }
+
+    @Test
+    public void setSplitterPosition_addComponents_appliesFlexStyle() {
+        SplitLayout splitLayout = new SplitLayout();
+        splitLayout.setSplitterPosition(75);
+
+        splitLayout.addToPrimary(new Div());
+        Assert.assertEquals("1 1 75.0%",
+                splitLayout.getPrimaryComponent().getStyle().get("flex"));
+
+        splitLayout.addToSecondary(new Div());
+        Assert.assertEquals("1 1 25.0%",
+                splitLayout.getSecondaryComponent().getStyle().get("flex"));
+    }
+
+    @Test
+    public void setSplitterPosition_replaceComponents_restoresFlexStyle() {
+        SplitLayout splitLayout = new SplitLayout(new Div(), new Div());
+        splitLayout.setSplitterPosition(75);
+        Assert.assertEquals("1 1 75.0%",
+                splitLayout.getPrimaryComponent().getStyle().get("flex"));
+        Assert.assertEquals("1 1 25.0%",
+                splitLayout.getSecondaryComponent().getStyle().get("flex"));
+
+        splitLayout.removeAll();
+
+        splitLayout.addToPrimary(new Div());
+        Assert.assertEquals("1 1 75.0%",
+                splitLayout.getPrimaryComponent().getStyle().get("flex"));
+        splitLayout.addToSecondary(new Div());
+        Assert.assertEquals("1 1 25.0%",
+                splitLayout.getSecondaryComponent().getStyle().get("flex"));
+    }
+
+    @Test
+    public void setSplitterPosition_dragEndEvent_updatesFlexStyle() {
+        SplitLayout splitLayout = new SplitLayout(new Div(), new Div());
+        splitLayout.setSplitterPosition(75);
+        Assert.assertEquals("1 1 75.0%",
+                splitLayout.getPrimaryComponent().getStyle().get("flex"));
+        Assert.assertEquals("1 1 25.0%",
+                splitLayout.getSecondaryComponent().getStyle().get("flex"));
+
+        ComponentUtil.fireEvent(splitLayout,
+                new SplitterDragendEvent(splitLayout, true, "30px", "70px"));
+
+        Assert.assertEquals("1 1 30px",
+                splitLayout.getPrimaryComponent().getStyle().get("flex"));
+        Assert.assertEquals("1 1 70px",
+                splitLayout.getSecondaryComponent().getStyle().get("flex"));
+    }
+
+    @Test
+    public void dragEndEvent_setSplitterPosition_updatesFlexStyle() {
+        SplitLayout splitLayout = new SplitLayout(new Div(), new Div());
+        ComponentUtil.fireEvent(splitLayout,
+                new SplitterDragendEvent(splitLayout, true, "30px", "70px"));
+        Assert.assertEquals("1 1 30px",
+                splitLayout.getPrimaryComponent().getStyle().get("flex"));
+        Assert.assertEquals("1 1 70px",
+                splitLayout.getSecondaryComponent().getStyle().get("flex"));
+
+        splitLayout.setSplitterPosition(75);
+
+        Assert.assertEquals("1 1 75.0%",
+                splitLayout.getPrimaryComponent().getStyle().get("flex"));
+        Assert.assertEquals("1 1 25.0%",
+                splitLayout.getSecondaryComponent().getStyle().get("flex"));
+    }
+
+    @Test
+    public void setSplitterPosition_dragEndEvent_replaceComponents_restoresFlexStyle() {
+        SplitLayout splitLayout = new SplitLayout(new Div(), new Div());
+        splitLayout.setSplitterPosition(75);
+        Assert.assertEquals("1 1 75.0%",
+                splitLayout.getPrimaryComponent().getStyle().get("flex"));
+        Assert.assertEquals("1 1 25.0%",
+                splitLayout.getSecondaryComponent().getStyle().get("flex"));
+
+        ComponentUtil.fireEvent(splitLayout,
+                new SplitterDragendEvent(splitLayout, true, "30px", "70px"));
+
+        Assert.assertEquals("1 1 30px",
+                splitLayout.getPrimaryComponent().getStyle().get("flex"));
+        Assert.assertEquals("1 1 70px",
+                splitLayout.getSecondaryComponent().getStyle().get("flex"));
+
+        splitLayout.removeAll();
+
+        splitLayout.addToPrimary(new Div());
+        Assert.assertEquals("1 1 30px",
+                splitLayout.getPrimaryComponent().getStyle().get("flex"));
+        splitLayout.addToSecondary(new Div());
+        Assert.assertEquals("1 1 70px",
+                splitLayout.getSecondaryComponent().getStyle().get("flex"));
+    }
+
+    @Test
     public void testGetSplitterPosition() {
         SplitLayout splitLayout = new SplitLayout();
         double splitterPosition = 45.66;
@@ -257,25 +378,5 @@ public class SplitLayoutUnitTest {
                 splitLayout, true, "432.68px", "267.32px"));
 
         Assert.assertEquals(61.81, splitLayout.getSplitterPosition(), 0.01);
-    }
-
-    @Test
-    public void testUpdateSplitterPosition_updatesFlexStyle() {
-        var primaryComponent = new Div();
-        var secondaryComponent = new Div();
-        SplitLayout splitLayout = new SplitLayout(primaryComponent,
-                secondaryComponent);
-
-        // Set initial flex style
-        primaryComponent.getStyle().set("flex", "1 1 50%");
-        secondaryComponent.getStyle().set("flex", "1 1 50%");
-
-        ComponentUtil.fireEvent(splitLayout,
-                new SplitterDragendEvent(splitLayout, true, "30px", "70px"));
-
-        Assert.assertEquals("1 1 30px",
-                primaryComponent.getStyle().get("flex"));
-        Assert.assertEquals("1 1 70px",
-                secondaryComponent.getStyle().get("flex"));
     }
 }
