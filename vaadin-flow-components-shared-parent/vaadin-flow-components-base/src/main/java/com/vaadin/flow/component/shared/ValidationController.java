@@ -33,7 +33,8 @@ public class ValidationController<C extends Component & HasValidator<V>, V>
      * When enabled, the {@link #validate(V)} method skips validation, allowing
      * the invalid state and error messages to be controlled manually.
      *
-     * @param enabled true to enable manual validation, false to disable
+     * @param enabled
+     *            true to enable manual validation, false to disable
      */
     public void setManualValidation(boolean enabled) {
         this.manualValidationEnabled = enabled;
@@ -106,7 +107,8 @@ public class ValidationController<C extends Component & HasValidator<V>, V>
      * The method skips validation if the manual validation mode is enabled, see
      * {@link #setManualValidation(boolean)}.
      *
-     * @param value the value to validate
+     * @param value
+     *            the value to validate
      */
     public void validate(V value) {
         if (manualValidationEnabled) {
