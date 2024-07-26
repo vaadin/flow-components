@@ -122,6 +122,8 @@ public class SplitterPositionIT extends AbstractComponentIT {
         // Check that the splitter position is not 30% anymore
         var flexBasisAfterDrag = primaryComponent.getCssValue("flex-basis");
         Assert.assertNotEquals(flexBasisInitial, flexBasisAfterDrag);
+        // Check that splitter position still is in px
+        Assert.assertTrue(flexBasisAfterDrag.endsWith("px"));
 
         // Reset splitter position to 30%
         $(NativeButtonElement.class).id("setSplitPositionJavaApi").click();
