@@ -258,4 +258,24 @@ public class SplitLayoutUnitTest {
 
         Assert.assertEquals(61.81, splitLayout.getSplitterPosition(), 0.01);
     }
+
+    @Test
+    public void testUpdateSplitterPosition_updatesFlexStyle() {
+        var primaryComponent = new Div();
+        var secondaryComponent = new Div();
+        SplitLayout splitLayout = new SplitLayout(primaryComponent,
+                secondaryComponent);
+
+        // Set initial flex style
+        primaryComponent.getStyle().set("flex", "1 1 50%");
+        secondaryComponent.getStyle().set("flex", "1 1 50%");
+
+        ComponentUtil.fireEvent(splitLayout,
+                new SplitterDragendEvent(splitLayout, true, "30px", "70px"));
+
+        Assert.assertEquals("1 1 30px",
+                primaryComponent.getStyle().get("flex"));
+        Assert.assertEquals("1 1 70px",
+                secondaryComponent.getStyle().get("flex"));
+    }
 }

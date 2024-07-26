@@ -370,8 +370,7 @@ public class SplitLayout extends Component
      */
     public Registration addSplitterDragendListener(
             ComponentEventListener<SplitterDragendEvent> listener) {
-        return addListener(SplitterDragendEvent.class,
-                (ComponentEventListener) listener);
+        return addListener(SplitterDragendEvent.class, listener);
     }
 
     private void setInnerComponentStyle(String styleName, String value,
