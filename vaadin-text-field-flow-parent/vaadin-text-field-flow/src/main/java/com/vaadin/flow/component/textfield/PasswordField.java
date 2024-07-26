@@ -57,7 +57,7 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
 
         // When the validator is called by Binder, we skip the required check,
         // as Binder has its own implementation of required validation.
-        if (fromBinder) {
+        if (!fromBinder) {
             ValidationResult requiredResult = ValidationUtil
                     .validateRequiredConstraint(
                             getI18nErrorMessage(
