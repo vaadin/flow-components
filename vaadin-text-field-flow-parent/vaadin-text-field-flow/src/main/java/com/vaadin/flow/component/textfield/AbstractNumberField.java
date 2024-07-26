@@ -63,6 +63,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<T>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
     private Validator<T> defaultValidator = (value, context) -> {
+        boolean fromBinder = context != null;
+
         boolean hasBadInput = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
         if (hasBadInput) {
@@ -70,7 +72,9 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
                     AbstractNumberFieldI18n::getBadInputErrorMessage));
         }
 
-        if (context == null) {
+        // When the validator is called by Binder, we skip the required check,
+        // as Binder has its own implementation of required validation.
+        if (!fromBinder) {
             ValidationResult requiredResult = ValidationUtil
                     .validateRequiredConstraint(getI18nErrorMessage(
                             AbstractNumberFieldI18n::getRequiredErrorMessage),

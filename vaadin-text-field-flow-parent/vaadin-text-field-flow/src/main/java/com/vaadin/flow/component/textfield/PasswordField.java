@@ -53,7 +53,11 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     private PasswordFieldI18n i18n;
 
     private Validator<String> defaultValidator = (value, context) -> {
-        if (context == null) {
+        boolean fromBinder = context != null;
+
+        // When the validator is called by Binder, we skip the required check,
+        // as Binder has its own implementation of required validation.
+        if (fromBinder) {
             ValidationResult requiredResult = ValidationUtil
                     .validateRequiredConstraint(
                             getI18nErrorMessage(
