@@ -565,6 +565,10 @@ public class MultiSelectComboBox<TItem>
         // translations with empty ones
         removeNullValuesFromJsonObject(i18nJson);
 
+        // Remove the error message properties because they aren't used on
+        // the client-side.
+        i18nJson.remove("requiredErrorMessage");
+
         // Assign new I18N object to WC, by merging the existing
         // WC I18N, and the values from the new I18n instance,
         // into an empty object
