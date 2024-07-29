@@ -28,7 +28,7 @@ public class PasswordFieldBasicValidationTest
         testField.setRequiredIndicatorVisible(true);
         testField.setValue("AAA");
         testField.setValue("");
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -38,14 +38,14 @@ public class PasswordFieldBasicValidationTest
                 .setRequiredErrorMessage("Field is required"));
         testField.setValue("AAA");
         testField.setValue("");
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Test
     public void minLength_validate_emptyErrorMessageDisplayed() {
         testField.setMinLength(3);
         testField.setValue("AA");
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -54,14 +54,14 @@ public class PasswordFieldBasicValidationTest
         testField.setI18n(new PasswordField.PasswordFieldI18n()
                 .setMinLengthErrorMessage("Value is too short"));
         testField.setValue("AA");
-        Assert.assertEquals("Value is too short", getErrorMessageProperty());
+        Assert.assertEquals("Value is too short", testField.getErrorMessage());
     }
 
     @Test
     public void maxLength_validate_emptyErrorMessageDisplayed() {
         testField.setMaxLength(3);
         testField.setValue("AAAA");
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -70,14 +70,14 @@ public class PasswordFieldBasicValidationTest
         testField.setI18n(new PasswordField.PasswordFieldI18n()
                 .setMaxLengthErrorMessage("Value is too long"));
         testField.setValue("AAAA");
-        Assert.assertEquals("Value is too long", getErrorMessageProperty());
+        Assert.assertEquals("Value is too long", testField.getErrorMessage());
     }
 
     @Test
     public void pattern_validate_emptyErrorMessageDisplayed() {
         testField.setPattern("\\d+");
         testField.setValue("AAAA");
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -87,7 +87,7 @@ public class PasswordFieldBasicValidationTest
                 .setPatternErrorMessage("Value does not match the pattern"));
         testField.setValue("AAAA");
         Assert.assertEquals("Value does not match the pattern",
-                getErrorMessageProperty());
+                testField.getErrorMessage());
     }
 
     @Test
@@ -98,7 +98,8 @@ public class PasswordFieldBasicValidationTest
         testField.setErrorMessage("Custom error message");
         testField.setValue("AAAA");
         testField.setValue("");
-        Assert.assertEquals("Custom error message", getErrorMessageProperty());
+        Assert.assertEquals("Custom error message",
+                testField.getErrorMessage());
     }
 
     @Test
@@ -110,15 +111,13 @@ public class PasswordFieldBasicValidationTest
         testField.setValue("AAAA");
         testField.setValue("");
         testField.setErrorMessage("");
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        testField.setValue("AAAA");
+        testField.setValue("");
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Override
     protected PasswordField createTestField() {
         return new PasswordField();
-    }
-
-    private String getErrorMessageProperty() {
-        return testField.getElement().getProperty("errorMessage");
     }
 }

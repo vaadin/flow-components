@@ -42,7 +42,7 @@ public class BigDecimalFieldBasicValidationTest
     public void badInput_validate_emptyErrorMessageDisplayed() {
         testField.getElement().setProperty("_hasInputValue", true);
         simulateBadInput();
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -52,7 +52,7 @@ public class BigDecimalFieldBasicValidationTest
         testField.getElement().setProperty("_hasInputValue", true);
         simulateBadInput();
         Assert.assertEquals("Value has invalid format",
-                getErrorMessageProperty());
+                testField.getErrorMessage());
     }
 
     @Test
@@ -60,7 +60,7 @@ public class BigDecimalFieldBasicValidationTest
         testField.setRequiredIndicatorVisible(true);
         testField.setValue(new BigDecimal(1));
         testField.setValue(null);
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -70,7 +70,7 @@ public class BigDecimalFieldBasicValidationTest
                 .setRequiredErrorMessage("Field is required"));
         testField.setValue(new BigDecimal(1));
         testField.setValue(null);
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Test
@@ -81,11 +81,12 @@ public class BigDecimalFieldBasicValidationTest
         testField.setErrorMessage("Custom error message");
         testField.setValue(new BigDecimal(1));
         testField.setValue(null);
-        Assert.assertEquals("Custom error message", getErrorMessageProperty());
+        Assert.assertEquals("Custom error message",
+                testField.getErrorMessage());
     }
 
     @Test
-    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_i18nErrorMessageDisplayed() {
+    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new BigDecimalField.BigDecimalFieldI18n()
                 .setRequiredErrorMessage("Field is required"));
@@ -93,7 +94,9 @@ public class BigDecimalFieldBasicValidationTest
         testField.setValue(new BigDecimal(1));
         testField.setValue(null);
         testField.setErrorMessage("");
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        testField.setValue(new BigDecimal(1));
+        testField.setValue(null);
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Override
@@ -112,9 +115,5 @@ public class BigDecimalFieldBasicValidationTest
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private String getErrorMessageProperty() {
-        return testField.getElement().getProperty("errorMessage");
     }
 }

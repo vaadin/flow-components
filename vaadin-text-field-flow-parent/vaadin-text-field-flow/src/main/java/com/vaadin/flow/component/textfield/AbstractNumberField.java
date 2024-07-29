@@ -155,41 +155,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         });
     }
 
-    /**
-     * Sets an error message to display for all constraint violations.
-     * <p>
-     * This error message takes priority over i18n error messages when both are
-     * set.
-     *
-     * @param errorMessage
-     *            the error message to set, or {@code null} to clear
-     *
-     */
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        validationController.setCustomErrorMessage(errorMessage);
-    }
-
-    /**
-     * Gets the error message displayed for all constraint violations.
-     *
-     * @return the error message
-     */
-    @Override
-    public String getErrorMessage() {
-        return validationController.getCustomErrorMessage();
-    }
-
-    @Override
-    public void setInvalid(boolean invalid) {
-        validationController.setInvalid(invalid);
-    }
-
-    @Override
-    public boolean isInvalid() {
-        return validationController.isInvalid();
-    }
-
     @Override
     public void setValueChangeMode(ValueChangeMode valueChangeMode) {
         if (inputListenerRegistration != null) {
