@@ -21,7 +21,7 @@ public class ValidationController<C extends Component & HasValidator<V> & HasVal
         implements Serializable {
     private C component;
     private boolean manualValidationEnabled;
-    private String validationResultErrorMessage;
+    private String lastValidationResultErrorMessage;
 
     public ValidationController(C component) {
         this.component = component;
@@ -61,25 +61,30 @@ public class ValidationController<C extends Component & HasValidator<V> & HasVal
         Validator<V> validator = component.getDefaultValidator();
         ValidationResult result = validator.apply(value, null);
         if (result.isError()) {
-            setInvalid(true);
-            setValidationResultErrorMessage(result.getErrorMessage());
+            setComponentInvalid(true);
+            setComponentErrorMessage(result.getErrorMessage());
         } else {
-            setInvalid(false);
-            setValidationResultErrorMessage("");
+            setComponentInvalid(false);
+            setComponentErrorMessage("");
         }
     }
 
-    private void setInvalid(boolean invalid) {
+    private void setComponentInvalid(boolean invalid) {
         component.setInvalid(invalid);
     }
 
-    private void setValidationResultErrorMessage(String errorMessage) {
-        if (component.getErrorMessage() == null
-                || component.getErrorMessage().isEmpty()
-                || component.getErrorMessage()
-                        .equals(validationResultErrorMessage)) {
+    private void setComponentErrorMessage(String errorMessage) {
+        boolean hasCustomErrorMessage = component.getErrorMessage() != null
+                && !component.getErrorMessage().isEmpty()
+                && !component.getErrorMessage()
+                        .equals(lastValidationResultErrorMessage);
+
+        // Avoid overwriting a custom error message that might have been
+        // set by the developer using the same component API.
+        if (!hasCustomErrorMessage) {
             component.setErrorMessage(errorMessage);
         }
-        validationResultErrorMessage = errorMessage;
+
+        lastValidationResultErrorMessage = errorMessage;
     }
 }
