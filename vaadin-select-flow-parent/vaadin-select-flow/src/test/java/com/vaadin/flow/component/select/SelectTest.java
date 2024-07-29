@@ -24,6 +24,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
@@ -862,6 +863,24 @@ public class SelectTest {
         Assert.assertTrue(select.isNoVerticalOverlap());
         select.setNoVerticalOverlap(false);
         Assert.assertFalse(select.isNoVerticalOverlap());
+    }
+
+    @Test
+    public void setOverlayWidth() {
+        Select<String> select = new Select<>();
+
+        select.setOverlayWidth(null);
+        Assert.assertNull(
+                select.getStyle().get("--vaadin-select-overlay-width"));
+        select.setOverlayWidth("30em");
+        Assert.assertEquals("30em",
+                select.getStyle().get("--vaadin-select-overlay-width"));
+        select.setOverlayWidth(-1, Unit.EM);
+        Assert.assertNull(
+                select.getStyle().get("--vaadin-select-overlay-width"));
+        select.setOverlayWidth(100, Unit.PIXELS);
+        Assert.assertEquals("100.0px",
+                select.getStyle().get("--vaadin-select-overlay-width"));
     }
 
     @Test
