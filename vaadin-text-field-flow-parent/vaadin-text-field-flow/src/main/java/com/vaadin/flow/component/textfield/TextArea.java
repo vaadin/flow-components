@@ -52,11 +52,12 @@ public class TextArea extends TextFieldBase<TextArea, String>
     private TextAreaI18n i18n;
 
     private Validator<String> defaultValidator = (value, context) -> {
-        boolean fromBinder = context != null;
+        boolean fromComponent = context == null;
 
-        // When the validator is called by Binder, we skip the required check,
-        // as Binder has its own implementation of required validation.
-        if (!fromBinder) {
+        // Do the required check only if the validator is called from the
+        // component, and not from Binder. Binder has its own implementation
+        // of required validation.
+        if (fromComponent) {
             ValidationResult requiredResult = ValidationUtil
                     .validateRequiredConstraint(
                             getI18nErrorMessage(
