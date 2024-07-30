@@ -10,8 +10,12 @@ import java.util.List;
 public class BasicValidationPage
         extends AbstractValidationPage<Select<String>> {
     public static final String REQUIRED_BUTTON = "required-button";
+    public static final String REQUIRED_ERROR_MESSAGE = "Field is required";
 
     public BasicValidationPage() {
+        testField.setI18n(new Select.SelectI18n()
+                .setRequiredErrorMessage(REQUIRED_ERROR_MESSAGE));
+
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
             testField.setRequiredIndicatorVisible(true);
         }));
@@ -28,7 +32,6 @@ public class BasicValidationPage
         };
         select.setItems(List.of("foo", "bar", "baz"));
         select.setEmptySelectionAllowed(true);
-
         return select;
     }
 }

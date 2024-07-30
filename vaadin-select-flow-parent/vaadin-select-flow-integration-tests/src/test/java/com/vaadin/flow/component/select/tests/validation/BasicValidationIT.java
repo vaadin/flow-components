@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import static com.vaadin.flow.component.select.tests.validation.BasicValidationPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.select.tests.validation.BasicValidationPage.REQUIRED_ERROR_MESSAGE;
 
 @TestPath("vaadin-select/validation/basic")
 public class BasicValidationIT extends AbstractValidationIT<SelectElement> {
@@ -15,6 +16,7 @@ public class BasicValidationIT extends AbstractValidationIT<SelectElement> {
     public void fieldIsInitiallyValid() {
         assertClientValid();
         assertServerValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -23,6 +25,7 @@ public class BasicValidationIT extends AbstractValidationIT<SelectElement> {
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -33,6 +36,7 @@ public class BasicValidationIT extends AbstractValidationIT<SelectElement> {
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -43,11 +47,13 @@ public class BasicValidationIT extends AbstractValidationIT<SelectElement> {
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         testField.selectByText("");
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
