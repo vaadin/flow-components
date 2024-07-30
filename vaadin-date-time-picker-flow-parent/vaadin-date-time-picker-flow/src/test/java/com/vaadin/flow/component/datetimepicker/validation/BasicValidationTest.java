@@ -35,7 +35,7 @@ public class BasicValidationTest
     public void badInput_validate_emptyErrorMessageDisplayed() {
         getDatePicker().getElement().setProperty("_hasInputValue", true);
         fireValidatedDomEvent();
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -45,7 +45,7 @@ public class BasicValidationTest
         getDatePicker().getElement().setProperty("_hasInputValue", true);
         fireValidatedDomEvent();
         Assert.assertEquals("Value has invalid format",
-                getErrorMessageProperty());
+                testField.getErrorMessage());
     }
 
     @Test
@@ -53,7 +53,7 @@ public class BasicValidationTest
         testField.setRequiredIndicatorVisible(true);
         testField.setValue(LocalDateTime.now());
         testField.setValue(null);
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -63,14 +63,14 @@ public class BasicValidationTest
                 .setRequiredErrorMessage("Field is required"));
         testField.setValue(LocalDateTime.now());
         testField.setValue(null);
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Test
     public void min_validate_emptyErrorMessageDisplayed() {
         testField.setMin(LocalDateTime.now());
         testField.setValue(LocalDateTime.now().minusDays(1));
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -79,14 +79,14 @@ public class BasicValidationTest
         testField.setI18n(new DateTimePicker.DateTimePickerI18n()
                 .setMinErrorMessage("Value is too small"));
         testField.setValue(LocalDateTime.now().minusDays(1));
-        Assert.assertEquals("Value is too small", getErrorMessageProperty());
+        Assert.assertEquals("Value is too small", testField.getErrorMessage());
     }
 
     @Test
     public void max_validate_emptyErrorMessageDisplayed() {
         testField.setMax(LocalDateTime.now());
         testField.setValue(LocalDateTime.now().plusDays(1));
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -95,7 +95,7 @@ public class BasicValidationTest
         testField.setI18n(new DateTimePicker.DateTimePickerI18n()
                 .setMaxErrorMessage("Value is too big"));
         testField.setValue(LocalDateTime.now().plusDays(1));
-        Assert.assertEquals("Value is too big", getErrorMessageProperty());
+        Assert.assertEquals("Value is too big", testField.getErrorMessage());
     }
 
     @Test
@@ -106,11 +106,11 @@ public class BasicValidationTest
         testField.setErrorMessage("Custom error message");
         testField.setValue(LocalDateTime.now());
         testField.setValue(null);
-        Assert.assertEquals("Custom error message", getErrorMessageProperty());
+        Assert.assertEquals("Custom error message", testField.getErrorMessage());
     }
 
     @Test
-    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_i18nErrorMessageDisplayed() {
+    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new DateTimePicker.DateTimePickerI18n()
                 .setRequiredErrorMessage("Field is required"));
@@ -118,7 +118,9 @@ public class BasicValidationTest
         testField.setValue(LocalDateTime.now());
         testField.setValue(null);
         testField.setErrorMessage("");
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        testField.setValue(LocalDateTime.now());
+        testField.setValue(null);
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Override
@@ -135,9 +137,5 @@ public class BasicValidationTest
                 "validated", Json.createObject());
         testField.getElement().getNode().getFeature(ElementListenerMap.class)
                 .fireEvent(validatedDomEvent);
-    }
-
-    private String getErrorMessageProperty() {
-        return testField.getElement().getProperty("errorMessage");
     }
 }
