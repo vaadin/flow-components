@@ -55,6 +55,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -116,12 +117,52 @@ public class DatePicker
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
 
-    private boolean manualValidationEnabled = false;
-
-    private String customErrorMessage;
-    private String constraintErrorMessage;
-
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
+
+    private Validator<LocalDate> defaultValidator = (value, context) -> {
+        boolean fromComponent = context == null;
+
+        boolean hasBadInput = valueEquals(value, getEmptyValue())
+                && isInputValuePresent();
+        if (hasBadInput) {
+            return ValidationResult.error(getI18nErrorMessage(
+                    DatePickerI18n::getBadInputErrorMessage));
+        }
+
+        // Do the required check only if the validator is called from the
+        // component, and not from Binder. Binder has its own implementation
+        // of required validation.
+        if (fromComponent) {
+            ValidationResult requiredResult = ValidationUtil
+                    .validateRequiredConstraint(
+                            getI18nErrorMessage(
+                                    DatePickerI18n::getRequiredErrorMessage),
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
+            if (requiredResult.isError()) {
+                return requiredResult;
+            }
+        }
+
+        ValidationResult maxResult = ValidationUtil.validateMaxConstraint(
+                getI18nErrorMessage(DatePickerI18n::getMaxErrorMessage), value,
+                max);
+        if (maxResult.isError()) {
+            return maxResult;
+        }
+
+        ValidationResult minResult = ValidationUtil.validateMinConstraint(
+                getI18nErrorMessage(DatePickerI18n::getMinErrorMessage), value,
+                min);
+        if (minResult.isError()) {
+            return minResult;
+        }
+
+        return ValidationResult.ok();
+    };
+
+    private ValidationController<DatePicker, LocalDate> validationController = new ValidationController<>(
+            this);
 
     /**
      * Default constructor.
@@ -296,44 +337,6 @@ public class DatePicker
     public DatePicker(LocalDate initialDate, Locale locale) {
         this(initialDate);
         setLocale(locale);
-    }
-
-    /**
-     * Sets an error message to display for all constraint violations.
-     * <p>
-     * This error message takes priority over i18n error messages when both are
-     * set.
-     *
-     * @param errorMessage
-     *            the error message to set, or {@code null} to clear
-     */
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        customErrorMessage = errorMessage;
-        updateErrorMessage();
-    }
-
-    /**
-     * Gets the error message displayed for all constraint violations.
-     *
-     * @return the error message
-     */
-    @Override
-    public String getErrorMessage() {
-        return customErrorMessage;
-    }
-
-    private void setConstraintErrorMessage(String errorMessage) {
-        constraintErrorMessage = errorMessage;
-        updateErrorMessage();
-    }
-
-    private void updateErrorMessage() {
-        String errorMessage = constraintErrorMessage;
-        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
-            errorMessage = customErrorMessage;
-        }
-        getElement().setProperty("errorMessage", errorMessage);
     }
 
     /**
@@ -567,7 +570,7 @@ public class DatePicker
 
     @Override
     public Validator<LocalDate> getDefaultValidator() {
-        return (value, context) -> checkValidity(value, false);
+        return defaultValidator;
     }
 
     @Override
@@ -588,44 +591,6 @@ public class DatePicker
                 this, !isInvalid());
         validationStatusChangeListeners
                 .forEach(listener -> listener.validationStatusChanged(event));
-    }
-
-    private ValidationResult checkValidity(LocalDate value,
-            boolean withRequiredValidator) {
-        boolean hasBadInput = valueEquals(value, getEmptyValue())
-                && isInputValuePresent();
-        if (hasBadInput) {
-            return ValidationResult.error(getI18nErrorMessage(
-                    DatePickerI18n::getBadInputErrorMessage));
-        }
-
-        if (withRequiredValidator) {
-            ValidationResult requiredResult = ValidationUtil
-                    .validateRequiredConstraint(
-                            getI18nErrorMessage(
-                                    DatePickerI18n::getRequiredErrorMessage),
-                            isRequiredIndicatorVisible(), value,
-                            getEmptyValue());
-            if (requiredResult.isError()) {
-                return requiredResult;
-            }
-        }
-
-        ValidationResult maxResult = ValidationUtil.validateMaxConstraint(
-                getI18nErrorMessage(DatePickerI18n::getMaxErrorMessage), value,
-                max);
-        if (maxResult.isError()) {
-            return maxResult;
-        }
-
-        ValidationResult minResult = ValidationUtil.validateMinConstraint(
-                getI18nErrorMessage(DatePickerI18n::getMinErrorMessage), value,
-                min);
-        if (minResult.isError()) {
-            return minResult;
-        }
-
-        return ValidationResult.ok();
     }
 
     /**
@@ -829,7 +794,7 @@ public class DatePicker
 
     @Override
     public void setManualValidation(boolean enabled) {
-        this.manualValidationEnabled = enabled;
+        validationController.setManualValidation(enabled);
     }
 
     /**
@@ -842,18 +807,7 @@ public class DatePicker
      * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (this.manualValidationEnabled) {
-            return;
-        }
-
-        ValidationResult result = checkValidity(getValue(), true);
-        if (result.isError()) {
-            setInvalid(true);
-            setConstraintErrorMessage(result.getErrorMessage());
-        } else {
-            setInvalid(false);
-            setConstraintErrorMessage("");
-        }
+        validationController.validate(getValue());
     }
 
     /**
