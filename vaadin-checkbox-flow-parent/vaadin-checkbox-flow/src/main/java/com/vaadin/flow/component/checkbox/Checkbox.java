@@ -37,7 +37,10 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.PropertyChangeListener;
 
+import java.io.Serializable;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Checkbox is an input field representing a binary choice.
@@ -68,7 +71,12 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
     private String ariaLabel;
     private String ariaLabelledBy;
 
+    private CheckboxI18n i18n;
+
     private boolean manualValidationEnabled = false;
+
+    private String customErrorMessage;
+    private String constraintErrorMessage;
 
     /**
      * Default constructor.
@@ -191,6 +199,44 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         super.onAttach(attachEvent);
 
         ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+    }
+
+    /**
+     * Sets an error message to display for all constraint violations.
+     * <p>
+     * This error message takes priority over i18n error messages when both are
+     * set.
+     *
+     * @param errorMessage
+     *            the error message to set, or {@code null} to clear
+     */
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        customErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    /**
+     * Gets the error message displayed for all constraint violations.
+     *
+     * @return the error message
+     */
+    @Override
+    public String getErrorMessage() {
+        return customErrorMessage;
+    }
+
+    private void setConstraintErrorMessage(String errorMessage) {
+        constraintErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    private void updateErrorMessage() {
+        String errorMessage = constraintErrorMessage;
+        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
+            errorMessage = customErrorMessage;
+        }
+        getElement().setProperty("errorMessage", errorMessage);
     }
 
     /**
@@ -328,27 +374,29 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
     }
 
     /**
-     * Performs server-side validation of the current value. This is needed
-     * because it is possible to circumvent the client-side validation
-     * constraints using browser development tools.
+     * Validates the current value against the constraints and sets the
+     * {@code invalid} property and the {@code errorMessage} property based on
+     * the result. If a custom error message is provided with
+     * {@link #setErrorMessage(String)}, it is used. Otherwise, the error
+     * message defined in the i18n object is used.
+     * <p>
+     * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            setInvalid(isInvalid(getValue()));
+        if (this.manualValidationEnabled) {
+            return;
         }
-    }
 
-    /**
-     * Performs a server-side validation of the given value. This is needed
-     * because it is possible to circumvent the client side validation
-     * constraints using browser development tools.
-     */
-    private boolean isInvalid(Boolean value) {
-        ValidationResult requiredValidation = ValidationUtil
-                .validateRequiredConstraint("", isRequiredIndicatorVisible(),
-                        value, getEmptyValue());
-
-        return requiredValidation.isError();
+        ValidationResult result = ValidationUtil.validateRequiredConstraint(
+                getI18nErrorMessage(CheckboxI18n::getRequiredErrorMessage),
+                isRequiredIndicatorVisible(), getValue(), getEmptyValue());
+        if (result.isError()) {
+            setInvalid(true);
+            setConstraintErrorMessage(result.getErrorMessage());
+        } else {
+            setInvalid(false);
+            setConstraintErrorMessage("");
+        }
     }
 
     /**
@@ -368,6 +416,73 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      */
     boolean isDisabledBoolean() {
         return getElement().getProperty("disabled", false);
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(CheckboxI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public CheckboxI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(CheckboxI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+    }
+
+    private String getI18nErrorMessage(Function<CheckboxI18n, String> getter) {
+        return Optional.ofNullable(i18n).map(getter).orElse("");
+    }
+
+    /**
+     * The internationalization properties for {@link Checkbox}.
+     */
+    public static class CheckboxI18n implements Serializable {
+
+        private String requiredErrorMessage;
+
+        /**
+         * Gets the error message displayed when the field is required but
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         * @see Checkbox#isRequiredIndicatorVisible()
+         * @see Checkbox#setRequiredIndicatorVisible(boolean)
+         */
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field is required but
+         * empty.
+         * <p>
+         * Note, custom error messages set with
+         * {@link Checkbox#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see Checkbox#isRequiredIndicatorVisible()
+         * @see Checkbox#setRequiredIndicatorVisible(boolean)
+         */
+        public CheckboxI18n setRequiredErrorMessage(String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
     }
 
 }
