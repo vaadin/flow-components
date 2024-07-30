@@ -15,6 +15,11 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import java.io.Serializable;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -22,7 +27,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.ValueChangeMode;
 
@@ -34,16 +41,19 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-text-area")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/text-area", version = "24.5.0-alpha5")
+@NpmPackage(value = "@vaadin/text-area", version = "24.5.0-alpha6")
 @JsModule("@vaadin/text-area/src/vaadin-text-area.js")
 public class TextArea extends TextFieldBase<TextArea, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextAreaVariant> {
 
-    private TextFieldValidationSupport validationSupport;
+    private TextAreaI18n i18n;
 
     private boolean manualValidationEnabled = false;
+
+    private String customErrorMessage;
+    private String constraintErrorMessage;
 
     /**
      * Constructs an empty {@code TextArea}.
@@ -174,11 +184,42 @@ public class TextArea extends TextFieldBase<TextArea, String>
         addValueChangeListener(listener);
     }
 
-    private TextFieldValidationSupport getValidationSupport() {
-        if (validationSupport == null) {
-            validationSupport = new TextFieldValidationSupport(this);
+    /**
+     * Sets an error message to display for all constraint violations.
+     * <p>
+     * This error message takes priority over i18n error messages when both are
+     * set.
+     *
+     * @param errorMessage
+     *            the error message to set, or {@code null} to clear
+     */
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        customErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    /**
+     * Gets the error message displayed for all constraint violations.
+     *
+     * @return the error message
+     */
+    @Override
+    public String getErrorMessage() {
+        return customErrorMessage;
+    }
+
+    private void setConstraintErrorMessage(String errorMessage) {
+        constraintErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    private void updateErrorMessage() {
+        String errorMessage = constraintErrorMessage;
+        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
+            errorMessage = customErrorMessage;
         }
-        return validationSupport;
+        getElement().setProperty("errorMessage", errorMessage);
     }
 
     /**
@@ -190,7 +231,6 @@ public class TextArea extends TextFieldBase<TextArea, String>
      */
     public void setMaxLength(int maxLength) {
         getElement().setProperty("maxlength", maxLength);
-        getValidationSupport().setMaxLength(maxLength);
     }
 
     /**
@@ -203,6 +243,10 @@ public class TextArea extends TextFieldBase<TextArea, String>
         return (int) getElement().getProperty("maxlength", 0.0);
     }
 
+    private boolean hasMaxLength() {
+        return getElement().getProperty("maxlength") != null;
+    }
+
     /**
      * Minimum number of characters (in Unicode code points) that the user can
      * enter.
@@ -212,7 +256,6 @@ public class TextArea extends TextFieldBase<TextArea, String>
      */
     public void setMinLength(int minLength) {
         getElement().setProperty("minlength", minLength);
-        getValidationSupport().setMinLength(minLength);
     }
 
     /**
@@ -240,22 +283,6 @@ public class TextArea extends TextFieldBase<TextArea, String>
     }
 
     /**
-     * <p>
-     * Specifies that the user must fill in a value.
-     * </p>
-     * NOTE: The required indicator will not be visible, if there is no
-     * {@code label} property set for the textfield.
-     *
-     * @param required
-     *            the boolean value to set
-     */
-    @Override
-    public void setRequired(boolean required) {
-        super.setRequired(required);
-        getValidationSupport().setRequired(required);
-    }
-
-    /**
      * Sets a regular expression for the value to pass on the client-side. The
      * pattern must be a valid JavaScript Regular Expression that matches the
      * entire value, not just some subset.
@@ -272,7 +299,6 @@ public class TextArea extends TextFieldBase<TextArea, String>
      */
     public void setPattern(String pattern) {
         getElement().setProperty("pattern", pattern == null ? "" : pattern);
-        getValidationSupport().setPattern(pattern);
     }
 
     /**
@@ -318,14 +344,8 @@ public class TextArea extends TextFieldBase<TextArea, String>
     }
 
     @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        getValidationSupport().setRequired(requiredIndicatorVisible);
-    }
-
-    @Override
     public Validator<String> getDefaultValidator() {
-        return (value, context) -> getValidationSupport().checkValidity(value);
+        return (value, context) -> checkValidity(value, false);
     }
 
     @Override
@@ -333,14 +353,71 @@ public class TextArea extends TextFieldBase<TextArea, String>
         this.manualValidationEnabled = enabled;
     }
 
+    private ValidationResult checkValidity(String value,
+            boolean withRequiredValidator) {
+        if (withRequiredValidator) {
+            ValidationResult requiredResult = ValidationUtil
+                    .validateRequiredConstraint(
+                            getI18nErrorMessage(
+                                    TextAreaI18n::getRequiredErrorMessage),
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
+            if (requiredResult.isError()) {
+                return requiredResult;
+            }
+        }
+
+        ValidationResult maxLengthResult = ValidationUtil
+                .validateMaxLengthConstraint(
+                        getI18nErrorMessage(
+                                TextAreaI18n::getMaxLengthErrorMessage),
+                        value, hasMaxLength() ? getMaxLength() : null);
+        if (maxLengthResult.isError()) {
+            return maxLengthResult;
+        }
+
+        ValidationResult minLengthResult = ValidationUtil
+                .validateMinLengthConstraint(
+                        getI18nErrorMessage(
+                                TextAreaI18n::getMinLengthErrorMessage),
+                        value, getMinLength());
+        if (minLengthResult.isError()) {
+            return minLengthResult;
+        }
+
+        ValidationResult patternResult = ValidationUtil
+                .validatePatternConstraint(
+                        getI18nErrorMessage(
+                                TextAreaI18n::getPatternErrorMessage),
+                        value, getPattern());
+        if (patternResult.isError()) {
+            return patternResult;
+        }
+
+        return ValidationResult.ok();
+    }
+
     /**
-     * Performs server-side validation of the current value. This is needed
-     * because it is possible to circumvent the client-side validation
-     * constraints using browser development tools.
+     * Validates the current value against the constraints and sets the
+     * {@code invalid} property and the {@code errorMessage} property based on
+     * the result. If a custom error message is provided with
+     * {@link #setErrorMessage(String)}, it is used. Otherwise, the error
+     * message defined in the i18n object is used.
+     * <p>
+     * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            setInvalid(getValidationSupport().isInvalid(getValue()));
+        if (this.manualValidationEnabled) {
+            return;
+        }
+
+        ValidationResult result = checkValidity(getValue(), true);
+        if (result.isError()) {
+            setInvalid(true);
+            setConstraintErrorMessage(result.getErrorMessage());
+        } else {
+            setInvalid(false);
+            setConstraintErrorMessage("");
         }
     }
 
@@ -348,5 +425,168 @@ public class TextArea extends TextFieldBase<TextArea, String>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(TextAreaI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public TextAreaI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(TextAreaI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+    }
+
+    private String getI18nErrorMessage(Function<TextAreaI18n, String> getter) {
+        return Optional.ofNullable(i18n).map(getter).orElse("");
+    }
+
+    /**
+     * The internationalization properties for {@link TextArea}.
+     */
+    public static class TextAreaI18n implements Serializable {
+
+        private String requiredErrorMessage;
+        private String minLengthErrorMessage;
+        private String maxLengthErrorMessage;
+        private String patternErrorMessage;
+
+        /**
+         * Gets the error message displayed when the field is required but
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         * @see TextArea#isRequiredIndicatorVisible()
+         * @see TextArea#setRequiredIndicatorVisible(boolean)
+         */
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field is required but
+         * empty.
+         * <p>
+         * Note, custom error messages set with
+         * {@link TextArea#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see TextArea#isRequiredIndicatorVisible()
+         * @see TextArea#setRequiredIndicatorVisible(boolean)
+         */
+        public TextAreaI18n setRequiredErrorMessage(String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field value is shorter than
+         * the minimum allowed length.
+         *
+         * @return the error message or {@code null} if not set
+         * @see TextArea#getMinLength()
+         * @see TextArea#setMinLength(int)
+         */
+        public String getMinLengthErrorMessage() {
+            return minLengthErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field value is shorter
+         * than the minimum allowed length.
+         * <p>
+         * Note, custom error messages set with
+         * {@link TextArea#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see TextArea#getMinLength()
+         * @see TextArea#setMinLength(int)
+         */
+        public TextAreaI18n setMinLengthErrorMessage(String errorMessage) {
+            minLengthErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field value is longer than
+         * the maximum allowed length.
+         *
+         * @return the error message or {@code null} if not set
+         * @see TextArea#getMaxLength()
+         * @see TextArea#setMaxLength(int)
+         */
+        public String getMaxLengthErrorMessage() {
+            return maxLengthErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field value is longer than
+         * the maximum allowed length.
+         * <p>
+         * Note, custom error messages set with
+         * {@link TextArea#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see TextArea#getMaxLength()
+         * @see TextArea#setMaxLength(int)
+         */
+        public TextAreaI18n setMaxLengthErrorMessage(String errorMessage) {
+            maxLengthErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field value does not match
+         * the pattern.
+         *
+         * @return the error message or {@code null} if not set
+         * @see TextArea#getPattern()
+         * @see TextArea#setPattern(String)
+         */
+        public String getPatternErrorMessage() {
+            return patternErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field value does not match
+         * the pattern.
+         * <p>
+         * Note, custom error messages set with
+         * {@link TextArea#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see TextArea#getPattern()
+         * @see TextArea#setPattern(String)
+         */
+        public TextAreaI18n setPatternErrorMessage(String errorMessage) {
+            patternErrorMessage = errorMessage;
+            return this;
+        }
     }
 }

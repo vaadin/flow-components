@@ -15,12 +15,110 @@
  */
 package com.vaadin.flow.component.textfield.validation;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class PasswordFieldBasicValidationTest
         extends AbstractBasicValidationTest<PasswordField, String> {
+    @Test
+    public void required_validate_emptyErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setValue("AAA");
+        testField.setValue("");
+        Assert.assertEquals("", getErrorMessageProperty());
+    }
+
+    @Test
+    public void required_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new PasswordField.PasswordFieldI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setValue("AAA");
+        testField.setValue("");
+        Assert.assertEquals("Field is required", getErrorMessageProperty());
+    }
+
+    @Test
+    public void minLength_validate_emptyErrorMessageDisplayed() {
+        testField.setMinLength(3);
+        testField.setValue("AA");
+        Assert.assertEquals("", getErrorMessageProperty());
+    }
+
+    @Test
+    public void minLength_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setMinLength(3);
+        testField.setI18n(new PasswordField.PasswordFieldI18n()
+                .setMinLengthErrorMessage("Value is too short"));
+        testField.setValue("AA");
+        Assert.assertEquals("Value is too short", getErrorMessageProperty());
+    }
+
+    @Test
+    public void maxLength_validate_emptyErrorMessageDisplayed() {
+        testField.setMaxLength(3);
+        testField.setValue("AAAA");
+        Assert.assertEquals("", getErrorMessageProperty());
+    }
+
+    @Test
+    public void maxLength_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setMaxLength(3);
+        testField.setI18n(new PasswordField.PasswordFieldI18n()
+                .setMaxLengthErrorMessage("Value is too long"));
+        testField.setValue("AAAA");
+        Assert.assertEquals("Value is too long", getErrorMessageProperty());
+    }
+
+    @Test
+    public void pattern_validate_emptyErrorMessageDisplayed() {
+        testField.setPattern("\\d+");
+        testField.setValue("AAAA");
+        Assert.assertEquals("", getErrorMessageProperty());
+    }
+
+    @Test
+    public void pattern_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setPattern("\\d+");
+        testField.setI18n(new PasswordField.PasswordFieldI18n()
+                .setPatternErrorMessage("Value does not match the pattern"));
+        testField.setValue("AAAA");
+        Assert.assertEquals("Value does not match the pattern",
+                getErrorMessageProperty());
+    }
+
+    @Test
+    public void setI18nAndCustomErrorMessage_validate_customErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new PasswordField.PasswordFieldI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setErrorMessage("Custom error message");
+        testField.setValue("AAAA");
+        testField.setValue("");
+        Assert.assertEquals("Custom error message", getErrorMessageProperty());
+    }
+
+    @Test
+    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_i18nErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new PasswordField.PasswordFieldI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setErrorMessage("Custom error message");
+        testField.setValue("AAAA");
+        testField.setValue("");
+        testField.setErrorMessage("");
+        Assert.assertEquals("Field is required", getErrorMessageProperty());
+    }
+
+    @Override
     protected PasswordField createTestField() {
         return new PasswordField();
+    }
+
+    private String getErrorMessageProperty() {
+        return testField.getElement().getProperty("errorMessage");
     }
 }
