@@ -17,12 +17,64 @@ package com.vaadin.flow.component.combobox.validation;
 
 import java.util.Set;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
+import com.vaadin.flow.component.combobox.MultiSelectComboBoxI18n;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class MultiSelectComboBoxBasicValidationTest extends
         AbstractBasicValidationTest<MultiSelectComboBox<String>, Set<String>> {
+    @Test
+    public void required_validate_emptyErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setValue(Set.of("foo"));
+        testField.setValue(Set.of());
+        Assert.assertEquals("", getErrorMessageProperty());
+    }
+
+    @Test
+    public void required_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new MultiSelectComboBoxI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setValue(Set.of("foo"));
+        testField.setValue(Set.of());
+        Assert.assertEquals("Field is required", getErrorMessageProperty());
+    }
+
+    @Test
+    public void setI18nAndCustomErrorMessage_validate_customErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new MultiSelectComboBoxI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setErrorMessage("Custom error message");
+        testField.setValue(Set.of("foo"));
+        testField.setValue(Set.of());
+        Assert.assertEquals("Custom error message", getErrorMessageProperty());
+    }
+
+    @Test
+    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_i18nErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new MultiSelectComboBoxI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setErrorMessage("Custom error message");
+        testField.setValue(Set.of("foo"));
+        testField.setValue(Set.of());
+        testField.setErrorMessage("");
+        Assert.assertEquals("Field is required", getErrorMessageProperty());
+    }
+
+    @Override
     protected MultiSelectComboBox<String> createTestField() {
-        return new MultiSelectComboBox<String>();
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems("foo");
+        return comboBox;
+    }
+
+    private String getErrorMessageProperty() {
+        return testField.getElement().getProperty("errorMessage");
     }
 }
