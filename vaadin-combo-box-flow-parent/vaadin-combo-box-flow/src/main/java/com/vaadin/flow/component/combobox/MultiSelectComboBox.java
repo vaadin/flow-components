@@ -84,7 +84,6 @@ public class MultiSelectComboBox<TItem>
         HasThemeVariant<MultiSelectComboBoxVariant> {
 
     private final MultiSelectComboBoxSelectionModel<TItem> selectionModel;
-    private MultiSelectComboBoxI18n i18n;
     private AutoExpandMode autoExpand;
 
     /**
@@ -241,8 +240,8 @@ public class MultiSelectComboBox<TItem>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
-        if (i18n != null) {
-            this.updateI18n();
+        if (getI18n() != null) {
+            updateI18n();
         }
     }
 
@@ -540,7 +539,7 @@ public class MultiSelectComboBox<TItem>
      * @return the i18n object or {@code null} if no i18n object has been set
      */
     public MultiSelectComboBoxI18n getI18n() {
-        return i18n;
+        return (MultiSelectComboBoxI18n) super.getI18n();
     }
 
     /**
@@ -550,8 +549,7 @@ public class MultiSelectComboBox<TItem>
      *            the i18n object, not {@code null}
      */
     public void setI18n(MultiSelectComboBoxI18n i18n) {
-        this.i18n = Objects.requireNonNull(i18n,
-                "The i18n properties object should not be null");
+        super.setI18n(i18n);
         updateI18n();
     }
 
@@ -561,11 +559,15 @@ public class MultiSelectComboBox<TItem>
      * settings of the web component.
      */
     private void updateI18n() {
-        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
+        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(getI18n());
 
         // Remove null values so that we don't overwrite existing WC
         // translations with empty ones
         removeNullValuesFromJsonObject(i18nJson);
+
+        // Remove the error message properties because they aren't used on
+        // the client-side.
+        i18nJson.remove("requiredErrorMessage");
 
         // Assign new I18N object to WC, by merging the existing
         // WC I18N, and the values from the new I18n instance,

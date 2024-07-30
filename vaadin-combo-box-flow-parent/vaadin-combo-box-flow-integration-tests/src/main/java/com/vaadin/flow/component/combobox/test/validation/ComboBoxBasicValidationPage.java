@@ -10,9 +10,13 @@ import java.util.List;
 public class ComboBoxBasicValidationPage
         extends AbstractValidationPage<ComboBox<String>> {
     public static final String REQUIRED_BUTTON = "required-button";
+    public static final String REQUIRED_ERROR_MESSAGE = "Field is required";
     public static final String ENABLE_CUSTOM_VALUE_BUTTON = "enable-custom-value-button";
 
     public ComboBoxBasicValidationPage() {
+        testField.setI18n(new ComboBox.ComboBoxI18n()
+                .setRequiredErrorMessage(REQUIRED_ERROR_MESSAGE));
+
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
             testField.setRequired(true);
         }));
