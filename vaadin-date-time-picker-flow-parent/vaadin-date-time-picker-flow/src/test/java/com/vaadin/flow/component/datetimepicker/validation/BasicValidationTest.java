@@ -106,7 +106,8 @@ public class BasicValidationTest
         testField.setErrorMessage("Custom error message");
         testField.setValue(LocalDateTime.now());
         testField.setValue(null);
-        Assert.assertEquals("Custom error message", testField.getErrorMessage());
+        Assert.assertEquals("Custom error message",
+                testField.getErrorMessage());
     }
 
     @Test
