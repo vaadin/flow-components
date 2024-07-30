@@ -17,6 +17,7 @@ package com.vaadin.flow.component.timepicker;
 
 import java.io.Serializable;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
@@ -51,6 +52,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -100,12 +102,52 @@ public class TimePicker
     private LocalTime min;
     private StateTree.ExecutionRegistration pendingLocaleUpdate;
 
-    private boolean manualValidationEnabled = false;
-
-    private String customErrorMessage;
-    private String constraintErrorMessage;
-
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalTime>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
+
+    private Validator<LocalTime> defaultValidator = (value, context) -> {
+        boolean fromComponent = context == null;
+
+        boolean hasBadInput = Objects.equals(value, getEmptyValue())
+                && isInputValuePresent();
+        if (hasBadInput) {
+            return ValidationResult.error(getI18nErrorMessage(
+                    TimePickerI18n::getBadInputErrorMessage));
+        }
+
+        // Do the required check only if the validator is called from the
+        // component, and not from Binder. Binder has its own implementation
+        // of required validation.
+        if (fromComponent) {
+            ValidationResult requiredResult = ValidationUtil
+                    .validateRequiredConstraint(
+                            getI18nErrorMessage(
+                                    TimePickerI18n::getRequiredErrorMessage),
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
+            if (requiredResult.isError()) {
+                return requiredResult;
+            }
+        }
+
+        ValidationResult maxResult = ValidationUtil.validateMaxConstraint(
+                getI18nErrorMessage(TimePickerI18n::getMaxErrorMessage), value,
+                max);
+        if (maxResult.isError()) {
+            return maxResult;
+        }
+
+        ValidationResult minResult = ValidationUtil.validateMinConstraint(
+                getI18nErrorMessage(TimePickerI18n::getMinErrorMessage), value,
+                min);
+        if (minResult.isError()) {
+            return minResult;
+        }
+
+        return ValidationResult.ok();
+    };
+
+    private ValidationController<TimePicker, LocalTime> validationController = new ValidationController<>(
+            this);
 
     /**
      * Default constructor.
@@ -236,44 +278,6 @@ public class TimePicker
     }
 
     /**
-     * Sets an error message to display for all constraint violations.
-     * <p>
-     * This error message takes priority over i18n error messages when both are
-     * set.
-     *
-     * @param errorMessage
-     *            the error message to set, or {@code null} to clear
-     */
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        customErrorMessage = errorMessage;
-        updateErrorMessage();
-    }
-
-    /**
-     * Gets the error message displayed for all constraint violations.
-     *
-     * @return the error message
-     */
-    @Override
-    public String getErrorMessage() {
-        return customErrorMessage;
-    }
-
-    private void setConstraintErrorMessage(String errorMessage) {
-        constraintErrorMessage = errorMessage;
-        updateErrorMessage();
-    }
-
-    private void updateErrorMessage() {
-        String errorMessage = constraintErrorMessage;
-        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
-            errorMessage = customErrorMessage;
-        }
-        getElement().setProperty("errorMessage", errorMessage);
-    }
-
-    /**
      * Sets the label for the time picker.
      *
      * @param label
@@ -366,7 +370,7 @@ public class TimePicker
 
     @Override
     public Validator<LocalTime> getDefaultValidator() {
-        return (value, context) -> checkValidity(value, false);
+        return defaultValidator;
     }
 
     @Override
@@ -387,44 +391,6 @@ public class TimePicker
                 this, !isInvalid());
         validationStatusChangeListeners
                 .forEach(listener -> listener.validationStatusChanged(event));
-    }
-
-    private ValidationResult checkValidity(LocalTime value,
-            boolean withRequiredValidator) {
-        boolean hasBadInput = Objects.equals(value, getEmptyValue())
-                && isInputValuePresent();
-        if (hasBadInput) {
-            return ValidationResult.error(getI18nErrorMessage(
-                    TimePickerI18n::getBadInputErrorMessage));
-        }
-
-        if (withRequiredValidator) {
-            ValidationResult requiredResult = ValidationUtil
-                    .validateRequiredConstraint(
-                            getI18nErrorMessage(
-                                    TimePickerI18n::getRequiredErrorMessage),
-                            isRequiredIndicatorVisible(), value,
-                            getEmptyValue());
-            if (requiredResult.isError()) {
-                return requiredResult;
-            }
-        }
-
-        ValidationResult maxResult = ValidationUtil.validateMaxConstraint(
-                getI18nErrorMessage(TimePickerI18n::getMaxErrorMessage), value,
-                max);
-        if (maxResult.isError()) {
-            return maxResult;
-        }
-
-        ValidationResult minResult = ValidationUtil.validateMinConstraint(
-                getI18nErrorMessage(TimePickerI18n::getMinErrorMessage), value,
-                min);
-        if (minResult.isError()) {
-            return minResult;
-        }
-
-        return ValidationResult.ok();
     }
 
     /**
@@ -541,7 +507,7 @@ public class TimePicker
 
     @Override
     public void setManualValidation(boolean enabled) {
-        this.manualValidationEnabled = enabled;
+        validationController.setManualValidation(enabled);
     }
 
     /**
@@ -554,18 +520,7 @@ public class TimePicker
      * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (this.manualValidationEnabled) {
-            return;
-        }
-
-        ValidationResult result = checkValidity(getValue(), true);
-        if (result.isError()) {
-            setInvalid(true);
-            setConstraintErrorMessage(result.getErrorMessage());
-        } else {
-            setInvalid(false);
-            setConstraintErrorMessage("");
-        }
+        validationController.validate(getValue());
     }
 
     @Override
