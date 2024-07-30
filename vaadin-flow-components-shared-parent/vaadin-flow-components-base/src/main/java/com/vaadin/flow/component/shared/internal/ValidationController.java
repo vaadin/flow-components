@@ -1,4 +1,4 @@
-package com.vaadin.flow.component.shared;
+package com.vaadin.flow.component.shared.internal;
 
 import java.io.Serializable;
 
