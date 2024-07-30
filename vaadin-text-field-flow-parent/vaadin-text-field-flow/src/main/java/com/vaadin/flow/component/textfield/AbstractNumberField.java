@@ -62,54 +62,68 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<T>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
-    private Validator<T> defaultValidator = (value, context) -> {
-        boolean fromComponent = context == null;
-
+    private Validator<T> badInputValidator = (value, context) -> {
         boolean hasBadInput = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
-        if (hasBadInput) {
-            return ValidationResult.error(getI18nErrorMessage(
-                    AbstractNumberFieldI18n::getBadInputErrorMessage));
-        }
+        return hasBadInput
+                ? ValidationResult.error(getI18nErrorMessage(
+                        AbstractNumberFieldI18n::getBadInputErrorMessage))
+                : ValidationResult.ok();
+    };
+
+    private Validator<T> requiredValidator = (value, context) -> {
+        boolean fromComponent = context == null;
 
         // Do the required check only if the validator is called from the
         // component, and not from Binder. Binder has its own implementation
         // of required validation.
-        if (fromComponent) {
-            ValidationResult requiredResult = ValidationUtil
-                    .validateRequiredConstraint(getI18nErrorMessage(
-                            AbstractNumberFieldI18n::getRequiredErrorMessage),
-                            isRequiredIndicatorVisible(), value,
-                            getEmptyValue());
-            if (requiredResult.isError()) {
-                return requiredResult;
-            }
-        }
+        boolean isRequired = fromComponent && isRequiredIndicatorVisible();
+        return ValidationUtil.validateRequiredConstraint(
+                getI18nErrorMessage(
+                        AbstractNumberFieldI18n::getRequiredErrorMessage),
+                isRequired, value, getEmptyValue());
+    };
 
+    private Validator<T> minValidator = (value, context) -> {
         Double doubleValue = value != null ? value.doubleValue() : null;
 
-        ValidationResult maxResult = ValidationUtil.validateMaxConstraint(
-                getI18nErrorMessage(
-                        AbstractNumberFieldI18n::getMaxErrorMessage),
-                doubleValue, max);
-        if (maxResult.isError()) {
-            return maxResult;
-        }
-
-        ValidationResult minResult = ValidationUtil.validateMinConstraint(
+        return ValidationUtil.validateMinConstraint(
                 getI18nErrorMessage(
                         AbstractNumberFieldI18n::getMinErrorMessage),
                 doubleValue, min);
-        if (minResult.isError()) {
-            return minResult;
+    };
+
+    private Validator<T> maxValidator = (value, context) -> {
+        Double doubleValue = value != null ? value.doubleValue() : null;
+
+        return ValidationUtil.validateMaxConstraint(
+                getI18nErrorMessage(
+                        AbstractNumberFieldI18n::getMaxErrorMessage),
+                doubleValue, max);
+    };
+
+    private Validator<T> stepValidator = (value, context) -> {
+        if (!stepSetByUser// Don't use step in validation if it's not explicitly
+                          // set by user. This follows the web component logic.
+                || value == null || step == 0) {
+            return ValidationResult.ok();
         }
 
-        if (!isValidByStep(value)) {
-            return ValidationResult.error(getI18nErrorMessage(
-                    AbstractNumberFieldI18n::getStepErrorMessage));
-        }
+        // When min is not defined by user, its value is the absoluteMin
+        // provided in constructor. In this case, min should not be considered
+        // in the step validation.
+        double stepBasis = minSetByUser && !Double.isInfinite(getMinDouble())
+                ? getMinDouble()
+                : 0.0;
 
-        return ValidationResult.ok();
+        // (value - stepBasis) % step == 0
+        boolean isValid = new BigDecimal(String.valueOf(value))
+                .subtract(BigDecimal.valueOf(stepBasis))
+                .remainder(BigDecimal.valueOf(step))
+                .compareTo(BigDecimal.ZERO) == 0;
+        return isValid ? ValidationResult.ok()
+                : ValidationResult.error(getI18nErrorMessage(
+                        AbstractNumberFieldI18n::getStepErrorMessage));
     };
 
     private ValidationController<AbstractNumberField<C, T>, T> validationController = new ValidationController<>(
@@ -354,7 +368,15 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     @Override
     public Validator<T> getDefaultValidator() {
-        return defaultValidator;
+        // @formatter:off
+        return ValidationUtil.chainValidators(
+            badInputValidator,
+            requiredValidator,
+            minValidator,
+            maxValidator,
+            stepValidator
+        );
+        // @formatter:on
     }
 
     @Override
@@ -393,28 +415,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
      */
     protected void validate() {
         validationController.validate(getValue());
-    }
-
-    private boolean isValidByStep(T value) {
-
-        if (!stepSetByUser// Don't use step in validation if it's not explicitly
-                          // set by user. This follows the web component logic.
-                || value == null || step == 0) {
-            return true;
-        }
-
-        // When min is not defined by user, its value is the absoluteMin
-        // provided in constructor. In this case, min should not be considered
-        // in the step validation.
-        double stepBasis = minSetByUser && !Double.isInfinite(getMinDouble())
-                ? getMinDouble()
-                : 0.0;
-
-        // (value - stepBasis) % step == 0
-        return new BigDecimal(String.valueOf(value))
-                .subtract(BigDecimal.valueOf(stepBasis))
-                .remainder(BigDecimal.valueOf(step))
-                .compareTo(BigDecimal.ZERO) == 0;
     }
 
     @Override

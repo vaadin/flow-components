@@ -16,8 +16,10 @@
 package com.vaadin.flow.component.shared;
 
 import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
 
 import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Util methods for component validation
@@ -237,5 +239,13 @@ public class ValidationUtil {
                 && !pattern.isEmpty() && !value.matches(pattern);
         return isError ? ValidationResult.error(errorMessage)
                 : ValidationResult.ok();
+    }
+
+    @SafeVarargs
+    public static <T> Validator<T> chainValidators(Validator<T>... validators) {
+        return (value, context) -> Stream.of(validators)
+                .map(validator -> validator.apply(value, context))
+                .filter(ValidationResult::isError).findFirst()
+                .orElse(ValidationResult.ok());
     }
 }
