@@ -126,6 +126,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
             width = event.getWidth();
             height = event.getHeight();
         });
+
+        setOverlayRole("dialog");
     }
 
     /**
@@ -966,6 +968,28 @@ public class Dialog extends Component implements HasComponents, HasSize,
         initHeaderFooterRenderer();
         updateVirtualChildNodeIds();
         registerClientCloseHandler();
+    }
+
+    /**
+     * Sets the ARIA role for the overlay element, used by screen readers.
+     *
+     * @param role
+     *            the role to set
+     */
+    public void setOverlayRole(String role) {
+        Objects.requireNonNull(role, "Role cannot be null");
+
+        getElement().setProperty("overlayRole", role);
+    }
+
+    /**
+     * Gets the ARIA role for the overlay element, used by screen readers.
+     * Defaults to {@code dialog}.
+     *
+     * @return the role
+     */
+    public String getOverlayRole() {
+        return getElement().getProperty("overlayRole");
     }
 
     /**
