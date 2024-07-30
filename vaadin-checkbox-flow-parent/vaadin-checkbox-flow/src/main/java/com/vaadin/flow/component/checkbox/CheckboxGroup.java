@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.checkbox;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -24,6 +25,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,6 +52,7 @@ import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -84,9 +87,9 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "24.5.0-alpha5")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "24.5.0-alpha6")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
@@ -120,7 +123,12 @@ public class CheckboxGroup<T>
 
     private SerializableConsumer<UI> sizeRequest;
 
+    private CheckboxGroupI18n i18n;
+
     private boolean manualValidationEnabled = false;
+
+    private String customErrorMessage;
+    private String constraintErrorMessage;
 
     private SelectionPreservationHandler<T> selectionPreservationHandler;
 
@@ -241,6 +249,44 @@ public class CheckboxGroup<T>
         super.onAttach(attachEvent);
 
         ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+    }
+
+    /**
+     * Sets an error message to display for all constraint violations.
+     * <p>
+     * This error message takes priority over i18n error messages when both are
+     * set.
+     *
+     * @param errorMessage
+     *            the error message to set, or {@code null} to clear
+     */
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        customErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    /**
+     * Gets the error message displayed for all constraint violations.
+     *
+     * @return the error message
+     */
+    @Override
+    public String getErrorMessage() {
+        return customErrorMessage;
+    }
+
+    private void setConstraintErrorMessage(String errorMessage) {
+        constraintErrorMessage = errorMessage;
+        updateErrorMessage();
+    }
+
+    private void updateErrorMessage() {
+        String errorMessage = constraintErrorMessage;
+        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
+            errorMessage = customErrorMessage;
+        }
+        getElement().setProperty("errorMessage", errorMessage);
     }
 
     @Override
@@ -905,13 +951,97 @@ public class CheckboxGroup<T>
         this.manualValidationEnabled = enabled;
     }
 
+    /**
+     * Validates the current value against the constraints and sets the
+     * {@code invalid} property and the {@code errorMessage} property based on
+     * the result. If a custom error message is provided with
+     * {@link #setErrorMessage(String)}, it is used. Otherwise, the error
+     * message defined in the i18n object is used.
+     * <p>
+     * The method does nothing if the manual validation mode is enabled.
+     */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            boolean isInvalid = ValidationUtil.validateRequiredConstraint("",
-                    isRequiredIndicatorVisible(), getValue(), getEmptyValue())
-                    .isError();
+        if (this.manualValidationEnabled) {
+            return;
+        }
 
-            setInvalid(isInvalid);
+        ValidationResult result = ValidationUtil.validateRequiredConstraint(
+                getI18nErrorMessage(CheckboxGroupI18n::getRequiredErrorMessage),
+                isRequiredIndicatorVisible(), getValue(), getEmptyValue());
+        if (result.isError()) {
+            setInvalid(true);
+            setConstraintErrorMessage(result.getErrorMessage());
+        } else {
+            setInvalid(false);
+            setConstraintErrorMessage("");
+        }
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(CheckboxGroupI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public CheckboxGroupI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(CheckboxGroupI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+    }
+
+    private String getI18nErrorMessage(
+            Function<CheckboxGroupI18n, String> getter) {
+        return Optional.ofNullable(i18n).map(getter).orElse("");
+    }
+
+    /**
+     * The internationalization properties for {@link CheckboxGroup}.
+     */
+    public static class CheckboxGroupI18n implements Serializable {
+
+        private String requiredErrorMessage;
+
+        /**
+         * Gets the error message displayed when the field is required but
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         * @see CheckboxGroup#isRequiredIndicatorVisible()
+         * @see CheckboxGroup#setRequiredIndicatorVisible(boolean)
+         */
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field is required but
+         * empty.
+         * <p>
+         * Note, custom error messages set with
+         * {@link CheckboxGroup#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see CheckboxGroup#isRequiredIndicatorVisible()
+         * @see CheckboxGroup#setRequiredIndicatorVisible(boolean)
+         */
+        public CheckboxGroupI18n setRequiredErrorMessage(String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
         }
     }
 }

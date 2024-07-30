@@ -6,7 +6,7 @@ import com.vaadin.tests.validation.AbstractValidationIT;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import static com.vaadin.flow.component.checkbox.tests.validation.BinderValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.checkbox.tests.validation.CheckboxBinderValidationPage.REQUIRED_ERROR_MESSAGE;
 
 @TestPath("vaadin-checkbox/validation/binder")
 public class CheckboxBinderValidationIT

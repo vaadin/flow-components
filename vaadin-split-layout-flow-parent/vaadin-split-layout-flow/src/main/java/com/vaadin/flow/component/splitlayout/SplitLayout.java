@@ -43,9 +43,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-split-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/split-layout", version = "24.5.0-alpha5")
+@NpmPackage(value = "@vaadin/split-layout", version = "24.5.0-alpha6")
 @JsModule("@vaadin/split-layout/src/vaadin-split-layout.js")
 public class SplitLayout extends Component
         implements ClickNotifier<SplitLayout>, HasSize, HasStyle,
@@ -81,11 +81,14 @@ public class SplitLayout extends Component
         addAttachListener(
                 e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
         addSplitterDragendListener(e -> {
-            var splitterPosition = calcNewSplitterPosition(
+            splitterPosition = calcNewSplitterPosition(
                     e.primaryComponentFlexBasis, e.secondaryComponentFlexBasis);
-            setSplitterPosition(splitterPosition);
-        });
 
+            setPrimaryStyle("flex",
+                    String.format("1 1 %s", e.primaryComponentFlexBasis));
+            setSecondaryStyle("flex",
+                    String.format("1 1 %s", e.secondaryComponentFlexBasis));
+        });
     }
 
     /**

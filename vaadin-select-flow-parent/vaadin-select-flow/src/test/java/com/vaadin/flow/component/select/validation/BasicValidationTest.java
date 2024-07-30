@@ -15,12 +15,63 @@
  */
 package com.vaadin.flow.component.select.validation;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class BasicValidationTest
         extends AbstractBasicValidationTest<Select<String>, String> {
+    @Test
+    public void required_validate_emptyErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setValue("foo");
+        testField.setValue(null);
+        Assert.assertEquals("", getErrorMessageProperty());
+    }
+
+    @Test
+    public void required_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new Select.SelectI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setValue("foo");
+        testField.setValue(null);
+        Assert.assertEquals("Field is required", getErrorMessageProperty());
+    }
+
+    @Test
+    public void setI18nAndCustomErrorMessage_validate_customErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new Select.SelectI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setErrorMessage("Custom error message");
+        testField.setValue("foo");
+        testField.setValue(null);
+        Assert.assertEquals("Custom error message", getErrorMessageProperty());
+    }
+
+    @Test
+    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_i18nErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new Select.SelectI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setErrorMessage("Custom error message");
+        testField.setValue("foo");
+        testField.setValue(null);
+        testField.setErrorMessage("");
+        Assert.assertEquals("Field is required", getErrorMessageProperty());
+    }
+
+    @Override
     protected Select<String> createTestField() {
-        return new Select<String>();
+        Select<String> select = new Select<>();
+        select.setItems("foo");
+        return select;
+    }
+
+    private String getErrorMessageProperty() {
+        return testField.getElement().getProperty("errorMessage");
     }
 }
