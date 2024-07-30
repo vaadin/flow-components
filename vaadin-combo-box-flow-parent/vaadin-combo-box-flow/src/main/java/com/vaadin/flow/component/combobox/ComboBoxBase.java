@@ -43,8 +43,9 @@ import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.HasValidator;
-import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
@@ -127,10 +128,20 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     private ComboBoxBaseI18n i18n;
 
-    private boolean manualValidationEnabled = false;
+    private Validator<TValue> defaultValidator = (value, context) -> {
+        boolean fromComponent = context == null;
 
-    private String customErrorMessage;
-    private String constraintErrorMessage;
+        // Do the required check only if the validator is called from the
+        // component, and not from Binder. Binder has its own implementation
+        // of required validation.
+        boolean isRequired = fromComponent && isRequiredIndicatorVisible();
+        return ValidationUtil.validateRequiredConstraint(
+                getI18nErrorMessage(ComboBoxBaseI18n::getRequiredErrorMessage),
+                isRequired, getValue(), getEmptyValue());
+    };
+
+    private ValidationController<ComboBoxBase<TComponent, TItem, TValue>, TValue> validationController = new ValidationController<>(
+            this);
 
     /**
      * Constructs a new ComboBoxBase instance
@@ -189,45 +200,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
                 e -> getDataCommunicator().notifySelectionChanged());
 
         addValueChangeListener(e -> validate());
-    }
-
-    /**
-     * Sets an error message to display for all constraint violations.
-     * <p>
-     * This error message takes priority over i18n error messages when both are
-     * set.
-     *
-     * @param errorMessage
-     *            the error message to set, or {@code null} to clear
-     *
-     */
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        customErrorMessage = errorMessage;
-        updateErrorMessage();
-    }
-
-    /**
-     * Gets the error message displayed for all constraint violations.
-     *
-     * @return the error message
-     */
-    @Override
-    public String getErrorMessage() {
-        return customErrorMessage;
-    }
-
-    private void setConstraintErrorMessage(String errorMessage) {
-        constraintErrorMessage = errorMessage;
-        updateErrorMessage();
-    }
-
-    private void updateErrorMessage() {
-        String errorMessage = constraintErrorMessage;
-        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
-            errorMessage = customErrorMessage;
-        }
-        getElement().setProperty("errorMessage", errorMessage);
     }
 
     /**
@@ -1233,7 +1205,12 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     @Override
     public void setManualValidation(boolean enabled) {
-        this.manualValidationEnabled = enabled;
+        validationController.setManualValidation(enabled);
+    }
+
+    @Override
+    public Validator<TValue> getDefaultValidator() {
+        return defaultValidator;
     }
 
     /**
@@ -1246,20 +1223,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (this.manualValidationEnabled) {
-            return;
-        }
-
-        ValidationResult result = ValidationUtil.validateRequiredConstraint(
-                getI18nErrorMessage(ComboBoxBaseI18n::getRequiredErrorMessage),
-                isRequiredIndicatorVisible(), getValue(), getEmptyValue());
-        if (result.isError()) {
-            setInvalid(true);
-            setConstraintErrorMessage(result.getErrorMessage());
-        } else {
-            setInvalid(false);
-            setConstraintErrorMessage("");
-        }
+        validationController.validate(getValue());
     }
 
     /**
