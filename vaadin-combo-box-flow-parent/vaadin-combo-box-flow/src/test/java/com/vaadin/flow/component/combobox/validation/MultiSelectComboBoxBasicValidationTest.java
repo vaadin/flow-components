@@ -31,7 +31,7 @@ public class MultiSelectComboBoxBasicValidationTest extends
         testField.setRequiredIndicatorVisible(true);
         testField.setValue(Set.of("foo"));
         testField.setValue(Set.of());
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -41,7 +41,7 @@ public class MultiSelectComboBoxBasicValidationTest extends
                 .setRequiredErrorMessage("Field is required"));
         testField.setValue(Set.of("foo"));
         testField.setValue(Set.of());
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Test
@@ -52,11 +52,12 @@ public class MultiSelectComboBoxBasicValidationTest extends
         testField.setErrorMessage("Custom error message");
         testField.setValue(Set.of("foo"));
         testField.setValue(Set.of());
-        Assert.assertEquals("Custom error message", getErrorMessageProperty());
+        Assert.assertEquals("Custom error message",
+                testField.getErrorMessage());
     }
 
     @Test
-    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_i18nErrorMessageDisplayed() {
+    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new MultiSelectComboBoxI18n()
                 .setRequiredErrorMessage("Field is required"));
@@ -64,7 +65,9 @@ public class MultiSelectComboBoxBasicValidationTest extends
         testField.setValue(Set.of("foo"));
         testField.setValue(Set.of());
         testField.setErrorMessage("");
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        testField.setValue(Set.of("foo"));
+        testField.setValue(Set.of());
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Override
@@ -72,9 +75,5 @@ public class MultiSelectComboBoxBasicValidationTest extends
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         comboBox.setItems("foo");
         return comboBox;
-    }
-
-    private String getErrorMessageProperty() {
-        return testField.getElement().getProperty("errorMessage");
     }
 }

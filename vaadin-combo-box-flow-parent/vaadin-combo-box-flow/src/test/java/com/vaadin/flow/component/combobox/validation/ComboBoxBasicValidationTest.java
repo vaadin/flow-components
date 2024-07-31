@@ -28,7 +28,7 @@ public class ComboBoxBasicValidationTest
         testField.setRequiredIndicatorVisible(true);
         testField.setValue("foo");
         testField.setValue(null);
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -38,7 +38,7 @@ public class ComboBoxBasicValidationTest
                 .setRequiredErrorMessage("Field is required"));
         testField.setValue("foo");
         testField.setValue(null);
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Test
@@ -49,11 +49,12 @@ public class ComboBoxBasicValidationTest
         testField.setErrorMessage("Custom error message");
         testField.setValue("foo");
         testField.setValue(null);
-        Assert.assertEquals("Custom error message", getErrorMessageProperty());
+        Assert.assertEquals("Custom error message",
+                testField.getErrorMessage());
     }
 
     @Test
-    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_i18nErrorMessageDisplayed() {
+    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new ComboBox.ComboBoxI18n()
                 .setRequiredErrorMessage("Field is required"));
@@ -61,7 +62,9 @@ public class ComboBoxBasicValidationTest
         testField.setValue("foo");
         testField.setValue(null);
         testField.setErrorMessage("");
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        testField.setValue("foo");
+        testField.setValue(null);
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Override
@@ -69,9 +72,5 @@ public class ComboBoxBasicValidationTest
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setItems("foo");
         return comboBox;
-    }
-
-    private String getErrorMessageProperty() {
-        return testField.getElement().getProperty("errorMessage");
     }
 }
