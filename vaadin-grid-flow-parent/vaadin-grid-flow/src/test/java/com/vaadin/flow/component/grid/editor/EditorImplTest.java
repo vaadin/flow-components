@@ -77,10 +77,15 @@ public class EditorImplTest {
         grid.getDataCommunicator().getKeyMapper().key("bar");
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void editItem_itemIsNotKnown_throw() {
-        editor.editItem("foo");
-        fakeClientResponse();
+    @Test()
+    public void editItem_itemIsNotKnown_noException() {
+        try {
+            // Edit an item that is not in the grid's active range yet
+            editor.editItem("foo");
+            fakeClientResponse();
+        } catch (Exception e) {
+            Assert.fail("No exception should be thrown");
+        }
     }
 
     @Test(expected = IllegalStateException.class)
