@@ -130,8 +130,6 @@ public interface Editor<T> extends Serializable {
      *            the edited item
      * @throws IllegalStateException
      *             if already editing a different item in buffered mode
-     * @throws IllegalArgumentException
-     *             if the {@code item} is not in the backing data provider
      */
     void editItem(T item);
 
