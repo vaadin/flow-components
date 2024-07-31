@@ -43,7 +43,9 @@ import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
@@ -69,6 +71,7 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Provides base functionality for combo box related components, such as
@@ -123,7 +126,22 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     private final ComboBoxDataController<TItem> dataController;
     private int customValueListenersCount;
 
-    private boolean manualValidationEnabled = false;
+    private ComboBoxBaseI18n i18n;
+
+    private Validator<TValue> defaultValidator = (value, context) -> {
+        boolean fromComponent = context == null;
+
+        // Do the required check only if the validator is called from the
+        // component, and not from Binder. Binder has its own implementation
+        // of required validation.
+        boolean isRequired = fromComponent && isRequiredIndicatorVisible();
+        return ValidationUtil.validateRequiredConstraint(
+                getI18nErrorMessage(ComboBoxBaseI18n::getRequiredErrorMessage),
+                isRequired, getValue(), getEmptyValue());
+    };
+
+    private ValidationController<ComboBoxBase<TComponent, TItem, TValue>, TValue> validationController = new ValidationController<>(
+            this);
 
     /**
      * Constructs a new ComboBoxBase instance
@@ -1187,17 +1205,25 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     @Override
     public void setManualValidation(boolean enabled) {
-        this.manualValidationEnabled = enabled;
+        validationController.setManualValidation(enabled);
     }
 
-    protected void validate() {
-        if (!this.manualValidationEnabled) {
-            boolean isInvalid = ValidationUtil.validateRequiredConstraint("",
-                    isRequiredIndicatorVisible(), getValue(), getEmptyValue())
-                    .isError();
+    @Override
+    public Validator<TValue> getDefaultValidator() {
+        return defaultValidator;
+    }
 
-            setInvalid(isInvalid);
-        }
+    /**
+     * Validates the current value against the constraints and sets the
+     * {@code invalid} property and the {@code errorMessage} property based on
+     * the result. If a custom error message is provided with
+     * {@link #setErrorMessage(String)}, it is used. Otherwise, the error
+     * message defined in the i18n object is used.
+     * <p>
+     * The method does nothing if the manual validation mode is enabled.
+     */
+    protected void validate() {
+        validationController.validate(getValue());
     }
 
     /**
@@ -1222,5 +1248,34 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         public String getDetail() {
             return detail;
         }
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(ComboBoxBaseI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    protected ComboBoxBaseI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    protected void setI18n(ComboBoxBaseI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+    }
+
+    private String getI18nErrorMessage(
+            Function<ComboBoxBaseI18n, String> getter) {
+        return Optional.ofNullable(i18n).map(getter).orElse("");
     }
 }

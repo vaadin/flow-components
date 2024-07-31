@@ -15,12 +15,62 @@
  */
 package com.vaadin.flow.component.radiobutton.validation;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class BasicValidationTest
         extends AbstractBasicValidationTest<RadioButtonGroup<String>, String> {
+    @Test
+    public void required_validate_emptyErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setValue("foo");
+        testField.setValue(null);
+        Assert.assertEquals("", testField.getErrorMessage());
+    }
+
+    @Test
+    public void required_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new RadioButtonGroup.RadioButtonGroupI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setValue("foo");
+        testField.setValue(null);
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
+    }
+
+    @Test
+    public void setI18nAndCustomErrorMessage_validate_customErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new RadioButtonGroup.RadioButtonGroupI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setErrorMessage("Custom error message");
+        testField.setValue("foo");
+        testField.setValue(null);
+        Assert.assertEquals("Custom error message",
+                testField.getErrorMessage());
+    }
+
+    @Test
+    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new RadioButtonGroup.RadioButtonGroupI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setErrorMessage("Custom error message");
+        testField.setValue("foo");
+        testField.setValue(null);
+        testField.setErrorMessage("");
+        testField.setValue("foo");
+        testField.setValue(null);
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
+    }
+
+    @Override
     protected RadioButtonGroup<String> createTestField() {
-        return new RadioButtonGroup<String>();
+        RadioButtonGroup<String> select = new RadioButtonGroup<>();
+        select.setItems("foo");
+        return select;
     }
 }

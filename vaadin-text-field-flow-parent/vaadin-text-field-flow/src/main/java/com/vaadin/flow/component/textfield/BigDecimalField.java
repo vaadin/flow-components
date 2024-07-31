@@ -34,6 +34,7 @@ import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
@@ -83,12 +84,37 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
                     : valueFromModel.toPlainString().replace('.',
                             field.getDecimalSeparator());
 
-    private boolean manualValidationEnabled = false;
-
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<BigDecimal>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
-    private String customErrorMessage;
-    private String constraintErrorMessage;
+    private Validator<BigDecimal> defaultValidator = (value, context) -> {
+        boolean fromComponent = context == null;
+
+        boolean hasBadInput = valueEquals(value, getEmptyValue())
+                && isInputValuePresent();
+        if (hasBadInput) {
+            return ValidationResult.error(getI18nErrorMessage(
+                    BigDecimalFieldI18n::getBadInputErrorMessage));
+        }
+
+        // Do the required check only if the validator is called from the
+        // component, and not from Binder. Binder has its own implementation
+        // of required validation.
+        if (fromComponent) {
+            ValidationResult requiredResult = ValidationUtil
+                    .validateRequiredConstraint(getI18nErrorMessage(
+                            BigDecimalFieldI18n::getRequiredErrorMessage),
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
+            if (requiredResult.isError()) {
+                return requiredResult;
+            }
+        }
+
+        return ValidationResult.ok();
+    };
+
+    private ValidationController<BigDecimalField, BigDecimal> validationController = new ValidationController<>(
+            this);
 
     /**
      * Constructs an empty {@code BigDecimalField}.
@@ -203,45 +229,6 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         addValueChangeListener(listener);
     }
 
-    /**
-     * Sets an error message to display for all constraint violations.
-     * <p>
-     * This error message takes priority over i18n error messages when both are
-     * set.
-     *
-     * @param errorMessage
-     *            the error message to set, or {@code null} to clear
-     *
-     */
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        customErrorMessage = errorMessage;
-        updateErrorMessage();
-    }
-
-    /**
-     * Gets the error message displayed for all constraint violations.
-     *
-     * @return the error message
-     */
-    @Override
-    public String getErrorMessage() {
-        return customErrorMessage;
-    }
-
-    private void setConstraintErrorMessage(String errorMessage) {
-        constraintErrorMessage = errorMessage;
-        updateErrorMessage();
-    }
-
-    private void updateErrorMessage() {
-        String errorMessage = constraintErrorMessage;
-        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
-            errorMessage = customErrorMessage;
-        }
-        getElement().setProperty("errorMessage", errorMessage);
-    }
-
     @Override
     public BigDecimal getEmptyValue() {
         return null;
@@ -319,7 +306,7 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
 
     @Override
     public void setManualValidation(boolean enabled) {
-        this.manualValidationEnabled = enabled;
+        validationController.setManualValidation(enabled);
     }
 
     /**
@@ -332,46 +319,12 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
      * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (this.manualValidationEnabled) {
-            return;
-        }
-
-        ValidationResult result = checkValidity(getValue(), true);
-        if (result.isError()) {
-            setInvalid(true);
-            setConstraintErrorMessage(result.getErrorMessage());
-        } else {
-            setInvalid(false);
-            setConstraintErrorMessage("");
-        }
-    }
-
-    private ValidationResult checkValidity(BigDecimal value,
-            boolean withRequiredValidator) {
-        boolean hasBadInput = valueEquals(value, getEmptyValue())
-                && isInputValuePresent();
-        if (hasBadInput) {
-            return ValidationResult.error(getI18nErrorMessage(
-                    BigDecimalFieldI18n::getBadInputErrorMessage));
-        }
-
-        if (withRequiredValidator) {
-            ValidationResult requiredResult = ValidationUtil
-                    .validateRequiredConstraint(getI18nErrorMessage(
-                            BigDecimalFieldI18n::getRequiredErrorMessage),
-                            isRequiredIndicatorVisible(), value,
-                            getEmptyValue());
-            if (requiredResult.isError()) {
-                return requiredResult;
-            }
-        }
-
-        return ValidationResult.ok();
+        validationController.validate(getValue());
     }
 
     @Override
     public Validator<BigDecimal> getDefaultValidator() {
-        return (value, context) -> checkValidity(value, false);
+        return defaultValidator;
     }
 
     @Override

@@ -15,17 +15,46 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import java.io.Serializable;
-
 /**
  * Class for localization of the {@link MultiSelectComboBox}
  */
-public class MultiSelectComboBoxI18n implements Serializable {
+public class MultiSelectComboBoxI18n implements ComboBoxBaseI18n {
     private String cleared;
     private String focused;
     private String selected;
     private String deselected;
     private String total;
+    private String requiredErrorMessage;
+
+    /**
+     * Gets the error message displayed when the field is required but empty.
+     *
+     * @return the error message or {@code null} if not set
+     * @see MultiSelectComboBox#isRequiredIndicatorVisible()
+     * @see MultiSelectComboBox#setRequiredIndicatorVisible(boolean)
+     */
+    public String getRequiredErrorMessage() {
+        return requiredErrorMessage;
+    }
+
+    /**
+     * Sets the error message to display when the field is required but empty.
+     * <p>
+     * Note, custom error messages set with
+     * {@link MultiSelectComboBox#setErrorMessage(String)} take priority over
+     * i18n error messages.
+     *
+     * @param errorMessage
+     *            the error message or {@code null} to clear it
+     * @return this instance for method chaining
+     * @see MultiSelectComboBox#isRequiredIndicatorVisible()
+     * @see MultiSelectComboBox#setRequiredIndicatorVisible(boolean)
+     */
+    public MultiSelectComboBoxI18n setRequiredErrorMessage(
+            String errorMessage) {
+        requiredErrorMessage = errorMessage;
+        return this;
+    }
 
     /**
      * The text that is announced by screen readers when the clear button is
