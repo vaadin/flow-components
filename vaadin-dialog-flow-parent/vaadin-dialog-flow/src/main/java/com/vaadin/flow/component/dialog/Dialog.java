@@ -620,7 +620,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * components will be attached to as well as the renderer function used by
      * the dialog.
      */
-    abstract static class DialogHeaderFooter implements Serializable {
+    abstract static class DialogHeaderFooter implements HasComponents {
         protected final Element root;
         private final String rendererFunction;
         private final Component dialog;
@@ -640,6 +640,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
          * @param components
          *            the components to be added.
          */
+        @Override
         public void add(Component... components) {
             Objects.requireNonNull(components, "Components should not be null");
             for (Component component : components) {
@@ -662,6 +663,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
          * @param components
          *            the components to be removed.
          */
+        @Override
         public void remove(Component... components) {
             Objects.requireNonNull(components, "Components should not be null");
             for (Component component : components) {
@@ -681,11 +683,47 @@ public class Dialog extends Component implements HasComponents, HasSize,
         /**
          * Removes all components from the container.
          */
+        @Override
         public void removeAll() {
             root.removeAllChildren();
             dialog.getElement()
                     .executeJs("this." + rendererFunction + " = null;");
             setRendererCreated(false);
+        }
+
+        /**
+         * Adds the given component to the container at the specific index.
+         *
+         * @param index
+         *            the index, where the component will be added. The index
+         *            must be non-negative and may not exceed the children count
+         *            component – the component to add, value should not be null
+         * @param component
+         *            the component to be added.
+         */
+        @Override
+        public void addComponentAtIndex(int index, Component component) {
+            Objects.requireNonNull(component, "Component should not be null");
+            if (index < 0) {
+                throw new IllegalArgumentException(
+                        "Cannot add a component with a negative index");
+            } else {
+                root.insertChild(index, component.getElement());
+            }
+            if (!isRendererCreated()) {
+                initRenderer();
+            }
+        }
+
+        /**
+         * Adds the given component as the first child of the container.
+         *
+         * @param component
+         *            the component to be added.
+         */
+        @Override
+        public void addComponentAsFirst(Component component) {
+            this.addComponentAtIndex(0, component);
         }
 
         /**
@@ -726,6 +764,11 @@ public class Dialog extends Component implements HasComponents, HasSize,
          */
         void setRendererCreated(boolean rendererCreated) {
             this.rendererCreated = rendererCreated;
+        }
+
+        @Override
+        public Element getElement() {
+            return root;
         }
     }
 
