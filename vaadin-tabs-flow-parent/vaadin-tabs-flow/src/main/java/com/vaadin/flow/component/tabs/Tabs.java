@@ -173,7 +173,7 @@ public class Tabs extends Component
      */
     public void add(Tab... tabs) {
         Objects.requireNonNull(tabs, "Tabs should not be null");
-        boolean wasEmpty = getComponentCount() == 0;
+        boolean wasEmpty = getTabCount() == 0;
         Arrays.stream(tabs).map(
                 tab -> Objects.requireNonNull(tab, "Tab to add cannot be null"))
                 .map(Tab::getElement).forEach(getElement()::appendChild);
@@ -248,11 +248,11 @@ public class Tabs extends Component
         int newSelectedIndex = getSelectedIndex() - lowerIndices;
 
         // In case the last tab was removed
-        if (newSelectedIndex > 0 && newSelectedIndex >= getComponentCount()) {
-            newSelectedIndex = getComponentCount() - 1;
+        if (newSelectedIndex > 0 && newSelectedIndex >= getTabCount()) {
+            newSelectedIndex = getTabCount() - 1;
         }
 
-        if (getComponentCount() == 0 || (isSelectedTab && !isAutoselect())) {
+        if (getTabCount() == 0 || (isSelectedTab && !isAutoselect())) {
             newSelectedIndex = -1;
         }
 
@@ -749,8 +749,19 @@ public class Tabs extends Component
      * Gets the number of children tabs.
      *
      * @return the number of tabs
+     * @deprecated since 24.5, use {@link #getTabCount} instead.
      */
+    @Deprecated
     public int getComponentCount() {
+        return getTabCount();
+    }
+
+    /**
+     * Gets the number of children tabs.
+     *
+     * @return the number of tabs
+     */
+    public int getTabCount() {
         return (int) getChildren().count();
     }
 
