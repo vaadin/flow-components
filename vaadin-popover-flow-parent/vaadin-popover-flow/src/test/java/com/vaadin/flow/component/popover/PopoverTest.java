@@ -264,4 +264,15 @@ public class PopoverTest {
         Assert.assertTrue(
                 popover.getElement().getProperty("withBackdrop", false));
     }
+
+    @Test
+    public void setAutofocus_isAutofocus() {
+        Assert.assertFalse(popover.isAutofocus());
+        Assert.assertFalse(
+                popover.getElement().getProperty("autofocus", false));
+
+        popover.setAutofocus(true);
+        Assert.assertTrue(popover.isAutofocus());
+        Assert.assertTrue(popover.getElement().getProperty("autofocus", false));
+    }
 }
