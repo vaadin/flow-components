@@ -221,6 +221,28 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
     }
 
     /**
+     * Set {@code true} to make the popover content automatically receive focus
+     * after it is opened. Modal popovers use this behavior by default.
+     *
+     * @param autofocus
+     *            the boolean value to set
+     */
+    public void setAutofocus(boolean autofocus) {
+        getElement().setProperty("autofocus", autofocus);
+    }
+
+    /**
+     * Get if the popover content automatically receives focus after it is
+     * opened. Modal popovers use this behavior by default.
+     *
+     * @return {@code true} if the popover content receives focus when opened,
+     *         {@code false} otherwise
+     */
+    public boolean isAutofocus() {
+        return getElement().getProperty("autofocus", false);
+    }
+
+    /**
      * Sets the ARIA role for the overlay element, used by screen readers.
      *
      * @param role
