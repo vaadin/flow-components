@@ -9,7 +9,7 @@ type ItemModel = { item: any; index: number };
 
 type Renderer = ((root: RenderRoot, rendererOwner: HTMLElement, model: ItemModel) => void) & { __rendererId?: string };
 
-type Component = HTMLElement & { [key: string]: Renderer | undefined };
+type Component = HTMLElement & { [key: string]: Renderer | undefined; __createLitRenderFunction: any };
 
 const _window = window as any;
 _window.Vaadin = _window.Vaadin || {};
@@ -33,32 +33,9 @@ _window.Vaadin.setLitRenderer = (
   templateExpression: string,
   returnChannel: (name: string, itemKey: string, args: any[]) => void,
   clientCallables: string[],
-  propertyNamespace: string,
+  propertyNamespace: string
 ) => {
-  // Dynamically created function that renders the templateExpression
-  // inside the given root element using Lit
-  const renderFunction = Function(`
-    "use strict";
-
-    const [render, html, live, returnChannel] = arguments;
-
-    return (root, model, itemKey) => {
-      const { item, index } = model;
-      ${clientCallables
-        .map((clientCallable) => {
-          // Map all the client-callables as inline functions so they can be accessed from the template literal
-          return `
-          const ${clientCallable} = (...args) => {
-            if (itemKey !== undefined) {
-              returnChannel('${clientCallable}', itemKey, args[0] instanceof Event ? [] : [...args]);
-            }
-          }`;
-        })
-        .join('')}
-
-      render(html\`${templateExpression}\`, root)
-    }
-  `)(render, html, live, returnChannel);
+  const renderFunction = component.__createLitRenderFunction(render, html, live, returnChannel);
 
   const renderer: Renderer = (root, _, model) => {
     const { item } = model;
@@ -86,6 +63,7 @@ _window.Vaadin.setLitRenderer = (
     }
 
     renderFunction(root, { ...model, item: mappedItem }, item.key);
+    // renderFunction(root, { ...model, item: mappedItem }, item.key);
   };
 
   renderer.__rendererId = propertyNamespace;

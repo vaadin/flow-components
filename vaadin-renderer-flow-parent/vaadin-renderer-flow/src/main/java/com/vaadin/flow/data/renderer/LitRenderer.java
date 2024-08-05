@@ -164,6 +164,28 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     private void setElementRenderer(Element container, String rendererName,
             String templateExpression, ReturnChannelRegistration returnChannel,
             JsonArray clientCallablesArray, String propertyNamespace) {
+
+        // Map all the client-callables as inline functions so they can be
+        // accessed from the template literal
+        var builder = new StringBuilder();
+        
+        clientCallables.forEach((name, handler) -> {
+            builder.append("""
+                    const $1 = (...args) => {
+                        if (itemKey !== undefined) {
+                            returnChannel('$1', itemKey, args[0] instanceof Event ? [] : [...args]);
+                        }
+                    };
+                """.replace("$1", name));
+        });
+
+        container.executeJs(
+            """
+                 this.__createLitRenderFunction = function(render, html, live, returnChannel) {
+                    return (root, model, itemKey) => {
+                    const { item, index } = model;
+            """ + builder.toString() + "render(html`" + templateExpression + "`, root)}}");
+
         container.executeJs(
                 "window.Vaadin.setLitRenderer(this, $0, $1, $2, $3, $4)",
                 rendererName, templateExpression, returnChannel,
