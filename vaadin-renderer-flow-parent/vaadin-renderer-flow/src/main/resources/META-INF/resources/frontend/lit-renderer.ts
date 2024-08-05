@@ -9,7 +9,7 @@ type ItemModel = { item: any; index: number };
 
 type Renderer = ((root: RenderRoot, rendererOwner: HTMLElement, model: ItemModel) => void) & { __rendererId?: string };
 
-type Component = HTMLElement & { [key: string]: Renderer | undefined; __createLitRenderFunction: any };
+type Component = HTMLElement & { [key: string]: Renderer | undefined };
 
 const _window = window as any;
 _window.Vaadin = _window.Vaadin || {};
@@ -63,7 +63,6 @@ _window.Vaadin.setLitRenderer = (
     }
 
     renderFunction(root, { ...model, item: mappedItem }, item.key);
-    // renderFunction(root, { ...model, item: mappedItem }, item.key);
   };
 
   renderer.__rendererId = propertyNamespace;
