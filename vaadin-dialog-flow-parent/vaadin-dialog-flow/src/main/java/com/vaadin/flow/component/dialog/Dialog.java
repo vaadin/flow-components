@@ -633,12 +633,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
             root.getStyle().set("display", "contents");
         }
 
-        /**
-         * Adds the given components to the container.
-         *
-         * @param components
-         *            the components to be added.
-         */
         @Override
         public void add(Component... components) {
             Objects.requireNonNull(components, "Components should not be null");
@@ -652,16 +646,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
             }
         }
 
-        /**
-         * Removes the given components from the container.
-         *
-         * <p>
-         * Note that the component needs to be removed from this method in order
-         * to guarantee the correct state of the component.
-         *
-         * @param components
-         *            the components to be removed.
-         */
         @Override
         public void remove(Component... components) {
             Objects.requireNonNull(components, "Components should not be null");
@@ -679,9 +663,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
             }
         }
 
-        /**
-         * Removes all components from the container.
-         */
         @Override
         public void removeAll() {
             root.removeAllChildren();
@@ -690,16 +671,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
             setRendererCreated(false);
         }
 
-        /**
-         * Adds the given component to the container at the specific index.
-         *
-         * @param index
-         *            the index, where the component will be added. The index
-         *            must be non-negative and may not exceed the children count
-         *            component – the component to add, value should not be null
-         * @param component
-         *            the component to be added.
-         */
         @Override
         public void addComponentAtIndex(int index, Component component) {
             Objects.requireNonNull(component, "Component should not be null");
@@ -714,12 +685,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
             }
         }
 
-        /**
-         * Adds the given component as the first child of the container.
-         *
-         * @param component
-         *            the component to be added.
-         */
         @Override
         public void addComponentAsFirst(Component component) {
             this.addComponentAtIndex(0, component);
