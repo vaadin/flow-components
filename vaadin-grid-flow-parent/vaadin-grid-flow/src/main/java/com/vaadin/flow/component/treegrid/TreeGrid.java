@@ -51,6 +51,7 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
@@ -268,7 +269,32 @@ public class TreeGrid<T> extends Grid<T>
      *            the bean type to use, not {@code null}
      */
     public TreeGrid(Class<T> beanType) {
-        this(beanType, new TreeDataCommunicatorBuilder<T>());
+        this(beanType, true);
+    }
+
+    /**
+     * Creates a new {@code TreeGrid} with an initial set of columns for each of
+     * the bean's properties. The property-values of the bean will be converted
+     * to Strings. Full names of the properties will be used as the
+     * {@link Column#setKey(String) column keys} and the property captions will
+     * be used as the {@link Column#setHeader(String) column headers}.
+     * <p>
+     * When autoCreateColumns is <code>true</code>, only the direct properties
+     * of the bean are included, and they will be in alphabetical order. Use
+     * {@link #setColumns(String...)} to define which properties to include and
+     * in which order. You can also add a column for an individual property with
+     * {@link #addColumn(String)}. Both of these methods support also
+     * sub-properties with dot-notation, e.g.
+     * <code>"property.nestedProperty"</code>.
+     *
+     * @param beanType
+     *            the bean type to use, not <code>null</code>
+     * @param autoCreateColumns
+     *            when <code>true</code>, columns are created automatically for
+     *            the properties of the beanType
+     */
+    public TreeGrid(Class<T> beanType, boolean autoCreateColumns) {
+        this(beanType, new TreeDataCommunicatorBuilder<>(), autoCreateColumns);
     }
 
     /**
@@ -286,7 +312,38 @@ public class TreeGrid<T> extends Grid<T>
      */
     protected TreeGrid(Class<T> beanType,
             DataCommunicatorBuilder<T, TreeGridArrayUpdater> dataCommunicatorBuilder) {
-        super(beanType, TreeGridUpdateQueue::new, dataCommunicatorBuilder);
+        this(beanType, dataCommunicatorBuilder, true);
+    }
+
+    /**
+     * Creates a new {@code TreeGrid} with an initial set of columns for each of
+     * the bean's properties. The property-values of the bean will be converted
+     * to Strings. Full names of the properties will be used as the
+     * {@link Column#setKey(String) column keys} and the property captions will
+     * be used as the {@link Column#setHeader(String) column headers}.
+     * <p>
+     * When autoCreateColumns is <code>true</code>, only the direct properties
+     * of the bean are included, and they will be in alphabetical order. Use
+     * {@link #setColumns(String...)} to define which properties to include and
+     * in which order. You can also add a column for an individual property with
+     * {@link #addColumn(String)}. Both of these methods support also
+     * sub-properties with dot-notation, e.g.
+     * <code>"property.nestedProperty"</code>.
+     *
+     * @param beanType
+     *            the bean type to use, not {@code null}
+     * @param dataCommunicatorBuilder
+     *            Builder for {@link DataCommunicator} implementation this Grid
+     *            uses to handle all data communication.
+     * @param autoCreateColumns
+     *            when <code>true</code>, columns are created automatically for
+     *            the properties of the beanType
+     */
+    private TreeGrid(Class<T> beanType,
+            DataCommunicatorBuilder<T, TreeGridArrayUpdater> dataCommunicatorBuilder,
+            boolean autoCreateColumns) {
+        super(beanType, TreeGridUpdateQueue::new, dataCommunicatorBuilder,
+                autoCreateColumns);
 
         setUniqueKeyProperty("key");
         getArrayUpdater().getUpdateQueueData()
