@@ -635,59 +635,40 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
         @Override
         public void add(Component... components) {
-            Objects.requireNonNull(components, "Components should not be null");
-            for (Component component : components) {
-                Objects.requireNonNull(component,
-                        "Component to add cannot be null");
-                root.appendChild(component.getElement());
-            }
-            if (!isRendererCreated()) {
-                initRenderer();
-            }
+            HasComponents.super.add(components);
+            updateRendererState();
         }
 
         @Override
         public void remove(Component... components) {
-            Objects.requireNonNull(components, "Components should not be null");
-            for (Component component : components) {
-                Objects.requireNonNull(component,
-                        "Component to remove cannot be null");
-                if (root.equals(component.getElement().getParent())) {
-                    root.removeChild(component.getElement());
-                }
-            }
-            if (root.getChildCount() == 0) {
-                dialog.getElement()
-                        .executeJs("this." + rendererFunction + " = null;");
-                setRendererCreated(false);
-            }
+            HasComponents.super.remove(components);
+            updateRendererState();
         }
 
         @Override
         public void removeAll() {
-            root.removeAllChildren();
-            dialog.getElement()
-                    .executeJs("this." + rendererFunction + " = null;");
-            setRendererCreated(false);
+            HasComponents.super.removeAll();
+            updateRendererState();
         }
 
         @Override
         public void addComponentAtIndex(int index, Component component) {
-            Objects.requireNonNull(component, "Component should not be null");
-            if (index < 0) {
-                throw new IllegalArgumentException(
-                        "Cannot add a component with a negative index");
-            } else {
-                root.insertChild(index, component.getElement());
-            }
-            if (!isRendererCreated()) {
-                initRenderer();
-            }
+            HasComponents.super.addComponentAtIndex(index, component);
+            updateRendererState();
         }
 
         @Override
         public void addComponentAsFirst(Component component) {
-            this.addComponentAtIndex(0, component);
+            HasComponents.super.addComponentAsFirst(component);
+            updateRendererState();
+        }
+
+        private void updateRendererState() {
+            if (root.getChildCount() == 0) {
+                removeRenderer();
+            } else if (!isRendererCreated()) {
+                initRenderer();
+            }
         }
 
         /**
@@ -705,6 +686,12 @@ public class Dialog extends Component implements HasComponents, HasSize,
                     + " = (root) => {" + "if (root.firstChild) { "
                     + "   return;" + "}" + "root.appendChild($0);" + "}", root);
             setRendererCreated(true);
+        }
+
+        private void removeRenderer() {
+            dialog.getElement()
+                    .executeJs("this." + rendererFunction + " = null;");
+            setRendererCreated(false);
         }
 
         /**
