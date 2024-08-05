@@ -167,27 +167,29 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
         // Map all the client-callables as inline functions so they can be
         // accessed from the template literal
-        var builder = new StringBuilder();
-        
+        var builder = new StringBuilder("""
+                     function(render, html, live, returnChannel) {
+                        return (root, model, itemKey) => {
+                        const { item, index } = model;
+                """);
+
         clientCallables.forEach((name, handler) -> {
-            builder.append("""
-                    const $1 = (...args) => {
-                        if (itemKey !== undefined) {
-                            returnChannel('$1', itemKey, args[0] instanceof Event ? [] : [...args]);
-                        }
-                    };
-                """.replace("$1", name));
+            builder.append(
+                    """
+                                const $1 = (...args) => {
+                                    if (itemKey !== undefined) {
+                                        returnChannel('$1', itemKey, args[0] instanceof Event ? [] : [...args]);
+                                    }
+                                };
+                            """
+                            .replace("$1", name));
         });
 
-        container.executeJs(
-            """
-                 this.__createLitRenderFunction = function(render, html, live, returnChannel) {
-                    return (root, model, itemKey) => {
-                    const { item, index } = model;
-            """ + builder.toString() + "render(html`" + templateExpression + "`, root)}}");
+        builder.append("render(html`" + templateExpression + "`, root)}}");
 
         container.executeJs(
-                "window.Vaadin.setLitRenderer(this, $0, $1, $2, $3, $4)",
+                "window.Vaadin.setLitRenderer(this, $0, " + builder.toString()
+                        + ", $2, $3, $4)",
                 rendererName, templateExpression, returnChannel,
                 clientCallablesArray, propertyNamespace);
     }

@@ -20,7 +20,7 @@ _window.Vaadin = _window.Vaadin || {};
  *
  * @param component The host component to which the renderer runction is to be set
  * @param rendererName The name of the renderer function
- * @param templateExpression The content of the template literal passed to Lit for rendering.
+ * @param createLitRenderFunction A function that creates the render function.
  * @param returnChannel A channel to the server.
  * Calling it will end up invoking a handler in the server-side LitRenderer.
  * @param clientCallables A list of function names that can be called from within the template literal.
@@ -30,12 +30,12 @@ _window.Vaadin = _window.Vaadin || {};
 _window.Vaadin.setLitRenderer = (
   component: Component,
   rendererName: string,
-  templateExpression: string,
+  createLitRenderFunction: any,
   returnChannel: (name: string, itemKey: string, args: any[]) => void,
   clientCallables: string[],
   propertyNamespace: string
 ) => {
-  const renderFunction = component.__createLitRenderFunction(render, html, live, returnChannel);
+  const renderFunction = createLitRenderFunction(render, html, live, returnChannel);
 
   const renderer: Renderer = (root, _, model) => {
     const { item } = model;
