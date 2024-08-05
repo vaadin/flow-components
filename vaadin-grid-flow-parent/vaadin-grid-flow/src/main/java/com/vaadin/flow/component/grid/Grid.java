@@ -1662,16 +1662,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuilder,
             B dataCommunicatorBuilder, boolean autoCreateColumns) {
         this(50, updateQueueBuilder, dataCommunicatorBuilder);
-        Objects.requireNonNull(beanType, "Bean type can't be null");
         Objects.requireNonNull(dataCommunicatorBuilder,
                 "Data communicator builder can't be null");
-        this.beanType = beanType;
-        propertySet = BeanPropertySet.get(beanType);
-        if (autoCreateColumns) {
-            propertySet.getProperties()
-                    .filter(property -> !property.isSubProperty())
-                    .forEach(this::addColumn);
-        }
+        configureBeanType(beanType, autoCreateColumns);
     }
 
     /**
