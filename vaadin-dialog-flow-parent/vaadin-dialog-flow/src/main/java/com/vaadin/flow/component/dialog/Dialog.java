@@ -640,7 +640,25 @@ public class Dialog extends Component implements HasComponents, HasSize,
         }
 
         @Override
+        public void add(Collection<Component> components) {
+            HasComponents.super.add(components);
+            updateRendererState();
+        }
+
+        @Override
+        public void add(String text) {
+            HasComponents.super.add(text);
+            updateRendererState();
+        }
+
+        @Override
         public void remove(Component... components) {
+            HasComponents.super.remove(components);
+            updateRendererState();
+        }
+
+        @Override
+        public void remove(Collection<Component> components) {
             HasComponents.super.remove(components);
             updateRendererState();
         }
