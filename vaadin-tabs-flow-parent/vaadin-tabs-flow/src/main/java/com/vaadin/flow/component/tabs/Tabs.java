@@ -757,7 +757,7 @@ public class Tabs extends Component
     }
 
     /**
-     * Gets the number of children tabs.
+     * Gets the number of tabs.
      *
      * @return the number of tabs
      */
