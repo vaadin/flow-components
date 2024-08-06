@@ -345,11 +345,13 @@ public class TabSheetTest {
     @Test
     public void addThemeVariants_hasThemeVariants() {
         tabSheet.addThemeVariants(TabSheetVariant.LUMO_TABS_CENTERED,
-                TabSheetVariant.LUMO_BORDERED);
+                TabSheetVariant.LUMO_BORDERED, TabSheetVariant.LUMO_NO_PADDING);
         Assert.assertTrue(tabSheet.getThemeName()
                 .contains(TabSheetVariant.LUMO_TABS_CENTERED.getVariantName()));
         Assert.assertTrue(tabSheet.getThemeName()
                 .contains(TabSheetVariant.LUMO_BORDERED.getVariantName()));
+        Assert.assertTrue(tabSheet.getThemeName()
+                .contains(TabSheetVariant.LUMO_NO_PADDING.getVariantName()));
     }
 
     @Test
