@@ -156,6 +156,16 @@ public class TabSheetTest {
     }
 
     @Test
+    public void addTabs_tabCountCorrect() {
+        Assert.assertEquals(0, tabSheet.getTabCount());
+
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        tabSheet.add("Tab 1", new Span("Content 1"));
+
+        Assert.assertEquals(2, tabSheet.getTabCount());
+    }
+
+    @Test
     public void changeTab_contentEnabled() {
         tabSheet.add("Tab 0", new Span("Content 0"));
 
@@ -261,6 +271,7 @@ public class TabSheetTest {
         var tab = tabSheet.add("Tab 0", new Span("Content 0"));
         tabSheet.remove(tab);
         Assert.assertFalse(tab.getParent().isPresent());
+        Assert.assertEquals(0, tabSheet.getTabCount());
     }
 
     @Test

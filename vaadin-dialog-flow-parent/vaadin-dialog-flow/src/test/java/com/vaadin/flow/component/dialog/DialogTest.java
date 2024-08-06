@@ -249,6 +249,18 @@ public class DialogTest {
 
         Assert.assertTrue(thirdContent.getParent().isPresent());
         Assert.assertEquals(thirdContent.getParent().get(), dialog);
+
+        Span fourthContent = new Span("fourth_content");
+        dialog.getHeader().addComponentAsFirst(fourthContent);
+
+        Assert.assertTrue(fourthContent.getParent().isPresent());
+        Assert.assertEquals(fourthContent.getParent().get(), dialog);
+
+        Span fifthContent = new Span("fifth_content");
+        dialog.getHeader().addComponentAtIndex(2, fifthContent);
+
+        Assert.assertTrue(fifthContent.getParent().isPresent());
+        Assert.assertEquals(fifthContent.getParent().get(), dialog);
     }
 
     @Test
@@ -304,7 +316,7 @@ public class DialogTest {
     @Test(expected = NullPointerException.class)
     public void callAddToHeaderOrFooter_withNull_shouldThrowError() {
         Dialog dialog = new Dialog();
-        dialog.getHeader().add(null);
+        dialog.getHeader().add((Component) null);
     }
 
     @Test(expected = NullPointerException.class)

@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.dialog;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -620,7 +619,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * components will be attached to as well as the renderer function used by
      * the dialog.
      */
-    abstract static class DialogHeaderFooter implements Serializable {
+    abstract static class DialogHeaderFooter implements HasComponents {
         protected final Element root;
         private final String rendererFunction;
         private final Component dialog;
@@ -634,58 +633,60 @@ public class Dialog extends Component implements HasComponents, HasSize,
             root.getStyle().set("display", "contents");
         }
 
-        /**
-         * Adds the given components to the container.
-         *
-         * @param components
-         *            the components to be added.
-         */
+        @Override
         public void add(Component... components) {
-            Objects.requireNonNull(components, "Components should not be null");
-            for (Component component : components) {
-                Objects.requireNonNull(component,
-                        "Component to add cannot be null");
-                root.appendChild(component.getElement());
-            }
-            if (!isRendererCreated()) {
+            HasComponents.super.add(components);
+            updateRendererState();
+        }
+
+        @Override
+        public void add(Collection<Component> components) {
+            HasComponents.super.add(components);
+            updateRendererState();
+        }
+
+        @Override
+        public void add(String text) {
+            HasComponents.super.add(text);
+            updateRendererState();
+        }
+
+        @Override
+        public void remove(Component... components) {
+            HasComponents.super.remove(components);
+            updateRendererState();
+        }
+
+        @Override
+        public void remove(Collection<Component> components) {
+            HasComponents.super.remove(components);
+            updateRendererState();
+        }
+
+        @Override
+        public void removeAll() {
+            HasComponents.super.removeAll();
+            updateRendererState();
+        }
+
+        @Override
+        public void addComponentAtIndex(int index, Component component) {
+            HasComponents.super.addComponentAtIndex(index, component);
+            updateRendererState();
+        }
+
+        @Override
+        public void addComponentAsFirst(Component component) {
+            HasComponents.super.addComponentAsFirst(component);
+            updateRendererState();
+        }
+
+        private void updateRendererState() {
+            if (root.getChildCount() == 0) {
+                removeRenderer();
+            } else if (!isRendererCreated()) {
                 initRenderer();
             }
-        }
-
-        /**
-         * Removes the given components from the container.
-         *
-         * <p>
-         * Note that the component needs to be removed from this method in order
-         * to guarantee the correct state of the component.
-         *
-         * @param components
-         *            the components to be removed.
-         */
-        public void remove(Component... components) {
-            Objects.requireNonNull(components, "Components should not be null");
-            for (Component component : components) {
-                Objects.requireNonNull(component,
-                        "Component to remove cannot be null");
-                if (root.equals(component.getElement().getParent())) {
-                    root.removeChild(component.getElement());
-                }
-            }
-            if (root.getChildCount() == 0) {
-                dialog.getElement()
-                        .executeJs("this." + rendererFunction + " = null;");
-                setRendererCreated(false);
-            }
-        }
-
-        /**
-         * Removes all components from the container.
-         */
-        public void removeAll() {
-            root.removeAllChildren();
-            dialog.getElement()
-                    .executeJs("this." + rendererFunction + " = null;");
-            setRendererCreated(false);
         }
 
         /**
@@ -703,6 +704,12 @@ public class Dialog extends Component implements HasComponents, HasSize,
                     + " = (root) => {" + "if (root.firstChild) { "
                     + "   return;" + "}" + "root.appendChild($0);" + "}", root);
             setRendererCreated(true);
+        }
+
+        private void removeRenderer() {
+            dialog.getElement()
+                    .executeJs("this." + rendererFunction + " = null;");
+            setRendererCreated(false);
         }
 
         /**
@@ -726,6 +733,11 @@ public class Dialog extends Component implements HasComponents, HasSize,
          */
         void setRendererCreated(boolean rendererCreated) {
             this.rendererCreated = rendererCreated;
+        }
+
+        @Override
+        public Element getElement() {
+            return root;
         }
     }
 
