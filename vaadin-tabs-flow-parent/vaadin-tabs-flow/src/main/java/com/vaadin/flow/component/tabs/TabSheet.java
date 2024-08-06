@@ -251,6 +251,15 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
     }
 
     /**
+     * Gets the number of tabs.
+     *
+     * @return the number of tabs
+     */
+    public int getTabCount() {
+        return tabs.getTabCount();
+    }
+
+    /**
      * Returns the tab at the given position.
      *
      * @param position
