@@ -18,6 +18,7 @@ package com.vaadin.flow.component.dashboard;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -26,6 +27,8 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.shared.Registration;
+
+import elemental.json.Json;
 
 /**
  * The Dashboard component.
@@ -46,6 +49,18 @@ public class Dashboard<T extends DashboardWidget> extends Component
      * Default constructor.
      */
     public Dashboard() {
+
+        getElement().addEventListener("items-changed", e -> {
+            var items = e.getEventData().getArray("event.detail.value");
+            var newWidgets = new ArrayList<T>();
+            for (int i = 0; i < items.length(); i++) {
+                var id = items.getObject(i).getString("id");
+                widgets.stream()
+                        .filter(widget -> widget.getId().get().equals(id))
+                        .findFirst().ifPresent(newWidgets::add);
+            }
+            widgets = newWidgets;
+        }).addEventData("event.detail.value").debounce(Integer.MAX_VALUE);
 
         getElement().addEventListener("dashboard-dragend", e -> {
             fireEvent(new DashboardDragEndEvent<>(this,
@@ -70,16 +85,24 @@ public class Dashboard<T extends DashboardWidget> extends Component
     private void widgetsUpdated() {
         getElement().removeAllChildren();
 
+        var items = Json.createArray();
+
         for (T widget : widgets) {
             var widgetElement = widget.getElement();
-            widgetElement.addEventListener("order-changed", e -> {
-                widgets.set(
-                        (int) e.getEventData().getNumber("event.detail.value"),
-                        widget);
-            }).addEventData("event.detail.value").debounce(Integer.MAX_VALUE);
-
             getElement().appendChild(widgetElement);
+
+            var item = Json.createObject();
+            item.put("id", widget.getId().orElseGet(() -> {
+                String newId = "w" + UUID.randomUUID();
+                // TODO: Not nice to force an ID on the widget.
+                widget.setId(newId);
+                return newId;
+            }));
+
+            items.set(items.length(), item);
         }
+
+        getElement().setPropertyJson("items", items);
     }
 
 }
