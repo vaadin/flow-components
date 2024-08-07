@@ -16,8 +16,15 @@ export const spreadsheetStyles = css`
     height: 100%;
     flex: 1 1 auto;
     isolation: isolate;
-    background-color: #fff;
+    background-color: var(--lumo-base-color);
   }
+
+  .v-spreadsheet .sheet .cell {
+    font-family: var(--lumo-font-family) !important;
+    color: var(--lumo-bory-text-color) !important;
+    background-color: var(--lumo-base-color) !important;
+    font-size: var(--lump-font-size-s) !important;
+  } 
 
   .v-disabled {
     cursor: default !important;
@@ -29,15 +36,10 @@ export const spreadsheetStyles = css`
     overflow: hidden;
     position: relative;
     padding: 0px;
-    /*
-    padding-bottom: $spreadsheet-toolbar-height;
-    padding-left: $spreadsheet-row-header-width;
-    padding-top: $spreadsheet-toolbar-height + $spreadsheet-bottom-bar-height;
-     */
-    border: 1px solid #c7c7c7;
-    font-family: Helvetica;
-    font-size: 14px;
-    color: #464646;
+    border: 1px solid var(--lumo-contrast-20pct);
+    font-family: var(--lumo-font-family);
+    font-size: var(--lumo-font-size-m);
+    color: var(--lumo-body-text-color);
   }
   .v-spreadsheet.hidefunctionbar {
     padding-top: 28px;
@@ -84,8 +86,8 @@ export const spreadsheetStyles = css`
     cursor: crosshair;
   }
   .v-spreadsheet .functionbar {
-    background-color: white;
-    border-bottom: 1px solid #c7c7c7;
+    background-color: var(--lumo-base-color);
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
     height: 29px;
     left: 0;
     position: absolute;
@@ -96,13 +98,13 @@ export const spreadsheetStyles = css`
   .v-spreadsheet .functionbar .functionfield,
   .v-spreadsheet .functionbar .addressfield {
     box-sizing: border-box;
-    font-size: 14px;
+    font-size: var(--lumo-font-size-s);
     height: 100%;
     width: 100%;
     padding: 0;
-    padding-left: 5px;
+    padding-left: var(--lumo-space-xs);
     border: none;
-    color: #474747;
+    color: var(--lumo-body-text-color);
     outline: none;
     background-color: initial;
   }
@@ -111,7 +113,7 @@ export const spreadsheetStyles = css`
     left: 161px;
     top: 0;
     line-height: 33px;
-    font-size: x-small;
+    font-size: var(--lumo-font-size-xs);
   }
   .v-spreadsheet .functionbar .namedrangebox {
     position: absolute;
@@ -125,32 +127,30 @@ export const spreadsheetStyles = css`
     float: left;
     width: 176px;
     height: 100%;
-    border-right: 1px solid #c7c7c7;
-    background: #fafafa;
+    border-right: 1px solid var(--lumo-contrast-20pct);
+    background: var(--lumo-contrast-5pct);
   }
   .v-spreadsheet .functionbar .adjusting-right-panel {
     box-sizing: border-box;
     overflow: hidden;
-    padding-right: 5px;
+    padding-right: var(--lumo-space-xs);
     height: 100%;
   }
   .v-spreadsheet .functionbar .addressfield {
     text-align: center;
-    background: #fafafa;
+    background: var(--lumo-contrast-5pct);
   }
   .v-spreadsheet .functionbar .functionfield {
-    font: 400 14px/1.55 Helvetica;
   }
   .v-spreadsheet .functionbar .formulaoverlay {
-    font: 400 14px/1.55 Helvetica;
     position: absolute;
     top: 3px;
     left: 181px;
     pointer-events: none;
-    color: rgba(0, 0, 0, 0);
+    color: var(--lumo-base-color);
   }
   .v-spreadsheet .functionbar .formulaoverlay span {
-    border-radius: 2px;
+    border-radius: var(--lumo-border-radius-s);
   }
   .v-spreadsheet .sheet.bottom-right-pane {
     overflow: scroll;
@@ -160,11 +160,11 @@ export const spreadsheetStyles = css`
   }
   .v-spreadsheet .sheet .cell {
     box-sizing: border-box;
-    background-color: white;
-    border-right: 1px solid #c7c7c7;
-    border-bottom: 1px solid #c7c7c7;
+    background-color: var(--lumo-base-color);
+    border-right: 1px solid var(--lumo-contrast-20pct);
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
     overflow: visible;
-    padding: 0 2px;
+    padding: 0px var(--lumo-space-xs);
     position: absolute;
     white-space: nowrap;
     flex-direction: column;
@@ -172,7 +172,7 @@ export const spreadsheetStyles = css`
     line-height: normal;
   }
   .v-spreadsheet .sheet .cell.selected-cell-highlight {
-    outline: solid #222222 1px;
+    outline: solid var(--lumo-contrast-80pct) 1px;
     outline-offset: -2px;
     z-index: 1;
   }
@@ -189,14 +189,14 @@ export const spreadsheetStyles = css`
     z-index: 1 !important;
   }
   .v-spreadsheet .sheet div.custom-editor-cell {
-    padding: 2px;
+    padding: var(--lumo-space-xs);
   }
   .v-spreadsheet .sheet.bottom-right-pane div.merged-cell {
     z-index: 1 !important;
   }
   .v-spreadsheet .sheet > input[type='text'] {
     border: 0 !important;
-    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.75);
+    box-shadow: var(--lump-box-shadow-s);
     cursor: text;
     display: block !important;
     outline: none !important;
@@ -226,8 +226,8 @@ export const spreadsheetStyles = css`
   .v-spreadsheet .top-right-pane,
   .v-spreadsheet .bottom-left-pane {
     box-sizing: border-box;
-    border-right: 1px solid #6a6a6a;
-    border-bottom: 1px solid #6a6a6a;
+    border-right: 1px solid var(--lumo-contrast-50pct);
+    border-bottom: 1px solid  var(--lumo-contrast-50pct);
     overflow: visible;
     position: absolute;
   }
@@ -315,9 +315,9 @@ export const spreadsheetStyles = css`
   .v-spreadsheet .ch,
   .v-spreadsheet .rh,
   .v-spreadsheet .corner {
-    background-color: #fafafa;
-    font-family: Helvetica;
-    font-size: 13px;
+    background-color: var(--lumo-contrast-5pct);
+    font-family: var(--lumo-font-family);
+    font-size: var(--lumo-font-size-s);
     overflow: hidden;
     position: absolute;
     text-align: center;
@@ -326,7 +326,7 @@ export const spreadsheetStyles = css`
     box-sizing: border-box;
     -webkit-user-select: none;
     user-select: none;
-    border-right: 1px solid #c7c7c7;
+    border-right: 1px solid var(--lumo-contrast-20pct);
     cursor: e-resize;
     -webkit-touch-callout: none;
     width: 50px;
@@ -338,8 +338,8 @@ export const spreadsheetStyles = css`
     line-height: 100%;
   }
   .v-spreadsheet .rh.selected-row-header {
-    background: #e6edf4 !important;
-    border-right: 2px solid #63b1ff;
+    border-right: 2px solid var(--lumo-primary-color-50pct);
+    background: var(--lumo-primary-color-10pct);
   }
   .v-spreadsheet .rh .header-resize-dnd-first,
   .v-spreadsheet .rh .header-resize-dnd-second {
@@ -355,19 +355,18 @@ export const spreadsheetStyles = css`
     top: 0;
   }
   .v-spreadsheet .rh .header-resize-dnd-second {
-    border-bottom: 1px solid #c7c7c7;
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
     bottom: 0;
   }
   .v-spreadsheet .rh.resize-extra {
-    border-bottom: 1px solid #c7c7c7;
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
   }
   .v-spreadsheet .ch {
-    background-color: #fafafa;
-    background-image: linear-gradient(to bottom, #fafafa 2%, #f0f0f0 98%);
+    background-color: var(--lumo-contrast-5pct);
     box-sizing: border-box;
     -webkit-user-select: none;
     user-select: none;
-    border-bottom: 1px solid #c7c7c7;
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
     cursor: s-resize;
     height: 27px;
     line-height: 27px;
@@ -375,8 +374,8 @@ export const spreadsheetStyles = css`
     z-index: 2;
   }
   .v-spreadsheet .ch.selected-column-header {
-    background: #e6edf4 !important;
-    border-bottom: 2px solid #63b1ff;
+    border-bottom: 2px solid var(--lumo-primary-color-50pct);
+    background: var(--lumo-primary-color-10pct) !important;
   }
   .v-spreadsheet .ch .header-resize-dnd-first,
   .v-spreadsheet .ch .header-resize-dnd-second {
@@ -392,7 +391,7 @@ export const spreadsheetStyles = css`
     left: 0;
   }
   .v-spreadsheet .ch .header-resize-dnd-second {
-    border-right: 1px solid #c7c7c7;
+    border-right: 1px solid var(--lumo-contrast-20pct);
     right: 0;
   }
   .v-spreadsheet .ch.resize-extra {
@@ -418,7 +417,7 @@ export const spreadsheetStyles = css`
     display: none;
   }
   .v-spreadsheet > div.resize-line {
-    background: #197de1;
+    background: var(--lumo-primary-color);
   }
   .v-spreadsheet .resize-line,
   .v-spreadsheet .sheet > div.resize-line {
@@ -457,16 +456,15 @@ export const spreadsheetStyles = css`
     margin-top: -1px;
   }
   .v-spreadsheet .corner {
-    background-color: #fafafa;
-    background-image: linear-gradient(to bottom, #fafafa 2%, #f0f0f0 98%);
+    background-color: var(--lumo-contrast-5pct);
     box-sizing: border-box;
     cursor: default;
     top: 30px;
     left: 0;
     width: 50px;
     height: 27px;
-    border-bottom: 1px solid #c7c7c7;
-    border-right: 1px solid #c7c7c7;
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    border-right: 1px solid var(--lumo-contrast-20pct);
     z-index: 1;
   }
   .v-spreadsheet .sheet > div.sheet-image {
@@ -488,7 +486,7 @@ export const spreadsheetStyles = css`
     z-index: 1;
   }
   .v-spreadsheet .sheet .cell-comment-triangle {
-    border-color: transparent #ffcf16 transparent transparent;
+    border-color: transparent var(--lumo-warning-color) transparent transparent;
     border-style: solid;
     border-width: 0 9px 9px 0;
     height: 0;
@@ -502,7 +500,7 @@ export const spreadsheetStyles = css`
     z-index: 1;
   }
   .v-spreadsheet .sheet .cell-invalidformula-triangle {
-    border-color: transparent #ed473b transparent transparent;
+    border-color: transparent var(--lumo-error-color) transparent transparent;
     border-style: solid;
     border-width: 0 9px 9px 0;
     height: 0;
@@ -516,7 +514,7 @@ export const spreadsheetStyles = css`
     z-index: 1;
   }
   .v-spreadsheet .sheet .comment-overlay-line {
-    background-color: #a7a7a7 !important;
+    background-color: var(--lumo-contrast-10pct) !important;
     border: none !important;
     display: block !important;
     height: 1px;
@@ -548,14 +546,14 @@ export const spreadsheetStyles = css`
   .v-spreadsheet .sheet-selection .s-bottom,
   .v-spreadsheet .sheet-selection .s-right {
     padding: 0;
-    background-color: #197de1;
+    background-color: var(--lumo-primary-color);
     position: absolute;
   }
   .v-spreadsheet .sheet-selection .s-top.extend,
   .v-spreadsheet .sheet-selection .s-left.extend,
   .v-spreadsheet .sheet-selection .s-bottom.extend,
   .v-spreadsheet .sheet-selection .s-right.extend {
-    background-color: #40b527 !important;
+    background-color: var(--lumo-success-color) !important;
   }
   .v-spreadsheet .sheet-selection .s-top {
     top: -2px;
@@ -576,27 +574,27 @@ export const spreadsheetStyles = css`
     width: 2px;
   }
   .v-spreadsheet .sheet-selection .s-corner {
-    background-color: #40b527;
+    background-color: var(--lumo-success-color);
     position: absolute;
     bottom: -2px;
     left: -2px;
     height: 6px;
     width: 6px;
-    outline: 2px solid white;
+    outline: 2px solid var(--lumo-base-color);
     cursor: crosshair;
   }
   .v-spreadsheet .sheet-selection.paintmode {
-    background-color: rgba(235, 247, 233, 0.8) !important;
+    background-color: var(--lumo-success-color-10pct) !important;
   }
   .v-spreadsheet .sheet-selection.paintmode .s-top,
   .v-spreadsheet .sheet-selection.paintmode .s-left,
   .v-spreadsheet .sheet-selection.paintmode .s-bottom,
   .v-spreadsheet .sheet-selection.paintmode .s-right {
-    background-color: #40b527;
+    background-color: var(--lumo-success-color);
   }
   .v-spreadsheet .sheet-tabsheet {
-    background: #fafafa;
-    border-top: 1px solid #c7c7c7;
+    background: var(--lumo-contrast-5pct);
+    border-top: 1px solid var(--lumo-contrast-20pct);
     height: 28px;
     width: 100%;
     cursor: default;
@@ -607,8 +605,8 @@ export const spreadsheetStyles = css`
     z-index: 1;
   }
   .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options {
-    background: #fafafa;
-    cursor: pointer;
+    background: var(--lumo-base-color);
+    cursor: var(--lumo-clickable-cursor);
     display: inline-block;
     height: 28px;
     position: absolute;
@@ -620,13 +618,13 @@ export const spreadsheetStyles = css`
   .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div {
     line-height: 26px;
     width: 26px;
-    cursor: pointer;
+    cursor: var(--lumo-clickable-cursor);
     display: inline-block;
     font-weight: bold;
     position: relative;
     text-align: center;
     z-index: inherit;
-    color: #464646;
+    color: var(--lumo-body-text-color);
   }
   .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.scroll-tabs-beginning::before,
   .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.scroll-tabs-end::before,
@@ -656,10 +654,10 @@ export const spreadsheetStyles = css`
     --mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>');
   }
   .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div:hover {
-    color: #197de1;
+    color: var(--lumo-primary-color);
   }
   .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.hidden {
-    color: #d6d6d6;
+    color: var(--lumo-contrast-10pct);
     cursor: default;
   }
   .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container {
@@ -674,23 +672,25 @@ export const spreadsheetStyles = css`
     white-space: nowrap;
   }
   .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab {
-    font-family: Helvetica;
-    font-size: 14px;
-    font-weight: 300;
-    background: #fafafa;
-    color: #6a6a6a;
-    border: 1px solid #c7c7c7;
+    font-family: var(--lumo-font-family);
+    font-size: var(--lumo-font-size-s);
+    background: var(--lumo-contrast-5pct);
+    color: var(--lumo-body-text-color);
+    border-right: 1px solid var(--lumo-contrast-20pct);
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    border-left: 1px solid var(--lumo-contrast-20pct);
+    border-image: initial;
     border-top: none;
-    border-bottom-right-radius: 5px;
-    border-bottom-left-radius: 5px;
-    cursor: pointer;
+    border-bottom-right-radius: var(--lumo-border-radius-m);
+    border-bottom-left-radius: var(--lumo-border-radius-m);
+    cursor: var(--lumo-clickable-cursor);
     display: inline-block;
     height: 20px;
-    margin-left: 5px;
+    margin-left: var(--lumo-space-s);
     max-width: 200px;
     min-width: 50px;
     overflow: hidden;
-    padding: 2px 6px;
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
     position: relative;
     text-align: center;
     text-overflow: ellipsis;
@@ -698,16 +698,16 @@ export const spreadsheetStyles = css`
     z-index: inherit;
   }
   .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab.selected-tab {
-    background: #ffffff;
+    background: var(--lumo-base-color);
     cursor: default;
-    color: #2584e2;
+    color: var(--lumo-primary-text-color);
     max-width: none;
     position: relative;
   }
   .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab.selected-tab input[type='text'] {
-    font-family: Helvetica;
-    font-size: 14px;
-    color: #2584e2;
+    font-family: var(--lumo-font-familty);
+    font-size: var(--lumo-font-size-s);
+    color: var(--lumo-primary-text-color);
     border: none !important;
     font-weight: 300;
     height: 20px;
@@ -719,23 +719,23 @@ export const spreadsheetStyles = css`
     width: inherit;
   }
   .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-temp {
-    font-family: Helvetica;
-    font-size: 14px;
+    font-family: var(--lumo-font-family);
+    font-size: var(--lumo-font-size-s);
     display: inline;
     left: -5000px;
     position: fixed;
     white-space-collapse: preserve;
   }
   .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-infolabel {
-    background: #fafafa;
+    background: var(--lumo-contrast-5pct);
     z-index: inherit;
     position: absolute;
     right: 0;
     font-weight: bold;
-    font-size: 11px;
-    border-left: 1px solid #c7c7c7;
-    padding-left: 5px;
-    padding-right: 5px;
+    font-size: var(--lumo-font-size-s);
+    border-left: 1px solid var(--lumo-contrast-20pct);
+    padding-left: var(--lumo-space-xs);
+    padding-right: var(--lumo-space-xs);
     width: 200px;
     height: 100%;
     line-height: 29px;
@@ -752,34 +752,34 @@ export const spreadsheetStyles = css`
   }
   .v-spreadsheet .sheet div div.popupbutton {
     padding: 0;
-    color: #191919;
+    color: var(--lumo-body-text-color);
     font-weight: 400;
     white-space: nowrap;
     outline: none;
     position: absolute;
     bottom: 0px;
     right: 1px;
-    cursor: pointer;
-    height: 11px;
-    width: 11px;
-    border: solid 1px lightgrey;
-    background: white;
-    border-radius: 2px;
+    cursor: var(--lumo-clickable-cursor);
+    height: 13px;
+    width: 13px;
+    border: solid 1px var(--lump-contrast-20pct);
+    background: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius-s);
     display: flex;
     align-items: center;
     justify-content: center;
   }
   .v-spreadsheet .sheet div div.popupbutton:after {
-    content: '▼';
-    color: grey;
-    font-size: 9px;
+    font-family: 'lumo-icons';
+    content: var(--lumo-icons-angle-down);
+    font-size: var(--lumo-font-size-xs);
     vertical-align: top;
   }
   .v-spreadsheet .sheet div div.popupbutton.v-disabled {
     opacity: 0.5;
   }
   .popupbutton.active {
-    box-shadow: rgb(0 171 238) 0 2px 0 0 inset;
+    box-shadow: var(--lumo-box-shadow-xs) inset;
   }
   .v-spreadsheet .sheet-selection.touch.fill .fill-touch-square {
     position: relative;
@@ -790,10 +790,10 @@ export const spreadsheetStyles = css`
   }
   .v-spreadsheet .sheet-selection.touch.fill .fill-touch-square > .square {
     position: absolute;
-    background-color: #40b527;
+    background-color: var(--lumo-success-color);
     width: 6px;
     height: 6px;
-    border: 2px solid white;
+    border: 2px solid var(--lumo-base-color);
     top: -4px;
   }
   .v-spreadsheet .sheet-selection.touch.fill .s-right > .fill-touch-square,
@@ -829,8 +829,8 @@ export const spreadsheetStyles = css`
     height: 7px;
     left: 7px;
     bottom: 7px;
-    background-color: #197de1;
-    border-radius: 5px;
+    background-color: var(--lumo-primary-color);
+    border-radius: var(--lumo-border-radius-m);
   }
   .v-spreadsheet .sheet-selection.touch .s-corner-touch {
     width: 30px;
@@ -845,17 +845,17 @@ export const spreadsheetStyles = css`
     left: 0;
     width: 100%;
     z-index: 1;
-    background-color: #fafafa;
-    border-bottom: 1px solid #c7c7c7;
+    background-color: var(--lumo-contrast-5pct);
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
     box-sizing: border-box;
   }
   .v-spreadsheet .col-group-pane .grouping,
   .v-spreadsheet .col-group-freeze-pane .grouping {
     position: absolute;
     height: 7px;
-    border-top: 2px solid #c7c7c7;
-    border-left: 2px solid #c7c7c7;
-    cursor: pointer;
+    border-top: 2px solid var(--lumo-contrast-20pct);
+    border-left: 2px solid var(--lumo-contrast-20pct);
+    cursor: var(--lumo-clickable-cursor);
   }
   .v-spreadsheet .col-group-pane .grouping .expand,
   .v-spreadsheet .col-group-freeze-pane .grouping .expand {
@@ -865,14 +865,14 @@ export const spreadsheetStyles = css`
     right: -4px;
     height: 12px;
     width: 12px;
-    background-color: #c7c7c7;
+    background-color: var(--lumo-contrast-20pct);
     color: white;
     border: none;
     line-height: 11px;
     text-align: center;
     vertical-align: middle;
     border-radius: 50%;
-    font-size: 12px;
+    font-size: var(--lumo-font-size-s);
   }
   .v-spreadsheet .col-group-pane .grouping.plus,
   .v-spreadsheet .col-group-freeze-pane .grouping.plus {
@@ -884,7 +884,7 @@ export const spreadsheetStyles = css`
   }
   .v-spreadsheet .col-group-pane .grouping.inversed,
   .v-spreadsheet .col-group-freeze-pane .grouping.inversed {
-    border-right: 2px solid #c7c7c7;
+    border-right: 2px solid var(--lumo-contrast-20pct);
     border-left: none;
   }
   .v-spreadsheet .col-group-pane .grouping.inversed .expand,
@@ -895,7 +895,7 @@ export const spreadsheetStyles = css`
   }
   .v-spreadsheet .col-group-freeze-pane {
     overflow: hidden;
-    border-right: 1px solid #6a6a6a;
+    border-right: 1px solid var(--lumo-contrast-50pct);
   }
   .v-spreadsheet .col-group-border {
     position: absolute;
@@ -904,7 +904,7 @@ export const spreadsheetStyles = css`
     position: absolute;
     width: 100%;
     z-index: 1;
-    border-bottom: 1px dotted #c7c7c7;
+    border-bottom: 1px dotted var(--lumo-contrast-20pct);
     margin-top: 20px;
   }
   .v-spreadsheet .row-group-pane,
@@ -913,17 +913,17 @@ export const spreadsheetStyles = css`
     left: 0;
     height: 100%;
     z-index: 1;
-    background-color: #fafafa;
-    border-right: 1px solid #c7c7c7;
+    background-color: var(--lumo-contrast-5pct);
+    border-right: 1px solid var(--lumo-contrast-20pct);
     box-sizing: border-box;
   }
   .v-spreadsheet .row-group-pane .grouping,
   .v-spreadsheet .row-group-freeze-pane .grouping {
     position: absolute;
     width: 8px;
-    border-top: 2px solid #c7c7c7;
-    border-left: 2px solid #c7c7c7;
-    cursor: pointer;
+    border-top: 2px solid var(--lumo-contrast-20pct);
+    border-left: 2px solid var(--lumo-contrast-20pct);
+    cursor: var(--lumo-clickable-cursor);
   }
   .v-spreadsheet .row-group-pane .grouping.plus,
   .v-spreadsheet .row-group-freeze-pane .grouping.plus {
@@ -936,14 +936,14 @@ export const spreadsheetStyles = css`
     right: 2px;
     height: 12px;
     width: 12px;
-    background-color: #c7c7c7;
+    background-color: var(--lumo-contrast-20pct);
     color: white;
     border: none;
     line-height: 11px;
     text-align: center;
     vertical-align: middle;
     border-radius: 50%;
-    font-size: 12px;
+    font-size: var(--lumo-font-size-xs);
   }
   .v-spreadsheet .row-group-pane .grouping.plus .expand,
   .v-spreadsheet .row-group-freeze-pane .grouping.plus .expand {
@@ -952,7 +952,7 @@ export const spreadsheetStyles = css`
   .v-spreadsheet .row-group-pane .grouping.inversed,
   .v-spreadsheet .row-group-freeze-pane .grouping.inversed {
     border-top: none;
-    border-bottom: 2px solid #c7c7c7;
+    border-bottom: 2px solid var(--lumo-contrast-20pct);
   }
   .v-spreadsheet .row-group-pane .grouping.inversed .expand,
   .v-spreadsheet .row-group-freeze-pane .grouping.inversed .expand {
@@ -961,7 +961,7 @@ export const spreadsheetStyles = css`
   }
   .v-spreadsheet .row-group-freeze-pane {
     overflow: hidden;
-    border-bottom: 1px solid #6a6a6a;
+    border-bottom: 1px solid var(--lumo-contrast-50pct);
   }
   .v-spreadsheet .row-group-border {
     position: absolute;
@@ -970,56 +970,54 @@ export const spreadsheetStyles = css`
     position: absolute;
     height: 100%;
     z-index: 1;
-    border-right: 1px dotted #c7c7c7;
-    /*margin-top: 20px;*/
+    border-right: 1px dotted var(--lumo-contrast-20pct);
   }
   .v-spreadsheet .expandbutton {
     height: 18px;
     width: 11px;
     line-height: 18px;
-    font-size: 11px;
+    font-size: var(--lumo-font-size-s);
     text-align: center;
-    cursor: pointer;
-    color: #484848;
+    cursor: var(--lumo-clickable-cursor);
+    color: var(--lumo-body-text-color);
   }
   .v-spreadsheet .expandbutton span {
     vertical-align: text-top;
   }
   .v-spreadsheet .expandbutton:active {
-    border-color: gray;
+    border-color: var(--lumo-contrast-20pct);
   }
   .v-spreadsheet .col-group-summary .expandbutton {
     margin-left: auto;
-    margin-right: 4px;
-    /*margin-top: 7px;*/
+    margin-right: var(--lumo-space-xs);
   }
   .v-spreadsheet .row-group-summary .expandbutton {
     display: inline-block;
-    margin-left: 4px;
+    margin-left: var(--lumo-space-xs);
   }
   .v-spreadsheet .grouping-corner {
     position: absolute;
     left: 0;
     z-index: 1;
-    border-right: 1px solid #c7c7c7;
-    border-bottom: 1px solid #c7c7c7;
+    border-right: 1px solid var(--lumo-contrast-20pct);
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
     box-sizing: border-box;
-    background-color: #fafafa;
+    background-color: var(--lumo-contrast-5pct);
   }
   .v-spreadsheet .col-group-summary {
     position: absolute;
     box-sizing: border-box;
-    border-bottom: 1px solid #c7c7c7;
-    border-right: 1px solid #c7c7c7;
-    background-color: #fafafa;
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    border-right: 1px solid var(--lumo-contrast-20pct);
+    background-color: var(--lumo-contrast-5pct);
     z-index: 1;
   }
   .v-spreadsheet .row-group-summary {
     position: absolute;
     box-sizing: border-box;
-    border-bottom: 1px solid #c7c7c7;
-    border-right: 1px solid #c7c7c7;
-    background-color: #fafafa;
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    border-right: 1px solid var(--lumo-contrast-20pct);
+    background-color: var(--lumo-contrast-5pct);
     left: 0;
     z-index: 1;
   }
@@ -1028,7 +1026,7 @@ export const spreadsheetStyles = css`
   }
 
   .cell-range-bg-color {
-    background-color: rgba(232, 242, 252, 0.8);
+    background-color: var(--lumo-primary-color-10pct);
   }
   span.code-snippet {
     font-family: 'Courier New', Courier, monospace;
@@ -1078,27 +1076,25 @@ export const spreadsheetOverlayStyles = css`
   }
 
   #spreadsheet-overlays .v-tooltip {
-    background-color: rgba(50, 50, 50, 0.9);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-    color: white;
-    padding: 5px 9px;
+    background-color: var(--lumo-contrast-50pct)
+    box-shadow: var(--lumo-box-shadow-s);
+    color: var(--lumo-base-color);
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
     border-radius: 3px;
     max-width: 35em;
     overflow: hidden !important;
-    font-size: 14px;
+    font-size: var(--lumo-font-size-s);
   }
   #spreadsheet-overlays .v-tooltip div[style*='width'] {
     width: auto !important;
   }
   #spreadsheet-overlays .v-tooltip .v-errormessage {
-    background-color: white;
-    background-color: #fff;
-    color: #ed473b;
-    margin: -5px -9px;
-    padding: 5px 9px;
+    background-color: var(--lumo-base-color);
+    color: var(--lumo-error-color);
+    margin: calc(-1 * var(--lumo-space-xs)) calc(-1 * var(--lumo-space-s));
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
     max-height: 10em;
     overflow: auto;
-    font-weight: 400;
   }
   #spreadsheet-overlays .v-tooltip .v-errormessage h2:only-child {
     font: inherit;
@@ -1108,16 +1104,16 @@ export const spreadsheetOverlayStyles = css`
     color: #00a7f5;
   }
   #spreadsheet-overlays .v-tooltip .v-errormessage-warning {
-    color: #fc9c00;
+    color: var(--lumo-warning-color);
   }
   #spreadsheet-overlays .v-tooltip .v-errormessage-error {
-    color: #ed473b;
+    color: var(--lumo-error-color);
   }
   #spreadsheet-overlays .v-tooltip .v-errormessage-critical {
-    color: #fa007d;
+    color: var(--vaadin-user-color-0);
   }
   #spreadsheet-overlays .v-tooltip .v-errormessage-system {
-    color: #bb00ff;
+    color: var(--vaadin-user-color-1);
   }
   #spreadsheet-overlays .v-tooltip .v-tooltip-text {
     max-height: 10em;
@@ -1141,14 +1137,13 @@ export const spreadsheetOverlayStyles = css`
     white-space: pre-wrap;
   }
   #spreadsheet-overlays .v-contextmenu {
-    padding: 4px 4px;
-    border-radius: 4px;
-    background-color: white;
-    color: #474747;
-    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.091);
+    padding: var(--lumo-space-xs) var(--lumo-space-xs);
+    border-radius: var(--lumo-border-radius-s);
+    background-color: var(--lumo-base-color);
+    color: var(--lumo-body-text-color);
+    box-shadow: var(--lumo-box-shadow-s);
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    padding: 4px 4px;
   }
   #spreadsheet-overlays .v-contextmenu[class*='animate-in'] {
     animation: valo-overlay-animate-in 120ms;
@@ -1160,11 +1155,10 @@ export const spreadsheetOverlayStyles = css`
     border-spacing: 0;
   }
   #spreadsheet-overlays .v-contextmenu .gwt-MenuItem {
-    cursor: pointer;
-    line-height: 27px;
-    padding: 0 20px 0 10px;
-    border-radius: 3px;
-    font-weight: 400;
+    cursor: var(--lumo-clickable-cursor);
+    line-height: calc(1.5 * var(--lumo-line-height-m));
+    padding: 0 var(--lumo-space-l) 0 var(--lumo-space-m);
+    border-radius: var(--lumo-border-radius-s);
     white-space: nowrap;
     position: relative;
     display: block;
@@ -1176,33 +1170,30 @@ export const spreadsheetOverlayStyles = css`
     right: 0;
     bottom: 0;
     left: 0;
-    background: #0957a6;
+    background: var(--lumo-primary-color);
     opacity: 0.15;
     filter: alpha(opacity=15);
     pointer-events: none;
     border-radius: inherit;
   }
   #spreadsheet-overlays .v-contextmenu .gwt-MenuItem .v-icon {
-    max-height: 27px;
-    margin-right: 5px;
+    max-height: calc(1.5 * var(--lumo-line-height-m));
+    margin-right: var(--lumo-space-xs);
     min-width: 1em;
   }
   #spreadsheet-overlays .v-contextmenu .gwt-MenuItem-selected {
-    background-color: #197de1;
-    background-image: linear-gradient(to bottom, #1b87e3 2%, #166ed6 98%);
-    color: #ecf2f8;
-    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.05);
+    background-color: var(--lumo-primary-color-10pct);
   }
 
   #spreadsheet-overlays .v-spreadsheet-comment-overlay {
-    padding: 4px 4px;
-    border-radius: 4px;
-    background-color: white;
-    color: #474747;
-    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.091);
+    padding: var(--lumo-space-xs) var(--lumo-space-xs);
+    border-radius: var(--lumo-border-radius-m);
+    background-color: var(--lumo-base-color);
+    color: var(--lumo-body-text-color);
+    box-shadow: var(--lumo-box-shadow-m);
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    padding: 7px;
+    padding: var(--lumo-space-s);
     overflow-y: auto !important;
     overflow-x: hidden !important;
     -webkit-user-select: text;
@@ -1219,13 +1210,13 @@ export const spreadsheetOverlayStyles = css`
     z-index: 2;
   }
   #spreadsheet-overlays .v-spreadsheet-comment-overlay .comment-overlay-author {
-    padding-bottom: 7px;
-    font-size: 11px;
+    padding-bottom: var(--lumo-space-s);
+    font-size: var(--lumo-font-size-xs);
     font-weight: bold;
     white-space: nowrap;
   }
   #spreadsheet-overlays .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
-    color: #ed473b;
+    color: var(--lumo-error-color);
     max-width: 168px;
     max-height: 140px;
     white-space: pre-wrap;
@@ -1240,22 +1231,21 @@ export const spreadsheetOverlayStyles = css`
   #spreadsheet-overlays .v-spreadsheet-comment-overlay .comment-overlay-input {
     max-width: 168px;
     max-height: 140px;
-    font-family: Helvetica;
-    font-size: 14px;
-    font-weight: 300;
+    font-family: var(--lumo-font-family);
+    font-size: var(--lumo-font-size-s);
     outline: none;
     border: none;
   }
   #spreadsheet-overlays .v-spreadsheet-comment-overlay .comment-overlay-separator {
-    border-bottom: 1px solid #c7c7c7;
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
     margin-bottom: 7px;
   }
   #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay {
-    padding: 4px 4px;
-    border-radius: 4px;
-    background-color: var(--lumo-base-color, #fff);
-    color: #474747;
-    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.1), 0 3px 5px 0 rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.091);
+    padding: var(--lumo-space-xs) var(--lumo-space-xs);
+    border-radius: var(--lumo-border-radius-m);
+    background-color: var(--lumo-base-color);
+    color: var(--lumo-body-text-color);
+    box-shadow: var(--lumo-box-shadow-s);
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
   }
@@ -1279,48 +1269,54 @@ export const spreadsheetOverlayStyles = css`
   #spreadsheet-overlays .spreadsheet-item-filter-layout {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--lumo-space-xs);
     max-height: 275px;
     overflow-y: auto;
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
   }
 
   #spreadsheet-overlays .spreadsheet-filter-table-content {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--lumo-space-xs);
   }
   #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay-header {
     height: 18px;
     position: relative;
     width: 100%;
-    padding-bottom: 7px;
+    padding-bottom: var(--lumo-space-xs);
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    margin-bottom: var(--lumo-space-xs);
   }
   #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay-header .v-window-closebox {
     position: absolute;
-    left: 0px;
+    right: 0px;
     top: 0px;
     width: 18px;
     height: 18px;
     line-height: 18px;
-    cursor: pointer;
+    cursor: var(--lumo-clickable-cursor);
     box-sizing: border-box;
-    font-size: 21px;
-    color: #999999;
-    padding-right: 4px;
-    border-radius: 0 4px 0 4px;
+    font-size: var(--lumo-font-size-xl);
+    color: var(--lumo-contrast-50pct);
+    padding-right: var(--lumo-space-xs);
+    border-radius: 0 var(--lumo-border-radius-m) 0 var(--lumo-border-radius-m);
     text-align: center;
   }
   #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay-header .v-window-closebox:hover {
-    color: #197de1;
+    color: var(--lumo-primary-color);
   }
   #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay-header .v-window-closebox:before {
-    content: '\\00d7';
+    content: var(--lumo-icons-cross);
+    font-family: 'lumo-icons';
   }
   #spreadsheet-overlays .v-spreadsheet-popupbutton-overlay-header .header-caption {
-    margin: 0 18px;
+    margin-left: var(--lumo-space-xs);
     height: 18px;
     line-height: 18px;
     text-align: center;
     color: var(--lumo-body-text-color);
+    font-weight: bold;
+    text-align: left;
   }
 `;
