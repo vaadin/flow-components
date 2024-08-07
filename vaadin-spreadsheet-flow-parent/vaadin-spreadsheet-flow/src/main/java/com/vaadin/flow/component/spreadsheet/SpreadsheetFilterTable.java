@@ -210,6 +210,8 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
         final Button button = new Button("Clear filters");
         button.setDisableOnClick(true);
         button.setEnabled(false);
+        button.addThemeVariants(ButtonVariant.LUMO_TERTIARY,
+                ButtonVariant.LUMO_SMALL);
         button.addClassName(CLEAR_FILTERS_BUTTON_CLASSNAME);
         button.addClickListener(event -> clearAllFilters());
         return button;
