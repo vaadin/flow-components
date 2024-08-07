@@ -685,7 +685,7 @@ export const spreadsheetStyles = css`
     border-bottom-left-radius: var(--lumo-border-radius-m);
     cursor: var(--lumo-clickable-cursor);
     display: inline-block;
-    height: 20px;
+    height: 18px;
     margin-left: var(--lumo-space-s);
     max-width: 200px;
     min-width: 50px;
