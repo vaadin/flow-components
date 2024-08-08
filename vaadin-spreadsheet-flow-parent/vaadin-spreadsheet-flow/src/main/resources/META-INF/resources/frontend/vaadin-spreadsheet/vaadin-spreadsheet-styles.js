@@ -1144,6 +1144,7 @@ export const spreadsheetStyles = css`
   .v-spreadsheet .rh,
   .v-spreadsheet .corner {
     background-color: var(--lumo-contrast-5pct);
+    background-image: none;
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
   }
@@ -1180,6 +1181,7 @@ export const spreadsheetStyles = css`
   :host([theme~="lumo"]) .v-spreadsheet .corner {
     border-bottom: 1px solid var(--lumo-contrast-20pct);
     border-right: 1px solid var(--lumo-contrast-20pct);
+    background-image: none;
   }
   :host([theme~="lumo"]) .v-spreadsheet .sheet .cell-comment-triangle {
     border-color: transparent var(--lumo-warning-color) transparent transparent;
