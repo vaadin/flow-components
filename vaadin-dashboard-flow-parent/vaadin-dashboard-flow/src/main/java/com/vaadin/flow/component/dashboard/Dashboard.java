@@ -50,8 +50,8 @@ public class Dashboard<T extends DashboardWidget> extends Component
      */
     public Dashboard() {
 
-        getElement().addEventListener("items-changed", e -> {
-            var items = e.getEventData().getArray("event.detail.value");
+        getElement().addEventListener("dashboard-dragend", e -> {
+            var items = e.getEventData().getArray("event.detail.items");
             var newWidgets = new ArrayList<T>();
             for (int i = 0; i < items.length(); i++) {
                 var id = items.getObject(i).getString("id");
@@ -60,12 +60,10 @@ public class Dashboard<T extends DashboardWidget> extends Component
                         .findFirst().ifPresent(newWidgets::add);
             }
             widgets = newWidgets;
-        }).addEventData("event.detail.value").debounce(Integer.MAX_VALUE);
 
-        getElement().addEventListener("dashboard-dragend", e -> {
             fireEvent(new DashboardDragEndEvent<>(this,
                     new ArrayList<>(widgets)));
-        });
+        }).addEventData("event.detail.items");
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
