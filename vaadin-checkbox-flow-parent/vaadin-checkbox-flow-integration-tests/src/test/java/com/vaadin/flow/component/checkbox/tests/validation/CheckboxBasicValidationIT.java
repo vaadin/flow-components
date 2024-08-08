@@ -6,7 +6,8 @@ import com.vaadin.tests.validation.AbstractValidationIT;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import static com.vaadin.flow.component.checkbox.tests.validation.BasicValidationPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.checkbox.tests.validation.CheckboxBasicValidationPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.checkbox.tests.validation.CheckboxBasicValidationPage.REQUIRED_ERROR_MESSAGE;
 
 @TestPath("vaadin-checkbox/validation/basic")
 public class CheckboxBasicValidationIT
@@ -16,6 +17,7 @@ public class CheckboxBasicValidationIT
     public void fieldIsInitiallyValid() {
         assertClientValid();
         assertServerValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -24,6 +26,7 @@ public class CheckboxBasicValidationIT
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -34,6 +37,7 @@ public class CheckboxBasicValidationIT
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -44,11 +48,13 @@ public class CheckboxBasicValidationIT
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         testField.setChecked(false);
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test

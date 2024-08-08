@@ -8,6 +8,7 @@ import org.openqa.selenium.Keys;
 
 import static com.vaadin.flow.component.combobox.test.validation.MultiSelectComboBoxBasicValidationPage.ENABLE_CUSTOM_VALUE_BUTTON;
 import static com.vaadin.flow.component.combobox.test.validation.MultiSelectComboBoxBasicValidationPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.combobox.test.validation.MultiSelectComboBoxBasicValidationPage.REQUIRED_ERROR_MESSAGE;
 
 @TestPath("vaadin-multi-select-combo-box/validation/basic")
 public class MultiSelectComboBoxBasicValidationIT
@@ -17,6 +18,7 @@ public class MultiSelectComboBoxBasicValidationIT
     public void fieldIsInitiallyValid() {
         assertClientValid();
         assertServerValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -25,6 +27,7 @@ public class MultiSelectComboBoxBasicValidationIT
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -35,6 +38,7 @@ public class MultiSelectComboBoxBasicValidationIT
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -45,11 +49,13 @@ public class MultiSelectComboBoxBasicValidationIT
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         testField.deselectAll();
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -60,6 +66,7 @@ public class MultiSelectComboBoxBasicValidationIT
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -71,11 +78,13 @@ public class MultiSelectComboBoxBasicValidationIT
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         testField.deselectAll();
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test

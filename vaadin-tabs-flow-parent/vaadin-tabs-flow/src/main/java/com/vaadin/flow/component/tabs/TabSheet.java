@@ -46,7 +46,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabsheet")
-@NpmPackage(value = "@vaadin/tabsheet", version = "24.5.0-alpha6")
+@NpmPackage(value = "@vaadin/tabsheet", version = "24.5.0-alpha7")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
         HasSuffix, HasThemeVariant<TabSheetVariant> {
@@ -248,6 +248,15 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
      */
     public void setSelectedTab(Tab selectedTab) {
         tabs.setSelectedTab(selectedTab);
+    }
+
+    /**
+     * Gets the number of tabs.
+     *
+     * @return the number of tabs
+     */
+    public int getTabCount() {
+        return tabs.getTabCount();
     }
 
     /**

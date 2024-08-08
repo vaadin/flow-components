@@ -45,7 +45,7 @@ public class BasicValidationTest
     public void badInput_validate_emptyErrorMessageDisplayed() {
         testField.getElement().setProperty("_hasInputValue", true);
         fireUnparsableChangeDomEvent();
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -55,7 +55,7 @@ public class BasicValidationTest
         testField.getElement().setProperty("_hasInputValue", true);
         fireUnparsableChangeDomEvent();
         Assert.assertEquals("Date has invalid format",
-                getErrorMessageProperty());
+                testField.getErrorMessage());
     }
 
     @Test
@@ -63,7 +63,7 @@ public class BasicValidationTest
         testField.setRequiredIndicatorVisible(true);
         testField.setValue(LocalDate.now());
         testField.setValue(null);
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -73,14 +73,14 @@ public class BasicValidationTest
                 .setRequiredErrorMessage("Field is required"));
         testField.setValue(LocalDate.now());
         testField.setValue(null);
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Test
     public void min_validate_emptyErrorMessageDisplayed() {
         testField.setMin(LocalDate.now());
         testField.setValue(LocalDate.now().minusDays(1));
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -89,14 +89,14 @@ public class BasicValidationTest
         testField.setI18n(new DatePicker.DatePickerI18n()
                 .setMinErrorMessage("Date is too small"));
         testField.setValue(LocalDate.now().minusDays(1));
-        Assert.assertEquals("Date is too small", getErrorMessageProperty());
+        Assert.assertEquals("Date is too small", testField.getErrorMessage());
     }
 
     @Test
     public void max_validate_emptyErrorMessageDisplayed() {
         testField.setMax(LocalDate.now());
         testField.setValue(LocalDate.now().plusDays(1));
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -105,7 +105,7 @@ public class BasicValidationTest
         testField.setI18n(new DatePicker.DatePickerI18n()
                 .setMaxErrorMessage("Date is too big"));
         testField.setValue(LocalDate.now().plusDays(1));
-        Assert.assertEquals("Date is too big", getErrorMessageProperty());
+        Assert.assertEquals("Date is too big", testField.getErrorMessage());
     }
 
     @Test
@@ -116,11 +116,12 @@ public class BasicValidationTest
         testField.setErrorMessage("Custom error message");
         testField.setValue(LocalDate.now());
         testField.setValue(null);
-        Assert.assertEquals("Custom error message", getErrorMessageProperty());
+        Assert.assertEquals("Custom error message",
+                testField.getErrorMessage());
     }
 
     @Test
-    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_i18nErrorMessageDisplayed() {
+    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new DatePicker.DatePickerI18n()
                 .setRequiredErrorMessage("Field is required"));
@@ -128,7 +129,9 @@ public class BasicValidationTest
         testField.setValue(LocalDate.now());
         testField.setValue(null);
         testField.setErrorMessage("");
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        testField.setValue(LocalDate.now());
+        testField.setValue(null);
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Override
@@ -141,9 +144,5 @@ public class BasicValidationTest
                 "unparsable-change", Json.createObject());
         testField.getElement().getNode().getFeature(ElementListenerMap.class)
                 .fireEvent(unparsableChangeDomEvent);
-    }
-
-    private String getErrorMessageProperty() {
-        return testField.getElement().getProperty("errorMessage");
     }
 }

@@ -29,6 +29,7 @@ import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
@@ -42,19 +43,65 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-password-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/password-field", version = "24.5.0-alpha6")
+@NpmPackage(value = "@vaadin/password-field", version = "24.5.0-alpha7")
 @JsModule("@vaadin/password-field/src/vaadin-password-field.js")
 public class PasswordField extends TextFieldBase<PasswordField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
 
     private PasswordFieldI18n i18n;
 
-    private boolean manualValidationEnabled = false;
+    private Validator<String> defaultValidator = (value, context) -> {
+        boolean fromComponent = context == null;
 
-    private String customErrorMessage;
-    private String constraintErrorMessage;
+        // Do the required check only if the validator is called from the
+        // component, and not from Binder. Binder has its own implementation
+        // of required validation.
+        if (fromComponent) {
+            ValidationResult requiredResult = ValidationUtil
+                    .validateRequiredConstraint(
+                            getI18nErrorMessage(
+                                    PasswordFieldI18n::getRequiredErrorMessage),
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
+            if (requiredResult.isError()) {
+                return requiredResult;
+            }
+        }
+
+        ValidationResult maxLengthResult = ValidationUtil
+                .validateMaxLengthConstraint(
+                        getI18nErrorMessage(
+                                PasswordFieldI18n::getMaxLengthErrorMessage),
+                        value, hasMaxLength() ? getMaxLength() : null);
+        if (maxLengthResult.isError()) {
+            return maxLengthResult;
+        }
+
+        ValidationResult minLengthResult = ValidationUtil
+                .validateMinLengthConstraint(
+                        getI18nErrorMessage(
+                                PasswordFieldI18n::getMinLengthErrorMessage),
+                        value, getMinLength());
+        if (minLengthResult.isError()) {
+            return minLengthResult;
+        }
+
+        ValidationResult patternResult = ValidationUtil
+                .validatePatternConstraint(
+                        getI18nErrorMessage(
+                                PasswordFieldI18n::getPatternErrorMessage),
+                        value, getPattern());
+        if (patternResult.isError()) {
+            return patternResult;
+        }
+
+        return ValidationResult.ok();
+    };
+
+    private ValidationController<PasswordField, String> validationController = new ValidationController<>(
+            this);
 
     /**
      * Constructs an empty {@code PasswordField}.
@@ -164,44 +211,6 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
-    }
-
-    /**
-     * Sets an error message to display for all constraint violations.
-     * <p>
-     * This error message takes priority over i18n error messages when both are
-     * set.
-     *
-     * @param errorMessage
-     *            the error message to set, or {@code null} to clear
-     */
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        customErrorMessage = errorMessage;
-        updateErrorMessage();
-    }
-
-    /**
-     * Gets the error message displayed for all constraint violations.
-     *
-     * @return the error message
-     */
-    @Override
-    public String getErrorMessage() {
-        return customErrorMessage;
-    }
-
-    private void setConstraintErrorMessage(String errorMessage) {
-        constraintErrorMessage = errorMessage;
-        updateErrorMessage();
-    }
-
-    private void updateErrorMessage() {
-        String errorMessage = constraintErrorMessage;
-        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
-            errorMessage = customErrorMessage;
-        }
-        getElement().setProperty("errorMessage", errorMessage);
     }
 
     /**
@@ -336,56 +345,12 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
 
     @Override
     public Validator<String> getDefaultValidator() {
-        return (value, context) -> checkValidity(value, false);
+        return defaultValidator;
     }
 
     @Override
     public void setManualValidation(boolean enabled) {
-        this.manualValidationEnabled = enabled;
-    }
-
-    private ValidationResult checkValidity(String value,
-            boolean withRequiredValidator) {
-        if (withRequiredValidator) {
-            ValidationResult requiredResult = ValidationUtil
-                    .validateRequiredConstraint(
-                            getI18nErrorMessage(
-                                    PasswordFieldI18n::getRequiredErrorMessage),
-                            isRequiredIndicatorVisible(), value,
-                            getEmptyValue());
-            if (requiredResult.isError()) {
-                return requiredResult;
-            }
-        }
-
-        ValidationResult maxLengthResult = ValidationUtil
-                .validateMaxLengthConstraint(
-                        getI18nErrorMessage(
-                                PasswordFieldI18n::getMaxLengthErrorMessage),
-                        value, hasMaxLength() ? getMaxLength() : null);
-        if (maxLengthResult.isError()) {
-            return maxLengthResult;
-        }
-
-        ValidationResult minLengthResult = ValidationUtil
-                .validateMinLengthConstraint(
-                        getI18nErrorMessage(
-                                PasswordFieldI18n::getMinLengthErrorMessage),
-                        value, getMinLength());
-        if (minLengthResult.isError()) {
-            return minLengthResult;
-        }
-
-        ValidationResult patternResult = ValidationUtil
-                .validatePatternConstraint(
-                        getI18nErrorMessage(
-                                PasswordFieldI18n::getPatternErrorMessage),
-                        value, getPattern());
-        if (patternResult.isError()) {
-            return patternResult;
-        }
-
-        return ValidationResult.ok();
+        validationController.setManualValidation(enabled);
     }
 
     /**
@@ -398,18 +363,7 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
      * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (this.manualValidationEnabled) {
-            return;
-        }
-
-        ValidationResult result = checkValidity(getValue(), true);
-        if (result.isError()) {
-            setInvalid(true);
-            setConstraintErrorMessage(result.getErrorMessage());
-        } else {
-            setInvalid(false);
-            setConstraintErrorMessage("");
-        }
+        validationController.validate(getValue());
     }
 
     @Override

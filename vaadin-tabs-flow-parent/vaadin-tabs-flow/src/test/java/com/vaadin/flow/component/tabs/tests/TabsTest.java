@@ -42,8 +42,7 @@ public class TabsTest {
     public void createTabsInDefaultState() {
         Tabs tabs = new Tabs();
 
-        assertThat("Initial child count is invalid", tabs.getComponentCount(),
-                is(0));
+        assertThat("Initial tab count is invalid", tabs.getTabCount(), is(0));
         assertThat("Initial orientation is invalid", tabs.getOrientation(),
                 is(Tabs.Orientation.HORIZONTAL));
         assertThat("Initial selected index is invalid", tabs.getSelectedIndex(),
@@ -59,8 +58,7 @@ public class TabsTest {
         Tab tab3 = new Tab("Tab three");
         Tabs tabs = new Tabs(tab1, tab2, tab3);
 
-        assertThat("Initial child count is invalid", tabs.getComponentCount(),
-                is(3));
+        assertThat("Initial tab count is invalid", tabs.getTabCount(), is(3));
         assertThat("Initial orientation is invalid", tabs.getOrientation(),
                 is(Tabs.Orientation.HORIZONTAL));
         assertThat("Initial selected tab is invalid", tabs.getSelectedTab(),

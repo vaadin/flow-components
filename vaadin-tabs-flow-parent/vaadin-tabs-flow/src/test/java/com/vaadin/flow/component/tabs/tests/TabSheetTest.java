@@ -156,6 +156,16 @@ public class TabSheetTest {
     }
 
     @Test
+    public void addTabs_tabCountCorrect() {
+        Assert.assertEquals(0, tabSheet.getTabCount());
+
+        tabSheet.add("Tab 0", new Span("Content 0"));
+        tabSheet.add("Tab 1", new Span("Content 1"));
+
+        Assert.assertEquals(2, tabSheet.getTabCount());
+    }
+
+    @Test
     public void changeTab_contentEnabled() {
         tabSheet.add("Tab 0", new Span("Content 0"));
 
@@ -261,6 +271,7 @@ public class TabSheetTest {
         var tab = tabSheet.add("Tab 0", new Span("Content 0"));
         tabSheet.remove(tab);
         Assert.assertFalse(tab.getParent().isPresent());
+        Assert.assertEquals(0, tabSheet.getTabCount());
     }
 
     @Test
@@ -334,11 +345,13 @@ public class TabSheetTest {
     @Test
     public void addThemeVariants_hasThemeVariants() {
         tabSheet.addThemeVariants(TabSheetVariant.LUMO_TABS_CENTERED,
-                TabSheetVariant.LUMO_BORDERED);
+                TabSheetVariant.LUMO_BORDERED, TabSheetVariant.LUMO_NO_PADDING);
         Assert.assertTrue(tabSheet.getThemeName()
                 .contains(TabSheetVariant.LUMO_TABS_CENTERED.getVariantName()));
         Assert.assertTrue(tabSheet.getThemeName()
                 .contains(TabSheetVariant.LUMO_BORDERED.getVariantName()));
+        Assert.assertTrue(tabSheet.getThemeName()
+                .contains(TabSheetVariant.LUMO_NO_PADDING.getVariantName()));
     }
 
     @Test

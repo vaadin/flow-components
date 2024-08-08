@@ -55,8 +55,8 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-popover")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha6")
-@NpmPackage(value = "@vaadin/popover", version = "24.5.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/popover", version = "24.5.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
 public class Popover extends Component implements HasAriaLabel, HasComponents {
@@ -218,6 +218,28 @@ public class Popover extends Component implements HasAriaLabel, HasComponents {
     public Optional<String> getAriaLabelledBy() {
         return Optional
                 .ofNullable(getElement().getProperty("accessibleNameRef"));
+    }
+
+    /**
+     * Set {@code true} to make the popover content automatically receive focus
+     * after it is opened. Modal popovers use this behavior by default.
+     *
+     * @param autofocus
+     *            the boolean value to set
+     */
+    public void setAutofocus(boolean autofocus) {
+        getElement().setProperty("autofocus", autofocus);
+    }
+
+    /**
+     * Get if the popover content automatically receives focus after it is
+     * opened. Modal popovers use this behavior by default.
+     *
+     * @return {@code true} if the popover content receives focus when opened,
+     *         {@code false} otherwise
+     */
+    public boolean isAutofocus() {
+        return getElement().getProperty("autofocus", false);
     }
 
     /**

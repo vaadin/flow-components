@@ -59,7 +59,7 @@ public class EmailFieldBasicValidationTest
         testField.setRequiredIndicatorVisible(true);
         testField.setValue("john@vaadin.com");
         testField.setValue("");
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -69,14 +69,14 @@ public class EmailFieldBasicValidationTest
                 .setRequiredErrorMessage("Field is required"));
         testField.setValue("john@vaadin.com");
         testField.setValue("");
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Test
     public void minLength_validate_emptyErrorMessageDisplayed() {
         testField.setMinLength(13);
         testField.setValue("a@vaadin.com");
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -85,14 +85,14 @@ public class EmailFieldBasicValidationTest
         testField.setI18n(new EmailField.EmailFieldI18n()
                 .setMinLengthErrorMessage("Value is too short"));
         testField.setValue("a@vaadin.com");
-        Assert.assertEquals("Value is too short", getErrorMessageProperty());
+        Assert.assertEquals("Value is too short", testField.getErrorMessage());
     }
 
     @Test
     public void maxLength_validate_emptyErrorMessageDisplayed() {
         testField.setMaxLength(13);
         testField.setValue("aaa@vaadin.com");
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -101,13 +101,13 @@ public class EmailFieldBasicValidationTest
         testField.setI18n(new EmailField.EmailFieldI18n()
                 .setMaxLengthErrorMessage("Value is too long"));
         testField.setValue("aaa@vaadin.com");
-        Assert.assertEquals("Value is too long", getErrorMessageProperty());
+        Assert.assertEquals("Value is too long", testField.getErrorMessage());
     }
 
     @Test
     public void pattern_validate_emptyErrorMessageDisplayed() {
         testField.setValue("foobar");
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -116,7 +116,7 @@ public class EmailFieldBasicValidationTest
                 .setPatternErrorMessage("Value has incorrect format"));
         testField.setValue("foobar");
         Assert.assertEquals("Value has incorrect format",
-                getErrorMessageProperty());
+                testField.getErrorMessage());
     }
 
     @Test
@@ -127,11 +127,12 @@ public class EmailFieldBasicValidationTest
         testField.setErrorMessage("Custom error message");
         testField.setValue("john@vaadin.com");
         testField.setValue("");
-        Assert.assertEquals("Custom error message", getErrorMessageProperty());
+        Assert.assertEquals("Custom error message",
+                testField.getErrorMessage());
     }
 
     @Test
-    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_i18nErrorMessageDisplayed() {
+    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new EmailField.EmailFieldI18n()
                 .setRequiredErrorMessage("Field is required"));
@@ -139,15 +140,13 @@ public class EmailFieldBasicValidationTest
         testField.setValue("john@vaadin.com");
         testField.setValue("");
         testField.setErrorMessage("");
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        testField.setValue("john@vaadin.com");
+        testField.setValue("");
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Override
     protected EmailField createTestField() {
         return new EmailField();
-    }
-
-    private String getErrorMessageProperty() {
-        return testField.getElement().getProperty("errorMessage");
     }
 }

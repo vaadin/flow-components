@@ -32,12 +32,16 @@ import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.HasValidator;
-import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.PropertyChangeListener;
 
+import java.io.Serializable;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Checkbox is an input field representing a binary choice.
@@ -52,9 +56,9 @@ import java.util.Optional;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox", version = "24.5.0-alpha6")
+@NpmPackage(value = "@vaadin/checkbox", version = "24.5.0-alpha7")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         implements ClickNotifier<Checkbox>, Focusable<Checkbox>, HasAriaLabel,
@@ -68,7 +72,22 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
     private String ariaLabel;
     private String ariaLabelledBy;
 
-    private boolean manualValidationEnabled = false;
+    private CheckboxI18n i18n;
+
+    private Validator<Boolean> defaultValidator = (value, context) -> {
+        boolean fromComponent = context == null;
+
+        // Do the required check only if the validator is called from the
+        // component, and not from Binder. Binder has its own implementation
+        // of required validation.
+        boolean isRequired = fromComponent && isRequiredIndicatorVisible();
+        return ValidationUtil.validateRequiredConstraint(
+                getI18nErrorMessage(CheckboxI18n::getRequiredErrorMessage),
+                isRequired, getValue(), getEmptyValue());
+    };
+
+    private ValidationController<Checkbox, Boolean> validationController = new ValidationController<>(
+            this);
 
     /**
      * Default constructor.
@@ -324,31 +343,25 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
 
     @Override
     public void setManualValidation(boolean enabled) {
-        this.manualValidationEnabled = enabled;
+        validationController.setManualValidation(enabled);
+    }
+
+    @Override
+    public Validator<Boolean> getDefaultValidator() {
+        return defaultValidator;
     }
 
     /**
-     * Performs server-side validation of the current value. This is needed
-     * because it is possible to circumvent the client-side validation
-     * constraints using browser development tools.
+     * Validates the current value against the constraints and sets the
+     * {@code invalid} property and the {@code errorMessage} property based on
+     * the result. If a custom error message is provided with
+     * {@link #setErrorMessage(String)}, it is used. Otherwise, the error
+     * message defined in the i18n object is used.
+     * <p>
+     * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            setInvalid(isInvalid(getValue()));
-        }
-    }
-
-    /**
-     * Performs a server-side validation of the given value. This is needed
-     * because it is possible to circumvent the client side validation
-     * constraints using browser development tools.
-     */
-    private boolean isInvalid(Boolean value) {
-        ValidationResult requiredValidation = ValidationUtil
-                .validateRequiredConstraint("", isRequiredIndicatorVisible(),
-                        value, getEmptyValue());
-
-        return requiredValidation.isError();
+        validationController.validate(getValue());
     }
 
     /**
@@ -368,6 +381,73 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      */
     boolean isDisabledBoolean() {
         return getElement().getProperty("disabled", false);
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(CheckboxI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public CheckboxI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(CheckboxI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+    }
+
+    private String getI18nErrorMessage(Function<CheckboxI18n, String> getter) {
+        return Optional.ofNullable(i18n).map(getter).orElse("");
+    }
+
+    /**
+     * The internationalization properties for {@link Checkbox}.
+     */
+    public static class CheckboxI18n implements Serializable {
+
+        private String requiredErrorMessage;
+
+        /**
+         * Gets the error message displayed when the field is required but
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         * @see Checkbox#isRequiredIndicatorVisible()
+         * @see Checkbox#setRequiredIndicatorVisible(boolean)
+         */
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field is required but
+         * empty.
+         * <p>
+         * Note, custom error messages set with
+         * {@link Checkbox#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see Checkbox#isRequiredIndicatorVisible()
+         * @see Checkbox#setRequiredIndicatorVisible(boolean)
+         */
+        public CheckboxI18n setRequiredErrorMessage(String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
     }
 
 }

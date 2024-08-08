@@ -43,7 +43,7 @@ public class IntegerFieldBasicValidationTest
     public void badInput_validate_emptyErrorMessageDisplayed() {
         testField.getElement().setProperty("_hasInputValue", true);
         fireUnparsableChangeDomEvent();
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -53,7 +53,7 @@ public class IntegerFieldBasicValidationTest
         testField.getElement().setProperty("_hasInputValue", true);
         fireUnparsableChangeDomEvent();
         Assert.assertEquals("Value has invalid format",
-                getErrorMessageProperty());
+                testField.getErrorMessage());
     }
 
     @Test
@@ -61,7 +61,7 @@ public class IntegerFieldBasicValidationTest
         testField.setRequiredIndicatorVisible(true);
         testField.setValue(1);
         testField.setValue(null);
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -71,14 +71,14 @@ public class IntegerFieldBasicValidationTest
                 .setRequiredErrorMessage("Field is required"));
         testField.setValue(1);
         testField.setValue(null);
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Test
     public void min_validate_emptyErrorMessageDisplayed() {
         testField.setMin(3);
         testField.setValue(1);
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -87,14 +87,14 @@ public class IntegerFieldBasicValidationTest
         testField.setI18n(new IntegerField.IntegerFieldI18n()
                 .setMinErrorMessage("Value is too small"));
         testField.setValue(1);
-        Assert.assertEquals("Value is too small", getErrorMessageProperty());
+        Assert.assertEquals("Value is too small", testField.getErrorMessage());
     }
 
     @Test
     public void max_validate_emptyErrorMessageDisplayed() {
         testField.setMax(1);
         testField.setValue(3);
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -103,7 +103,7 @@ public class IntegerFieldBasicValidationTest
         testField.setI18n(new IntegerField.IntegerFieldI18n()
                 .setMaxErrorMessage("Value is too big"));
         testField.setValue(3);
-        Assert.assertEquals("Value is too big", getErrorMessageProperty());
+        Assert.assertEquals("Value is too big", testField.getErrorMessage());
     }
 
     @Test
@@ -114,11 +114,12 @@ public class IntegerFieldBasicValidationTest
         testField.setErrorMessage("Custom error message");
         testField.setValue(1);
         testField.setValue(null);
-        Assert.assertEquals("Custom error message", getErrorMessageProperty());
+        Assert.assertEquals("Custom error message",
+                testField.getErrorMessage());
     }
 
     @Test
-    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_i18nErrorMessageDisplayed() {
+    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new IntegerField.IntegerFieldI18n()
                 .setRequiredErrorMessage("Field is required"));
@@ -126,7 +127,9 @@ public class IntegerFieldBasicValidationTest
         testField.setValue(1);
         testField.setValue(null);
         testField.setErrorMessage("");
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        testField.setValue(1);
+        testField.setValue(null);
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Override
@@ -139,9 +142,5 @@ public class IntegerFieldBasicValidationTest
                 "unparsable-change", Json.createObject());
         testField.getElement().getNode().getFeature(ElementListenerMap.class)
                 .fireEvent(unparsableChangeDomEvent);
-    }
-
-    private String getErrorMessageProperty() {
-        return testField.getElement().getProperty("errorMessage");
     }
 }
