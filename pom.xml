@@ -40,6 +40,10 @@
         <!-- spreadsheet -->
         <poi.version>5.2.5</poi.version>
         <javaparser.version>3.25.3</javaparser.version>
+
+        <!-- spotless -->
+        <spotless.version>2.43.0</spotless.version>
+        <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
     </properties>
     <modules>
         <module>vaadin-renderer-flow-parent</module>
@@ -442,15 +446,25 @@
         </pluginManagement>
         <plugins>
             <plugin>
-                <groupId>net.revelc.code.formatter</groupId>
-                <artifactId>formatter-maven-plugin</artifactId>
-                <version>2.24.1</version>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.version}</version>
                 <configuration>
-                    <configFile>https://raw.githubusercontent.com/vaadin/flow/main/eclipse/VaadinJavaConventions.xml</configFile>
-                    <skipHtmlFormatting>true</skipHtmlFormatting>
-                    <excludes>
-                        <exclude>**/*.css</exclude>
-                    </excludes>
+                    <java>
+                        <eclipse>
+                            <file>https://raw.githubusercontent.com/vaadin/flow/main/eclipse/VaadinJavaConventions.xml</file>
+                        </eclipse>
+
+                        <removeUnusedImports />
+                        <importOrder>
+                            <wildcardsLast>true</wildcardsLast>
+                            <order>java|javax,org,com</order>
+                        </importOrder>
+
+                        <licenseHeader>
+                            <file>${spotless.licence-header}</file>
+                        </licenseHeader>
+                    </java>
                 </configuration>
             </plugin>
         </plugins>
