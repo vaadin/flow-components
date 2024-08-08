@@ -1068,6 +1068,9 @@ export const spreadsheetStyles = css`
     color: var(--lumo-body-text-color);
     background-color: var(--lumo-base-color);
     font-size: var(--lump-font-size-s);
+    border-right: 1px solid var(--lumo-contrast-20pct);
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    padding: 0 var(--lumo-space-xs);
   } 
 
   :host([theme~="lumo"]) .v-spreadsheet {
@@ -1091,6 +1094,8 @@ export const spreadsheetStyles = css`
     font-size: var(--lumo-font-size-s);
     padding-left: var(--lumo-space-xs);
     color: var(--lumo-body-text-color);
+    background-color: unset;
+    padding: 0px 0px 0px var(--lumo-space-s);
   }
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .arrow {
     font-size: var(--lumo-font-size-xs);
@@ -1105,6 +1110,10 @@ export const spreadsheetStyles = css`
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .addressfield {
     background: var(--lumo-contrast-5pct);
   }
+  :host([theme~="lumo"]) .v-spreadsheet .functionbar .functionfield {
+    font: unset;
+  }
+
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .formulaoverlay {
     color: var(--lumo-base-color);
   }
@@ -1140,6 +1149,7 @@ export const spreadsheetStyles = css`
   .v-spreadsheet .rh,
   .v-spreadsheet .corner {
     background-color: var(--lumo-contrast-5pct);
+    background-image: unset;
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
   }
@@ -1228,7 +1238,7 @@ export const spreadsheetStyles = css`
     color: var(--lumo-primary-color);
   }
   :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.hidden {
-    color: var(--lumo-contrast-10pct);
+    color: var(--lumo-contrast-20pct);
   }
   :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab {
     font-family: var(--lumo-font-family);
