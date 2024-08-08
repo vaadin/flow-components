@@ -1074,11 +1074,6 @@ export const spreadsheetStyles = css`
   } 
 
   :host([theme~="lumo"]) .v-spreadsheet {
-    box-sizing: border-box;
-    min-height: 100px;
-    overflow: hidden;
-    position: relative;
-    padding: 0px;
     border: 1px solid var(--lumo-contrast-20pct);
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-m);
@@ -1090,7 +1085,6 @@ export const spreadsheetStyles = css`
   }
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .functionfield,
   .v-spreadsheet .functionbar .addressfield {
-    box-sizing: border-box;
     font-size: var(--lumo-font-size-s);
     padding-left: var(--lumo-space-xs);
     color: var(--lumo-body-text-color);
@@ -1109,6 +1103,7 @@ export const spreadsheetStyles = css`
   }
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .addressfield {
     background: var(--lumo-contrast-5pct);
+    background-color: unset;
   }
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .functionfield {
     font: unset;
@@ -1149,7 +1144,6 @@ export const spreadsheetStyles = css`
   .v-spreadsheet .rh,
   .v-spreadsheet .corner {
     background-color: var(--lumo-contrast-5pct);
-    background-image: unset;
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
   }
@@ -1184,7 +1178,6 @@ export const spreadsheetStyles = css`
     background: var(--lumo-primary-color);
   }
   :host([theme~="lumo"]) .v-spreadsheet .corner {
-    background-color: var(--lumo-contrast-5pct);
     border-bottom: 1px solid var(--lumo-contrast-20pct);
     border-right: 1px solid var(--lumo-contrast-20pct);
   }
