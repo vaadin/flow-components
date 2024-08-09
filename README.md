@@ -129,7 +129,7 @@ If you need to make any modification in a component, consider whether it is conv
 
 ### Formatting
 
-Run `mvn formatter:format` before pushing your code.
+Run `mvn spotless:apply` before pushing your code.
 
 ## Bug and enhancement tickets
 - Bug tickets and enhancement requests for the web component implementations should go to the Vaadin web components monorepo https://github.com/vaadin/web-components/.
