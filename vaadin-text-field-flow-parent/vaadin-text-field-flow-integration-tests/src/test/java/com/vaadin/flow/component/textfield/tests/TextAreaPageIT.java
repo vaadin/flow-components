@@ -15,12 +15,10 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
-import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
+import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
+
+import java.util.stream.IntStream;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,9 +26,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import java.util.stream.IntStream;
-
-import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
+import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for {@link TextArea}.

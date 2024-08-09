@@ -13,23 +13,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.tabs.tests;
 
-import com.vaadin.flow.component.tabs.TabsVariant;
-import com.vaadin.tests.AbstractComponentIT;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
-
+import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchTestCase;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the {@link TabsPage}.

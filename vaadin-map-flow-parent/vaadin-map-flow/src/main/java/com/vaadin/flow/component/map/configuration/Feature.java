@@ -8,6 +8,8 @@
  */
 package com.vaadin.flow.component.map.configuration;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -17,8 +19,6 @@ import com.vaadin.flow.component.map.configuration.geometry.Point;
 import com.vaadin.flow.component.map.configuration.geometry.SimpleGeometry;
 import com.vaadin.flow.component.map.configuration.style.Style;
 import com.vaadin.flow.component.map.configuration.style.TextStyle;
-
-import java.util.Objects;
 
 /**
  * A geographic feature to be displayed on a map. A feature represents a point

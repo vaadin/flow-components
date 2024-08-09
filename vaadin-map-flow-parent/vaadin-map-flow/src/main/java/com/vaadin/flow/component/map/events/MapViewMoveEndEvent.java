@@ -15,6 +15,7 @@ import com.vaadin.flow.component.map.MapBase;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Extent;
 import com.vaadin.flow.component.map.configuration.View;
+
 import elemental.json.JsonArray;
 
 /**

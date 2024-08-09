@@ -8,12 +8,12 @@
  */
 package com.vaadin.flow.component.charts.model.serializers;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
-
-import java.io.IOException;
 
 /**
  * Custom bean serializer for {@link AbstractSeries} that adds the type field.

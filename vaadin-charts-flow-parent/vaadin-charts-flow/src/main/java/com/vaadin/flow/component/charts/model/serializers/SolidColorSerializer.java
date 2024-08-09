@@ -8,6 +8,8 @@
  */
 package com.vaadin.flow.component.charts.model.serializers;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -15,8 +17,6 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.vaadin.flow.component.charts.model.style.SolidColor;
-
-import java.io.IOException;
 
 /**
  * Serializer for {@link SolidColor}

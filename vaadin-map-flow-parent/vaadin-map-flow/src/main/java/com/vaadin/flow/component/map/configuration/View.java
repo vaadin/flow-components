@@ -8,11 +8,11 @@
  */
 package com.vaadin.flow.component.map.configuration;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.source.Source;
-
-import java.util.Objects;
 
 /**
  * Represents a map's viewport, responsible for changing properties like center

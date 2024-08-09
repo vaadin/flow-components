@@ -15,11 +15,12 @@
  */
 package com.vaadin.flow.component.virtuallist.tests;
 
-import com.vaadin.flow.component.virtuallist.VirtualList;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import com.vaadin.flow.component.virtuallist.VirtualList;
 
 public class VirtualListTest {
 

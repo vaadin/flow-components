@@ -8,11 +8,11 @@
  */
 package com.vaadin.flow.component.map.events;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
-
-import java.io.Serializable;
 
 /**
  * Stores information about a {@link Feature} that is part of an event

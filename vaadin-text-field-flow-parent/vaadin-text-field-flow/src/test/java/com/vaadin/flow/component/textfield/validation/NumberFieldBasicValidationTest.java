@@ -18,12 +18,12 @@ package com.vaadin.flow.component.textfield.validation;
 import org.junit.Assert;
 import org.junit.Test;
 
-import elemental.json.Json;
-
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
+
+import elemental.json.Json;
 
 public class NumberFieldBasicValidationTest
         extends AbstractBasicValidationTest<NumberField, Double> {

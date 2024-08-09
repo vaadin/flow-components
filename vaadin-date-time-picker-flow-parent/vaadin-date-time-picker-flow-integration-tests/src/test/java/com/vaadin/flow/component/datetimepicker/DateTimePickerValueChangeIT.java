@@ -15,17 +15,18 @@
  */
 package com.vaadin.flow.component.datetimepicker;
 
-import com.vaadin.flow.component.datetimepicker.testbench.DateTimePickerElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractComponentIT;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import com.vaadin.flow.component.datetimepicker.testbench.DateTimePickerElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-date-time-picker/date-time-picker-value-change")
 public class DateTimePickerValueChangeIT extends AbstractComponentIT {

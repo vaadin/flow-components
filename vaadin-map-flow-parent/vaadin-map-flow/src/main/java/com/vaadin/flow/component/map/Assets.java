@@ -8,9 +8,9 @@
  */
 package com.vaadin.flow.component.map;
 
-import com.vaadin.flow.server.StreamResource;
-
 import java.io.Serializable;
+
+import com.vaadin.flow.server.StreamResource;
 
 /**
  * Defines the default assets that the Map component provides

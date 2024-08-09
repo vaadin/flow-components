@@ -15,11 +15,11 @@
  */
 package com.vaadin.flow.component.datetimepicker;
 
+import java.util.function.Consumer;
+
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
-
-import java.util.function.Consumer;
 
 @Route
 public class DateTimePickerAutoOpenPage extends Div {

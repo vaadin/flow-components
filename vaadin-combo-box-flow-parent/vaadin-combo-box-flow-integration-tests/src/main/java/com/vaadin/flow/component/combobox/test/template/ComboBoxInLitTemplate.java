@@ -15,16 +15,16 @@
  */
 package com.vaadin.flow.component.combobox.test.template;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.template.Id;
 import com.vaadin.flow.data.binder.Binder;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 @JsModule("./src/combo-box-lit-wrapper.ts")
 @Tag("combo-box-lit-wrapper")

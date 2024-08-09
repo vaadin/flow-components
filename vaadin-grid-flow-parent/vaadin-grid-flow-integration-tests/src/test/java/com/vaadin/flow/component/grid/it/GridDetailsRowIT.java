@@ -15,15 +15,16 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.util.List;
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/grid-details-row")
 public class GridDetailsRowIT extends AbstractComponentIT {

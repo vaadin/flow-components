@@ -15,11 +15,12 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/grid-data-provider-size")
 public class GridDataProviderSizeIT extends AbstractComponentIT {

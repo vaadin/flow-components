@@ -8,10 +8,10 @@
  */
 package com.vaadin.flow.component.map.configuration.source;
 
-import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
-
 import java.util.List;
 import java.util.Objects;
+
+import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 
 /**
  * Abstract base class for all map sources

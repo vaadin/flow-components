@@ -1,21 +1,29 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.gridpro;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.HasValueAndElement;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.shared.Registration;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.HasValueAndElement;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.gridpro.GridPro.EditColumn;
+import com.vaadin.flow.shared.Registration;
 
 public class GridProEditColumnTest {
 

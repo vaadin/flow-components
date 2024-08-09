@@ -15,17 +15,18 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
-import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
-import com.vaadin.flow.component.checkbox.testbench.CheckboxGroupElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-import java.util.Arrays;
-import java.util.List;
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
+import com.vaadin.flow.component.checkbox.testbench.CheckboxGroupElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-checkbox-group-list-data-view")
 public class CheckboxGroupListDataViewIT extends AbstractComponentIT {

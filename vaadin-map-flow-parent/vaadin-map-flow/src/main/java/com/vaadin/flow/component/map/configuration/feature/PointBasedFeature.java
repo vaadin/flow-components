@@ -8,6 +8,8 @@
  */
 package com.vaadin.flow.component.map.configuration.feature;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -17,8 +19,6 @@ import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.geometry.Point;
 import com.vaadin.flow.component.map.configuration.geometry.SimpleGeometry;
-
-import java.util.Objects;
 
 /**
  * Abstract base class for features that are represented by a single point and a

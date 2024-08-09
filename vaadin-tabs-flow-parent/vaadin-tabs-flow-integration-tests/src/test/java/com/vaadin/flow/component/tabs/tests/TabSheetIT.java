@@ -13,10 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.tabs.tests;
-
-import com.vaadin.tests.AbstractComponentIT;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -25,6 +22,7 @@ import org.openqa.selenium.NoSuchElementException;
 
 import com.vaadin.flow.component.tabs.testbench.TabSheetElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the {@link TabSheetPage}.

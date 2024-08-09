@@ -15,12 +15,12 @@
  */
 package com.vaadin.flow.component.datetimepicker;
 
-import elemental.json.JsonObject;
-import elemental.json.JsonNull;
-
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.Assert;
+
+import elemental.json.JsonNull;
+import elemental.json.JsonObject;
 
 public class DateTimePickerI18nTest {
 

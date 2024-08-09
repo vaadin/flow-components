@@ -8,14 +8,14 @@
  */
 package com.vaadin.flow.component.map.configuration.layer;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.source.TileSource;
 import com.vaadin.flow.component.map.configuration.source.UrlTileSource;
-
-import java.util.Objects;
 
 /**
  * Layer for displaying tiled map data

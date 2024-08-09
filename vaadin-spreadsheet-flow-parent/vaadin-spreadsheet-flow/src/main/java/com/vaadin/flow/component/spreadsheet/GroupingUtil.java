@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.apache.poi.xssf.usermodel.XSSFRow;

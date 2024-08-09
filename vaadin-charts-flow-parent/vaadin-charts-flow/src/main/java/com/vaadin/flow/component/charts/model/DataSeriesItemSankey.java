@@ -8,8 +8,6 @@
  */
 package com.vaadin.flow.component.charts.model;
 
-import java.time.Instant;
-
 /**
  * DataSeriesItem that can hold also "from", "to" and "weight". Used in sankey
  * series.

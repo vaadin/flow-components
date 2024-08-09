@@ -8,11 +8,11 @@
  */
 package com.vaadin.flow.component.map.configuration.style;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.server.StreamResource;
-
-import java.io.Serializable;
 
 /**
  * An icon or image that can be used to visually represent a {@link Feature}, by

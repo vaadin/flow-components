@@ -8,11 +8,11 @@
  */
 package com.vaadin.flow.component.richtexteditor.testbench;
 
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.elementsbase.Element;
-
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 @Element("vaadin-rich-text-editor")
 public class RichTextEditorElement extends TestBenchElement {
