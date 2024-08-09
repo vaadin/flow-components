@@ -121,7 +121,7 @@ If you need to make any modification in a component, consider whether it is conv
 
 ### Formatting
 
-Run `mvn formatter:format` before pushing your code.
+Run `mvn spotless:apply` before pushing your code.
 
 ## Bug and enhancement tickets
 - Bug tickets and enhancement requests that are specific to a certain Vaadin component should be posted in the component's Web Component repostory (e.g. https://github.com/vaadin/vaadin-button for Button).
