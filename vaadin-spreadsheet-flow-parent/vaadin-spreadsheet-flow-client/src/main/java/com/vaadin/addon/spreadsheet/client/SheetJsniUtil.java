@@ -41,7 +41,7 @@ public class SheetJsniUtil {
         }
         this.@com.vaadin.addon.spreadsheet.client.SheetJsniUtil::parsedRow = r;
         this.@com.vaadin.addon.spreadsheet.client.SheetJsniUtil::parsedCol = c;
-
+    
     }-*/;
 
     public int getParsedCol() {
