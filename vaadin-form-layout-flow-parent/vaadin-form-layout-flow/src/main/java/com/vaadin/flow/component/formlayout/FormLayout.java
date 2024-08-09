@@ -32,7 +32,7 @@ import com.vaadin.flow.component.JsonSerializable;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.shared.SlotUtils;
 
 import elemental.json.Json;
@@ -430,7 +430,7 @@ public class FormLayout extends Component
      * @return the created form item
      */
     public FormItem addFormItem(Component field, String label) {
-        return addFormItem(field, new Label(label));
+        return addFormItem(field, new NativeLabel(label));
     }
 
     /**
