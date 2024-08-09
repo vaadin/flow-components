@@ -453,17 +453,17 @@ public class ApplicationConfiguration implements EntryPoint {
         jsoConfiguration.getConfig = function(name) {
             return this[name];
         }
-
+    
         jsoConfiguration.rootElement = rootElement;
-
+    
         jsoConfiguration.versionInfo = {
             vaadinVersion: '8.0.0'
         };
-
+    
         jsoConfiguration.theme = 'valo';
-
+    
         $wnd.vaadin.clients = {};
-
+    
         $wnd.vaadin.gwtStatsEvents = false;
      }-*/;
 

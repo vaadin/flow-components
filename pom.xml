@@ -26,6 +26,7 @@
         <maven.surefire.plugin.version>3.2.2</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.2.2</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
+        <spotless.plugin.version>2.43.0</spotless.plugin.version>
         <failsafe.forkCount>4</failsafe.forkCount>
         <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
         <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
@@ -441,15 +442,15 @@
         </pluginManagement>
         <plugins>
             <plugin>
-                <groupId>net.revelc.code.formatter</groupId>
-                <artifactId>formatter-maven-plugin</artifactId>
-                <version>2.23.0</version>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.plugin.version}</version>
                 <configuration>
-                    <configFile>https://raw.githubusercontent.com/vaadin/flow/main/eclipse/VaadinJavaConventions.xml</configFile>
-                    <skipHtmlFormatting>true</skipHtmlFormatting>
-                    <excludes>
-                        <exclude>**/*.css</exclude>
-                    </excludes>
+                    <java>
+                        <eclipse>
+                            <file>https://raw.githubusercontent.com/vaadin/flow/main/eclipse/VaadinJavaConventions.xml</file>
+                        </eclipse>
+                    </java>
                 </configuration>
             </plugin>
         </plugins>
