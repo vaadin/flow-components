@@ -19,6 +19,9 @@
         <module>vaadin-cookie-consent-flow</module>
         <module>vaadin-cookie-consent-testbench</module>
     </modules>
+    <properties>
+        <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/vaadin-commercial-license-header.txt</spotless.licence-header>
+    </properties>
     <profiles>
         <profile>
             <id>default</id>
