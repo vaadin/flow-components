@@ -175,6 +175,7 @@ export class VaadinSpreadsheet extends LitElement {
         overlays.id = 'spreadsheet-overlays';
         document.body.appendChild(overlays);
       }
+      overlays.setAttribute('theme', this.getAttribute('theme'));
 
       this.api = new Spreadsheet(this, this.renderRoot);
       this.api.setHeight('100%');

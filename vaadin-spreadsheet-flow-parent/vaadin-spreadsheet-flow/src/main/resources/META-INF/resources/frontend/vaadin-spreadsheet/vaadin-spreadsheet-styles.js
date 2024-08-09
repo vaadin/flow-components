@@ -1055,6 +1055,336 @@ export const spreadsheetStyles = css`
   .clear-filters-button {
     width: 100%;
   }
+
+  /*
+   * Lumo theme variant styles
+   */
+  :host([theme~="lumo"]) {
+    background-color: var(--lumo-base-color);
+  }
+
+  :host([theme~="lumo"]) .v-spreadsheet .sheet .cell {
+    font-family: var(--lumo-font-family);
+    color: var(--lumo-body-text-color);
+    background-color: var(--lumo-base-color);
+    font-size: var(--lump-font-size-s);
+    border-right: 1px solid var(--lumo-contrast-20pct);
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    padding: 0 var(--lumo-space-xs);
+  } 
+
+  :host([theme~="lumo"]) .v-spreadsheet {
+    border: 1px solid var(--lumo-contrast-20pct);
+    font-family: var(--lumo-font-family);
+    font-size: var(--lumo-font-size-m);
+    color: var(--lumo-body-text-color);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .functionbar {
+    background-color: var(--lumo-base-color);
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .functionbar .functionfield,
+  .v-spreadsheet .functionbar .addressfield {
+    font-size: var(--lumo-font-size-s);
+    padding-left: var(--lumo-space-xs);
+    color: var(--lumo-body-text-color);
+    background-color: unset;
+    padding: 0px 0px 0px var(--lumo-space-s);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .functionbar .arrow {
+    font-size: var(--lumo-font-size-xs);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .functionbar .fixed-left-panel {
+    border-right: 1px solid var(--lumo-contrast-20pct);
+    background: var(--lumo-contrast-5pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .functionbar .adjusting-right-panel {
+    padding-right: var(--lumo-space-xs);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .functionbar .addressfield {
+    background: var(--lumo-contrast-5pct);
+    background-color: unset;
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .functionbar .functionfield {
+    font: unset;
+  }
+
+  :host([theme~="lumo"]) .v-spreadsheet .functionbar .formulaoverlay {
+    color: var(--lumo-base-color);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .functionbar .formulaoverlay span {
+    border-radius: var(--lumo-border-radius-s);
+  }
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet .cell {
+    background-color: var(--lumo-base-color);
+    border-right: 1px solid var(--lumo-contrast-20pct);
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    padding: 0px var(--lumo-space-xs);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet .cell.selected-cell-highlight {
+    outline: solid var(--lumo-contrast-80pct) 1px;
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet div.custom-editor-cell {
+    padding: var(--lumo-space-xs);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet > input[type='text'] {
+    box-shadow: var(--lump-box-shadow-s);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet .floater {
+    background-color: var(--lumo-base-color);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .top-left-pane,
+  .v-spreadsheet .top-right-pane,
+  .v-spreadsheet .bottom-left-pane {
+    border-right: 1px solid var(--lumo-contrast-50pct);
+    border-bottom: 1px solid  var(--lumo-contrast-50pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .ch,
+  .v-spreadsheet .rh,
+  .v-spreadsheet .corner {
+    background-color: var(--lumo-contrast-5pct);
+    background-image: none;
+    font-family: var(--lumo-font-family);
+    font-size: var(--lumo-font-size-s);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .rh {
+    border-right: 1px solid var(--lumo-contrast-20pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .rh.selected-row-header {
+    border-right: 2px solid var(--lumo-primary-color-50pct);
+    background: var(--lumo-primary-color-10pct) !important;
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .rh .header-resize-dnd-second {
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .rh.resize-extra {
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .ch {
+    background-color: var(--lumo-contrast-5pct);
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .ch.selected-column-header {
+    border-bottom: 2px solid var(--lumo-primary-color-50pct);
+    background: var(--lumo-primary-color-10pct) !important;
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .ch .header-resize-dnd-second {
+    border-right: 1px solid var(--lumo-contrast-20pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .ch.resize-extra {
+    border-right: 1px solid var(--lumo-contrast-20pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet > div.resize-line {
+    background: var(--lumo-primary-color);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .corner {
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    border-right: 1px solid var(--lumo-contrast-20pct);
+    background-image: none;
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet .cell-comment-triangle {
+    border-color: transparent var(--lumo-warning-color) transparent transparent;
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet .cell-invalidformula-triangle {
+    border-color: transparent var(--lumo-error-color) transparent transparent;
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet .comment-overlay-line {
+    background-color: var(--lumo-contrast-10pct) !important;
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-top,
+  .v-spreadsheet .sheet-selection .s-left,
+  .v-spreadsheet .sheet-selection .s-bottom,
+  .v-spreadsheet .sheet-selection .s-right {
+    background-color: var(--lumo-primary-color);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-top.extend,
+  .v-spreadsheet .sheet-selection .s-left.extend,
+  .v-spreadsheet .sheet-selection .s-bottom.extend,
+  .v-spreadsheet .sheet-selection .s-right.extend {
+    background-color: var(--lumo-success-color) !important;
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-corner {
+    background-color: var(--lumo-success-color);
+    outline: 2px solid var(--lumo-base-color);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.paintmode {
+    background-color: var(--lumo-success-color-10pct) !important;
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.paintmode .s-top,
+  .v-spreadsheet .sheet-selection.paintmode .s-left,
+  .v-spreadsheet .sheet-selection.paintmode .s-bottom,
+  .v-spreadsheet .sheet-selection.paintmode .s-right {
+    background-color: var(--lumo-success-color);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet {
+    background: var(--lumo-contrast-5pct);
+    border-top: 1px solid var(--lumo-contrast-20pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options {
+    background: var(--lumo-base-color);
+    cursor: var(--lumo-clickable-cursor);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div {
+    cursor: var(--lumo-clickable-cursor);
+    color: var(--lumo-body-text-color);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div:hover {
+    color: var(--lumo-primary-color);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.hidden {
+    color: var(--lumo-contrast-20pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab {
+    font-family: var(--lumo-font-family);
+    font-size: var(--lumo-font-size-s);
+    font-weight: 400;
+    background: var(--lumo-contrast-5pct);
+    color: var(--lumo-body-text-color);
+    border-right: 1px solid var(--lumo-contrast-20pct);
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    border-left: 1px solid var(--lumo-contrast-20pct);
+    border-bottom-right-radius: var(--lumo-border-radius-m);
+    border-bottom-left-radius: var(--lumo-border-radius-m);
+    cursor: var(--lumo-clickable-cursor);
+    height: 18px;
+    margin-left: var(--lumo-space-s);
+    padding: var(--lumo-space-xs) var(--lumo-space-xs);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab.selected-tab {
+    background: var(--lumo-base-color);
+    color: var(--lumo-primary-text-color);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab.selected-tab input[type='text'] {
+    font-family: var(--lumo-font-familty);
+    font-size: var(--lumo-font-size-s);
+    color: var(--lumo-primary-text-color);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-temp {
+    font-family: var(--lumo-font-family);
+    font-size: var(--lumo-font-size-s);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-infolabel {
+    background: var(--lumo-contrast-5pct);
+    font-size: var(--lumo-font-size-s);
+    border-left: 1px solid var(--lumo-contrast-20pct);
+    padding-left: var(--lumo-space-xs);
+    padding-right: var(--lumo-space-xs);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet div div.popupbutton {
+    color: var(--lumo-body-text-color);
+    cursor: var(--lumo-clickable-cursor);
+    height: 13px;
+    width: 13px;
+    border: solid 1px var(--lump-contrast-20pct);
+    background: var(--lumo-contrast-5pct);
+    border-radius: var(--lumo-border-radius-s);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet div div.popupbutton:after {
+    font-family: 'lumo-icons';
+    content: var(--lumo-icons-angle-down);
+    font-size: var(--lumo-font-size-xs);
+    vertical-align: top;
+  }
+  :host([theme~="lumo"]) .popupbutton.active {
+    box-shadow: var(--lumo-box-shadow-xs) inset;
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.touch.fill .fill-touch-square > .square {
+    background-color: var(--lumo-success-color);
+    border: 2px solid var(--lumo-base-color);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.touch .s-corner {
+    background-color: var(--lumo-primary-color);
+    border-radius: var(--lumo-border-radius-m);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .col-group-pane,
+  .v-spreadsheet .col-group-freeze-pane {
+    background-color: var(--lumo-contrast-5pct);
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .col-group-pane .grouping,
+  .v-spreadsheet .col-group-freeze-pane .grouping {
+    border-top: 2px solid var(--lumo-contrast-20pct);
+    border-left: 2px solid var(--lumo-contrast-20pct);
+    cursor: var(--lumo-clickable-cursor);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .col-group-pane .grouping .expand,
+  .v-spreadsheet .col-group-freeze-pane .grouping .expand {
+    background-color: var(--lumo-contrast-20pct);
+    font-size: var(--lumo-font-size-s);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .col-group-pane .grouping.inversed,
+  .v-spreadsheet .col-group-freeze-pane .grouping.inversed {
+    border-right: 2px solid var(--lumo-contrast-20pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .col-group-freeze-pane {
+    border-right: 1px solid var(--lumo-contrast-50pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .col-group-border .border {
+    border-bottom: 1px dotted var(--lumo-contrast-20pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .row-group-pane,
+  .v-spreadsheet .row-group-freeze-pane {
+    background-color: var(--lumo-contrast-5pct);
+    border-right: 1px solid var(--lumo-contrast-20pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .row-group-pane .grouping,
+  .v-spreadsheet .row-group-freeze-pane .grouping {
+    border-top: 2px solid var(--lumo-contrast-20pct);
+    border-left: 2px solid var(--lumo-contrast-20pct);
+    cursor: var(--lumo-clickable-cursor);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .row-group-pane .grouping .expand,
+  .v-spreadsheet .row-group-freeze-pane .grouping .expand {
+    background-color: var(--lumo-contrast-20pct);
+    font-size: var(--lumo-font-size-xs);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .row-group-pane .grouping.inversed,
+  .v-spreadsheet .row-group-freeze-pane .grouping.inversed {
+    border-bottom: 2px solid var(--lumo-contrast-20pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .row-group-freeze-pane {
+    border-bottom: 1px solid var(--lumo-contrast-50pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .row-group-border .border {
+    border-right: 1px dotted var(--lumo-contrast-20pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .expandbutton {
+    font-size: var(--lumo-font-size-s);
+    cursor: var(--lumo-clickable-cursor);
+    color: var(--lumo-body-text-color);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .expandbutton:active {
+    border-color: var(--lumo-contrast-20pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .col-group-summary .expandbutton {
+    margin-right: var(--lumo-space-xs);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .row-group-summary .expandbutton {
+    margin-left: var(--lumo-space-xs);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .grouping-corner {
+    border-right: 1px solid var(--lumo-contrast-20pct);
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    background-color: var(--lumo-contrast-5pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .col-group-summary {
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    border-right: 1px solid var(--lumo-contrast-20pct);
+    background-color: var(--lumo-contrast-5pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .row-group-summary {
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    border-right: 1px solid var(--lumo-contrast-20pct);
+    background-color: var(--lumo-contrast-5pct);
+  }
+  :host([theme~="lumo"]) .cell-range-bg-color {
+    background-color: var(--lumo-primary-color-10pct);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet .cell .cell-range {
+    background-image: var(--lumo-primary-color-10pct) !important;
+    background-color: var(--lumo-primary-color-10pct) !important;
+  }
 `;
 
 export const spreadsheetOverlayStyles = css`
@@ -1322,5 +1652,129 @@ export const spreadsheetOverlayStyles = css`
     line-height: 18px;
     text-align: center;
     color: var(--lumo-body-text-color);
+  }
+
+  /*
+   * Lumo theme variant 
+   */
+  #spreadsheet-overlays[theme~="lumo"] .v-tooltip {
+    background-color: var(--lumo-contrast-50pct)
+    box-shadow: var(--lumo-box-shadow-s);
+    color: var(--lumo-base-color);
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
+    font-size: var(--lumo-font-size-s);
+  }
+  :host([theme~="lumo"])  #spreadsheet-overlays .v-tooltip .v-errormessage {
+    background-color: var(--lumo-base-color);
+    color: var(--lumo-error-color);
+    margin: calc(-1 * var(--lumo-space-xs)) calc(-1 * var(--lumo-space-s));
+    padding: var(--lumo-space-xs) var(--lumo-space-s);
+  }
+  :host([theme~="lumo"])  #spreadsheet-overlays .v-tooltip .v-errormessage-info {
+    color: var(--lumo-error-text-color);
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage-warning {
+    color: var(--lumo-warning-text-color);
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage-error {
+    color: var(--lumo-error-text-color);
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage-critical {
+    color: var(--vaadin-user-color-0);
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage-system {
+    color: var(--vaadin-user-color-1);
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-contextmenu {
+    padding: var(--lumo-space-xs) var(--lumo-space-xs);
+    border-radius: var(--lumo-border-radius-s);
+    background-color: var(--lumo-base-color);
+    color: var(--lumo-body-text-color);
+    box-shadow: var(--lumo-box-shadow-s);
+    -webkit-backface-visibility: hidden;
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-contextmenu .gwt-MenuItem {
+    cursor: var(--lumo-clickable-cursor);
+    line-height: calc(1.5 * var(--lumo-line-height-m));
+    padding: 0 var(--lumo-space-l) 0 var(--lumo-space-m);
+    border-radius: var(--lumo-border-radius-s);
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-contextmenu .gwt-MenuItem:active:before {
+    background: var(--lumo-primary-color);
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-contextmenu .gwt-MenuItem .v-icon {
+    max-height: calc(1.5 * var(--lumo-line-height-m));
+    margin-right: var(--lumo-space-xs);
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-contextmenu .gwt-MenuItem-selected {
+    background-color: var(--lumo-primary-color-10pct) !important;
+    background-image: var(--lumo-primary-color-10pct);
+    color: var(--lumo-body-text-color) !important;
+  }
+
+  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay {
+    padding: var(--lumo-space-xs) var(--lumo-space-xs);
+    border-radius: var(--lumo-border-radius-m);
+    background-color: var(--lumo-base-color);
+    color: var(--lumo-body-text-color);
+    box-shadow: var(--lumo-box-shadow-m);
+    padding: var(--lumo-space-s);
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay .comment-overlay-author {
+    padding-bottom: var(--lumo-space-s);
+    font-size: var(--lumo-font-size-xs);
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay .comment-overlay-invalidformula {
+    color: var(--lumo-error-color);
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay .comment-overlay-input {
+    font-family: var(--lumo-font-family);
+    font-size: var(--lumo-font-size-s);
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay .comment-overlay-separator {
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    margin-bottom: 7px;
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay {
+    padding: var(--lumo-space-xs) var(--lumo-space-xs);
+    border-radius: var(--lumo-border-radius-m);
+    background-color: var(--lumo-base-color);
+    color: var(--lumo-body-text-color);
+    box-shadow: var(--lumo-box-shadow-s);
+  }
+  #spreadsheet-overlays[theme~="lumo"] .spreadsheet-item-filter-layout {
+    gap: var(--lumo-space-xs);
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+  }
+
+  #spreadsheet-overlays[theme~="lumo"] .spreadsheet-filter-table-content {
+    gap: var(--lumo-space-xs);
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay-header {
+    padding-bottom: var(--lumo-space-xs);
+    border-bottom: 1px solid var(--lumo-contrast-20pct);
+    margin-bottom: var(--lumo-space-xs);
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay-header .v-window-closebox {
+    right: 0px;
+    left: unset;
+    cursor: var(--lumo-clickable-cursor);
+    font-size: var(--lumo-font-size-xl);
+    color: var(--lumo-contrast-50pct);
+    padding-right: var(--lumo-space-xs);
+    border-radius: 0 var(--lumo-border-radius-m) 0 var(--lumo-border-radius-m);
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay-header .v-window-closebox:hover {
+    color: var(--lumo-primary-color);
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay-header .v-window-closebox:before {
+    content: var(--lumo-icons-cross);
+    font-family: 'lumo-icons';
+  }
+  #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-popupbutton-overlay-header .header-caption {
+    margin-left: var(--lumo-space-xs);
+    color: var(--lumo-body-text-color);
+    font-weight: bold;
+    text-align: left;
   }
 `;

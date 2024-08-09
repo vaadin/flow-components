@@ -21,6 +21,7 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTAutoFilter;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 
 /**
@@ -210,6 +211,8 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
         final Button button = new Button("Clear filters");
         button.setDisableOnClick(true);
         button.setEnabled(false);
+        button.addThemeVariants(ButtonVariant.LUMO_TERTIARY,
+                ButtonVariant.LUMO_SMALL);
         button.addClassName(CLEAR_FILTERS_BUTTON_CLASSNAME);
         button.addClickListener(event -> clearAllFilters());
         return button;
