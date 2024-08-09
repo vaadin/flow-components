@@ -477,7 +477,8 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
         /**
          * Gets the error message displayed when the field value does not match
-         * the pattern.
+         * the default email format, or alternatively, the custom format if
+         * provided with {@link EmailField#setPattern(String)}.
          *
          * @return the error message or {@code null} if not set
          * @see EmailField#getPattern()
@@ -489,7 +490,8 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
         /**
          * Sets the error message to display when the field value does not match
-         * the pattern.
+         * the default email format, or alternatively, the custom format if
+         * provided with {@link EmailField#setPattern(String)}.
          * <p>
          * Note, custom error messages set with
          * {@link EmailField#setErrorMessage(String)} take priority over i18n
