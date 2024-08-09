@@ -15,13 +15,14 @@
  */
 package com.vaadin.flow.component.combobox.testbench;
 
+import java.util.List;
+
+import org.openqa.selenium.By;
+
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
-import org.openqa.selenium.By;
-
-import java.util.List;
 
 /**
  * A TestBench element representing a

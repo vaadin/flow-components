@@ -18,11 +18,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.spreadsheet.PopupButton.PopupCloseEvent;
 import com.vaadin.flow.component.spreadsheet.PopupButton.PopupCloseListener;

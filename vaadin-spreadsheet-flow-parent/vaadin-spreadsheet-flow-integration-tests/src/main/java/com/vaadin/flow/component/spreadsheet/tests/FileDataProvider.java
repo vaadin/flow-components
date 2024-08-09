@@ -1,6 +1,12 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests;
-
-import com.vaadin.flow.data.provider.ListDataProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +19,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
+
+import com.vaadin.flow.data.provider.ListDataProvider;
 
 /**
  * Helper class a replacement for Vaadin 7 FilesystemContainer Doesn't support

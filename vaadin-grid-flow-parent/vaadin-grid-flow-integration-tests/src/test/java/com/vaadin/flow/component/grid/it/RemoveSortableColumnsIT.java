@@ -19,11 +19,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.vaadin.flow.component.select.testbench.SelectElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 @TestPath("vaadin-grid/remove-sortable-column")
 public class RemoveSortableColumnsIT extends AbstractComponentIT {

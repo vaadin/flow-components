@@ -18,8 +18,8 @@ package com.vaadin.flow.component.checkbox.tests;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-checkbox/refresh-on-value-change")
 public class RefreshOnValueChangeIT extends AbstractComponentIT {

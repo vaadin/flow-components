@@ -18,6 +18,7 @@ package com.vaadin.flow.component.shared.internal;
 import java.io.Serializable;
 import java.util.AbstractSet;
 import java.util.Iterator;
+
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.dom.ClassList;
 

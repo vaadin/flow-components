@@ -19,8 +19,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/bean-grid-sorting")
 public class BeanGridSortingIT extends AbstractComponentIT {

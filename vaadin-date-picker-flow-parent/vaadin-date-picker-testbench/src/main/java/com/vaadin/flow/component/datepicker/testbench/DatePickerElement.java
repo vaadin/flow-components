@@ -15,18 +15,18 @@
  */
 package com.vaadin.flow.component.datepicker.testbench;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.testbench.HasHelper;
-import com.vaadin.testbench.HasLabel;
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.elementsbase.Element;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.testbench.HasHelper;
+import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-date-picker&gt;</code>

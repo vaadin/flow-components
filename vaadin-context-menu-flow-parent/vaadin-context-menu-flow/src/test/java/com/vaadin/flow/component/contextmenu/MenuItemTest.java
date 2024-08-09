@@ -15,10 +15,11 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
-import com.vaadin.flow.component.HasAriaLabel;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.vaadin.flow.component.HasAriaLabel;
 
 /**
  * Unit tests for MenuItem.

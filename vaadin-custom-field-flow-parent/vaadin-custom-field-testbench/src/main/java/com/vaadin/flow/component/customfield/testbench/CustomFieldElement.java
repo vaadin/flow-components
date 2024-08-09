@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.customfield.testbench;
 
 import com.vaadin.testbench.ElementQuery;
-
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;

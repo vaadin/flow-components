@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.splitlayout.test;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.html.Div;
@@ -26,8 +28,6 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
 import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
 import com.vaadin.flow.router.Route;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * View for {@link SplitLayout}.

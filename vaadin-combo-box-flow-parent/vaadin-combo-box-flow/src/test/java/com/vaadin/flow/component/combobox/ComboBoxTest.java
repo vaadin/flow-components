@@ -15,6 +15,14 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
@@ -28,14 +36,8 @@ import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
-import elemental.json.JsonObject;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 
-import java.util.Arrays;
-import java.util.stream.Stream;
+import elemental.json.JsonObject;
 
 public class ComboBoxTest extends ComboBoxBaseTest {
     private enum Category {

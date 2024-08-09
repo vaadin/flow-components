@@ -12,18 +12,17 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 package com.vaadin.flow.component.popover;
-
-import elemental.json.JsonArray;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.html.Div;
+
+import elemental.json.JsonArray;
 
 /**
  * @author Vaadin Ltd.

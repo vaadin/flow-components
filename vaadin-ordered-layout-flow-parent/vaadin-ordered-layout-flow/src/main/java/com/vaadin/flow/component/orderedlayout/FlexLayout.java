@@ -15,12 +15,12 @@
  */
 package com.vaadin.flow.component.orderedlayout;
 
+import java.util.Arrays;
+
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Tag;
-
-import java.util.Arrays;
 
 /**
  * A layout component that implements Flexbox. It uses the default

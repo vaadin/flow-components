@@ -15,14 +15,15 @@
  */
 package com.vaadin.flow.component.grid;
 
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.EventData;
-import elemental.json.JsonArray;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
+
+import elemental.json.JsonArray;
 
 /**
  * Event fired when the columns in the Grid are reordered.

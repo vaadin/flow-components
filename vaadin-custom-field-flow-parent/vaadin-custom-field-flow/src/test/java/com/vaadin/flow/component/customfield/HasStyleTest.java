@@ -15,9 +15,10 @@
  */
 package com.vaadin.flow.component.customfield;
 
-import com.vaadin.flow.component.HasStyle;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.vaadin.flow.component.HasStyle;
 
 public class HasStyleTest {
 

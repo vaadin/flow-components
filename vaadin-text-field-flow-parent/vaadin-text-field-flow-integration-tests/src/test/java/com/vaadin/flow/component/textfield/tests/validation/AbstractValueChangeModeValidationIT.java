@@ -15,16 +15,16 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import static com.vaadin.flow.component.textfield.tests.validation.AbstractValueChangeModeValidationPage.RESET_VALIDATION_LOG_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.AbstractValueChangeModeValidationPage.VALIDATION_LOG;
+
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
 
-import com.vaadin.tests.validation.AbstractValidationIT;
 import com.vaadin.testbench.TestBenchElement;
-
-import static com.vaadin.flow.component.textfield.tests.validation.AbstractValueChangeModeValidationPage.VALIDATION_LOG;
-import static com.vaadin.flow.component.textfield.tests.validation.AbstractValueChangeModeValidationPage.RESET_VALIDATION_LOG_BUTTON;
+import com.vaadin.tests.validation.AbstractValidationIT;
 
 public abstract class AbstractValueChangeModeValidationIT<T extends TestBenchElement>
         extends AbstractValidationIT<T> {

@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.html.Div;
@@ -22,9 +25,6 @@ import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.Route;
-
-import java.util.Arrays;
-import java.util.stream.Stream;
 
 /**
  * @author Vaadin Ltd.

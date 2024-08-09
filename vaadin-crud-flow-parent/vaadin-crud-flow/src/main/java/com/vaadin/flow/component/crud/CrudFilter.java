@@ -8,11 +8,11 @@
  */
 package com.vaadin.flow.component.crud;
 
-import com.vaadin.flow.data.provider.SortDirection;
-
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import com.vaadin.flow.data.provider.SortDirection;
 
 /**
  * The filter type for use with {@link CrudGrid}. This provides information

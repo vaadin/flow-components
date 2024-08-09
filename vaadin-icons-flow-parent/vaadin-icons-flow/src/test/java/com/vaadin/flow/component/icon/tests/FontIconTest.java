@@ -15,10 +15,10 @@
  */
 package com.vaadin.flow.component.icon.tests;
 
-import com.vaadin.flow.component.icon.FontIcon;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.vaadin.flow.component.icon.FontIcon;
 
 public class FontIconTest {
 

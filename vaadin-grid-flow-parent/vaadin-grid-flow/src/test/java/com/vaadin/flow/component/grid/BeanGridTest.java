@@ -17,7 +17,6 @@ package com.vaadin.flow.component.grid;
 
 import java.util.Collections;
 
-import com.vaadin.flow.data.renderer.Renderer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -28,6 +27,7 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.renderer.Renderer;
 
 public class BeanGridTest {
 

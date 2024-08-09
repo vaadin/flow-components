@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.vaadin.flow.function.ValueProvider;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -29,6 +28,7 @@ import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.ValueProvider;
 
 import elemental.json.Json;
 import elemental.json.JsonObject;

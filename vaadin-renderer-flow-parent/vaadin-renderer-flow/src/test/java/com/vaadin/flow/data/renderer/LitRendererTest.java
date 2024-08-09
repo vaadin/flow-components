@@ -15,11 +15,11 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import com.vaadin.flow.component.UI;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.vaadin.flow.component.UI;
 
 public class LitRendererTest {
 

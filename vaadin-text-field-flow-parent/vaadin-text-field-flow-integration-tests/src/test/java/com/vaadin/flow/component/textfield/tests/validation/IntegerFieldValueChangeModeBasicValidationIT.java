@@ -15,16 +15,16 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValueChangeModeBasicValidationPage.SET_EAGER_MODE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValueChangeModeBasicValidationPage.SET_LAZY_MODE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValueChangeModeBasicValidationPage.SET_TIMEOUT_MODE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValueChangeModeBasicValidationPage.VALUE_CHANGE_TIMEOUT;
+
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
 import com.vaadin.flow.testutil.TestPath;
-
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValueChangeModeBasicValidationPage.VALUE_CHANGE_TIMEOUT;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValueChangeModeBasicValidationPage.SET_EAGER_MODE_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValueChangeModeBasicValidationPage.SET_LAZY_MODE_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValueChangeModeBasicValidationPage.SET_TIMEOUT_MODE_BUTTON;
 
 @TestPath("vaadin-integer-field/validation/value-change-mode/basic")
 public class IntegerFieldValueChangeModeBasicValidationIT

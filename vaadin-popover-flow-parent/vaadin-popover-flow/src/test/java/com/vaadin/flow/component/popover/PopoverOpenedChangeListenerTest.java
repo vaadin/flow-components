@@ -15,16 +15,17 @@
  */
 package com.vaadin.flow.component.popover;
 
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.server.VaadinSession;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.concurrent.atomic.AtomicReference;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.server.VaadinSession;
 
 public class PopoverOpenedChangeListenerTest {
     private final UI ui = new UI();

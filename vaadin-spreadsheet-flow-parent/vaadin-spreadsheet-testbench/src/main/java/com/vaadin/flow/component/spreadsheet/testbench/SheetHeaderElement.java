@@ -8,8 +8,9 @@
  */
 package com.vaadin.flow.component.spreadsheet.testbench;
 
-import com.vaadin.testbench.TestBenchElement;
 import org.openqa.selenium.By;
+
+import com.vaadin.testbench.TestBenchElement;
 
 /**
  * This class represents a header (either row- or column) within the currently

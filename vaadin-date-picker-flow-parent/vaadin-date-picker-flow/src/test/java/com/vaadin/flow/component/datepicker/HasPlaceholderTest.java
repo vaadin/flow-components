@@ -15,9 +15,10 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import com.vaadin.flow.component.HasPlaceholder;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.vaadin.flow.component.HasPlaceholder;
 
 public class HasPlaceholderTest {
 

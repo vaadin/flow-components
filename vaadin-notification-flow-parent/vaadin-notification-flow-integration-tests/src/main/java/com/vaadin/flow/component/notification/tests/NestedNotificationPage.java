@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.notification.tests;
 
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.notification.Notification;

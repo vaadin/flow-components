@@ -8,13 +8,13 @@
  */
 package com.vaadin.flow.component.charts.model;
 
-import com.vaadin.flow.component.charts.model.style.Color;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Plot options for {@link ChartType#SANKEY} charts.

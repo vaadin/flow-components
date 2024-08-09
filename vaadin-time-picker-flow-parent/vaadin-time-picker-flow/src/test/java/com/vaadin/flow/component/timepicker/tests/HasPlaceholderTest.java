@@ -15,10 +15,11 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
-import com.vaadin.flow.component.HasPlaceholder;
-import com.vaadin.flow.component.timepicker.TimePicker;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.vaadin.flow.component.HasPlaceholder;
+import com.vaadin.flow.component.timepicker.TimePicker;
 
 public class HasPlaceholderTest {
 

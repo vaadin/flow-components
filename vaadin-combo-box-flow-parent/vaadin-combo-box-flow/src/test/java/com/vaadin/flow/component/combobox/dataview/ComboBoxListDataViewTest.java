@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.combobox.dataview;
 
 import java.util.ArrayList;
@@ -22,15 +21,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.provider.AbstractListDataViewListenerTest;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.HasListDataView;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
 

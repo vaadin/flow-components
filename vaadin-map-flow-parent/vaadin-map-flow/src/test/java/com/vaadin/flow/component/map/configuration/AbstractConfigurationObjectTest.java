@@ -1,14 +1,20 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.map.configuration;
+
+import java.beans.PropertyChangeListener;
+import java.util.function.Consumer;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.beans.PropertyChangeListener;
-import java.lang.reflect.Field;
-import java.util.Set;
-import java.util.function.Consumer;
 
 public class AbstractConfigurationObjectTest {
 

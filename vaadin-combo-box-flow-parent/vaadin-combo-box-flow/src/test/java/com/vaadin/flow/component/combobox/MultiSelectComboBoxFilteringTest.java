@@ -15,14 +15,15 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.IntStream;
+import com.vaadin.flow.data.provider.DataCommunicatorTest;
 
 public class MultiSelectComboBoxFilteringTest {
     private DataCommunicatorTest.MockUI ui;

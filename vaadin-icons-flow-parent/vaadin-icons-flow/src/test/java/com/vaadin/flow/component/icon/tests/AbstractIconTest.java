@@ -15,11 +15,12 @@
  */
 package com.vaadin.flow.component.icon.tests;
 
-import com.vaadin.flow.component.icon.AbstractIcon;
-import com.vaadin.flow.dom.ElementConstants;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.vaadin.flow.component.icon.AbstractIcon;
+import com.vaadin.flow.dom.ElementConstants;
 
 public class AbstractIconTest {
     private AbstractIcon abstractIcon;

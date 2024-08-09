@@ -23,15 +23,15 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.selection.MultiSelect;
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.selection.SingleSelect;
 
 /**

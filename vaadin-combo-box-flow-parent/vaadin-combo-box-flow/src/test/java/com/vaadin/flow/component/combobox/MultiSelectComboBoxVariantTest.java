@@ -15,8 +15,9 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.tests.ThemeVariantTestHelper;
 import org.junit.Test;
+
+import com.vaadin.tests.ThemeVariantTestHelper;
 
 public class MultiSelectComboBoxVariantTest {
 

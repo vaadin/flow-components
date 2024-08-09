@@ -15,10 +15,10 @@
  */
 package com.vaadin.flow.component.textfield.validation;
 
+import java.util.Objects;
+
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.function.SerializablePredicate;
-
-import java.util.Objects;
 
 public class TextAreaBinderValidationTest
         extends AbstractBinderValidationTest<String, TextArea> {

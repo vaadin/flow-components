@@ -15,9 +15,10 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import com.vaadin.flow.testutil.TestPath;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-combo-box/initially-empty")
 public class InitiallyEmptyPageIT extends AbstractComboBoxIT {

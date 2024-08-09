@@ -8,9 +8,9 @@
  */
 package com.vaadin.flow.component.gridpro.testbench;
 
-import com.vaadin.testbench.TestBenchElement;
-
 import java.util.ArrayList;
+
+import com.vaadin.testbench.TestBenchElement;
 
 /**
  * A TestBench element representing a

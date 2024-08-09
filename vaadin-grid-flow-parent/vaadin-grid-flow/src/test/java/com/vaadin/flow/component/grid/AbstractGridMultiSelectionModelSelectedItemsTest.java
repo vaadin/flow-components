@@ -15,18 +15,19 @@
  */
 package com.vaadin.flow.component.grid;
 
-import com.vaadin.flow.component.grid.Grid.SelectionMode;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
-import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.data.selection.MultiSelect;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.data.provider.DataCommunicatorTest;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.selection.MultiSelect;
 
 public class AbstractGridMultiSelectionModelSelectedItemsTest {
 

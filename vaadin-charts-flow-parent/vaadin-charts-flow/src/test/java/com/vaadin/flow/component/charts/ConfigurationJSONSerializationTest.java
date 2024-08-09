@@ -1,10 +1,16 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.charts;
 
 import static com.vaadin.flow.component.charts.util.ChartSerialization.toJSON;
 import static org.junit.Assert.assertEquals;
 
-import com.vaadin.flow.component.charts.model.AnnotationItemLabel;
-import com.vaadin.flow.component.charts.model.AnnotationItemLabelPoint;
 import org.junit.Test;
 
 import com.vaadin.flow.component.charts.events.internal.AxisRescaledEvent;
@@ -16,6 +22,8 @@ import com.vaadin.flow.component.charts.events.internal.ItemSlicedEvent;
 import com.vaadin.flow.component.charts.events.internal.SeriesAddedEvent;
 import com.vaadin.flow.component.charts.events.internal.SeriesChangedEvent;
 import com.vaadin.flow.component.charts.events.internal.SeriesStateEvent;
+import com.vaadin.flow.component.charts.model.AnnotationItemLabel;
+import com.vaadin.flow.component.charts.model.AnnotationItemLabelPoint;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.Inactive;
 import com.vaadin.flow.component.charts.model.ListSeries;

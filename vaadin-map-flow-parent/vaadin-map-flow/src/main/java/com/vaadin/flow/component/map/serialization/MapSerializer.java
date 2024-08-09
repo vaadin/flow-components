@@ -8,6 +8,12 @@
  */
 package com.vaadin.flow.component.map.serialization;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,14 +25,9 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
+
 import elemental.json.JsonValue;
 import elemental.json.impl.JreJsonFactory;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Custom JSON serializer for the map component using a Jackson

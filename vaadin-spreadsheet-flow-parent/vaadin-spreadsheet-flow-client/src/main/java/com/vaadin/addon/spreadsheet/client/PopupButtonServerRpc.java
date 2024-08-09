@@ -8,7 +8,6 @@
  */
 package com.vaadin.addon.spreadsheet.client;
 
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.vaadin.shared.communication.ServerRpc;
 
 public interface PopupButtonServerRpc extends ServerRpc {

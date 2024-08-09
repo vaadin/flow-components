@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.shared;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.HasComponents;
@@ -25,9 +29,6 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.function.SerializableFunction;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 public class InputFieldTest {
 

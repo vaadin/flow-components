@@ -15,12 +15,13 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import org.junit.Test;
+
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
-import org.junit.Test;
 
 @TestPath("vaadin-grid/select-during-data-provider-change")
 public class SelectDuringDataProviderChangeIT extends AbstractComponentIT {

@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import static org.junit.Assert.assertTrue;
+
+import java.time.Duration;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,15 +34,9 @@ import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import com.vaadin.testbench.TestBenchElement;
-
-import com.vaadin.tests.AbstractComponentIT;
-
-import static org.junit.Assert.assertTrue;
-
 import com.vaadin.flow.testutil.TestPath;
-
-import java.time.Duration;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for changing the ValueChangeMode of TextField, TextArea and

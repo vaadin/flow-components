@@ -8,8 +8,8 @@
  */
 package com.vaadin.flow.component.charts.model;
 
-import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.model.style.ButtonTheme;
+import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Options for the export button.

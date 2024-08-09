@@ -18,8 +18,6 @@ package com.vaadin.flow.component.combobox;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasSize;

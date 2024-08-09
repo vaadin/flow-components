@@ -15,10 +15,8 @@
  */
 package com.vaadin.flow.component.button.tests;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchTestCase;
-import com.vaadin.tests.AbstractComponentIT;
+import java.time.Duration;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -29,8 +27,10 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
-import java.util.List;
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchTestCase;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the ButtonView.

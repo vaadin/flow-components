@@ -15,11 +15,12 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class HasLabelTest {
 

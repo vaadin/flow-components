@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.Arrays;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
@@ -25,9 +29,6 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.Route;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Arrays;
 
 @Route("vaadin-grid/item-click-listener")
 public class ItemClickListenerPage extends Div {

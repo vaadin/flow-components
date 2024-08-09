@@ -15,25 +15,25 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.BAD_INPUT_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.CLEAR_VALUE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.MAX_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.MAX_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.MIN_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.MIN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.RESET_BEAN_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.STEP_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.STEP_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
+
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.BAD_INPUT_ERROR_MESSAGE;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
-
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.STEP_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.MIN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.MAX_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.CLEAR_VALUE_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.MAX_ERROR_MESSAGE;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.MIN_ERROR_MESSAGE;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.RESET_BEAN_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.STEP_ERROR_MESSAGE;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
 @TestPath("vaadin-number-field/validation/binder")
 public class NumberFieldBinderValidationIT

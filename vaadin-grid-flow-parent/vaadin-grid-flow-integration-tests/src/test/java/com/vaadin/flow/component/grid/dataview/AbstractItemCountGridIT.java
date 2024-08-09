@@ -13,8 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.grid.dataview;
+
+import org.junit.Assert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.it.dataview.AbstractItemCountGridPage;
@@ -22,10 +26,6 @@ import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
 import com.vaadin.flow.internal.Range;
 import com.vaadin.tests.AbstractComponentIT;
-import org.junit.Assert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.WebElement;
 
 public abstract class AbstractItemCountGridIT extends AbstractComponentIT {
 

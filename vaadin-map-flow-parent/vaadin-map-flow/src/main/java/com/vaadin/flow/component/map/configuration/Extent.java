@@ -8,9 +8,9 @@
  */
 package com.vaadin.flow.component.map.configuration;
 
-import com.vaadin.flow.component.map.Map;
-
 import java.io.Serializable;
+
+import com.vaadin.flow.component.map.Map;
 
 /**
  * Defines an area within a map using min/max coordinates. Coordinates must be

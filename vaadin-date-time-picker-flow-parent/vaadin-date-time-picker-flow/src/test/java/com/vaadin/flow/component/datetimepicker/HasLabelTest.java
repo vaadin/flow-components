@@ -15,13 +15,13 @@
  */
 package com.vaadin.flow.component.datetimepicker;
 
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.UI;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.UI;
 
 import net.jcip.annotations.NotThreadSafe;
 

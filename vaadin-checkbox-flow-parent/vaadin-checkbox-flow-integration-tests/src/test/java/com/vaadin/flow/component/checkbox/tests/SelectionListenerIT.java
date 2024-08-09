@@ -21,8 +21,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-checkbox/selection-listener")
 public class SelectionListenerIT extends AbstractComponentIT {

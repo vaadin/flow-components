@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.orderedlayout.it;
 
+import java.util.function.Consumer;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -29,8 +31,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.router.Route;
-
-import java.util.function.Consumer;
 
 /**
  * View for the ordered layouts {@link HorizontalLayout} and

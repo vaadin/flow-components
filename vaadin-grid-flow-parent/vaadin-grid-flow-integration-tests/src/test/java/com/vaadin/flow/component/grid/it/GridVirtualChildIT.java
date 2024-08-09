@@ -15,9 +15,10 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import org.junit.Test;
+
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
-import org.junit.Test;
 
 @TestPath("vaadin-grid/virtual-child")
 public class GridVirtualChildIT extends AbstractComponentIT {

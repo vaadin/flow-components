@@ -19,9 +19,9 @@ import java.util.List;
 
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.SearchContext;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.testbench.TestBenchElement;
-import org.openqa.selenium.WebElement;
 
 /**
  * A TestBench element representing a <code>&lt;td&gt;</code> or

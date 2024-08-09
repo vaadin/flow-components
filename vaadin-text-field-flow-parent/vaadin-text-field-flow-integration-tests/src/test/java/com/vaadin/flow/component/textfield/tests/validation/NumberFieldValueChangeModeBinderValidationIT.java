@@ -15,16 +15,16 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValueChangeModeBinderValidationPage.SET_EAGER_MODE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValueChangeModeBinderValidationPage.SET_LAZY_MODE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValueChangeModeBinderValidationPage.SET_TIMEOUT_MODE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValueChangeModeBinderValidationPage.VALUE_CHANGE_TIMEOUT;
+
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import com.vaadin.flow.testutil.TestPath;
-
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValueChangeModeBinderValidationPage.VALUE_CHANGE_TIMEOUT;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValueChangeModeBinderValidationPage.SET_EAGER_MODE_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValueChangeModeBinderValidationPage.SET_LAZY_MODE_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldValueChangeModeBinderValidationPage.SET_TIMEOUT_MODE_BUTTON;
 
 @TestPath("vaadin-number-field/validation/value-change-mode/binder")
 public class NumberFieldValueChangeModeBinderValidationIT

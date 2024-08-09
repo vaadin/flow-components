@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 
 import org.junit.Assert;
@@ -25,8 +27,6 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.testutil.TestPath;
-
-import static org.junit.Assert.assertTrue;
 
 @TestPath("vaadin-grid/treegrid-huge-tree-navigation")
 public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {

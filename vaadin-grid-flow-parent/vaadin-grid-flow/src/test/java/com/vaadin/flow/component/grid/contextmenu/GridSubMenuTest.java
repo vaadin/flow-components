@@ -15,11 +15,11 @@
  */
 package com.vaadin.flow.component.grid.contextmenu;
 
-import com.vaadin.flow.component.contextmenu.MenuManager;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.contextmenu.MenuManager;
 import com.vaadin.flow.function.SerializableRunnable;
 
 public class GridSubMenuTest {

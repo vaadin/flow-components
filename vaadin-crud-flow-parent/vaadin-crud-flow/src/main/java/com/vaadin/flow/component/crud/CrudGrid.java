@@ -8,6 +8,8 @@
  */
 package com.vaadin.flow.component.crud;
 
+import java.util.List;
+
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -16,8 +18,6 @@ import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.shared.util.SharedUtil;
-
-import java.util.List;
 
 /**
  * A simple grid implementation for Crud that allows searching and sorting

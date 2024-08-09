@@ -12,9 +12,14 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 package com.vaadin.flow.component.upload.tests;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.function.Function;
+
+import org.apache.commons.io.IOUtils;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.upload.SucceededEvent;
@@ -22,11 +27,6 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileBuffer;
 import com.vaadin.flow.router.Route;
-import org.apache.commons.io.IOUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.function.Function;
 
 /**
  * View for {@link Upload} tests using {@link FileBuffer} and

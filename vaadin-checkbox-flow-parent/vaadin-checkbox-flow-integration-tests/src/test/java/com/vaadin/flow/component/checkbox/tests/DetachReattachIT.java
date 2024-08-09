@@ -15,15 +15,16 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-checkbox/detach-reattach")
 public class DetachReattachIT extends AbstractComponentIT {

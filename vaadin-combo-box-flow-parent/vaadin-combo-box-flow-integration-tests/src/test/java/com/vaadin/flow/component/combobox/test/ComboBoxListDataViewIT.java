@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.combobox.test;
 
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.AGE_FILTER;
@@ -34,12 +33,12 @@ import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.S
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
 import com.vaadin.flow.testutil.TestPath;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 
 @TestPath("vaadin-combo-box/combobox-list-data-view-page")
 public class ComboBoxListDataViewIT extends AbstractComboBoxIT {

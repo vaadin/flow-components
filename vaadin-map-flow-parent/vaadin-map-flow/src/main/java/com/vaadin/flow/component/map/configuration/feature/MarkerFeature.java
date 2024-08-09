@@ -8,6 +8,9 @@
  */
 package com.vaadin.flow.component.map.configuration.feature;
 
+import java.beans.PropertyChangeListener;
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.map.Assets;
 import com.vaadin.flow.component.map.Map;
@@ -16,9 +19,6 @@ import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.geometry.Point;
 import com.vaadin.flow.component.map.configuration.style.Icon;
 import com.vaadin.flow.component.map.configuration.style.Style;
-
-import java.beans.PropertyChangeListener;
-import java.util.Objects;
 
 /**
  * A convenience class for displaying icons or images, such as markers, at a

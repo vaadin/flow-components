@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
+import java.util.Set;
+
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.html.Div;
@@ -22,8 +24,6 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
-
-import java.util.Set;
 
 @Route("vaadin-checkbox/helper")
 public class HelperPage extends Div {

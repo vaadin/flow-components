@@ -15,12 +15,13 @@
  */
 package com.vaadin.flow.component.menubar.tests;
 
-import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+
+import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-menu-bar/close")
 public class MenuBarCloseIT extends AbstractComponentIT {

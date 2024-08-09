@@ -8,11 +8,11 @@
  */
 package com.vaadin.flow.component.charts.model.serializers;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
-
-import java.io.IOException;
 
 /**
  * Abstract class for bean serializers. It is called by

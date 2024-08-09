@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import static com.vaadin.flow.component.grid.it.GridFilteringPage.GRID_FILTER_ID;
+import static com.vaadin.flow.component.grid.it.GridFilteringPage.LAZY_FILTERABLE_GRID_ID;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -25,9 +28,6 @@ import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
-
-import static com.vaadin.flow.component.grid.it.GridFilteringPage.GRID_FILTER_ID;
-import static com.vaadin.flow.component.grid.it.GridFilteringPage.LAZY_FILTERABLE_GRID_ID;
 
 @TestPath("vaadin-grid/grid-filtering")
 public class GridFilteringIT extends AbstractComponentIT {

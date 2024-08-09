@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.icon;
 
 import java.util.Locale;
+
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 

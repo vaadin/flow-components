@@ -8,12 +8,13 @@
  */
 package com.vaadin.flow.component.map.testbench;
 
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.elementsbase.Element;
+import java.util.List;
+
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.interactions.Actions;
 
-import java.util.List;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 @Element("vaadin-map")
 public class MapElement extends TestBenchElement {

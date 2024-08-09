@@ -8,12 +8,11 @@
  */
 package com.vaadin.flow.component.charts.tests;
 
-import com.vaadin.testbench.ElementQuery;
-import com.vaadin.testbench.TestBenchElement;
-
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.flow.component.charts.ui.MainView;
+import com.vaadin.testbench.ElementQuery;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractParallelTest;
 
 public abstract class AbstractTBTest extends AbstractParallelTest {

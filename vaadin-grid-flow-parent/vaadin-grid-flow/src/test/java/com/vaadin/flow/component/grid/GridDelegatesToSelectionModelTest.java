@@ -21,9 +21,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridSelectionModel;
-
 public class GridDelegatesToSelectionModelTest {
 
     private GridSelectionModel<String> selectionModelMock;

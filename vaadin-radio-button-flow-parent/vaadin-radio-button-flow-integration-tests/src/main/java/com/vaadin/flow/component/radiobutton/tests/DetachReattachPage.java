@@ -15,15 +15,15 @@
  */
 package com.vaadin.flow.component.radiobutton.tests;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
-
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Test view for {@link RadioButtonGroup}.

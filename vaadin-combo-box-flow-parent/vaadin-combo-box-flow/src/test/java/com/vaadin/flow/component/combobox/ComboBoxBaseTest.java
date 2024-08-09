@@ -15,6 +15,14 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Stream;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasLabel;
@@ -32,14 +40,8 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.DataProviderListenersTest;
-import elemental.json.Json;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Mockito;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.stream.Stream;
+import elemental.json.Json;
 
 /**
  * Suite of basic tests that apply to both, ComboBox and MultiSelectComboBox

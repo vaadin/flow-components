@@ -8,9 +8,9 @@
  */
 package com.vaadin.flow.component.crud;
 
-import com.vaadin.flow.component.Component;
-
 import java.io.Serializable;
+
+import com.vaadin.flow.component.Component;
 
 /**
  * Interface representing a crud editor.

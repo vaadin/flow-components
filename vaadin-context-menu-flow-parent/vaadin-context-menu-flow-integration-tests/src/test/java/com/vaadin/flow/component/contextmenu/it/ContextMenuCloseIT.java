@@ -18,7 +18,6 @@ package com.vaadin.flow.component.contextmenu.it;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 

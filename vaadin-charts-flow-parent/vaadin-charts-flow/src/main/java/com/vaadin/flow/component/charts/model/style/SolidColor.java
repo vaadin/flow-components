@@ -8,9 +8,9 @@
  */
 package com.vaadin.flow.component.charts.model.style;
 
-import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
-
 import java.util.Locale;
+
+import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 
 /**
  * Solid (non gradient) colors

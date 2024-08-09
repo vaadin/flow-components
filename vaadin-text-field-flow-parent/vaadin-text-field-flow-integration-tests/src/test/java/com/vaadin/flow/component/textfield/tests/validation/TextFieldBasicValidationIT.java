@@ -15,21 +15,21 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.MAX_LENGTH_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.MIN_LENGTH_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.PATTERN_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.PATTERN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.REQUIRED_ERROR_MESSAGE;
+
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
-
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.MIN_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.MAX_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.MIN_LENGTH_ERROR_MESSAGE;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.MAX_LENGTH_ERROR_MESSAGE;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.PATTERN_ERROR_MESSAGE;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.PATTERN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.REQUIRED_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldBasicValidationPage.REQUIRED_ERROR_MESSAGE;
 
 @TestPath("vaadin-text-field/validation/basic")
 public class TextFieldBasicValidationIT

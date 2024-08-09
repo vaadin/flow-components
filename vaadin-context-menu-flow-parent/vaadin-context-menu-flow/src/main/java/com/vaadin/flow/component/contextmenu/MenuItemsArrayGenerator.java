@@ -16,12 +16,12 @@
 package com.vaadin.flow.component.contextmenu;
 
 import java.io.Serializable;
-import com.vaadin.flow.function.SerializableConsumer;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableConsumer;
 
 /**
  * A class which is utilized internally by components such as context menu and

@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2000-2024 Vaadin Ltd.
  *
@@ -16,6 +15,10 @@
  */
 package com.vaadin.flow.component.datepicker;
 
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Locale;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -23,10 +26,6 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Locale;
 
 /**
  * View for {@link DatePicker} demo.

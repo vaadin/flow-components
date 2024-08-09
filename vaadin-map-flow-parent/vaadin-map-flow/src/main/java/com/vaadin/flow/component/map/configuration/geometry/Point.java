@@ -8,11 +8,11 @@
  */
 package com.vaadin.flow.component.map.configuration.geometry;
 
+import java.util.Objects;
+
 import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Coordinate;
-
-import java.util.Objects;
 
 /**
  * Geometry that is represented by a single point and coordinate.

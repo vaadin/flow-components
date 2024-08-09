@@ -15,6 +15,11 @@
  */
 package com.vaadin.flow.component.checkbox;
 
+import java.io.Serializable;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -37,11 +42,6 @@ import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.PropertyChangeListener;
-
-import java.io.Serializable;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * Checkbox is an input field representing a binary choice.

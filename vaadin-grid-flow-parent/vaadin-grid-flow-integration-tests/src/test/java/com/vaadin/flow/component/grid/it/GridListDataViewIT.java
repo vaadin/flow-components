@@ -15,17 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
-import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
-
 import static com.vaadin.flow.component.grid.it.GridListDataViewPage.ADD_EXTRA_PERSONS_FOR_SORTING;
 import static com.vaadin.flow.component.grid.it.GridListDataViewPage.ADD_ITEM;
 import static com.vaadin.flow.component.grid.it.GridListDataViewPage.ADD_SERVER_SIDE_SORTING;
@@ -41,6 +30,17 @@ import static com.vaadin.flow.component.grid.it.GridListDataViewPage.SHOW_ITEM_D
 import static com.vaadin.flow.component.grid.it.GridListDataViewPage.SHOW_NEXT_DATA;
 import static com.vaadin.flow.component.grid.it.GridListDataViewPage.SHOW_PREVIOUS_DATA;
 import static com.vaadin.flow.component.grid.it.GridListDataViewPage.UPDATE_ITEM;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/grid-list-data-view-page")
 public class GridListDataViewIT extends AbstractComponentIT {

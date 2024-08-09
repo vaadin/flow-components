@@ -8,6 +8,9 @@
  */
 package com.vaadin.flow.component.charts;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.component.charts.events.HasItem;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
@@ -17,8 +20,6 @@ import com.vaadin.flow.component.charts.model.NodeSeries;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.model.TreeSeries;
 import com.vaadin.flow.component.charts.model.TreeSeriesItem;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class HasItemTest {
     @Test

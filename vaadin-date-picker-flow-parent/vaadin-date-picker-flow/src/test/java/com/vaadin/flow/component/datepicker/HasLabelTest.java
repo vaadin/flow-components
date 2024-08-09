@@ -15,9 +15,10 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import com.vaadin.flow.component.HasLabel;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.vaadin.flow.component.HasLabel;
 
 public class HasLabelTest {
 

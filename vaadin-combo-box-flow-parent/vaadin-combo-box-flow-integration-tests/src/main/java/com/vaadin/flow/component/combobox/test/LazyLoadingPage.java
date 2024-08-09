@@ -36,7 +36,6 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.Element;
-
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-combo-box/lazy-loading")

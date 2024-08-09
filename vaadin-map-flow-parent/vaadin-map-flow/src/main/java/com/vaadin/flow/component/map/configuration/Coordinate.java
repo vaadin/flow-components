@@ -8,10 +8,9 @@
  */
 package com.vaadin.flow.component.map.configuration;
 
-import com.vaadin.flow.component.map.Map;
-
 import java.io.Serializable;
-import java.util.Objects;
+
+import com.vaadin.flow.component.map.Map;
 
 /**
  * Represents map coordinates in a specific projection. Coordinates must be

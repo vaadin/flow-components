@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -23,9 +26,6 @@ import com.vaadin.flow.data.provider.hierarchy.AbstractHierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
-
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 @Route("vaadin-grid/lazy-loading-treegrid-refreshall")
 public class LazyLoadingTreeGridRefreshAllPage extends Div {

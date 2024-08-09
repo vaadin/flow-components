@@ -8,10 +8,10 @@
  */
 package com.vaadin.flow.component.charts.model;
 
-import com.vaadin.flow.component.charts.model.style.Color;
-
 import java.time.Instant;
 import java.util.Date;
+
+import com.vaadin.flow.component.charts.model.style.Color;
 
 public abstract class AreaOptions extends AbstractPlotOptions {
 
