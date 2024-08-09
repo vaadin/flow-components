@@ -34,6 +34,7 @@
         <maven.failsafe.plugin.version>2.22.1</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.0.2</maven.resources.plugin.version>
         <spotless.plugin.version>2.43.0</spotless.plugin.version>
+        <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/vaadin-commercial-license-header.txt</spotless.licence-header>
         <failsafe.forkCount>4</failsafe.forkCount>
         <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
         <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
@@ -524,6 +525,19 @@
                         <eclipse>
                             <file>https://raw.githubusercontent.com/vaadin/flow/main/eclipse/VaadinJavaConventions.xml</file>
                         </eclipse>
+                        <excludes>
+                            <!-- Do not modify GWT sources / license headers -->
+                            <exclude>**/com/google/gwt/**/*.*</exclude>
+                        </excludes>
+                        <endWithNewline/>
+                        <removeUnusedImports />
+                        <importOrder>
+                            <wildcardsLast>true</wildcardsLast>
+                            <order>java|javax,org,com</order>
+                        </importOrder>
+                        <licenseHeader>
+                            <file>${spotless.licence-header}</file>
+                        </licenseHeader>
                     </java>
                 </configuration>
             </plugin>

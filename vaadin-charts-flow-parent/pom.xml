@@ -9,6 +9,18 @@
     <artifactId>vaadin-charts-flow-parent</artifactId>
     <packaging>pom</packaging>
     <name>Vaadin Charts Parent</name>
+
+    <description>Vaadin Charts Parent</description>
+    <licenses>
+        <license>
+            <name>Vaadin Commercial License and Service Terms</name>
+            <url>https://vaadin.com/commercial-license-and-service-terms</url>
+        </license>
+    </licenses>
+    <properties>
+        <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/vaadin-commercial-license-header.txt</spotless.licence-header>
+    </properties>
+
     <modules>
         <module>vaadin-charts-flow</module>
         <module>vaadin-charts-testbench</module>
