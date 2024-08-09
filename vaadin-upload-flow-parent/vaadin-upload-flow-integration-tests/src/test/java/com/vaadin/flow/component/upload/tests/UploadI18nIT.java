@@ -69,6 +69,7 @@ public class UploadI18nIT extends AbstractUploadIT {
 
         UploadI18N expected = UploadTestsI18N.RUSSIAN_FULL;
         JsonObject expectedJson = (JsonObject) JsonSerializer.toJson(expected);
+        deeplyRemoveNullValuesFromJsonObject(expectedJson);
         Map<String, String> expectedMap = jsonToMap(expectedJson);
 
         assertTranslationMapsAreEqual(expectedMap, translationMap);
@@ -111,6 +112,7 @@ public class UploadI18nIT extends AbstractUploadIT {
         UploadI18N fullTranslation = UploadTestsI18N.RUSSIAN_FULL;
         JsonObject fullTranslationJson = (JsonObject) JsonSerializer
                 .toJson(fullTranslation);
+        deeplyRemoveNullValuesFromJsonObject(fullTranslationJson);
         Map<String, String> fullTranslationMap = jsonToMap(fullTranslationJson);
 
         assertTranslationMapsHaveSameKeys(fullTranslationMap, translationMap);
@@ -213,5 +215,15 @@ public class UploadI18nIT extends AbstractUploadIT {
                 .executeScript("return JSON.stringify(arguments[0].i18n)",
                         upload);
         return Json.parse(i18nJsonString);
+    }
+
+    private void deeplyRemoveNullValuesFromJsonObject(JsonObject jsonObject) {
+        for (String key : jsonObject.keys()) {
+            if (jsonObject.get(key).getType() == JsonType.OBJECT) {
+                deeplyRemoveNullValuesFromJsonObject(jsonObject.get(key));
+            } else if (jsonObject.get(key).getType() == JsonType.NULL) {
+                jsonObject.remove(key);
+            }
+        }
     }
 }
