@@ -35,7 +35,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.shared.SlotUtils;
 
-import com.vaadin.flow.dom.Element;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
