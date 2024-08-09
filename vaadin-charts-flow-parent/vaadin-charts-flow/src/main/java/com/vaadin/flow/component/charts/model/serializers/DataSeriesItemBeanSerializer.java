@@ -8,14 +8,14 @@
  */
 package com.vaadin.flow.component.charts.model.serializers;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.OhlcItem;
-
-import java.io.IOException;
 
 /**
  * Custom bean serializer for {@link DataSeriesItem}

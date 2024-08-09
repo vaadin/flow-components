@@ -16,6 +16,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -44,7 +46,6 @@ import com.vaadin.flow.shared.Registration;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
-import org.slf4j.LoggerFactory;
 
 @Tag("vaadin-grid-pro")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")

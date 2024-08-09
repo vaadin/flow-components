@@ -8,6 +8,8 @@
  */
 package com.vaadin.flow.component.map;
 
+import java.util.Objects;
+
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -25,8 +27,6 @@ import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import com.vaadin.flow.component.map.configuration.source.Source;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 import com.vaadin.flow.component.map.configuration.source.XYZSource;
-
-import java.util.Objects;
 
 /**
  * Map is a component for displaying geographic maps from various sources. It

@@ -1,10 +1,18 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests.fixtures;
+
+import java.io.Serializable;
 
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.spreadsheet.PopupButton;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
-
-import java.io.Serializable;
 
 @SuppressWarnings("serial")
 public class TablePopupButtonFixture implements SpreadsheetFixture {

@@ -8,6 +8,15 @@
  */
 package com.vaadin.flow.component.charts.model;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.events.internal.AxisRescaledEvent;
@@ -19,15 +28,6 @@ import com.vaadin.flow.component.charts.events.internal.ItemSlicedEvent;
 import com.vaadin.flow.component.charts.events.internal.SeriesAddedEvent;
 import com.vaadin.flow.component.charts.events.internal.SeriesChangedEvent;
 import com.vaadin.flow.component.charts.events.internal.SeriesStateEvent;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * Chart's configuration root object containing all the child objects that are

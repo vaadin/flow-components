@@ -21,12 +21,12 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import com.vaadin.flow.data.selection.SelectionListener;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.data.provider.ListDataProvider;
-import org.mockito.Mockito;
+import com.vaadin.flow.data.selection.SelectionListener;
 
 public class GridMultiSelectionWithIdProviderTest {
 

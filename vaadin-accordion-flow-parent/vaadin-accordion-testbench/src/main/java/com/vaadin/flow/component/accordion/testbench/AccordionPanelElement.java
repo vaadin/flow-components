@@ -15,10 +15,10 @@
  */
 package com.vaadin.flow.component.accordion.testbench;
 
-import com.vaadin.testbench.elementsbase.Element;
-import com.vaadin.flow.component.details.testbench.DetailsElement;
-
 import static com.vaadin.flow.component.accordion.testbench.AccordionElement.OPENED_PROPERTY;
+
+import com.vaadin.flow.component.details.testbench.DetailsElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 /**
  * TestBench element for the vaadin-accordion-panel element

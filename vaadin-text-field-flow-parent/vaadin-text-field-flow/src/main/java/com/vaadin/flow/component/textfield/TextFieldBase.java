@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import java.util.Optional;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
@@ -34,8 +36,6 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
-
-import java.util.Optional;
 
 /**
  * Internal class that provides base functionality for input field components,

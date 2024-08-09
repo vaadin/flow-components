@@ -8,14 +8,14 @@
  */
 package com.vaadin.flow.component.map.configuration.layer;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
-
-import java.util.List;
 
 /**
  * Layer that allows to conveniently display a number of geographic features. A

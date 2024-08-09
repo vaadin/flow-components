@@ -8,17 +8,18 @@
  */
 package com.vaadin.flow.component.map.events;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.MapBase;
 import com.vaadin.flow.component.map.configuration.Coordinate;
-import elemental.json.JsonArray;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import elemental.json.JsonArray;
 
 /**
  * Representing OpenLayers' @code{click} event

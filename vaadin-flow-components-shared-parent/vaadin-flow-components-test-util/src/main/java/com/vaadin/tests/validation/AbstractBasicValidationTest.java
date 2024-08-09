@@ -20,9 +20,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.shared.HasClientValidation.ClientValidatedEvent;
 
 /**

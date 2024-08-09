@@ -8,9 +8,9 @@
  */
 package com.vaadin.flow.component.charts.events.internal;
 
-import com.vaadin.flow.component.charts.model.Series;
-
 import java.io.Serializable;
+
+import com.vaadin.flow.component.charts.model.Series;
 
 /**
  * Base class for series events.

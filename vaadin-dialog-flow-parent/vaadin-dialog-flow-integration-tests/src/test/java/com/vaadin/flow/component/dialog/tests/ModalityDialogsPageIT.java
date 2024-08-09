@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
+import static com.vaadin.flow.component.dialog.tests.ModalityDialogsPage.Log.LOG_ID;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,8 +27,6 @@ import com.vaadin.flow.component.html.testbench.NativeButtonElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
-
-import static com.vaadin.flow.component.dialog.tests.ModalityDialogsPage.Log.LOG_ID;
 
 @TestPath("vaadin-dialog/dialog-modality")
 public class ModalityDialogsPageIT extends AbstractComponentIT {

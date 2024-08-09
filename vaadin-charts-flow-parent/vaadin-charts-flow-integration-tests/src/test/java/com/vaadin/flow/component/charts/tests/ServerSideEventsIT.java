@@ -1,17 +1,17 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * license.
+ */
 package com.vaadin.flow.component.charts.tests;
 
-import com.google.gson.*;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.examples.AbstractChartExample;
-import com.vaadin.flow.component.charts.examples.dynamic.ServerSideEvents;
-import com.vaadin.flow.component.charts.events.*;
-import com.vaadin.flow.component.charts.model.DataSeries;
-import com.vaadin.flow.component.charts.model.Series;
-import com.vaadin.flow.component.charts.testbench.ChartElement;
-import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
-import com.vaadin.testbench.TestBenchElement;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,9 +19,18 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import java.lang.reflect.Type;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.google.gson.*;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.events.*;
+import com.vaadin.flow.component.charts.examples.AbstractChartExample;
+import com.vaadin.flow.component.charts.examples.dynamic.ServerSideEvents;
+import com.vaadin.flow.component.charts.model.DataSeries;
+import com.vaadin.flow.component.charts.model.Series;
+import com.vaadin.flow.component.charts.testbench.ChartElement;
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
+import com.vaadin.testbench.TestBenchElement;
 
 public class ServerSideEventsIT extends AbstractTBTest {
 

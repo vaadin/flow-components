@@ -9,7 +9,6 @@
 package com.vaadin.addon.spreadsheet.client;
 
 import com.google.gwt.dom.client.Element;
-
 import com.google.gwt.dom.client.StyleElement;
 
 public class SheetJsniUtil {

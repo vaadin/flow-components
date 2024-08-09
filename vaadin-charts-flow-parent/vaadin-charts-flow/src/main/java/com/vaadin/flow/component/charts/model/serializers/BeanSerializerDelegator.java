@@ -8,6 +8,9 @@
  */
 package com.vaadin.flow.component.charts.model.serializers;
 
+import java.io.IOException;
+import java.util.Set;
+
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -15,9 +18,6 @@ import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.impl.BeanAsArraySerializer;
 import com.fasterxml.jackson.databind.ser.impl.ObjectIdWriter;
 import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
-
-import java.io.IOException;
-import java.util.Set;
 
 /**
  * Delegates serialization calls to the given instance of

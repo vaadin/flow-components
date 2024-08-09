@@ -8,11 +8,11 @@
  */
 package com.vaadin.flow.component.charts.model.serializers;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.vaadin.flow.component.charts.model.LegendTitle;
-
-import java.io.IOException;
 
 /**
  * Serializer for {@link com.vaadin.flow.component.charts.model.LegendTitle}.
