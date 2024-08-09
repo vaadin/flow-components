@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class MultiSelectComboBoxFilteringTest {
@@ -37,8 +38,8 @@ public class MultiSelectComboBoxFilteringTest {
         MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
         ui.add(comboBox);
 
-        List<String> items = new ArrayList<>(
-                IntStream.range(0, 100).mapToObj(i -> "Item " + i).toList());
+        List<String> items = new ArrayList<>(IntStream.range(0, 100)
+                .mapToObj(i -> "Item " + i).collect(Collectors.toList()));
         comboBox.setItems(items);
 
         comboBox.getDataController().setRequestedRange(0, 50, "foo");
