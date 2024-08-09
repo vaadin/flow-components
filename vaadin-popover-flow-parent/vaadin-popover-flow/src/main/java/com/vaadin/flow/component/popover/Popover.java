@@ -40,6 +40,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
@@ -59,7 +60,8 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/popover", version = "24.5.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
-public class Popover extends Component implements HasAriaLabel, HasComponents {
+public class Popover extends Component implements HasAriaLabel, HasComponents,
+        HasThemeVariant<PopoverVariant> {
 
     private Component target;
     private Registration targetAttachRegistration;
