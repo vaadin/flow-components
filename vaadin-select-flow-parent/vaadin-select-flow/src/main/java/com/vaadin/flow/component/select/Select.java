@@ -44,9 +44,10 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
-import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -85,9 +86,9 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/select", version = "24.5.0-alpha6")
+@NpmPackage(value = "@vaadin/select", version = "24.5.0-alpha7")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 @JsModule("./selectConnector.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
@@ -133,10 +134,20 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
     private SelectI18n i18n;
 
-    private boolean manualValidationEnabled = false;
+    private Validator<T> defaultValidator = (value, context) -> {
+        boolean fromComponent = context == null;
 
-    private String customErrorMessage;
-    private String constraintErrorMessage;
+        // Do the required check only if the validator is called from the
+        // component, and not from Binder. Binder has its own implementation
+        // of required validation.
+        boolean isRequired = fromComponent && isRequiredIndicatorVisible();
+        return ValidationUtil.validateRequiredConstraint(
+                getI18nErrorMessage(SelectI18n::getRequiredErrorMessage),
+                isRequired, getValue(), getEmptyValue());
+    };
+
+    private ValidationController<Select<T>, T> validationController = new ValidationController<>(
+            this);
 
     /**
      * Constructs a select.
@@ -216,44 +227,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         setItems(items);
     }
 
-    /**
-     * Sets an error message to display for all constraint violations.
-     * <p>
-     * This error message takes priority over i18n error messages when both are
-     * set.
-     *
-     * @param errorMessage
-     *            the error message to set, or {@code null} to clear
-     */
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        customErrorMessage = errorMessage;
-        updateErrorMessage();
-    }
-
-    /**
-     * Gets the error message displayed for all constraint violations.
-     *
-     * @return the error message
-     */
-    @Override
-    public String getErrorMessage() {
-        return customErrorMessage;
-    }
-
-    private void setConstraintErrorMessage(String errorMessage) {
-        constraintErrorMessage = errorMessage;
-        updateErrorMessage();
-    }
-
-    private void updateErrorMessage() {
-        String errorMessage = constraintErrorMessage;
-        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
-            errorMessage = customErrorMessage;
-        }
-        getElement().setProperty("errorMessage", errorMessage);
-    }
-
     private static <T> T presentationToModel(Select<T> select,
             String presentation) {
         if (select.keyMapper == null) {
@@ -295,7 +268,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-select-list-box")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha6")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox extends Component
             implements HasItemComponents<T> {
@@ -1115,7 +1088,12 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
 
     @Override
     public void setManualValidation(boolean enabled) {
-        this.manualValidationEnabled = enabled;
+        validationController.setManualValidation(enabled);
+    }
+
+    @Override
+    public Validator<T> getDefaultValidator() {
+        return defaultValidator;
     }
 
     /**
@@ -1128,20 +1106,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (this.manualValidationEnabled) {
-            return;
-        }
-
-        ValidationResult result = ValidationUtil.validateRequiredConstraint(
-                getI18nErrorMessage(SelectI18n::getRequiredErrorMessage),
-                isRequiredIndicatorVisible(), getValue(), getEmptyValue());
-        if (result.isError()) {
-            setInvalid(true);
-            setConstraintErrorMessage(result.getErrorMessage());
-        } else {
-            setInvalid(false);
-            setConstraintErrorMessage("");
-        }
+        validationController.validate(getValue());
     }
 
     /**

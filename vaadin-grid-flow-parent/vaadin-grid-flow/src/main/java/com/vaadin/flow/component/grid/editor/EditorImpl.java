@@ -216,11 +216,6 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
             throw new IllegalStateException("Editing item " + item
                     + " failed. Item editor is already editing item " + edited);
         }
-
-        if (!getGrid().getDataCommunicator().getKeyMapper().has(item)) {
-            throw new IllegalStateException("The item " + item
-                    + " is not in the backing data provider");
-        }
     }
 
     @Override

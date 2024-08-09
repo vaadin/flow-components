@@ -28,7 +28,7 @@ public class CheckboxBasicValidationTest
         testField.setRequiredIndicatorVisible(true);
         testField.setValue(true);
         testField.setValue(false);
-        Assert.assertEquals("", getErrorMessageProperty());
+        Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
@@ -38,7 +38,7 @@ public class CheckboxBasicValidationTest
                 .setRequiredErrorMessage("Field is required"));
         testField.setValue(true);
         testField.setValue(false);
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Test
@@ -49,11 +49,12 @@ public class CheckboxBasicValidationTest
         testField.setErrorMessage("Custom error message");
         testField.setValue(true);
         testField.setValue(false);
-        Assert.assertEquals("Custom error message", getErrorMessageProperty());
+        Assert.assertEquals("Custom error message",
+                testField.getErrorMessage());
     }
 
     @Test
-    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_i18nErrorMessageDisplayed() {
+    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setI18n(new Checkbox.CheckboxI18n()
                 .setRequiredErrorMessage("Field is required"));
@@ -61,15 +62,13 @@ public class CheckboxBasicValidationTest
         testField.setValue(true);
         testField.setValue(false);
         testField.setErrorMessage("");
-        Assert.assertEquals("Field is required", getErrorMessageProperty());
+        testField.setValue(true);
+        testField.setValue(false);
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
     @Override
     protected Checkbox createTestField() {
         return new Checkbox();
-    }
-
-    private String getErrorMessageProperty() {
-        return testField.getElement().getProperty("errorMessage");
     }
 }

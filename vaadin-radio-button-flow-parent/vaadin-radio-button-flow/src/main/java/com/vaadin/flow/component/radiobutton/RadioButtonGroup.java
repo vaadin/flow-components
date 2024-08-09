@@ -37,8 +37,9 @@ import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.HasValidator;
-import com.vaadin.flow.data.binder.ValidationResult;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -74,9 +75,9 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/radio-group", version = "24.5.0-alpha6")
+@NpmPackage(value = "@vaadin/radio-group", version = "24.5.0-alpha7")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
@@ -109,10 +110,21 @@ public class RadioButtonGroup<T>
 
     private RadioButtonGroupI18n i18n;
 
-    private boolean manualValidationEnabled = false;
+    private Validator<T> defaultValidator = (value, context) -> {
+        boolean fromComponent = context == null;
 
-    private String customErrorMessage;
-    private String constraintErrorMessage;
+        // Do the required check only if the validator is called from the
+        // component, and not from Binder. Binder has its own implementation
+        // of required validation.
+        boolean isRequired = fromComponent && isRequiredIndicatorVisible();
+        return ValidationUtil.validateRequiredConstraint(
+                getI18nErrorMessage(
+                        RadioButtonGroupI18n::getRequiredErrorMessage),
+                isRequired, getValue(), getEmptyValue());
+    };
+
+    private ValidationController<RadioButtonGroup<T>, T> validationController = new ValidationController<>(
+            this);
 
     private SelectionPreservationHandler<T> selectionPreservationHandler;
 
@@ -243,44 +255,6 @@ public class RadioButtonGroup<T>
             T... items) {
         this(label, listener);
         setItems(items);
-    }
-
-    /**
-     * Sets an error message to display for all constraint violations.
-     * <p>
-     * This error message takes priority over i18n error messages when both are
-     * set.
-     *
-     * @param errorMessage
-     *            the error message to set, or {@code null} to clear
-     */
-    @Override
-    public void setErrorMessage(String errorMessage) {
-        customErrorMessage = errorMessage;
-        updateErrorMessage();
-    }
-
-    /**
-     * Gets the error message displayed for all constraint violations.
-     *
-     * @return the error message
-     */
-    @Override
-    public String getErrorMessage() {
-        return customErrorMessage;
-    }
-
-    private void setConstraintErrorMessage(String errorMessage) {
-        constraintErrorMessage = errorMessage;
-        updateErrorMessage();
-    }
-
-    private void updateErrorMessage() {
-        String errorMessage = constraintErrorMessage;
-        if (customErrorMessage != null && !customErrorMessage.isEmpty()) {
-            errorMessage = customErrorMessage;
-        }
-        getElement().setProperty("errorMessage", errorMessage);
     }
 
     @Override
@@ -838,7 +812,12 @@ public class RadioButtonGroup<T>
 
     @Override
     public void setManualValidation(boolean enabled) {
-        this.manualValidationEnabled = enabled;
+        validationController.setManualValidation(enabled);
+    }
+
+    @Override
+    public Validator<T> getDefaultValidator() {
+        return defaultValidator;
     }
 
     /**
@@ -851,21 +830,7 @@ public class RadioButtonGroup<T>
      * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (this.manualValidationEnabled) {
-            return;
-        }
-
-        ValidationResult result = ValidationUtil.validateRequiredConstraint(
-                getI18nErrorMessage(
-                        RadioButtonGroupI18n::getRequiredErrorMessage),
-                isRequiredIndicatorVisible(), getValue(), getEmptyValue());
-        if (result.isError()) {
-            setInvalid(true);
-            setConstraintErrorMessage(result.getErrorMessage());
-        } else {
-            setInvalid(false);
-            setConstraintErrorMessage("");
-        }
+        validationController.validate(getValue());
     }
 
     /**

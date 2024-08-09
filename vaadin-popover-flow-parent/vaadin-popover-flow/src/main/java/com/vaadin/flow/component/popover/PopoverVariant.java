@@ -12,31 +12,21 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
+ *
  */
-package com.vaadin.flow.component.tabs;
+package com.vaadin.flow.component.popover;
 
 import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
- * Set of theme variants applicable for {@code vaadin-tabsheet} component.
+ * Set of theme variants applicable for the {@link Popover} component.
  */
-public enum TabSheetVariant implements ThemeVariant {
-    //@formatter:off
-    LUMO_TABS_ICON_ON_TOP("icon-on-top"),
-    LUMO_TABS_CENTERED("centered"),
-    LUMO_TABS_SMALL("small"),
-    LUMO_TABS_MINIMAL("minimal"),
-    LUMO_TABS_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
-    LUMO_TABS_EQUAL_WIDTH_TABS( "equal-width-tabs"),
-    LUMO_BORDERED("bordered"),
-    LUMO_NO_PADDING("no-padding"),
-    MATERIAL_TABS_FIXED("fixed"),
-    MATERIAL_BORDERED("bordered");
-    //@formatter:on
+public enum PopoverVariant implements ThemeVariant {
+    ARROW("arrow");
 
     private final String variant;
 
-    TabSheetVariant(String variant) {
+    PopoverVariant(String variant) {
         this.variant = variant;
     }
 
