@@ -1,12 +1,16 @@
 /**
- * Copyright (C) 2000-2024 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.crud.testbench;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
@@ -17,10 +21,6 @@ import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * TestBench element for the vaadin-crud element

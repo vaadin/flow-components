@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,14 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.BACKEND_COMBO_BOX;
+import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.BACKEND_COMBO_BOX_ITEM_COUNT_SPAN_ID;
+import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.CLIENT_FILTER_COMBO_BOX;
+import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.CLIENT_FILTER_COMBO_BOX_ITEM_COUNT_SPAN_ID;
+import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.IN_MEMORY_COMBO_BOX;
+import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.IN_MEMORY_COMBO_BOX_ITEM_COUNT_SPAN_ID;
+import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.OPTIONS_COMBO_BOX;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,14 +31,6 @@ import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
-
-import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.BACKEND_COMBO_BOX;
-import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.BACKEND_COMBO_BOX_ITEM_COUNT_SPAN_ID;
-import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.CLIENT_FILTER_COMBO_BOX;
-import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.CLIENT_FILTER_COMBO_BOX_ITEM_COUNT_SPAN_ID;
-import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.IN_MEMORY_COMBO_BOX;
-import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.IN_MEMORY_COMBO_BOX_ITEM_COUNT_SPAN_ID;
-import static com.vaadin.flow.component.combobox.test.ClientSideFilterPage.OPTIONS_COMBO_BOX;
 
 @TestPath("vaadin-combo-box/clientside-filter")
 public class ClientSideFilterIT extends AbstractComboBoxIT {

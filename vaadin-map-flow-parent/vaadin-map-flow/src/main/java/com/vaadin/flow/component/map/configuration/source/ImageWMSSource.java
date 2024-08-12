@@ -1,17 +1,17 @@
 /**
- * Copyright (C) 2000-2024 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.map.configuration.source;
 
-import com.vaadin.flow.component.map.configuration.Constants;
-
 import java.util.Map;
 import java.util.Objects;
+
+import com.vaadin.flow.component.map.configuration.Constants;
 
 /**
  * Source for WMS servers providing single, untiled images

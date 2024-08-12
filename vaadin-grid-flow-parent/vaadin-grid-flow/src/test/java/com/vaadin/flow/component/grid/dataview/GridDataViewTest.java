@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.grid.dataview;
 
 import java.util.ArrayList;
@@ -21,12 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.data.provider.DataProviderListener;
-import com.vaadin.flow.data.provider.InMemoryDataProvider;
-import com.vaadin.flow.data.provider.Query;
-import com.vaadin.flow.function.SerializableComparator;
-import com.vaadin.flow.function.SerializablePredicate;
-import com.vaadin.flow.shared.Registration;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -36,9 +29,15 @@ import com.vaadin.flow.data.provider.AbstractComponentDataViewTest;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.DataProviderListener;
 import com.vaadin.flow.data.provider.DataView;
 import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.IdentifierProvider;
+import com.vaadin.flow.data.provider.InMemoryDataProvider;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.function.SerializableComparator;
+import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.flow.shared.Registration;
 
 public class GridDataViewTest extends AbstractComponentDataViewTest {
 

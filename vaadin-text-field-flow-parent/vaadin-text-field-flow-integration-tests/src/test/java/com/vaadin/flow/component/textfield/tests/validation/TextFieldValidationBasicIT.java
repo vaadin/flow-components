@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,19 +15,19 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.ATTACH_FIELD_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.DETACH_FIELD_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.PATTERN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.REQUIRED_BUTTON;
+
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
-
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.MIN_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.MAX_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.PATTERN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.REQUIRED_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.DETACH_FIELD_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.TextFieldValidationBasicPage.ATTACH_FIELD_BUTTON;
 
 @TestPath("vaadin-text-field/validation/basic")
 public class TextFieldValidationBasicIT

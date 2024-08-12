@@ -1,7 +1,17 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * license.
+ */
 package com.vaadin.flow.component.charts.export;
 
-import com.vaadin.flow.server.frontend.FrontendToolsLocator;
-import com.vaadin.flow.server.frontend.FrontendUtils;
+import java.io.File;
+import java.util.Optional;
+import java.util.regex.Pattern;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,9 +19,8 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-import java.io.File;
-import java.util.Optional;
-import java.util.regex.Pattern;
+import com.vaadin.flow.server.frontend.FrontendToolsLocator;
+import com.vaadin.flow.server.frontend.FrontendUtils;
 
 public class NodeRunnerTest {
 

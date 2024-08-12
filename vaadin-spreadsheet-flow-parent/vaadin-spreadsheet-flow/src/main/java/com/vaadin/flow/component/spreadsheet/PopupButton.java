@@ -1,9 +1,9 @@
 /**
- * Copyright (C) 2000-2024 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet;
@@ -11,12 +11,12 @@ package com.vaadin.flow.component.spreadsheet;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 
-import com.vaadin.flow.component.UI;
 import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.PopupButtonServerRpc;
 import com.vaadin.flow.component.spreadsheet.shared.PopupButtonState;

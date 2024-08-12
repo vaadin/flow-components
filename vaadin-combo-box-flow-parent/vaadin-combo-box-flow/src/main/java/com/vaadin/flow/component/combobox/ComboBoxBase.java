@@ -1,12 +1,24 @@
-/**
- * Copyright (C) 2000-2024 Vaadin Ltd
+/*
+ * Copyright 2000-2024 Vaadin Ltd.
  *
- * This program is available under Vaadin Commercial License and Service Terms.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
- * license.
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.vaadin.flow.component.combobox;
+
+import java.util.Collection;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -15,8 +27,6 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
@@ -29,6 +39,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
@@ -52,11 +64,6 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.Registration;
-
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.stream.Stream;
 
 /**
  * Provides base functionality for combo box related components, such as

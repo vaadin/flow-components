@@ -1,10 +1,17 @@
-/**
- * Copyright (C) 2000-2024 Vaadin Ltd
+/*
+ * Copyright 2000-2024 Vaadin Ltd.
  *
- * This program is available under Vaadin Commercial License and Service Terms.
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
- * license.
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package com.vaadin.flow.component.grid;
 
@@ -27,6 +34,8 @@ import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
@@ -90,6 +99,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
@@ -114,7 +124,6 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.ReflectTools;
-import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -122,7 +131,6 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonType;
 import elemental.json.JsonValue;
-import org.slf4j.LoggerFactory;
 
 /**
  * Grid is a component for showing tabular data. A basic Grid uses plain text to
