@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,8 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.avatar;
+
+import java.io.Serializable;
+import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
@@ -25,10 +27,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.server.AbstractStreamResource;
-import elemental.json.JsonObject;
 
-import java.io.Serializable;
-import java.util.Objects;
+import elemental.json.JsonObject;
 
 /**
  * Avatar is a graphical representation of an object or entity, for example a

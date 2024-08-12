@@ -1,12 +1,21 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * license.
+ */
 package com.vaadin.flow.component.map.configuration.style;
 
-import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
-import com.vaadin.flow.component.map.configuration.ConfigurationTestUtil;
+import java.util.Set;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Set;
+import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
+import com.vaadin.flow.component.map.configuration.ConfigurationTestUtil;
 
 public class TextStyleTest {
     private TextStyle textStyle;

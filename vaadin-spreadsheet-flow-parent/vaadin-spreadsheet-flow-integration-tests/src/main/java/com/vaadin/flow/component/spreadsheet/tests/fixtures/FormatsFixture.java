@@ -1,12 +1,21 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests.fixtures;
 
-import com.vaadin.flow.component.spreadsheet.Spreadsheet;
+import java.util.Calendar;
+import java.util.Date;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import java.util.Calendar;
-import java.util.Date;
+import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 public class FormatsFixture implements SpreadsheetFixture {
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,14 +15,15 @@
  */
 package com.vaadin.flow.component.icon.tests;
 
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.icon.SvgIcon;
-import com.vaadin.flow.server.StreamResource;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.icon.SvgIcon;
+import com.vaadin.flow.server.StreamResource;
 
 public class SvgIconTest {
     @Test

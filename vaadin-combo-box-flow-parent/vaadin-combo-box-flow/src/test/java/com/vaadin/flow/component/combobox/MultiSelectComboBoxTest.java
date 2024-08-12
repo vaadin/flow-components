@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,15 +15,6 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.shared.InputField;
-import elemental.json.JsonArray;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -31,6 +22,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.shared.InputField;
+
+import elemental.json.JsonArray;
 
 public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
     @Override

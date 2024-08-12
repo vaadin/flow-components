@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,12 +15,13 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Tests for setting prefix and suffix components for {@link TextField}.

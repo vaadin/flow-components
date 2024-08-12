@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,19 +15,19 @@
  */
 package com.vaadin.tests.validation;
 
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractComponentIT;
+import static com.vaadin.tests.validation.AbstractValidationPage.ATTACH_FIELD_BUTTON;
+import static com.vaadin.tests.validation.AbstractValidationPage.DETACH_FIELD_BUTTON;
+import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDATION_COUNTER;
+import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDATION_COUNTER_RESET_BUTTON;
+import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
+import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import static com.vaadin.tests.validation.AbstractValidationPage.ATTACH_FIELD_BUTTON;
-import static com.vaadin.tests.validation.AbstractValidationPage.DETACH_FIELD_BUTTON;
-import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
-import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON;
-import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDATION_COUNTER;
-import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDATION_COUNTER_RESET_BUTTON;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 public abstract class AbstractValidationIT<T extends TestBenchElement>
         extends AbstractComponentIT {

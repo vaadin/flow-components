@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.orderedlayout;
 
+import static java.util.Objects.requireNonNull;
+
+import java.util.Locale;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
@@ -23,10 +27,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-
-import static java.util.Objects.requireNonNull;
-
-import java.util.Locale;
 
 /**
  * Scroller is a component container which enables scrolling overflowing
