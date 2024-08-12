@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,6 +14,8 @@
  * the License.
  */
 package com.vaadin.flow.component.confirmdialog;
+
+import java.util.Optional;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -30,16 +32,14 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
-
-import java.util.Optional;
 
 /**
  * Confirm Dialog is a modal Dialog used to confirm user actions.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,15 +12,13 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
-
 package com.vaadin.flow.component.upload.tests;
-
-import com.vaadin.flow.component.upload.UploadI18N;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.vaadin.flow.component.upload.UploadI18N;
 
 class UploadTestsI18N {
     static final UploadI18N RUSSIAN_FULL = new UploadI18N()

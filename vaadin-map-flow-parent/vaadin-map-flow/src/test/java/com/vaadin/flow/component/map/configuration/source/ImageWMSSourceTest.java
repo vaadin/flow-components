@@ -1,11 +1,19 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * license.
+ */
 package com.vaadin.flow.component.map.configuration.source;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ImageWMSSourceTest {
     @Test

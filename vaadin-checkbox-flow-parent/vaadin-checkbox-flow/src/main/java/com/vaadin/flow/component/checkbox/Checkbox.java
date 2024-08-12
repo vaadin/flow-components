@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.checkbox;
 
+import java.util.Optional;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.ClickNotifier;
@@ -29,8 +31,6 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.PropertyChangeListener;
-
-import java.util.Optional;
 
 /**
  * Checkbox is an input field representing a binary choice.

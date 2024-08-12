@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,16 +15,16 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import static com.vaadin.flow.component.textfield.tests.validation.AbstractValueChangeModeValidationPage.RESET_VALIDATION_LOG_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.AbstractValueChangeModeValidationPage.VALIDATION_LOG;
+
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
 
-import com.vaadin.tests.validation.AbstractValidationIT;
 import com.vaadin.testbench.TestBenchElement;
-
-import static com.vaadin.flow.component.textfield.tests.validation.AbstractValueChangeModeValidationPage.VALIDATION_LOG;
-import static com.vaadin.flow.component.textfield.tests.validation.AbstractValueChangeModeValidationPage.RESET_VALIDATION_LOG_BUTTON;
+import com.vaadin.tests.validation.AbstractValidationIT;
 
 public abstract class AbstractValueChangeModeValidationIT<T extends TestBenchElement>
         extends AbstractValidationIT<T> {

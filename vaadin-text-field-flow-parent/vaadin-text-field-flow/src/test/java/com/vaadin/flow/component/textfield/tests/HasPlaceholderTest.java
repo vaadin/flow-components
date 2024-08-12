@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.EmailField;
@@ -22,8 +25,6 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class HasPlaceholderTest {
 

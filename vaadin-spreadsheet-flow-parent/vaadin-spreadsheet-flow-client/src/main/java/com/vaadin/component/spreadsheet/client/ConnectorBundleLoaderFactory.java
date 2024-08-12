@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.component.spreadsheet.client;
@@ -50,8 +50,6 @@ import com.vaadin.client.metadata.ProxyHandler;
 import com.vaadin.client.metadata.TypeData;
 import com.vaadin.client.metadata.TypeDataStore;
 import com.vaadin.client.metadata.TypeDataStore.MethodAttribute;
-import com.vaadin.client.ui.UnknownComponentConnector;
-import com.vaadin.client.ui.UnknownExtensionConnector;
 import com.vaadin.server.widgetsetutils.metadata.ClientRpcVisitor;
 import com.vaadin.server.widgetsetutils.metadata.ConnectorBundle;
 import com.vaadin.server.widgetsetutils.metadata.ConnectorInitVisitor;
@@ -65,8 +63,6 @@ import com.vaadin.server.widgetsetutils.metadata.TypeVisitor;
 import com.vaadin.server.widgetsetutils.metadata.WidgetInitVisitor;
 import com.vaadin.shared.annotations.DelegateToWidget;
 import com.vaadin.shared.annotations.NoLayout;
-import com.vaadin.shared.communication.ClientRpc;
-import com.vaadin.shared.communication.ServerRpc;
 import com.vaadin.shared.ui.Connect;
 import com.vaadin.shared.ui.Connect.LoadStyle;
 import com.vaadin.tools.CvalAddonsChecker;

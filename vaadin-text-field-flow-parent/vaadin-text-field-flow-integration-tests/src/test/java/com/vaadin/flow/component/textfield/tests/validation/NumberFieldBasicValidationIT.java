@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,18 +15,18 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.CLEAR_VALUE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.MAX_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.MIN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.STEP_INPUT;
+
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
-
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.MIN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.MAX_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.STEP_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.REQUIRED_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.NumberFieldBasicValidationPage.CLEAR_VALUE_BUTTON;
 
 @TestPath("vaadin-number-field/validation/basic")
 public class NumberFieldBasicValidationIT

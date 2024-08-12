@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.data.renderer.tests;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.UI;
@@ -27,9 +30,6 @@ import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.communication.PushMode;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 /**
  * Page created for testing purposes. Not suitable for demos.

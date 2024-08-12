@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,7 +22,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.NotFoundException;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
@@ -32,18 +42,9 @@ import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.Router;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
+
 import elemental.json.JsonArray;
 import elemental.json.impl.JsonUtil;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.sidenav.SideNavItem;
-import com.vaadin.flow.dom.Element;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 public class SideNavItemTest {
 
