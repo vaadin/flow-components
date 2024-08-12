@@ -43,10 +43,11 @@ _window.Vaadin.setLitRenderer = (
     });
   };
   const fnArgs = [
-    'model',
-    'itemKey',
     'html',
+    'root',
     'live',
+    'itemKey',
+    'model',
     'item',
     'index',
     ...clientCallables,
@@ -55,7 +56,7 @@ _window.Vaadin.setLitRenderer = (
   const htmlGenerator = new Function(...fnArgs);
   const renderFunction = (root: RenderRoot, model: ItemModel, itemKey: string) => {
     const { item, index } = model;
-    render(htmlGenerator(model, itemKey, html, live, item, index, ...callablesCreator(itemKey)), root);
+    render(htmlGenerator(html, root, live, itemKey, model, item, index, ...callablesCreator(itemKey)), root);
   };
 
   const renderer: Renderer = (root, _, model) => {
