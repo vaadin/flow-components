@@ -1,17 +1,26 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests.fixtures;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.util.CellReference;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.spreadsheet.PopupButton;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.data.provider.ListDataProvider;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.util.CellReference;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 
 public class PopupButtonFixture implements SpreadsheetFixture {
 

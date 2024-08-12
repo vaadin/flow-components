@@ -1,12 +1,14 @@
 /**
- * Copyright (C) 2000-2024 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.map;
+
+import java.util.HashMap;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
@@ -16,8 +18,6 @@ import com.vaadin.flow.component.map.configuration.source.ImageWMSSource;
 import com.vaadin.flow.component.map.configuration.source.TileWMSSource;
 import com.vaadin.flow.component.map.configuration.source.XYZSource;
 import com.vaadin.flow.router.Route;
-
-import java.util.HashMap;
 
 @Route("vaadin-map/sources")
 public class SourcesPage extends Div {

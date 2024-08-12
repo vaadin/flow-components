@@ -1,12 +1,19 @@
 /**
- * Copyright (C) 2000-2024 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.map;
+
+import java.beans.PropertyChangeEvent;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -20,20 +27,14 @@ import com.vaadin.flow.component.map.configuration.Extent;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
-import com.vaadin.flow.component.map.events.MapFeatureClickEvent;
 import com.vaadin.flow.component.map.events.MapClickEvent;
+import com.vaadin.flow.component.map.events.MapFeatureClickEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
 import com.vaadin.flow.component.map.serialization.MapSerializer;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
-import elemental.json.JsonValue;
 
-import java.beans.PropertyChangeEvent;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import elemental.json.JsonValue;
 
 /**
  * Base class for the map component. Contains all base functionality for the map

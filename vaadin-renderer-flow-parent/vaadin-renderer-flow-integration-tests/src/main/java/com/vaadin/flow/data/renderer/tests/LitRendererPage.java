@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,8 +20,8 @@ import java.util.Arrays;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-renderer-flow/lit-renderer")

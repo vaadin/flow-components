@@ -1,14 +1,5 @@
-/**
- * Copyright (C) 2000-2024 Vaadin Ltd
- *
- * This program is available under Vaadin Commercial License and Service Terms.
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
- * license.
- */
-
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,6 +15,10 @@
  */
 package com.vaadin.flow.component.datepicker;
 
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Locale;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -31,10 +26,6 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Locale;
 
 /**
  * View for {@link DatePicker} demo.

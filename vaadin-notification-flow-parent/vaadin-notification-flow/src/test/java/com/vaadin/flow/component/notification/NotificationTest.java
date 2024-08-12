@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.concurrent.NotThreadSafe;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.After;
@@ -37,8 +38,6 @@ import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinSession;
-
-import javax.annotation.concurrent.NotThreadSafe;
 
 /**
  * Unit tests for the Notification.

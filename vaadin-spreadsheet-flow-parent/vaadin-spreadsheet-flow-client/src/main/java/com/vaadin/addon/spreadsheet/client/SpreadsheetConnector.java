@@ -1,12 +1,15 @@
 /**
- * Copyright (C) 2000-2024 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.addon.spreadsheet.client;
+
+import static com.vaadin.addon.spreadsheet.client.OverlayInfo.COMPONENT;
+import static com.vaadin.addon.spreadsheet.client.OverlayInfo.IMAGE;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,9 +45,6 @@ import com.vaadin.client.ui.layout.ElementResizeListener;
 import com.vaadin.component.spreadsheet.client.js.SpreadsheetServerRpcImpl;
 import com.vaadin.shared.communication.ServerRpc;
 import com.vaadin.shared.communication.SharedState;
-
-import static com.vaadin.addon.spreadsheet.client.OverlayInfo.IMAGE;
-import static com.vaadin.addon.spreadsheet.client.OverlayInfo.COMPONENT;
 
 @SuppressWarnings("serial")
 public class SpreadsheetConnector extends AbstractHasComponentsConnector

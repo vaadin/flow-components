@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,11 +15,20 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Stream;
+
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.provider.AbstractDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
@@ -29,15 +38,8 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.DataProviderListenersTest;
-import elemental.json.Json;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.mockito.Mockito;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.stream.Stream;
+import elemental.json.Json;
 
 /**
  * Suite of basic tests that apply to both, ComboBox and MultiSelectComboBox
