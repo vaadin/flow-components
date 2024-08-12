@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.gridpro.tests;
 
 import java.util.ArrayList;
@@ -15,7 +23,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;

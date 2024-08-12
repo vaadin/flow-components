@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import static com.vaadin.flow.component.textfield.TextFieldVariant.LUMO_ALIGN_RIGHT;
+import static com.vaadin.flow.component.textfield.TextFieldVariant.LUMO_SMALL;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.html.Div;
@@ -23,9 +26,6 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
-
-import static com.vaadin.flow.component.textfield.TextFieldVariant.LUMO_ALIGN_RIGHT;
-import static com.vaadin.flow.component.textfield.TextFieldVariant.LUMO_SMALL;
 
 public class ValueChangeModeButtonProvider {
     private final HasValueChangeMode elementWithChangeMode;

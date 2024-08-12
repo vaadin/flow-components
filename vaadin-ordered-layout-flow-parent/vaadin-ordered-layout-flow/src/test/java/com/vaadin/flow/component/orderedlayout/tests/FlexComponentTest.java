@@ -15,12 +15,13 @@
  */
 package com.vaadin.flow.component.orderedlayout.tests;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class FlexComponentTest {
 

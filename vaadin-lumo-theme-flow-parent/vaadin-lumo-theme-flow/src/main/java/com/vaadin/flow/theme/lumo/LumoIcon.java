@@ -15,10 +15,10 @@
  */
 package com.vaadin.flow.theme.lumo;
 
+import java.util.Locale;
+
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IconFactory;
-
-import java.util.Locale;
 
 /**
  * Enumeration of all icons in the

@@ -15,11 +15,12 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import org.junit.Test;
+
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-import org.junit.Test;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/gridsetitemsafterdetachpage")
 public class GridSetItemsAfterDetachIT extends AbstractComponentIT {

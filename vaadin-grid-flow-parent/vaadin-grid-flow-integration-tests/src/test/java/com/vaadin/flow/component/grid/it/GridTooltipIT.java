@@ -15,15 +15,16 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
+
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/tooltip")
 public class GridTooltipIT extends AbstractComponentIT {

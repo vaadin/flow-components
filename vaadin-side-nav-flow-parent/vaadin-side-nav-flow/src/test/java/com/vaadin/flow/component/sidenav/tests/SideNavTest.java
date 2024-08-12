@@ -15,6 +15,11 @@
  */
 package com.vaadin.flow.component.sidenav.tests;
 
+import static com.vaadin.flow.component.sidenav.tests.SideNavTest.SetLabelOption.SET_LABEL_AFTER_ITEMS_CREATION;
+import static com.vaadin.flow.component.sidenav.tests.SideNavTest.SetLabelOption.SET_LABEL_BEFORE_ITEMS_CREATION;
+import static com.vaadin.flow.component.sidenav.tests.SideNavTest.SetLabelOption.SET_LABEL_DURING_ITEMS_CREATION;
+import static com.vaadin.flow.component.sidenav.tests.SideNavTest.SetLabelOption.SET_NO_LABEL;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -26,11 +31,6 @@ import org.junit.Test;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.dom.Element;
-
-import static com.vaadin.flow.component.sidenav.tests.SideNavTest.SetLabelOption.SET_LABEL_AFTER_ITEMS_CREATION;
-import static com.vaadin.flow.component.sidenav.tests.SideNavTest.SetLabelOption.SET_LABEL_BEFORE_ITEMS_CREATION;
-import static com.vaadin.flow.component.sidenav.tests.SideNavTest.SetLabelOption.SET_LABEL_DURING_ITEMS_CREATION;
-import static com.vaadin.flow.component.sidenav.tests.SideNavTest.SetLabelOption.SET_NO_LABEL;
 
 public class SideNavTest {
 

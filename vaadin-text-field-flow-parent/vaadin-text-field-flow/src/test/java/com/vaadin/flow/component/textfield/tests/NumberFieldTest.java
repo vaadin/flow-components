@@ -15,6 +15,16 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import java.util.Arrays;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.UI;
@@ -27,16 +37,6 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 /**
  * Tests for the {@link NumberField}.

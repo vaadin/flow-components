@@ -15,6 +15,16 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import static org.junit.Assert.assertNull;
+
+import java.math.BigDecimal;
+import java.util.Locale;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
@@ -28,17 +38,6 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import java.math.BigDecimal;
-import java.util.Locale;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 public class BigDecimalFieldTest extends TextFieldTest {
 

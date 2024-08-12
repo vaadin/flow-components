@@ -12,23 +12,22 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
-
 package com.vaadin.flow.component.datepicker;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
-import org.junit.Assert;
-import org.junit.Test;
-import org.openqa.selenium.By;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
 @TestPath("vaadin-date-picker/date-picker-i18n")
 public class DatePickerI18nIT extends AbstractComponentIT {

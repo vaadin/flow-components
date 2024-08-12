@@ -1,13 +1,22 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests.fixtures;
 
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
+
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 public class HyperLinkFixture implements SpreadsheetFixture {
 

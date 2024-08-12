@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import static org.junit.Assert.assertFalse;
+import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
+
 import java.util.List;
 
 import org.junit.Assert;
@@ -26,12 +29,9 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-
-import static org.junit.Assert.assertFalse;
-import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for {@link IntegerField}.

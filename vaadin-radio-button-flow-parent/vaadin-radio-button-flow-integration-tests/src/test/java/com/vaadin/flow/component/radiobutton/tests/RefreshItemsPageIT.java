@@ -21,10 +21,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-radio-button/refresh-items")
 public class RefreshItemsPageIT extends AbstractComponentIT {

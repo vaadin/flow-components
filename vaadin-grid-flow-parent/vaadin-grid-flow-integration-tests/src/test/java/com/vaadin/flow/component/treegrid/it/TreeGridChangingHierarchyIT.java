@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.List;
 
 import org.junit.After;
@@ -25,11 +28,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/treegrid-changing-hierarchy")
 public class TreeGridChangingHierarchyIT extends AbstractComponentIT {

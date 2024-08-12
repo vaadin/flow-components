@@ -15,6 +15,11 @@
  */
 package com.vaadin.flow.component.button;
 
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ClickNotifier;
@@ -37,11 +42,6 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
-
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * The Button component allows users to perform actions. It comes in several

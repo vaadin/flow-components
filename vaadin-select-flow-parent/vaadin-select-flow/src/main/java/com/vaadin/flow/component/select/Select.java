@@ -15,6 +15,15 @@
  */
 package com.vaadin.flow.component.select;
 
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -66,15 +75,6 @@ import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
-
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * Select allows users to choose a single value from a list of options presented

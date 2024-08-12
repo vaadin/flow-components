@@ -20,14 +20,14 @@ import java.time.LocalDateTime;
 import org.junit.Assert;
 import org.junit.Test;
 
-import elemental.json.Json;
-
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.DomEvent;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
+
+import elemental.json.Json;
 
 public class BasicValidationTest
         extends AbstractBasicValidationTest<DateTimePicker, LocalDateTime> {

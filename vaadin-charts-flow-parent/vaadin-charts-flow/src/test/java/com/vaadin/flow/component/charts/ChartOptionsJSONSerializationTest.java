@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.charts;
 
 import static com.vaadin.flow.component.charts.util.ChartSerialization.toJSON;
@@ -10,12 +18,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.model.Lang;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
-import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChartOptionsJSONSerializationTest {

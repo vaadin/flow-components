@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
+import static com.vaadin.flow.component.dialog.tests.DialogTestPageIT.DIALOG_OVERLAY_TAG;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,8 +27,6 @@ import com.vaadin.flow.component.dialog.testbench.DialogElement;
 import com.vaadin.flow.component.html.testbench.NativeButtonElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
-
-import static com.vaadin.flow.component.dialog.tests.DialogTestPageIT.DIALOG_OVERLAY_TAG;
 
 @TestPath("vaadin-dialog/dialog-class-names-test")
 public class DialogWithClassNamesIT extends AbstractComponentIT {
