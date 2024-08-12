@@ -23,7 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.SerializableFunction;
 
 /**
  * Unit tests for Grid tooltip.

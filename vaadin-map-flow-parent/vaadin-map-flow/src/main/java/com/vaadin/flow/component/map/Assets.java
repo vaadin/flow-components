@@ -3,14 +3,14 @@
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.map;
 
-import com.vaadin.flow.server.StreamResource;
-
 import java.io.Serializable;
+
+import com.vaadin.flow.server.StreamResource;
 
 /**
  * Defines the default assets that the Map component provides

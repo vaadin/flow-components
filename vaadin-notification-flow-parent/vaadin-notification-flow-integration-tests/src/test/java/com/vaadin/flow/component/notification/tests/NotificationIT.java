@@ -19,15 +19,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.notification.testbench.NotificationElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.component.notification.testbench.NotificationElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the {@link NotificationView}.

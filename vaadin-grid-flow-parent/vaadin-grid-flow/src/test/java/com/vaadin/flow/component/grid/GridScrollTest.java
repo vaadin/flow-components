@@ -13,16 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.grid;
+
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
 import com.vaadin.flow.internal.Range;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.stream.IntStream;
 
 public class GridScrollTest {
 

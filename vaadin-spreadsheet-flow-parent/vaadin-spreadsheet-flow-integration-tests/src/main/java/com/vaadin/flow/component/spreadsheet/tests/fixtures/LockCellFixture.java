@@ -1,13 +1,22 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests.fixtures;
 
-import com.vaadin.flow.component.spreadsheet.Spreadsheet;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 public class LockCellFixture implements SpreadsheetFixture {
 

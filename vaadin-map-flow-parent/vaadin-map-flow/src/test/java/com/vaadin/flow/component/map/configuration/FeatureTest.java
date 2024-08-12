@@ -1,10 +1,19 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.map.configuration;
 
-import com.vaadin.flow.component.map.configuration.style.Style;
-import com.vaadin.flow.component.map.configuration.style.TextStyle;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.vaadin.flow.component.map.configuration.style.Style;
+import com.vaadin.flow.component.map.configuration.style.TextStyle;
 
 public class FeatureTest {
 

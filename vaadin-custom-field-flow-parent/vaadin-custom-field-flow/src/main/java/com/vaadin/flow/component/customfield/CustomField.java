@@ -19,10 +19,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.InputField;
-import com.vaadin.flow.component.shared.HasValidationProperties;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AbstractField;
@@ -32,6 +28,10 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.dom.Element;
 
 /**

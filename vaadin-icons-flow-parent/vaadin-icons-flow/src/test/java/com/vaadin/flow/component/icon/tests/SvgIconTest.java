@@ -15,14 +15,15 @@
  */
 package com.vaadin.flow.component.icon.tests;
 
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.icon.SvgIcon;
-import com.vaadin.flow.server.StreamResource;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.icon.SvgIcon;
+import com.vaadin.flow.server.StreamResource;
 
 public class SvgIconTest {
     @Test

@@ -15,11 +15,12 @@
  */
 package com.vaadin.tests;
 
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.ThemeVariant;
+import java.util.Set;
+
 import org.junit.Assert;
 
-import java.util.Set;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.ThemeVariant;
 
 /**
  * Helper class that provides methods for testing that a component correctly

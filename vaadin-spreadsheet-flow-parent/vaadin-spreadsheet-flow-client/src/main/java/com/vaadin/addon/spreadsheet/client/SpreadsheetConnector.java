@@ -3,10 +3,13 @@
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.addon.spreadsheet.client;
+
+import static com.vaadin.addon.spreadsheet.client.OverlayInfo.COMPONENT;
+import static com.vaadin.addon.spreadsheet.client.OverlayInfo.IMAGE;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +22,6 @@ import java.util.Set;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Node;
@@ -44,9 +46,6 @@ import com.vaadin.client.ui.layout.ElementResizeListener;
 import com.vaadin.component.spreadsheet.client.js.SpreadsheetServerRpcImpl;
 import com.vaadin.shared.communication.ServerRpc;
 import com.vaadin.shared.communication.SharedState;
-
-import static com.vaadin.addon.spreadsheet.client.OverlayInfo.IMAGE;
-import static com.vaadin.addon.spreadsheet.client.OverlayInfo.COMPONENT;
 
 @SuppressWarnings("serial")
 public class SpreadsheetConnector extends AbstractHasComponentsConnector

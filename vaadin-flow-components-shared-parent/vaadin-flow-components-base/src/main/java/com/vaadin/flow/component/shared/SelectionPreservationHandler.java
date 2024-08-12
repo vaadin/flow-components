@@ -15,11 +15,11 @@
  */
 package com.vaadin.flow.component.shared;
 
-import com.vaadin.flow.data.provider.DataChangeEvent;
-import com.vaadin.flow.data.provider.DataProvider;
-
 import java.io.Serializable;
 import java.util.Objects;
+
+import com.vaadin.flow.data.provider.DataChangeEvent;
+import com.vaadin.flow.data.provider.DataProvider;
 
 /**
  * Abstract class that handles selection when {@link DataProvider#refreshAll} is

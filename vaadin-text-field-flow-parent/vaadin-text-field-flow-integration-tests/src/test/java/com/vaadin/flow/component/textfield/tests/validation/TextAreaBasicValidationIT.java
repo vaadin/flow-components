@@ -15,16 +15,17 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
-import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.validation.AbstractValidationIT;
-import org.junit.Test;
-import org.openqa.selenium.Keys;
-
 import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBasicValidationPage.MAX_LENGTH_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBasicValidationPage.MIN_LENGTH_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBasicValidationPage.PATTERN_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBasicValidationPage.REQUIRED_BUTTON;
+
+import org.junit.Test;
+import org.openqa.selenium.Keys;
+
+import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.validation.AbstractValidationIT;
 
 @TestPath("vaadin-text-area/validation/basic")
 public class TextAreaBasicValidationIT
