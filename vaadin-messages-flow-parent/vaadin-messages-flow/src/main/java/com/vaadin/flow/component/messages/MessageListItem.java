@@ -1,9 +1,9 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.messages;
@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-
 import com.vaadin.flow.internal.NodeOwner;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.server.AbstractStreamResource;

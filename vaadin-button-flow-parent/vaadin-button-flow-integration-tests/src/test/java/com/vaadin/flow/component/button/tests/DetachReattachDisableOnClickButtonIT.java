@@ -1,20 +1,21 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.button.tests;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-button/detach-reattach-disable-on-click-button")
 public class DetachReattachDisableOnClickButtonIT extends AbstractComponentIT {

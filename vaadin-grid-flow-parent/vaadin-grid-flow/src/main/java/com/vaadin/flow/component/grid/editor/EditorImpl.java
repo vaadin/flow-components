@@ -1,15 +1,13 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.grid.editor;
 
-import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.internal.ExecutionContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +23,8 @@ import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertySet;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.internal.ExecutionContext;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;

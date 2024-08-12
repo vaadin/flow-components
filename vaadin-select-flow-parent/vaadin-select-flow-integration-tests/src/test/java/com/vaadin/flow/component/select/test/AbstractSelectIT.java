@@ -1,9 +1,9 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.select.test;
@@ -11,17 +11,18 @@ package com.vaadin.flow.component.select.test;
 import java.util.List;
 import java.util.function.IntSupplier;
 
-import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
-import com.vaadin.flow.component.select.examples.TestView;
-import com.vaadin.flow.component.select.testbench.SelectElement;
-import com.vaadin.flow.function.SerializablePredicate;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
+
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
+import com.vaadin.flow.component.select.examples.TestView;
+import com.vaadin.flow.component.select.testbench.SelectElement;
+import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 public abstract class AbstractSelectIT extends AbstractComponentIT {
 

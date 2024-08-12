@@ -1,9 +1,9 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.cookieconsent;
@@ -12,10 +12,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
+import org.openqa.selenium.WebElement;
+
 import com.vaadin.flow.component.cookieconsent.CookieConsent.Position;
 import com.vaadin.flow.component.cookieconsent.testbench.CookieConsentElement;
-
-import org.openqa.selenium.WebElement;
 
 public abstract class AbstractParallelTest
         extends com.vaadin.tests.AbstractParallelTest {

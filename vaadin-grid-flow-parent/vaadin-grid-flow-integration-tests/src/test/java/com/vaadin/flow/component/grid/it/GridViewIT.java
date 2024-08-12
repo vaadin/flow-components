@@ -1,21 +1,22 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.component.grid.ColumnTextAlign;
-import com.vaadin.flow.component.grid.testbench.GridColumnElement;
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
-import com.vaadin.flow.component.grid.testbench.GridTRElement;
-import com.vaadin.flow.data.provider.QuerySortOrder;
-import com.vaadin.tests.TabbedComponentDemoTest;
-import com.vaadin.testbench.TestBenchElement;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -26,14 +27,14 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
+import com.vaadin.flow.component.grid.testbench.GridColumnElement;
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
+import com.vaadin.flow.component.grid.testbench.GridTRElement;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.TabbedComponentDemoTest;
 
 /**
  * Integration tests for the {@link GridView}.

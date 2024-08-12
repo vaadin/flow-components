@@ -1,9 +1,9 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.ironlist;
@@ -19,10 +19,8 @@ import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;

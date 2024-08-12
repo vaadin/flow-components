@@ -1,12 +1,20 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.accordion.examples;
+
+import static java.util.stream.Collectors.toMap;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.accordion.Accordion;
@@ -21,14 +29,6 @@ import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.IntStream;
-
-import static java.util.stream.Collectors.toMap;
 
 @Route(value = "vaadin-accordion")
 @Theme(Lumo.class)

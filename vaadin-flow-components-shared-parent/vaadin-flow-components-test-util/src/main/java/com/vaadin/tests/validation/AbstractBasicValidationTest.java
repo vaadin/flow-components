@@ -1,9 +1,9 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.tests.validation;
@@ -13,10 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
-import com.vaadin.flow.component.shared.HasClientValidation.ClientValidatedEvent;
 
 /**
  * An abstract class that provides tests verifying that a component correctly

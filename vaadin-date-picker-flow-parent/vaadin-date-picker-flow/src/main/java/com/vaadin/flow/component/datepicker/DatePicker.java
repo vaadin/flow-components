@@ -1,9 +1,9 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.datepicker;
@@ -25,8 +25,8 @@ import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.HasValue;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -34,8 +34,8 @@ import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
-import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
+import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.DeploymentConfiguration;
 import com.vaadin.flow.function.SerializableConsumer;

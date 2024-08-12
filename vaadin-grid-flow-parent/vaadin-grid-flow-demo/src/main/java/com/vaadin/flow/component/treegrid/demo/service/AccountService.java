@@ -1,19 +1,19 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.treegrid.demo.service;
 
-import com.vaadin.flow.component.treegrid.demo.data.AccountData;
-import com.vaadin.flow.component.treegrid.demo.entity.Account;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import com.vaadin.flow.component.treegrid.demo.data.AccountData;
+import com.vaadin.flow.component.treegrid.demo.entity.Account;
 
 public class AccountService {
     private AccountData accountData = new AccountData();

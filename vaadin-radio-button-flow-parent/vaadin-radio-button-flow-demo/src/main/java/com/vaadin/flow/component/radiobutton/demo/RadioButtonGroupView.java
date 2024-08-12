@@ -1,12 +1,14 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.radiobutton.demo;
+
+import java.util.List;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Anchor;
@@ -28,8 +30,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
-
-import java.util.List;
 
 @Route("vaadin-radio-button")
 public class RadioButtonGroupView extends DemoView {

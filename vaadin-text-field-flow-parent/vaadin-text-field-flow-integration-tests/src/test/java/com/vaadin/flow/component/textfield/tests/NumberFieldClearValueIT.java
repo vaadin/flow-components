@@ -1,12 +1,15 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.textfield.tests;
+
+import static com.vaadin.flow.component.textfield.tests.NumberFieldClearValuePage.CLEAR_AND_SET_VALUE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.NumberFieldClearValuePage.CLEAR_BUTTON;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,9 +20,6 @@ import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
-
-import static com.vaadin.flow.component.textfield.tests.NumberFieldClearValuePage.CLEAR_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.NumberFieldClearValuePage.CLEAR_AND_SET_VALUE_BUTTON;
 
 @TestPath("vaadin-number-field/clear-value")
 public class NumberFieldClearValueIT extends AbstractComponentIT {

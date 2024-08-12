@@ -1,12 +1,19 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.button;
+
+import java.io.Serializable;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
@@ -19,12 +26,6 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.nodefeature.ElementAttributeMap;
 import com.vaadin.flow.internal.nodefeature.NodeFeature;
 import com.vaadin.flow.shared.Registration;
-import java.io.Serializable;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Server-side component for the <code>vaadin-button</code> element.

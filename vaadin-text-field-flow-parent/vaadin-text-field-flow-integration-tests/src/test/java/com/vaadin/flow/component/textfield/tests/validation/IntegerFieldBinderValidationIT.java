@@ -1,12 +1,20 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.textfield.tests.validation;
+
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.CLEAR_VALUE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.MAX_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.MIN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.STEP_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
 import org.junit.Test;
 import org.openqa.selenium.Keys;
@@ -14,14 +22,6 @@ import org.openqa.selenium.Keys;
 import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
-
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.STEP_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.MIN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.MAX_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.EXPECTED_VALUE_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.CLEAR_VALUE_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.REQUIRED_ERROR_MESSAGE;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBinderPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
 @TestPath("vaadin-integer-field/validation/binder")
 public class IntegerFieldBinderValidationIT

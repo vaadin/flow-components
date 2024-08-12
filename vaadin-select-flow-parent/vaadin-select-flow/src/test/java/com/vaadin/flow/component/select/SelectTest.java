@@ -1,9 +1,9 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.select;
@@ -16,15 +16,16 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableFunction;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 public class SelectTest {
 

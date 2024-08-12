@@ -1,19 +1,15 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
+import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +18,12 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
+import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for {@link TextField}.

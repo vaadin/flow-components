@@ -1,24 +1,24 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.tests.validation;
-
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractComponentIT;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import static com.vaadin.tests.validation.AbstractValidationPage.ATTACH_FIELD_BUTTON;
 import static com.vaadin.tests.validation.AbstractValidationPage.DETACH_FIELD_BUTTON;
 import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
 import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 public abstract class AbstractValidationIT<T extends TestBenchElement>
         extends AbstractComponentIT {

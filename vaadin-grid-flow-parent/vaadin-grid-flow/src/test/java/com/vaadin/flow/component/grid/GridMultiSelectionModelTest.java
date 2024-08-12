@@ -1,17 +1,22 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.grid;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,11 +33,6 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.data.selection.SelectionEvent;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 public class GridMultiSelectionModelTest {
 

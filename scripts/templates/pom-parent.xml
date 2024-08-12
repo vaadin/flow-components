@@ -14,6 +14,13 @@
     <packaging>pom</packaging>
     <name>component Parent</name>
 
+    <licenses>
+        <license>
+            <name>Vaadin Commercial License and Service Terms</name>
+            <url>https://vaadin.com/commercial-license-and-service-terms</url>
+        </license>
+    </licenses>
+
     <modules>
         <module>component-flow</module>
     </modules>

@@ -1,12 +1,14 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.treegrid.it;
+
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
@@ -17,8 +19,6 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.testutil.TestPath;
-
-import static org.junit.Assert.assertTrue;
 
 @TestPath("vaadin-grid/treegrid-huge-tree-navigation")
 public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {

@@ -1,12 +1,16 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.listbox.test;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -16,10 +20,6 @@ import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
-
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * View for {@link ListBox} demo.

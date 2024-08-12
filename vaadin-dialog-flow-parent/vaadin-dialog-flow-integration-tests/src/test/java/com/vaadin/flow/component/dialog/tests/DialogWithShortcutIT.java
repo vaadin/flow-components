@@ -1,20 +1,13 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.dialog.tests;
 
-import com.vaadin.flow.component.dialog.testbench.DialogElement;
-import com.vaadin.flow.component.html.testbench.DivElement;
-import com.vaadin.flow.component.html.testbench.InputTextElement;
-import com.vaadin.flow.component.html.testbench.NativeButtonElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -23,6 +16,14 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+
+import com.vaadin.flow.component.dialog.testbench.DialogElement;
+import com.vaadin.flow.component.html.testbench.DivElement;
+import com.vaadin.flow.component.html.testbench.InputTextElement;
+import com.vaadin.flow.component.html.testbench.NativeButtonElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-dialog/shortcuts")
 public class DialogWithShortcutIT extends AbstractComponentIT {

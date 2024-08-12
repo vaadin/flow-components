@@ -1,9 +1,9 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.grid;
@@ -15,16 +15,12 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import com.vaadin.flow.data.provider.ConfigurableFilterDataProvider;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.selection.SelectionListener;
-import com.vaadin.flow.function.SerializableBiFunction;
-import com.vaadin.flow.function.SerializableFunction;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.data.provider.ListDataProvider;
-import org.mockito.Mockito;
+import com.vaadin.flow.data.selection.SelectionListener;
 
 public class GridMultiSelectionWithIdProviderTest {
 

@@ -1,12 +1,19 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.timepicker.tests;
+
+import java.time.Duration;
+import java.time.LocalTime;
+import java.time.temporal.ChronoField;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
@@ -16,13 +23,6 @@ import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.OptionalParameter;
 import com.vaadin.flow.router.Route;
-
-import java.time.Duration;
-import java.time.LocalTime;
-import java.time.temporal.ChronoField;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.stream.Collectors;
 
 @Route("vaadin-time-picker/time-picker-localization")
 public class TimePickerLocalizationView extends Div

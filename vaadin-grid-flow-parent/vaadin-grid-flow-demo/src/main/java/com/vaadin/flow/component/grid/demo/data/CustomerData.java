@@ -1,17 +1,17 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.grid.demo.data;
 
-import com.vaadin.flow.component.grid.demo.entity.Customer;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import com.vaadin.flow.component.grid.demo.entity.Customer;
 
 public class CustomerData {
     private static final List<Customer> CUSTOMER_LIST = createCustomerList();

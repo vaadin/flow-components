@@ -1,9 +1,9 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component;
@@ -11,16 +11,16 @@ package com.vaadin.flow.component;
 import java.net.URL;
 import java.util.Optional;
 
-import com.vaadin.flow.testutil.LocalExecution;
-import com.vaadin.testbench.parallel.Browser;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import com.vaadin.tests.AbstractComponentIT;
+import com.vaadin.flow.testutil.LocalExecution;
 import com.vaadin.testbench.TestBench;
+import com.vaadin.testbench.parallel.Browser;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Temp class for disabling the w3c communication mode on remote chrome.
