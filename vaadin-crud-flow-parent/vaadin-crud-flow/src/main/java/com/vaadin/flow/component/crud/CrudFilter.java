@@ -1,9 +1,9 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.crud;
@@ -25,11 +25,11 @@ package com.vaadin.flow.component.crud;
  * #L%
  */
 
-import com.vaadin.flow.data.provider.SortDirection;
-
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import com.vaadin.flow.data.provider.SortDirection;
 
 /**
  * The filter type for use with {@link CrudGrid}. This provides information

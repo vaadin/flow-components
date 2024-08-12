@@ -1,21 +1,21 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.combobox.test.validation;
 
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractComponentIT;
+import static com.vaadin.flow.component.combobox.test.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
+import static com.vaadin.flow.component.combobox.test.validation.AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON;
 
 import org.junit.Assert;
 import org.junit.Before;
 
-import static com.vaadin.flow.component.combobox.test.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
-import static com.vaadin.flow.component.combobox.test.validation.AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 public abstract class AbstractValidationIT<T extends TestBenchElement>
         extends AbstractComponentIT {

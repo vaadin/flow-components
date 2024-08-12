@@ -1,12 +1,17 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.orderedlayout.tests;
+
+import java.util.stream.Stream;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Label;
@@ -14,10 +19,6 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.util.stream.Stream;
 
 public class LayoutDefaultsTest {
 

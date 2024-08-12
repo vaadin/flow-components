@@ -1,28 +1,30 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.upload.tests;
 
-import com.vaadin.flow.component.upload.UploadI18N;
-import com.vaadin.flow.component.upload.testbench.UploadElement;
-import com.vaadin.flow.internal.JsonSerializer;
-import com.vaadin.flow.testutil.TestPath;
-import elemental.json.Json;
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
-import elemental.json.JsonValue;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.vaadin.flow.component.upload.UploadI18N;
+import com.vaadin.flow.component.upload.testbench.UploadElement;
+import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.testutil.TestPath;
+
+import elemental.json.Json;
+import elemental.json.JsonObject;
+import elemental.json.JsonType;
+import elemental.json.JsonValue;
 
 @TestPath("vaadin-upload/i18n")
 public class UploadI18nIT extends AbstractUploadIT {

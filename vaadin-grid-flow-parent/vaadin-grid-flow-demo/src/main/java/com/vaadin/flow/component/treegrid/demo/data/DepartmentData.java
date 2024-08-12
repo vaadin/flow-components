@@ -1,19 +1,19 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.treegrid.demo.data;
-
-import com.vaadin.flow.component.treegrid.demo.entity.Department;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import com.vaadin.flow.component.treegrid.demo.entity.Department;
 
 public class DepartmentData {
     private static final List<Department> DEPARTMENT_LIST = createDepartmentList();

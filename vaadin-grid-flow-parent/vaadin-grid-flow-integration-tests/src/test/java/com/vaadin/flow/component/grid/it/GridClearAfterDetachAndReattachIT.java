@@ -1,22 +1,22 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.grid.it;
+
+import static com.vaadin.flow.component.grid.it.GridClearAfterDetachAndReattachPage.CLEAR_BUTTON_ID;
+import static com.vaadin.flow.component.grid.it.GridClearAfterDetachAndReattachPage.GRID_ID;
+import static com.vaadin.flow.component.grid.it.GridClearAfterDetachAndReattachPage.GRID_ROW_COUNT;
 
 import org.junit.Test;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
-
-import static com.vaadin.flow.component.grid.it.GridClearAfterDetachAndReattachPage.CLEAR_BUTTON_ID;
-import static com.vaadin.flow.component.grid.it.GridClearAfterDetachAndReattachPage.GRID_ID;
-import static com.vaadin.flow.component.grid.it.GridClearAfterDetachAndReattachPage.GRID_ROW_COUNT;
 
 @TestPath("vaadin-grid/clean-grid-items-after-detach-and-reattach")
 public class GridClearAfterDetachAndReattachIT extends AbstractComponentIT {

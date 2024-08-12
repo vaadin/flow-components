@@ -1,12 +1,18 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.upload.tests;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.function.Function;
+
+import org.apache.commons.io.IOUtils;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.upload.SucceededEvent;
@@ -14,11 +20,6 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.FileBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileBuffer;
 import com.vaadin.flow.router.Route;
-import org.apache.commons.io.IOUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.function.Function;
 
 /**
  * View for {@link Upload} tests using {@link FileBuffer} and

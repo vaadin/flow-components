@@ -1,35 +1,34 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.treegrid.demo;
 
-import com.vaadin.flow.component.Component;
+import java.util.Collections;
+import java.util.stream.Stream;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.demo.GridDemo.Person;
-import com.vaadin.flow.component.treegrid.demo.data.DepartmentData;
-import com.vaadin.flow.component.treegrid.demo.entity.Account;
-import com.vaadin.flow.component.treegrid.demo.entity.Department;
-import com.vaadin.flow.component.treegrid.demo.service.AccountService;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.component.treegrid.demo.data.DepartmentData;
+import com.vaadin.flow.component.treegrid.demo.entity.Account;
+import com.vaadin.flow.component.treegrid.demo.entity.Department;
+import com.vaadin.flow.component.treegrid.demo.service.AccountService;
 import com.vaadin.flow.data.provider.hierarchy.AbstractBackEndHierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.demo.DemoView;
 import com.vaadin.flow.router.Route;
-
-import java.util.Collections;
-import java.util.stream.Stream;
 
 @Route("vaadin-tree-grid")
 @JsModule("@vaadin/flow-frontend/grid-demo-styles.js")

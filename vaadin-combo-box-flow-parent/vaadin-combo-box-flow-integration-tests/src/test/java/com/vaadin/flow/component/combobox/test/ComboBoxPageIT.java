@@ -1,16 +1,17 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.combobox.test;
 
+import static org.junit.Assert.assertFalse;
+
 import java.util.List;
 
-import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,8 +20,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
-
-import static org.junit.Assert.assertFalse;
+import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-combo-box/combo-box-test")
 public class ComboBoxPageIT extends AbstractComboBoxIT {

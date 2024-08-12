@@ -1,12 +1,15 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.crud.examples;
+
+import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
+import static com.vaadin.flow.component.crud.examples.Helper.createYorubaI18n;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.button.Button;
@@ -24,9 +27,6 @@ import com.vaadin.flow.component.page.BodySize;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
-
-import static com.vaadin.flow.component.crud.examples.Helper.createPersonEditor;
-import static com.vaadin.flow.component.crud.examples.Helper.createYorubaI18n;
 
 @Route(value = "vaadin-crud")
 @Theme(Lumo.class)

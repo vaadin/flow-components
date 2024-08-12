@@ -1,12 +1,14 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.combobox.test;
+
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -14,8 +16,6 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
-
-import java.util.stream.Stream;
 
 @Route("vaadin-combo-box/refresh-empty-lazy-data-provider")
 public class RefreshEmptyLazyDataProviderPage extends Div {

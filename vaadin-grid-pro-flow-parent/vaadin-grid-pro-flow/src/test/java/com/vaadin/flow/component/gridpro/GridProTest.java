@@ -1,29 +1,30 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.gridpro;
 
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.data.provider.DataCommunicator;
-import com.vaadin.flow.data.provider.KeyMapper;
-import com.vaadin.flow.data.provider.DataProvider;
-import elemental.json.JsonObject;
-import elemental.json.impl.JreJsonFactory;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.mockito.Mockito;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.KeyMapper;
+
+import elemental.json.JsonObject;
+import elemental.json.impl.JreJsonFactory;
 
 public class GridProTest {
 

@@ -1,12 +1,14 @@
-/*
- * Copyright (C) 2024 Vaadin Ltd
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
 package com.vaadin.flow.component.datetimepicker;
+
+import static com.vaadin.flow.component.datetimepicker.ClearValuePage.CLEAR_BUTTON;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,8 +19,6 @@ import com.vaadin.flow.component.datetimepicker.testbench.DateTimePickerElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
-
-import static com.vaadin.flow.component.datetimepicker.ClearValuePage.CLEAR_BUTTON;
 
 @TestPath("vaadin-date-time-picker/clear-value")
 public class ClearValueIT extends AbstractComponentIT {
