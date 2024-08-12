@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
@@ -24,9 +27,6 @@ import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.bean.HierarchicalTestBean;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.router.Route;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Route("vaadin-grid/" + TreeGridOrderColumnsPage.VIEW)
 public class TreeGridOrderColumnsPage extends Div {

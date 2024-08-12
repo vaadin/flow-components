@@ -19,8 +19,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-dialog/content")
 public class DialogContentIT extends AbstractComponentIT {

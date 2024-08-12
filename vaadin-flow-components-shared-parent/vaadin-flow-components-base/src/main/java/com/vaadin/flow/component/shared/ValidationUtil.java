@@ -15,9 +15,9 @@
  */
 package com.vaadin.flow.component.shared;
 
-import com.vaadin.flow.data.binder.ValidationResult;
-
 import java.util.Objects;
+
+import com.vaadin.flow.data.binder.ValidationResult;
 
 /**
  * Util methods for component validation

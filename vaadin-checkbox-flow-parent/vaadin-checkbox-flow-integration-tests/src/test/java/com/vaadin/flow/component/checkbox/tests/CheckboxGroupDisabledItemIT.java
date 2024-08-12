@@ -15,15 +15,16 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.component.checkbox.testbench.CheckboxGroupElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.util.List;
 
 @TestPath("vaadin-checkbox-group-disabled-item")
 public class CheckboxGroupDisabledItemIT extends AbstractComponentIT {

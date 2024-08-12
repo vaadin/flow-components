@@ -15,11 +15,11 @@
  */
 package com.vaadin.flow.component.notification.tests;
 
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
-
 import org.junit.Test;
 import org.openqa.selenium.By;
+
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-notification/nested")
 public class NestedNotificationIT extends AbstractComponentIT {

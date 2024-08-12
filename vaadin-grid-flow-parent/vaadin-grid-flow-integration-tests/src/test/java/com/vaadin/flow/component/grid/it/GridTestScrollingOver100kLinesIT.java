@@ -22,9 +22,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/scroll-over-100k")
 public class GridTestScrollingOver100kLinesIT extends AbstractComponentIT {

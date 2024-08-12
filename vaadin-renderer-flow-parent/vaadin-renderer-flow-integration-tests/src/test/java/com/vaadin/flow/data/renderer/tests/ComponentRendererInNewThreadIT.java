@@ -15,11 +15,12 @@
  */
 package com.vaadin.flow.data.renderer.tests;
 
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
+
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-renderer-flow/component-renderer-in-new-thread")
 public class ComponentRendererInNewThreadIT extends AbstractComponentIT {

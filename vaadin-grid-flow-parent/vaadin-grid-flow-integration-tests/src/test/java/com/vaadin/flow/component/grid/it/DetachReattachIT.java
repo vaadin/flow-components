@@ -15,12 +15,13 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
+
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/detach-reattach-page")
 public class DetachReattachIT extends AbstractComponentIT {

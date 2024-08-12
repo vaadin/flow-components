@@ -15,16 +15,16 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import static com.vaadin.flow.component.textfield.tests.validation.BigDecimalFieldBinderValidationPage.CLEAR_VALUE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.BigDecimalFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.BigDecimalFieldBinderValidationPage.RESET_BEAN_BUTTON;
+
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.BigDecimalFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
-
-import static com.vaadin.flow.component.textfield.tests.validation.BigDecimalFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
-import static com.vaadin.flow.component.textfield.tests.validation.BigDecimalFieldBinderValidationPage.CLEAR_VALUE_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.BigDecimalFieldBinderValidationPage.RESET_BEAN_BUTTON;
 
 @TestPath("vaadin-big-decimal-field/validation/binder")
 public class BigDecimalFieldBinderValidationIT

@@ -15,17 +15,17 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBasicValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBasicValidationPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBasicValidationPage.PATTERN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBasicValidationPage.REQUIRED_BUTTON;
+
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
-
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBasicValidationPage.MIN_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBasicValidationPage.MAX_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBasicValidationPage.PATTERN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBasicValidationPage.REQUIRED_BUTTON;
 
 @TestPath("vaadin-password-field/validation/basic")
 public class PasswordFieldBasicValidationIT

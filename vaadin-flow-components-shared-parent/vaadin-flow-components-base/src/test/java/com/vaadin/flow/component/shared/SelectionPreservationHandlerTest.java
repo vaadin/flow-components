@@ -15,13 +15,14 @@
  */
 package com.vaadin.flow.component.shared;
 
-import com.vaadin.flow.data.provider.DataChangeEvent;
-import com.vaadin.flow.data.provider.DataProvider;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
+import com.vaadin.flow.data.provider.DataChangeEvent;
+import com.vaadin.flow.data.provider.DataProvider;
 
 /**
  * Tests for {@link SelectionPreservationHandler}.

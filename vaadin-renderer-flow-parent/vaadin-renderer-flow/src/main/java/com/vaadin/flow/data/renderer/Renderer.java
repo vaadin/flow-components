@@ -16,7 +16,7 @@
 package com.vaadin.flow.data.renderer;
 
 import java.io.Serializable;
-import com.vaadin.flow.data.provider.DataGenerator;
+
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;

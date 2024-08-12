@@ -15,19 +15,19 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.PATTERN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
+
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.EmailFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
-
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.PATTERN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.MIN_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.MAX_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
 @TestPath("vaadin-email-field/validation/binder")
 public class EmailFieldBinderValidationIT

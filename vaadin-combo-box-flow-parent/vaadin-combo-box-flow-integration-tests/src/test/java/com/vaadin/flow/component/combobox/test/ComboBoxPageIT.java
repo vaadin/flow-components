@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import static org.junit.Assert.assertFalse;
+
 import java.util.List;
 
 import org.junit.Assert;
@@ -27,8 +29,6 @@ import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
-
-import static org.junit.Assert.assertFalse;
 
 @TestPath("vaadin-combo-box/combo-box-test")
 public class ComboBoxPageIT extends AbstractComboBoxIT {

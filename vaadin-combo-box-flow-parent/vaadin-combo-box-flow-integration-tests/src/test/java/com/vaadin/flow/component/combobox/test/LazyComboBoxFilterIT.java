@@ -13,16 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.combobox.test;
 
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-combo-box/lazy-combo-box-filter")
 public class LazyComboBoxFilterIT extends AbstractComponentIT {

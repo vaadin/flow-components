@@ -15,17 +15,17 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.PATTERN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.REQUIRED_BUTTON;
+
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.EmailFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
-
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.MIN_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.MAX_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.PATTERN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBasicValidationPage.REQUIRED_BUTTON;
 
 @TestPath("vaadin-email-field/validation/basic")
 public class EmailFieldBasicValidationIT

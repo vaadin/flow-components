@@ -15,11 +15,12 @@
  */
 package com.vaadin.flow.component.textfield.validation;
 
-import com.vaadin.flow.component.textfield.BigDecimalField;
-import com.vaadin.flow.function.SerializablePredicate;
+import java.math.BigDecimal;
+
 import org.junit.Ignore;
 
-import java.math.BigDecimal;
+import com.vaadin.flow.component.textfield.BigDecimalField;
+import com.vaadin.flow.function.SerializablePredicate;
 
 public class BigDecimalFieldBinderValidationTest
         extends AbstractBinderValidationTest<BigDecimal, BigDecimalField> {

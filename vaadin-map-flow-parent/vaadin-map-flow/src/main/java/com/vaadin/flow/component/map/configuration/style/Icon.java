@@ -3,16 +3,16 @@
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.map.configuration.style;
 
+import java.io.Serializable;
+
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.server.StreamResource;
-
-import java.io.Serializable;
 
 /**
  * An icon or image that can be used to visually represent a {@link Feature}, by

@@ -15,13 +15,13 @@
  */
 package com.vaadin.flow.component.applayout.tests;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.vaadin.flow.component.applayout.testbench.AppLayoutElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
-
-import org.junit.Test;
-import org.junit.Assert;
-import org.junit.Before;
 
 @TestPath("vaadin-app-layout/i18n")
 public class AppLayoutI18nIT extends AbstractComponentIT {
