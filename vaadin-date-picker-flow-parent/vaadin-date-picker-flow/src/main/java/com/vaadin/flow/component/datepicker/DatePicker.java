@@ -82,7 +82,7 @@ import elemental.json.JsonType;
  * the format of the current locale or through the date picker overlay. The
  * overlay opens when the field is clicked and/or any input is entered when the
  * field is focused.
- * <h3>Validation</h3>
+ * <h2>Validation</h2>
  * <p>
  * DatePicker comes with a built-in validation mechanism based on constraints.
  * Validation is triggered when the user attempts to apply a date whether by
