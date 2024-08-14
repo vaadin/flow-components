@@ -15,13 +15,9 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import java.util.List;
-
 import org.hamcrest.core.StringContains;
 import org.junit.Assert;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
 import com.vaadin.flow.data.performance.TreeGridMemory;
@@ -37,29 +33,25 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
 
         TreeGridElement grid = getTreeGrid();
 
-        List<WebElement> buttons = findElements(By.tagName("button"));
-        WebElement expandSecondRowButton = buttons.get(0);
-        WebElement collapseSecondRowButton = buttons.get(1);
-
         grid.expandWithClick(2);
         grid.expandWithClick(3);
         grid.scrollToRow(300);
 
-        expandSecondRowButton.click();
+        $("button").id("expand-second-row-button").click();
 
         grid.scrollToRow(0);
         assertCellTexts(0, 0, new String[] { "Granddad 0", "Granddad 1",
                 "Dad 1/0", "Dad 1/1", "Dad 1/2", "Granddad 2", "Dad 2/0" });
 
         grid.scrollToRow(300);
-        collapseSecondRowButton.click();
+        $("button").id("collapse-second-row-button").click();
         grid.scrollToRow(0);
         assertCellTexts(0, 0, new String[] { "Granddad 0", "Granddad 1",
                 "Granddad 2", "Dad 2/0" });
 
         grid.scrollToRow(300);
-        expandSecondRowButton.click();
-        collapseSecondRowButton.click();
+        $("button").id("expand-second-row-button").click();
+        $("button").id("collapse-second-row-button").click();
         grid.scrollToRow(0);
         assertCellTexts(0, 0, new String[] { "Granddad 0", "Granddad 1",
                 "Granddad 2", "Dad 2/0" });
@@ -88,22 +80,19 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
         setupTreeGrid();
 
         TreeGridElement grid = getTreeGrid();
-        List<WebElement> buttons = findElements(By.tagName("button"));
 
-        // Init huge dataset -button
-        buttons.get(4).click();
-        // Check key -button
-        buttons.get(5).click();
+        $("button").id("init-huge-data-set").click();
+        $("button").id("check-first-root-item-key").click();
         Assert.assertEquals("First root key was not in KeyMapper as expected",
-                "true", buttons.get(5).getText());
+                "true", $("button").id("check-first-root-item-key").getText());
 
         // Scroll first root item way out of viewport and check that the key was
         // dropped
         grid.scrollToRow(200);
-        buttons.get(5).click();
+        $("button").id("check-first-root-item-key").click();
         Assert.assertEquals(
                 "First root key was in KeyMapper when it should not be",
-                "false", buttons.get(5).getText());
+                "false", $("button").id("check-first-root-item-key").getText());
     }
 
     @Test
@@ -152,11 +141,8 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
 
         TreeGridElement grid = getTreeGrid();
 
-        List<WebElement> buttons = findElements(By.tagName("button"));
-        // Init larger data set -button
-        buttons.get(2).click();
-        // Expand recursively -button
-        buttons.get(3).click();
+        $("button").id("init-large-data-set").click();
+        $("button").id("expand-recursively").click();
 
         // Scroll as far as possible
         grid.scrollToRowAndWait(1000000);
