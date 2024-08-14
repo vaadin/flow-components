@@ -1102,7 +1102,7 @@ export const spreadsheetStyles = css`
     padding-right: var(--lumo-space-xs);
   }
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .addressfield {
-    background-color: white;
+    background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
   }
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .functionfield {
