@@ -88,7 +88,7 @@ import elemental.json.JsonType;
  * Validation is triggered when the user attempts to apply a date whether by
  * entering it manually or selecting it from the overlay, or when the date is
  * updated programmatically. Validation checks if the date is parsable and
- * satisfies the defined constraints. If validation fails, the component is
+ * satisfies the specified constraints. If validation fails, the component is
  * marked as invalid and an error message is displayed (if one is provided).
  * <p>
  * The following constraints can be set:
