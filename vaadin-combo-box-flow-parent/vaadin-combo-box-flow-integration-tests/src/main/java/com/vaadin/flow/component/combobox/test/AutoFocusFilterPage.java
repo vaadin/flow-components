@@ -15,13 +15,13 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.router.Route;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
+
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.router.Route;
 
 @Route("vaadin-combo-box/auto-focus-filter")
 public class AutoFocusFilterPage extends Div {

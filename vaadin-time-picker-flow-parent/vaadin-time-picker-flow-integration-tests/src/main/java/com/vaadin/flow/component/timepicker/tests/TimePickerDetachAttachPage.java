@@ -15,13 +15,13 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
+import java.time.LocalTime;
+import java.util.Locale;
+
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.router.Route;
-
-import java.time.LocalTime;
-import java.util.Locale;
 
 /**
  * Test view for attaching / detaching {@link TimePicker}.

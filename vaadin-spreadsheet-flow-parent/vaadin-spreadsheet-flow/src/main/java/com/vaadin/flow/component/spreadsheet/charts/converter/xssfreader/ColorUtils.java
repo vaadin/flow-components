@@ -3,10 +3,15 @@
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet.charts.converter.xssfreader;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 import org.openxmlformats.schemas.drawingml.x2006.main.CTColorScheme;
 import org.openxmlformats.schemas.drawingml.x2006.main.CTGradientFillProperties;
@@ -19,11 +24,6 @@ import org.openxmlformats.schemas.drawingml.x2006.main.CTSolidColorFillPropertie
 
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartData.ColorProperties;
 import com.vaadin.flow.component.spreadsheet.charts.converter.chartdata.ChartData.GradientProperties;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
 
 class ColorUtils {
 

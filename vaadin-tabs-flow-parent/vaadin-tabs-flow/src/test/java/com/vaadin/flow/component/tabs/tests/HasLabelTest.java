@@ -15,10 +15,11 @@
  */
 package com.vaadin.flow.component.tabs.tests;
 
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.tabs.Tab;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.tabs.Tab;
 
 public class HasLabelTest {
 

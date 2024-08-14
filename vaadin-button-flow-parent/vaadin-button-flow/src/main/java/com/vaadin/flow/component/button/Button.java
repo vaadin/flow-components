@@ -15,6 +15,11 @@
  */
 package com.vaadin.flow.component.button;
 
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ClickNotifier;
@@ -38,11 +43,6 @@ import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 /**
  * The Button component allows users to perform actions. It comes in several
  * different style variants, and supports icons in addition to text labels.
@@ -50,9 +50,9 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/button", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/button", version = "24.5.0-alpha8")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 @JsModule("./buttonFunctions.js")
 public class Button extends Component

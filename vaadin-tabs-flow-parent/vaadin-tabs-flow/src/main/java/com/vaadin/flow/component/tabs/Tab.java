@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.tabs;
 
 import com.vaadin.flow.component.Component;
@@ -34,10 +33,10 @@ import com.vaadin.flow.component.shared.HasTooltip;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tab")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/tabs/src/vaadin-tab.js")
-@NpmPackage(value = "@vaadin/tabs", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/tabs", version = "24.5.0-alpha8")
 public class Tab extends Component implements HasAriaLabel, HasComponents,
         HasLabel, HasStyle, HasThemeVariant<TabVariant>, HasTooltip {
 

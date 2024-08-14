@@ -12,7 +12,6 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
 package com.vaadin.flow.component.popover;
 
@@ -23,9 +22,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import elemental.json.Json;
-import elemental.json.JsonArray;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -40,6 +36,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
@@ -48,6 +45,9 @@ import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
 
+import elemental.json.Json;
+import elemental.json.JsonArray;
+
 /**
  * Popover is a component for creating overlays that are positioned next to
  * specified component (target).
@@ -55,11 +55,12 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-popover")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
-@NpmPackage(value = "@vaadin/popover", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha8")
+@NpmPackage(value = "@vaadin/popover", version = "24.5.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
-public class Popover extends Component implements HasAriaLabel, HasComponents {
+public class Popover extends Component implements HasAriaLabel, HasComponents,
+        HasThemeVariant<PopoverVariant> {
 
     private Component target;
     private Registration targetAttachRegistration;

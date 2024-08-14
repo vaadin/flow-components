@@ -32,7 +32,7 @@ import com.vaadin.flow.component.JsonSerializable;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.shared.SlotUtils;
 
 import elemental.json.Json;
@@ -69,9 +69,9 @@ import elemental.json.JsonValue;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-form-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/form-layout", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/form-layout", version = "24.5.0-alpha8")
 @JsModule("@vaadin/form-layout/src/vaadin-form-layout.js")
 public class FormLayout extends Component
         implements HasSize, HasStyle, HasComponents, ClickNotifier<FormLayout> {
@@ -200,9 +200,9 @@ public class FormLayout extends Component
      * @author Vaadin Ltd
      */
     @Tag("vaadin-form-item")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha8")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-    @NpmPackage(value = "@vaadin/form-layout", version = "24.5.0-alpha7")
+    @NpmPackage(value = "@vaadin/form-layout", version = "24.5.0-alpha8")
     @JsModule("@vaadin/form-layout/src/vaadin-form-item.js")
     public static class FormItem extends Component
             implements HasComponents, HasStyle, ClickNotifier<FormItem> {
@@ -430,7 +430,7 @@ public class FormLayout extends Component
      * @return the created form item
      */
     public FormItem addFormItem(Component field, String label) {
-        return addFormItem(field, new Label(label));
+        return addFormItem(field, new NativeLabel(label));
     }
 
     /**

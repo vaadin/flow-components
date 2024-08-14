@@ -12,18 +12,16 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
-
 package com.vaadin.flow.component.splitlayout.tests;
-
-import com.vaadin.flow.component.splitlayout.testbench.SplitLayoutElement;
-import com.vaadin.testbench.TestBenchElement;
 
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
+
+import com.vaadin.flow.component.splitlayout.testbench.SplitLayoutElement;
+import com.vaadin.testbench.TestBenchElement;
 
 class SplitLayoutAssertions {
 

@@ -15,13 +15,13 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.router.Route;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Test view for {@link Checkbox}.

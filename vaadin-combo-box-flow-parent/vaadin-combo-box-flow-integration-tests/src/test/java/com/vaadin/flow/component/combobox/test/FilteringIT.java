@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import static com.vaadin.flow.component.combobox.test.FilteringPage.COMBOBOX_WITH_FILTERED_ITEMS_ID;
+import static com.vaadin.flow.component.combobox.test.FilteringPage.SWITCH_TO_IN_MEMORY_ITEMS_BUTTON_ID;
+import static com.vaadin.flow.component.combobox.test.FilteringPage.SWITCH_TO_UNKNOWN_ITEM_COUNT_BUTTON_ID;
+
 import java.util.List;
 
 import org.hamcrest.CoreMatchers;
@@ -25,10 +29,6 @@ import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
-
-import static com.vaadin.flow.component.combobox.test.FilteringPage.COMBOBOX_WITH_FILTERED_ITEMS_ID;
-import static com.vaadin.flow.component.combobox.test.FilteringPage.SWITCH_TO_IN_MEMORY_ITEMS_BUTTON_ID;
-import static com.vaadin.flow.component.combobox.test.FilteringPage.SWITCH_TO_UNKNOWN_ITEM_COUNT_BUTTON_ID;
 
 @TestPath("vaadin-combo-box/filtering")
 public class FilteringIT extends AbstractComboBoxIT {

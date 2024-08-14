@@ -15,6 +15,11 @@
  */
 package com.vaadin.flow.component.checkbox;
 
+import java.io.Serializable;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -38,11 +43,6 @@ import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.PropertyChangeListener;
 
-import java.io.Serializable;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-
 /**
  * Checkbox is an input field representing a binary choice.
  * <p>
@@ -56,9 +56,9 @@ import java.util.function.Function;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/checkbox", version = "24.5.0-alpha8")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         implements ClickNotifier<Checkbox>, Focusable<Checkbox>, HasAriaLabel,

@@ -12,18 +12,17 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
-
 package com.vaadin.flow.component.splitlayout.tests;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import com.vaadin.flow.component.splitlayout.test.OrientationChangeView;
 import com.vaadin.flow.component.splitlayout.testbench.SplitLayoutElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
-import org.junit.Before;
-import org.junit.Test;
 
 @TestPath("vaadin-split-layout/orientation-change")
 public class OrientationChangeIT extends AbstractComponentIT {

@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.textfield;
 
 import java.io.Serializable;
@@ -49,9 +48,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-email-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/email-field", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/email-field", version = "24.5.0-alpha8")
 @JsModule("@vaadin/email-field/src/vaadin-email-field.js")
 public class EmailField extends TextFieldBase<EmailField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
@@ -477,7 +476,8 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
         /**
          * Gets the error message displayed when the field value does not match
-         * the pattern.
+         * the default email format, or alternatively, the custom format if
+         * provided with {@link EmailField#setPattern(String)}.
          *
          * @return the error message or {@code null} if not set
          * @see EmailField#getPattern()
@@ -489,7 +489,8 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
         /**
          * Sets the error message to display when the field value does not match
-         * the pattern.
+         * the default email format, or alternatively, the custom format if
+         * provided with {@link EmailField#setPattern(String)}.
          * <p>
          * Note, custom error messages set with
          * {@link EmailField#setErrorMessage(String)} take priority over i18n

@@ -18,9 +18,9 @@ package com.vaadin.flow.component.datepicker;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-date-picker/injected-datepicker")
 public class InjectedDatePickerI18nIT extends AbstractComponentIT {

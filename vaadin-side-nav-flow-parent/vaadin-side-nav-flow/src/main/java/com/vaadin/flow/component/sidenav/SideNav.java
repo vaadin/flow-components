@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.sidenav;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
@@ -23,9 +26,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JsonSerializer;
-
-import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * A side navigation menu with support for hierarchical and flat menus.
@@ -37,7 +37,7 @@ import java.util.Objects;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav")
-@NpmPackage(value = "@vaadin/side-nav", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/side-nav", version = "24.5.0-alpha8")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
 public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
 
