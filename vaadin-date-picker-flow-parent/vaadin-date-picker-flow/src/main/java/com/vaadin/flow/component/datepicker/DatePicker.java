@@ -91,7 +91,7 @@ import elemental.json.JsonType;
  * satisfies the specified constraints. If validation fails, the component is
  * marked as invalid and an error message is displayed (if one is provided).
  * <p>
- * The following constraints can be set:
+ * The following constraints are supported:
  * <ul>
  * <li>{@link #setRequiredIndicatorVisible(boolean)}
  * <li>{@link #setMin(LocalDate)}
