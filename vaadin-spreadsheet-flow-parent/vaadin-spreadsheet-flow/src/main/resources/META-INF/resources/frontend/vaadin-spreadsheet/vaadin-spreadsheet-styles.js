@@ -1150,6 +1150,7 @@ export const spreadsheetStyles = css`
   :host([theme~="lumo"]) .v-spreadsheet .rh.selected-row-header {
     border-right: 2px solid var(--lumo-primary-color-50pct);
     background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct)) !important;
+    background-color: var(--lumo-base-color) !important;
   }
   :host([theme~="lumo"]) .v-spreadsheet .rh .header-resize-dnd-second {
     border-bottom: 1px solid var(--lumo-contrast-20pct);
@@ -1165,6 +1166,7 @@ export const spreadsheetStyles = css`
   :host([theme~="lumo"]) .v-spreadsheet .ch.selected-column-header {
     border-bottom: 2px solid var(--lumo-primary-color-50pct);
     background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct)) !important;
+    background-color: var(--lumo-base-color) !important;
   }
   :host([theme~="lumo"]) .v-spreadsheet .ch .header-resize-dnd-second {
     border-right: 1px solid var(--lumo-contrast-20pct);
