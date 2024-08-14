@@ -99,7 +99,10 @@ import elemental.json.JsonType;
  * </ul>
  * <p>
  * Error messages for unparsable input and constraint violations can be
- * configured using the respective properties in the {@link DatePickerI18n} object.
+ * configured with the respective properties in the {@link DatePickerI18n} object. If you want to
+ * provide a single error message for all constraints, you can also use the
+ * {@link #setErrorMessage(String)} method. Note that error messages set with
+ * {@link #setErrorMessage(String)} will take priority over i18n error messages.
  * <p>
  * In addition to validation, constraints may also have a visual representation.
  * For example, dates before the minimum date appear disabled in the overlay.
