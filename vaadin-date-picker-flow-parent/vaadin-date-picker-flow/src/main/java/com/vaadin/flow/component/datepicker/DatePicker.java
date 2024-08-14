@@ -84,7 +84,7 @@ import elemental.json.JsonType;
  * field is focused.
  * <h2>Validation</h2>
  * <p>
- * DatePicker comes with a built-in validation mechanism based on constraints.
+ * Date Picker comes with a built-in validation mechanism based on constraints.
  * Validation is triggered when the user attempts to apply a date whether by
  * entering it manually or selecting it from the overlay, or when the date is
  * updated programmatically. Validation checks if the date is parsable and
