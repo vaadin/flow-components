@@ -86,11 +86,11 @@ import elemental.json.JsonType;
  * <h2>Validation</h2>
  * <p>
  * Date Picker comes with a built-in validation mechanism based on constraints.
- * Validation is triggered when the user attempts to apply a date whether by
- * entering it manually or selecting it from the overlay, or when the date is
- * updated programmatically. Validation checks if the date is parsable and
- * satisfies the specified constraints. If validation fails, the component is
- * marked as invalid and an error message is displayed (if one is provided).
+ * Validation is triggered when the user attempts to apply a date by entering it
+ * manually, selecting it from the overlay, etc, or when the date is updated
+ * programmatically. Validation checks if the date is parsable and satisfies the
+ * specified constraints. If validation fails, the component is marked as
+ * invalid and an error message is displayed (if one is provided).
  * <p>
  * The following constraints are supported:
  * <ul>
