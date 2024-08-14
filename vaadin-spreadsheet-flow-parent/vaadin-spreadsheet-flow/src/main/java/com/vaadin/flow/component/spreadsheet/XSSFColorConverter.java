@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2023 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet;
@@ -241,7 +241,7 @@ public class XSSFColorConverter implements ColorConverter {
         defaultBackgroundColor = styleColor(fillBackgroundColorColor);
 
         if (defaultBackgroundColor == null) {
-            defaultBackgroundColor = "rgba(255,255,255,1.0);";
+            defaultBackgroundColor = "var(--lumo-base-color);";
         }
         sb.append("background-color:");
         sb.append(defaultBackgroundColor);
@@ -250,7 +250,7 @@ public class XSSFColorConverter implements ColorConverter {
         defaultColor = styleColor(xssfColor);
 
         if (defaultColor == null) {
-            defaultColor = "rgba(0,0,0,1.0);";
+            defaultColor = "var(--lumo-body-text-color);";
         }
         sb.append("color:");
         sb.append(defaultColor);
