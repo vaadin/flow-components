@@ -1115,13 +1115,6 @@ export const spreadsheetStyles = css`
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .formulaoverlay span {
     border-radius: var(--lumo-border-radius-s);
   }
-  }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet .cell {
-    background-color: var(--lumo-base-color);
-    border-right: 1px solid var(--lumo-contrast-20pct);
-    border-bottom: 1px solid var(--lumo-contrast-20pct);
-    padding: 0px var(--lumo-space-xs);
-  }
   :host([theme~="lumo"]) .v-spreadsheet .sheet .cell.selected-cell-highlight {
     outline: solid var(--lumo-contrast-80pct) 1px;
   }
@@ -1144,9 +1137,12 @@ export const spreadsheetStyles = css`
   .v-spreadsheet .rh,
   .v-spreadsheet .corner {
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
-    background-color: white;
+    background-color: var(--lumo-base-color);
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
+  }
+  :host([theme~="lumo"]) .v-spreadsheet .corner {
+    width: 51px;
   }
   :host([theme~="lumo"]) .v-spreadsheet .rh {
     border-right: 1px solid var(--lumo-contrast-20pct);
@@ -1162,7 +1158,7 @@ export const spreadsheetStyles = css`
     border-bottom: 1px solid var(--lumo-contrast-20pct);
   }
   :host([theme~="lumo"]) .v-spreadsheet .ch {
-    background-color: white;
+    background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     border-bottom: 1px solid var(--lumo-contrast-20pct);
   }
@@ -1239,7 +1235,7 @@ export const spreadsheetStyles = css`
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
     font-weight: 400;
-    background-color: white;
+    background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     color: var(--lumo-body-text-color);
     border-right: 1px solid var(--lumo-contrast-20pct);
@@ -1280,7 +1276,7 @@ export const spreadsheetStyles = css`
     aspect-ratio: 1 / 1;
     width: auto;
     border: solid 1px var(--lump-contrast-20pct);
-    background-color: white;
+    background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     border-radius: var(--lumo-border-radius-s);
   }
@@ -1304,7 +1300,7 @@ export const spreadsheetStyles = css`
   }
   :host([theme~="lumo"]) .v-spreadsheet .col-group-pane,
   .v-spreadsheet .col-group-freeze-pane {
-    background-color: white;
+    background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     border-bottom: 1px solid var(--lumo-contrast-20pct);
   }
@@ -1331,7 +1327,7 @@ export const spreadsheetStyles = css`
   }
   :host([theme~="lumo"]) .v-spreadsheet .row-group-pane,
   .v-spreadsheet .row-group-freeze-pane {
-    background-color: white;
+    background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     border-right: 1px solid var(--lumo-contrast-20pct);
   }
@@ -1373,19 +1369,19 @@ export const spreadsheetStyles = css`
   :host([theme~="lumo"]) .v-spreadsheet .grouping-corner {
     border-right: 1px solid var(--lumo-contrast-20pct);
     border-bottom: 1px solid var(--lumo-contrast-20pct);
-    background-color: white;
+    background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));        
   }
   :host([theme~="lumo"]) .v-spreadsheet .col-group-summary {
     border-bottom: 1px solid var(--lumo-contrast-20pct);
     border-right: 1px solid var(--lumo-contrast-20pct);
-    background-color: white;
+    background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
   }
   :host([theme~="lumo"]) .v-spreadsheet .row-group-summary {
     border-bottom: 1px solid var(--lumo-contrast-20pct);
     border-right: 1px solid var(--lumo-contrast-20pct);
-    background-color: white;
+    background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
   }
   :host([theme~="lumo"]) .cell-range-bg-color {
