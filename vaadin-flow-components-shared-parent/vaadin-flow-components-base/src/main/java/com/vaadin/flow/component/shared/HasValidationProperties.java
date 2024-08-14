@@ -27,10 +27,9 @@ import com.vaadin.flow.component.HasValidation;
 public interface HasValidationProperties extends HasElement, HasValidation {
 
     /**
-     * Sets an error message to display for all constraint violations.
-     * <p>
-     * This error message takes priority over i18n error messages when both are
-     * set.
+     * Sets a single error message to display for all constraint violations. The
+     * error message will be only displayed when the field is highlighted as invalid,
+     * see {@link #isInvalid()}.
      *
      * @param errorMessage
      *            the error message to set, or {@code null} to clear
@@ -42,7 +41,9 @@ public interface HasValidationProperties extends HasElement, HasValidation {
     }
 
     /**
-     * Gets the error message displayed for all constraint violations.
+     * Gets the error message set with {@link #setErrorMessage(String)} and
+     * displayed for all constraint violations. If not set and the value is
+     * currently invalid, the method returns the current i18n error message.
      *
      * @return the error message
      */

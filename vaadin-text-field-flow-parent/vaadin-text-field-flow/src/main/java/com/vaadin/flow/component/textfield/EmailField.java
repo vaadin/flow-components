@@ -37,13 +37,53 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 
 /**
  * Email Field is an extension of Text Field that only accepts email addresses
- * as input. If the given address is invalid, the field is highlighted in red
- * and an error message appears underneath the input. The validity of the email
- * addresses is checked according to the RFC 5322 standard, which includes the
- * format for email addresses. The component also supports supplying additional
- * validation criteria using a regular expression (see
- * {@link #setPattern(String)}). These extra validation criteria can be used,
+ * as input.
+ *
+ * <h2>Validation</h2>
+ * <p>
+ * Email Field comes with a built-in validation mechanism based on constraints.
+ * Validation is triggered when the user applies an email address by pressing
+ * Enter, blurring the field, etc, or when the value is updated
+ * programmatically. In eager and lazy value change modes, validation is
+ * triggered on every key press with a delay according to the selected mode.
+ * <p>
+ * By default, validation checks if the email address adheres to the correct
+ * format according to the RFC 5322 standard and satisfies the specified
+ * constraints. If validation fails, the component is marked as invalid and an
+ * error message is displayed below the input.
+ * <p>
+ * The following constraints are supported:
+ * <ul>
+ * <li>{@link #setRequiredIndicatorVisible(boolean)}
+ * <li>{@link #setMinLength(int)}
+ * <li>{@link #setMaxLength(int)}
+ * <li>{@link #setPattern(String)}
+ * </ul>
+ * <p>
+ * {@link #setPattern(String)} can be used to modify the default email format,
  * for example, to require a specific email domain.
+ * <p>
+ * Error messages for email format and constraints can be configured with the
+ * {@link EmailFieldI18n} object, using the respective properties. If you want
+ * to provide a single catch-all error message, you can also use the
+ * {@link #setErrorMessage(String)} method. Note that error messages set with
+ * {@link #setErrorMessage(String)} will take priority over i18n error messages.
+ * <p>
+ * In addition to validation, constraints may also limit user input. For
+ * example, the browser will prevent the user from entering more text than
+ * specified by the maximum length constraint.
+ * <p>
+ * For more advanced validation that requires custom rules, you can use
+ * {@link Binder}. By default, before running custom validators, Binder will
+ * also check the component constraints using error messages from the
+ * {@link EmailFieldI18n} object. The exception is the required constraint, for
+ * which Binder has its own implementation.
+ * <p>
+ * However, if Binder doesn't fit your needs and you want to implement fully
+ * custom validation logic, you can disable the constraint validation by setting
+ * {@link #setManualValidation(boolean)} to true. This will allow you to control
+ * the invalid state and the error message manually using
+ * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd.
  */
@@ -203,11 +243,36 @@ public class EmailField extends TextFieldBase<EmailField, String>
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
+     * Distinct error messages for different constraints can be configured with
+     * the {@link EmailFieldI18n} object, using the respective properties.
+     * <p>
+     * NOTE: This error message will take priority over i18n error messages if
+     * both are set.
+     */
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        super.setErrorMessage(errorMessage);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see EmailFieldI18n#setRequiredErrorMessage(String)
+     */
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
+    }
+
+    /**
      * Maximum number of characters (in Unicode code points) that the user can
-     * enter.
+     * enter. Longer emails will cause the component to invalidate.
      *
      * @param maxLength
      *            the maximum length
+     * @see EmailFieldI18n#setMaxLengthErrorMessage(String)
      */
     public void setMaxLength(int maxLength) {
         getElement().setProperty("maxlength", maxLength);
@@ -215,7 +280,7 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
     /**
      * Maximum number of characters (in Unicode code points) that the user can
-     * enter.
+     * enter. Longer emails will cause the component to invalidate.
      *
      * @return the {@code maxlength} property from the webcomponent
      */
@@ -229,10 +294,11 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
     /**
      * Minimum number of characters (in Unicode code points) that the user can
-     * enter.
+     * enter. Shorter emails will cause the component to invalidate.
      *
      * @param minLength
      *            the minimum length
+     * @see EmailFieldI18n#setMinLengthErrorMessage(String)
      */
     public void setMinLength(int minLength) {
         getElement().setProperty("minlength", minLength);
@@ -240,7 +306,7 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
     /**
      * Minimum number of characters (in Unicode code points) that the user can
-     * enter.
+     * enter. Shorter emails will cause the component to invalidate.
      *
      * @return the {@code minlength} property from the webcomponent
      */
@@ -249,12 +315,16 @@ public class EmailField extends TextFieldBase<EmailField, String>
     }
 
     /**
-     * Sets a regular expression for the value to pass on the client-side. The
-     * pattern must be a valid JavaScript Regular Expression that matches the
-     * entire value, not just some subset.
+     * Sets a regular expression that specifies a custom email format. This will
+     * override the format from the RFC 5322 standard, which is used by default
+     * during validation.
+     * <p>
+     * The pattern must be a valid JavaScript Regular Expression that matches
+     * the entire value, not just some subset. Emails that do not match the
+     * pattern will cause the component to invalidate.
      *
      * @param pattern
-     *            the new String pattern
+     *            the custom format pattern
      *
      * @see <a href=
      *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern">
@@ -262,16 +332,20 @@ public class EmailField extends TextFieldBase<EmailField, String>
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern">
      *      https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
+     * @see EmailFieldI18n#setPatternErrorMessage(String)
      */
     public void setPattern(String pattern) {
         getElement().setProperty("pattern", pattern == null ? "" : pattern);
     }
 
     /**
-     * A regular expression that the value is checked against. The pattern must
-     * match the entire value, not just some subset.
+     * A regular expression that specifies a custom email format to use instead
+     * of the default format from the RFC 5322 standard during validation.
+     * <p>
+     * The pattern must match the entire value, not just some subset. Emails
+     * that do not match the pattern will cause the component to invalidate.
      *
-     * @return the {@code pattern} property from the webcomponent
+     * @return the custom format pattern
      */
     public String getPattern() {
         return getElement().getProperty("pattern");

@@ -39,6 +39,48 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * typically used for descriptions, comments, and other longer free-form
  * content.
  *
+ * <h2>Validation</h2>
+ * <p>
+ * Text Area comes with a built-in validation mechanism based on constraints.
+ * Validation is triggered when the user applies input by pressing Enter,
+ * blurring the field, etc, or when the value is updated programmatically. In
+ * eager and lazy value change modes, validation is triggered on every key press
+ * with a delay according to the selected mode.
+ * <p>
+ * Validation checks if the value satisfies the specified constraints. If any of
+ * the constraints are violated, the component is marked as invalid and an error
+ * message is displayed below the input.
+ * <p>
+ * The following constraints are supported:
+ * <ul>
+ * <li>{@link #setRequiredIndicatorVisible(boolean)}
+ * <li>{@link #setMinLength(int)}
+ * <li>{@link #setMaxLength(int)}
+ * <li>{@link #setPattern(String)}
+ * </ul>
+ * <p>
+ * Error messages for constraints can be configured with the
+ * {@link TextAreaI18n} object, using the respective properties. If you want to
+ * provide a single catch-all error message, you can also use the
+ * {@link #setErrorMessage(String)} method. Note that error messages set with
+ * {@link #setErrorMessage(String)} will take priority over i18n error messages.
+ * <p>
+ * In addition to validation, constraints may also limit user input. For
+ * example, the browser will prevent the user from entering more text than
+ * specified by the max length constraint.
+ * <p>
+ * For more advanced validation that requires custom rules, you can use
+ * {@link Binder}. By default, before running custom validators, Binder will
+ * also check the component constraints using error messages from the
+ * {@link TextAreaI18n} object. The exception is the required constraint, for
+ * which Binder has its own implementation.
+ * <p>
+ * However, if Binder doesn't fit your needs and you want to implement fully
+ * custom validation logic, you can disable the constraint validation by setting
+ * {@link #setManualValidation(boolean)} to true. This will allow you to control
+ * the invalid state and the error message manually using
+ * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
+ *
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-text-area")
@@ -232,42 +274,6 @@ public class TextArea extends TextFieldBase<TextArea, String>
     }
 
     /**
-     * Maximum number of characters (in Unicode code points) that the user can
-     * enter.
-     *
-     * @param maxLength
-     *            the maximum length
-     */
-    public void setMaxLength(int maxLength) {
-        getElement().setProperty("maxlength", maxLength);
-    }
-
-    /**
-     * Maximum number of characters (in Unicode code points) that the user can
-     * enter.
-     *
-     * @return the {@code maxlength} property from the webcomponent
-     */
-    public int getMaxLength() {
-        return (int) getElement().getProperty("maxlength", 0.0);
-    }
-
-    private boolean hasMaxLength() {
-        return getElement().getProperty("maxlength") != null;
-    }
-
-    /**
-     * Minimum number of characters (in Unicode code points) that the user can
-     * enter.
-     *
-     * @param minLength
-     *            the minimum length
-     */
-    public void setMinLength(int minLength) {
-        getElement().setProperty("minlength", minLength);
-    }
-
-    /**
      * Scrolls the textarea to the start if it has a vertical scrollbar.
      */
     public void scrollToStart() {
@@ -282,8 +288,70 @@ public class TextArea extends TextFieldBase<TextArea, String>
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
+     * Distinct error messages for different constraints can be configured with
+     * the {@link TextAreaI18n} object, using the respective properties.
+     * <p>
+     * NOTE: This error message will take priority over i18n error messages if
+     * both are set.
+     */
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        super.setErrorMessage(errorMessage);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see TextAreaI18n#setRequiredErrorMessage(String)
+     */
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
+    }
+
+    /**
+     * Maximum number of characters (in Unicode code points) that the user can
+     * enter. Longer values will cause the component to invalidate.
+     *
+     * @see TextAreaI18n#setMaxLengthErrorMessage(String)
+     * @param maxLength
+     *            the maximum length
+     */
+    public void setMaxLength(int maxLength) {
+        getElement().setProperty("maxlength", maxLength);
+    }
+
+    /**
+     * Maximum number of characters (in Unicode code points) that the user can
+     * enter. Longer values will cause the component to invalidate.
+     *
+     * @return the {@code maxlength} property from the webcomponent
+     */
+    public int getMaxLength() {
+        return (int) getElement().getProperty("maxlength", 0.0);
+    }
+
+    private boolean hasMaxLength() {
+        return getElement().getProperty("maxlength") != null;
+    }
+
+    /**
      * Minimum number of characters (in Unicode code points) that the user can
-     * enter.
+     * enter. Shorter values will cause the component to invalidate.
+     *
+     * @see TextAreaI18n#setMinLengthErrorMessage(String)
+     * @param minLength
+     *            the minimum length
+     */
+    public void setMinLength(int minLength) {
+        getElement().setProperty("minlength", minLength);
+    }
+
+    /**
+     * Minimum number of characters (in Unicode code points) that the user can
+     * enter. Shorter values will cause the component to invalidate.
      *
      * @return the {@code minlength} property from the webcomponent
      */
@@ -292,13 +360,15 @@ public class TextArea extends TextFieldBase<TextArea, String>
     }
 
     /**
-     * Sets a regular expression for the value to pass on the client-side. The
+     * Sets a regular expression for the value to pass during validation. The
      * pattern must be a valid JavaScript Regular Expression that matches the
-     * entire value, not just some subset.
+     * entire value, not just some subset. Values that do not match the pattern
+     * will cause the component to invalidate.
      *
      * @param pattern
      *            the new String pattern
      *
+     * @see TextAreaI18n#setPatternErrorMessage(String)
      * @see <a href=
      *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern">
      *      https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern</>
@@ -311,8 +381,9 @@ public class TextArea extends TextFieldBase<TextArea, String>
     }
 
     /**
-     * A regular expression that the value is checked against. The pattern must
-     * match the entire value, not just some subset.
+     * A regular expression that the value is checked against during validation.
+     * The pattern must match the entire value, not just some subset. Values
+     * that do not match the pattern will cause the component to invalidate.
      *
      * @return the {@code pattern} property
      */
