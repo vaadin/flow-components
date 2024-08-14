@@ -22,6 +22,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
 import com.vaadin.flow.data.performance.TreeGridMemory;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-grid/treegrid-huge-tree")
 public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
@@ -32,26 +33,30 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
         setupTreeGrid();
 
         TreeGridElement grid = getTreeGrid();
+        TestBenchElement expandSecondRowButton = $("button")
+                .id("expand-second-row-button");
+        TestBenchElement collapseSecondRowButton = $("button")
+                .id("collapse-second-row-button");
 
         grid.expandWithClick(2);
         grid.expandWithClick(3);
         grid.scrollToRow(300);
 
-        $("button").id("expand-second-row-button").click();
+        expandSecondRowButton.click();
 
         grid.scrollToRow(0);
         assertCellTexts(0, 0, new String[] { "Granddad 0", "Granddad 1",
                 "Dad 1/0", "Dad 1/1", "Dad 1/2", "Granddad 2", "Dad 2/0" });
 
         grid.scrollToRow(300);
-        $("button").id("collapse-second-row-button").click();
+        collapseSecondRowButton.click();
         grid.scrollToRow(0);
         assertCellTexts(0, 0, new String[] { "Granddad 0", "Granddad 1",
                 "Granddad 2", "Dad 2/0" });
 
         grid.scrollToRow(300);
-        $("button").id("expand-second-row-button").click();
-        $("button").id("collapse-second-row-button").click();
+        expandSecondRowButton.click();
+        collapseSecondRowButton.click();
         grid.scrollToRow(0);
         assertCellTexts(0, 0, new String[] { "Granddad 0", "Granddad 1",
                 "Granddad 2", "Dad 2/0" });
@@ -81,18 +86,22 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
 
         TreeGridElement grid = getTreeGrid();
 
-        $("button").id("init-huge-data-set").click();
-        $("button").id("check-first-root-item-key").click();
+        TestBenchElement checkFirstRootItemKey = $("button")
+                .id("check-first-root-item-key");
+        TestBenchElement initHugeDataSet = $("button").id("init-huge-data-set");
+
+        initHugeDataSet.click();
+        checkFirstRootItemKey.click();
         Assert.assertEquals("First root key was not in KeyMapper as expected",
-                "true", $("button").id("check-first-root-item-key").getText());
+                "true", checkFirstRootItemKey.getText());
 
         // Scroll first root item way out of viewport and check that the key was
         // dropped
         grid.scrollToRow(200);
-        $("button").id("check-first-root-item-key").click();
+        checkFirstRootItemKey.click();
         Assert.assertEquals(
                 "First root key was in KeyMapper when it should not be",
-                "false", $("button").id("check-first-root-item-key").getText());
+                "false", checkFirstRootItemKey.getText());
     }
 
     @Test
