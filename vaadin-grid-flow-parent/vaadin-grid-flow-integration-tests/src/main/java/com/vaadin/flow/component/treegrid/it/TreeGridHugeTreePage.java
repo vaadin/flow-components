@@ -39,21 +39,25 @@ public class TreeGridHugeTreePage extends Div {
 
         NativeButton expand = new NativeButton("Expand Granddad 1");
         expand.addClickListener(event -> treeGrid.expand("Granddad 1"));
+
         NativeButton collapse = new NativeButton("Collapse Granddad 1");
         collapse.addClickListener(event -> treeGrid.collapse("Granddad 1"));
-        NativeButton initLargeDataSet = new NativeButton(
-                "Init larger data set");
-        initLargeDataSet.addClickListener(event -> treeGrid
-                .setDataProvider(initializeDataProvider(3, 300)));
-        NativeButton initHugeDataSet = new NativeButton("Init huge data set");
-        initHugeDataSet.addClickListener(event -> treeGrid
-                .setDataProvider(initializeDataProvider(300, 1)));
+
+        NativeButton initLargeDataSet = new NativeButton("Init larger data set",
+                event -> treeGrid
+                        .setDataProvider(initializeDataProvider(3, 300)));
+
+        NativeButton initHugeDataSet = new NativeButton("Init huge data set",
+                event -> treeGrid
+                        .setDataProvider(initializeDataProvider(300, 1)));
+
         NativeButton keyChecker = new NativeButton(
-                "check key of first root item");
-        keyChecker.addClickListener(event -> {
-            keyChecker.setText(String.valueOf(treeGrid.getDataCommunicator()
-                    .getKeyMapper().has("Granddad 0")));
-        });
+                "check key of first root item", event -> {
+                    event.getSource().setText(
+                            String.valueOf(treeGrid.getDataCommunicator()
+                                    .getKeyMapper().has("Granddad 0")));
+                });
+
         NativeButton expandRecursively = new NativeButton("Expand Recursively");
         expandRecursively.addClickListener(event -> treeGrid.expandRecursively(
                 ((TreeDataProvider<String>) treeGrid.getDataProvider())
