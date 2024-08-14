@@ -34,9 +34,9 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
 
         TreeGridElement grid = getTreeGrid();
         TestBenchElement expandSecondRowButton = $("button")
-                .id("expand-second-row-button");
+                .id("expand-second-row");
         TestBenchElement collapseSecondRowButton = $("button")
-                .id("collapse-second-row-button");
+                .id("collapse-second-row");
 
         grid.expandWithClick(2);
         grid.expandWithClick(3);

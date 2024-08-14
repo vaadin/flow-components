@@ -39,12 +39,12 @@ public class TreeGridHugeTreePage extends Div {
 
         NativeButton expandSecondRow = new NativeButton("Expand Granddad 1",
                 event -> treeGrid.expand("Granddad 1"));
-        expandSecondRow.setId("expand-second-row-button");
+        expandSecondRow.setId("expand-second-row");
 
         NativeButton collapseSecondRowButton = new NativeButton(
                 "Collapse Granddad 1",
                 event -> treeGrid.collapse("Granddad 1"));
-        collapseSecondRowButton.setId("collapse-second-row-button");
+        collapseSecondRowButton.setId("collapse-second-row");
 
         NativeButton initLargeDataSet = new NativeButton("Init larger data set",
                 event -> treeGrid
