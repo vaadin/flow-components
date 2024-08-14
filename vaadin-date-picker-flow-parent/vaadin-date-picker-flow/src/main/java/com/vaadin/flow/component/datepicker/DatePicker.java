@@ -56,6 +56,7 @@ import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -103,15 +104,18 @@ import elemental.json.JsonType;
  * object. If you want to provide a single error message for all constraints,
  * including unparsable input, you can also use the
  * {@link #setErrorMessage(String)} method. Note that error messages set with
- * {@link #setErrorMessage(String)} will take priority over i18n error messages.
+ * {@link #setErrorMessage(String)} will take priority over i18n error messages
+ * if both are set.
  * <p>
  * In addition to validation, constraints may also have a visual representation.
  * For example, dates before the minimum date appear disabled in the overlay.
  * <p>
- * The constraint validation can be disabled by setting
- * {@link #setManualValidation(boolean)} to true. This will allow the invalid
- * state and the error message to be controlled manually using
- * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
+ * For more complex validation that requires custom rules, consider using
+ * {@link Binder}. However, if Binder doesn't fit your needs and you want to
+ * implement fully custom validation logic, you can disable the constraint
+ * validation by setting {@link #setManualValidation(boolean)} to true. This
+ * will allow you to control the invalid state and the error message manually
+ * using {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd
  */
