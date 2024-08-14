@@ -1062,10 +1062,10 @@ export const spreadsheetStyles = css`
     background-color: var(--lumo-base-color);
   }
 
-  :host([theme~="lumo"]) .v-spreadsheet .sheet .cell {
+  :where(:host([theme~="lumo"])) .v-spreadsheet .sheet .cell {
     font-family: var(--lumo-font-family);
-    /* color: var(--lumo-body-text-color); */
-    /* background-color: var(--lumo-base-color); */
+    color: var(--lumo-body-text-color);
+    background-color: var(--lumo-base-color);
     font-size: var(--lump-font-size-s);
     border-right: 1px solid var(--lumo-contrast-20pct);
     border-bottom: 1px solid var(--lumo-contrast-20pct);
