@@ -83,6 +83,30 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
     }
 
     @Test
+    public void root_keys_dropped_from_keymapper_properly() {
+        open();
+        setupTreeGrid();
+
+        TreeGridElement grid = getTreeGrid();
+        List<WebElement> buttons = findElements(By.tagName("button"));
+
+        // Init huge dataset -button
+        buttons.get(4).click();
+        // Check key -button
+        buttons.get(5).click();
+        Assert.assertEquals("First root key was not in KeyMapper as expected",
+                "true", buttons.get(5).getText());
+
+        // Scroll first root item way out of viewport and check that the key was
+        // dropped
+        grid.scrollToRow(200);
+        buttons.get(5).click();
+        Assert.assertEquals(
+                "First root key was in KeyMapper when it should not be",
+                "false", buttons.get(5).getText());
+    }
+
+    @Test
     public void collapsed_subtrees_outside_of_cache_stay_expanded() {
 
         if (Double.parseDouble(

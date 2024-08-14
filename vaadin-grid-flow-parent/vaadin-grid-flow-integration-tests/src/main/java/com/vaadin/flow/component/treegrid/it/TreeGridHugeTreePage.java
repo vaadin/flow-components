@@ -30,7 +30,7 @@ public class TreeGridHugeTreePage extends Div {
     public TreeGridHugeTreePage() {
 
         treeGrid = new TreeGrid<>();
-        treeGrid.setDataProvider(initializeDataProvider(3));
+        treeGrid.setDataProvider(initializeDataProvider(3, 3));
         treeGrid.setWidth("100%");
         treeGrid.addHierarchyColumn(String::toString).setHeader("String")
                 .setId("string");
@@ -43,20 +43,31 @@ public class TreeGridHugeTreePage extends Div {
         collapse.addClickListener(event -> treeGrid.collapse("Granddad 1"));
         NativeButton initLargeDataSet = new NativeButton(
                 "Init larger data set");
-        initLargeDataSet.addClickListener(
-                event -> treeGrid.setDataProvider(initializeDataProvider(300)));
+        initLargeDataSet.addClickListener(event -> treeGrid
+                .setDataProvider(initializeDataProvider(3, 300)));
+        NativeButton initHugeDataSet = new NativeButton("Init huge data set");
+        initHugeDataSet.addClickListener(event -> treeGrid
+                .setDataProvider(initializeDataProvider(300, 1)));
+        NativeButton keyChecker = new NativeButton(
+                "check key of first root item");
+        keyChecker.addClickListener(event -> {
+            keyChecker.setText(String.valueOf(treeGrid.getDataCommunicator()
+                    .getKeyMapper().has("Granddad 0")));
+        });
         NativeButton expandRecursively = new NativeButton("Expand Recursively");
         expandRecursively.addClickListener(event -> treeGrid.expandRecursively(
                 ((TreeDataProvider<String>) treeGrid.getDataProvider())
                         .getTreeData().getRootItems(),
                 2));
 
-        add(treeGrid, expand, collapse, initLargeDataSet, expandRecursively);
+        add(treeGrid, expand, collapse, initLargeDataSet, expandRecursively,
+                initHugeDataSet, keyChecker);
     }
 
-    private TreeDataProvider<String> initializeDataProvider(int dadCount) {
+    private TreeDataProvider<String> initializeDataProvider(int granddadCount,
+            int dadCount) {
         TreeData<String> data = new TreeGridStringDataBuilder()
-                .addLevel("Granddad", 3).addLevel("Dad", dadCount)
+                .addLevel("Granddad", granddadCount).addLevel("Dad", dadCount)
                 .addLevel("Son", 300).build();
         return new TreeDataProvider<>(data);
     }
