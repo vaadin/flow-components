@@ -160,7 +160,6 @@ export const spreadsheetStyles = css`
   }
   .v-spreadsheet .sheet .cell {
     box-sizing: border-box;
-    background-color: white;
     border-right: 1px solid #c7c7c7;
     border-bottom: 1px solid #c7c7c7;
     overflow: visible;
@@ -1065,8 +1064,8 @@ export const spreadsheetStyles = css`
 
   :host([theme~="lumo"]) .v-spreadsheet .sheet .cell {
     font-family: var(--lumo-font-family);
-    color: var(--lumo-body-text-color);
-    background-color: var(--lumo-base-color);
+    /* color: var(--lumo-body-text-color); */
+    /* background-color: var(--lumo-base-color); */
     font-size: var(--lump-font-size-s);
     border-right: 1px solid var(--lumo-contrast-20pct);
     border-bottom: 1px solid var(--lumo-contrast-20pct);
@@ -1218,7 +1217,7 @@ export const spreadsheetStyles = css`
     background-color: var(--lumo-success-color);
   }
   :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet {
-    background: var(--lumo-contrast-5pct);
+    background: var(--lumo-base-color);
     border-top: 1px solid var(--lumo-contrast-20pct);
   }
   :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options {
@@ -1227,10 +1226,10 @@ export const spreadsheetStyles = css`
   }
   :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div {
     cursor: var(--lumo-clickable-cursor);
-    color: var(--lumo-body-text-color);
+    color: var(--lumo-primary-text-color);
   }
   :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div:hover {
-    color: var(--lumo-primary-color);
+    background: var(--lumo-primary-color-10pct);
   }
   :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.hidden {
     color: var(--lumo-contrast-20pct);
@@ -1254,6 +1253,7 @@ export const spreadsheetStyles = css`
   :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab.selected-tab {
     background: var(--lumo-base-color);
     color: var(--lumo-primary-text-color);
+    box-shadow: var(--lumo-box-shadow-xs);
   }
   :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab.selected-tab input[type='text'] {
     font-family: var(--lumo-font-familty);
@@ -1274,8 +1274,9 @@ export const spreadsheetStyles = css`
   :host([theme~="lumo"]) .v-spreadsheet .sheet div div.popupbutton {
     color: var(--lumo-body-text-color);
     cursor: var(--lumo-clickable-cursor);
-    height: 13px;
-    width: 13px;
+    height: 100%;
+    aspect-ratio: 1 / 1;
+    width: auto;
     border: solid 1px var(--lump-contrast-20pct);
     background: var(--lumo-contrast-5pct);
     border-radius: var(--lumo-border-radius-s);
@@ -1284,6 +1285,7 @@ export const spreadsheetStyles = css`
     font-family: 'lumo-icons';
     content: var(--lumo-icons-angle-down);
     font-size: var(--lumo-font-size-xs);
+    color: var(--lumo-body-text-color);
     vertical-align: top;
   }
   :host([theme~="lumo"]) .popupbutton.active {
