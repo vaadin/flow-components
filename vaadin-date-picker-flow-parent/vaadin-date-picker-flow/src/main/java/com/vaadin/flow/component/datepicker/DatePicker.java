@@ -110,12 +110,16 @@ import elemental.json.JsonType;
  * In addition to validation, constraints may also have a visual representation.
  * For example, dates before the minimum date appear disabled in the overlay.
  * <p>
- * For more complex validation that requires custom rules, {@link Binder} is
- * available. However, if Binder doesn't fit your needs and you want to
- * implement fully custom validation logic, you can disable the constraint
- * validation by setting {@link #setManualValidation(boolean)} to true. This
- * will allow you to control the invalid state and the error message manually
- * using {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
+ * For more complex validation that requires custom rules, you can use
+ * {@link Binder}. By default, before running custom validators, Binder will
+ * also validate if the date is parsable and satisfies the component constraints
+ * using error messages from the component's i18n object.
+ * <p>
+ * However, if Binder doesn't fit your needs and you want to implement fully
+ * custom validation logic, you can disable the constraint validation by setting
+ * {@link #setManualValidation(boolean)} to true. This will allow you to control
+ * the invalid state and the error message manually using
+ * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd
  */
