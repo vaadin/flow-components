@@ -17,7 +17,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dashboard-widget")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha0")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard-widget.js")
 // @NpmPackage(value = "@vaadin/dashboard", version = "24.6.0-alpha0")
