@@ -17,6 +17,8 @@ export const spreadsheetStyles = css`
     flex: 1 1 auto;
     isolation: isolate;
     background-color: #fff;
+    --default-background-color: #fff;
+    --default-color: #000;
   }
 
   .v-disabled {
@@ -1059,6 +1061,8 @@ export const spreadsheetStyles = css`
    * Lumo theme variant styles
    */
   :host([theme~="lumo"]) {
+	--default-background-color: var(--lumo-base-color);
+	--default-color: var(--lumo-body-text-color);
     background-color: var(--lumo-base-color);
   }
 
@@ -1083,7 +1087,7 @@ export const spreadsheetStyles = css`
     border-bottom: 1px solid var(--lumo-contrast-20pct);
   }
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .functionfield,
-  .v-spreadsheet .functionbar .addressfield {
+  :host([theme~="lumo"]) .v-spreadsheet .functionbar .addressfield {
     font-size: var(--lumo-font-size-s);
     padding-left: var(--lumo-space-xs);
     color: var(--lumo-body-text-color);
@@ -1108,7 +1112,6 @@ export const spreadsheetStyles = css`
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .functionfield {
     font: unset;
   }
-
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .formulaoverlay {
     color: var(--lumo-base-color);
   }
@@ -1128,21 +1131,18 @@ export const spreadsheetStyles = css`
     background-color: var(--lumo-base-color);
   }
   :host([theme~="lumo"]) .v-spreadsheet .top-left-pane,
-  .v-spreadsheet .top-right-pane,
-  .v-spreadsheet .bottom-left-pane {
-    border-right: 1px solid var(--lumo-contrast-50pct);
+  :host([theme~="lumo"]) .v-spreadsheet .top-right-pane,
+  :host([theme~="lumo"]) .v-spreadsheet .bottom-left-pane {
+    /*border-right: 1px solid var(--lumo-contrast-50pct);*/
     border-bottom: 1px solid  var(--lumo-contrast-50pct);
   }
   :host([theme~="lumo"]) .v-spreadsheet .ch,
-  .v-spreadsheet .rh,
-  .v-spreadsheet .corner {
+  :host([theme~="lumo"]) .v-spreadsheet .rh,
+  :host([theme~="lumo"]) .v-spreadsheet .corner {
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     background-color: var(--lumo-base-color);
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
-  }
-  :host([theme~="lumo"]) .v-spreadsheet .corner {
-    width: 51px;
   }
   :host([theme~="lumo"]) .v-spreadsheet .rh {
     border-right: 1px solid var(--lumo-contrast-20pct);
@@ -1191,15 +1191,15 @@ export const spreadsheetStyles = css`
     background-color: var(--lumo-contrast-10pct) !important;
   }
   :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-top,
-  .v-spreadsheet .sheet-selection .s-left,
-  .v-spreadsheet .sheet-selection .s-bottom,
-  .v-spreadsheet .sheet-selection .s-right {
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-left,
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-bottom,
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-right {
     background-color: var(--lumo-primary-color);
   }
   :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-top.extend,
-  .v-spreadsheet .sheet-selection .s-left.extend,
-  .v-spreadsheet .sheet-selection .s-bottom.extend,
-  .v-spreadsheet .sheet-selection .s-right.extend {
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-left.extend,
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-bottom.extend,
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-right.extend {
     background-color: var(--lumo-success-color) !important;
   }
   :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-corner {
@@ -1210,9 +1210,9 @@ export const spreadsheetStyles = css`
     background-color: var(--lumo-success-color-10pct) !important;
   }
   :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.paintmode .s-top,
-  .v-spreadsheet .sheet-selection.paintmode .s-left,
-  .v-spreadsheet .sheet-selection.paintmode .s-bottom,
-  .v-spreadsheet .sheet-selection.paintmode .s-right {
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.paintmode .s-left,
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.paintmode .s-bottom,
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.paintmode .s-right {
     background-color: var(--lumo-success-color);
   }
   :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet {
@@ -1301,24 +1301,24 @@ export const spreadsheetStyles = css`
     border-radius: var(--lumo-border-radius-m);
   }
   :host([theme~="lumo"]) .v-spreadsheet .col-group-pane,
-  .v-spreadsheet .col-group-freeze-pane {
+  :host([theme~="lumo"]) .v-spreadsheet .col-group-freeze-pane {
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     border-bottom: 1px solid var(--lumo-contrast-20pct);
   }
   :host([theme~="lumo"]) .v-spreadsheet .col-group-pane .grouping,
-  .v-spreadsheet .col-group-freeze-pane .grouping {
+  :host([theme~="lumo"]) .v-spreadsheet .col-group-freeze-pane .grouping {
     border-top: 2px solid var(--lumo-contrast-20pct);
     border-left: 2px solid var(--lumo-contrast-20pct);
     cursor: var(--lumo-clickable-cursor);
   }
   :host([theme~="lumo"]) .v-spreadsheet .col-group-pane .grouping .expand,
-  .v-spreadsheet .col-group-freeze-pane .grouping .expand {
+  :host([theme~="lumo"]) .v-spreadsheet .col-group-freeze-pane .grouping .expand {
     background-color: var(--lumo-contrast-20pct);
     font-size: var(--lumo-font-size-s);
   }
   :host([theme~="lumo"]) .v-spreadsheet .col-group-pane .grouping.inversed,
-  .v-spreadsheet .col-group-freeze-pane .grouping.inversed {
+  :host([theme~="lumo"]) .v-spreadsheet .col-group-freeze-pane .grouping.inversed {
     border-right: 2px solid var(--lumo-contrast-20pct);
   }
   :host([theme~="lumo"]) .v-spreadsheet .col-group-freeze-pane {
@@ -1328,13 +1328,13 @@ export const spreadsheetStyles = css`
     border-bottom: 1px dotted var(--lumo-contrast-20pct);
   }
   :host([theme~="lumo"]) .v-spreadsheet .row-group-pane,
-  .v-spreadsheet .row-group-freeze-pane {
+  :host([theme~="lumo"]) .v-spreadsheet .row-group-freeze-pane {
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     border-right: 1px solid var(--lumo-contrast-20pct);
   }
   :host([theme~="lumo"]) .v-spreadsheet .row-group-pane .grouping,
-  .v-spreadsheet .row-group-freeze-pane .grouping {
+  :host([theme~="lumo"]) .v-spreadsheet .row-group-freeze-pane .grouping {
     border-top: 2px solid var(--lumo-contrast-20pct);
     border-left: 2px solid var(--lumo-contrast-20pct);
     cursor: var(--lumo-clickable-cursor);
@@ -1345,7 +1345,7 @@ export const spreadsheetStyles = css`
     font-size: var(--lumo-font-size-xs);
   }
   :host([theme~="lumo"]) .v-spreadsheet .row-group-pane .grouping.inversed,
-  .v-spreadsheet .row-group-freeze-pane .grouping.inversed {
+  :host([theme~="lumo"]) .v-spreadsheet .row-group-freeze-pane .grouping.inversed {
     border-bottom: 2px solid var(--lumo-contrast-20pct);
   }
   :host([theme~="lumo"]) .v-spreadsheet .row-group-freeze-pane {
@@ -1672,13 +1672,13 @@ export const spreadsheetOverlayStyles = css`
     padding: var(--lumo-space-xs) var(--lumo-space-s);
     font-size: var(--lumo-font-size-s);
   }
-  :host([theme~="lumo"])  #spreadsheet-overlays .v-tooltip .v-errormessage {
+  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage {
     background-color: var(--lumo-base-color);
     color: var(--lumo-error-color);
     margin: calc(-1 * var(--lumo-space-xs)) calc(-1 * var(--lumo-space-s));
     padding: var(--lumo-space-xs) var(--lumo-space-s);
   }
-  :host([theme~="lumo"])  #spreadsheet-overlays .v-tooltip .v-errormessage-info {
+  #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage-info {
     color: var(--lumo-error-text-color);
   }
   #spreadsheet-overlays[theme~="lumo"] .v-tooltip .v-errormessage-warning {
