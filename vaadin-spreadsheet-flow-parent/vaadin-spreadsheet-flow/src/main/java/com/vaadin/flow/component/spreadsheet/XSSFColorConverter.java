@@ -249,8 +249,8 @@ public class XSSFColorConverter implements ColorConverter {
         XSSFColor xssfColor = cs.getFont().getXSSFColor();
         defaultColor = styleColor(xssfColor);
 
-        System.out.println("DEFAULT: "+defaultColor);
-        if (defaultColor == null || defaultColor.equals("rgba(0, 0, 0, 1.0);")) {
+        if (defaultColor == null
+                || defaultColor.equals("rgba(0, 0, 0, 1.0);")) {
             defaultColor = "var(--default-color);";
         }
         sb.append("color:");
