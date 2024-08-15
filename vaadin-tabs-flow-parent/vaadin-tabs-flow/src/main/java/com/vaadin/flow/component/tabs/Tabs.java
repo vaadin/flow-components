@@ -95,7 +95,7 @@ public class Tabs extends Component
         getElement().addPropertyChangeListener(SELECTED, event -> {
             int oldIndex = selectedTab != null ? indexOf(selectedTab) : -1;
             int newIndex = getSelectedIndex();
-            if (newIndex >= getTabCount()) {
+            if (newIndex >= getComponentCount()) {
                 LoggerFactory.getLogger(getClass()).warn(String.format(
                         "The selected index is out of range: %d. Reverting to the previous index: %d.",
                         newIndex, oldIndex));
