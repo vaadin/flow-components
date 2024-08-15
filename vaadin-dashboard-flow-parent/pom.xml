@@ -10,6 +10,15 @@
     <packaging>pom</packaging>
     <name>Vaadin Dashboard Parent</name>
     <description>Vaadin Dashboard Parent</description>
+    <licenses>
+        <license>
+            <name>Vaadin Commercial License and Service Terms</name>
+            <url>https://vaadin.com/commercial-license-and-service-terms</url>
+        </license>
+    </licenses>
+    <properties>
+        <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/vaadin-commercial-license-header.txt</spotless.licence-header>
+    </properties>
     <modules>
         <module>vaadin-dashboard-flow</module>
     </modules>
