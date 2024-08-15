@@ -26,5 +26,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @Tag("vaadin-dashboard")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard-widget.js")
 @NpmPackage(value = "@vaadin/avatar", version = "24.5.0-alpha8")
+// @NpmPackage(value = "@vaadin/dashboard", version = "24.6.0-alpha0")
 public class Dashboard extends Component {
 }
