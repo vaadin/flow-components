@@ -113,7 +113,8 @@ import elemental.json.JsonType;
  * For more advanced validation that requires custom rules, you can use
  * {@link Binder}. By default, before running custom validators, Binder will
  * also check if the date is parsable and satisfies the component constraints
- * using error messages from the component's i18n object.
+ * using error messages from the {@link DatePickerI18n} object. The exception is
+ * the required constraint, for which Binder has its own implementation.
  * <p>
  * However, if Binder doesn't fit your needs and you want to implement fully
  * custom validation logic, you can disable the constraint validation by setting
