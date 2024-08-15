@@ -16,6 +16,13 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -23,6 +30,8 @@ import com.vaadin.flow.component.tabs.Tabs;
 /**
  * @author Vaadin Ltd.
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ LoggerFactory.class })
 public class TabsTest {
 
     @Rule
@@ -93,6 +102,38 @@ public class TabsTest {
 
         assertThat("Selected tab is invalid", tabs.getSelectedTab(), is(tab3));
         assertThat("Selected index is invalid", tabs.getSelectedIndex(), is(2));
+    }
+
+    @Test
+    public void selectInvalidIndex_previousIndexIsReverted() {
+        Tab tab = new Tab("Tab");
+        Tabs tabs = new Tabs(tab);
+
+        // Select index out of range
+        tabs.setSelectedIndex(10);
+        Assert.assertEquals(0, tabs.getSelectedIndex());
+
+        // Deselect the active tab
+        tabs.setSelectedIndex(-1);
+        // Select index out of range
+        tabs.setSelectedIndex(10);
+        Assert.assertEquals(-1, tabs.getSelectedIndex());
+    }
+
+    @Test
+    public void selectInvalidIndex_warningIsShown() {
+        Tab tab = new Tab("Tab");
+        Tabs tabs = new Tabs(tab);
+
+        Logger mockedLogger = Mockito.mock(Logger.class);
+        PowerMockito.mockStatic(LoggerFactory.class);
+        PowerMockito.when(LoggerFactory.getLogger(Tabs.class)).thenReturn(mockedLogger);
+
+        // Select index out of range
+        tabs.setSelectedIndex(10);
+
+        Mockito.verify(mockedLogger, Mockito.times(1)).warn(
+                "The selected index is out of range: 10. Reverting to the previous index: 0.");
     }
 
     @Test
