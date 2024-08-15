@@ -1727,6 +1727,7 @@ export const spreadsheetOverlayStyles = css`
     color: var(--lumo-body-text-color);
     box-shadow: var(--lumo-box-shadow-m);
     padding: var(--lumo-space-s);
+    border: 1px solid var(--lumo-contrast-20pct);
   }
   #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay .comment-overlay-author {
     padding-bottom: var(--lumo-space-s);
@@ -1738,6 +1739,7 @@ export const spreadsheetOverlayStyles = css`
   #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay .comment-overlay-input {
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
+    background-color: var(--lumo-base-color);
   }
   #spreadsheet-overlays[theme~="lumo"] .v-spreadsheet-comment-overlay .comment-overlay-separator {
     border-bottom: 1px solid var(--lumo-contrast-20pct);
@@ -1749,6 +1751,7 @@ export const spreadsheetOverlayStyles = css`
     background-color: var(--lumo-base-color);
     color: var(--lumo-body-text-color);
     box-shadow: var(--lumo-box-shadow-s);
+    border: 1px solid var(--lumo-contrast-20pct);
   }
   #spreadsheet-overlays[theme~="lumo"] .spreadsheet-item-filter-layout {
     gap: var(--lumo-space-xs);
