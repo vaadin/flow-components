@@ -90,7 +90,7 @@ import elemental.json.JsonType;
  * manually, selecting it from the overlay, etc, or when the date is updated
  * programmatically. Validation checks if the date is parsable and satisfies the
  * specified constraints. If validation fails, the component is marked as
- * invalid and an error message is displayed (if one is provided).
+ * invalid and an error message is displayed underneath the input.
  * <p>
  * The following constraints are supported:
  * <ul>
@@ -100,9 +100,9 @@ import elemental.json.JsonType;
  * </ul>
  * <p>
  * Error messages for unparsable input and constraint violations can be
- * configured with the respective properties in the {@link DatePickerI18n}
- * object. If you want to provide a single error message for all constraints,
- * including unparsable input, you can also use the
+ * configured with the {@link DatePickerI18n} object, using the respective
+ * properties. If you want to provide a single error message for all
+ * constraints, including unparsable input, you can also use the
  * {@link #setErrorMessage(String)} method. Note that error messages set with
  * {@link #setErrorMessage(String)} will take priority over i18n error messages
  * if both are set.
