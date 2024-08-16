@@ -114,6 +114,7 @@ public class UploadI18nIT extends AbstractUploadIT {
                 .toJson(fullTranslation);
         deeplyRemoveNullValuesFromJsonObject(fullTranslationJson);
         Map<String, String> fullTranslationMap = jsonToMap(fullTranslationJson);
+        UploadTestsI18N.OPTIONAL_KEYS.forEach(fullTranslationMap::remove);
 
         assertTranslationMapsHaveSameKeys(fullTranslationMap, translationMap);
         assertTranslationMapHasNoMissingTranslations(translationMap);
