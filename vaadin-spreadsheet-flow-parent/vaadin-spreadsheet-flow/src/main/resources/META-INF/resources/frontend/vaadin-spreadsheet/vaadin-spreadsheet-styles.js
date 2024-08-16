@@ -19,6 +19,8 @@ export const spreadsheetStyles = css`
     background-color: #fff;
     --default-background-color: #fff;
     --default-color: #000;
+    --default-font-family: Helvetica;
+    --default-font-size: 11pt;
   }
 
   .v-disabled {
@@ -1074,6 +1076,8 @@ export const spreadsheetStyles = css`
     border-right: 1px solid var(--lumo-contrast-20pct);
     border-bottom: 1px solid var(--lumo-contrast-20pct);
     padding: 0 var(--lumo-space-xs);
+    --default-font-family: var(--lumo-font-family) !important;
+    --default-font-size: var(--lumo-font-size-s) !important;
   } 
 
   :host([theme~="lumo"]) .v-spreadsheet {
