@@ -1218,6 +1218,7 @@ export const spreadsheetStyles = css`
   :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet {
     background: var(--lumo-base-color);
     border-top: 1px solid var(--lumo-contrast-20pct);
+    height: calc(var(--lumo-font-size-s) + 14px);
   }
   :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options {
     background: var(--lumo-base-color);
@@ -1246,7 +1247,7 @@ export const spreadsheetStyles = css`
     border-bottom-right-radius: var(--lumo-border-radius-m);
     border-bottom-left-radius: var(--lumo-border-radius-m);
     cursor: var(--lumo-clickable-cursor);
-    height: 18px;
+    height: calc(var(--lumo-font-size-s) + 4px);
     margin-left: var(--lumo-space-s);
     padding: var(--lumo-space-xs) var(--lumo-space-xs);
   }
