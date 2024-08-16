@@ -92,8 +92,19 @@ public class Tabs extends Component
      */
     public Tabs() {
         setSelectedIndex(-1);
-        getElement().addPropertyChangeListener(SELECTED,
-                event -> updateSelectedTab(event.isUserOriginated()));
+        getElement().addPropertyChangeListener(SELECTED, event -> {
+            int oldIndex = selectedTab != null ? indexOf(selectedTab) : -1;
+            int newIndex = getSelectedIndex();
+            if (newIndex >= getComponentCount()) {
+                LoggerFactory.getLogger(getClass()).warn(String.format(
+                        "The selected index is out of range: %d. Reverting to the previous index: %d.",
+                        newIndex, oldIndex));
+                setSelectedIndex(oldIndex);
+                return;
+            }
+
+            updateSelectedTab(event.isUserOriginated());
+        });
     }
 
     /**
