@@ -1234,6 +1234,9 @@ export const spreadsheetStyles = css`
   :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.hidden {
     color: var(--lumo-contrast-20pct);
   }
+  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container {
+    height: calc(var(--lumo-font-size-s) + 12px);
+  }
   :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab {
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
