@@ -127,7 +127,8 @@ public class TabsTest {
 
         Logger mockedLogger = Mockito.mock(Logger.class);
         PowerMockito.mockStatic(LoggerFactory.class);
-        PowerMockito.when(LoggerFactory.getLogger(Tabs.class)).thenReturn(mockedLogger);
+        PowerMockito.when(LoggerFactory.getLogger(Tabs.class))
+                .thenReturn(mockedLogger);
 
         // Select index out of range
         tabs.setSelectedIndex(10);
