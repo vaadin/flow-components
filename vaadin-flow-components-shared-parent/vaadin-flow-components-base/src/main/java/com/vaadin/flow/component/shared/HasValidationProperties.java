@@ -28,8 +28,8 @@ public interface HasValidationProperties extends HasElement, HasValidation {
 
     /**
      * Sets a single error message to display for all constraint violations. The
-     * error message will be only displayed when the field is highlighted as invalid,
-     * see {@link #isInvalid()}.
+     * error message will be only displayed when the field is highlighted as
+     * invalid, see {@link #isInvalid()}.
      *
      * @param errorMessage
      *            the error message to set, or {@code null} to clear

@@ -62,8 +62,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * Error messages for constraints can be configured with the
  * {@link TextAreaI18n} object, using the respective properties. If you want to
  * provide a single catch-all error message, you can also use the
- * {@link #setErrorMessage(String)} method. Note that error messages set with
- * {@link #setErrorMessage(String)} will take priority over i18n error messages.
+ * {@link #setErrorMessage(String)} method. Note that such an error message will
+ * take priority over i18n error messages.
  * <p>
  * In addition to validation, constraints may also limit user input. For
  * example, the browser will prevent the user from entering more text than
