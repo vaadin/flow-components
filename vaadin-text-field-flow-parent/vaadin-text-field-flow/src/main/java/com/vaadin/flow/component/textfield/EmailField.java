@@ -47,10 +47,10 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * programmatically. In eager and lazy value change modes, validation is
  * triggered on every key press with a delay according to the selected mode.
  * <p>
- * By default, validation checks if the email address adheres to the correct
- * format according to the RFC 5322 standard and satisfies the specified
- * constraints. If validation fails, the component is marked as invalid and an
- * error message is displayed below the input.
+ * By default, validation checks if the address adheres to the RFC 5322 standard
+ * email format and satisfies the specified constraints. If validation fails,
+ * the component is marked as invalid and an error message is displayed below
+ * the input.
  * <p>
  * The following constraints are supported:
  * <ul>
@@ -316,8 +316,8 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
     /**
      * Sets a regular expression that specifies a custom email format. This will
-     * override the format from the RFC 5322 standard, which is used by default
-     * during validation.
+     * override the RFC 5322 standard format, which is used by default during
+     * validation.
      * <p>
      * The pattern must be a valid JavaScript Regular Expression that matches
      * the entire value, not just some subset. Emails that do not match the
@@ -340,7 +340,7 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
     /**
      * A regular expression that specifies a custom email format to use instead
-     * of the default format from the RFC 5322 standard during validation.
+     * of the RFC 5322 standard format during validation.
      * <p>
      * The pattern must match the entire value, not just some subset. Emails
      * that do not match the pattern will cause the component to invalidate.
