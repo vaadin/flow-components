@@ -1129,8 +1129,11 @@ export const spreadsheetStyles = css`
     padding: var(--lumo-space-xs);
   }
   :host([theme~="lumo"]) .v-spreadsheet .sheet > input[type='text'] {
+    margin-left: -1px;
+    margin-top: -1px;
     box-shadow: var(--lumo-box-shadow-s);
     color: var(--lumo-body-text-color);
+    outline: 1px solid var(--lumo-primary-color) !important;
   }
   :host([theme~="lumo"]) .v-spreadsheet .sheet .floater {
     background-color: var(--lumo-base-color);
