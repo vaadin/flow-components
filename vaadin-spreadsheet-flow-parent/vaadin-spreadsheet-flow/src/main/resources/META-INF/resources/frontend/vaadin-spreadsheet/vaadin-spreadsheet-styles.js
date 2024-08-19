@@ -1093,17 +1093,16 @@ export const spreadsheetStyles = css`
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .functionfield,
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .addressfield {
     font-size: var(--lumo-font-size-s);
-    padding-left: var(--lumo-space-xs);
+    font-family: var(--lumo-font-family);
     color: var(--lumo-body-text-color);
-    background-color: unset;
-    padding: 0px 0px 0px var(--lumo-space-s);
-  }
+    background-color: var(--lumo-base-color);
+    padding: 0px 0px 0px var(--lumo-space-s);  }
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .arrow {
     font-size: var(--lumo-font-size-xs);
   }
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .fixed-left-panel {
     border-right: 1px solid var(--lumo-contrast-20pct);
-    background-color: white;
+    background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
   }
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .adjusting-right-panel {
@@ -1113,11 +1112,10 @@ export const spreadsheetStyles = css`
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
   }
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar .functionfield {
-    font: unset;
-  }
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .formulaoverlay {
-    color: var(--lumo-base-color);
+    color: var(--lumo-contrast-20pct);
+    font-family: var(--lumo-font-family);
+    font-size: var(--lumo-font-size-s);
   }
   :host([theme~="lumo"]) .v-spreadsheet .functionbar .formulaoverlay span {
     border-radius: var(--lumo-border-radius-s);
