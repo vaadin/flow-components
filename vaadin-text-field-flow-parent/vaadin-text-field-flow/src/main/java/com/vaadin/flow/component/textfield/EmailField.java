@@ -67,7 +67,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * {@link EmailFieldI18n} object, using the respective properties. If you want
  * to provide a single catch-all error message, you can also use the
  * {@link #setErrorMessage(String)} method. Note that such an error message will
- * take priority over i18n error messages.
+ * take priority over i18n error messages if both are set.
  * <p>
  * In addition to validation, constraints may also limit user input. For
  * example, the browser will prevent the user from entering more text than
