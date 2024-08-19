@@ -4033,6 +4033,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (autoCreateColumns) {
             propertySet.getProperties()
                     .filter(property -> !property.isSubProperty())
+                    .sorted((prop1, prop2) -> prop1.getName()
+                            .compareTo(prop2.getName()))
                     .forEach(this::addColumn);
         }
 
