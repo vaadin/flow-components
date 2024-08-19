@@ -1323,7 +1323,8 @@ export const spreadsheetStyles = css`
   }
   :host([theme~="lumo"]) .v-spreadsheet .col-group-pane .grouping .expand,
   :host([theme~="lumo"]) .v-spreadsheet .col-group-freeze-pane .grouping .expand {
-    background-color: var(--lumo-contrast-20pct);
+    background-color: var(--lumo-base-color);
+    background-image: linear-gradient(var(--lumo-contrast-30pct), var(--lumo-contrast-30pct));
     font-size: var(--lumo-font-size-s);
   }
   :host([theme~="lumo"]) .v-spreadsheet .col-group-pane .grouping.inversed,
@@ -1350,7 +1351,8 @@ export const spreadsheetStyles = css`
   }
   :host([theme~="lumo"]) .v-spreadsheet .row-group-pane .grouping .expand,
   .v-spreadsheet .row-group-freeze-pane .grouping .expand {
-    background-color: var(--lumo-contrast-20pct);
+    background-color: var(--lumo-base-color);
+    background-image: linear-gradient(var(--lumo-contrast-30pct), var(--lumo-contrast-30pct));
     font-size: var(--lumo-font-size-xs);
   }
   :host([theme~="lumo"]) .v-spreadsheet .row-group-pane .grouping.inversed,
