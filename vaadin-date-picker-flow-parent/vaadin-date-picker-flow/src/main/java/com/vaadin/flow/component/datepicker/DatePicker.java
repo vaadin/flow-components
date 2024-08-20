@@ -90,7 +90,7 @@ import elemental.json.JsonType;
  * manually, selecting it from the overlay, etc, or when the date is updated
  * programmatically. Validation checks if the date is parsable and satisfies the
  * specified constraints. If validation fails, the component is marked as
- * invalid and an error message is displayed underneath the input.
+ * invalid and an error message is displayed below the input.
  * <p>
  * The following constraints are supported:
  * <ul>
@@ -99,16 +99,14 @@ import elemental.json.JsonType;
  * <li>{@link #setMax(LocalDate)}
  * </ul>
  * <p>
- * Error messages for unparsable input and constraint violations can be
- * configured with the {@link DatePickerI18n} object, using the respective
- * properties. If you want to provide a single error message for all
- * constraints, including unparsable input, you can also use the
- * {@link #setErrorMessage(String)} method. Note that error messages set with
- * {@link #setErrorMessage(String)} will take priority over i18n error messages
- * if both are set.
+ * Error messages for unparsable input and constraints can be configured with
+ * the {@link DatePickerI18n} object, using the respective properties. If you
+ * want to provide a single catch-all error message, you can also use the
+ * {@link #setErrorMessage(String)} method. Note that such an error message will
+ * take priority over i18n error messages if both are set.
  * <p>
- * In addition to validation, constraints may also have a visual representation.
- * For example, dates before the minimum date appear disabled in the overlay.
+ * In addition to validation, constraints may also have a visual aspect. For
+ * example, dates before the minimum date appear disabled in the overlay.
  * <p>
  * For more advanced validation that requires custom rules, you can use
  * {@link Binder}. By default, before running custom validators, Binder will
@@ -379,9 +377,23 @@ public class DatePicker
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
+     * Distinct error messages depending on constraints can be configured with
+     * the {@link DatePickerI18n} object, using the respective properties.
+     * However, note that the error message set with
+     * {@link #setErrorMessage(String)} will take priority and override any i18n
+     * error messages if both are set.
+     */
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        HasValidationProperties.super.setErrorMessage(errorMessage);
+    }
+
+    /**
      * Sets the minimum date in the date picker. Dates before that will be
      * disabled in the popup. Manual entry of dates before the minimum will
-     * cause the component to invalidate.
+     * cause the component to invalidate. The minimum date is inclusive.
      *
      * @param min
      *            the minimum date that is allowed to be selected, or
@@ -397,7 +409,7 @@ public class DatePicker
     /**
      * Gets the minimum date in the date picker. Dates before that will be
      * disabled in the popup. Manual entry of dates before the minimum will
-     * cause the component to invalidate.
+     * cause the component to invalidate. The minimum date is inclusive.
      *
      * @return the minimum date that is allowed to be selected, or
      *         <code>null</code> if there's no minimum
@@ -409,7 +421,7 @@ public class DatePicker
     /**
      * Sets the maximum date in the date picker. Dates after that will be
      * disabled in the popup. Manual entry of dates after the maximum will cause
-     * the component to invalidate.
+     * the component to invalidate. The maximum date is inclusive.
      *
      * @param max
      *            the maximum date that is allowed to be selected, or
@@ -425,7 +437,7 @@ public class DatePicker
     /**
      * Gets the maximum date in the date picker. Dates after that will be
      * disabled in the popup. Manual entry of dates after the maximum will cause
-     * the component to invalidate.
+     * the component to invalidate. The maximum date is inclusive.
      *
      * @return the maximum date that is allowed to be selected, or
      *         <code>null</code> if there's no maximum
