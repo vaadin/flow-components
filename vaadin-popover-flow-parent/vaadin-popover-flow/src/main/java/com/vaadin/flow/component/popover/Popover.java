@@ -166,6 +166,11 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * popover is modal, interacting with elements behind it will be prevented
      * until the popover is closed.
      * <p>
+     * Setting the modal to {@code true} does not enable showing the backdrop
+     * (modality curtain) automatically. This should be done separately using
+     * {@link #setBackdropVisible(boolean)} or optionally passed as a second
+     * parameter using {@link #setModal(boolean, boolean)}.
+     * <p>
      * NOTE: this setting does not involve server-side modality, as the modal
      * popover is typically not used to prevent anything else from happening
      * while it's open.
@@ -175,9 +180,33 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * @param modal
      *            {@code true} to enable popover to open as modal, {@code false}
      *            otherwise.
+     * @see #setBackdropVisible(boolean)
+     * @see #setModal(boolean, boolean)
      */
     public void setModal(boolean modal) {
         getElement().setProperty("modal", modal);
+    }
+
+    /**
+     * Sets whether component should open modal or modeless popover and whether
+     * the component should show a backdrop (modality curtain) when opened.
+     * <p>
+     * NOTE: this setting does not involve server-side modality, as the modal
+     * popover is typically not used to prevent anything else from happening
+     * while it's open.
+     * <p>
+     * By default, the popover is non-modal and has no modality curtain.
+     *
+     * @param modal
+     *            {@code true} to enable popover to open as modal, {@code false}
+     *            otherwise.
+     * @param backdropVisible
+     *            {@code true} to show the backdrop, {@code false} otherwise.
+     * @see #setBackdropVisible(boolean)
+     */
+    public void setModal(boolean modal, boolean backdropVisible) {
+        setModal(modal);
+        setBackdropVisible(backdropVisible);
     }
 
     /**

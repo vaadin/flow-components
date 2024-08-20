@@ -265,6 +265,17 @@ public class PopoverTest {
     }
 
     @Test
+    public void setModalAndBackdropVisible() {
+        popover.setModal(true, true);
+        Assert.assertTrue(popover.isModal());
+        Assert.assertTrue(popover.isBackdropVisible());
+
+        popover.setModal(false, false);
+        Assert.assertFalse(popover.isModal());
+        Assert.assertFalse(popover.isBackdropVisible());
+    }
+
+    @Test
     public void setAutofocus_isAutofocus() {
         Assert.assertFalse(popover.isAutofocus());
         Assert.assertFalse(
