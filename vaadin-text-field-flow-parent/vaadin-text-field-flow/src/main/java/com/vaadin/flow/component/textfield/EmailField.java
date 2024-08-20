@@ -245,11 +245,11 @@ public class EmailField extends TextFieldBase<EmailField, String>
     /**
      * {@inheritDoc}
      * <p>
-     * Distinct error messages for different constraints can be configured with
+     * Distinct error messages depending on constraints can be configured with
      * the {@link EmailFieldI18n} object, using the respective properties.
-     * <p>
-     * NOTE: This error message will take priority over i18n error messages if
-     * both are set.
+     * However, note that the error message set with
+     * {@link #setErrorMessage(String)} will take priority and override any i18n
+     * error messages if both are set.
      */
     @Override
     public void setErrorMessage(String errorMessage) {
@@ -268,7 +268,8 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
     /**
      * Maximum number of characters (in Unicode code points) that the user can
-     * enter. Longer emails will cause the component to invalidate.
+     * enter. Emails with a length exceeding this limit will cause the component
+     * to invalidate. The maximum length is inclusive.
      *
      * @param maxLength
      *            the maximum length
@@ -280,7 +281,8 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
     /**
      * Maximum number of characters (in Unicode code points) that the user can
-     * enter. Longer emails will cause the component to invalidate.
+     * enter. Emails with a length exceeding this limit will cause the component
+     * to invalidate. The maximum length is inclusive.
      *
      * @return the {@code maxlength} property from the webcomponent
      */
@@ -294,7 +296,8 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
     /**
      * Minimum number of characters (in Unicode code points) that the user can
-     * enter. Shorter emails will cause the component to invalidate.
+     * enter. Emails with a length shorter than this limit will cause the
+     * component to invalidate. The minimum length is inclusive
      *
      * @param minLength
      *            the minimum length
@@ -306,7 +309,8 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
     /**
      * Minimum number of characters (in Unicode code points) that the user can
-     * enter. Shorter emails will cause the component to invalidate.
+     * enter. Emails with a length shorter than this limit will cause the
+     * component to invalidate. The minimum length is inclusive.
      *
      * @return the {@code minlength} property from the webcomponent
      */
@@ -317,11 +321,11 @@ public class EmailField extends TextFieldBase<EmailField, String>
     /**
      * Sets a regular expression that specifies a custom email format. This will
      * override the RFC 5322 standard format, which is used by default during
-     * validation.
+     * validation. Emails that do not match the pattern will cause the component
+     * to invalidate.
      * <p>
      * The pattern must be a valid JavaScript Regular Expression that matches
-     * the entire value, not just some subset. Emails that do not match the
-     * pattern will cause the component to invalidate.
+     * the entire value, not just some subset.
      *
      * @param pattern
      *            the custom format pattern
@@ -340,10 +344,10 @@ public class EmailField extends TextFieldBase<EmailField, String>
 
     /**
      * A regular expression that specifies a custom email format to use instead
-     * of the RFC 5322 standard format during validation.
+     * of the RFC 5322 standard format during validation. Emails that do not
+     * match the pattern will cause the component to invalidate.
      * <p>
-     * The pattern must match the entire value, not just some subset. Emails
-     * that do not match the pattern will cause the component to invalidate.
+     * The pattern must match the entire value, not just some subset.
      *
      * @return the custom format pattern
      */

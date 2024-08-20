@@ -257,11 +257,11 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     /**
      * {@inheritDoc}
      * <p>
-     * Distinct error messages for different constraints can be configured with
+     * Distinct error messages depending on constraints can be configured with
      * the {@link PasswordFieldI18n} object, using the respective properties.
-     * <p>
-     * NOTE: This error message will take priority over i18n error messages if
-     * both are set.
+     * However, note that the error message set with
+     * {@link #setErrorMessage(String)} will take priority and override any i18n
+     * error messages if both are set.
      */
     @Override
     public void setErrorMessage(String errorMessage) {
@@ -280,7 +280,8 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
 
     /**
      * Maximum number of characters (in Unicode code points) that the user can
-     * enter. Longer values will cause the component to invalidate.
+     * enter. Values with a length exceeding this limit will cause the component
+     * to invalidate. The maximum length is inclusive.
      *
      * @param maxLength
      *            the maximum length
@@ -292,7 +293,8 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
 
     /**
      * Maximum number of characters (in Unicode code points) that the user can
-     * enter. Longer values will cause the component to invalidate.
+     * enter. Values with a length exceeding this limit will cause the component
+     * to invalidate. The maximum length is inclusive.
      *
      * @return the {@code maxlength} property from the webcomponent
      */
@@ -306,7 +308,8 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
 
     /**
      * Minimum number of characters (in Unicode code points) that the user can
-     * enter. Shorter values will cause the component to invalidate.
+     * enter. Values with a length shorter than this limit will cause the
+     * component to invalidate. The minimum length is inclusive.
      *
      * @param minLength
      *            the minimum length
@@ -318,7 +321,8 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
 
     /**
      * Minimum number of characters (in Unicode code points) that the user can
-     * enter. Shorter values will cause the component to invalidate.
+     * enter. Values with a length shorter than this limit will cause the
+     * component to invalidate. The minimum length is inclusive.
      *
      * @return the {@code minlength} property from the webcomponent
      */
@@ -327,13 +331,14 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     }
 
     /**
-     * Sets a regular expression for the value to pass during validation. The
-     * pattern must be a valid JavaScript Regular Expression that matches the
-     * entire value, not just some subset. Values that do not match the pattern
-     * will cause the component to invalidate.
+     * Sets a regular expression for the value to pass during validation. Values
+     * that do not match the pattern will cause the component to invalidate.
+     * <p>
+     * The pattern must be a valid JavaScript Regular Expression that matches
+     * the entire value, not just some subset.
      *
      * @param pattern
-     *            the new String pattern
+     *            the new String pattern or {@code null} to clear it
      *
      * @see PasswordFieldI18n#setPatternErrorMessage(String)
      * @see <a href=
@@ -348,9 +353,11 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     }
 
     /**
-     * A regular expression that the value is checked against. The pattern must
-     * match the entire value, not just some subset. Values that do not match
-     * the pattern will cause the component to invalidate.
+     * A regular expression that the value is checked against during validation.
+     * Values that do not match the pattern will cause the component to
+     * invalidate.
+     * <p>
+     * The pattern must match the entire value, not just some subset.
      *
      * @return the {@code pattern} property from the webcomponent
      */

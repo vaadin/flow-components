@@ -28,8 +28,9 @@ public interface HasValidationProperties extends HasElement, HasValidation {
 
     /**
      * Sets a single error message to display for all constraint violations. The
-     * error message will be only displayed when the field is highlighted as
-     * invalid, see {@link #isInvalid()}.
+     * error message will only appear when the component is marked as invalid,
+     * either as a result of constraint validation or by the developer through
+     * {@link #setInvalid(boolean)} if manual validation mode is enabled.
      *
      * @param errorMessage
      *            the error message to set, or {@code null} to clear
@@ -41,9 +42,9 @@ public interface HasValidationProperties extends HasElement, HasValidation {
     }
 
     /**
-     * Gets the error message set with {@link #setErrorMessage(String)} and
-     * displayed for all constraint violations. If not set and the value is
-     * currently invalid, the method returns the current i18n error message.
+     * Gets the error message displayed for all constraint violations if it has
+     * been set with {@link #setErrorMessage(String)}. Otherwise, gets the
+     * current i18n error message if the value is currently invalid.
      *
      * @return the error message
      */
@@ -55,10 +56,10 @@ public interface HasValidationProperties extends HasElement, HasValidation {
     /**
      * Sets the invalid state of the component.
      * <p>
-     * NOTE: If you need to manually control the invalid state, consider
-     * enabling manual validation mode with
-     * {@link #setManualValidation(boolean)} to avoid potential conflicts
-     * between your custom validation and the component's built-in validation.
+     * NOTE: If you need to manually control the invalid state, enable manual
+     * validation mode with {@link #setManualValidation(boolean)} to avoid
+     * potential conflicts between your custom validation and the component's
+     * constraint validation.
      *
      * @param invalid
      *            {@code true} for invalid, {@code false} for valid
