@@ -108,6 +108,22 @@ public class MenuBarTest {
                 menuBar.getElement().getProperty("reverseCollapse", false));
     }
 
+    @Test
+    public void isTabNavigation() {
+        Assert.assertFalse(menuBar.isTabNavigation());
+        Assert.assertFalse(
+                menuBar.getElement().getProperty("tabNavigation", false));
+    }
+
+    @Test
+    public void setTabNavigation_isTabNavigation() {
+        menuBar.setTabNavigation(true);
+        Assert.assertTrue(menuBar.isTabNavigation());
+        Assert.assertTrue(
+                menuBar.getElement().getProperty("tabNavigation", false));
+    }
+
+
     private void assertChildrenAndItems(MenuItem... expected) {
         Object[] menuItems = menuBar.getChildren().toArray();
         Assert.assertArrayEquals(expected, menuItems);
