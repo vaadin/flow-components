@@ -274,4 +274,13 @@ public class PopoverTest {
         Assert.assertTrue(popover.isAutofocus());
         Assert.assertTrue(popover.getElement().getProperty("autofocus", false));
     }
+
+    @Test
+    public void popoverWithContent() {
+        Div content = new Div();
+        Popover popoverWithContent = new Popover(content);
+        Assert.assertEquals(1, popoverWithContent.getChildren().count());
+        Assert.assertSame(content,
+                popoverWithContent.getChildren().findFirst().get());
+    }
 }
