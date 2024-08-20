@@ -45,7 +45,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * Validation is triggered when the user applies an email address by pressing
  * Enter, blurring the field, etc, or when the value is updated
  * programmatically. In eager and lazy value change modes, validation is
- * triggered on every key press with a delay according to the selected mode.
+ * triggered on every character press with a delay according to the selected
+ * mode.
  * <p>
  * By default, validation checks if the address adheres to the RFC 5322 standard
  * email format and satisfies the specified constraints. If validation fails,

@@ -45,7 +45,8 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * constraints. Validation is triggered when the user applies input by pressing
  * Enter, blurring the field, etc, or when the value is updated
  * programmatically. In eager and lazy value change modes, validation is
- * triggered on every key press with a delay according to the selected mode.
+ * triggered on every character press with a delay according to the selected
+ * mode.
  * <p>
  * Validation checks if the value satisfies the specified constraints. If any of
  * the constraints are violated, the component is marked as invalid and an error
