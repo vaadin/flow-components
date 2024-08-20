@@ -83,6 +83,18 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
+     * Creates a popover with given components inside.
+     *
+     * @param components
+     *            the components inside the popover
+     * @see #add(Component...)
+     */
+    public Popover(Component... components) {
+        this();
+        add(components);
+    }
+
+    /**
      * {@code opened-changed} event is sent when the overlay opened state
      * changes.
      */
