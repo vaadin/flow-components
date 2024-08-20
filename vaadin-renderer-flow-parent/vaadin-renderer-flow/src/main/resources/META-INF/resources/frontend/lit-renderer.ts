@@ -36,7 +36,7 @@ _window.Vaadin.setLitRenderer = (
   propertyNamespace: string
 ) => {
   const callablesCreator = (itemKey: string) => {
-    return clientCallables.map((clientCallable) => (...args) => {
+    return clientCallables.map((clientCallable) => (...args: any[]) => {
       if (itemKey !== undefined) {
         returnChannel(clientCallable, itemKey, args[0] instanceof Event ? [] : [...args]);
       }

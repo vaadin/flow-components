@@ -421,6 +421,8 @@ public class UploadI18N implements Serializable {
         private List<String> size = Arrays.asList("B", "kB", "MB", "GB", "TB",
                 "PB", "EB", "ZB", "YB");
 
+        private Integer sizeBase;
+
         /**
          * unit translations with default size:
          *
@@ -433,9 +435,22 @@ public class UploadI18N implements Serializable {
         /**
          *
          * @param size
+         *            list of unit translations
          */
         public Units(List<String> size) {
             this.size = size;
+        }
+
+        /**
+         *
+         * @param size
+         *            list of unit translations
+         * @param sizeBase
+         *            units size base
+         */
+        public Units(List<String> size, Integer sizeBase) {
+            this.size = size;
+            this.sizeBase = sizeBase;
         }
 
         /**
@@ -456,6 +471,27 @@ public class UploadI18N implements Serializable {
          */
         public Units setSize(List<String> size) {
             this.size = size;
+            return this;
+        }
+
+        /**
+         * Gets the units size base.
+         *
+         * @return the units size base
+         */
+        public Integer getSizeBase() {
+            return sizeBase;
+        }
+
+        /**
+         * Sets the units size base.
+         *
+         * @param sizeBase
+         *            units size base
+         * @return units
+         */
+        public Units setSizeBase(Integer sizeBase) {
+            this.sizeBase = sizeBase;
             return this;
         }
     }
@@ -690,6 +726,20 @@ public class UploadI18N implements Serializable {
      */
     public Units getUnits() {
         return units;
+    }
+
+    /**
+     * Set unit translations.
+     *
+     * @param units
+     *            list of unit translations
+     * @param sizeBase
+     *            units size base
+     * @return i18n translations
+     */
+    public UploadI18N setUnits(List<String> units, int sizeBase) {
+        this.units = new Units(units, sizeBase);
+        return this;
     }
 
     /**
