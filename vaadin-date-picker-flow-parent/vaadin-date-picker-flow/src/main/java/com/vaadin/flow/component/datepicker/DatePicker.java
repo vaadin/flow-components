@@ -379,9 +379,9 @@ public class DatePicker
     /**
      * {@inheritDoc}
      * <p>
-     * Distinct error messages depending on constraints can be configured with
-     * the {@link DatePickerI18n} object, using the respective properties.
-     * However, note that the error message set with
+     * Distinct error messages depending on constraints and for unparsable input
+     * can be configured with the {@link DatePickerI18n} object, using the
+     * respective properties. However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
      * error messages if both are set.
      */
