@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -54,7 +55,7 @@ class UploadTestsI18N {
             .setUnits(Stream
                     .of("Б", "Кбайт", "Мбайт", "Гбайт", "Тбайт", "Пбайт",
                             "Эбайт", "Збайт", "Ибайт")
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList()), 1024);
 
     static final UploadI18N RUSSIAN_PARTIAL = new UploadI18N()
             // Only translate a single property from dropFiles
@@ -62,4 +63,6 @@ class UploadTestsI18N {
                     .setOne("Перетащите файл сюда..."))
             // Set an empty object into addFiles, but don't translate anything
             .setAddFiles(new UploadI18N.AddFiles());
+
+    static final Set<String> OPTIONAL_KEYS = Set.of("units.sizeBase");
 }
