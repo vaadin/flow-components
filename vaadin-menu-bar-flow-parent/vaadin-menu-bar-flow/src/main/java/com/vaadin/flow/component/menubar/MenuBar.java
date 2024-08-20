@@ -389,6 +389,28 @@ public class MenuBar extends Component
     }
 
     /**
+     * Sets tab navigation for the menu bar.
+     *
+     * @param tabNavigation
+     *            If {@code true}, the top-level menu items is traversable by
+     *            tab instead of arrow keys (i.e. disabling roving tabindex)
+     */
+    public void setTabNavigation(boolean tabNavigation) {
+        getElement().setProperty("tabNavigation", tabNavigation);
+    }
+
+    /**
+     * Gets whether the menu bar uses tab navigation.
+     *
+     * @return {@code true} if the top-level menu items is traversable by tab
+     *         instead of arrow keys (i.e. disabling roving tabindex)
+     *
+     */
+    public boolean isTabNavigation() {
+        return getElement().getProperty("tabNavigation", false);
+    }
+
+    /**
      * Gets the internationalization object previously set for this component.
      * <p>
      * NOTE: Updating the instance that is returned from this method will not
