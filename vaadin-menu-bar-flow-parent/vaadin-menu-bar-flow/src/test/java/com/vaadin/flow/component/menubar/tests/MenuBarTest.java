@@ -123,7 +123,6 @@ public class MenuBarTest {
                 menuBar.getElement().getProperty("tabNavigation", false));
     }
 
-
     private void assertChildrenAndItems(MenuItem... expected) {
         Object[] menuItems = menuBar.getChildren().toArray();
         Assert.assertArrayEquals(expected, menuItems);
