@@ -54,13 +54,13 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-menu-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "24.5.0-alpha7")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/menu-bar", version = "24.5.0-alpha8")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.5.0-alpha8")
 public class MenuBar extends Component
         implements HasEnabled, HasMenuItems, HasOverlayClassName, HasSize,
         HasStyle, HasThemeVariant<MenuBarVariant> {
@@ -386,6 +386,28 @@ public class MenuBar extends Component
      */
     public boolean isReverseCollapseOrder() {
         return getElement().getProperty("reverseCollapse", false);
+    }
+
+    /**
+     * Sets tab navigation for the menu bar.
+     *
+     * @param tabNavigation
+     *            If {@code true}, the top-level menu items is traversable by
+     *            tab instead of arrow keys (i.e. disabling roving tabindex)
+     */
+    public void setTabNavigation(boolean tabNavigation) {
+        getElement().setProperty("tabNavigation", tabNavigation);
+    }
+
+    /**
+     * Gets whether the menu bar uses tab navigation.
+     *
+     * @return {@code true} if the top-level menu items is traversable by tab
+     *         instead of arrow keys (i.e. disabling roving tabindex)
+     *
+     */
+    public boolean isTabNavigation() {
+        return getElement().getProperty("tabNavigation", false);
     }
 
     /**

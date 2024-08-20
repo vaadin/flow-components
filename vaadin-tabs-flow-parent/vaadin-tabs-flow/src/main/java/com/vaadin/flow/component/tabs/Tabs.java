@@ -66,10 +66,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabs")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/tabs/src/vaadin-tabs.js")
-@NpmPackage(value = "@vaadin/tabs", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/tabs", version = "24.5.0-alpha8")
 public class Tabs extends Component
         implements HasEnabled, HasSize, HasStyle, HasThemeVariant<TabsVariant> {
 
@@ -92,8 +92,19 @@ public class Tabs extends Component
      */
     public Tabs() {
         setSelectedIndex(-1);
-        getElement().addPropertyChangeListener(SELECTED,
-                event -> updateSelectedTab(event.isUserOriginated()));
+        getElement().addPropertyChangeListener(SELECTED, event -> {
+            int oldIndex = selectedTab != null ? indexOf(selectedTab) : -1;
+            int newIndex = getSelectedIndex();
+            if (newIndex >= getTabCount()) {
+                LoggerFactory.getLogger(getClass()).warn(String.format(
+                        "The selected index is out of range: %d. Reverting to the previous index: %d.",
+                        newIndex, oldIndex));
+                setSelectedIndex(oldIndex);
+                return;
+            }
+
+            updateSelectedTab(event.isUserOriginated());
+        });
     }
 
     /**

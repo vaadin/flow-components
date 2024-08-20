@@ -3,7 +3,7 @@
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.map;
@@ -65,7 +65,7 @@ import com.vaadin.flow.component.map.configuration.source.XYZSource;
  * using {@link #defineProjection(String, String)}.
  */
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/map", version = "24.5.0-alpha8")
 @NpmPackage(value = "proj4", version = "2.11.0")
 @JsModule("@vaadin/map/src/vaadin-map.js")
 @JsModule("./vaadin-map/mapConnector.js")
