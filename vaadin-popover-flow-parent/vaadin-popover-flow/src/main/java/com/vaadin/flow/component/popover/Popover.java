@@ -163,6 +163,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * @param modal
      *            {@code true} to enable popover to open as modal, {@code false}
      *            otherwise.
+     * @see #setBackdropVisible(boolean)
      */
     public void setModal(boolean modal) {
         getElement().setProperty("modal", modal);
@@ -186,6 +187,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      *
      * @param backdropVisible
      *            {@code true} to show the backdrop, {@code false} otherwise.
+     * @see #setModal(boolean)
      */
     public void setBackdropVisible(boolean backdropVisible) {
         getElement().setProperty("withBackdrop", backdropVisible);
