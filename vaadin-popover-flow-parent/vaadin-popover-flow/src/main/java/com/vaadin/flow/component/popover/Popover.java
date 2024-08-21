@@ -43,6 +43,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -59,8 +60,14 @@ import elemental.json.JsonArray;
 @NpmPackage(value = "@vaadin/popover", version = "24.5.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
+@JsModule("./popover.ts")
 public class Popover extends Component implements HasAriaLabel, HasComponents,
         HasThemeVariant<PopoverVariant> {
+
+    private static Integer defaultHideDelay;
+    private static Integer defaultFocusDelay;
+    private static Integer defaultHoverDelay;
+    private static boolean uiInitListenerRegistered = false;
 
     private Component target;
     private Registration targetAttachRegistration;
@@ -92,6 +99,88 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     public Popover(Component... components) {
         this();
         add(components);
+    }
+
+    /**
+     * Sets the default focus delay to be used by all popover instances (running
+     * in the same JVM), except for those that have focus delay configured using
+     * {@link #setFocusDelay(int)}.
+     *
+     * @param defaultFocusDelay
+     *            the default focus delay
+     */
+    public static void setDefaultFocusDelay(int defaultFocusDelay) {
+        Popover.defaultFocusDelay = defaultFocusDelay;
+        applyConfiguration();
+    }
+
+    /**
+     * Sets the default hide delay to be used by all popover instances (running
+     * in the same JVM), except for those that have hide delay configured using
+     * {@link #setHideDelay(int)}.
+     *
+     * @param defaultHideDelay
+     *            the default hide delay
+     */
+    public static void setDefaultHideDelay(int defaultHideDelay) {
+        Popover.defaultHideDelay = defaultHideDelay;
+        applyConfiguration();
+    }
+
+    /**
+     * Sets the default hover delay to be used by all popover instances (running
+     * in the same JVM), except for those that have hover delay configured using
+     * {@link #setHoverDelay(int)}.
+     *
+     * @param defaultHoverDelay
+     *            the default hover delay
+     */
+    public static void setDefaultHoverDelay(int defaultHoverDelay) {
+        Popover.defaultHoverDelay = defaultHoverDelay;
+        applyConfiguration();
+    }
+
+    private static void applyConfiguration() {
+        if (UI.getCurrent() != null) {
+            // Apply the default tooltip configuration for the current UI
+            applyConfigurationForUI(UI.getCurrent());
+        }
+
+        if (!uiInitListenerRegistered) {
+            // Apply the tooltip configuration for all new UIs
+            VaadinService.getCurrent()
+                    .addUIInitListener(e -> applyConfigurationForUI(e.getUI()));
+            uiInitListenerRegistered = true;
+        }
+    }
+
+    private static void applyConfigurationForUI(UI ui) {
+        ui.getElement().executeJs(
+                "((window.Vaadin ||= {}).Flow ||= {}).popover ||= {}");
+
+        if (defaultHideDelay != null) {
+            ui.getElement().executeJs(
+                    "const popover = window.Vaadin.Flow.popover;"
+                            + "popover.defaultHideDelay = $0;"
+                            + "popover.setDefaultHideDelay?.($0)",
+                    defaultHideDelay);
+        }
+
+        if (defaultFocusDelay != null) {
+            ui.getElement().executeJs(
+                    "const popover = window.Vaadin.Flow.popover;"
+                            + "popover.defaultFocusDelay = $0;"
+                            + "popover.setDefaultFocusDelay?.($0)",
+                    defaultFocusDelay);
+        }
+
+        if (defaultHoverDelay != null) {
+            ui.getElement().executeJs(
+                    "const popover = window.Vaadin.Flow.popover;"
+                            + "popover.defaultHoverDelay = $0;"
+                            + "popover.setDefaultHoverDelay?.($0)",
+                    defaultHoverDelay);
+        }
     }
 
     /**
