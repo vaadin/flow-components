@@ -276,7 +276,7 @@ public class TextField extends TextFieldBase<TextField, String>
     /**
      * {@inheritDoc}
      * <p>
-     * Distinct error messages depending on constraints can be configured with
+     * Distinct error messages for different constraints can be configured with
      * the {@link TextFieldI18n} object, using the respective properties.
      * However, note that the error message set with
      * {@link #setErrorMessage(String)} will take priority and override any i18n
