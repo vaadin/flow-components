@@ -95,7 +95,7 @@ export const spreadsheetStyles = css`
     position: absolute;
     top: 0;
     width: 100%;
-    z-index: 0;
+    z-index: 1;
   }
   .v-spreadsheet .functionbar .functionfield,
   .v-spreadsheet .functionbar .addressfield {
