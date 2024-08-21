@@ -16,4 +16,13 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-dashboard-widget")
 public class DashboardWidgetElement extends TestBenchElement {
+
+    /**
+     * Returns the title of the widget.
+     *
+     * @return the {@code widgetTitle} property from the web component
+     */
+    public String getTitle() {
+        return getPropertyString("widgetTitle");
+    }
 }
