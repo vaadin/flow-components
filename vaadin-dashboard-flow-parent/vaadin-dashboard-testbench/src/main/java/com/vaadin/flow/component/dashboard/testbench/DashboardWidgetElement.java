@@ -23,6 +23,6 @@ public class DashboardWidgetElement extends TestBenchElement {
      * @return the {@code widget-title} property from the web component
      */
     public String getTitle() {
-        return getAttribute("widget-title");
+        return getPropertyString("widgetTitle");
     }
 }

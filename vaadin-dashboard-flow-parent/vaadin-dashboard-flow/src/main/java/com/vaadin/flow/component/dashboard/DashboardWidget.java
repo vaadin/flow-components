@@ -29,7 +29,7 @@ public class DashboardWidget extends Component {
      * @return the {@code widget-title} property from the web component
      */
     public String getTitle() {
-        return getElement().getAttribute("widget-title");
+        return getElement().getProperty("widgetTitle");
     }
 
     /**
@@ -39,6 +39,6 @@ public class DashboardWidget extends Component {
      *            the title to set
      */
     public void setTitle(String title) {
-        getElement().setAttribute("widget-title", title == null ? "" : title);
+        getElement().setProperty("widgetTitle", title == null ? "" : title);
     }
 }
