@@ -20,7 +20,7 @@ public class DashboardWidgetElement extends TestBenchElement {
     /**
      * Returns the title of the widget.
      *
-     * @return the {@code widget-title} property from the web component
+     * @return the {@code widgetTitle} property from the web component
      */
     public String getTitle() {
         return getPropertyString("widgetTitle");
