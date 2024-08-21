@@ -1139,9 +1139,15 @@ export const spreadsheetStyles = css`
   :host([theme~="lumo"]) .v-spreadsheet .top-left-pane,
   :host([theme~="lumo"]) .v-spreadsheet .top-right-pane,
   :host([theme~="lumo"]) .v-spreadsheet .bottom-left-pane {
-    /*border-right: 1px solid var(--lumo-contrast-50pct);*/
+    border-right: 1px solid var(--lumo-contrast-50pct);
     border-bottom: 1px solid  var(--lumo-contrast-50pct);
   }
+  :host([theme~="lumo"]) .v-spreadsheet .top-left-pane.inactive,
+  :host([theme~="lumo"]) .v-spreadsheet .top-right-pane.inactive,
+  :host([theme~="lumo"]) .v-spreadsheet .bottom-left-pane.inactive {
+    border-right: 0;
+    border-bottom: 0;
+  }  
   :host([theme~="lumo"]) .v-spreadsheet .ch,
   :host([theme~="lumo"]) .v-spreadsheet .rh,
   :host([theme~="lumo"]) .v-spreadsheet .corner {
