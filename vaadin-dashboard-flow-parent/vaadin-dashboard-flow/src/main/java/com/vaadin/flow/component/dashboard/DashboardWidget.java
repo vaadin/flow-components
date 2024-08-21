@@ -22,4 +22,23 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard-widget.js")
 // @NpmPackage(value = "@vaadin/dashboard", version = "24.6.0-alpha0")
 public class DashboardWidget extends Component {
+
+    /**
+     * Returns the title of the widget.
+     *
+     * @return the {@code widgetTitle} property from the web component
+     */
+    public String getTitle() {
+        return getElement().getProperty("widgetTitle");
+    }
+
+    /**
+     * Sets the title of the widget.
+     *
+     * @param title
+     *            the title to set
+     */
+    public void setTitle(String title) {
+        getElement().setProperty("widgetTitle", title == null ? "" : title);
+    }
 }
