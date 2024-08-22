@@ -72,7 +72,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * {@link Binder}. By default, before running custom validators, Binder will
  * also check the component constraints using error messages from the
  * {@link TextFieldI18n} object. The exception is the required constraint, for
- * which Binder has its own implementation, see
+ * which Binder provides its own API, see
  * {@link Binder.BindingBuilder#asRequired(String)}.
  * <p>
  * However, if Binder doesn't fit your needs and you want to implement fully
