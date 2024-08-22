@@ -106,7 +106,8 @@ import elemental.json.JsonType;
  * take priority over i18n error messages if both are set.
  * <p>
  * In addition to validation, constraints may also have a visual aspect. For
- * example, dates before the minimum date appear disabled in the overlay.
+ * example, dates before the minimum date are displayed as disabled in the
+ * overlay to prevent their selection.
  * <p>
  * For more advanced validation that requires custom rules, you can use
  * {@link Binder}. By default, before running custom validators, Binder will
