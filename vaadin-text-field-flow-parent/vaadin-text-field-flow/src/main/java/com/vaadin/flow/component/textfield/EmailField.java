@@ -331,13 +331,13 @@ public class EmailField extends TextFieldBase<EmailField, String>
      * @param pattern
      *            the custom format pattern
      *
+     * @see EmailFieldI18n#setPatternErrorMessage(String)
      * @see <a href=
      *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern">
      *      https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern</>
      * @see <a href=
      *      "https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern">
      *      https://html.spec.whatwg.org/multipage/input.html#attr-input-pattern</>
-     * @see EmailFieldI18n#setPatternErrorMessage(String)
      */
     public void setPattern(String pattern) {
         getElement().setProperty("pattern", pattern == null ? "" : pattern);
