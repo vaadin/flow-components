@@ -42,7 +42,8 @@ public class DashboardIT extends AbstractComponentIT {
     @Test
     public void addWidgetsAtIndex1_widgetIsAddedIntoTheCorrectPlace() {
         $("button").id("add-widget-at-index-1").click();
-        assertWidgetsByTitle("Widget 1", "Widget at index 1", "Widget 2", "Widget 3");
+        assertWidgetsByTitle("Widget 1", "Widget at index 1", "Widget 2",
+                "Widget 3");
     }
 
     @Test
@@ -61,7 +62,6 @@ public class DashboardIT extends AbstractComponentIT {
         List<DashboardWidgetElement> widgets = dashboardElement.getWidgets();
         List<String> widgetTitles = widgets.stream()
                 .map(DashboardWidgetElement::getTitle).toList();
-        Assert.assertEquals(Arrays.asList(expectedWidgetTitles),
-                widgetTitles);
+        Assert.assertEquals(Arrays.asList(expectedWidgetTitles), widgetTitles);
     }
 }

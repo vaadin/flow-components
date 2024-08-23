@@ -32,7 +32,8 @@ public class DashboardTest {
     @Test
     public void addNullWidget_exceptionIsThrown() {
         Dashboard dashboard = new Dashboard();
-        Assert.assertThrows(NullPointerException.class, () -> dashboard.add((DashboardWidget) null));
+        Assert.assertThrows(NullPointerException.class,
+                () -> dashboard.add((DashboardWidget) null));
     }
 
     @Test
@@ -63,7 +64,8 @@ public class DashboardTest {
     @Test
     public void addNullWidgetAtIndex_exceptionIsThrown() {
         Dashboard dashboard = new Dashboard();
-        Assert.assertThrows(NullPointerException.class, () -> dashboard.addWidgetAtIndex(0, null));
+        Assert.assertThrows(NullPointerException.class,
+                () -> dashboard.addWidgetAtIndex(0, null));
     }
 
     @Test
@@ -80,7 +82,8 @@ public class DashboardTest {
     @Test
     public void removeNullWidget_exceptionIsThrown() {
         Dashboard dashboard = new Dashboard();
-        Assert.assertThrows(NullPointerException.class, () -> dashboard.remove((DashboardWidget) null));
+        Assert.assertThrows(NullPointerException.class,
+                () -> dashboard.remove((DashboardWidget) null));
 
     }
 

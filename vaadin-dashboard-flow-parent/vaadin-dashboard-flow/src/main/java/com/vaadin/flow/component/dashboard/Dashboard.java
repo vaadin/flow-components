@@ -20,8 +20,10 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.shared.Registration;
@@ -37,6 +39,7 @@ import elemental.json.JsonObject;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
+@JsModule("./flow-component-renderer.js")
 // @NpmPackage(value = "@vaadin/dashboard", version = "24.6.0-alpha0")
 public class Dashboard extends Component {
 
@@ -210,7 +213,7 @@ public class Dashboard extends Component {
         JsonArray jsonItems = Json.createArray();
         for (DashboardWidget widget : widgets) {
             JsonObject jsonItem = Json.createObject();
-             */
+            jsonItem.put("nodeid", getWidgetNodeId(widget));
             jsonItems.set(jsonItems.length(), jsonItem);
         }
         return jsonItems;
@@ -238,4 +241,5 @@ public class Dashboard extends Component {
     private void doAddWidget(DashboardWidget widget) {
         widgets.add(widget);
         getElement().appendChild(widget.getElement());
+    }
 }

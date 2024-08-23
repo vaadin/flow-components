@@ -36,7 +36,8 @@ public class DashboardPage extends Div {
         Dashboard dashboard = new Dashboard();
         dashboard.add(widget1, widget2, widget3);
 
-        NativeButton addWidgetAtIndex1 = new NativeButton("Add widget at index 1");
+        NativeButton addWidgetAtIndex1 = new NativeButton(
+                "Add widget at index 1");
         addWidgetAtIndex1.addClickListener(click -> {
             DashboardWidget widgetAtIndex1 = new DashboardWidget();
             widgetAtIndex1.setTitle("Widget at index 1");
@@ -45,8 +46,10 @@ public class DashboardPage extends Div {
         });
         addWidgetAtIndex1.setId("add-widget-at-index-1");
 
-        NativeButton removeWidgets1And3 = new NativeButton("Remove widgets 1 and 3");
-        removeWidgets1And3.addClickListener(click -> dashboard.remove(widget1, widget3));
+        NativeButton removeWidgets1And3 = new NativeButton(
+                "Remove widgets 1 and 3");
+        removeWidgets1And3
+                .addClickListener(click -> dashboard.remove(widget1, widget3));
         removeWidgets1And3.setId("remove-widgets-1-and-3");
 
         NativeButton removeAllWidgets = new NativeButton("Remove all widgets");
