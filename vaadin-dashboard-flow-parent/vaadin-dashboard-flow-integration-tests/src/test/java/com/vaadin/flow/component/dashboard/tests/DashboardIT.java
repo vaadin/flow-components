@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
