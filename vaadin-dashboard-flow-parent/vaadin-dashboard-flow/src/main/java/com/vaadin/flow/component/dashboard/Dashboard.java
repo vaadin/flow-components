@@ -141,7 +141,7 @@ public class Dashboard extends Component {
     public void removeAll() {
         doRemoveAllWidgets();
         updateClient();
-     */
+    }
 
     private final Map<Element, Registration> childDetachListenerMap = new HashMap<>();
 
