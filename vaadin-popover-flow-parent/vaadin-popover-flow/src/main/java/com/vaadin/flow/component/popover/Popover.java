@@ -55,8 +55,8 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-popover")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha8")
-@NpmPackage(value = "@vaadin/popover", version = "24.5.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha9")
+@NpmPackage(value = "@vaadin/popover", version = "24.5.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
 public class Popover extends Component implements HasAriaLabel, HasComponents,
