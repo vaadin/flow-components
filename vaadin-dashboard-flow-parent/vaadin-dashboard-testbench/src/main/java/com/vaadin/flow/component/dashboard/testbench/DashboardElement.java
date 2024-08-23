@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
@@ -8,6 +8,8 @@
  */
 package com.vaadin.flow.component.dashboard.testbench;
 
+import java.util.List;
+
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -16,4 +18,13 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-dashboard")
 public class DashboardElement extends TestBenchElement {
+
+    /**
+     * Returns the widgets in the dashboard.
+     *
+     * @return The widgets in the dashboard
+     */
+    public List<DashboardWidgetElement> getWidgets() {
+        return $(DashboardWidgetElement.class).all();
+    }
 }
