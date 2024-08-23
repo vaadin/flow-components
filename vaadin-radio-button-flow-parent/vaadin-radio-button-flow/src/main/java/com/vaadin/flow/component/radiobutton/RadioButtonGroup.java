@@ -573,9 +573,15 @@ public class RadioButtonGroup<T>
             // Ignore new size requests unless the last one has been executed
             // so as to avoid multiple beforeClientResponses.
             if (sizeRequest == null) {
-                sizeRequest = ui -> {
-                    fireSizeEvent();
-                    sizeRequest = null;
+                // Using anonymous class to fix serialization issue:
+                // https://github.com/vaadin/flow-components/issues/6555
+                // Do not replace with lambda
+                sizeRequest = new SerializableConsumer<>() {
+                    @Override
+                    public void accept(UI ui) {
+                        fireSizeEvent();
+                        sizeRequest = null;
+                    }
                 };
                 // Size event is fired before client response so as to avoid
                 // multiple size change events during server round trips
