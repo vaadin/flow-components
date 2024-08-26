@@ -86,9 +86,11 @@ import elemental.json.JsonType;
  * <h2>Validation</h2>
  * <p>
  * Date Picker comes with a built-in validation mechanism based on constraints.
- * Validation is triggered when the user attempts to apply a date by entering it
- * manually, selecting it from the overlay, etc, or when the date is updated
- * programmatically. Validation checks if the date is parsable and satisfies the
+ * Validation is triggered when the user initiates a date change, for example by
+ * selection from the overlay or manual entry followed by Enter or blur.
+ * Programmatic value changes trigger validation as well.
+ * <p>
+ * Validation verifies that the chosen date is parsable and satisfies the
  * specified constraints. If validation fails, the component is marked as
  * invalid and an error message is displayed below the input.
  * <p>
@@ -111,10 +113,10 @@ import elemental.json.JsonType;
  * <p>
  * For more advanced validation that requires custom rules, you can use
  * {@link Binder}. By default, before running custom validators, Binder will
- * also check if the date is parsable and satisfies the component constraints
- * using error messages from the {@link DatePickerI18n} object. The exception is
- * the required constraint, for which Binder provides its own API, see
- * {@link Binder.BindingBuilder#asRequired(String)}.
+ * also check if the date is parsable and satisfies the component
+ * constraints, displaying error messages from the {@link DatePickerI18n}
+ * object. The exception is the required constraint, for which Binder provides
+ * its own API, see {@link Binder.BindingBuilder#asRequired(String)}.
  * <p>
  * However, if Binder doesn't fit your needs and you want to implement fully
  * custom validation logic, you can disable the constraint validation by setting
