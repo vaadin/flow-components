@@ -62,7 +62,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-select</artifactId>
+            <artifactId>vaadin-select-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
