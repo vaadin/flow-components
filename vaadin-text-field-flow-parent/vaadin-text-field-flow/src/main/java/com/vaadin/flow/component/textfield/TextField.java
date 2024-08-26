@@ -41,9 +41,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * <h2>Validation</h2>
  * <p>
  * Text Field comes with a built-in validation mechanism based on constraints.
- * Validation is triggered when the user applies an input change, for example,
- * by pressing Enter, blurring the field, or when the value changes
- * programmatically. In eager and lazy value change modes, validation is also
+ * Validation is triggered when the user applies an input change, for example by
+ * pressing Enter or blurring the field. Programmatic value changes trigger
+ * validation as well. In eager and lazy value change modes, validation is also
  * triggered on every character press with a delay according to the selected
  * mode.
  * <p>
