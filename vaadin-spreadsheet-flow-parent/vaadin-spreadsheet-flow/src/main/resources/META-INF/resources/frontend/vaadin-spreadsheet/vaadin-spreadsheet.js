@@ -138,7 +138,9 @@ export class VaadinSpreadsheet extends LitElement {
 
       lockFormatRows: { type: Boolean },
 
-      namedRanges: { type: String }
+      namedRanges: { type: String },
+
+      theme: { type: String, reflectToAttribute: true }
     };
   }
 
@@ -168,14 +170,13 @@ export class VaadinSpreadsheet extends LitElement {
   updated(_changedProperties) {
     super.updated(_changedProperties);
     let initial = false;
+    let overlays = document.getElementById('spreadsheet-overlays');
     if (!this.api) {
-      let overlays = document.getElementById('spreadsheet-overlays');
       if (!overlays) {
         overlays = document.createElement('div');
         overlays.id = 'spreadsheet-overlays';
         document.body.appendChild(overlays);
       }
-      overlays.setAttribute('theme', this.getAttribute('theme'));
 
       this.api = new Spreadsheet(this, this.renderRoot);
       this.api.setHeight('100%');
@@ -184,6 +185,7 @@ export class VaadinSpreadsheet extends LitElement {
 
       initial = true;
     }
+    overlays.setAttribute('theme', this.getAttribute('theme'));
     let propNames = [];
     let dirty = false;
     _changedProperties.forEach((oldValue, name) => {
