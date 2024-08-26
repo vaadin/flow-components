@@ -43,8 +43,6 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
-import com.vaadin.flow.internal.StateTree;
-import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
 
@@ -73,7 +71,6 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
     private Component target;
     private Registration targetAttachRegistration;
-    private Registration afterProgrammaticNavigationListenerRegistration;
     private boolean autoAddedToTheUi;
 
     private boolean openOnClick = true;
@@ -88,14 +85,6 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         getElement().setProperty("opened", false);
-
-        getElement().addPropertyChangeListener("opened", event -> {
-            // Only handle client-side changes, server-side changes are already
-            // handled by setOpened
-            if (event.isUserOriginated()) {
-                doSetOpened(this.isOpened(), event.isUserOriginated());
-            }
-        });
 
         updateTrigger();
         setOverlayRole("dialog");
@@ -221,31 +210,13 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      */
     public void setOpened(boolean opened) {
         if (opened != isOpened()) {
-            doSetOpened(opened, false);
+            getElement().setProperty("opened", opened);
+            fireEvent(new OpenedChangeEvent(this, false));
         }
-    }
-
-    private void doSetOpened(boolean opened, boolean fromClient) {
-        if (opened) {
-            ensureAttached();
-        } else if (autoAddedToTheUi) {
-            getElement().removeFromParent();
-            autoAddedToTheUi = false;
-        }
-        getElement().setProperty("opened", opened);
-        fireEvent(new OpenedChangeEvent(this, fromClient));
     }
 
     /**
      * Opens the popover.
-     * <p>
-     * Note: You don't need to add the popover component before opening it,
-     * because opening a popover will automatically add it to the {@code <body>}
-     * if it's not yet attached anywhere.
-     * <p>
-     * When using {@link #setFor(String)} it is recommended to manually add the
-     * popover to the UI instead, and to ensure it is placed in the same DOM
-     * scope (document or shadow root) as the component with the given ID.
      */
     public void open() {
         setOpened(true);
@@ -253,9 +224,6 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
     /**
      * Closes the popover.
-     * <p>
-     * Note: This method also removes the popover component from the DOM after
-     * closing it, unless you have added the component manually.
      */
     public void close() {
         setOpened(false);
@@ -697,6 +665,9 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * <p>
      * By default, the popover can be opened with a click on the target
      * component.
+     * <p>
+     * Note: setting target will also add the popover to the {@code <body>} if
+     * it's not yet attached anywhere.
      *
      * @param target
      *            the target component for this popover, can be {@code null} to
@@ -717,6 +688,11 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
         this.target = target;
 
         if (target == null) {
+            if (autoAddedToTheUi) {
+                getElement().removeFromParent();
+                autoAddedToTheUi = false;
+            }
+
             getElement().executeJs("this.target = null");
             return;
         }
@@ -726,10 +702,22 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
         target.getUI().ifPresent(this::onTargetAttach);
         targetAttachRegistration = target
                 .addAttachListener(e -> onTargetAttach(e.getUI()));
+        target.addDetachListener(e -> {
+            if (autoAddedToTheUi) {
+                getElement().removeFromParent();
+                autoAddedToTheUi = false;
+            }
+        });
     }
 
     private void onTargetAttach(UI ui) {
         if (target != null) {
+            ui.beforeClientResponse(ui, context -> {
+                if (getElement().getNode().getParent() == null) {
+                    ui.addToModalComponent(this);
+                    autoAddedToTheUi = true;
+                }
+            });
             getElement().executeJs("this.target = $0", target.getElement());
         }
     }
@@ -856,45 +844,6 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
         super.onAttach(attachEvent);
 
         updateVirtualChildNodeIds();
-    }
-
-    private UI getCurrentUI() {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        return ui;
-    }
-
-    private void ensureAttached() {
-        UI ui = getCurrentUI();
-        StateTree.ExecutionRegistration addToUiRegistration = ui
-                .beforeClientResponse(ui, context -> {
-                    if (getElement().getNode().getParent() == null
-                            && isOpened()) {
-                        ui.addToModalComponent(this);
-                        autoAddedToTheUi = true;
-                    }
-                    if (afterProgrammaticNavigationListenerRegistration != null) {
-                        afterProgrammaticNavigationListenerRegistration
-                                .remove();
-                    }
-                });
-        if (ui.getSession() != null) {
-            afterProgrammaticNavigationListenerRegistration = ui
-                    .addAfterNavigationListener(event -> {
-                        if (event.getLocationChangeEvent()
-                                .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
-                            addToUiRegistration.remove();
-                            afterProgrammaticNavigationListenerRegistration
-                                    .remove();
-                        }
-                    });
-        }
     }
 
     /**

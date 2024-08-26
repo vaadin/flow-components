@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.server.VaadinSession;
 
 /**
@@ -45,21 +46,39 @@ public class PopoverAutoAddTest {
     }
 
     @Test
-    public void open_autoAttachedInBeforeClientResponse() {
+    public void setTarget_autoAttachedInBeforeClientResponse() {
         Popover popover = new Popover();
-        popover.open();
+        Div target = new Div();
+        popover.setTarget(target);
+        ui.add(target);
 
         fakeClientResponse();
         Assert.assertNotNull(popover.getElement().getParent());
     }
 
     @Test
-    public void open_close_notAutoAttachedInBeforeClientResponse() {
+    public void setTarget_clearTarget_notAutoAttachedInBeforeClientResponse() {
         Popover popover = new Popover();
-        popover.open();
+        Div target = new Div();
+        popover.setTarget(target);
+        ui.add(target);
         fakeClientResponse();
 
-        popover.close();
+        popover.setTarget(null);
+
+        fakeClientResponse();
+        Assert.assertNull(popover.getElement().getParent());
+    }
+
+    @Test
+    public void setTarget_detachTarget_notAutoAttachedInBeforeClientResponse() {
+        Popover popover = new Popover();
+        Div target = new Div();
+        popover.setTarget(target);
+        ui.add(target);
+        fakeClientResponse();
+
+        ui.remove(target);
 
         fakeClientResponse();
         Assert.assertNull(popover.getElement().getParent());
