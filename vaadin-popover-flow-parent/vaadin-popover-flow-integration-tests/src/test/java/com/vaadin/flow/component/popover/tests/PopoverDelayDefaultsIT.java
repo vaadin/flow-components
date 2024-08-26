@@ -35,7 +35,7 @@ public class PopoverDelayDefaultsIT extends AbstractComponentIT {
     }
 
     @Test
-    public void changeDefaults_checkTooltipConfig() {
+    public void changeDefaults_checkPopoverConfig() {
         $("button").id("set-default-delays-to-2000").click();
         Assert.assertEquals(2000, getActiveHideDelay(popover));
         Assert.assertEquals(2000, getActiveFocusDelay(popover));
@@ -43,7 +43,7 @@ public class PopoverDelayDefaultsIT extends AbstractComponentIT {
     }
 
     @Test
-    public void changeDefaults_refreshPage_checkTooltipConfig() {
+    public void changeDefaults_refreshPage_checkPopoverConfig() {
         $("button").id("set-default-delays-to-5000").click();
         getDriver().navigate().refresh();
         popover = $(PopoverElement.class).first();
@@ -53,18 +53,18 @@ public class PopoverDelayDefaultsIT extends AbstractComponentIT {
     }
 
     private int getActiveFocusDelay(PopoverElement popover) {
-        return getTooltipControllerPropertyValue(popover, "__focusDelay");
+        return getOpenedStateControllerPropertyValue(popover, "__focusDelay");
     }
 
     private int getActiveHoverDelay(PopoverElement popover) {
-        return getTooltipControllerPropertyValue(popover, "__hoverDelay");
+        return getOpenedStateControllerPropertyValue(popover, "__hoverDelay");
     }
 
     private int getActiveHideDelay(PopoverElement popover) {
-        return getTooltipControllerPropertyValue(popover, "__hideDelay");
+        return getOpenedStateControllerPropertyValue(popover, "__hideDelay");
     }
 
-    private int getTooltipControllerPropertyValue(PopoverElement popover,
+    private int getOpenedStateControllerPropertyValue(PopoverElement popover,
             String propertyName) {
         var value = executeScript(
                 "return arguments[0]._openedStateController[arguments[1]];",

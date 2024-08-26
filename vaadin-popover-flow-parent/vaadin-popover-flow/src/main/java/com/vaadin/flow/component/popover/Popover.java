@@ -142,12 +142,12 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
     private static void applyConfiguration() {
         if (UI.getCurrent() != null) {
-            // Apply the default tooltip configuration for the current UI
+            // Apply the default popover configuration for the current UI
             applyConfigurationForUI(UI.getCurrent());
         }
 
         if (!uiInitListenerRegistered) {
-            // Apply the tooltip configuration for all new UIs
+            // Apply the popover configuration for all new UIs
             VaadinService.getCurrent()
                     .addUIInitListener(e -> applyConfigurationForUI(e.getUI()));
             uiInitListenerRegistered = true;
