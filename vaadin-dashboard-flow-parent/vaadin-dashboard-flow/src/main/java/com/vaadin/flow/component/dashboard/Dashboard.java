@@ -51,7 +51,6 @@ public class Dashboard extends Component {
      * Creates an empty dashboard.
      */
     public Dashboard() {
-        getElement().getNode().addAttachListener(this::attachRenderer);
     }
 
     /**
@@ -172,7 +171,8 @@ public class Dashboard extends Component {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        updateClient();
+        attachRenderer();
+        doUpdateClient();
     }
 
     private void updateClient() {
