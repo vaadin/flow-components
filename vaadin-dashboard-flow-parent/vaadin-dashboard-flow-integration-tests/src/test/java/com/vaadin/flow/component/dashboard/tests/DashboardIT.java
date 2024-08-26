@@ -14,6 +14,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.dashboard.testbench.DashboardElement;
 import com.vaadin.flow.component.dashboard.testbench.DashboardWidgetElement;
@@ -41,20 +42,20 @@ public class DashboardIT extends AbstractComponentIT {
 
     @Test
     public void addWidgetsAtIndex1_widgetIsAddedIntoTheCorrectPlace() {
-        $("button").id("add-widget-at-index-1").click();
+        clickElementWithJs(findElement(By.id("add-widget-at-index-1")));
         assertWidgetsByTitle("Widget 1", "Widget at index 1", "Widget 2",
                 "Widget 3");
     }
 
     @Test
-    public void removeWidgets1And3_widgetsAreCorrectlyRemoved() {
-        $("button").id("remove-widgets-1-and-3").click();
+    public void removeFirstAndLastWidgets_widgetsAreCorrectlyRemoved() {
+        clickElementWithJs(findElement(By.id("remove-first-and-last-widgets")));
         assertWidgetsByTitle("Widget 2");
     }
 
     @Test
     public void removeAllWidgets_widgetsAreCorrectlyRemoved() {
-        $("button").id("remove-all-widgets").click();
+        clickElementWithJs(findElement(By.id("remove-all-widgets")));
         assertWidgetsByTitle();
     }
 

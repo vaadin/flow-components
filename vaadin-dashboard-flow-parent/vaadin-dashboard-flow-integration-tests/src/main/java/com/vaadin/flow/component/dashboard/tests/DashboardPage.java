@@ -8,6 +8,8 @@
  */
 package com.vaadin.flow.component.dashboard.tests;
 
+import java.util.List;
+
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.html.Div;
@@ -46,16 +48,28 @@ public class DashboardPage extends Div {
         });
         addWidgetAtIndex1.setId("add-widget-at-index-1");
 
-        NativeButton removeWidgets1And3 = new NativeButton(
-                "Remove widgets 1 and 3");
-        removeWidgets1And3
-                .addClickListener(click -> dashboard.remove(widget1, widget3));
-        removeWidgets1And3.setId("remove-widgets-1-and-3");
+        NativeButton removeFirstAndLastWidgets = new NativeButton(
+                "Remove first and last widgets");
+        removeFirstAndLastWidgets.addClickListener(click -> {
+            List<DashboardWidget> currentWidgets = dashboard.getWidgets();
+            if (currentWidgets.isEmpty()) {
+                return;
+            }
+            int currentWidgetCount = currentWidgets.size();
+            if (currentWidgetCount == 1) {
+                dashboard.remove(dashboard.getWidgets().get(0));
+            } else {
+                dashboard.remove(dashboard.getWidgets().get(0),
+                        dashboard.getWidgets().get(currentWidgetCount - 1));
+            }
+        });
+        removeFirstAndLastWidgets.setId("remove-first-and-last-widgets");
 
         NativeButton removeAllWidgets = new NativeButton("Remove all widgets");
         removeAllWidgets.addClickListener(click -> dashboard.removeAll());
         removeAllWidgets.setId("remove-all-widgets");
 
-        add(addWidgetAtIndex1, removeWidgets1And3, removeAllWidgets, dashboard);
+        add(addWidgetAtIndex1, removeFirstAndLastWidgets, removeAllWidgets,
+                dashboard);
     }
 }
