@@ -47,9 +47,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * triggered on every character press with a delay according to the selected
  * mode.
  * <p>
- * Validation checks if the value satisfies the specified constraints. If any of
- * the constraints are violated, the component is marked as invalid and an error
- * message is displayed below the input.
+ * Validation verifies that the value satisfies the specified constraints. If
+ * any of the constraints are violated, the component is marked as invalid and
+ * an error message is displayed below the input.
  * <p>
  * The following constraints are supported:
  * <ul>

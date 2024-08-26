@@ -48,10 +48,10 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * triggered on every character press with a delay according to the selected
  * mode.
  * <p>
- * By default, validation checks if the address adheres to the RFC 5322 standard
- * email format and satisfies the specified constraints. If validation fails,
- * the component is marked as invalid and an error message is displayed below
- * the input.
+ * Validation verifies that the address adheres to the RFC 5322 standard email
+ * format and satisfies the specified constraints. If validation fails, the
+ * component is marked as invalid and an error message is displayed below the
+ * input.
  * <p>
  * The following constraints are supported:
  * <ul>
