@@ -60,7 +60,7 @@ public class TextField extends TextFieldBase<TextField, String>
             ValidationResult requiredResult = ValidationUtil
                     .validateRequiredConstraint(
                             getI18nErrorMessage(
-                                TextFieldI18n::getRequiredErrorMessage),
+                                    TextFieldI18n::getRequiredErrorMessage),
                             isRequiredIndicatorVisible(), value,
                             getEmptyValue());
             if (requiredResult.isError()) {
