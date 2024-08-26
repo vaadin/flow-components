@@ -194,9 +194,6 @@ public class Dashboard extends Component {
                         child.addDetachListener(childDetachListener));
             }
         });
-        List<Integer> widgetNodeIds = getWidgets().stream()
-                .map(this::getWidgetNodeId).toList();
-        getElement().setPropertyList("virtualChildNodeIds", widgetNodeIds);
         getElement().setPropertyJson("items", createItemsJsonArray());
     }
 
