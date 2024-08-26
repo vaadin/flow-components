@@ -72,7 +72,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * <p>
  * For more advanced validation that requires custom rules, you can use
  * {@link Binder}. By default, before running custom validators, Binder will
- * also check the component constraints using error messages from the
+ * also check the component constraints and display error messages from the
  * {@link PasswordFieldI18n} object. The exception is the required constraint,
  * for which Binder provides its own API, see
  * {@link Binder.BindingBuilder#asRequired(String)}.
