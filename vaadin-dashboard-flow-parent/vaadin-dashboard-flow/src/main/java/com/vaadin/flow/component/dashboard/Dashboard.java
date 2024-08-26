@@ -224,22 +224,30 @@ public class Dashboard extends Component {
     }
 
     private void doRemoveAllWidgets() {
+        List<Element> elementsToRemove = widgets.stream()
+                .map(Component::getElement).toList();
+        elementsToRemove.forEach(getElement()::removeVirtualChild);
         widgets.clear();
-        getElement().removeAllChildren();
     }
 
     private void doRemoveWidget(DashboardWidget widget) {
+        getElement().removeVirtualChild(widget.getElement());
         widgets.remove(widget);
-        getElement().removeChild(widget.getElement());
     }
 
     private void doAddWidget(int index, DashboardWidget widget) {
+        if (widget.getParent().isPresent()) {
+            widget.removeFromParent();
+        }
+        getElement().appendVirtualChild(widget.getElement());
         widgets.add(index, widget);
-        getElement().insertChild(index, widget.getElement());
     }
 
     private void doAddWidget(DashboardWidget widget) {
+        if (widget.getParent().isPresent()) {
+            widget.removeFromParent();
+        }
+        getElement().appendVirtualChild(widget.getElement());
         widgets.add(widget);
-        getElement().appendChild(widget.getElement());
     }
 }
