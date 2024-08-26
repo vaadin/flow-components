@@ -44,7 +44,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * Password Field comes with a built-in validation mechanism based on
  * constraints. Validation is triggered when the user applies an input change,
  * for example, by pressing Enter, blurring the field, or when the value changes
- * programmatically. In eager and lazy value change modes, validation is
+ * programmatically. In eager and lazy value change modes, validation is also
  * triggered on every character press with a delay according to the selected
  * mode.
  * <p>
