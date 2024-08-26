@@ -28,7 +28,7 @@ public interface HasValidationProperties extends HasElement, HasValidation {
 
     /**
      * Sets a single error message to display for all constraint violations. The
-     * error message will only appear when the component is marked as invalid,
+     * error message will only appear when the component is flagged as invalid,
      * either as a result of constraint validation or by the developer through
      * {@link #setInvalid(boolean)} if manual validation mode is enabled.
      *
