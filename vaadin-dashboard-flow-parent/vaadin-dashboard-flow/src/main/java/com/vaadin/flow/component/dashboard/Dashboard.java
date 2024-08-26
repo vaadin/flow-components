@@ -188,10 +188,12 @@ public class Dashboard extends Component {
     }
 
     private void doUpdateClient() {
-        getElement().getChildren().forEach(child -> {
-            if (!childDetachListenerMap.containsKey(child)) {
-                childDetachListenerMap.put(child,
-                        child.addDetachListener(childDetachListener));
+        widgets.forEach(widget -> {
+            Element childWidgetElement = widget.getElement();
+            if (!childDetachListenerMap.containsKey(childWidgetElement)) {
+                childDetachListenerMap.put(childWidgetElement,
+                        childWidgetElement
+                                .addDetachListener(childDetachListener));
             }
         });
         getElement().setPropertyJson("items", createItemsJsonArray());
