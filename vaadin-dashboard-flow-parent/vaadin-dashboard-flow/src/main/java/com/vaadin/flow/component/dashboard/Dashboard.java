@@ -162,7 +162,7 @@ public class Dashboard extends Component {
                         childDetachListenerMap
                                 .remove(detachedWidget.getElement());
 
-                        doRemoveWidget(detachedWidget);
+                        widgets.remove(detachedWidget);
                         updateClient();
                     });
         }
