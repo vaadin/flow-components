@@ -46,18 +46,18 @@ public class PopoverAutoAddTest {
     }
 
     @Test
-    public void setTarget_autoAttachedInBeforeClientResponse() {
+    public void setTarget_autoAdded() {
         Popover popover = new Popover();
         Div target = new Div();
         popover.setTarget(target);
         ui.add(target);
 
         fakeClientResponse();
-        Assert.assertNotNull(popover.getElement().getParent());
+        Assert.assertEquals(ui.getElement(), popover.getElement().getParent());
     }
 
     @Test
-    public void setTarget_clearTarget_notAutoAttachedInBeforeClientResponse() {
+    public void setTarget_clearTarget_autoRemoved() {
         Popover popover = new Popover();
         Div target = new Div();
         popover.setTarget(target);
@@ -71,7 +71,7 @@ public class PopoverAutoAddTest {
     }
 
     @Test
-    public void setTarget_detachTarget_notAutoAttachedInBeforeClientResponse() {
+    public void setTarget_detachTarget_autoRemoved() {
         Popover popover = new Popover();
         Div target = new Div();
         popover.setTarget(target);
