@@ -225,10 +225,7 @@ public class Dashboard extends Component {
     }
 
     private void doRemoveAllWidgets() {
-        List<Element> elementsToRemove = widgets.stream()
-                .map(Component::getElement).toList();
-        elementsToRemove.forEach(getElement()::removeChild);
-        widgets.clear();
+        new ArrayList<>(widgets).forEach(this::doRemoveWidget);
     }
 
     private void doRemoveWidget(DashboardWidget widget) {
