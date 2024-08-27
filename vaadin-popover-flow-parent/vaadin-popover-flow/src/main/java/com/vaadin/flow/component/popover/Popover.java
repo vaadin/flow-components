@@ -687,14 +687,14 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
             targetDetachRegistration.remove();
         }
 
+        if (autoAddedToTheUi) {
+            getElement().removeFromParent();
+            autoAddedToTheUi = false;
+        }
+
         this.target = target;
 
         if (target == null) {
-            if (autoAddedToTheUi) {
-                getElement().removeFromParent();
-                autoAddedToTheUi = false;
-            }
-
             getElement().executeJs("this.target = null");
             return;
         }

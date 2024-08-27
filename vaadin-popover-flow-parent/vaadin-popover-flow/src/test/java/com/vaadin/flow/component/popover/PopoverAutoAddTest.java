@@ -85,6 +85,22 @@ public class PopoverAutoAddTest {
     }
 
     @Test
+    public void setTarget_changeTarget_notAutoRemoved() {
+        Popover popover = new Popover();
+        Div target = new Div();
+        popover.setTarget(target);
+        ui.add(target);
+        fakeClientResponse();
+
+        Div other = new Div();
+        ui.add(other);
+        popover.setTarget(other);
+        fakeClientResponse();
+
+        Assert.assertEquals(ui.getElement(), popover.getElement().getParent());
+    }
+
+    @Test
     public void setTarget_changeTarget_detachOldTarget_notAutoRemoved() {
         Popover popover = new Popover();
         Div target = new Div();
@@ -100,6 +116,21 @@ public class PopoverAutoAddTest {
         ui.remove(target);
         fakeClientResponse();
         Assert.assertEquals(ui.getElement(), popover.getElement().getParent());
+    }
+
+    @Test
+    public void setTarget_changeToDetachedTarget_autoRemoved() {
+        Popover popover = new Popover();
+        Div target = new Div();
+        popover.setTarget(target);
+        ui.add(target);
+        fakeClientResponse();
+
+        Div other = new Div();
+        popover.setTarget(other);
+        fakeClientResponse();
+
+        Assert.assertNull(popover.getElement().getParent());
     }
 
     private void fakeClientResponse() {
