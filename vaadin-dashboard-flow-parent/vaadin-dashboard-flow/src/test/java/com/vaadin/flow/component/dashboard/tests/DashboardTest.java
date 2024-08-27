@@ -22,6 +22,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.server.VaadinSession;
 
@@ -170,24 +171,91 @@ public class DashboardTest {
     }
 
     @Test
-    public void addWidgetToAnotherDashboard_widgetIsAdded() {
-        DashboardWidget widget1 = new DashboardWidget();
-        dashboard.add(widget1);
+    public void addWidgetToLayout_widgetIsAdded() {
+        Div layout = new Div();
+        ui.add(layout);
+        DashboardWidget widget = new DashboardWidget();
+        layout.add(widget);
         fakeClientCommunication();
+        Assert.assertTrue(widget.getParent().isPresent());
+        Assert.assertEquals(layout, widget.getParent().get());
+    }
 
+    @Test
+    public void removeWidgetFromLayout_widgetIsRemoved() {
+        Div layout = new Div();
+        ui.add(layout);
+        DashboardWidget widget = new DashboardWidget();
+        layout.add(widget);
+        fakeClientCommunication();
+        layout.remove(widget);
+        fakeClientCommunication();
+        Assert.assertTrue(widget.getParent().isEmpty());
+    }
+
+    @Test
+    public void addWidgetToLayout_removeFromParent_widgetIsRemoved() {
+        Div layout = new Div();
+        ui.add(layout);
+        DashboardWidget widget = new DashboardWidget();
+        layout.add(widget);
+        fakeClientCommunication();
+        widget.removeFromParent();
+        fakeClientCommunication();
+        Assert.assertTrue(widget.getParent().isEmpty());
+    }
+
+    @Test
+    public void addWidgetFromLayoutToDashboard_widgetIsAdded() {
+        Div parent = new Div();
+        ui.add(parent);
+        DashboardWidget widget = new DashboardWidget();
+        parent.add(widget);
+        fakeClientCommunication();
+        dashboard.add(widget);
+        fakeClientCommunication();
+        assertWidgets(dashboard, widget);
+    }
+
+    @Test
+    public void addWidgetToAnotherDashboard_widgetIsMoved() {
+        DashboardWidget widget = new DashboardWidget();
+        dashboard.add(widget);
+        fakeClientCommunication();
         Dashboard newDashboard = new Dashboard();
         ui.add(newDashboard);
-        newDashboard.add(widget1);
+        newDashboard.add(widget);
         fakeClientCommunication();
+        assertWidgets(dashboard);
+        assertWidgets(newDashboard, widget);
+    }
 
-        assertVirtualChildren(dashboard);
-        assertVirtualChildren(newDashboard, widget1);
+    @Test
+    public void addWidgetFromLayoutToOtherLayout_widgetIsAdded() {
+        Div parent = new Div();
+        ui.add(parent);
+        DashboardWidget widget = new DashboardWidget();
+        parent.add(widget);
+        fakeClientCommunication();
+        Div newParent = new Div();
+        ui.add(newParent);
+        newParent.add(widget);
+        fakeClientCommunication();
+        Assert.assertTrue(widget.getParent().isPresent());
+        Assert.assertEquals(newParent, widget.getParent().get());
     }
 
     private void fakeClientCommunication() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
         });
+    }
+
+    private static void assertWidgets(Dashboard dashboard,
+            DashboardWidget... expectedWidgets) {
+        assertVirtualChildren(dashboard, expectedWidgets);
+        Assert.assertEquals(Arrays.asList(expectedWidgets),
+                dashboard.getWidgets());
     }
 
     private static void assertVirtualChildren(Dashboard dashboard,
