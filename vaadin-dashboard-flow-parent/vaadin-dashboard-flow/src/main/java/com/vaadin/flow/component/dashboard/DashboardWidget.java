@@ -8,8 +8,6 @@
  */
 package com.vaadin.flow.component.dashboard;
 
-import java.util.Optional;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -42,16 +40,5 @@ public class DashboardWidget extends Component {
      */
     public void setTitle(String title) {
         getElement().setProperty("widgetTitle", title == null ? "" : title);
-    }
-
-    @Override
-    public void removeFromParent() {
-        Optional<Component> optionalParent = getParent();
-        if (optionalParent.isPresent()
-                && optionalParent.get() instanceof Dashboard dashboard) {
-            dashboard.remove(this);
-        } else {
-            super.removeFromParent();
-        }
     }
 }

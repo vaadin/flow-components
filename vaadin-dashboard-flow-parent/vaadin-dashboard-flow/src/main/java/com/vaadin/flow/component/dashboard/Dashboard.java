@@ -10,8 +10,11 @@ package com.vaadin.flow.component.dashboard;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +25,9 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.ElementDetachEvent;
+import com.vaadin.flow.dom.ElementDetachListener;
+import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -145,6 +151,32 @@ public class Dashboard extends Component {
         doUpdateClient();
     }
 
+    private final Map<Element, Registration> childDetachListenerMap = new HashMap<>();
+
+    // Must not use lambda here as that would break serialization. See
+    // https://github.com/vaadin/flow-components/issues/5597
+    private final ElementDetachListener childDetachListener = new ElementDetachListener() {
+        @Override
+        public void onDetach(ElementDetachEvent e) {
+            var detachedElement = e.getSource();
+            getWidgets().stream()
+                    .filter(widget -> Objects.equals(detachedElement,
+                            widget.getElement()))
+                    .findAny().ifPresent(detachedWidget -> {
+                        // The child was removed from the dashboard
+
+                        // Remove the registration for the child detach listener
+                        childDetachListenerMap.get(detachedWidget.getElement())
+                                .remove();
+                        childDetachListenerMap
+                                .remove(detachedWidget.getElement());
+
+                        widgets.remove(detachedWidget);
+                        updateClient();
+                    });
+        }
+    };
+
     private void updateClient() {
         if (pendingUpdate) {
             return;
@@ -158,6 +190,14 @@ public class Dashboard extends Component {
     }
 
     private void doUpdateClient() {
+        widgets.forEach(widget -> {
+            Element childWidgetElement = widget.getElement();
+            if (!childDetachListenerMap.containsKey(childWidgetElement)) {
+                childDetachListenerMap.put(childWidgetElement,
+                        childWidgetElement
+                                .addDetachListener(childDetachListener));
+            }
+        });
         getElement().setPropertyJson("items", createItemsJsonArray());
     }
 
@@ -187,28 +227,22 @@ public class Dashboard extends Component {
     private void doRemoveAllWidgets() {
         List<Element> elementsToRemove = widgets.stream()
                 .map(Component::getElement).toList();
-        elementsToRemove.forEach(getElement()::removeVirtualChild);
+        elementsToRemove.forEach(getElement()::removeChild);
         widgets.clear();
     }
 
     private void doRemoveWidget(DashboardWidget widget) {
-        getElement().removeVirtualChild(widget.getElement());
+        getElement().removeChild(widget.getElement());
         widgets.remove(widget);
     }
 
     private void doAddWidget(int index, DashboardWidget widget) {
-        if (widget.getParent().isPresent()) {
-            widget.removeFromParent();
-        }
-        getElement().appendVirtualChild(widget.getElement());
+        getElement().appendChild(widget.getElement());
         widgets.add(index, widget);
     }
 
     private void doAddWidget(DashboardWidget widget) {
-        if (widget.getParent().isPresent()) {
-            widget.removeFromParent();
-        }
-        getElement().appendVirtualChild(widget.getElement());
+        getElement().appendChild(widget.getElement());
         widgets.add(widget);
     }
 }
