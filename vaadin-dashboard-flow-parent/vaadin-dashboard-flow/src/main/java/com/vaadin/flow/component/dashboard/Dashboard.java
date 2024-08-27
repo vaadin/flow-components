@@ -10,9 +10,7 @@ package com.vaadin.flow.component.dashboard;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.slf4j.LoggerFactory;
@@ -24,9 +22,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.dom.ElementDetachEvent;
-import com.vaadin.flow.dom.ElementDetachListener;
-import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -142,31 +137,6 @@ public class Dashboard extends Component {
         updateClient();
     }
 
-    private final Map<Element, Registration> childDetachListenerMap = new HashMap<>();
-
-    // Must not use lambda here as that would break serialization. See
-    // https://github.com/vaadin/flow-components/issues/5597
-    private final ElementDetachListener childDetachListener = new ElementDetachListener() {
-        @Override
-        public void onDetach(ElementDetachEvent e) {
-            var detachedElement = e.getSource();
-            getWidgets().stream()
-                    .filter(widget -> Objects.equals(detachedElement,
-                            widget.getElement()))
-                    .findAny().ifPresent(detachedWidget -> {
-                        // The child was removed from the dashboard
-
-                        // Remove the registration for the child detach listener
-                        childDetachListenerMap.get(detachedWidget.getElement())
-                                .remove();
-                        childDetachListenerMap
-                                .remove(detachedWidget.getElement());
-
-                        widgets.remove(detachedWidget);
-                        updateClient();
-                    });
-        }
-    };
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
@@ -188,14 +158,6 @@ public class Dashboard extends Component {
     }
 
     private void doUpdateClient() {
-        widgets.forEach(widget -> {
-            Element childWidgetElement = widget.getElement();
-            if (!childDetachListenerMap.containsKey(childWidgetElement)) {
-                childDetachListenerMap.put(childWidgetElement,
-                        childWidgetElement
-                                .addDetachListener(childDetachListener));
-            }
-        });
         getElement().setPropertyJson("items", createItemsJsonArray());
     }
 
