@@ -71,6 +71,8 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
     private Component target;
     private Registration targetAttachRegistration;
+    private Registration targetDetachRegistration;
+    private boolean autoAddedToTheUi;
 
     private boolean openOnClick = true;
     private boolean openOnHover = false;
@@ -664,6 +666,9 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * <p>
      * By default, the popover can be opened with a click on the target
      * component.
+     * <p>
+     * Note: setting target will also add the popover to the {@code <body>} if
+     * it's not yet attached anywhere.
      *
      * @param target
      *            the target component for this popover, can be {@code null} to
@@ -679,6 +684,12 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
         if (this.target != null) {
             targetAttachRegistration.remove();
+            targetDetachRegistration.remove();
+        }
+
+        if (autoAddedToTheUi) {
+            getElement().removeFromParent();
+            autoAddedToTheUi = false;
         }
 
         this.target = target;
@@ -693,10 +704,22 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
         target.getUI().ifPresent(this::onTargetAttach);
         targetAttachRegistration = target
                 .addAttachListener(e -> onTargetAttach(e.getUI()));
+        targetDetachRegistration = target.addDetachListener(e -> {
+            if (autoAddedToTheUi) {
+                getElement().removeFromParent();
+                autoAddedToTheUi = false;
+            }
+        });
     }
 
     private void onTargetAttach(UI ui) {
         if (target != null) {
+            ui.beforeClientResponse(ui, context -> {
+                if (getElement().getNode().getParent() == null) {
+                    ui.addToModalComponent(this);
+                    autoAddedToTheUi = true;
+                }
+            });
             getElement().executeJs("this.target = $0", target.getElement());
         }
     }
