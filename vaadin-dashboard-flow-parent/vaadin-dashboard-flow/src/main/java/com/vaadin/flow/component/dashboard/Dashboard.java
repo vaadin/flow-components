@@ -143,6 +143,10 @@ public class Dashboard extends Component {
         updateClient();
     }
 
+    @Override
+    public Stream<Component> getChildren() {
+        return getWidgets().stream().map(Component.class::cast);
+    }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
