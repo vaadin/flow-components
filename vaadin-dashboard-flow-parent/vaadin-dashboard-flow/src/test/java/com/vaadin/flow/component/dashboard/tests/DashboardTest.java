@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.dashboard.tests;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.After;
@@ -54,8 +53,8 @@ public class DashboardTest {
         DashboardWidget widget1 = new DashboardWidget();
         DashboardWidget widget2 = new DashboardWidget();
         dashboard.add(widget1, widget2);
-
-        Assert.assertEquals(List.of(widget1, widget2), dashboard.getWidgets());
+        fakeClientCommunication();
+        assertWidgets(dashboard, widget1, widget2);
     }
 
     @Test
@@ -72,7 +71,8 @@ public class DashboardTest {
         } catch (NullPointerException e) {
             // Do nothing
         }
-        Assert.assertEquals(Collections.emptyList(), dashboard.getWidgets());
+        fakeClientCommunication();
+        assertWidgets(dashboard);
     }
 
     @Test
@@ -81,10 +81,10 @@ public class DashboardTest {
         DashboardWidget widget2 = new DashboardWidget();
         DashboardWidget widget3 = new DashboardWidget();
         dashboard.add(widget1, widget2);
+        fakeClientCommunication();
         dashboard.addWidgetAtIndex(1, widget3);
-
-        Assert.assertEquals(List.of(widget1, widget3, widget2),
-                dashboard.getWidgets());
+        fakeClientCommunication();
+        assertWidgets(dashboard, widget1, widget3, widget2);
     }
 
     @Test
@@ -98,16 +98,16 @@ public class DashboardTest {
         DashboardWidget widget1 = new DashboardWidget();
         DashboardWidget widget2 = new DashboardWidget();
         dashboard.add(widget1, widget2);
+        fakeClientCommunication();
         dashboard.remove(widget1);
-
-        Assert.assertEquals(List.of(widget2), dashboard.getWidgets());
+        fakeClientCommunication();
+        assertWidgets(dashboard, widget2);
     }
 
     @Test
     public void removeNullWidget_exceptionIsThrown() {
         Assert.assertThrows(NullPointerException.class,
                 () -> dashboard.remove((DashboardWidget) null));
-
     }
 
     @Test
@@ -115,9 +115,10 @@ public class DashboardTest {
         DashboardWidget widget1 = new DashboardWidget();
         DashboardWidget widget2 = new DashboardWidget();
         dashboard.add(widget1, widget2);
+        fakeClientCommunication();
         dashboard.removeAll();
-
-        Assert.assertEquals(Collections.emptyList(), dashboard.getWidgets());
+        fakeClientCommunication();
+        assertWidgets(dashboard);
     }
 
     @Test
@@ -126,7 +127,8 @@ public class DashboardTest {
         dashboard.add(widget1);
         fakeClientCommunication();
         widget1.removeFromParent();
-        Assert.assertEquals(Collections.emptyList(), dashboard.getWidgets());
+        fakeClientCommunication();
+        assertWidgets(dashboard);
     }
 
     @Test
@@ -134,7 +136,7 @@ public class DashboardTest {
         DashboardWidget widget1 = new DashboardWidget();
         dashboard.add(widget1);
         fakeClientCommunication();
-        assertVirtualChildren(dashboard, widget1);
+        assertWidgets(dashboard, widget1);
     }
 
     @Test
@@ -144,7 +146,7 @@ public class DashboardTest {
         fakeClientCommunication();
         widget1.removeFromParent();
         fakeClientCommunication();
-        assertVirtualChildren(dashboard);
+        assertWidgets(dashboard);
     }
 
     @Test
@@ -155,7 +157,7 @@ public class DashboardTest {
         fakeClientCommunication();
         widget1.removeFromParent();
         fakeClientCommunication();
-        assertVirtualChildren(dashboard, widget2);
+        assertWidgets(dashboard, widget2);
     }
 
     @Test
@@ -167,46 +169,11 @@ public class DashboardTest {
         fakeClientCommunication();
         widget1.removeFromParent();
         fakeClientCommunication();
-        assertVirtualChildren(dashboard, widget2);
+        assertWidgets(dashboard, widget2);
     }
 
     @Test
-    public void addWidgetToLayout_widgetIsAdded() {
-        Div layout = new Div();
-        ui.add(layout);
-        DashboardWidget widget = new DashboardWidget();
-        layout.add(widget);
-        fakeClientCommunication();
-        Assert.assertTrue(widget.getParent().isPresent());
-        Assert.assertEquals(layout, widget.getParent().get());
-    }
-
-    @Test
-    public void removeWidgetFromLayout_widgetIsRemoved() {
-        Div layout = new Div();
-        ui.add(layout);
-        DashboardWidget widget = new DashboardWidget();
-        layout.add(widget);
-        fakeClientCommunication();
-        layout.remove(widget);
-        fakeClientCommunication();
-        Assert.assertTrue(widget.getParent().isEmpty());
-    }
-
-    @Test
-    public void addWidgetToLayout_removeFromParent_widgetIsRemoved() {
-        Div layout = new Div();
-        ui.add(layout);
-        DashboardWidget widget = new DashboardWidget();
-        layout.add(widget);
-        fakeClientCommunication();
-        widget.removeFromParent();
-        fakeClientCommunication();
-        Assert.assertTrue(widget.getParent().isEmpty());
-    }
-
-    @Test
-    public void addWidgetFromLayoutToDashboard_widgetIsAdded() {
+    public void addWidgetFromLayoutToDashboard_widgetIsMoved() {
         Div parent = new Div();
         ui.add(parent);
         DashboardWidget widget = new DashboardWidget();
@@ -214,7 +181,21 @@ public class DashboardTest {
         fakeClientCommunication();
         dashboard.add(widget);
         fakeClientCommunication();
+        Assert.assertTrue(parent.getChildren().noneMatch(widget::equals));
         assertWidgets(dashboard, widget);
+    }
+
+    @Test
+    public void addWidgetFromDashboardToLayout_widgetIsMoved() {
+        DashboardWidget widget = new DashboardWidget();
+        dashboard.add(widget);
+        fakeClientCommunication();
+        Div parent = new Div();
+        ui.add(parent);
+        parent.add(widget);
+        fakeClientCommunication();
+        assertWidgets(dashboard);
+        Assert.assertTrue(parent.getChildren().anyMatch(widget::equals));
     }
 
     @Test
@@ -228,21 +209,6 @@ public class DashboardTest {
         fakeClientCommunication();
         assertWidgets(dashboard);
         assertWidgets(newDashboard, widget);
-    }
-
-    @Test
-    public void addWidgetFromLayoutToOtherLayout_widgetIsAdded() {
-        Div parent = new Div();
-        ui.add(parent);
-        DashboardWidget widget = new DashboardWidget();
-        parent.add(widget);
-        fakeClientCommunication();
-        Div newParent = new Div();
-        ui.add(newParent);
-        newParent.add(widget);
-        fakeClientCommunication();
-        Assert.assertTrue(widget.getParent().isPresent());
-        Assert.assertEquals(newParent, widget.getParent().get());
     }
 
     private void fakeClientCommunication() {
