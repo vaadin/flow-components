@@ -71,6 +71,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
     private Component target;
     private Registration targetAttachRegistration;
+    private Registration targetDetachRegistration;
     private boolean autoAddedToTheUi;
 
     private boolean openOnClick = true;
@@ -683,6 +684,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
         if (this.target != null) {
             targetAttachRegistration.remove();
+            targetDetachRegistration.remove();
         }
 
         this.target = target;
@@ -702,7 +704,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
         target.getUI().ifPresent(this::onTargetAttach);
         targetAttachRegistration = target
                 .addAttachListener(e -> onTargetAttach(e.getUI()));
-        target.addDetachListener(e -> {
+        targetDetachRegistration = target.addDetachListener(e -> {
             if (autoAddedToTheUi) {
                 getElement().removeFromParent();
                 autoAddedToTheUi = false;

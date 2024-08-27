@@ -84,6 +84,24 @@ public class PopoverAutoAddTest {
         Assert.assertNull(popover.getElement().getParent());
     }
 
+    @Test
+    public void setTarget_changeTarget_detachOldTarget_notAutoRemoved() {
+        Popover popover = new Popover();
+        Div target = new Div();
+        popover.setTarget(target);
+        ui.add(target);
+        fakeClientResponse();
+
+        Div other = new Div();
+        ui.add(other);
+        popover.setTarget(other);
+        fakeClientResponse();
+
+        ui.remove(target);
+        fakeClientResponse();
+        Assert.assertEquals(ui.getElement(), popover.getElement().getParent());
+    }
+
     private void fakeClientResponse() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
