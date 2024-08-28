@@ -58,6 +58,33 @@ public class DashboardIT extends AbstractComponentIT {
         assertWidgetsByTitle();
     }
 
+    @Test
+    public void changeMaximumColumnCountTo1_widgetsShouldBeOnTheSameColumn() {
+        List<DashboardWidgetElement> widgets = dashboardElement.getWidgets();
+        // The first two widgets should initially be on the same horizontal line
+        int yOfWidget1 = widgets.get(0).getLocation().getY();
+        Assert.assertEquals(yOfWidget1, widgets.get(1).getLocation().getY());
+
+        clickElementWithJs("set-maximum-column-count-1");
+        // The first two widgets should be on the same vertical line
+        int xOfWidget1 = widgets.get(0).getLocation().getX();
+        Assert.assertEquals(xOfWidget1, widgets.get(1).getLocation().getX());
+    }
+
+    @Test
+    public void changeMaximumColumnCountToNull_widgetsShouldBeOnTheSameRow() {
+        clickElementWithJs("set-maximum-column-count-1");
+        List<DashboardWidgetElement> widgets = dashboardElement.getWidgets();
+        // The first two widgets should be on the same vertical line
+        int xOfWidget1 = widgets.get(0).getLocation().getX();
+        Assert.assertEquals(xOfWidget1, widgets.get(1).getLocation().getX());
+
+        clickElementWithJs("set-maximum-column-count-null");
+        // The widgets should be on the same horizontal line
+        int yOfWidget1 = widgets.get(0).getLocation().getY();
+        Assert.assertEquals(yOfWidget1, widgets.get(1).getLocation().getY());
+    }
+
     private void assertWidgetsByTitle(String... expectedWidgetTitles) {
         List<DashboardWidgetElement> widgets = dashboardElement.getWidgets();
         List<String> widgetTitles = widgets.stream()

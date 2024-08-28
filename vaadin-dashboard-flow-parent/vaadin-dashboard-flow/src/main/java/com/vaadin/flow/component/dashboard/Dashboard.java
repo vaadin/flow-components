@@ -146,6 +146,28 @@ public class Dashboard extends Component {
         updateClient();
     }
 
+    /**
+     * Returns the maximum column count of the dashboard.
+     *
+     * @return the maximum column count of the dashboard
+     */
+    public Integer getMaximumColumnCount() {
+        String maxColCount = getStyle().get("--vaadin-dashboard-col-max-count");
+        return maxColCount == null ? null : Integer.valueOf(maxColCount);
+    }
+
+    /**
+     * Sets the maximum column count of the dashboard.
+     *
+     * @param maxCount
+     *            the new maximum column count. Pass in {@code null} to set the
+     *            maximum column count back to the default value.
+     */
+    public void setMaximumColumnCount(Integer maxColCount) {
+        getStyle().set("--vaadin-dashboard-col-max-count",
+                maxColCount == null ? null : String.valueOf(maxColCount));
+    }
+
     @Override
     public Stream<Component> getChildren() {
         return getWidgets().stream().map(Component.class::cast);
