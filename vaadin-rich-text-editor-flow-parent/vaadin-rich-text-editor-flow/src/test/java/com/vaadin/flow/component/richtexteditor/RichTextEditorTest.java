@@ -11,7 +11,6 @@ package com.vaadin.flow.component.richtexteditor;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
-import elemental.json.JsonArray;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -27,6 +26,8 @@ import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
+
+import elemental.json.JsonArray;
 
 /**
  * Tests for the {@link RichTextEditor}.
