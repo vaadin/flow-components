@@ -286,7 +286,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * Sets the minimum value of the field.
+     * Sets the minimum value for the field.
      *
      * @param min
      *            the double value to set
@@ -305,7 +305,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * Sets the maximum value of the field.
+     * Sets the maximum value for the field.
      *
      * @param max
      *            the double value to set
