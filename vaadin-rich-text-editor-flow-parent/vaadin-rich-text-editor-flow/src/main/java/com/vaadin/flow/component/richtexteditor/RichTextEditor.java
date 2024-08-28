@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.richtexteditor;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -271,15 +272,19 @@ public class RichTextEditor
     }
 
     /**
-     * Gets the list of colors in HEX format used by the text color picker and
-     * background color picker controls of the text editor.
+     * Gets an unmodifiable list of colors in HEX format used by the text color
+     * picker and background color picker controls of the text editor.
+     * <p>
+     * Returns {@code null} by default, which means the web component shows a
+     * default color palette.
      *
      * @since 24.5
-     * @return the list of colors options
+     * @return an unmodifiable list of colors options
      */
     public List<String> getColorOptions() {
-        return JsonSerializer.toObjects(String.class,
+        List options = JsonSerializer.toObjects(String.class,
                 (JsonArray) getElement().getPropertyRaw("colorOptions"));
+        return Collections.unmodifiableList(options);
     }
 
     /**
