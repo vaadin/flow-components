@@ -622,6 +622,24 @@ public class SideNavItemTest {
     }
 
     @Test
+    public void isMatchNested_falseByDefault() {
+        Assert.assertFalse(sideNavItem.isMatchNested());
+    }
+
+    @Test
+    public void setMatchNested_isMatchNested() {
+        sideNavItem.setMatchNested(true);
+        Assert.assertTrue(
+                sideNavItem.getElement().getProperty("matchNested", false));
+        Assert.assertTrue(sideNavItem.isMatchNested());
+
+        sideNavItem.setMatchNested(false);
+        Assert.assertFalse(
+                sideNavItem.getElement().getProperty("matchNested", false));
+        Assert.assertFalse(sideNavItem.isMatchNested());
+    }
+
+    @Test
     public void isRouterIgnore_falseByDefault() {
         Assert.assertFalse(sideNavItem.isRouterIgnore());
     }
