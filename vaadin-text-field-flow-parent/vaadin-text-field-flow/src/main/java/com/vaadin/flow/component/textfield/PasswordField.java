@@ -75,7 +75,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * also check the component constraints and display error messages from the
  * {@link PasswordFieldI18n} object. The exception is the required constraint,
  * for which Binder provides its own API, see
- * {@link Binder.BindingBuilder#asRequired(String)}.
+ * {@link Binder.BindingBuilder#asRequired(String) asRequired()}.
  * <p>
  * However, if Binder doesn't fit your needs and you want to implement fully
  * custom validation logic, you can disable the constraint validation by setting
@@ -281,9 +281,11 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     }
 
     /**
-     * Maximum number of characters (in Unicode code points) that the user can
-     * enter. Values with a length exceeding this limit will cause the component
-     * to invalidate. The maximum length is inclusive.
+     * Sets the maximum number of characters (in Unicode code points) that the
+     * user can enter. Values with a length exceeding this limit will cause the
+     * component to invalidate.
+     * <p>
+     * The maximum length is inclusive.
      *
      * @param maxLength
      *            the maximum length
@@ -294,11 +296,11 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     }
 
     /**
-     * Maximum number of characters (in Unicode code points) that the user can
-     * enter. Values with a length exceeding this limit will cause the component
-     * to invalidate. The maximum length is inclusive.
+     * Gets the maximum number of characters (in Unicode code points) that the
+     * user can enter.
      *
-     * @return the {@code maxlength} property from the webcomponent
+     * @return the maximum length
+     * @see #setMaxLength(int)
      */
     public int getMaxLength() {
         return (int) getElement().getProperty("maxlength", 0.0);
@@ -309,9 +311,11 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     }
 
     /**
-     * Minimum number of characters (in Unicode code points) that the user can
-     * enter. Values with a length shorter than this limit will cause the
-     * component to invalidate. The minimum length is inclusive.
+     * Sets the minimum number of characters (in Unicode code points) that the
+     * user can enter. Values with a length shorter than this limit will cause
+     * the component to invalidate.
+     * <p>
+     * The minimum length is inclusive.
      *
      * @param minLength
      *            the minimum length
@@ -322,11 +326,11 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     }
 
     /**
-     * Minimum number of characters (in Unicode code points) that the user can
-     * enter. Values with a length shorter than this limit will cause the
-     * component to invalidate. The minimum length is inclusive.
+     * Gets the minimum number of characters (in Unicode code points) that the
+     * user can enter.
      *
-     * @return the {@code minlength} property from the webcomponent
+     * @return the minimum length
+     * @see #setMinLength(int)
      */
     public int getMinLength() {
         return (int) getElement().getProperty("minlength", 0.0);
@@ -355,13 +359,11 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     }
 
     /**
-     * A regular expression that the value is checked against during validation.
-     * Values that do not match the pattern will cause the component to
-     * invalidate.
-     * <p>
-     * The pattern must match the entire value, not just some subset.
+     * Gets the regular expression that the value is checked against during
+     * validation.
      *
-     * @return the {@code pattern} property from the webcomponent
+     * @return the pattern or {@code null} if not set
+     * @see #setPattern(String)
      */
     public String getPattern() {
         return getElement().getProperty("pattern");
