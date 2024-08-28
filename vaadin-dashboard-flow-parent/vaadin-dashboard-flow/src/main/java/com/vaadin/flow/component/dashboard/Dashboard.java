@@ -98,8 +98,11 @@ public class Dashboard extends Component {
             throw new IllegalArgumentException(
                     "Cannot add a widget with a negative index.");
         }
-        // The case when the index is bigger than the children count is handled
-        // inside the method below
+        if (index > widgets.size()) {
+            throw new IllegalArgumentException(String.format(
+                    "Cannot add a widget with index %d when there are %d widgets",
+                    index, widgets.size()));
+        }
         doAddWidget(index, widget);
         updateClient();
     }
