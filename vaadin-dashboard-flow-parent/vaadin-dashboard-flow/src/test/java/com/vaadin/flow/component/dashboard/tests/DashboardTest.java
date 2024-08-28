@@ -88,6 +88,27 @@ public class DashboardTest {
     }
 
     @Test
+    public void addWidgetAtInvalidIndex_exceptionIsThrown() {
+        DashboardWidget widget1 = new DashboardWidget();
+        DashboardWidget widget2 = new DashboardWidget();
+        dashboard.add(widget1);
+        fakeClientCommunication();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> dashboard.addWidgetAtIndex(2, widget2));
+        fakeClientCommunication();
+        assertWidgets(dashboard, widget1);
+    }
+
+    @Test
+    public void addWidgetAtNegativeIndex_exceptionIsThrown() {
+        DashboardWidget widget = new DashboardWidget();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> dashboard.addWidgetAtIndex(-1, widget));
+        fakeClientCommunication();
+        assertWidgets(dashboard);
+    }
+
+    @Test
     public void addNullWidgetAtIndex_exceptionIsThrown() {
         Assert.assertThrows(NullPointerException.class,
                 () -> dashboard.addWidgetAtIndex(0, null));
