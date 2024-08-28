@@ -160,9 +160,9 @@ public class Dashboard extends Component {
      *            the new maximum column count. Pass in {@code null} to set the
      *            maximum column count back to the default value.
      */
-    public void setMaximumColumnCount(Integer maxCount) {
+    public void setMaximumColumnCount(Integer maxColCount) {
         getStyle().set("--vaadin-dashboard-col-max-count",
-                maxCount == null ? null : String.valueOf(maxCount));
+                maxColCount == null ? null : String.valueOf(maxColCount));
     }
 
     @Override
