@@ -132,25 +132,7 @@ public class DashboardTest {
     }
 
     @Test
-    public void addWidget_virtualNodeIdsInSync() {
-        DashboardWidget widget1 = new DashboardWidget();
-        dashboard.add(widget1);
-        fakeClientCommunication();
-        assertWidgets(dashboard, widget1);
-    }
-
-    @Test
-    public void removeWidget_virtualNodeIdsInSync() {
-        DashboardWidget widget1 = new DashboardWidget();
-        dashboard.add(widget1);
-        fakeClientCommunication();
-        widget1.removeFromParent();
-        fakeClientCommunication();
-        assertWidgets(dashboard);
-    }
-
-    @Test
-    public void selfRemoveChild_virtualNodeIdsInSync() {
+    public void addMultipleWidgets_removeOneFromParent_widgetIsRemoved() {
         DashboardWidget widget1 = new DashboardWidget();
         DashboardWidget widget2 = new DashboardWidget();
         dashboard.add(widget1, widget2);
@@ -161,7 +143,7 @@ public class DashboardTest {
     }
 
     @Test
-    public void addSeparately_selfRemoveChild_doesNotThrow() {
+    public void addSeparately_removeOneFromParent_widgetIsRemoved() {
         DashboardWidget widget1 = new DashboardWidget();
         DashboardWidget widget2 = new DashboardWidget();
         dashboard.add(widget1);
