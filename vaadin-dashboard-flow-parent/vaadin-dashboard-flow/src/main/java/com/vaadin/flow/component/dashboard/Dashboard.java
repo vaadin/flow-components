@@ -144,7 +144,7 @@ public class Dashboard extends Component {
     }
 
     /**
-     * Returns maximum column count of the dashboard.
+     * Returns the maximum column count of the dashboard.
      *
      * @return the maximum column count of the dashboard
      */
