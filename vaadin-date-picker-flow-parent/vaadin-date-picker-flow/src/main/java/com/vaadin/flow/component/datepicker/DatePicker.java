@@ -90,9 +90,9 @@ import elemental.json.JsonType;
  * selection from the overlay or manual entry followed by Enter or blur.
  * Programmatic value changes trigger validation as well.
  * <p>
- * Validation verifies that the chosen date is parsable and satisfies the
- * specified constraints. If validation fails, the component is marked as
- * invalid and an error message is displayed below the input.
+ * Validation verifies that the value is parsable into {@link LocalDate} and
+ * satisfies the specified constraints. If validation fails, the component is
+ * marked as invalid and an error message is displayed below the input.
  * <p>
  * The following constraints are supported:
  * <ul>
@@ -116,7 +116,7 @@ import elemental.json.JsonType;
  * also check if the date is parsable and satisfies the component constraints,
  * displaying error messages from the {@link DatePickerI18n} object. The
  * exception is the required constraint, for which Binder provides its own API,
- * see {@link Binder.BindingBuilder#asRequired(String)}.
+ * see {@link Binder.BindingBuilder#asRequired(String) asRequired()}.
  * <p>
  * However, if Binder doesn't fit your needs and you want to implement fully
  * custom validation logic, you can disable the constraint validation by setting
@@ -395,9 +395,11 @@ public class DatePicker
     }
 
     /**
-     * Sets the minimum date in the date picker. Dates before that will be
-     * disabled in the popup. Manual entry of dates before the minimum will
-     * cause the component to invalidate. The minimum date is inclusive.
+     * Sets the minimum date for the field. Dates before that will be disabled
+     * in the calendar overlay. Manual entry of dates before the minimum will
+     * cause the component to invalidate.
+     * <p>
+     * The minimum date is inclusive.
      *
      * @param min
      *            the minimum date that is allowed to be selected, or
@@ -411,21 +413,22 @@ public class DatePicker
     }
 
     /**
-     * Gets the minimum date in the date picker. Dates before that will be
-     * disabled in the popup. Manual entry of dates before the minimum will
-     * cause the component to invalidate. The minimum date is inclusive.
+     * Gets the minimum date of the field.
      *
      * @return the minimum date that is allowed to be selected, or
      *         <code>null</code> if there's no minimum
+     * @see #setMax(LocalDate)
      */
     public LocalDate getMin() {
         return PARSER.apply(getElement().getProperty("min"));
     }
 
     /**
-     * Sets the maximum date in the date picker. Dates after that will be
-     * disabled in the popup. Manual entry of dates after the maximum will cause
-     * the component to invalidate. The maximum date is inclusive.
+     * Sets the maximum date for the field. Dates after that will be disabled in
+     * the calendar overlay. Manual entry of dates after the maximum will cause
+     * the component to invalidate.
+     * <p>
+     * The maximum date is inclusive.
      *
      * @param max
      *            the maximum date that is allowed to be selected, or
@@ -439,12 +442,11 @@ public class DatePicker
     }
 
     /**
-     * Gets the maximum date in the date picker. Dates after that will be
-     * disabled in the popup. Manual entry of dates after the maximum will cause
-     * the component to invalidate. The maximum date is inclusive.
+     * Gets the maximum date of the field.
      *
      * @return the maximum date that is allowed to be selected, or
      *         <code>null</code> if there's no maximum
+     * @see #setMax(LocalDate)
      */
     public LocalDate getMax() {
         return PARSER.apply(getElement().getProperty("max"));
