@@ -8,6 +8,11 @@
  */
 package com.vaadin.flow.component.dashboard.testbench;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.openqa.selenium.By;
+
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -24,5 +29,41 @@ public class DashboardWidgetElement extends TestBenchElement {
      */
     public String getTitle() {
         return getPropertyString("widgetTitle");
+    }
+
+    /**
+     * Returns the colspan of the widget.
+     *
+     * @return the {@code --vaadin-dashboard-item-colspan} style from the
+     *         wrapper of the web component
+     */
+    public Integer getColspan() {
+        TestBenchElement wrapper = getWrapper();
+        if (wrapper == null) {
+            return null;
+        }
+        String colspanStr = getStyle(wrapper,
+                "--vaadin-dashboard-item-colspan");
+        if (colspanStr == null) {
+            return null;
+        }
+        return Integer.valueOf(colspanStr);
+    }
+
+    private TestBenchElement getWrapper() {
+        return findElement(By.xpath(".."));
+    }
+
+    private static String getStyle(TestBenchElement element, String name) {
+        String style = element.getAttribute("style");
+        if (style == null) {
+            return null;
+        }
+        Pattern pattern = Pattern.compile(name + ": (.*?);");
+        Matcher matcher = pattern.matcher(style);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
     }
 }
