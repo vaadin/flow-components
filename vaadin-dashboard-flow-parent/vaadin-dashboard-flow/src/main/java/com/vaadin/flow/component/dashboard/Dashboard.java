@@ -144,6 +144,16 @@ public class Dashboard extends Component {
     }
 
     /**
+     * Returns maximum column count of the dashboard.
+     *
+     * @return the maximum column count of the dashboard
+     */
+    public Integer getMaximumColumnCount() {
+        String maxColCount = getStyle().get("--vaadin-dashboard-col-max-count");
+        return maxColCount == null ? null : Integer.valueOf(maxColCount);
+    }
+
+    /**
      * Sets the maximum column count of the dashboard.
      *
      * @param maxCount

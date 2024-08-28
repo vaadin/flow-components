@@ -215,13 +215,10 @@ public class DashboardTest {
     public void setMaximumColumnCount_valueIsCorrectlySet() {
         String propertyName = "--vaadin-dashboard-col-max-count";
         int valueToSet = 5;
-
         Assert.assertNull(dashboard.getStyle().get(propertyName));
-
         dashboard.setMaximumColumnCount(valueToSet);
         Assert.assertEquals(String.valueOf(valueToSet),
                 dashboard.getStyle().get(propertyName));
-
         dashboard.setMaximumColumnCount(null);
         Assert.assertNull(dashboard.getStyle().get(propertyName));
     }
@@ -229,10 +226,28 @@ public class DashboardTest {
     @Test
     public void setMaximumColumnCountNull_propertyIsRemoved() {
         dashboard.setMaximumColumnCount(5);
-
         dashboard.setMaximumColumnCount(null);
         Assert.assertNull(
                 dashboard.getStyle().get("--vaadin-dashboard-col-max-count"));
+    }
+
+    @Test
+    public void defaultMaximumColumnCountValueIsCorrectlyRetrieved() {
+        Assert.assertNull(dashboard.getMaximumColumnCount());
+    }
+
+    @Test
+    public void setMaximumColumnCount_valueIsCorrectlyRetrieved() {
+        Integer valueToSet = 5;
+        dashboard.setMaximumColumnCount(valueToSet);
+        Assert.assertEquals(valueToSet, dashboard.getMaximumColumnCount());
+    }
+
+    @Test
+    public void setMaximumColumnCountNull_valueIsCorrectlyRetrieved() {
+        dashboard.setMaximumColumnCount(5);
+        dashboard.setMaximumColumnCount(null);
+        Assert.assertNull(dashboard.getMaximumColumnCount());
     }
 
     private void fakeClientCommunication() {
