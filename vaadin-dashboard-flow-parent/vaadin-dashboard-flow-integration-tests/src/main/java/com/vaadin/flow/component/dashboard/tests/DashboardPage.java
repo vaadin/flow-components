@@ -38,6 +38,8 @@ public class DashboardPage extends Div {
         Dashboard dashboard = new Dashboard();
         dashboard.add(widget1, widget2, widget3);
 
+        dashboard.setMaximumColumnCount(3);
+
         NativeButton addWidgetAtIndex1 = new NativeButton(
                 "Add widget at index 1");
         addWidgetAtIndex1.addClickListener(click -> {
@@ -69,7 +71,19 @@ public class DashboardPage extends Div {
         removeAllWidgets.addClickListener(click -> dashboard.removeAll());
         removeAllWidgets.setId("remove-all-widgets");
 
+        NativeButton setMaximumColumnCount1 = new NativeButton(
+                "Set maximum column count 1");
+        setMaximumColumnCount1
+                .addClickListener(click -> dashboard.setMaximumColumnCount(1));
+        setMaximumColumnCount1.setId("set-maximum-column-count-1");
+
+        NativeButton setMaximumColumnCountNull = new NativeButton(
+                "Set maximum column count null");
+        setMaximumColumnCountNull.addClickListener(
+                click -> dashboard.setMaximumColumnCount(null));
+        setMaximumColumnCountNull.setId("set-maximum-column-count-null");
+
         add(addWidgetAtIndex1, removeFirstAndLastWidgets, removeAllWidgets,
-                dashboard);
+                setMaximumColumnCount1, setMaximumColumnCountNull, dashboard);
     }
 }
