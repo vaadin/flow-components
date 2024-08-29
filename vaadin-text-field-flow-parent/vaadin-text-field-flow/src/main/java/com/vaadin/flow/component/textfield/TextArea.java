@@ -304,8 +304,6 @@ public class TextArea extends TextFieldBase<TextArea, String>
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @see TextAreaI18n#setRequiredErrorMessage(String)
      */
     @Override

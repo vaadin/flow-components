@@ -259,8 +259,6 @@ public class EmailField extends TextFieldBase<EmailField, String>
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @see EmailFieldI18n#setRequiredErrorMessage(String)
      */
     @Override

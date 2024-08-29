@@ -271,8 +271,6 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @see PasswordFieldI18n#setRequiredErrorMessage(String)
      */
     @Override

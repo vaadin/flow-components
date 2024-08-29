@@ -289,8 +289,6 @@ public class TextField extends TextFieldBase<TextField, String>
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @see TextFieldI18n#setRequiredErrorMessage(String)
      */
     @Override

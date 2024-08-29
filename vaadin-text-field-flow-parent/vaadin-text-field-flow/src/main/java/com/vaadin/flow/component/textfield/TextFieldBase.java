@@ -165,8 +165,6 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
      * NOTE: The required indicator won't be visible if the field doesn't have a
      * label.
      *
-     * @param required
-     *            true to make the field required, false otherwise
      * @see #setLabel(String)
      */
     @Override
@@ -194,6 +192,8 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
 
     /**
      * Alias for {@link #isRequiredIndicatorVisible()}
+     *
+     * @return true if the field is required, false otherwise
      */
     public boolean isRequired() {
         return isRequiredIndicatorVisible();
