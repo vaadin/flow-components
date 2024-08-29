@@ -159,7 +159,7 @@ public class Dashboard extends Component {
     /**
      * Sets the maximum column count of the dashboard.
      *
-     * @param maxCount
+     * @param maxColCount
      *            the new maximum column count. Pass in {@code null} to set the
      *            maximum column count back to the default value.
      */
@@ -178,6 +178,18 @@ public class Dashboard extends Component {
         super.onAttach(attachEvent);
         attachRenderer();
         doUpdateClient();
+    }
+
+    void updateClient() {
+        if (pendingUpdate) {
+            return;
+        }
+        pendingUpdate = true;
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(this, ctx -> {
+                    doUpdateClient();
+                    pendingUpdate = false;
+                }));
     }
 
     private final Map<Element, Registration> childDetachListenerMap = new HashMap<>();
@@ -206,18 +218,6 @@ public class Dashboard extends Component {
         }
     };
 
-    private void updateClient() {
-        if (pendingUpdate) {
-            return;
-        }
-        pendingUpdate = true;
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this, ctx -> {
-                    doUpdateClient();
-                    pendingUpdate = false;
-                }));
-    }
-
     private void doUpdateClient() {
         widgets.forEach(widget -> {
             Element childWidgetElement = widget.getElement();
@@ -244,6 +244,7 @@ public class Dashboard extends Component {
         for (DashboardWidget widget : widgets) {
             JsonObject jsonItem = Json.createObject();
             jsonItem.put("nodeid", getWidgetNodeId(widget));
+            jsonItem.put("colspan", widget.getColspan());
             jsonItems.set(jsonItems.length(), jsonItem);
         }
         return jsonItems;

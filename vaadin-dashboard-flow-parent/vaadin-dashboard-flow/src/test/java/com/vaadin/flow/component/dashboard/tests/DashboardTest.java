@@ -10,6 +10,7 @@ package com.vaadin.flow.component.dashboard.tests;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -26,6 +27,7 @@ import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.server.VaadinSession;
 
 import elemental.json.JsonArray;
+import elemental.json.JsonObject;
 
 public class DashboardTest {
 
@@ -253,6 +255,26 @@ public class DashboardTest {
         Assert.assertNull(dashboard.getMaximumColumnCount());
     }
 
+    @Test
+    public void setWidgetsWithDifferentColspans_itemsAreGeneratedWithCorrectColspans() {
+        DashboardWidget widget1 = new DashboardWidget();
+        DashboardWidget widget2 = new DashboardWidget();
+        widget2.setColspan(2);
+        dashboard.add(widget1, widget2);
+        fakeClientCommunication();
+        assertWidgetColspans(dashboard, widget1, widget2);
+    }
+
+    @Test
+    public void setColspanOnExistingWidget_itemsAreUpdatedWithCorrectColspans() {
+        DashboardWidget widget = new DashboardWidget();
+        dashboard.add(widget);
+        fakeClientCommunication();
+        widget.setColspan(2);
+        fakeClientCommunication();
+        assertWidgetColspans(dashboard, widget);
+    }
+
     private void fakeClientCommunication() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
@@ -278,10 +300,30 @@ public class DashboardTest {
     }
 
     private static List<Integer> getChildNodeIds(Dashboard dashboard) {
-        JsonArray jsonArrayOfIds = (JsonArray) dashboard.getElement()
-                .getPropertyRaw("items");
-        return JsonUtils.objectStream(jsonArrayOfIds)
+        return getItemsStream(dashboard)
                 .mapToInt(obj -> (int) obj.getNumber("nodeid")).boxed()
                 .toList();
+    }
+
+    private static void assertWidgetColspans(Dashboard dashboard,
+            DashboardWidget... widgets) {
+        // Get a List of the widget colspans
+        List<Integer> expectedColspans = Arrays.stream(widgets)
+                .map(DashboardWidget::getColspan).toList();
+        // Get the colspans from the items property of the dashboard
+        List<Integer> actualColspans = getWidgetColspans(dashboard);
+        Assert.assertEquals(expectedColspans, actualColspans);
+    }
+
+    private static List<Integer> getWidgetColspans(Dashboard dashboard) {
+        return getItemsStream(dashboard)
+                .mapToInt(obj -> (int) obj.getNumber("colspan")).boxed()
+                .toList();
+    }
+
+    private static Stream<JsonObject> getItemsStream(Dashboard dashboard) {
+        JsonArray jsonArrayOfIds = (JsonArray) dashboard.getElement()
+                .getPropertyRaw("items");
+        return JsonUtils.objectStream(jsonArrayOfIds);
     }
 }
