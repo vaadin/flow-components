@@ -756,8 +756,6 @@ public class DatePicker
      * NOTE: The required indicator won't be visible if the field doesn't have a
      * label.
      *
-     * @param required
-     *            true to make the field required, false otherwise
      * @see #setLabel(String)
      * @see DatePickerI18n#setRequiredErrorMessage(String)
      */
@@ -786,6 +784,8 @@ public class DatePicker
 
     /**
      * Alias for {@link #isRequiredIndicatorVisible()}
+     *
+     * @return true if the field is required, false otherwise
      */
     public boolean isRequired() {
         return isRequiredIndicatorVisible();
