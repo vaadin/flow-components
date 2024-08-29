@@ -83,7 +83,20 @@ public class DashboardPage extends Div {
                 click -> dashboard.setMaximumColumnCount(null));
         setMaximumColumnCountNull.setId("set-maximum-column-count-null");
 
+        NativeButton increaseAllColspansBy1 = new NativeButton(
+                "Increase all colspans by 1");
+        increaseAllColspansBy1.addClickListener(click -> dashboard.getWidgets()
+                .forEach(widget -> widget.setColspan(widget.getColspan() + 1)));
+        increaseAllColspansBy1.setId("increase-all-colspans-by-1");
+
+        NativeButton decreaseAllColspansBy1 = new NativeButton(
+                "Decrease all colspans by 1");
+        decreaseAllColspansBy1.addClickListener(click -> dashboard.getWidgets()
+                .forEach(widget -> widget.setColspan(widget.getColspan() - 1)));
+        decreaseAllColspansBy1.setId("decrease-all-colspans-by-1");
+
         add(addWidgetAtIndex1, removeFirstAndLastWidgets, removeAllWidgets,
-                setMaximumColumnCount1, setMaximumColumnCountNull, dashboard);
+                setMaximumColumnCount1, setMaximumColumnCountNull,
+                increaseAllColspansBy1, decreaseAllColspansBy1, dashboard);
     }
 }
