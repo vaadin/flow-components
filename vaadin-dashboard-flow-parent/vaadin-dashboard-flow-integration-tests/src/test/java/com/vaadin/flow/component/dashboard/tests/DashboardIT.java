@@ -85,6 +85,24 @@ public class DashboardIT extends AbstractComponentIT {
         Assert.assertEquals(yOfWidget1, widgets.get(1).getLocation().getY());
     }
 
+    @Test
+    public void defaultWidgetColspanIsCorrect() {
+        List<DashboardWidgetElement> widgets = dashboardElement.getWidgets();
+        widgets.forEach(widget -> Assert.assertEquals(Integer.valueOf(1),
+                widget.getColspan()));
+    }
+
+    @Test
+    public void updateColspans_colspansForAllWidgetsUpdated() {
+        clickElementWithJs("increase-all-colspans-by-1");
+        List<DashboardWidgetElement> widgets = dashboardElement.getWidgets();
+        widgets.forEach(widget -> Assert.assertEquals(Integer.valueOf(2),
+                widget.getColspan()));
+        clickElementWithJs("decrease-all-colspans-by-1");
+        widgets.forEach(widget -> Assert.assertEquals(Integer.valueOf(1),
+                widget.getColspan()));
+    }
+
     private void assertWidgetsByTitle(String... expectedWidgetTitles) {
         List<DashboardWidgetElement> widgets = dashboardElement.getWidgets();
         List<String> widgetTitles = widgets.stream()

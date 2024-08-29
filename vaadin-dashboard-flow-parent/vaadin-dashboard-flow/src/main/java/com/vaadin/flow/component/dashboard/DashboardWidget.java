@@ -23,6 +23,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 // @NpmPackage(value = "@vaadin/dashboard", version = "24.6.0-alpha0")
 public class DashboardWidget extends Component {
 
+    private int colspan = 1;
+
     /**
      * Returns the title of the widget.
      *
@@ -40,5 +42,40 @@ public class DashboardWidget extends Component {
      */
     public void setTitle(String title) {
         getElement().setProperty("widgetTitle", title == null ? "" : title);
+    }
+
+    /**
+     * Returns the colspan of the widget. The default is 1.
+     *
+     * @return the colspan of the widget
+     */
+    public int getColspan() {
+        return colspan;
+    }
+
+    /**
+     * Sets the colspan of the widget. Cannot be lower than 1.
+     *
+     * @param colspan
+     *            the colspan to set
+     */
+    public void setColspan(int colspan) {
+        if (colspan < 1) {
+            throw new IllegalArgumentException(
+                    "Cannot set a colspan lower than 1.");
+        }
+        if (this.colspan == colspan) {
+            return;
+        }
+        this.colspan = colspan;
+        notifyParentDashboard();
+    }
+
+    private void notifyParentDashboard() {
+        getParent().ifPresent(parent -> {
+            if (parent instanceof Dashboard dashboard) {
+                dashboard.updateClient();
+            }
+        });
     }
 }

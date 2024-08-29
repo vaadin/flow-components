@@ -85,6 +85,27 @@ public class DashboardWidgetTest {
         Assert.assertTrue(newParent.getChildren().anyMatch(widget::equals));
     }
 
+    @Test
+    public void assertDefaultColspan() {
+        DashboardWidget widget = new DashboardWidget();
+        Assert.assertEquals(1, widget.getColspan());
+    }
+
+    @Test
+    public void setValidColspan_returnsCorrectColspan() {
+        int valueToSet = 2;
+        DashboardWidget widget = new DashboardWidget();
+        widget.setColspan(valueToSet);
+        Assert.assertEquals(valueToSet, widget.getColspan());
+    }
+
+    @Test
+    public void setInvalidColspan_throwsIllegalArgumentException() {
+        DashboardWidget widget = new DashboardWidget();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> widget.setColspan(0));
+    }
+
     private void fakeClientCommunication() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
