@@ -244,7 +244,6 @@ public class SpreadsheetPage extends VerticalLayout implements Receiver {
         VerticalLayout createAndFreeze = new VerticalLayout();
         createAndFreeze.setSpacing(true);
         createAndFreeze.setMargin(false);
-        createAndFreeze.add(newSpreadsheetButton, freezePanesButton);
 
         Select<SpreadsheetTheme> themeSelect = new Select<>();
         themeSelect.setLabel("Theme");
