@@ -275,6 +275,82 @@ public class DashboardTest {
         assertWidgetColspans(dashboard, widget);
     }
 
+    @Test
+    public void setMaximumColumnWidth_valueIsCorrectlySet() {
+        String propertyName = "--vaadin-dashboard-col-max-width";
+        String valueToSet = "50px";
+        Assert.assertNull(dashboard.getStyle().get(propertyName));
+        dashboard.setMaximumColumnWidth(valueToSet);
+        Assert.assertEquals(valueToSet, dashboard.getStyle().get(propertyName));
+        dashboard.setMaximumColumnWidth(null);
+        Assert.assertNull(dashboard.getStyle().get(propertyName));
+    }
+
+    @Test
+    public void setMaximumColumnWidthNull_propertyIsRemoved() {
+        dashboard.setMaximumColumnWidth("50px");
+        dashboard.setMaximumColumnWidth(null);
+        Assert.assertNull(
+                dashboard.getStyle().get("--vaadin-dashboard-col-max-width"));
+    }
+
+    @Test
+    public void defaultMaximumColumnWidthValueIsCorrectlyRetrieved() {
+        Assert.assertNull(dashboard.getMaximumColumnWidth());
+    }
+
+    @Test
+    public void setMaximumColumnWidth_valueIsCorrectlyRetrieved() {
+        String valueToSet = "50px";
+        dashboard.setMaximumColumnWidth(valueToSet);
+        Assert.assertEquals(valueToSet, dashboard.getMaximumColumnWidth());
+    }
+
+    @Test
+    public void setMaximumColumnWidthNull_valueIsCorrectlyRetrieved() {
+        dashboard.setMaximumColumnWidth("50px");
+        dashboard.setMaximumColumnWidth(null);
+        Assert.assertNull(dashboard.getMaximumColumnWidth());
+    }
+
+    @Test
+    public void setMinimumColumnWidth_valueIsCorrectlySet() {
+        String propertyName = "--vaadin-dashboard-col-min-width";
+        String valueToSet = "50px";
+        Assert.assertNull(dashboard.getStyle().get(propertyName));
+        dashboard.setMinimumColumnWidth(valueToSet);
+        Assert.assertEquals(valueToSet, dashboard.getStyle().get(propertyName));
+        dashboard.setMinimumColumnWidth(null);
+        Assert.assertNull(dashboard.getStyle().get(propertyName));
+    }
+
+    @Test
+    public void setMinimumColumnWidthNull_propertyIsRemoved() {
+        dashboard.setMinimumColumnWidth("50px");
+        dashboard.setMinimumColumnWidth(null);
+        Assert.assertNull(
+                dashboard.getStyle().get("--vaadin-dashboard-col-min-width"));
+    }
+
+    @Test
+    public void defaultMinimumColumnWidthValueIsCorrectlyRetrieved() {
+        Assert.assertNull(dashboard.getMinimumColumnWidth());
+    }
+
+    @Test
+    public void setMinimumColumnWidth_valueIsCorrectlyRetrieved() {
+        String valueToSet = "50px";
+        dashboard.setMinimumColumnWidth(valueToSet);
+        Assert.assertEquals(valueToSet, dashboard.getMinimumColumnWidth());
+    }
+
+    @Test
+    public void setMinimumColumnWidthNull_valueIsCorrectlyRetrieved() {
+        dashboard.setMinimumColumnWidth("50px");
+        dashboard.setMinimumColumnWidth(null);
+        Assert.assertNull(dashboard.getMinimumColumnWidth());
+    }
+
     private void fakeClientCommunication() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {

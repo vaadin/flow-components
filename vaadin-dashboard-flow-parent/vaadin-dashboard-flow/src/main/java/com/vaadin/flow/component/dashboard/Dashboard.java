@@ -168,6 +168,46 @@ public class Dashboard extends Component {
                 maxColCount == null ? null : String.valueOf(maxColCount));
     }
 
+    /**
+     * Returns the minimum column width of the dashboard.
+     *
+     * @return the minimum column width of the dashboard
+     */
+    public String getMinimumColumnWidth() {
+        return getStyle().get("--vaadin-dashboard-col-min-width");
+    }
+
+    /**
+     * Sets the minimum column width of the dashboard.
+     *
+     * @param minColWidth
+     *            the new minimum column width. Pass in {@code null} to set the
+     *            minimum column width back to the default value.
+     */
+    public void setMinimumColumnWidth(String minColWidth) {
+        getStyle().set("--vaadin-dashboard-col-min-width", minColWidth);
+    }
+
+    /**
+     * Returns the maximum column width of the dashboard.
+     *
+     * @return the maximum column width of the dashboard
+     */
+    public String getMaximumColumnWidth() {
+        return getStyle().get("--vaadin-dashboard-col-max-width");
+    }
+
+    /**
+     * Sets the maximum column width of the dashboard.
+     *
+     * @param maxColWidth
+     *            the new maximum column width. Pass in {@code null} to set the
+     *            maximum column width back to the default value.
+     */
+    public void setMaximumColumnWidth(String maxColWidth) {
+        getStyle().set("--vaadin-dashboard-col-max-width", maxColWidth);
+    }
+
     @Override
     public Stream<Component> getChildren() {
         return getWidgets().stream().map(Component.class::cast);
