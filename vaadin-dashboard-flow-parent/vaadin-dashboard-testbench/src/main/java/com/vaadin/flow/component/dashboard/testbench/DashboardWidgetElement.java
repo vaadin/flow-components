@@ -29,8 +29,8 @@ public class DashboardWidgetElement extends TestBenchElement {
     /**
      * Returns the colspan of the widget.
      *
-     * @return the {@code --vaadin-dashboard-item-colspan} style from the
-     *         wrapper of the web component
+     * @return the {@code --vaadin-dashboard-item-colspan} computed style from
+     *         the web component
      */
     public Integer getColspan() {
         var colspanStr = getComputedCssValue("--vaadin-dashboard-item-colspan");
