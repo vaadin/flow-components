@@ -395,6 +395,34 @@ public class SideNavItem extends SideNavItemContainer
     }
 
     /**
+     * Gets whether this item also matches nested paths / routes.
+     *
+     * @return true if this item also matches nested paths / routes, false
+     *         otherwise
+     */
+    public boolean isMatchNested() {
+        return getElement().getProperty("matchNested", false);
+    }
+
+    /**
+     * Sets whether to also match nested paths / routes. {@code false} by
+     * default.
+     * <p>
+     * When enabled, an item with the path {@code /path} is considered current
+     * when the browser URL is {@code /path}, {@code /path/child},
+     * {@code /path/child/grandchild}, etc.
+     * <p>
+     * Note that this only affects matching of the URLs path, not the base
+     * origin or query parameters.
+     *
+     * @param value
+     *            true to also match nested paths / routes, false otherwise
+     */
+    public void setMatchNested(boolean value) {
+        getElement().setProperty("matchNested", value);
+    }
+
+    /**
      * @return true if this item should be ignored by the Vaadin router and
      *         behave like a regular anchor.
      */
