@@ -25,4 +25,21 @@ public class DashboardWidgetElement extends TestBenchElement {
     public String getTitle() {
         return getPropertyString("widgetTitle");
     }
+
+    /**
+     * Returns the colspan of the widget.
+     *
+     * @return the {@code --vaadin-dashboard-item-colspan} computed style from
+     *         the web component
+     */
+    public Integer getColspan() {
+        var colspanStr = getComputedCssValue("--vaadin-dashboard-item-colspan");
+        return colspanStr.isEmpty() ? null : Integer.valueOf(colspanStr);
+    }
+
+    private String getComputedCssValue(String propertyName) {
+        return (String) executeScript(
+                "return getComputedStyle(arguments[0]).getPropertyValue(arguments[1]);",
+                this, propertyName);
+    }
 }
