@@ -35,6 +35,7 @@ import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
@@ -51,6 +52,38 @@ import com.vaadin.flow.shared.Registration;
  * When setting values from the server-side, the {@code scale} of the provided
  * {@link BigDecimal} is preserved in the presentation format shown to the user,
  * as described in {@link #setValue(BigDecimal)}.
+ * <h2>Validation</h2>
+ * <p>
+ * BigDecimalField comes with a built-in validation mechanism that verifies that
+ * the value is parsable into {@link BigDecimal} and is not empty when the
+ * {@link #setRequiredIndicatorVisible(boolean) required constraint} is enabled.
+ * If validation fails, the component is marked as invalid and an error message
+ * is displayed below the input.
+ * <p>
+ * Validation is triggered when the user applies an input change, for example by
+ * pressing Enter or blurring the field. Programmatic value changes trigger
+ * validation as well. In eager and lazy value change modes, validation is also
+ * triggered on every character press with a delay according to the selected
+ * mode.
+ * <p>
+ * Error messages for unparsable input and required constraint can be configured
+ * with the {@link BigDecimalFieldI18n} object, using the respective properties.
+ * If you want to provide a single catch-all error message, you can also use the
+ * {@link #setErrorMessage(String)} method. Note that such an error message will
+ * take priority over i18n error messages if both are set.
+ * <p>
+ * For more advanced validation that requires custom rules, you can use
+ * {@link Binder}. By default, before running custom validators, Binder will
+ * also check if the value is parsable and display an error message from the
+ * {@link BigDecimalFieldI18n} object. For the required constraint, Binder
+ * provides its own API, see {@link Binder.BindingBuilder#asRequired(String)
+ * asRequired()}.
+ * <p>
+ * However, if Binder doesn't fit your needs and you want to implement fully
+ * custom validation logic, you can disable the constraint validation by setting
+ * {@link #setManualValidation(boolean)} to true. This will allow you to control
+ * the invalid state and the error message manually using
+ * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd.
  */
@@ -227,6 +260,30 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         this(label);
         setValue(initialValue);
         addValueChangeListener(listener);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Distinct error messages for unparsable input and required constraint can
+     * be configured with the {@link BigDecimalFieldI18n} object, using the
+     * respective properties. However, note that the error message set with
+     * {@link #setErrorMessage(String)} will take priority and override any i18n
+     * error messages if both are set.
+     */
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        super.setErrorMessage(errorMessage);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see BigDecimalFieldI18n#setRequiredErrorMessage(String)
+     */
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
     }
 
     @Override
