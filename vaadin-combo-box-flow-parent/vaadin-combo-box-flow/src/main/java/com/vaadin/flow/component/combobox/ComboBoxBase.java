@@ -362,8 +362,6 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * NOTE: The required indicator won't be visible if the field doesn't have a
      * label.
      *
-     * @param required
-     *            true to make the field required, false otherwise
      * @see #setLabel(String)
      */
     @Override
