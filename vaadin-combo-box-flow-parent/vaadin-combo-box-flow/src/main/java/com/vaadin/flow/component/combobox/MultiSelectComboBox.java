@@ -31,6 +31,7 @@ import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.IdentifierProviderChangeEvent;
@@ -67,6 +68,32 @@ import elemental.json.JsonType;
  * override the {@code pageSize} to be bigger than the size of your data set.
  * However, then the full data set will be sent to the client immediately, and
  * you will lose the benefits of lazy loading.
+ * <h2>Validation</h2>
+ * <p>
+ * MultiSelectComboBox comes with a built-in validation mechanism that verifies
+ * that the field is not empty when {@link #setRequiredIndicatorVisible(boolean)
+ * required} is enabled.
+ * <p>
+ * Validation is triggered whenever the user initiates a value change, for
+ * example by selection from the dropdown or manual entry followed by Enter or
+ * blur. Programmatic value changes trigger validation as well. If validation
+ * fails, the component is marked as invalid and an error message is displayed
+ * below the input.
+ * <p>
+ * The required error message can be configured using either
+ * {@link MultiSelectComboBoxI18n#setRequiredErrorMessage(String)} or
+ * {@link #setErrorMessage(String)}.
+ * <p>
+ * For more advanced validation that requires custom rules, you can use
+ * {@link Binder}. Please note that Binder provides its own API for the required
+ * validation, see {@link Binder.BindingBuilder#asRequired(String)
+ * asRequired()}.
+ * <p>
+ * However, if Binder doesn't fit your needs and you want to implement fully
+ * custom validation logic, you can disable the built-in validation by setting
+ * {@link #setManualValidation(boolean)} to true. This will allow you to control
+ * the invalid state and the error message manually using
+ * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @param <TItem>
  *            the type of the items to be selectable from the combo box
@@ -282,6 +309,16 @@ public class MultiSelectComboBox<TItem>
         jsonObject.put("key", getKeyMapper().key(item));
         getDataGenerator().generateData(item, jsonObject);
         return jsonObject;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see MultiSelectComboBoxI18n#setRequiredErrorMessage(String)
+     */
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
     }
 
     /**

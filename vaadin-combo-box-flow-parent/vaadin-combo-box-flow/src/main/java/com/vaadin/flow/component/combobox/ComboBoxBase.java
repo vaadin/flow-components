@@ -355,20 +355,44 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
-     * Sets whether the component requires a value to be considered in a valid
-     * state.
+     * Sets whether the user is required to provide a value. When required, a
+     * required indicator will be displayed next to the label, and the component
+     * will invalidate if the value is cleared.
+     * <p>
+     * NOTE: The required indicator won't be visible if the field doesn't have a
+     * label.
      *
-     * @return {@code true} if the component requires a value to be valid
+     * @param required
+     *            true to make the field required, false otherwise
+     * @see #setLabel(String)
+     */
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
+    }
+
+    /**
+     * Gets whether the user is required to provide a value.
+     */
+    @Override
+    public boolean isRequiredIndicatorVisible() {
+        return super.isRequiredIndicatorVisible();
+    }
+
+    /**
+     * Alias for {@link #isRequiredIndicatorVisible()}
+     *
+     * @return true if the field is required, false otherwise
      */
     public boolean isRequired() {
         return isRequiredIndicatorVisible();
     }
 
     /**
-     * Whether the component requires a value to be considered in a valid state.
+     * Alias for {@link #setRequiredIndicatorVisible(boolean)}.
      *
      * @param required
-     *            {@code true} if the component requires a value to be valid
+     *            true to make the field required, false otherwise
      */
     public void setRequired(boolean required) {
         setRequiredIndicatorVisible(required);
