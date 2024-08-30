@@ -42,6 +42,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
@@ -749,14 +750,15 @@ public class DatePicker
     }
 
     /**
-     * Sets whether the user is required to provide a value. When required, a
-     * required indicator will be displayed next to the label, and the component
-     * will invalidate if the value is cleared.
+     * Sets whether the user is required to provide a value. When required, an
+     * indicator appears next to the label and the field invalidates if the
+     * value is cleared.
      * <p>
-     * NOTE: The required indicator won't be visible if the field doesn't have a
-     * label.
+     * NOTE: The required indicator is only visible when the field has a label,
+     * see {@link #setLabel(String)}.
      *
-     * @see #setLabel(String)
+     * @param required
+     *            true to make the field required, false otherwise
      * @see DatePickerI18n#setRequiredErrorMessage(String)
      */
     @Override
@@ -766,6 +768,9 @@ public class DatePicker
 
     /**
      * Gets whether the user is required to provide a value.
+     *
+     * @return true if the field is required, false otherwise
+     * @see #setRequiredIndicatorVisible(boolean)
      */
     @Override
     public boolean isRequiredIndicatorVisible() {
