@@ -56,7 +56,6 @@ import elemental.json.JsonObject;
  * override the {@code pageSize} to be bigger than the size of your data set.
  * However, then the full data set will be sent to the client immediately, and
  * you will lose the benefits of lazy loading.
- *
  * <h2>Validation</h2>
  * <p>
  * Combo Box comes with a built-in validation mechanism that verifies that the
