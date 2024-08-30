@@ -194,8 +194,6 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @see NumberFieldI18n#setRequiredErrorMessage(String)
      */
     @Override

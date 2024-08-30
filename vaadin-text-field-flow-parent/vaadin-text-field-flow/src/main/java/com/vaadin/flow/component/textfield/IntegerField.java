@@ -191,8 +191,6 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer>
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @see IntegerFieldI18n#setRequiredErrorMessage(String)
      */
     @Override

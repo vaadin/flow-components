@@ -277,8 +277,6 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @see BigDecimalFieldI18n#setRequiredErrorMessage(String)
      */
     @Override
