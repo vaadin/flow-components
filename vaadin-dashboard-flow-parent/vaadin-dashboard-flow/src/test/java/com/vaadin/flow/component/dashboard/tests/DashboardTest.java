@@ -351,6 +351,43 @@ public class DashboardTest {
         Assert.assertNull(dashboard.getMinimumColumnWidth());
     }
 
+    @Test
+    public void setGap_valueIsCorrectlySet() {
+        String propertyName = "--vaadin-dashboard-gap";
+        String valueToSet = "10px";
+        Assert.assertNull(dashboard.getStyle().get(propertyName));
+        dashboard.setGap(valueToSet);
+        Assert.assertEquals(valueToSet, dashboard.getStyle().get(propertyName));
+        dashboard.setGap(null);
+        Assert.assertNull(dashboard.getStyle().get(propertyName));
+    }
+
+    @Test
+    public void setGapNull_propertyIsRemoved() {
+        dashboard.setGap("10px");
+        dashboard.setGap(null);
+        Assert.assertNull(dashboard.getStyle().get("--vaadin-dashboard-gap"));
+    }
+
+    @Test
+    public void defaultGapValueIsCorrectlyRetrieved() {
+        Assert.assertNull(dashboard.getGap());
+    }
+
+    @Test
+    public void setGap_valueIsCorrectlyRetrieved() {
+        String valueToSet = "10px";
+        dashboard.setGap(valueToSet);
+        Assert.assertEquals(valueToSet, dashboard.getGap());
+    }
+
+    @Test
+    public void setGapNull_valueIsCorrectlyRetrieved() {
+        dashboard.setGap("10px");
+        dashboard.setGap(null);
+        Assert.assertNull(dashboard.getGap());
+    }
+
     private void fakeClientCommunication() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
