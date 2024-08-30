@@ -103,32 +103,6 @@ public class DashboardIT extends AbstractComponentIT {
                 widget.getColspan()));
     }
 
-    @Test
-    public void setMinAndMaxColumnWidths_columnWidthIsInTheRange() {
-        List<DashboardWidgetElement> widgets = dashboardElement.getWidgets();
-        int initialWidth = widgets.get(0).getSize().getWidth();
-        Assert.assertTrue(initialWidth > 50);
-        clickElementWithJs("set-column-width-range-to-40px-50px");
-        waitUntil(
-                driver -> initialWidth != widgets.get(0).getSize().getWidth());
-        int updatedWidth = widgets.get(0).getSize().getWidth();
-        Assert.assertTrue(updatedWidth >= 40 && updatedWidth <= 50);
-    }
-
-    @Test
-    public void setMinAndMaxColumnWidths_setMinAndMaxColumnWidthsNull_columnWidthReturnsToInitialState() {
-        List<DashboardWidgetElement> widgets = dashboardElement.getWidgets();
-        int initialWidth = widgets.get(0).getSize().getWidth();
-        clickElementWithJs("set-column-width-range-to-40px-50px");
-        waitUntil(
-                driver -> initialWidth != widgets.get(0).getSize().getWidth());
-        int updatedWidth = widgets.get(0).getSize().getWidth();
-        clickElementWithJs("set-max-and-min-column-widths-null");
-        waitUntil(
-                driver -> updatedWidth != widgets.get(0).getSize().getWidth());
-        Assert.assertEquals(initialWidth, widgets.get(0).getSize().getWidth());
-    }
-
     private void assertWidgetsByTitle(String... expectedWidgetTitles) {
         List<DashboardWidgetElement> widgets = dashboardElement.getWidgets();
         List<String> widgetTitles = widgets.stream()

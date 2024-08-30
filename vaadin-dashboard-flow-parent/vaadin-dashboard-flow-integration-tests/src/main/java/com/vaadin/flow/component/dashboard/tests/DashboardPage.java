@@ -93,28 +93,8 @@ public class DashboardPage extends Div {
                 .forEach(widget -> widget.setColspan(widget.getColspan() - 1)));
         decreaseAllColspansBy1.setId("decrease-all-colspans-by-1");
 
-        NativeButton setColumnWidthRangeTo40Px50Px = new NativeButton(
-                "Set column width range to 40px-50px");
-        setColumnWidthRangeTo40Px50Px.addClickListener(click -> {
-            dashboard.setMinimumColumnWidth("40px");
-            dashboard.setMaximumColumnWidth("50px");
-        });
-        setColumnWidthRangeTo40Px50Px
-                .setId("set-column-width-range-to-40px-50px");
-
-        NativeButton setMaxAndMinColumnWidthsNull = new NativeButton(
-                "Set max and min column widths null");
-        setMaxAndMinColumnWidthsNull.addClickListener(click -> {
-            dashboard.setMinimumColumnWidth(null);
-            dashboard.setMaximumColumnWidth(null);
-        });
-        setMaxAndMinColumnWidthsNull
-                .setId("set-max-and-min-column-widths-null");
-
         add(addWidgetAtIndex1, removeFirstAndLastWidgets, removeAllWidgets,
                 setMaximumColumnCount1, setMaximumColumnCountNull,
-                increaseAllColspansBy1, decreaseAllColspansBy1,
-                setColumnWidthRangeTo40Px50Px, setMaxAndMinColumnWidthsNull,
-                dashboard);
+                increaseAllColspansBy1, decreaseAllColspansBy1, dashboard);
     }
 }
