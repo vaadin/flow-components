@@ -38,8 +38,6 @@ public class DashboardPage extends Div {
         Dashboard dashboard = new Dashboard();
         dashboard.add(widget1, widget2, widget3);
 
-        dashboard.setMaximumColumnCount(3);
-
         NativeButton addWidgetAtIndex1 = new NativeButton(
                 "Add widget at index 1");
         addWidgetAtIndex1.addClickListener(click -> {
