@@ -208,6 +208,26 @@ public class Dashboard extends Component {
         getStyle().set("--vaadin-dashboard-col-max-width", maxColWidth);
     }
 
+    /**
+     * Returns the gap between the cells of the dashboard.
+     *
+     * @return the gap between the cells of the dashboard
+     */
+    public String getGap() {
+        return getStyle().get("--vaadin-dashboard-gap");
+    }
+
+    /**
+     * Sets the gap between the cells of the dashboard.
+     *
+     * @param gap
+     *            the new gap. Pass in {@code null} to set the gap back to the
+     *            default value.
+     */
+    public void setGap(String gap) {
+        getStyle().set("--vaadin-dashboard-gap", gap);
+    }
+
     @Override
     public Stream<Component> getChildren() {
         return getWidgets().stream().map(Component.class::cast);
