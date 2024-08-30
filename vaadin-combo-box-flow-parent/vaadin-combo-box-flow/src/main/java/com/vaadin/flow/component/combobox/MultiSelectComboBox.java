@@ -312,11 +312,31 @@ public class MultiSelectComboBox<TItem>
     }
 
     /**
+     * Sets whether the user is required to provide a value. When required, an
+     * indicator appears next to the label and the field invalidates if the
+     * value is cleared.
+     * <p>
+     * NOTE: The required indicator is only visible when the field has a label,
+     * see {@link #setLabel(String)}.
+     *
+     * @param required
+     *            true to make the field required, false otherwise
      * @see MultiSelectComboBoxI18n#setRequiredErrorMessage(String)
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
         super.setRequiredIndicatorVisible(required);
+    }
+
+    /**
+     * Gets whether the user is required to provide a value.
+     *
+     * @return true if the field is required, false otherwise
+     * @see #setRequiredIndicatorVisible(boolean)
+     */
+    @Override
+    public boolean isRequiredIndicatorVisible() {
+        return super.isRequiredIndicatorVisible();
     }
 
     /**

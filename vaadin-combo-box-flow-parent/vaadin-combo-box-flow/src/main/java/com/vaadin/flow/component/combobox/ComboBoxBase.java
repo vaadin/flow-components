@@ -355,14 +355,15 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
-     * Sets whether the user is required to provide a value. When required, a
-     * required indicator will be displayed next to the label, and the component
-     * will invalidate if the value is cleared.
+     * Sets whether the user is required to provide a value. When required, an
+     * indicator appears next to the label and the field invalidates if the
+     * value is cleared.
      * <p>
-     * NOTE: The required indicator won't be visible if the field doesn't have a
-     * label.
+     * NOTE: The required indicator is only visible when the field has a label,
+     * see {@link #setLabel(String)}.
      *
-     * @see #setLabel(String)
+     * @param required
+     *            true to make the field required, false otherwise
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
@@ -371,6 +372,9 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     /**
      * Gets whether the user is required to provide a value.
+     *
+     * @return true if the field is required, false otherwise
+     * @see #setRequiredIndicatorVisible(boolean)
      */
     @Override
     public boolean isRequiredIndicatorVisible() {
