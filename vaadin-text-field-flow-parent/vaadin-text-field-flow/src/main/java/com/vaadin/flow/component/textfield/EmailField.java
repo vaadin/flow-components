@@ -42,11 +42,11 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * <h2>Validation</h2>
  * <p>
  * Email Field comes with a built-in validation mechanism based on constraints.
- * Validation is triggered when the user applies an input change, for example by
- * pressing Enter or blurring the field. Programmatic value changes trigger
- * validation as well. In eager and lazy value change modes, validation is also
- * triggered on every character press with a delay according to the selected
- * mode.
+ * Validation is triggered whenever the user applies an input change, for
+ * example by pressing Enter or blurring the field. Programmatic value changes
+ * trigger validation as well. In eager and lazy value change modes, validation
+ * is also triggered on every character press with a delay according to the
+ * selected mode.
  * <p>
  * Validation verifies that the address adheres to the RFC 5322 standard email
  * format and satisfies the specified constraints. If validation fails, the
