@@ -60,11 +60,11 @@ import com.vaadin.flow.shared.Registration;
  * If validation fails, the component is marked as invalid and an error message
  * is displayed below the input.
  * <p>
- * Validation is triggered when the user applies an input change, for example by
- * pressing Enter or blurring the field. Programmatic value changes trigger
- * validation as well. In eager and lazy value change modes, validation is also
- * triggered on every character press with a delay according to the selected
- * mode.
+ * Validation is triggered whenever the user applies an input change, for
+ * example by pressing Enter or blurring the field. Programmatic value changes
+ * trigger validation as well. In eager and lazy value change modes, validation
+ * is also triggered on every character press with a delay according to the
+ * selected mode.
  * <p>
  * Error messages for unparsable input and required constraint can be configured
  * with the {@link BigDecimalFieldI18n} object, using the respective properties.
