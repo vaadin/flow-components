@@ -247,7 +247,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      *
      * @param required
      *            true to make the field required, false otherwise
-     * @see RadioButtonGroupI18n#setRequiredErrorMessage(String)
+     * @see CheckboxI18n#setRequiredErrorMessage(String)
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {

@@ -668,7 +668,7 @@ public class CheckboxGroup<T>
      *
      * @param required
      *            true to make the field required, false otherwise
-     * @see RadioButtonGroupI18n#setRequiredErrorMessage(String)
+     * @see CheckboxGroupI18n#setRequiredErrorMessage(String)
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
