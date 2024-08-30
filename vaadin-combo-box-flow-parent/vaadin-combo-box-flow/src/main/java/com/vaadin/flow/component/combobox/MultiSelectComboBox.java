@@ -312,8 +312,6 @@ public class MultiSelectComboBox<TItem>
     }
 
     /**
-     * {@inheritDoc}
-     *
      * @see MultiSelectComboBoxI18n#setRequiredErrorMessage(String)
      */
     @Override
