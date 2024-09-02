@@ -52,6 +52,7 @@ import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -67,6 +68,46 @@ import com.vaadin.flow.shared.Registration;
  * time can be entered directly using a keyboard or by choosing a value from a
  * set of predefined options presented in an overlay. The overlay opens when the
  * field is clicked or any input is entered when the field is focused.
+ * <h2>Validation</h2>
+ * <p>
+ * Time Picker comes with a built-in validation mechanism based on constraints.
+ * Validation is triggered whenever the user initiates a time change, for
+ * example by selection from the dropdown or manual entry followed by Enter or
+ * blur. Programmatic value changes trigger validation as well.
+ * <p>
+ * Validation verifies that the value is parsable into {@link LocalTime} and
+ * satisfies the specified constraints. If validation fails, the component is
+ * marked as invalid and an error message is displayed below the input.
+ * <p>
+ * The following constraints are supported:
+ * <ul>
+ * <li>{@link #setRequiredIndicatorVisible(boolean)}
+ * <li>{@link #setMin(LocalTime)}
+ * <li>{@link #setMax(LocalTime)}
+ * </ul>
+ * <p>
+ * Error messages for unparsable input and constraints can be configured with
+ * the {@link TimePickerI18n} object, using the respective properties. If you
+ * want to provide a single catch-all error message, you can also use the
+ * {@link #setErrorMessage(String)} method. Note that such an error message will
+ * take priority over i18n error messages if both are set.
+ * <p>
+ * In addition to validation, constraints may also have a visual impact. For
+ * example, times before the minimum time or after the maximum time are not
+ * displayed in the dropdown to prevent their selection.
+ * <p>
+ * For more advanced validation that requires custom rules, you can use
+ * {@link Binder}. By default, before running custom validators, Binder will
+ * also check if the time is parsable and satisfies the component constraints,
+ * displaying error messages from the {@link TimePickerI18n} object. The
+ * exception is the required constraint, for which Binder provides its own API,
+ * see {@link Binder.BindingBuilder#asRequired(String) asRequired()}.
+ * <p>
+ * However, if Binder doesn't fit your needs and you want to implement fully
+ * custom validation logic, you can disable the constraint validation by setting
+ * {@link #setManualValidation(boolean)} to true. This will allow you to control
+ * the invalid state and the error message manually using
+ * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd
  */
@@ -277,6 +318,20 @@ public class TimePicker
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
+     * Distinct error messages for unparsable input and different constraints
+     * can be configured with the {@link TimePickerI18n} object, using the
+     * respective properties. However, note that the error message set with
+     * {@link #setErrorMessage(String)} will take priority and override any i18n
+     * error messages if both are set.
+     */
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        HasValidationProperties.super.setErrorMessage(errorMessage);
+    }
+
+    /**
      * Sets the label for the time picker.
      *
      * @param label
@@ -404,22 +459,47 @@ public class TimePicker
     }
 
     /**
-     * Sets whether the time picker is marked as input required.
+     * Sets whether the user is required to provide a value. When required, an
+     * indicator appears next to the label and the field invalidates if the
+     * value is cleared.
+     * <p>
+     * NOTE: The required indicator is only visible when the field has a label,
+     * see {@link #setLabel(String)}.
      *
      * @param required
-     *            the boolean value to set
+     *            true to make the field required, false otherwise
+     * @see TimePickerI18n#setRequiredErrorMessage(String)
+     */
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
+    }
+
+    /**
+     * Gets whether the user is required to provide a value.
+     *
+     * @return true if the field is required, false otherwise
+     * @see #setRequiredIndicatorVisible(boolean)
+     */
+    @Override
+    public boolean isRequiredIndicatorVisible() {
+        return super.isRequiredIndicatorVisible();
+    }
+
+    /**
+     * Alias for {@link #setRequiredIndicatorVisible(boolean)}.
+     *
+     * @param required
+     *            true to make the field required, false otherwise
      */
     public void setRequired(boolean required) {
         setRequiredIndicatorVisible(required);
     }
 
     /**
-     * Determines whether the time picker is marked as input required.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
+     * Alias for {@link #isRequiredIndicatorVisible()}
      *
-     * @return {@code true} if the input is required, {@code false} otherwise
+     * @return true if the field is required, false otherwise
      */
     public boolean isRequired() {
         return isRequiredIndicatorVisible();
@@ -620,12 +700,16 @@ public class TimePicker
     }
 
     /**
-     * Sets the minimum time in the time picker. Times before that will be
-     * disabled in the popup.
+     * Sets the minimum time for the field. Times before that won't be displayed
+     * in the dropdown. Manual entry of times before the minimum will cause the
+     * component to invalidate.
+     * <p>
+     * The minimum time is inclusive.
      *
      * @param min
      *            the minimum time that is allowed to be selected, or
      *            <code>null</code> to remove any minimum constraints
+     * @see TimePickerI18n#setMinErrorMessage(String)
      */
     public void setMin(LocalTime min) {
         this.min = min;
@@ -634,23 +718,27 @@ public class TimePicker
     }
 
     /**
-     * Gets the minimum time in the time picker. Time before that will be
-     * disabled in the popup.
+     * Gets the minimum time of the field.
      *
      * @return the minimum time that is allowed to be selected, or
      *         <code>null</code> if there's no minimum
+     * @see #setMax(LocalTime)
      */
     public LocalTime getMin() {
         return this.min;
     }
 
     /**
-     * Sets the maximum time in the time picker. Times after that will be
-     * disabled in the popup.
+     * Sets the maximum time for the field. Times after that won't be displayed
+     * in the dropdown. Manual entry of times after the maximum will cause the
+     * component to invalidate.
+     * <p>
+     * The maximum time is inclusive.
      *
      * @param max
      *            the maximum time that is allowed to be selected, or
      *            <code>null</code> to remove any maximum constraints
+     * @see TimePickerI18n#setMaxErrorMessage(String)
      */
     public void setMax(LocalTime max) {
         this.max = max;
@@ -659,11 +747,11 @@ public class TimePicker
     }
 
     /**
-     * Gets the maximum time in the time picker. Times after that will be
-     * disabled in the popup.
+     * Gets the maximum time of the field.
      *
      * @return the maximum time that is allowed to be selected, or
      *         <code>null</code> if there's no maximum
+     * @see #setMin(LocalTime)
      */
     public LocalTime getMax() {
         return this.max;
