@@ -37,7 +37,9 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
+import com.vaadin.flow.component.spreadsheet.Spreadsheet.SpreadsheetTheme;
 import com.vaadin.flow.component.spreadsheet.SpreadsheetFactory;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 import com.vaadin.flow.component.textfield.TextField;
@@ -242,7 +244,17 @@ public class SpreadsheetPage extends VerticalLayout implements Receiver {
         VerticalLayout createAndFreeze = new VerticalLayout();
         createAndFreeze.setSpacing(true);
         createAndFreeze.setMargin(false);
-        createAndFreeze.add(newSpreadsheetButton, freezePanesButton);
+
+        Select<SpreadsheetTheme> themeSelect = new Select<>();
+        themeSelect.setLabel("Theme");
+        themeSelect.setItems(SpreadsheetTheme.values());
+        themeSelect.setItemLabelGenerator(theme -> theme.name());
+        themeSelect.addValueChangeListener(
+                event -> spreadsheet.setTheme(event.getValue()));
+        themeSelect.setId("themeSelect");
+
+        createAndFreeze.add(newSpreadsheetButton, freezePanesButton,
+                themeSelect);
 
         HorizontalLayout updateLayout = new HorizontalLayout();
         updateLayout.setSpacing(false);
