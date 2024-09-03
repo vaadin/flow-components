@@ -11,6 +11,7 @@ package com.vaadin.flow.component.dashboard.tests;
 import java.util.List;
 
 import com.vaadin.flow.component.dashboard.Dashboard;
+import com.vaadin.flow.component.dashboard.DashboardSection;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
@@ -23,6 +24,8 @@ import com.vaadin.flow.router.Route;
 public class DashboardPage extends Div {
 
     public DashboardPage() {
+        Dashboard dashboard = new Dashboard();
+
         DashboardWidget widget1 = new DashboardWidget();
         widget1.setTitle("Widget 1");
         widget1.setId("widget-1");
@@ -35,8 +38,26 @@ public class DashboardPage extends Div {
         widget3.setTitle("Widget 3");
         widget3.setId("widget-3");
 
-        Dashboard dashboard = new Dashboard();
+        DashboardWidget widget1InSection1 = new DashboardWidget();
+        widget1InSection1.setTitle("Widget 1 in Section 1");
+        widget1InSection1.setId("widget-1-in-section-1");
+
+        DashboardWidget widget2InSection1 = new DashboardWidget();
+        widget2InSection1.setTitle("Widget 2 in Section 1");
+        widget2InSection1.setId("widget-2-in-section-1");
+
+        DashboardWidget widget1InSection2 = new DashboardWidget();
+        widget1InSection2.setTitle("Widget 1 in Section 2");
+        widget1InSection2.setId("widget-1-in-section-2");
+
         dashboard.add(widget1, widget2, widget3);
+
+        DashboardSection section1 = new DashboardSection("Section 1");
+        section1.add(widget1InSection1, widget2InSection1);
+        dashboard.addSection(section1);
+
+        DashboardSection section2 = dashboard.addSection("Section 2");
+        section2.add(widget1InSection2);
 
         NativeButton addWidgetAtIndex1 = new NativeButton(
                 "Add widget at index 1");
@@ -57,10 +78,11 @@ public class DashboardPage extends Div {
             }
             int currentWidgetCount = currentWidgets.size();
             if (currentWidgetCount == 1) {
-                dashboard.remove(dashboard.getWidgets().get(0));
+                dashboard.getWidgets().get(0).removeFromParent();
             } else {
-                dashboard.remove(dashboard.getWidgets().get(0),
-                        dashboard.getWidgets().get(currentWidgetCount - 1));
+                dashboard.getWidgets().get(currentWidgetCount - 1)
+                        .removeFromParent();
+                dashboard.getWidgets().get(0).removeFromParent();
             }
         });
         removeFirstAndLastWidgets.setId("remove-first-and-last-widgets");

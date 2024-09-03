@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.dashboard.testbench.DashboardElement;
+import com.vaadin.flow.component.dashboard.testbench.DashboardSectionElement;
 import com.vaadin.flow.component.dashboard.testbench.DashboardWidgetElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
@@ -36,26 +37,45 @@ public class DashboardIT extends AbstractComponentIT {
 
     @Test
     public void addWidgets_widgetsAreCorrectlyAdded() {
-        assertWidgetsByTitle("Widget 1", "Widget 2", "Widget 3");
+        assertDashboardWidgetsByTitle("Widget 1", "Widget 2", "Widget 3",
+                "Widget 1 in Section 1", "Widget 2 in Section 1",
+                "Widget 1 in Section 2");
     }
 
     @Test
     public void addWidgetsAtIndex1_widgetIsAddedIntoTheCorrectPlace() {
         clickElementWithJs("add-widget-at-index-1");
-        assertWidgetsByTitle("Widget 1", "Widget at index 1", "Widget 2",
-                "Widget 3");
+        assertDashboardWidgetsByTitle("Widget 1", "Widget at index 1",
+                "Widget 2", "Widget 3", "Widget 1 in Section 1",
+                "Widget 2 in Section 1", "Widget 1 in Section 2");
     }
 
     @Test
     public void removeFirstAndLastWidgets_widgetsAreCorrectlyRemoved() {
         clickElementWithJs("remove-first-and-last-widgets");
-        assertWidgetsByTitle("Widget 2");
+        assertDashboardWidgetsByTitle("Widget 2", "Widget 3",
+                "Widget 1 in Section 1", "Widget 2 in Section 1");
     }
 
     @Test
     public void removeAllWidgets_widgetsAreCorrectlyRemoved() {
         clickElementWithJs("remove-all-widgets");
-        assertWidgetsByTitle();
+        assertDashboardWidgetsByTitle();
+    }
+
+    @Test
+    public void addSectionsWithWidgets_widgetsAreCorrectlyAdded() {
+        List<DashboardSectionElement> sections = dashboardElement.getSections();
+        Assert.assertEquals(2, sections.size());
+
+        DashboardSectionElement section1 = sections.get(0);
+        Assert.assertEquals("Section 1", section1.getTitle());
+        assertSectionWidgetsByTitle(section1, "Widget 1 in Section 1",
+                "Widget 2 in Section 1");
+
+        DashboardSectionElement section2 = sections.get(1);
+        Assert.assertEquals("Section 2", section2.getTitle());
+        assertSectionWidgetsByTitle(section2, "Widget 1 in Section 2");
     }
 
     @Test
@@ -103,9 +123,20 @@ public class DashboardIT extends AbstractComponentIT {
                 widget.getColspan()));
     }
 
-    private void assertWidgetsByTitle(String... expectedWidgetTitles) {
-        List<DashboardWidgetElement> widgets = dashboardElement.getWidgets();
-        List<String> widgetTitles = widgets.stream()
+    private void assertDashboardWidgetsByTitle(String... expectedWidgetTitles) {
+        assertWidgetsByTitle(dashboardElement.getWidgets(),
+                expectedWidgetTitles);
+    }
+
+    private static void assertSectionWidgetsByTitle(
+            DashboardSectionElement section, String... expectedWidgetTitles) {
+        assertWidgetsByTitle(section.getWidgets(), expectedWidgetTitles);
+    }
+
+    private static void assertWidgetsByTitle(
+            List<DashboardWidgetElement> actualWidgets,
+            String... expectedWidgetTitles) {
+        List<String> widgetTitles = actualWidgets.stream()
                 .map(DashboardWidgetElement::getTitle).toList();
         Assert.assertEquals(Arrays.asList(expectedWidgetTitles), widgetTitles);
     }

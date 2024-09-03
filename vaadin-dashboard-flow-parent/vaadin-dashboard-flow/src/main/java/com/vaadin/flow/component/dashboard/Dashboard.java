@@ -9,10 +9,9 @@
 package com.vaadin.flow.component.dashboard;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -25,9 +24,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.dom.ElementDetachEvent;
-import com.vaadin.flow.dom.ElementDetachListener;
-import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -42,9 +38,11 @@ import elemental.json.JsonObject;
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
 // @NpmPackage(value = "@vaadin/dashboard", version = "24.6.0-alpha0")
-public class Dashboard extends Component {
+public class Dashboard extends Component implements HasWidgets {
 
-    private final List<DashboardWidget> widgets = new ArrayList<>();
+    private final List<Component> childrenComponents = new ArrayList<>();
+
+    private final DashboardChildDetachHandler childDetachHandler;
 
     private boolean pendingUpdate = false;
 
@@ -52,23 +50,53 @@ public class Dashboard extends Component {
      * Creates an empty dashboard.
      */
     public Dashboard() {
+        childDetachHandler = getChildDetachHandler();
     }
 
     /**
-     * Returns the widgets in the dashboard.
-     *
-     * @return The widgets in the dashboard
+     * Adds an empty section to this dashboard.
      */
+    public DashboardSection addSection() {
+        return addSection((String) null);
+    }
+
+    /**
+     * Adds an empty section to this dashboard.
+     *
+     * @param title
+     *            the title of the section
+     */
+    public DashboardSection addSection(String title) {
+        DashboardSection dashboardSection = new DashboardSection(title);
+        addSection(dashboardSection);
+        return dashboardSection;
+    }
+
+    /**
+     * Adds the given section to this dashboard.
+     *
+     * @param section
+     *            the widgets to add, not {@code null}
+     */
+    public void addSection(DashboardSection section) {
+        doAddSection(section);
+        updateClient();
+    }
+
+    @Override
     public List<DashboardWidget> getWidgets() {
+        List<DashboardWidget> widgets = new ArrayList<>();
+        childrenComponents.forEach(component -> {
+            if (component instanceof DashboardSection section) {
+                widgets.addAll(section.getWidgets());
+            } else {
+                widgets.add((DashboardWidget) component);
+            }
+        });
         return Collections.unmodifiableList(widgets);
     }
 
-    /**
-     * Adds the given widgets to the dashboard.
-     *
-     * @param widgets
-     *            the widgets to add, not {@code null}
-     */
+    @Override
     public void add(DashboardWidget... widgets) {
         Objects.requireNonNull(widgets, "Widgets to add cannot be null.");
         List<DashboardWidget> toAdd = new ArrayList<>(widgets.length);
@@ -80,42 +108,23 @@ public class Dashboard extends Component {
         updateClient();
     }
 
-    /**
-     * Adds the given widget as child of this dashboard at the specific index.
-     * <p>
-     * In case the specified widget has already been added to another parent, it
-     * will be removed from there and added to this one.
-     *
-     * @param index
-     *            the index, where the widget will be added. The index must be
-     *            non-negative and may not exceed the children count
-     * @param widget
-     *            the widget to add, not {@code null}
-     */
+    @Override
     public void addWidgetAtIndex(int index, DashboardWidget widget) {
         Objects.requireNonNull(widget, "Widget to add cannot be null.");
         if (index < 0) {
             throw new IllegalArgumentException(
                     "Cannot add a widget with a negative index.");
         }
-        if (index > widgets.size()) {
+        if (index > childrenComponents.size()) {
             throw new IllegalArgumentException(String.format(
-                    "Cannot add a widget with index %d when there are %d widgets",
-                    index, widgets.size()));
+                    "Cannot add a widget with index %d when there are %d children components",
+                    index, childrenComponents.size()));
         }
-        doAddWidget(index, widget);
+        doAddWidgetAtIndex(index, widget);
         updateClient();
     }
 
-    /**
-     * Removes the given widgets from this dashboard.
-     *
-     * @param widgets
-     *            the widgets to remove, not {@code null}
-     * @throws IllegalArgumentException
-     *             if there is a widget whose non {@code null} parent is not
-     *             this dashboard
-     */
+    @Override
     public void remove(DashboardWidget... widgets) {
         Objects.requireNonNull(widgets, "Widgets to remove cannot be null.");
         List<DashboardWidget> toRemove = new ArrayList<>(widgets.length);
@@ -134,15 +143,36 @@ public class Dashboard extends Component {
                         + ") is not a child of this dashboard");
             }
         }
-        toRemove.forEach(this::doRemoveWidget);
+        if (!toRemove.isEmpty()) {
+            toRemove.forEach(this::doRemoveWidget);
+            updateClient();
+        }
+    }
+
+    /**
+     * Removes the given section from this component.
+     *
+     * @param section
+     *            the section to remove, not {@code null}
+     * @throws IllegalArgumentException
+     *             if the non {@code null} parent of the section is not this
+     *             component
+     */
+    public void remove(DashboardSection section) {
+        Objects.requireNonNull(section, "Section to remove cannot be null.");
+        doRemoveSection(section);
         updateClient();
     }
 
     /**
-     * Removes all widgets from this dashboard.
+     * Removes all widgets and sections from this component.
      */
+    @Override
     public void removeAll() {
-        doRemoveAllWidgets();
+        if (getChildren().findAny().isEmpty()) {
+            return;
+        }
+        doRemoveAll();
         updateClient();
     }
 
@@ -230,7 +260,7 @@ public class Dashboard extends Component {
 
     @Override
     public Stream<Component> getChildren() {
-        return getWidgets().stream().map(Component.class::cast);
+        return childrenComponents.stream();
     }
 
     @Override
@@ -252,41 +282,8 @@ public class Dashboard extends Component {
                 }));
     }
 
-    private final Map<Element, Registration> childDetachListenerMap = new HashMap<>();
-
-    // Must not use lambda here as that would break serialization. See
-    // https://github.com/vaadin/flow-components/issues/5597
-    private final ElementDetachListener childDetachListener = new ElementDetachListener() {
-        @Override
-        public void onDetach(ElementDetachEvent e) {
-            var detachedElement = e.getSource();
-            getWidgets().stream()
-                    .filter(widget -> Objects.equals(detachedElement,
-                            widget.getElement()))
-                    .findAny().ifPresent(detachedWidget -> {
-                        // The child was removed from the dashboard
-
-                        // Remove the registration for the child detach listener
-                        childDetachListenerMap.get(detachedWidget.getElement())
-                                .remove();
-                        childDetachListenerMap
-                                .remove(detachedWidget.getElement());
-
-                        widgets.remove(detachedWidget);
-                        updateClient();
-                    });
-        }
-    };
-
     private void doUpdateClient() {
-        widgets.forEach(widget -> {
-            Element childWidgetElement = widget.getElement();
-            if (!childDetachListenerMap.containsKey(childWidgetElement)) {
-                childDetachListenerMap.put(childWidgetElement,
-                        childWidgetElement
-                                .addDetachListener(childDetachListener));
-            }
-        });
+        childDetachHandler.refreshListeners();
         getElement().setPropertyJson("items", createItemsJsonArray());
     }
 
@@ -301,35 +298,90 @@ public class Dashboard extends Component {
 
     private JsonArray createItemsJsonArray() {
         JsonArray jsonItems = Json.createArray();
-        for (DashboardWidget widget : widgets) {
-            JsonObject jsonItem = Json.createObject();
-            jsonItem.put("nodeid", getWidgetNodeId(widget));
-            jsonItem.put("colspan", widget.getColspan());
+        for (Component component : childrenComponents) {
+            JsonObject jsonItem;
+            if (component instanceof DashboardSection section) {
+                jsonItem = getSectionJsonItem(section);
+            } else {
+                jsonItem = getWidgetJsonItem((DashboardWidget) component);
+            }
             jsonItems.set(jsonItems.length(), jsonItem);
         }
         return jsonItems;
     }
 
-    private int getWidgetNodeId(DashboardWidget widget) {
-        return widget.getElement().getNode().getId();
+    private JsonObject getSectionJsonItem(DashboardSection section) {
+        JsonObject sectionJsonItem = Json.createObject();
+        if (section.getTitle() != null) {
+            sectionJsonItem.put("title", section.getTitle());
+        }
+        JsonArray sectionItems = Json.createArray();
+        section.getWidgets().forEach(widget -> {
+            JsonObject sectionItem = getWidgetJsonItem(widget);
+            sectionItems.set(sectionItems.length(), sectionItem);
+        });
+        sectionJsonItem.put("items", sectionItems);
+        return sectionJsonItem;
     }
 
-    private void doRemoveAllWidgets() {
-        new ArrayList<>(widgets).forEach(this::doRemoveWidget);
+    private JsonObject getWidgetJsonItem(DashboardWidget widget) {
+        JsonObject widgetJsonItem = Json.createObject();
+        widgetJsonItem.put("nodeid", getComponentNodeId(widget));
+        widgetJsonItem.put("colspan", widget.getColspan());
+        return widgetJsonItem;
+    }
+
+    private int getComponentNodeId(Component component) {
+        return component.getElement().getNode().getId();
+    }
+
+    private void doRemoveAll() {
+        new ArrayList<>(childrenComponents).forEach(child -> {
+            if (child instanceof DashboardSection section) {
+                doRemoveSection(section);
+            } else {
+                doRemoveWidget((DashboardWidget) child);
+            }
+        });
     }
 
     private void doRemoveWidget(DashboardWidget widget) {
         getElement().removeChild(widget.getElement());
-        widgets.remove(widget);
+        childrenComponents.remove(widget);
     }
 
-    private void doAddWidget(int index, DashboardWidget widget) {
+    private void doAddWidgetAtIndex(int index, DashboardWidget widget) {
         getElement().appendChild(widget.getElement());
-        widgets.add(index, widget);
+        childrenComponents.add(index, widget);
     }
 
     private void doAddWidget(DashboardWidget widget) {
         getElement().appendChild(widget.getElement());
-        widgets.add(widget);
+        childrenComponents.add(widget);
+    }
+
+    private void doAddSection(DashboardSection section) {
+        getElement().appendVirtualChild(section.getElement());
+        childrenComponents.add(section);
+    }
+
+    private void doRemoveSection(DashboardSection section) {
+        getElement().removeVirtualChild(section.getElement());
+        childrenComponents.remove(section);
+    }
+
+    private DashboardChildDetachHandler getChildDetachHandler() {
+        return new DashboardChildDetachHandler() {
+            @Override
+            void removeChild(Component child) {
+                childrenComponents.remove(child);
+                updateClient();
+            }
+
+            @Override
+            Collection<Component> getDirectChildren() {
+                return Dashboard.this.getChildren().toList();
+            }
+        };
     }
 }
