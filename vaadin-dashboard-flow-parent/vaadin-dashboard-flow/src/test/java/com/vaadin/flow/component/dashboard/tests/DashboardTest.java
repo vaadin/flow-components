@@ -11,7 +11,6 @@ package com.vaadin.flow.component.dashboard.tests;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -25,11 +24,7 @@ import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardSection;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.server.VaadinSession;
-
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
 
 public class DashboardTest {
     private final UI ui = new UI();
@@ -773,57 +768,8 @@ public class DashboardTest {
         List<DashboardWidget> expectedWidgets = getExpectedWidgets(
                 expectedChildren);
         Assert.assertEquals(expectedWidgets, dashboard.getWidgets());
-
-        List<JsonObject> dashboardItems = getItemsStream(dashboard).toList();
-        assertDashboardItems(dashboardItems, expectedChildren);
-    }
-
-    private static void assertDashboardItems(List<JsonObject> dashboardItems,
-            Component... expectedChildren) {
-        Assert.assertEquals(expectedChildren.length, dashboardItems.size());
-        for (int i = 0; i < expectedChildren.length; i++) {
-            JsonObject actualChild = dashboardItems.get(i);
-            Component expectedChild = expectedChildren[i];
-            if (expectedChild instanceof DashboardSection section) {
-                assertSectionItem(section, actualChild);
-            } else if (expectedChild instanceof DashboardWidget widget) {
-                assertWidgetItem(widget, actualChild);
-            } else {
-                throw new IllegalArgumentException(
-                        "A dashboard can only contain widgets or sections.");
-            }
-        }
-    }
-
-    private static void assertSectionItem(DashboardSection expectedSection,
-            JsonObject actualSection) {
-        if (expectedSection.getTitle() == null) {
-            Assert.assertNull(actualSection.get("title"));
-        } else {
-            Assert.assertEquals(expectedSection.getTitle(),
-                    actualSection.getString("title"));
-        }
-        JsonArray sectionItems = actualSection.getArray("items");
-        List<DashboardWidget> expectedSectionWidgets = expectedSection
-                .getWidgets();
-        Assert.assertEquals(expectedSectionWidgets.size(),
-                sectionItems.length());
-        for (int i = 0; i < expectedSectionWidgets.size(); i++) {
-            DashboardWidget expectedWidget = expectedSectionWidgets.get(i);
-            JsonObject actualWidget = sectionItems.getObject(i);
-            assertWidgetItem(expectedWidget, actualWidget);
-        }
-    }
-
-    private static void assertWidgetItem(DashboardWidget expectedWidget,
-            JsonObject actualWidget) {
-        int expectedNodeId = expectedWidget.getElement().getNode().getId();
-        int actualNodeId = (int) actualWidget.getNumber("nodeid");
-        Assert.assertEquals(expectedNodeId, actualNodeId);
-
-        int expectedColspan = expectedWidget.getColspan();
-        int actualColspan = (int) actualWidget.getNumber("colspan");
-        Assert.assertEquals(expectedColspan, actualColspan);
+        Assert.assertEquals(Arrays.asList(expectedChildren),
+                dashboard.getChildren().toList());
     }
 
     private static List<DashboardWidget> getExpectedWidgets(
@@ -840,12 +786,6 @@ public class DashboardTest {
             }
         }
         return expectedWidgets;
-    }
-
-    private static Stream<JsonObject> getItemsStream(Dashboard dashboard) {
-        JsonArray jsonArrayOfIds = (JsonArray) dashboard.getElement()
-                .getPropertyRaw("items");
-        return JsonUtils.objectStream(jsonArrayOfIds);
     }
 
     private static void assertSectionWidgets(DashboardSection section,

@@ -13,6 +13,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
@@ -20,14 +22,9 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
-
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
 
 /**
  * @author Vaadin Ltd
@@ -266,7 +263,6 @@ public class Dashboard extends Component implements HasWidgets {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        attachRenderer();
         doUpdateClient();
     }
 
@@ -284,55 +280,43 @@ public class Dashboard extends Component implements HasWidgets {
 
     private void doUpdateClient() {
         childDetachHandler.refreshListeners();
-        getElement().setPropertyJson("items", createItemsJsonArray());
+        updateClientItems();
     }
 
-    private void attachRenderer() {
-        getElement().executeJs(
-                "Vaadin.FlowComponentHost.patchVirtualContainer(this);");
-        String appId = UI.getCurrent().getInternals().getAppId();
-        getElement().executeJs(
-                "this.renderer = (root, _, model) => Vaadin.FlowComponentHost.setChildNodes($0, [model.item.nodeid], root);",
-                appId);
-    }
-
-    private JsonArray createItemsJsonArray() {
-        JsonArray jsonItems = Json.createArray();
+    private void updateClientItems() {
+        final AtomicInteger itemIndex = new AtomicInteger();
+        List<String> itemRepresentations = new ArrayList<>();
+        List<Component> flatOrderedComponents = new ArrayList<>();
         for (Component component : childrenComponents) {
-            JsonObject jsonItem;
+            flatOrderedComponents.add(component);
+            String itemRepresentation;
             if (component instanceof DashboardSection section) {
-                jsonItem = getSectionJsonItem(section);
+                flatOrderedComponents.addAll(section.getWidgets());
+                List<DashboardWidget> sectionWidgets = section.getWidgets();
+                int sectionIndex = itemIndex.getAndIncrement();
+                String sectionWidgetsRepresentation = sectionWidgets.stream()
+                        .map(widget -> getWidgetRepresentation(widget,
+                                itemIndex.getAndIncrement()))
+                        .collect(Collectors.joining(","));
+                itemRepresentation = "{ component: $%d, items: [ %s ] }"
+                        .formatted(sectionIndex, sectionWidgetsRepresentation);
             } else {
-                jsonItem = getWidgetJsonItem((DashboardWidget) component);
+                itemRepresentation = getWidgetRepresentation(
+                        (DashboardWidget) component,
+                        itemIndex.getAndIncrement());
             }
-            jsonItems.set(jsonItems.length(), jsonItem);
+            itemRepresentations.add(itemRepresentation);
         }
-        return jsonItems;
+        String updateItemsSnippet = "this.items = [ %s ];"
+                .formatted(String.join(",", itemRepresentations));
+        getElement().executeJs(updateItemsSnippet,
+                flatOrderedComponents.toArray(Component[]::new));
     }
 
-    private JsonObject getSectionJsonItem(DashboardSection section) {
-        JsonObject sectionJsonItem = Json.createObject();
-        if (section.getTitle() != null) {
-            sectionJsonItem.put("title", section.getTitle());
-        }
-        JsonArray sectionItems = Json.createArray();
-        section.getWidgets().forEach(widget -> {
-            JsonObject sectionItem = getWidgetJsonItem(widget);
-            sectionItems.set(sectionItems.length(), sectionItem);
-        });
-        sectionJsonItem.put("items", sectionItems);
-        return sectionJsonItem;
-    }
-
-    private JsonObject getWidgetJsonItem(DashboardWidget widget) {
-        JsonObject widgetJsonItem = Json.createObject();
-        widgetJsonItem.put("nodeid", getComponentNodeId(widget));
-        widgetJsonItem.put("colspan", widget.getColspan());
-        return widgetJsonItem;
-    }
-
-    private int getComponentNodeId(Component component) {
-        return component.getElement().getNode().getId();
+    private static String getWidgetRepresentation(DashboardWidget widget,
+            int itemIndex) {
+        return "{ component: $%d, colspan: %d }".formatted(itemIndex,
+                widget.getColspan());
     }
 
     private void doRemoveAll() {
@@ -361,12 +345,12 @@ public class Dashboard extends Component implements HasWidgets {
     }
 
     private void doAddSection(DashboardSection section) {
-        getElement().appendVirtualChild(section.getElement());
+        getElement().appendChild(section.getElement());
         childrenComponents.add(section);
     }
 
     private void doRemoveSection(DashboardSection section) {
-        getElement().removeVirtualChild(section.getElement());
+        getElement().removeChild(section.getElement());
         childrenComponents.remove(section);
     }
 
