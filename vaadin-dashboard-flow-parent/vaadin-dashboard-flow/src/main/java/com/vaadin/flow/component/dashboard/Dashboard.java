@@ -263,6 +263,8 @@ public class Dashboard extends Component implements HasWidgets {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+        getElement().executeJs(
+                "Vaadin.FlowComponentHost.patchVirtualContainer(this);");
         doUpdateClient();
     }
 
