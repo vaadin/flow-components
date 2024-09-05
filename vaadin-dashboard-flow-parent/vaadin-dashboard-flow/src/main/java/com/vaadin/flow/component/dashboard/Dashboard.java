@@ -209,6 +209,26 @@ public class Dashboard extends Component {
     }
 
     /**
+     * Returns the minimum row height of the dashboard.
+     *
+     * @return the minimum row height of the dashboard
+     */
+    public String getMinimumRowHeight() {
+        return getStyle().get("--vaadin-dashboard-row-min-height");
+    }
+
+    /**
+     * Sets the minimum row height of the dashboard.
+     *
+     * @param minRowHeight
+     *            the new minimum row height. Pass in {@code null} to set the
+     *            minimum row height back to the default value.
+     */
+    public void setMinimumRowHeight(String minRowHeight) {
+        getStyle().set("--vaadin-dashboard-row-min-height", minRowHeight);
+    }
+
+    /**
      * Returns the gap between the cells of the dashboard.
      *
      * @return the gap between the cells of the dashboard
