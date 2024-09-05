@@ -71,6 +71,34 @@ public class DashboardWidget extends Component {
         notifyParentDashboard();
     }
 
+    /**
+     * Returns the content of the widget. Returns {@code null} if the widget has
+     * no content.
+     *
+     * @return the content of the widget
+     */
+    public Component getContent() {
+        return getChildren().findFirst().orElse(null);
+    }
+
+    /**
+     * Sets the content to the widget. Set {@code null} to remove the current
+     * content.
+     *
+     * @param content
+     *            the content to set
+     */
+    public void setContent(Component content) {
+        if (content == null) {
+            getElement().removeAllChildren();
+            return;
+        }
+        if (!content.equals(getContent())) {
+            getElement().removeAllChildren();
+            getElement().appendChild(content.getElement());
+        }
+    }
+
     private void notifyParentDashboard() {
         getParent().ifPresent(parent -> {
             if (parent instanceof Dashboard dashboard) {
