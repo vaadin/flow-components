@@ -37,8 +37,6 @@ public class DashboardSection extends Component implements HasWidgets {
 
     private final DashboardChildDetachHandler childDetachHandler;
 
-    private String title;
-
     /**
      * Creates an empty section.
      */
@@ -64,7 +62,7 @@ public class DashboardSection extends Component implements HasWidgets {
      * @return the {@code sectionTitle} property from the web component
      */
     public String getTitle() {
-        return title;
+        return getElement().getProperty("sectionTitle");
     }
 
     /**
@@ -74,8 +72,7 @@ public class DashboardSection extends Component implements HasWidgets {
      *            the title to set
      */
     public void setTitle(String title) {
-        this.title = title;
-        updateClient();
+        getElement().setProperty("sectionTitle", title);
     }
 
     @Override
