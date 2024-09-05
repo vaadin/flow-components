@@ -352,6 +352,44 @@ public class DashboardTest {
     }
 
     @Test
+    public void setMinimumRowHeight_valueIsCorrectlySet() {
+        String propertyName = "--vaadin-dashboard-row-min-height";
+        String valueToSet = "200px";
+        Assert.assertNull(dashboard.getStyle().get(propertyName));
+        dashboard.setMinimumRowHeight(valueToSet);
+        Assert.assertEquals(valueToSet, dashboard.getStyle().get(propertyName));
+        dashboard.setMinimumRowHeight(null);
+        Assert.assertNull(dashboard.getStyle().get(propertyName));
+    }
+
+    @Test
+    public void setMinimumRowHeightNull_propertyIsRemoved() {
+        dashboard.setMinimumRowHeight("200px");
+        dashboard.setMinimumRowHeight(null);
+        Assert.assertNull(
+                dashboard.getStyle().get("--vaadin-dashboard-row-min-height"));
+    }
+
+    @Test
+    public void defaultMinimumRowHeightValueIsCorrectlyRetrieved() {
+        Assert.assertNull(dashboard.getMinimumRowHeight());
+    }
+
+    @Test
+    public void setMinimumRowHeight_valueIsCorrectlyRetrieved() {
+        String valueToSet = "200px";
+        dashboard.setMinimumRowHeight(valueToSet);
+        Assert.assertEquals(valueToSet, dashboard.getMinimumRowHeight());
+    }
+
+    @Test
+    public void setMinimumRowHeightNull_valueIsCorrectlyRetrieved() {
+        dashboard.setMinimumRowHeight("200px");
+        dashboard.setMinimumRowHeight(null);
+        Assert.assertNull(dashboard.getMinimumRowHeight());
+    }
+
+    @Test
     public void setGap_valueIsCorrectlySet() {
         String propertyName = "--vaadin-dashboard-gap";
         String valueToSet = "10px";
