@@ -140,8 +140,7 @@ public class DashboardIT extends AbstractComponentIT {
     private static void assertWidgetsByTitle(
             List<DashboardWidgetElement> actualWidgets,
             String... expectedWidgetTitles) {
-        List<String> widgetTitles = actualWidgets.stream()
-                .map(DashboardWidgetElement::getTitle).toList();
+        List<String> widgetTitles = actualWidgets.stream().map(DashboardWidgetElement::getTitle).toList();
         Assert.assertEquals(Arrays.asList(expectedWidgetTitles), widgetTitles);
     }
 }
