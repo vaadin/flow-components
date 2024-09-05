@@ -37,6 +37,18 @@ public class DashboardWidgetElement extends TestBenchElement {
         return colspanStr.isEmpty() ? null : Integer.valueOf(colspanStr);
     }
 
+    /**
+     * Returns the content of the widget.
+     *
+     * @return the content element set to the widget
+     */
+    public TestBenchElement getContent() {
+        Object content = executeScript(
+                "return Array.from(arguments[0].children).filter(child => child.slot !== 'title')[0]",
+                this);
+        return content == null ? null : (TestBenchElement) content;
+    }
+
     private String getComputedCssValue(String propertyName) {
         return (String) executeScript(
                 "return getComputedStyle(arguments[0]).getPropertyValue(arguments[1]);",

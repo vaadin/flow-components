@@ -16,6 +16,7 @@ import com.vaadin.flow.component.dashboard.DashboardSection;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -29,6 +30,7 @@ public class DashboardPage extends Div {
 
         DashboardWidget widget1 = new DashboardWidget();
         widget1.setTitle("Widget 1");
+        widget1.setContent(new Div("Some content"));
         widget1.setId("widget-1");
 
         DashboardWidget widget2 = new DashboardWidget();
@@ -170,10 +172,32 @@ public class DashboardPage extends Div {
                 .forEach(widget -> widget.setColspan(widget.getColspan() - 1)));
         decreaseAllColspansBy1.setId("decrease-all-colspans-by-1");
 
+        NativeButton updateContentOfTheFirstWidget = new NativeButton(
+                "Update content of the first widget");
+        updateContentOfTheFirstWidget.addClickListener(click -> {
+            List<DashboardWidget> widgets = dashboard.getWidgets();
+            if (!widgets.isEmpty()) {
+                widgets.get(0).setContent(new Span("Updated content"));
+            }
+        });
+        updateContentOfTheFirstWidget
+                .setId("update-content-of-the-first-widget");
+
+        NativeButton removeContentOfTheFirstWidget = new NativeButton(
+                "Remove content of the first widget");
+        removeContentOfTheFirstWidget.addClickListener(click -> {
+            List<DashboardWidget> widgets = dashboard.getWidgets();
+            if (!widgets.isEmpty()) {
+                widgets.get(0).setContent(null);
+            }
+        });
+        removeContentOfTheFirstWidget
+                .setId("remove-content-of-the-first-widget");
+
         add(addMultipleWidgets, removeFirstAndLastWidgets, removeAll,
                 addSectionWithMultipleWidgets, removeFirstSection,
                 addWidgetToFirstSection, removeFirstWidgetFromFirstSection,
-                removeAllFromFirstSection, setMaximumColumnCount1,
+                removeAllFromFirstSection, updateContentOfTheFirstWidget, removeContentOfTheFirstWidget, setMaximumColumnCount1,
                 setMaximumColumnCountNull, increaseAllColspansBy1,
                 decreaseAllColspansBy1, dashboard);
     }

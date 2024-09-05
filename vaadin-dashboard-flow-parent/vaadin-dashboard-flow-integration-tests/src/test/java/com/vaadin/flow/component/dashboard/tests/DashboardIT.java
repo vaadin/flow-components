@@ -173,6 +173,36 @@ public class DashboardIT extends AbstractComponentIT {
                 widget.getColspan()));
     }
 
+    @Test
+    public void widgetWithInitialContent_contentIsCorrectlySet() {
+        DashboardWidgetElement firstWidget = dashboardElement.getWidgets()
+                .get(0);
+        Assert.assertNotNull(firstWidget.getContent());
+        Assert.assertTrue(
+                firstWidget.getContent().getText().contains("Some content"));
+    }
+
+    @Test
+    public void updateWidgetContent_contentIsCorrectlyUpdated() {
+        clickElementWithJs("update-content-of-the-first-widget");
+        DashboardWidgetElement firstWidget = dashboardElement.getWidgets()
+                .get(0);
+        Assert.assertNotNull(firstWidget.getContent());
+        Assert.assertFalse(
+                firstWidget.getContent().getText().contains("Some content"));
+        Assert.assertTrue(
+                firstWidget.getContent().getText().contains("Updated content"));
+    }
+
+    @Test
+    public void removeWidgetContent_contentIsCorrectlyRemoved() {
+        clickElementWithJs("remove-content-of-the-first-widget");
+        DashboardWidgetElement firstWidget = dashboardElement.getWidgets()
+                .get(0);
+        Assert.assertFalse(firstWidget.getText().contains("Some content"));
+        Assert.assertNull(firstWidget.getContent());
+    }
+
     private void assertDashboardWidgetsByTitle(String... expectedWidgetTitles) {
         assertWidgetsByTitle(dashboardElement.getWidgets(),
                 expectedWidgetTitles);
@@ -186,8 +216,7 @@ public class DashboardIT extends AbstractComponentIT {
     private static void assertWidgetsByTitle(
             List<DashboardWidgetElement> actualWidgets,
             String... expectedWidgetTitles) {
-        List<String> widgetTitles = actualWidgets.stream()
-                .map(DashboardWidgetElement::getTitle).toList();
+        List<String> widgetTitles = actualWidgets.stream().map(DashboardWidgetElement::getTitle).toList();
         Assert.assertEquals(Arrays.asList(expectedWidgetTitles), widgetTitles);
     }
 }
