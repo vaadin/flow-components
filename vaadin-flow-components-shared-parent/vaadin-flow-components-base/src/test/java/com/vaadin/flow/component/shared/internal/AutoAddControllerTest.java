@@ -1,0 +1,213 @@
+/*
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.shared.internal;
+
+import javax.annotation.concurrent.NotThreadSafe;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.function.SerializableSupplier;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationListener;
+import com.vaadin.flow.router.LocationChangeEvent;
+import com.vaadin.flow.router.NavigationTrigger;
+import com.vaadin.flow.server.VaadinSession;
+
+@NotThreadSafe
+public class AutoAddControllerTest {
+    private UI ui;
+
+    @Before
+    public void setUp() {
+        ui = Mockito.spy(new TestUI());
+        UI.setCurrent(ui);
+
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        Mockito.when(session.hasLock()).thenReturn(true);
+        ui.getInternals().setSession(session);
+    }
+
+    @Test
+    public void open_withoutUI_throws() {
+        UI.setCurrent(null);
+
+        TestComponent component = new TestComponent();
+
+        Assert.assertThrows(IllegalStateException.class, () -> {
+            component.setOpened(true);
+        });
+    }
+
+    @Test
+    public void open_withoutParent_autoAddsToUI() {
+        TestComponent component = new TestComponent();
+
+        component.setOpened(true);
+        fakeClientResponse();
+
+        Assert.assertEquals(ui.getElement(),
+                component.getElement().getParent());
+    }
+
+    @Test
+    public void open_withParent_doesNotAutoAdd() {
+        Div parent = new Div();
+        TestComponent component = new TestComponent();
+        parent.add(component);
+
+        component.setOpened(true);
+        fakeClientResponse();
+
+        Assert.assertEquals(parent.getElement(),
+                component.getElement().getParent());
+    }
+
+    @Test
+    public void open_closeBeforeClientResponse_doesNotAutoAdd() {
+        TestComponent component = new TestComponent();
+
+        component.setOpened(true);
+        component.setOpened(false);
+        fakeClientResponse();
+
+        Assert.assertNull(component.getElement().getParent());
+    }
+
+    @Test
+    public void close_withoutParent_autoRemoves() {
+        TestComponent component = new TestComponent();
+
+        component.setOpened(true);
+        fakeClientResponse();
+
+        component.setOpened(false);
+        fakeClientResponse();
+
+        Assert.assertNull(component.getElement().getParent());
+    }
+
+    @Test
+    public void close_withParent_doesNotAutoClose() {
+        Div parent = new Div();
+        TestComponent component = new TestComponent();
+        parent.add(component);
+
+        component.setOpened(true);
+        fakeClientResponse();
+
+        component.setOpened(false);
+        fakeClientResponse();
+
+        Assert.assertEquals(parent.getElement(),
+                component.getElement().getParent());
+    }
+
+    @Test
+    public void open_withoutModalSupplier_notModal() {
+        TestComponent component = new TestComponent();
+
+        component.setOpened(true);
+        fakeClientResponse();
+
+        Mockito.verify(ui, Mockito.times(1)).setChildComponentModal(component,
+                false);
+    }
+
+    @Test
+    public void open_withModalSupplierReturningTrue_isModal() {
+        TestComponent component = new TestComponent(() -> true);
+
+        component.setOpened(true);
+        fakeClientResponse();
+
+        Mockito.verify(ui, Mockito.times(1)).setChildComponentModal(component,
+                true);
+    }
+
+    @Test
+    public void open_withModalSupplierReturningFalse_notModal() {
+        TestComponent component = new TestComponent(() -> false);
+
+        component.setOpened(true);
+        fakeClientResponse();
+
+        Mockito.verify(ui, Mockito.times(1)).setChildComponentModal(component,
+                false);
+    }
+
+    @Test
+    public void open_programmaticNavigationBeforeClientResponse_doesNotAutoAdd() {
+        TestComponent component = new TestComponent();
+
+        component.setOpened(true);
+
+        ArgumentCaptor<AfterNavigationListener> captor = ArgumentCaptor
+                .forClass(AfterNavigationListener.class);
+        Mockito.verify(ui).addAfterNavigationListener(captor.capture());
+
+        LocationChangeEvent locationChangeEvent = Mockito
+                .mock(LocationChangeEvent.class);
+        Mockito.when(locationChangeEvent.getTrigger())
+                .thenReturn(NavigationTrigger.PROGRAMMATIC);
+
+        AfterNavigationEvent afterNavigationEvent = Mockito
+                .mock(AfterNavigationEvent.class);
+        Mockito.when(afterNavigationEvent.getLocationChangeEvent())
+                .thenReturn(locationChangeEvent);
+
+        captor.getValue().afterNavigation(afterNavigationEvent);
+        fakeClientResponse();
+
+        Assert.assertNull(component.getElement().getParent());
+    }
+
+    private void fakeClientResponse() {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
+    }
+
+    @Tag("test")
+    private static class TestComponent extends Component {
+        public TestComponent() {
+            new AutoAddController<>(this);
+        }
+
+        public TestComponent(SerializableSupplier<Boolean> isModalSupplier) {
+            new AutoAddController<>(this, isModalSupplier);
+        }
+
+        public void setOpened(boolean opened) {
+            getElement().setProperty("opened", opened);
+        }
+    }
+
+    private static class TestUI extends UI {
+        @Override
+        public boolean equals(Object obj) {
+            // Needed for check in UI.setChildComponentModal to pass
+            return true;
+        }
+    }
+}
