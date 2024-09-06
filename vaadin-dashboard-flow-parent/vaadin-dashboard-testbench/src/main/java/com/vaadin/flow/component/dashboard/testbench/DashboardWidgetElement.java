@@ -44,7 +44,7 @@ public class DashboardWidgetElement extends TestBenchElement {
      */
     public TestBenchElement getContent() {
         Object content = executeScript(
-                "return Array.from(arguments[0].children).filter(child => child.slot !== 'title')[0]",
+                "return Array.from(arguments[0].children).filter(child => !child.slot)[0]",
                 this);
         return content == null ? null : (TestBenchElement) content;
     }
