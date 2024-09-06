@@ -60,7 +60,7 @@ public class AutoAddControllerTest {
     }
 
     @Test
-    public void open_withoutParent_autoAddsToUI() {
+    public void open_withoutParent_autoAdded() {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
@@ -71,7 +71,7 @@ public class AutoAddControllerTest {
     }
 
     @Test
-    public void open_withParent_doesNotAutoAdd() {
+    public void open_withParent_notAutoAdded() {
         Div parent = new Div();
         TestComponent component = new TestComponent();
         parent.add(component);
@@ -84,7 +84,20 @@ public class AutoAddControllerTest {
     }
 
     @Test
-    public void open_closeBeforeClientResponse_doesNotAutoAdd() {
+    public void open_addParentBeforeClientResponse_notAutoAdded() {
+        Div parent = new Div();
+        TestComponent component = new TestComponent();
+
+        component.setOpened(true);
+        parent.add(component);
+        fakeClientResponse();
+
+        Assert.assertEquals(parent.getElement(),
+                component.getElement().getParent());
+    }
+
+    @Test
+    public void open_closeBeforeClientResponse_notAutoAdded() {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
@@ -95,7 +108,33 @@ public class AutoAddControllerTest {
     }
 
     @Test
-    public void close_withoutParent_autoRemoves() {
+    public void open_programmaticNavigationBeforeClientResponse_notAutoAdded() {
+        TestComponent component = new TestComponent();
+
+        component.setOpened(true);
+
+        ArgumentCaptor<AfterNavigationListener> captor = ArgumentCaptor
+                .forClass(AfterNavigationListener.class);
+        Mockito.verify(ui).addAfterNavigationListener(captor.capture());
+
+        LocationChangeEvent locationChangeEvent = Mockito
+                .mock(LocationChangeEvent.class);
+        Mockito.when(locationChangeEvent.getTrigger())
+                .thenReturn(NavigationTrigger.PROGRAMMATIC);
+
+        AfterNavigationEvent afterNavigationEvent = Mockito
+                .mock(AfterNavigationEvent.class);
+        Mockito.when(afterNavigationEvent.getLocationChangeEvent())
+                .thenReturn(locationChangeEvent);
+
+        captor.getValue().afterNavigation(afterNavigationEvent);
+        fakeClientResponse();
+
+        Assert.assertNull(component.getElement().getParent());
+    }
+
+    @Test
+    public void close_withoutParent_autoRemoved() {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
@@ -108,7 +147,7 @@ public class AutoAddControllerTest {
     }
 
     @Test
-    public void close_withParent_doesNotAutoClose() {
+    public void close_withParent_notAutoRemoved() {
         Div parent = new Div();
         TestComponent component = new TestComponent();
         parent.add(component);
@@ -120,6 +159,21 @@ public class AutoAddControllerTest {
         fakeClientResponse();
 
         Assert.assertEquals(parent.getElement(),
+                component.getElement().getParent());
+    }
+
+    @Test
+    public void close_reopenBeforeClientResponse_notAutoRemoved() {
+        TestComponent component = new TestComponent();
+
+        component.setOpened(true);
+        fakeClientResponse();
+
+        component.setOpened(false);
+        component.setOpened(true);
+        fakeClientResponse();
+
+        Assert.assertEquals(ui.getElement(),
                 component.getElement().getParent());
     }
 
@@ -154,32 +208,6 @@ public class AutoAddControllerTest {
 
         Mockito.verify(ui, Mockito.times(1)).setChildComponentModal(component,
                 false);
-    }
-
-    @Test
-    public void open_programmaticNavigationBeforeClientResponse_doesNotAutoAdd() {
-        TestComponent component = new TestComponent();
-
-        component.setOpened(true);
-
-        ArgumentCaptor<AfterNavigationListener> captor = ArgumentCaptor
-                .forClass(AfterNavigationListener.class);
-        Mockito.verify(ui).addAfterNavigationListener(captor.capture());
-
-        LocationChangeEvent locationChangeEvent = Mockito
-                .mock(LocationChangeEvent.class);
-        Mockito.when(locationChangeEvent.getTrigger())
-                .thenReturn(NavigationTrigger.PROGRAMMATIC);
-
-        AfterNavigationEvent afterNavigationEvent = Mockito
-                .mock(AfterNavigationEvent.class);
-        Mockito.when(afterNavigationEvent.getLocationChangeEvent())
-                .thenReturn(locationChangeEvent);
-
-        captor.getValue().afterNavigation(afterNavigationEvent);
-        fakeClientResponse();
-
-        Assert.assertNull(component.getElement().getParent());
     }
 
     private void fakeClientResponse() {

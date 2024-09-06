@@ -57,14 +57,7 @@ public class AutoAddController<C extends Component> implements Serializable {
     }
 
     private void handleOpen() {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
+        UI ui = getUI();
         StateTree.ExecutionRegistration addToUiRegistration = ui
                 .beforeClientResponse(ui, context -> {
                     if (isOpened() && !isAttached()) {
@@ -92,10 +85,25 @@ public class AutoAddController<C extends Component> implements Serializable {
     }
 
     private void handleClose() {
-        if (autoAdded) {
-            autoAdded = false;
-            component.getElement().removeFromParent();
+        UI ui = getUI();
+        ui.beforeClientResponse(ui, context -> {
+            if (!isOpened() && autoAdded) {
+                autoAdded = false;
+                component.getElement().removeFromParent();
+            }
+        });
+    }
+
+    private UI getUI() {
+        UI ui = UI.getCurrent();
+        if (ui == null) {
+            throw new IllegalStateException("UI instance is not available. "
+                    + "It means that you are calling this method "
+                    + "out of a normal workflow where it's always implicitly set. "
+                    + "That may happen if you call the method from the custom thread without "
+                    + "'UI::access' or from tests without proper initialization.");
         }
+        return ui;
     }
 
     private boolean isOpened() {
