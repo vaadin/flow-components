@@ -168,6 +168,86 @@ public class DashboardWidgetTest {
         Assert.assertNull(widget.getContent());
     }
 
+    @Test
+    public void defaultHeaderIsNull() {
+        DashboardWidget widget = new DashboardWidget();
+        Assert.assertNull(widget.getHeader());
+    }
+
+    @Test
+    public void setHeaderToEmptyWidget_correctHeaderIsSet() {
+        Div header = new Div();
+        DashboardWidget widget = new DashboardWidget();
+        widget.setHeader(header);
+        Assert.assertEquals(header, widget.getHeader());
+    }
+
+    @Test
+    public void setAnotherHeaderToNonEmptyWidget_correctHeaderIsSet() {
+        DashboardWidget widget = new DashboardWidget();
+        widget.setHeader(new Div());
+        Span newHeader = new Span();
+        widget.setHeader(newHeader);
+        Assert.assertEquals(newHeader, widget.getHeader());
+    }
+
+    @Test
+    public void setTheSameHeaderToNonEmptyWidget_correctHeaderIsSet() {
+        Div header = new Div();
+        DashboardWidget widget = new DashboardWidget();
+        widget.setHeader(header);
+        widget.setHeader(header);
+        Assert.assertEquals(header, widget.getHeader());
+    }
+
+    @Test
+    public void setNullHeaderToNonEmptyWidget_headerIsRemoved() {
+        DashboardWidget widget = new DashboardWidget();
+        widget.setHeader(new Div());
+        widget.setHeader(null);
+        Assert.assertNull(widget.getHeader());
+    }
+
+    @Test
+    public void setNullHeaderToWidgetWithContent_contentIsNotRemoved() {
+        Div content = new Div();
+        DashboardWidget widget = new DashboardWidget();
+        widget.setContent(content);
+        widget.setHeader(null);
+        Assert.assertEquals(content, widget.getContent());
+    }
+
+    @Test
+    public void setNullContentToWidgetWithHeader_headerIsNotRemoved() {
+        Div header = new Div();
+        DashboardWidget widget = new DashboardWidget();
+        widget.setHeader(header);
+        widget.setContent(null);
+        Assert.assertEquals(header, widget.getHeader());
+    }
+
+    @Test
+    public void setHeaderToWidgetWithContent_contentAndHeaderCorrectlyRetrieved() {
+        Div content = new Div();
+        Span header = new Span();
+        DashboardWidget widget = new DashboardWidget();
+        widget.setContent(content);
+        widget.setHeader(header);
+        Assert.assertEquals(content, widget.getContent());
+        Assert.assertEquals(header, widget.getHeader());
+    }
+
+    @Test
+    public void setContentToWidgetWithHeader_contentAndHeaderCorrectlyRetrieved() {
+        Div content = new Div();
+        Span header = new Span();
+        DashboardWidget widget = new DashboardWidget();
+        widget.setHeader(header);
+        widget.setContent(content);
+        Assert.assertEquals(content, widget.getContent());
+        Assert.assertEquals(header, widget.getHeader());
+    }
+
     private void fakeClientCommunication() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
