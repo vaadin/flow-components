@@ -78,7 +78,9 @@ public class DashboardWidget extends Component {
      * @return the content of the widget
      */
     public Component getContent() {
-        return getChildren().findFirst().orElse(null);
+        return getChildren().filter(
+                component -> !component.getElement().hasAttribute("slot"))
+                .findAny().orElse(null);
     }
 
     /**
@@ -89,12 +91,14 @@ public class DashboardWidget extends Component {
      *            the content to set
      */
     public void setContent(Component content) {
-        if (content == null) {
-            getElement().removeAllChildren();
+        Component initialContent = getContent();
+        if (initialContent == content) {
             return;
         }
-        if (!content.equals(getContent())) {
-            getElement().removeAllChildren();
+        if (initialContent != null) {
+            getElement().removeChild(initialContent.getElement());
+        }
+        if (content != null) {
             getElement().appendChild(content.getElement());
         }
     }
