@@ -16,24 +16,24 @@ import com.vaadin.testbench.elementsbase.Element;
 /**
  * @author Vaadin Ltd
  */
-@Element("vaadin-dashboard")
-public class DashboardElement extends TestBenchElement {
+@Element("vaadin-dashboard-section")
+public class DashboardSectionElement extends TestBenchElement {
 
     /**
-     * Returns the widgets in the dashboard.
+     * Returns the title of the section.
      *
-     * @return The widgets in the dashboard
+     * @return the {@code sectionTitle} property from the web component
      */
-    public List<DashboardWidgetElement> getWidgets() {
-        return $(DashboardWidgetElement.class).all();
+    public String getTitle() {
+        return getPropertyString("sectionTitle");
     }
 
     /**
-     * Returns the sections in the dashboard.
+     * Returns the widgets in the section.
      *
-     * @return The sections in the dashboard
+     * @return The widgets in the section
      */
-    public List<DashboardSectionElement> getSections() {
-        return $(DashboardSectionElement.class).all();
+    public List<DashboardWidgetElement> getWidgets() {
+        return $(DashboardWidgetElement.class).all();
     }
 }

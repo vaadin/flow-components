@@ -9,8 +9,10 @@
 package com.vaadin.flow.component.dashboard.tests;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.vaadin.flow.component.dashboard.Dashboard;
+import com.vaadin.flow.component.dashboard.DashboardSection;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
@@ -23,6 +25,8 @@ import com.vaadin.flow.router.Route;
 public class DashboardPage extends Div {
 
     public DashboardPage() {
+        Dashboard dashboard = new Dashboard();
+
         DashboardWidget widget1 = new DashboardWidget();
         widget1.setTitle("Widget 1");
         widget1.setId("widget-1");
@@ -35,18 +39,39 @@ public class DashboardPage extends Div {
         widget3.setTitle("Widget 3");
         widget3.setId("widget-3");
 
-        Dashboard dashboard = new Dashboard();
+        DashboardWidget widget1InSection1 = new DashboardWidget();
+        widget1InSection1.setTitle("Widget 1 in Section 1");
+        widget1InSection1.setId("widget-1-in-section-1");
+
+        DashboardWidget widget2InSection1 = new DashboardWidget();
+        widget2InSection1.setTitle("Widget 2 in Section 1");
+        widget2InSection1.setId("widget-2-in-section-1");
+
+        DashboardWidget widget1InSection2 = new DashboardWidget();
+        widget1InSection2.setTitle("Widget 1 in Section 2");
+        widget1InSection2.setId("widget-1-in-section-2");
+
         dashboard.add(widget1, widget2, widget3);
 
-        NativeButton addWidgetAtIndex1 = new NativeButton(
-                "Add widget at index 1");
-        addWidgetAtIndex1.addClickListener(click -> {
-            DashboardWidget widgetAtIndex1 = new DashboardWidget();
-            widgetAtIndex1.setTitle("Widget at index 1");
-            widgetAtIndex1.setId("widget-at-index-1");
-            dashboard.addWidgetAtIndex(1, widgetAtIndex1);
+        DashboardSection section1 = new DashboardSection("Section 1");
+        section1.add(widget1InSection1, widget2InSection1);
+        dashboard.addSection(section1);
+
+        DashboardSection section2 = dashboard.addSection("Section 2");
+        section2.add(widget1InSection2);
+
+        NativeButton addMultipleWidgets = new NativeButton(
+                "Add multiple widgets");
+        addMultipleWidgets.addClickListener(click -> {
+            DashboardWidget newWidget1 = new DashboardWidget();
+            newWidget1.setTitle("New widget 1");
+            DashboardWidget newWidget2 = new DashboardWidget();
+            newWidget2.setTitle("New widget 2");
+            dashboard.add(newWidget2);
+            dashboard.addWidgetAtIndex(
+                    (int) (dashboard.getChildren().count() - 1), newWidget1);
         });
-        addWidgetAtIndex1.setId("add-widget-at-index-1");
+        addMultipleWidgets.setId("add-multiple-widgets");
 
         NativeButton removeFirstAndLastWidgets = new NativeButton(
                 "Remove first and last widgets");
@@ -57,17 +82,69 @@ public class DashboardPage extends Div {
             }
             int currentWidgetCount = currentWidgets.size();
             if (currentWidgetCount == 1) {
-                dashboard.remove(dashboard.getWidgets().get(0));
+                dashboard.getWidgets().get(0).removeFromParent();
             } else {
-                dashboard.remove(dashboard.getWidgets().get(0),
-                        dashboard.getWidgets().get(currentWidgetCount - 1));
+                dashboard.getWidgets().get(currentWidgetCount - 1)
+                        .removeFromParent();
+                dashboard.getWidgets().get(0).removeFromParent();
             }
         });
         removeFirstAndLastWidgets.setId("remove-first-and-last-widgets");
 
-        NativeButton removeAllWidgets = new NativeButton("Remove all widgets");
-        removeAllWidgets.addClickListener(click -> dashboard.removeAll());
-        removeAllWidgets.setId("remove-all-widgets");
+        NativeButton removeAll = new NativeButton("Remove all");
+        removeAll.addClickListener(click -> dashboard.removeAll());
+        removeAll.setId("remove-all");
+
+        NativeButton addSectionWithMultipleWidgets = new NativeButton(
+                "Add section with multiple widgets");
+        addSectionWithMultipleWidgets.addClickListener(click -> {
+            DashboardSection section = dashboard
+                    .addSection("New section with multiple widgets");
+            DashboardWidget newWidget1 = new DashboardWidget();
+            newWidget1.setTitle("New widget 1");
+            DashboardWidget newWidget2 = new DashboardWidget();
+            newWidget2.setTitle("New widget 2");
+            section.add(newWidget2);
+            section.addWidgetAtIndex(0, newWidget1);
+        });
+        addSectionWithMultipleWidgets
+                .setId("add-section-with-multiple-widgets");
+
+        NativeButton removeFirstSection = new NativeButton(
+                "Remove first section");
+        removeFirstSection.addClickListener(click -> getFirstSection(dashboard)
+                .ifPresent(dashboard::remove));
+        removeFirstSection.setId("remove-first-section");
+
+        NativeButton addWidgetToFirstSection = new NativeButton(
+                "Add widget to first section");
+        addWidgetToFirstSection.addClickListener(
+                click -> getFirstSection(dashboard).ifPresent(section -> {
+                    DashboardWidget newWidget = new DashboardWidget();
+                    newWidget.setTitle("New widget");
+                    section.add(newWidget);
+                }));
+        addWidgetToFirstSection.setId("add-widget-to-first-section");
+
+        NativeButton removeFirstWidgetFromFirstSection = new NativeButton(
+                "Remove first widget from first section");
+        removeFirstWidgetFromFirstSection.addClickListener(
+                click -> getFirstSection(dashboard).ifPresent(section -> {
+                    List<DashboardWidget> currentWidgets = section.getWidgets();
+                    if (currentWidgets.isEmpty()) {
+                        return;
+                    }
+                    section.remove(currentWidgets.get(0));
+                }));
+        removeFirstWidgetFromFirstSection
+                .setId("remove-first-widget-from-first-section");
+
+        NativeButton removeAllFromFirstSection = new NativeButton(
+                "Remove all from first section");
+        removeAllFromFirstSection
+                .addClickListener(click -> getFirstSection(dashboard)
+                        .ifPresent(DashboardSection::removeAll));
+        removeAllFromFirstSection.setId("remove-all-from-first-section");
 
         NativeButton setMaximumColumnCount1 = new NativeButton(
                 "Set maximum column count 1");
@@ -93,8 +170,18 @@ public class DashboardPage extends Div {
                 .forEach(widget -> widget.setColspan(widget.getColspan() - 1)));
         decreaseAllColspansBy1.setId("decrease-all-colspans-by-1");
 
-        add(addWidgetAtIndex1, removeFirstAndLastWidgets, removeAllWidgets,
-                setMaximumColumnCount1, setMaximumColumnCountNull,
-                increaseAllColspansBy1, decreaseAllColspansBy1, dashboard);
+        add(addMultipleWidgets, removeFirstAndLastWidgets, removeAll,
+                addSectionWithMultipleWidgets, removeFirstSection,
+                addWidgetToFirstSection, removeFirstWidgetFromFirstSection,
+                removeAllFromFirstSection, setMaximumColumnCount1,
+                setMaximumColumnCountNull, increaseAllColspansBy1,
+                decreaseAllColspansBy1, dashboard);
+    }
+
+    private static Optional<DashboardSection> getFirstSection(
+            Dashboard dashboard) {
+        return dashboard.getChildren()
+                .filter(DashboardSection.class::isInstance)
+                .map(DashboardSection.class::cast).findFirst();
     }
 }
