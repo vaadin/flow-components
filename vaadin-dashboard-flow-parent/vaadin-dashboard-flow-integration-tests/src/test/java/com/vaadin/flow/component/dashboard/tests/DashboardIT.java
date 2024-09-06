@@ -36,35 +36,36 @@ public class DashboardIT extends AbstractComponentIT {
     }
 
     @Test
-    public void addWidgets_widgetsAreCorrectlyAdded() {
+    public void addInitialWidgetsToDashboard_widgetsAreCorrectlyAdded() {
         assertDashboardWidgetsByTitle("Widget 1", "Widget 2", "Widget 3",
                 "Widget 1 in Section 1", "Widget 2 in Section 1",
                 "Widget 1 in Section 2");
     }
 
     @Test
-    public void addWidgetsAtIndex1_widgetIsAddedIntoTheCorrectPlace() {
-        clickElementWithJs("add-widget-at-index-1");
-        assertDashboardWidgetsByTitle("Widget 1", "Widget at index 1",
-                "Widget 2", "Widget 3", "Widget 1 in Section 1",
-                "Widget 2 in Section 1", "Widget 1 in Section 2");
+    public void addWidgetsToDashboard_widgetsAreCorrectlyAdded() {
+        clickElementWithJs("add-multiple-widgets");
+        assertDashboardWidgetsByTitle("Widget 1", "Widget 2", "Widget 3",
+                "Widget 1 in Section 1", "Widget 2 in Section 1",
+                "Widget 1 in Section 2", "New widget 1", "New widget 2");
     }
 
     @Test
-    public void removeFirstAndLastWidgets_widgetsAreCorrectlyRemoved() {
+    public void removeFirstAndLastWidgetsFromDashboard_widgetsAreCorrectlyRemoved() {
         clickElementWithJs("remove-first-and-last-widgets");
         assertDashboardWidgetsByTitle("Widget 2", "Widget 3",
                 "Widget 1 in Section 1", "Widget 2 in Section 1");
     }
 
     @Test
-    public void removeAllWidgets_widgetsAreCorrectlyRemoved() {
-        clickElementWithJs("remove-all-widgets");
+    public void removeAllFromDashboard_widgetsAnsSectionsAreCorrectlyRemoved() {
+        clickElementWithJs("remove-all");
         assertDashboardWidgetsByTitle();
+        Assert.assertTrue(dashboardElement.getSections().isEmpty());
     }
 
     @Test
-    public void addSectionsWithWidgets_widgetsAreCorrectlyAdded() {
+    public void addInitialSectionsWithWidgetsToDashboard_widgetsAreCorrectlyAdded() {
         List<DashboardSectionElement> sections = dashboardElement.getSections();
         Assert.assertEquals(2, sections.size());
 
@@ -76,6 +77,55 @@ public class DashboardIT extends AbstractComponentIT {
         DashboardSectionElement section2 = sections.get(1);
         Assert.assertEquals("Section 2", section2.getTitle());
         assertSectionWidgetsByTitle(section2, "Widget 1 in Section 2");
+    }
+
+    @Test
+    public void addSectionWithWidgets_sectionAndWidgetsAreCorrectlyAdded() {
+        clickElementWithJs("add-section-with-multiple-widgets");
+        List<DashboardSectionElement> sections = dashboardElement.getSections();
+        Assert.assertEquals(3, sections.size());
+        DashboardSectionElement newSection = sections.get(2);
+        Assert.assertEquals("New section with multiple widgets",
+                newSection.getTitle());
+        assertSectionWidgetsByTitle(newSection, "New widget 1", "New widget 2");
+    }
+
+    @Test
+    public void removeFirstSection_sectionIsRemoved() {
+        clickElementWithJs("remove-first-section");
+        List<DashboardSectionElement> sections = dashboardElement.getSections();
+        Assert.assertEquals(1, sections.size());
+        DashboardSectionElement firstSection = sections.get(0);
+        Assert.assertEquals("Section 2", firstSection.getTitle());
+        assertSectionWidgetsByTitle(firstSection, "Widget 1 in Section 2");
+    }
+
+    @Test
+    public void addWidgetToFirstSection_widgetsAreAdded() {
+        clickElementWithJs("add-widget-to-first-section");
+        List<DashboardSectionElement> sections = dashboardElement.getSections();
+        DashboardSectionElement firstSection = sections.get(0);
+        Assert.assertEquals("Section 1", firstSection.getTitle());
+        assertSectionWidgetsByTitle(firstSection, "Widget 1 in Section 1",
+                "Widget 2 in Section 1", "New widget");
+    }
+
+    @Test
+    public void removeFirstWidgetFromFirstSection_widgetIsRemoved() {
+        clickElementWithJs("remove-first-widget-from-first-section");
+        List<DashboardSectionElement> sections = dashboardElement.getSections();
+        DashboardSectionElement firstSection = sections.get(0);
+        Assert.assertEquals("Section 1", firstSection.getTitle());
+        assertSectionWidgetsByTitle(firstSection, "Widget 2 in Section 1");
+    }
+
+    @Test
+    public void removeAllFromFirstSection_widgetsAreRemoved() {
+        clickElementWithJs("remove-all-from-first-section");
+        List<DashboardSectionElement> sections = dashboardElement.getSections();
+        DashboardSectionElement firstSection = sections.get(0);
+        Assert.assertEquals("Section 1", firstSection.getTitle());
+        assertSectionWidgetsByTitle(firstSection);
     }
 
     @Test
