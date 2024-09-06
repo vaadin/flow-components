@@ -68,13 +68,15 @@ public class DashboardWidget extends Component {
             return;
         }
         this.colspan = colspan;
-        notifyParentDashboard();
+        notifyParentDashboardOrSection();
     }
 
-    private void notifyParentDashboard() {
+    private void notifyParentDashboardOrSection() {
         getParent().ifPresent(parent -> {
             if (parent instanceof Dashboard dashboard) {
                 dashboard.updateClient();
+            } else if (parent instanceof DashboardSection section) {
+                section.updateClient();
             }
         });
     }

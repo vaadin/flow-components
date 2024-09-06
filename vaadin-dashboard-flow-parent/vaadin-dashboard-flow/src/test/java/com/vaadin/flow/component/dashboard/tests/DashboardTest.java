@@ -8,9 +8,9 @@
  */
 package com.vaadin.flow.component.dashboard.tests;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -21,16 +21,12 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dashboard.Dashboard;
+import com.vaadin.flow.component.dashboard.DashboardSection;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.server.VaadinSession;
 
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-
 public class DashboardTest {
-
     private final UI ui = new UI();
     private Dashboard dashboard;
 
@@ -56,7 +52,7 @@ public class DashboardTest {
         DashboardWidget widget2 = new DashboardWidget();
         dashboard.add(widget1, widget2);
         fakeClientCommunication();
-        assertWidgets(dashboard, widget1, widget2);
+        assertChildComponents(dashboard, widget1, widget2);
     }
 
     @Test
@@ -74,7 +70,7 @@ public class DashboardTest {
             // Do nothing
         }
         fakeClientCommunication();
-        assertWidgets(dashboard);
+        assertChildComponents(dashboard);
     }
 
     @Test
@@ -86,7 +82,7 @@ public class DashboardTest {
         fakeClientCommunication();
         dashboard.addWidgetAtIndex(1, widget3);
         fakeClientCommunication();
-        assertWidgets(dashboard, widget1, widget3, widget2);
+        assertChildComponents(dashboard, widget1, widget3, widget2);
     }
 
     @Test
@@ -98,7 +94,7 @@ public class DashboardTest {
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> dashboard.addWidgetAtIndex(2, widget2));
         fakeClientCommunication();
-        assertWidgets(dashboard, widget1);
+        assertChildComponents(dashboard, widget1);
     }
 
     @Test
@@ -107,7 +103,7 @@ public class DashboardTest {
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> dashboard.addWidgetAtIndex(-1, widget));
         fakeClientCommunication();
-        assertWidgets(dashboard);
+        assertChildComponents(dashboard);
     }
 
     @Test
@@ -124,7 +120,7 @@ public class DashboardTest {
         fakeClientCommunication();
         dashboard.remove(widget1);
         fakeClientCommunication();
-        assertWidgets(dashboard, widget2);
+        assertChildComponents(dashboard, widget2);
     }
 
     @Test
@@ -141,7 +137,7 @@ public class DashboardTest {
         fakeClientCommunication();
         dashboard.removeAll();
         fakeClientCommunication();
-        assertWidgets(dashboard);
+        assertChildComponents(dashboard);
     }
 
     @Test
@@ -151,7 +147,7 @@ public class DashboardTest {
         fakeClientCommunication();
         widget1.removeFromParent();
         fakeClientCommunication();
-        assertWidgets(dashboard);
+        assertChildComponents(dashboard);
     }
 
     @Test
@@ -162,11 +158,11 @@ public class DashboardTest {
         fakeClientCommunication();
         widget1.removeFromParent();
         fakeClientCommunication();
-        assertWidgets(dashboard, widget2);
+        assertChildComponents(dashboard, widget2);
     }
 
     @Test
-    public void addSeparately_removeOneFromParent_widgetIsRemoved() {
+    public void addWidgetsSeparately_removeOneFromParent_widgetIsRemoved() {
         DashboardWidget widget1 = new DashboardWidget();
         DashboardWidget widget2 = new DashboardWidget();
         dashboard.add(widget1);
@@ -174,7 +170,7 @@ public class DashboardTest {
         fakeClientCommunication();
         widget1.removeFromParent();
         fakeClientCommunication();
-        assertWidgets(dashboard, widget2);
+        assertChildComponents(dashboard, widget2);
     }
 
     @Test
@@ -187,7 +183,7 @@ public class DashboardTest {
         dashboard.add(widget);
         fakeClientCommunication();
         Assert.assertTrue(parent.getChildren().noneMatch(widget::equals));
-        assertWidgets(dashboard, widget);
+        assertChildComponents(dashboard, widget);
     }
 
     @Test
@@ -199,7 +195,7 @@ public class DashboardTest {
         ui.add(parent);
         parent.add(widget);
         fakeClientCommunication();
-        assertWidgets(dashboard);
+        assertChildComponents(dashboard);
         Assert.assertTrue(parent.getChildren().anyMatch(widget::equals));
     }
 
@@ -212,8 +208,381 @@ public class DashboardTest {
         ui.add(newDashboard);
         newDashboard.add(widget);
         fakeClientCommunication();
-        assertWidgets(dashboard);
-        assertWidgets(newDashboard, widget);
+        assertChildComponents(dashboard);
+        assertChildComponents(newDashboard, widget);
+    }
+
+    @Test
+    public void addSectionWithoutTitle_sectionIsAdded() {
+        DashboardSection section1 = dashboard.addSection();
+        DashboardSection section2 = dashboard.addSection();
+        fakeClientCommunication();
+        assertChildComponents(dashboard, section1, section2);
+    }
+
+    @Test
+    public void addSectionWithNullTitle_sectionIsAdded() {
+        DashboardSection section1 = dashboard.addSection((String) null);
+        DashboardSection section2 = dashboard.addSection((String) null);
+        fakeClientCommunication();
+        assertChildComponents(dashboard, section1, section2);
+    }
+
+    @Test
+    public void addSectionWithTitle_sectionIsAdded() {
+        DashboardSection section1 = dashboard.addSection("Section 1");
+        DashboardSection section2 = dashboard.addSection("Section 2");
+        fakeClientCommunication();
+        assertChildComponents(dashboard, section1, section2);
+    }
+
+    @Test
+    public void createAndAddSectionWithoutTitle_sectionIsAdded() {
+        DashboardSection section1 = new DashboardSection();
+        DashboardSection section2 = new DashboardSection();
+        dashboard.addSection(section1);
+        dashboard.addSection(section2);
+        fakeClientCommunication();
+        assertChildComponents(dashboard, section1, section2);
+    }
+
+    @Test
+    public void createAndAddSectionWithNullTitle_sectionIsAdded() {
+        DashboardSection section1 = new DashboardSection(null);
+        DashboardSection section2 = new DashboardSection(null);
+        dashboard.addSection(section1);
+        dashboard.addSection(section2);
+        fakeClientCommunication();
+        assertChildComponents(dashboard, section1, section2);
+    }
+
+    @Test
+    public void createAndAddSectionWithTitle_sectionIsAdded() {
+        DashboardSection section1 = new DashboardSection("Section 1");
+        DashboardSection section2 = new DashboardSection("Section 2");
+        dashboard.addSection(section1);
+        dashboard.addSection(section2);
+        fakeClientCommunication();
+        assertChildComponents(dashboard, section1, section2);
+    }
+
+    @Test
+    public void addNullSection_exceptionIsThrown() {
+        Assert.assertThrows(NullPointerException.class,
+                () -> dashboard.addSection((DashboardSection) null));
+    }
+
+    @Test
+    public void removeSection_sectionIsRemoved() {
+        DashboardSection section1 = dashboard.addSection();
+        DashboardSection section2 = dashboard.addSection();
+        fakeClientCommunication();
+        dashboard.remove(section1);
+        fakeClientCommunication();
+        assertChildComponents(dashboard, section2);
+    }
+
+    @Test
+    public void removeNullSection_exceptionIsThrown() {
+        Assert.assertThrows(NullPointerException.class,
+                () -> dashboard.remove((DashboardSection) null));
+    }
+
+    @Test
+    public void removeAllSections_sectionsAreRemoved() {
+        dashboard.addSection();
+        dashboard.addSection();
+        fakeClientCommunication();
+        dashboard.removeAll();
+        fakeClientCommunication();
+        assertChildComponents(dashboard);
+    }
+
+    @Test
+    public void removeSectionFromParent_sectionIsRemoved() {
+        DashboardSection section = dashboard.addSection();
+        fakeClientCommunication();
+        section.removeFromParent();
+        fakeClientCommunication();
+        assertChildComponents(dashboard);
+    }
+
+    @Test
+    public void addMultipleSections_removeOneFromParent_sectionIsRemoved() {
+        DashboardSection section1 = dashboard.addSection();
+        DashboardSection section2 = dashboard.addSection();
+        fakeClientCommunication();
+        section1.removeFromParent();
+        fakeClientCommunication();
+        assertChildComponents(dashboard, section2);
+    }
+
+    @Test
+    public void setTitleOnExistingSection_itemsAreUpdatedWithCorrectTitles() {
+        DashboardSection section = dashboard.addSection("Section");
+        fakeClientCommunication();
+        section.setTitle("New title");
+        fakeClientCommunication();
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void addSectionWithWidget_removeWidgetFromDashboard_throwsException() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget = new DashboardWidget();
+        section.add(widget);
+        fakeClientCommunication();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> dashboard.remove(widget));
+        fakeClientCommunication();
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void addSection_addWidgetToSection_widgetIsAdded() {
+        DashboardSection section = dashboard.addSection();
+        fakeClientCommunication();
+        DashboardWidget widget = new DashboardWidget();
+        section.add(widget);
+        fakeClientCommunication();
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void addSectionAndWidget_removeWidget_widgetRemoved() {
+        DashboardSection section = dashboard.addSection();
+        section.add(new DashboardWidget());
+        DashboardWidget widget = new DashboardWidget();
+        dashboard.add(widget);
+        fakeClientCommunication();
+        dashboard.remove(widget);
+        fakeClientCommunication();
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void addSectionAndWidget_removeSection_sectionRemoved() {
+        DashboardSection section = dashboard.addSection();
+        section.add(new DashboardWidget());
+        DashboardWidget widget = new DashboardWidget();
+        dashboard.add(widget);
+        fakeClientCommunication();
+        dashboard.remove(section);
+        fakeClientCommunication();
+        assertChildComponents(dashboard, widget);
+    }
+
+    @Test
+    public void addSectionAndWidget_removeAll_widgetAndSectionRemoved() {
+        DashboardSection section = dashboard.addSection();
+        section.add(new DashboardWidget());
+        DashboardWidget widget = new DashboardWidget();
+        dashboard.add(widget);
+        fakeClientCommunication();
+        dashboard.removeAll();
+        fakeClientCommunication();
+        assertChildComponents(dashboard);
+    }
+
+    @Test
+    public void addWidgetToSection_widgetIsAdded() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget1 = new DashboardWidget();
+        DashboardWidget widget2 = new DashboardWidget();
+        section.add(widget1, widget2);
+        fakeClientCommunication();
+        assertSectionWidgets(section, widget1, widget2);
+        assertChildComponents(dashboard, section);
+
+    }
+
+    @Test
+    public void addNullWidgetToSection_exceptionIsThrown() {
+        DashboardSection section = dashboard.addSection();
+        Assert.assertThrows(NullPointerException.class,
+                () -> section.add((DashboardWidget) null));
+        fakeClientCommunication();
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void addNullWidgetInArrayToSection_noWidgetIsAdded() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget = new DashboardWidget();
+        try {
+            section.add(widget, null);
+        } catch (NullPointerException e) {
+            // Do nothing
+        }
+        fakeClientCommunication();
+        assertSectionWidgets(section);
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void addWidgetAtIndexToSection_widgetIsCorrectlyAdded() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget1 = new DashboardWidget();
+        DashboardWidget widget2 = new DashboardWidget();
+        DashboardWidget widget3 = new DashboardWidget();
+        section.add(widget1, widget2);
+        fakeClientCommunication();
+        section.addWidgetAtIndex(1, widget3);
+        fakeClientCommunication();
+        assertSectionWidgets(section, widget1, widget3, widget2);
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void addWidgetAtInvalidIndexToSection_exceptionIsThrown() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget1 = new DashboardWidget();
+        DashboardWidget widget2 = new DashboardWidget();
+        section.add(widget1);
+        fakeClientCommunication();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> section.addWidgetAtIndex(2, widget2));
+        fakeClientCommunication();
+        assertSectionWidgets(section, widget1);
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void addWidgetAtNegativeIndexToSection_exceptionIsThrown() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget = new DashboardWidget();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> section.addWidgetAtIndex(-1, widget));
+        fakeClientCommunication();
+        assertSectionWidgets(section);
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void addNullWidgetAtIndexToSection_exceptionIsThrown() {
+        DashboardSection section = dashboard.addSection();
+        fakeClientCommunication();
+        Assert.assertThrows(NullPointerException.class,
+                () -> section.addWidgetAtIndex(0, null));
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void removeWidgetFromSection_widgetIsRemoved() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget1 = new DashboardWidget();
+        DashboardWidget widget2 = new DashboardWidget();
+        section.add(widget1, widget2);
+        fakeClientCommunication();
+        section.remove(widget1);
+        fakeClientCommunication();
+        assertSectionWidgets(section, widget2);
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void removeNullWidgetFromSection_exceptionIsThrown() {
+        DashboardSection section = dashboard.addSection();
+        fakeClientCommunication();
+        Assert.assertThrows(NullPointerException.class,
+                () -> section.remove((DashboardWidget) null));
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void removeAllWidgetsFromSection_widgetsAreRemoved() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget1 = new DashboardWidget();
+        DashboardWidget widget2 = new DashboardWidget();
+        section.add(widget1, widget2);
+        fakeClientCommunication();
+        section.removeAll();
+        fakeClientCommunication();
+        assertSectionWidgets(section);
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void removeWidgetInSectionFromParent_widgetIsRemoved() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget1 = new DashboardWidget();
+        section.add(widget1);
+        fakeClientCommunication();
+        widget1.removeFromParent();
+        fakeClientCommunication();
+        assertSectionWidgets(section);
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void addMultipleWidgetsToSection_removeOneFromParent_widgetIsRemoved() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget1 = new DashboardWidget();
+        DashboardWidget widget2 = new DashboardWidget();
+        section.add(widget1, widget2);
+        fakeClientCommunication();
+        widget1.removeFromParent();
+        fakeClientCommunication();
+        assertSectionWidgets(section, widget2);
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void addWidgetsSeparatelyToSection_removeOneFromParent_widgetIsRemoved() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget1 = new DashboardWidget();
+        DashboardWidget widget2 = new DashboardWidget();
+        section.add(widget1);
+        section.add(widget2);
+        fakeClientCommunication();
+        widget1.removeFromParent();
+        fakeClientCommunication();
+        assertSectionWidgets(section, widget2);
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void addWidgetFromLayoutToSection_widgetIsMoved() {
+        DashboardSection section = dashboard.addSection();
+        Div parent = new Div();
+        ui.add(parent);
+        DashboardWidget widget = new DashboardWidget();
+        parent.add(widget);
+        fakeClientCommunication();
+        section.add(widget);
+        fakeClientCommunication();
+        Assert.assertTrue(parent.getChildren().noneMatch(widget::equals));
+        assertSectionWidgets(section, widget);
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void addWidgetFromSectionToLayout_widgetIsMoved() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget = new DashboardWidget();
+        section.add(widget);
+        fakeClientCommunication();
+        Div parent = new Div();
+        ui.add(parent);
+        parent.add(widget);
+        fakeClientCommunication();
+        assertSectionWidgets(section);
+        Assert.assertTrue(parent.getChildren().anyMatch(widget::equals));
+        assertChildComponents(dashboard, section);
+    }
+
+    @Test
+    public void addWidgetToAnotherSection_widgetIsMoved() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget = new DashboardWidget();
+        section.add(widget);
+        fakeClientCommunication();
+        DashboardSection newSection = dashboard.addSection();
+        newSection.add(widget);
+        fakeClientCommunication();
+        assertSectionWidgets(section);
+        assertSectionWidgets(newSection, widget);
+        assertChildComponents(dashboard, section, newSection);
     }
 
     @Test
@@ -262,7 +631,7 @@ public class DashboardTest {
         widget2.setColspan(2);
         dashboard.add(widget1, widget2);
         fakeClientCommunication();
-        assertWidgetColspans(dashboard, widget1, widget2);
+        assertChildComponents(dashboard, widget1, widget2);
     }
 
     @Test
@@ -272,7 +641,7 @@ public class DashboardTest {
         fakeClientCommunication();
         widget.setColspan(2);
         fakeClientCommunication();
-        assertWidgetColspans(dashboard, widget);
+        assertChildComponents(dashboard, widget);
     }
 
     @Test
@@ -432,49 +801,34 @@ public class DashboardTest {
         });
     }
 
-    private static void assertWidgets(Dashboard dashboard,
+    private static void assertChildComponents(Dashboard dashboard,
+            Component... expectedChildren) {
+        List<DashboardWidget> expectedWidgets = getExpectedWidgets(
+                expectedChildren);
+        Assert.assertEquals(expectedWidgets, dashboard.getWidgets());
+        Assert.assertEquals(Arrays.asList(expectedChildren),
+                dashboard.getChildren().toList());
+    }
+
+    private static List<DashboardWidget> getExpectedWidgets(
+            Component... expectedChildren) {
+        List<DashboardWidget> expectedWidgets = new ArrayList<>();
+        for (Component child : expectedChildren) {
+            if (child instanceof DashboardSection section) {
+                expectedWidgets.addAll(section.getWidgets());
+            } else if (child instanceof DashboardWidget widget) {
+                expectedWidgets.add(widget);
+            } else {
+                throw new IllegalArgumentException(
+                        "A dashboard can only contain widgets or sections.");
+            }
+        }
+        return expectedWidgets;
+    }
+
+    private static void assertSectionWidgets(DashboardSection section,
             DashboardWidget... expectedWidgets) {
-        assertVirtualChildren(dashboard, expectedWidgets);
         Assert.assertEquals(Arrays.asList(expectedWidgets),
-                dashboard.getWidgets());
-    }
-
-    private static void assertVirtualChildren(Dashboard dashboard,
-            Component... components) {
-        // Get a List of the node ids
-        List<Integer> expectedChildNodeIds = Arrays.stream(components)
-                .map(component -> component.getElement().getNode().getId())
-                .toList();
-        // Get the node ids from the items property of the dashboard
-        List<Integer> actualChildNodeIds = getChildNodeIds(dashboard);
-        Assert.assertEquals(expectedChildNodeIds, actualChildNodeIds);
-    }
-
-    private static List<Integer> getChildNodeIds(Dashboard dashboard) {
-        return getItemsStream(dashboard)
-                .mapToInt(obj -> (int) obj.getNumber("nodeid")).boxed()
-                .toList();
-    }
-
-    private static void assertWidgetColspans(Dashboard dashboard,
-            DashboardWidget... widgets) {
-        // Get a List of the widget colspans
-        List<Integer> expectedColspans = Arrays.stream(widgets)
-                .map(DashboardWidget::getColspan).toList();
-        // Get the colspans from the items property of the dashboard
-        List<Integer> actualColspans = getWidgetColspans(dashboard);
-        Assert.assertEquals(expectedColspans, actualColspans);
-    }
-
-    private static List<Integer> getWidgetColspans(Dashboard dashboard) {
-        return getItemsStream(dashboard)
-                .mapToInt(obj -> (int) obj.getNumber("colspan")).boxed()
-                .toList();
-    }
-
-    private static Stream<JsonObject> getItemsStream(Dashboard dashboard) {
-        JsonArray jsonArrayOfIds = (JsonArray) dashboard.getElement()
-                .getPropertyRaw("items");
-        return JsonUtils.objectStream(jsonArrayOfIds);
+                section.getWidgets());
     }
 }
