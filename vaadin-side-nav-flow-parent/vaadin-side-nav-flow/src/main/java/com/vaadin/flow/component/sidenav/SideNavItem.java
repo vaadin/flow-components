@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -57,7 +58,7 @@ import elemental.json.JsonArray;
 @NpmPackage(value = "@vaadin/side-nav", version = "24.5.0-alpha11")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 public class SideNavItem extends SideNavItemContainer
-        implements HasPrefix, HasSuffix {
+        implements HasEnabled, HasPrefix, HasSuffix {
 
     private Element labelElement;
 

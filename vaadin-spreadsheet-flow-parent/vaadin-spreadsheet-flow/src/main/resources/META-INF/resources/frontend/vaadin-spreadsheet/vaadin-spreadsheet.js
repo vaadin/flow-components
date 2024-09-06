@@ -299,6 +299,7 @@ export class VaadinSpreadsheet extends LitElement {
       } else if ('resources' == name) {
         this.api.setResources(this, newVal);
       } else if ('api' == name) {
+      } else if ('theme' == name) {
       } else {
         console.error('<vaadin-spreadsheet> unsupported property received from server: property=' + name);
       }
