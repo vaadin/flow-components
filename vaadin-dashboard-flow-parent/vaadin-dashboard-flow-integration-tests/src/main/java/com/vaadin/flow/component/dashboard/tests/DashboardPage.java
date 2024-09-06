@@ -197,7 +197,8 @@ public class DashboardPage extends Div {
         add(addMultipleWidgets, removeFirstAndLastWidgets, removeAll,
                 addSectionWithMultipleWidgets, removeFirstSection,
                 addWidgetToFirstSection, removeFirstWidgetFromFirstSection,
-                removeAllFromFirstSection, updateContentOfTheFirstWidget, removeContentOfTheFirstWidget, setMaximumColumnCount1,
+                removeAllFromFirstSection, updateContentOfTheFirstWidget,
+                removeContentOfTheFirstWidget, setMaximumColumnCount1,
                 setMaximumColumnCountNull, increaseAllColspansBy1,
                 decreaseAllColspansBy1, dashboard);
     }
