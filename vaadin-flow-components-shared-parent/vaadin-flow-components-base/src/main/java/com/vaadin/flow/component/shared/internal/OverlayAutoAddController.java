@@ -31,18 +31,19 @@ import com.vaadin.flow.shared.Registration;
  * @param <C>
  *            Type of the component that uses this controller.
  */
-public class AutoAddController<C extends Component> implements Serializable {
+public class OverlayAutoAddController<C extends Component>
+        implements Serializable {
     private final C component;
     private final SerializableSupplier<Boolean> isModalSupplier;
 
     private boolean autoAdded;
     private Registration afterProgrammaticNavigationListenerRegistration;
 
-    public AutoAddController(C component) {
+    public OverlayAutoAddController(C component) {
         this(component, () -> false);
     }
 
-    public AutoAddController(C component,
+    public OverlayAutoAddController(C component,
             SerializableSupplier<Boolean> isModalSupplier) {
         this.component = component;
         this.isModalSupplier = isModalSupplier;

@@ -39,7 +39,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.internal.AutoAddController;
+import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
@@ -125,7 +125,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
         setOverlayRole("dialog");
 
         // Initialize auto-add behavior
-        new AutoAddController<>(this, this::isModal);
+        new OverlayAutoAddController<>(this, this::isModal);
     }
 
     /**

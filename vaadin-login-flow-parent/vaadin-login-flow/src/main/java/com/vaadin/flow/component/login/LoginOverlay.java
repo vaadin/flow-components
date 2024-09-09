@@ -25,7 +25,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
-import com.vaadin.flow.component.shared.internal.AutoAddController;
+import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
@@ -65,7 +65,7 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
 
     private void init() {
         // Initialize auto-add behavior
-        new AutoAddController<>(this);
+        new OverlayAutoAddController<>(this);
     }
 
     /**

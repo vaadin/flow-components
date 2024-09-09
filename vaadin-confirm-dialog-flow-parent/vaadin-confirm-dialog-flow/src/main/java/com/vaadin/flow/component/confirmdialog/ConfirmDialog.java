@@ -33,7 +33,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
-import com.vaadin.flow.component.shared.internal.AutoAddController;
+import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
@@ -218,7 +218,7 @@ public class ConfirmDialog extends Component
      */
     public ConfirmDialog() {
         // Initialize auto-add behavior
-        new AutoAddController<>(this, () -> true);
+        new OverlayAutoAddController<>(this, () -> true);
 
         getElement().addEventListener("opened-changed", event -> {
             if (!isOpened()) {

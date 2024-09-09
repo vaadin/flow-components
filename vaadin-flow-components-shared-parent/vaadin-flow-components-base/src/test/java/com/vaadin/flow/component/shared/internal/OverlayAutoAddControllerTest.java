@@ -35,7 +35,7 @@ import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.server.VaadinSession;
 
 @NotThreadSafe
-public class AutoAddControllerTest {
+public class OverlayAutoAddControllerTest {
     private UI ui;
 
     @Before
@@ -219,11 +219,11 @@ public class AutoAddControllerTest {
     @Tag("test")
     private static class TestComponent extends Component {
         public TestComponent() {
-            new AutoAddController<>(this);
+            new OverlayAutoAddController<>(this);
         }
 
         public TestComponent(SerializableSupplier<Boolean> isModalSupplier) {
-            new AutoAddController<>(this, isModalSupplier);
+            new OverlayAutoAddController<>(this, isModalSupplier);
         }
 
         public void setOpened(boolean opened) {
