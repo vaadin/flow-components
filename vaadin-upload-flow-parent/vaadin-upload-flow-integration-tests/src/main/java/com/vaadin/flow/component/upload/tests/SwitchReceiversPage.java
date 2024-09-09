@@ -48,7 +48,8 @@ public class SwitchReceiversPage extends Div {
                     upload.setReceiver(buffer);
                     upload.setMaxFiles(3);
                 });
-        setMultiFileReceiverAndMaxFiles.setId("set-multi-file-receiver-and-max-files");
+        setMultiFileReceiverAndMaxFiles
+                .setId("set-multi-file-receiver-and-max-files");
 
         add(upload, setSingleFileReceiver, setMultiFileReceiver,
                 setMultiFileReceiverAndMaxFiles);
