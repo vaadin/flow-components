@@ -12,6 +12,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.SlotUtils;
 
 /**
  * @author Vaadin Ltd
@@ -130,6 +131,28 @@ public class DashboardWidget extends Component {
         if (content != null) {
             getElement().appendChild(content.getElement());
         }
+    }
+
+    /**
+     * Gets the component in the header slot of this widget.
+     *
+     * @return the header component of this widget, or {@code null} if no header
+     *         component has been set
+     */
+    public Component getHeader() {
+        return SlotUtils.getChildInSlot(this, "header");
+    }
+
+    /**
+     * Sets the component in the header slot of this widget, replacing any
+     * existing header component.
+     *
+     * @param header
+     *            the component to set, can be {@code null} to remove existing
+     *            header component
+     */
+    public void setHeader(Component header) {
+        SlotUtils.setSlot(this, "header", header);
     }
 
     private void notifyParentDashboardOrSection() {
