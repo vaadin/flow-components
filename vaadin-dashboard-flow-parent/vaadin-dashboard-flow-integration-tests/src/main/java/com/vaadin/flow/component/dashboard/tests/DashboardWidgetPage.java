@@ -29,6 +29,7 @@ public class DashboardWidgetPage extends Div {
         DashboardWidget widget1 = new DashboardWidget();
         widget1.setTitle("Widget 1");
         widget1.setContent(new Div("Some content"));
+        widget1.setHeader(new Span("Some header"));
         widget1.setId("widget-1");
 
         DashboardWidget widget2 = new DashboardWidget();
