@@ -17,6 +17,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.server.VaadinSession;
 
 public class DashboardWidgetTest {
@@ -104,6 +105,46 @@ public class DashboardWidgetTest {
         DashboardWidget widget = new DashboardWidget();
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> widget.setColspan(0));
+    }
+
+    @Test
+    public void defaultContentIsNull() {
+        DashboardWidget widget = new DashboardWidget();
+        Assert.assertNull(widget.getContent());
+    }
+
+    @Test
+    public void setContentToEmptyWidget_correctContentIsSet() {
+        Div content = new Div();
+        DashboardWidget widget = new DashboardWidget();
+        widget.setContent(content);
+        Assert.assertEquals(content, widget.getContent());
+    }
+
+    @Test
+    public void setAnotherContentToNonEmptyWidget_correctContentIsSet() {
+        DashboardWidget widget = new DashboardWidget();
+        widget.setContent(new Div());
+        Span newContent = new Span();
+        widget.setContent(newContent);
+        Assert.assertEquals(newContent, widget.getContent());
+    }
+
+    @Test
+    public void setTheSameContentToNonEmptyWidget_correctContentIsSet() {
+        Div content = new Div();
+        DashboardWidget widget = new DashboardWidget();
+        widget.setContent(content);
+        widget.setContent(content);
+        Assert.assertEquals(content, widget.getContent());
+    }
+
+    @Test
+    public void setNullContentToNonEmptyWidget_contentIsRemoved() {
+        DashboardWidget widget = new DashboardWidget();
+        widget.setContent(new Div());
+        widget.setContent(null);
+        Assert.assertNull(widget.getContent());
     }
 
     private void fakeClientCommunication() {
