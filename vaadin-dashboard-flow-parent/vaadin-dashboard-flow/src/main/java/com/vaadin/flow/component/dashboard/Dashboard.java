@@ -11,9 +11,14 @@ package com.vaadin.flow.component.dashboard;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,10 +26,15 @@ import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.shared.Registration;
+
+import elemental.json.JsonArray;
+import elemental.json.JsonObject;
 
 /**
  * @author Vaadin Ltd
@@ -48,6 +58,9 @@ public class Dashboard extends Component implements HasWidgets {
      */
     public Dashboard() {
         childDetachHandler = getChildDetachHandler();
+        customizeItemReorderEndEvent();
+        setEditable(true);
+        addItemReorderEndListener(this::onItemReorderEnd);
     }
 
     /**
@@ -275,6 +288,49 @@ public class Dashboard extends Component implements HasWidgets {
         getStyle().set("--vaadin-dashboard-gap", gap);
     }
 
+    /**
+     * Sets the option to make the dashboard editable.
+     *
+     * @param editable
+     *            whether to set the dashboard editable
+     */
+    public void setEditable(boolean editable) {
+        getElement().setProperty("editable", editable);
+    }
+
+    /**
+     * Returns whether the dashboard is editable.
+     *
+     * @return whether to set the dashboard editable
+     */
+    public boolean isEditable() {
+        return getElement().getProperty("editable", false);
+    }
+
+    /**
+     * Adds an item reorder start listener to this dashboard.
+     *
+     * @param listener
+     *            the listener to add, not <code>null</code>
+     * @return a handle that can be used for removing the listener
+     */
+    public Registration addItemReorderStartListener(
+            ComponentEventListener<DashboardItemReorderStartEvent> listener) {
+        return addListener(DashboardItemReorderStartEvent.class, listener);
+    }
+
+    /**
+     * Adds an item reorder end listener to this dashboard.
+     *
+     * @param listener
+     *            the listener to add, not <code>null</code>
+     * @return a handle that can be used for removing the listener
+     */
+    public Registration addItemReorderEndListener(
+            ComponentEventListener<DashboardItemReorderEndEvent> listener) {
+        return addListener(DashboardItemReorderEndEvent.class, listener);
+    }
+
     @Override
     public Stream<Component> getChildren() {
         return childrenComponents.stream();
@@ -320,8 +376,9 @@ public class Dashboard extends Component implements HasWidgets {
                         .map(widget -> getWidgetRepresentation(widget,
                                 itemIndex.getAndIncrement()))
                         .collect(Collectors.joining(","));
-                itemRepresentation = "{ component: $%d, items: [ %s ] }"
-                        .formatted(sectionIndex, sectionWidgetsRepresentation);
+                itemRepresentation = "{ component: $%d, items: [ %s ], nodeid: %d }"
+                        .formatted(sectionIndex, sectionWidgetsRepresentation,
+                                section.getElement().getNode().getId());
             } else {
                 itemRepresentation = getWidgetRepresentation(
                         (DashboardWidget) component,
@@ -337,8 +394,8 @@ public class Dashboard extends Component implements HasWidgets {
 
     private static String getWidgetRepresentation(DashboardWidget widget,
             int itemIndex) {
-        return "{ component: $%d, colspan: %d, rowspan: %d }"
-                .formatted(itemIndex, widget.getColspan(), widget.getRowspan());
+        return "{ component: $%d, colspan: %d, rowspan: %d, nodeid: %d  }"
+                .formatted(itemIndex, widget.getColspan(), widget.getRowspan(), widget.getElement().getNode().getId());
     }
 
     private void doRemoveAll() {
@@ -389,5 +446,152 @@ public class Dashboard extends Component implements HasWidgets {
                 return Dashboard.this.getChildren().toList();
             }
         };
+    }
+
+    private void onItemReorderEnd(
+            DashboardItemReorderEndEvent dashboardItemReorderEndEvent) {
+        JsonArray orderedItemsFromClient = dashboardItemReorderEndEvent
+                .getItems();
+        if (areItemsInSync(orderedItemsFromClient)) {
+            reorderItems(orderedItemsFromClient);
+        } else {
+            LoggerFactory.getLogger(getClass())
+                    .debug("Dashboard items do not match those on the server.");
+        }
+        updateClient();
+    }
+
+    private void reorderItems(JsonArray orderedItemsFromClient) {
+        // Keep references to the root level children before clearing them
+        Map<Integer, Component> nodeIdToComponent = childrenComponents.stream()
+                .collect(Collectors.toMap(
+                        component -> component.getElement().getNode().getId(),
+                        Function.identity()));
+        // Remove all children and add them back using the node IDs from client
+        // items
+        childrenComponents.clear();
+        for (int rootLevelItemIdx = 0; rootLevelItemIdx < orderedItemsFromClient
+                .length(); rootLevelItemIdx++) {
+            JsonObject rootLevelItemFromClient = orderedItemsFromClient
+                    .getObject(rootLevelItemIdx);
+            int rootLevelItemNodeId = (int) rootLevelItemFromClient
+                    .getNumber("nodeid");
+            Component componentMatch = nodeIdToComponent
+                    .get(rootLevelItemNodeId);
+            childrenComponents.add(componentMatch);
+            // Reorder the widgets in sections separately
+            if (componentMatch instanceof DashboardSection sectionMatch) {
+                reorderSectionWidgets(sectionMatch, rootLevelItemFromClient);
+            }
+        }
+    }
+
+    private void reorderSectionWidgets(DashboardSection section,
+            JsonObject rootLevelItem) {
+        // Keep references to the widgets before clearing them
+        Map<Integer, DashboardWidget> nodeIdToWidget = section.getWidgets()
+                .stream()
+                .collect(Collectors.toMap(
+                        widget -> widget.getElement().getNode().getId(),
+                        Function.identity()));
+        // Remove all widgets and add them back using the node IDs from client
+        // items
+        section.removeAll();
+        JsonArray sectionWidgetsFromClient = rootLevelItem.getArray("items");
+        for (int sectionWidgetIdx = 0; sectionWidgetIdx < sectionWidgetsFromClient
+                .length(); sectionWidgetIdx++) {
+            int sectionItemNodeId = (int) sectionWidgetsFromClient
+                    .getObject(sectionWidgetIdx).getNumber("nodeid");
+            section.add(nodeIdToWidget.get(sectionItemNodeId));
+        }
+    }
+
+    private boolean areItemsInSync(JsonArray itemsFromClient) {
+        // Assert root level item count
+        if (itemsFromClient.length() != getChildren().count()) {
+            return false;
+        }
+        Set<Integer> allNodeIds = new HashSet<>();
+        for (int rootLevelItemIdx = 0; rootLevelItemIdx < itemsFromClient
+                .length(); rootLevelItemIdx++) {
+            JsonObject rootLevelItemFromClient = itemsFromClient
+                    .getObject(rootLevelItemIdx);
+            int rootLevelItemNodeId = (int) rootLevelItemFromClient
+                    .getNumber("nodeid");
+            // Assert unique node ID
+            if (allNodeIds.contains(rootLevelItemNodeId)) {
+                return false;
+            }
+            allNodeIds.add(rootLevelItemNodeId);
+            Optional<Component> childMatch = getChildren().filter(child -> child
+                    .getElement().getNode().getId() == rootLevelItemNodeId)
+                    .findAny();
+            // Assert root level item node ID
+            if (childMatch.isEmpty()) {
+                return false;
+            }
+            // Assert section contents
+            if (childMatch.get() instanceof DashboardSection sectionMatch
+                    && !areSectionItemsInSync(sectionMatch,
+                            rootLevelItemFromClient, allNodeIds)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean areSectionItemsInSync(DashboardSection section,
+            JsonObject sectionFromClient, Set<Integer> allNodeIds) {
+        // Assert section has items array
+        if (!sectionFromClient.hasKey("items")) {
+            return false;
+        }
+        JsonArray sectionItemsFromClient = sectionFromClient.getArray("items");
+        // Assert section child item count
+        if (sectionItemsFromClient.length() != section.getWidgets().size()) {
+            return false;
+        }
+        for (int sectionItemIdx = 0; sectionItemIdx < sectionItemsFromClient
+                .length(); sectionItemIdx++) {
+            int sectionItemNodeId = (int) sectionItemsFromClient
+                    .getObject(sectionItemIdx).getNumber("nodeid");
+            // Assert unique node ID
+            if (allNodeIds.contains(sectionItemNodeId)) {
+                return false;
+            }
+            allNodeIds.add(sectionItemNodeId);
+            // Assert section child item node ID
+            if (section.getWidgets().stream().noneMatch(child -> child
+                    .getElement().getNode().getId() == sectionItemNodeId)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void customizeItemReorderEndEvent() {
+        getElement().executeJs(
+                """
+                        this.addEventListener('dashboard-item-reorder-end', (e) => {
+                          const itemsCopy = [];
+                          for (let rootLevelIdx = 0; rootLevelIdx < this.items; rootLevelIdx++) {
+                            const item = this.items[rootLevelIdx];
+                            const itemCopy = { nodeid: item.nodeid };
+                            if (item.items) {
+                              const sectionItemsCopy = [];
+                              const sectionItems = item.items;
+                              for (let sectionItemIdx = 0; sectionItemIdx < sectionItems; sectionItemIdx++) {
+                                const sectionItemCopy = { nodeid: sectionItems[sectionItemIdx].nodeid };
+                                sectionItemsCopy.push(sectionItemCopy);
+                              }
+                              itemCopy.items = sectionItemsCopy;
+                            }
+                            itemsCopy.push(itemCopy);
+                          }
+                          const flowReorderEvent = new CustomEvent('dashboard-item-reorder-end-flow', {
+                            detail: { items: itemsCopy },
+                          });
+                          this.dispatchEvent(flowReorderEvent);
+                        });""");
     }
 }

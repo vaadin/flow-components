@@ -8,39 +8,41 @@
  */
 package com.vaadin.flow.component.dashboard.tests;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.server.VaadinSession;
 
-public class DashboardWidgetTest {
+public class DashboardWidgetTest extends DashboardTestBase {
 
-    private final UI ui = new UI();
-
-    @Before
-    public void setup() {
-        UI.setCurrent(ui);
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        Mockito.when(session.hasLock()).thenReturn(true);
-        ui.getInternals().setSession(session);
+    @Test
+    public void assertDefaultTitle() {
+        DashboardWidget widget = new DashboardWidget();
+        Assert.assertNull(widget.getTitle());
     }
 
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
+    @Test
+    public void setTitle_returnsCorrectTitle() {
+        String valueToSet = "New title";
+        DashboardWidget widget = new DashboardWidget();
+        widget.setTitle(valueToSet);
+        Assert.assertEquals(valueToSet, widget.getTitle());
+    }
+
+    @Test
+    public void setTitleNull_returnsEmptyTitle() {
+        DashboardWidget widget = new DashboardWidget();
+        widget.setTitle("New title");
+        widget.setTitle(null);
+        Assert.assertNull(widget.getTitle());
     }
 
     @Test
     public void addWidgetToLayout_widgetIsAdded() {
         Div layout = new Div();
-        ui.add(layout);
+        getUi().add(layout);
         DashboardWidget widget = new DashboardWidget();
         layout.add(widget);
         fakeClientCommunication();
@@ -50,7 +52,7 @@ public class DashboardWidgetTest {
     @Test
     public void removeWidgetFromLayout_widgetIsRemoved() {
         Div layout = new Div();
-        ui.add(layout);
+        getUi().add(layout);
         DashboardWidget widget = new DashboardWidget();
         layout.add(widget);
         fakeClientCommunication();
@@ -62,7 +64,7 @@ public class DashboardWidgetTest {
     @Test
     public void addWidgetToLayout_removeFromParent_widgetIsRemoved() {
         Div layout = new Div();
-        ui.add(layout);
+        getUi().add(layout);
         DashboardWidget widget = new DashboardWidget();
         layout.add(widget);
         fakeClientCommunication();
@@ -74,12 +76,12 @@ public class DashboardWidgetTest {
     @Test
     public void addWidgetFromLayoutToAnotherLayout_widgetIsMoved() {
         Div parent = new Div();
-        ui.add(parent);
+        getUi().add(parent);
         DashboardWidget widget = new DashboardWidget();
         parent.add(widget);
         fakeClientCommunication();
         Div newParent = new Div();
-        ui.add(newParent);
+        getUi().add(newParent);
         newParent.add(widget);
         fakeClientCommunication();
         Assert.assertTrue(parent.getChildren().noneMatch(widget::equals));
@@ -246,11 +248,5 @@ public class DashboardWidgetTest {
         widget.setContent(content);
         Assert.assertEquals(content, widget.getContent());
         Assert.assertEquals(header, widget.getHeader());
-    }
-
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 }

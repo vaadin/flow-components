@@ -8,42 +8,25 @@
  */
 package com.vaadin.flow.component.dashboard.tests;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardSection;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.server.VaadinSession;
 
-public class DashboardTest {
-    private final UI ui = new UI();
+public class DashboardTest extends DashboardTestBase {
     private Dashboard dashboard;
 
     @Before
+    @Override
     public void setup() {
-        UI.setCurrent(ui);
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        Mockito.when(session.hasLock()).thenReturn(true);
-        ui.getInternals().setSession(session);
+        super.setup();
         dashboard = new Dashboard();
-        ui.add(dashboard);
+        getUi().add(dashboard);
         fakeClientCommunication();
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test
@@ -176,7 +159,7 @@ public class DashboardTest {
     @Test
     public void addWidgetFromLayoutToDashboard_widgetIsMoved() {
         Div parent = new Div();
-        ui.add(parent);
+        getUi().add(parent);
         DashboardWidget widget = new DashboardWidget();
         parent.add(widget);
         fakeClientCommunication();
@@ -192,7 +175,7 @@ public class DashboardTest {
         dashboard.add(widget);
         fakeClientCommunication();
         Div parent = new Div();
-        ui.add(parent);
+        getUi().add(parent);
         parent.add(widget);
         fakeClientCommunication();
         assertChildComponents(dashboard);
@@ -205,7 +188,7 @@ public class DashboardTest {
         dashboard.add(widget);
         fakeClientCommunication();
         Dashboard newDashboard = new Dashboard();
-        ui.add(newDashboard);
+        getUi().add(newDashboard);
         newDashboard.add(widget);
         fakeClientCommunication();
         assertChildComponents(dashboard);
@@ -545,7 +528,7 @@ public class DashboardTest {
     public void addWidgetFromLayoutToSection_widgetIsMoved() {
         DashboardSection section = dashboard.addSection();
         Div parent = new Div();
-        ui.add(parent);
+        getUi().add(parent);
         DashboardWidget widget = new DashboardWidget();
         parent.add(widget);
         fakeClientCommunication();
@@ -563,7 +546,7 @@ public class DashboardTest {
         section.add(widget);
         fakeClientCommunication();
         Div parent = new Div();
-        ui.add(parent);
+        getUi().add(parent);
         parent.add(widget);
         fakeClientCommunication();
         assertSectionWidgets(section);
@@ -795,40 +778,21 @@ public class DashboardTest {
         Assert.assertNull(dashboard.getGap());
     }
 
-    private void fakeClientCommunication() {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
+    @Test
+    public void dashboardIsEditableByDefault() {
+        Assert.assertTrue(dashboard.isEditable());
     }
 
-    private static void assertChildComponents(Dashboard dashboard,
-            Component... expectedChildren) {
-        List<DashboardWidget> expectedWidgets = getExpectedWidgets(
-                expectedChildren);
-        Assert.assertEquals(expectedWidgets, dashboard.getWidgets());
-        Assert.assertEquals(Arrays.asList(expectedChildren),
-                dashboard.getChildren().toList());
+    @Test
+    public void setEditableFalse_valueIsCorrectlyRetrieved() {
+        dashboard.setEditable(false);
+        Assert.assertFalse(dashboard.isEditable());
     }
 
-    private static List<DashboardWidget> getExpectedWidgets(
-            Component... expectedChildren) {
-        List<DashboardWidget> expectedWidgets = new ArrayList<>();
-        for (Component child : expectedChildren) {
-            if (child instanceof DashboardSection section) {
-                expectedWidgets.addAll(section.getWidgets());
-            } else if (child instanceof DashboardWidget widget) {
-                expectedWidgets.add(widget);
-            } else {
-                throw new IllegalArgumentException(
-                        "A dashboard can only contain widgets or sections.");
-            }
-        }
-        return expectedWidgets;
-    }
-
-    private static void assertSectionWidgets(DashboardSection section,
-            DashboardWidget... expectedWidgets) {
-        Assert.assertEquals(Arrays.asList(expectedWidgets),
-                section.getWidgets());
+    @Test
+    public void setEditableTrue_valueIsCorrectlyRetrieved() {
+        dashboard.setEditable(false);
+        dashboard.setEditable(true);
+        Assert.assertTrue(dashboard.isEditable());
     }
 }
