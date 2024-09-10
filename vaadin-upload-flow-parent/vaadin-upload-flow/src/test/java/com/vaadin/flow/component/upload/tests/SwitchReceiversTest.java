@@ -51,4 +51,13 @@ public class SwitchReceiversTest {
         upload.setReceiver(new MultiFileMemoryBuffer());
         Assert.assertEquals(3, upload.getElement().getProperty("maxFiles", 0));
     }
+
+    @Test
+    public void setMaxFiles_setMultiFileReceiver_setAnotherMultiFileReceive_maxFilesArePreserved() {
+        Upload upload = new Upload();
+        upload.setMaxFiles(3);
+        upload.setReceiver(new MultiFileMemoryBuffer());
+        upload.setReceiver(new MultiFileMemoryBuffer());
+        Assert.assertEquals(3, upload.getElement().getProperty("maxFiles", 0));
+    }
 }
