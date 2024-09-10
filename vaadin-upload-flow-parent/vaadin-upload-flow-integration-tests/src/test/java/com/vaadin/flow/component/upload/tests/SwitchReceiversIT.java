@@ -50,5 +50,10 @@ public class SwitchReceiversIT extends AbstractUploadIT {
         Assert.assertEquals(
                 "The maxFiles property should equal 1 when single file receiver is set",
                 1, (int) upload.getPropertyInteger("maxFiles"));
+
+        $("button").id("set-multi-file-receiver-and-max-files").click();
+        Assert.assertEquals(
+                "The maxFiles property should equal 3 when multi file receiver and max files is set",
+                3, (int) upload.getPropertyInteger("maxFiles"));
     }
 }
