@@ -104,4 +104,34 @@ public class DashboardWidgetIT extends AbstractComponentIT {
         Assert.assertFalse(firstWidget.getText().contains("Some content"));
         Assert.assertNull(firstWidget.getContent());
     }
+
+    @Test
+    public void widgetWithInitialHeader_headerIsCorrectlySet() {
+        DashboardWidgetElement firstWidget = dashboardElement.getWidgets()
+                .get(0);
+        Assert.assertNotNull(firstWidget.getHeader());
+        Assert.assertTrue(
+                firstWidget.getHeader().getText().contains("Some header"));
+    }
+
+    @Test
+    public void updateWidgetHeader_headerIsCorrectlyUpdated() {
+        clickElementWithJs("update-header-of-the-first-widget");
+        DashboardWidgetElement firstWidget = dashboardElement.getWidgets()
+                .get(0);
+        Assert.assertNotNull(firstWidget.getHeader());
+        Assert.assertFalse(
+                firstWidget.getHeader().getText().contains("Some header"));
+        Assert.assertTrue(
+                firstWidget.getHeader().getText().contains("Updated header"));
+    }
+
+    @Test
+    public void removeWidgetHeader_headerIsCorrectlyRemoved() {
+        clickElementWithJs("remove-header-of-the-first-widget");
+        DashboardWidgetElement firstWidget = dashboardElement.getWidgets()
+                .get(0);
+        Assert.assertFalse(firstWidget.getText().contains("Some header"));
+        Assert.assertNull(firstWidget.getHeader());
+    }
 }

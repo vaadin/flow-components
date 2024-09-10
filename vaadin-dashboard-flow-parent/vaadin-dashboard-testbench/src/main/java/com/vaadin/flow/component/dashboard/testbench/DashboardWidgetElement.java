@@ -60,6 +60,18 @@ public class DashboardWidgetElement extends TestBenchElement {
         return content == null ? null : (TestBenchElement) content;
     }
 
+    /**
+     * Returns the header of the widget.
+     *
+     * @return the header element set to the widget
+     */
+    public TestBenchElement getHeader() {
+        Object header = executeScript(
+                "return Array.from(arguments[0].children).filter(child => child.slot === 'header')[0]",
+                this);
+        return header == null ? null : (TestBenchElement) header;
+    }
+
     private String getComputedCssValue(String propertyName) {
         return (String) executeScript(
                 "return getComputedStyle(arguments[0]).getPropertyValue(arguments[1]);",

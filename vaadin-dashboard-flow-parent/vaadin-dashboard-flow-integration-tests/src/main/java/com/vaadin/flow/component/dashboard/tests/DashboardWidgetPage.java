@@ -29,6 +29,7 @@ public class DashboardWidgetPage extends Div {
         DashboardWidget widget1 = new DashboardWidget();
         widget1.setTitle("Widget 1");
         widget1.setContent(new Div("Some content"));
+        widget1.setHeader(new Span("Some header"));
         widget1.setId("widget-1");
 
         DashboardWidget widget2 = new DashboardWidget();
@@ -83,7 +84,28 @@ public class DashboardWidgetPage extends Div {
         removeContentOfTheFirstWidget
                 .setId("remove-content-of-the-first-widget");
 
+        NativeButton updateHeaderOfTheFirstWidget = new NativeButton(
+                "Update header of the first widget");
+        updateHeaderOfTheFirstWidget.addClickListener(click -> {
+            List<DashboardWidget> widgets = dashboard.getWidgets();
+            if (!widgets.isEmpty()) {
+                widgets.get(0).setHeader(new Span("Updated header"));
+            }
+        });
+        updateHeaderOfTheFirstWidget.setId("update-header-of-the-first-widget");
+
+        NativeButton removeHeaderOfTheFirstWidget = new NativeButton(
+                "Remove header of the first widget");
+        removeHeaderOfTheFirstWidget.addClickListener(click -> {
+            List<DashboardWidget> widgets = dashboard.getWidgets();
+            if (!widgets.isEmpty()) {
+                widgets.get(0).setHeader(null);
+            }
+        });
+        removeHeaderOfTheFirstWidget.setId("remove-header-of-the-first-widget");
+
         add(updateContentOfTheFirstWidget, removeContentOfTheFirstWidget,
+                updateHeaderOfTheFirstWidget, removeHeaderOfTheFirstWidget,
                 increaseAllColspansBy1, decreaseAllColspansBy1,
                 increaseAllRowspansBy1, decreaseAllRowspansBy1, dashboard);
     }
