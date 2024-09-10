@@ -25,6 +25,8 @@ public class DashboardWidget extends Component {
 
     private int colspan = 1;
 
+    private int rowspan = 1;
+
     /**
      * Returns the title of the widget.
      *
@@ -68,6 +70,33 @@ public class DashboardWidget extends Component {
             return;
         }
         this.colspan = colspan;
+        notifyParentDashboardOrSection();
+    }
+
+    /**
+     * Returns the rowspan of the widget. The default is 1.
+     *
+     * @return the rowspan of the widget
+     */
+    public int getRowspan() {
+        return rowspan;
+    }
+
+    /**
+     * Sets the rowspan of the widget. Cannot be lower than 1.
+     *
+     * @param rowspan
+     *            the rowspan to set
+     */
+    public void setRowspan(int rowspan) {
+        if (rowspan < 1) {
+            throw new IllegalArgumentException(
+                    "Cannot set a rowspan lower than 1.");
+        }
+        if (this.rowspan == rowspan) {
+            return;
+        }
+        this.rowspan = rowspan;
         notifyParentDashboardOrSection();
     }
 
