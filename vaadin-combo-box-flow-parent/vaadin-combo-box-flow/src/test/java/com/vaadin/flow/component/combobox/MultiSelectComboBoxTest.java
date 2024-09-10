@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -32,6 +33,8 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.data.provider.IdentifierProvider;
+import com.vaadin.flow.data.provider.KeyMapper;
 
 import elemental.json.JsonArray;
 
@@ -208,6 +211,36 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         comboBox.setValue(Set.of("foo", "bar"));
 
         Assert.assertEquals(Set.of("foo", "bar"), comboBox.getValue());
+    }
+
+    @Test
+    public void setLazyItems_changeIdentifierProvider()
+            throws NoSuchFieldException, IllegalAccessException {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+        comboBox.setItems(query -> Stream.of("foo", "bar", "baz"));
+
+        IdentifierProvider<String> ip = s -> s + "foo";
+        comboBox.getLazyDataView().setIdentifierProvider(ip);
+
+        // Check idProvider matches in SelectionModel
+        Field selectionModel = MultiSelectComboBox.class
+                .getDeclaredField("selectionModel");
+        selectionModel.setAccessible(true);
+        MultiSelectComboBoxSelectionModel<String> cbsm = (MultiSelectComboBoxSelectionModel<String>) selectionModel
+                .get(comboBox);
+        Field identityProviderField = MultiSelectComboBoxSelectionModel.class
+                .getDeclaredField("identityProvider");
+        identityProviderField.setAccessible(true);
+        IdentifierProvider<String> ipInSelectionModel = (IdentifierProvider<String>) identityProviderField
+                .get(cbsm);
+        Assert.assertEquals(ipInSelectionModel, ip);
+
+        // Check idProvider matches in DataCommunicator's KeyMapper
+        Field identifierGetter = KeyMapper.class
+                .getDeclaredField("identifierGetter");
+        identifierGetter.setAccessible(true);
+        Assert.assertEquals(identifierGetter
+                .get(comboBox.getDataCommunicator().getKeyMapper()), ip);
     }
 
     @Test
