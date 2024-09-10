@@ -38,6 +38,17 @@ public class DashboardWidgetElement extends TestBenchElement {
     }
 
     /**
+     * Returns the rowspan of the widget.
+     *
+     * @return the {@code --vaadin-dashboard-item-rowspan} computed style from
+     *         the web component
+     */
+    public Integer getRowspan() {
+        var rowspanStr = getComputedCssValue("--vaadin-dashboard-item-rowspan");
+        return rowspanStr.isEmpty() ? null : Integer.valueOf(rowspanStr);
+    }
+
+    /**
      * Returns the content of the widget.
      *
      * @return the content element set to the widget
