@@ -127,8 +127,11 @@ public class MultiSelectComboBox<TItem>
         });
         // Pass identifier provider to selection model when it is changed
         // through a data view
-        ComponentEventListener<IdentifierProviderChangeEvent<TItem, ?>> listener = e -> selectionModel
-                .setIdentityProvider(e.getIdentifierProvider());
+        ComponentEventListener<IdentifierProviderChangeEvent<TItem, ?>> listener = e -> {
+            selectionModel.setIdentityProvider(e.getIdentifierProvider());
+            getDataCommunicator().getKeyMapper()
+                    .setIdentifierGetter(e.getIdentifierProvider());
+        };
         ComponentUtil.addListener(this, IdentifierProviderChangeEvent.class,
                 (ComponentEventListener) listener);
         // Initialize page size and data provider
