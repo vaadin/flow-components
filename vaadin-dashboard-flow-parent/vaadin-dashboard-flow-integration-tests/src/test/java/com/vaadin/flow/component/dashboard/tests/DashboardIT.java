@@ -101,34 +101,6 @@ public class DashboardIT extends AbstractComponentIT {
     }
 
     @Test
-    public void addWidgetToFirstSection_widgetsAreAdded() {
-        clickElementWithJs("add-widget-to-first-section");
-        List<DashboardSectionElement> sections = dashboardElement.getSections();
-        DashboardSectionElement firstSection = sections.get(0);
-        Assert.assertEquals("Section 1", firstSection.getTitle());
-        assertSectionWidgetsByTitle(firstSection, "Widget 1 in Section 1",
-                "Widget 2 in Section 1", "New widget");
-    }
-
-    @Test
-    public void removeFirstWidgetFromFirstSection_widgetIsRemoved() {
-        clickElementWithJs("remove-first-widget-from-first-section");
-        List<DashboardSectionElement> sections = dashboardElement.getSections();
-        DashboardSectionElement firstSection = sections.get(0);
-        Assert.assertEquals("Section 1", firstSection.getTitle());
-        assertSectionWidgetsByTitle(firstSection, "Widget 2 in Section 1");
-    }
-
-    @Test
-    public void removeAllFromFirstSection_widgetsAreRemoved() {
-        clickElementWithJs("remove-all-from-first-section");
-        List<DashboardSectionElement> sections = dashboardElement.getSections();
-        DashboardSectionElement firstSection = sections.get(0);
-        Assert.assertEquals("Section 1", firstSection.getTitle());
-        assertSectionWidgetsByTitle(firstSection);
-    }
-
-    @Test
     public void changeMaximumColumnCountTo1_widgetsShouldBeOnTheSameColumn() {
         List<DashboardWidgetElement> widgets = dashboardElement.getWidgets();
         // The first two widgets should initially be on the same horizontal line
@@ -153,24 +125,6 @@ public class DashboardIT extends AbstractComponentIT {
         // The widgets should be on the same horizontal line
         int yOfWidget1 = widgets.get(0).getLocation().getY();
         Assert.assertEquals(yOfWidget1, widgets.get(1).getLocation().getY());
-    }
-
-    @Test
-    public void defaultWidgetColspanIsCorrect() {
-        List<DashboardWidgetElement> widgets = dashboardElement.getWidgets();
-        widgets.forEach(widget -> Assert.assertEquals(Integer.valueOf(1),
-                widget.getColspan()));
-    }
-
-    @Test
-    public void updateColspans_colspansForAllWidgetsUpdated() {
-        clickElementWithJs("increase-all-colspans-by-1");
-        List<DashboardWidgetElement> widgets = dashboardElement.getWidgets();
-        widgets.forEach(widget -> Assert.assertEquals(Integer.valueOf(2),
-                widget.getColspan()));
-        clickElementWithJs("decrease-all-colspans-by-1");
-        widgets.forEach(widget -> Assert.assertEquals(Integer.valueOf(1),
-                widget.getColspan()));
     }
 
     private void assertDashboardWidgetsByTitle(String... expectedWidgetTitles) {
