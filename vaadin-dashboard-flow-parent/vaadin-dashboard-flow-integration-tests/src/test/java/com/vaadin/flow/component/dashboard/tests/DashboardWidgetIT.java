@@ -58,6 +58,24 @@ public class DashboardWidgetIT extends AbstractComponentIT {
     }
 
     @Test
+    public void defaultWidgetRowspanIsCorrect() {
+        List<DashboardWidgetElement> widgets = dashboardElement.getWidgets();
+        widgets.forEach(widget -> Assert.assertEquals(Integer.valueOf(1),
+                widget.getRowspan()));
+    }
+
+    @Test
+    public void updateRowspans_rowspansForAllWidgetsUpdated() {
+        clickElementWithJs("increase-all-rowspans-by-1");
+        List<DashboardWidgetElement> widgets = dashboardElement.getWidgets();
+        widgets.forEach(widget -> Assert.assertEquals(Integer.valueOf(2),
+                widget.getRowspan()));
+        clickElementWithJs("decrease-all-rowspans-by-1");
+        widgets.forEach(widget -> Assert.assertEquals(Integer.valueOf(1),
+                widget.getRowspan()));
+    }
+
+    @Test
     public void widgetWithInitialContent_contentIsCorrectlySet() {
         DashboardWidgetElement firstWidget = dashboardElement.getWidgets()
                 .get(0);

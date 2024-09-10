@@ -49,6 +49,18 @@ public class DashboardWidgetPage extends Div {
                 .forEach(widget -> widget.setColspan(widget.getColspan() - 1)));
         decreaseAllColspansBy1.setId("decrease-all-colspans-by-1");
 
+        NativeButton increaseAllRowspansBy1 = new NativeButton(
+                "Increase all rowspans by 1");
+        increaseAllRowspansBy1.addClickListener(click -> dashboard.getWidgets()
+                .forEach(widget -> widget.setRowspan(widget.getRowspan() + 1)));
+        increaseAllRowspansBy1.setId("increase-all-rowspans-by-1");
+
+        NativeButton decreaseAllRowspansBy1 = new NativeButton(
+                "Decrease all rowspans by 1");
+        decreaseAllRowspansBy1.addClickListener(click -> dashboard.getWidgets()
+                .forEach(widget -> widget.setRowspan(widget.getRowspan() - 1)));
+        decreaseAllRowspansBy1.setId("decrease-all-rowspans-by-1");
+
         NativeButton updateContentOfTheFirstWidget = new NativeButton(
                 "Update content of the first widget");
         updateContentOfTheFirstWidget.addClickListener(click -> {
@@ -72,6 +84,7 @@ public class DashboardWidgetPage extends Div {
                 .setId("remove-content-of-the-first-widget");
 
         add(updateContentOfTheFirstWidget, removeContentOfTheFirstWidget,
-                increaseAllColspansBy1, decreaseAllColspansBy1, dashboard);
+                increaseAllColspansBy1, decreaseAllColspansBy1,
+                increaseAllRowspansBy1, decreaseAllRowspansBy1, dashboard);
     }
 }

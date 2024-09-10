@@ -108,6 +108,27 @@ public class DashboardWidgetTest {
     }
 
     @Test
+    public void assertDefaultRowspan() {
+        DashboardWidget widget = new DashboardWidget();
+        Assert.assertEquals(1, widget.getRowspan());
+    }
+
+    @Test
+    public void setValidRowspan_returnsCorrectRowspan() {
+        int valueToSet = 2;
+        DashboardWidget widget = new DashboardWidget();
+        widget.setRowspan(valueToSet);
+        Assert.assertEquals(valueToSet, widget.getRowspan());
+    }
+
+    @Test
+    public void setInvalidRowspan_throwsIllegalArgumentException() {
+        DashboardWidget widget = new DashboardWidget();
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> widget.setRowspan(0));
+    }
+
+    @Test
     public void defaultContentIsNull() {
         DashboardWidget widget = new DashboardWidget();
         Assert.assertNull(widget.getContent());

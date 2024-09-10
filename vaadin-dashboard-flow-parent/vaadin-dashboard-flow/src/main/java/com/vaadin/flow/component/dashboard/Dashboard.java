@@ -337,8 +337,8 @@ public class Dashboard extends Component implements HasWidgets {
 
     private static String getWidgetRepresentation(DashboardWidget widget,
             int itemIndex) {
-        return "{ component: $%d, colspan: %d }".formatted(itemIndex,
-                widget.getColspan());
+        return "{ component: $%d, colspan: %d, rowspan: %d }"
+                .formatted(itemIndex, widget.getColspan(), widget.getRowspan());
     }
 
     private void doRemoveAll() {
