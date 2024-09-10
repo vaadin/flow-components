@@ -53,7 +53,7 @@ public class SwitchReceiversTest {
     }
 
     @Test
-    public void setMaxFiles_setMultiFileReceiver_setAnotherMultiFileReceive_maxFilesArePreserved() {
+    public void setMaxFiles_setMultiFileReceiver_setAnotherMultiFileReceiver_maxFilesArePreserved() {
         Upload upload = new Upload();
         upload.setMaxFiles(3);
         upload.setReceiver(new MultiFileMemoryBuffer());
