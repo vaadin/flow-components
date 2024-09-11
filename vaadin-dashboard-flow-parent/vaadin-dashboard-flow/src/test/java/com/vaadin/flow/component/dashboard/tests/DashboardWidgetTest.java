@@ -36,7 +36,7 @@ public class DashboardWidgetTest extends DashboardTestBase {
         DashboardWidget widget = new DashboardWidget();
         widget.setTitle("New title");
         widget.setTitle(null);
-        Assert.assertNull(widget.getTitle());
+        Assert.assertEquals("", widget.getTitle());
     }
 
     @Test
