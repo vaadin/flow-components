@@ -21,7 +21,7 @@ import com.vaadin.flow.router.Route;
 /**
  * @author Vaadin Ltd
  */
-@Route("vaadin-dashboard-section")
+@Route("vaadin-dashboard/section")
 public class DashboardSectionPage extends Div {
 
     public DashboardSectionPage() {
