@@ -574,23 +574,14 @@ public class Dashboard extends Component implements HasWidgets {
         getElement().executeJs(
                 """
                         this.addEventListener('dashboard-item-reorder-end', (e) => {
-                          const itemsCopy = [];
-                          for (let rootLevelIdx = 0; rootLevelIdx < this.items; rootLevelIdx++) {
-                            const item = this.items[rootLevelIdx];
-                            const itemCopy = { nodeid: item.nodeid };
-                            if (item.items) {
-                              const sectionItemsCopy = [];
-                              const sectionItems = item.items;
-                              for (let sectionItemIdx = 0; sectionItemIdx < sectionItems; sectionItemIdx++) {
-                                const sectionItemCopy = { nodeid: sectionItems[sectionItemIdx].nodeid };
-                                sectionItemsCopy.push(sectionItemCopy);
-                              }
-                              itemCopy.items = sectionItemsCopy;
-                            }
-                            itemsCopy.push(itemCopy);
+                          function mapItems(items) {
+                            return items.map(({nodeid, items}) => ({
+                              nodeid,
+                              ...(items && { items: mapItems(items) })
+                            }));
                           }
                           const flowReorderEvent = new CustomEvent('dashboard-item-reorder-end-flow', {
-                            detail: { items: itemsCopy },
+                            detail: { items: mapItems(this.items) }
                           });
                           this.dispatchEvent(flowReorderEvent);
                         });""");
