@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.dashboard;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -22,28 +21,31 @@ import com.vaadin.flow.shared.Registration;
 public abstract class DashboardChildDetachHandler
         implements ElementDetachListener {
 
+    private final Component component;
+
     private final Map<Element, Registration> childDetachListenerMap = new HashMap<>();
+
+    DashboardChildDetachHandler(Component component) {
+        this.component = component;
+    }
 
     @Override
     public void onDetach(ElementDetachEvent e) {
         var detachedElement = e.getSource();
-        getDirectChildren().stream()
-                .filter(childComponent -> Objects.equals(detachedElement,
-                        childComponent.getElement()))
-                .findAny().ifPresent(detachedChild -> {
-                    // The child was removed from the component
-
-                    // Remove the registration for the child detach listener
-                    childDetachListenerMap.get(detachedChild.getElement())
-                            .remove();
-                    childDetachListenerMap.remove(detachedChild.getElement());
-
-                    removeChild(detachedChild);
-                });
+        var childDetachedFromContainer = component.getElement().getChildren()
+                .noneMatch(containerChild -> Objects.equals(detachedElement,
+                        containerChild));
+        if (childDetachedFromContainer) {
+            // The child was removed from the component
+            // Remove the registration for the child detach listener
+            childDetachListenerMap.get(detachedElement).remove();
+            childDetachListenerMap.remove(detachedElement);
+            detachedElement.getComponent().ifPresent(this::removeChild);
+        }
     }
 
     void refreshListeners() {
-        getDirectChildren().forEach(child -> {
+        component.getChildren().forEach(child -> {
             Element childElement = child.getElement();
             if (!childDetachListenerMap.containsKey(childElement)) {
                 childDetachListenerMap.put(childElement,
@@ -53,6 +55,4 @@ public abstract class DashboardChildDetachHandler
     }
 
     abstract void removeChild(Component child);
-
-    abstract Collection<Component> getDirectChildren();
 }

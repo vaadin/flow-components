@@ -24,7 +24,7 @@ import com.vaadin.tests.AbstractComponentIT;
 /**
  * @author Vaadin Ltd
  */
-@TestPath("vaadin-dashboard-section")
+@TestPath("vaadin-dashboard/section")
 public class DashboardSectionIT extends AbstractComponentIT {
 
     private DashboardElement dashboardElement;
