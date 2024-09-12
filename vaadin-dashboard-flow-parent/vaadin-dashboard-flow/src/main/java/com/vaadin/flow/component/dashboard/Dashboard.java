@@ -10,12 +10,9 @@ package com.vaadin.flow.component.dashboard;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -447,12 +444,7 @@ public class Dashboard extends Component implements HasWidgets {
             DashboardItemReorderEndEvent dashboardItemReorderEndEvent) {
         JsonArray orderedItemsFromClient = dashboardItemReorderEndEvent
                 .getItems();
-        if (areItemsInSync(orderedItemsFromClient)) {
-            reorderItems(orderedItemsFromClient);
-        } else {
-            LoggerFactory.getLogger(getClass())
-                    .debug("Dashboard items do not match those on the server.");
-        }
+        reorderItems(orderedItemsFromClient);
         updateClient();
     }
 
@@ -499,69 +491,6 @@ public class Dashboard extends Component implements HasWidgets {
                     .getObject(sectionWidgetIdx).getNumber("nodeid");
             section.add(nodeIdToWidget.get(sectionItemNodeId));
         }
-    }
-
-    private boolean areItemsInSync(JsonArray itemsFromClient) {
-        // Assert root level item count
-        if (itemsFromClient.length() != getChildren().count()) {
-            return false;
-        }
-        Set<Integer> allNodeIds = new HashSet<>();
-        for (int rootLevelItemIdx = 0; rootLevelItemIdx < itemsFromClient
-                .length(); rootLevelItemIdx++) {
-            JsonObject rootLevelItemFromClient = itemsFromClient
-                    .getObject(rootLevelItemIdx);
-            int rootLevelItemNodeId = (int) rootLevelItemFromClient
-                    .getNumber("nodeid");
-            // Assert unique node ID
-            if (allNodeIds.contains(rootLevelItemNodeId)) {
-                return false;
-            }
-            allNodeIds.add(rootLevelItemNodeId);
-            Optional<Component> childMatch = getChildren().filter(child -> child
-                    .getElement().getNode().getId() == rootLevelItemNodeId)
-                    .findAny();
-            // Assert root level item node ID
-            if (childMatch.isEmpty()) {
-                return false;
-            }
-            // Assert section contents
-            if (childMatch.get() instanceof DashboardSection sectionMatch
-                    && !areSectionItemsInSync(sectionMatch,
-                            rootLevelItemFromClient, allNodeIds)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private boolean areSectionItemsInSync(DashboardSection section,
-            JsonObject sectionFromClient, Set<Integer> allNodeIds) {
-        // Assert section has items array
-        if (!sectionFromClient.hasKey("items")) {
-            return false;
-        }
-        JsonArray sectionItemsFromClient = sectionFromClient.getArray("items");
-        // Assert section child item count
-        if (sectionItemsFromClient.length() != section.getWidgets().size()) {
-            return false;
-        }
-        for (int sectionItemIdx = 0; sectionItemIdx < sectionItemsFromClient
-                .length(); sectionItemIdx++) {
-            int sectionItemNodeId = (int) sectionItemsFromClient
-                    .getObject(sectionItemIdx).getNumber("nodeid");
-            // Assert unique node ID
-            if (allNodeIds.contains(sectionItemNodeId)) {
-                return false;
-            }
-            allNodeIds.add(sectionItemNodeId);
-            // Assert section child item node ID
-            if (section.getWidgets().stream().noneMatch(child -> child
-                    .getElement().getNode().getId() == sectionItemNodeId)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private void customizeItemReorderEndEvent() {

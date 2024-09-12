@@ -59,67 +59,6 @@ public class DashboardDragDropTest extends DashboardTestBase {
         assertSectionWidgetReorder(2, 0, 1);
     }
 
-    @Test
-    public void invalidNumberOfRootLevelItemsInEvent_itemsAreUnchanged() {
-        JsonObject newItem = Json.createObject();
-        newItem.put("nodeid", 50);
-        itemsArray.set(itemsArray.length(), newItem);
-        assertInvalidItemsAreDisregarded();
-    }
-
-    @Test
-    public void invalidNumberOfWidgetsInSectionInEvent_itemsAreUnchanged() {
-        JsonObject sectionItem = itemsArray.get(2);
-        JsonArray sectionItems = sectionItem.getArray("items");
-        JsonObject newItem = Json.createObject();
-        sectionItems.set(sectionItems.length(), newItem);
-        assertInvalidItemsAreDisregarded();
-    }
-
-    @Test
-    public void invalidRootLevelItemNodeIdInEvent_itemsAreUnchanged() {
-        JsonObject item = itemsArray.get(0);
-        item.put("nodeid", -2);
-        assertInvalidItemsAreDisregarded();
-    }
-
-    @Test
-    public void duplicateRootLevelItemNodeIdInEvent_itemsAreUnchanged() {
-        JsonObject item1 = itemsArray.get(0);
-        JsonObject item2 = itemsArray.get(1);
-        item2.put("nodeid", item1.getNumber("nodeid"));
-        assertInvalidItemsAreDisregarded();
-    }
-
-    @Test
-    public void invalidWidgetInSectionNodeIdInEvent_itemsAreUnchanged() {
-        JsonObject sectionItem = itemsArray.get(2);
-        JsonArray sectionItems = sectionItem.getArray("items");
-        JsonObject item = sectionItems.get(0);
-        item.put("nodeid", -2);
-        assertInvalidItemsAreDisregarded();
-    }
-
-    @Test
-    public void duplicateWidgetInSectionNodeIdInEvent_itemsAreUnchanged() {
-        JsonObject sectionItem = itemsArray.get(2);
-        JsonArray sectionItems = sectionItem.getArray("items");
-        JsonObject item1 = sectionItems.get(0);
-        JsonObject item2 = sectionItems.get(1);
-        item2.put("nodeid", item1.getNumber("nodeid"));
-        assertInvalidItemsAreDisregarded();
-    }
-
-    @Test
-    public void duplicateNodeIdForRootLevelItemAndWidgetInSectionInEvent_itemsAreUnchanged() {
-        JsonObject rootLevelItem = itemsArray.get(0);
-        JsonObject sectionItem = itemsArray.get(2);
-        JsonArray sectionItems = sectionItem.getArray("items");
-        JsonObject itemInSection = sectionItems.get(0);
-        itemInSection.put("nodeid", rootLevelItem.getNumber("nodeid"));
-        assertInvalidItemsAreDisregarded();
-    }
-
     private void fireItemReorderEndEvent() {
         ComponentUtil.fireEvent(dashboard,
                 new DashboardItemReorderEndEvent(dashboard, false, itemsArray));
@@ -188,13 +127,6 @@ public class DashboardDragDropTest extends DashboardTestBase {
                 initialIndex, finalIndex);
         fireItemReorderEndEvent();
         Assert.assertEquals(expectedRootLevelNodeIds, getRootLevelNodeIds());
-    }
-
-    private void assertInvalidItemsAreDisregarded() {
-        reorderRootLevelItem(0, 1);
-        List<Integer> initialRootLevelNodeIds = getRootLevelNodeIds();
-        fireItemReorderEndEvent();
-        Assert.assertEquals(initialRootLevelNodeIds, getRootLevelNodeIds());
     }
 
     private static JsonArray reorderItemInJsonArray(int initialIndex,
