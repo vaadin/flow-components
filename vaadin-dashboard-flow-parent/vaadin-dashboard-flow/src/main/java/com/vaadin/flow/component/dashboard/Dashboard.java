@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.dashboard;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -58,7 +57,6 @@ public class Dashboard extends Component implements HasWidgets {
      */
     public Dashboard() {
         childDetachHandler = getChildDetachHandler();
-        customizeItemReorderEndEvent();
         setEditable(true);
         addItemReorderEndListener(this::onItemReorderEnd);
     }
@@ -341,6 +339,7 @@ public class Dashboard extends Component implements HasWidgets {
         super.onAttach(attachEvent);
         getElement().executeJs(
                 "Vaadin.FlowComponentHost.patchVirtualContainer(this);");
+        customizeItemReorderEndEvent();
         doUpdateClient();
     }
 
@@ -435,16 +434,11 @@ public class Dashboard extends Component implements HasWidgets {
     }
 
     private DashboardChildDetachHandler getChildDetachHandler() {
-        return new DashboardChildDetachHandler() {
+        return new DashboardChildDetachHandler(this) {
             @Override
             void removeChild(Component child) {
                 childrenComponents.remove(child);
                 updateClient();
-            }
-
-            @Override
-            Collection<Component> getDirectChildren() {
-                return Dashboard.this.getChildren().toList();
             }
         };
     }

@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.dashboard;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -17,17 +16,27 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
+import com.vaadin.flow.internal.NullOwner;
 import com.vaadin.flow.shared.Registration;
 
 public abstract class DashboardChildDetachHandler
         implements ElementDetachListener {
 
+    private final Component component;
+
     private final Map<Element, Registration> childDetachListenerMap = new HashMap<>();
+
+    DashboardChildDetachHandler(Component component) {
+        this.component = component;
+    }
 
     @Override
     public void onDetach(ElementDetachEvent e) {
+        if (isComponentDetaching()) {
+            return;
+        }
         var detachedElement = e.getSource();
-        getDirectChildren().stream()
+        component.getChildren()
                 .filter(childComponent -> Objects.equals(detachedElement,
                         childComponent.getElement()))
                 .findAny().ifPresent(detachedChild -> {
@@ -42,8 +51,16 @@ public abstract class DashboardChildDetachHandler
                 });
     }
 
+    private boolean isComponentDetaching() {
+        return component.isAttached()
+                && !NullOwner.get()
+                        .equals(component.getElement().getNode().getOwner())
+                && !component.getElement().getNode().getOwner()
+                        .hasNode(component.getElement().getNode());
+    }
+
     void refreshListeners() {
-        getDirectChildren().forEach(child -> {
+        component.getChildren().forEach(child -> {
             Element childElement = child.getElement();
             if (!childDetachListenerMap.containsKey(childElement)) {
                 childDetachListenerMap.put(childElement,
@@ -53,6 +70,4 @@ public abstract class DashboardChildDetachHandler
     }
 
     abstract void removeChild(Component child);
-
-    abstract Collection<Component> getDirectChildren();
 }

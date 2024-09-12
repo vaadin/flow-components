@@ -795,4 +795,24 @@ public class DashboardTest extends DashboardTestBase {
         dashboard.setEditable(true);
         Assert.assertTrue(dashboard.isEditable());
     }
+
+    @Test
+    public void addWidget_detachDashboard_widgetIsRetained() {
+        DashboardWidget widget = new DashboardWidget();
+        dashboard.add(widget);
+        fakeClientCommunication();
+        getUi().remove(dashboard);
+        fakeClientCommunication();
+        assertChildComponents(dashboard, widget);
+    }
+
+    @Test
+    public void detachDashboard_addWidget_reattachDashboard_widgetIsAdded() {
+        getUi().remove(dashboard);
+        fakeClientCommunication();
+        DashboardWidget widget = new DashboardWidget();
+        dashboard.add(widget);
+        fakeClientCommunication();
+        assertChildComponents(dashboard, widget);
+    }
 }

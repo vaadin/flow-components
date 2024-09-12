@@ -62,6 +62,14 @@ public class DashboardDragDropIT extends AbstractComponentIT {
                 firstSection.getWidgets().get(0).getTitle());
     }
 
+    @Test
+    public void detachReattach_reorderWidgetOnClientSide_itemsAreReorderedCorrectly() {
+        clickElementWithJs("toggle-attached");
+        clickElementWithJs("toggle-attached");
+        dashboardElement = $(DashboardElement.class).waitForFirst();
+        reorderWidgetOnClientSide_itemsAreReorderedCorrectly();
+    }
+
     private void reorderWidgetInSection(int sectionIndex, int initialIndex,
             int targetIndex) {
         executeScript(

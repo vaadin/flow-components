@@ -12,6 +12,7 @@ import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardSection;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -50,6 +51,15 @@ public class DashboardDragDropPage extends Div {
 
         dashboard.addSection(section2);
 
-        add(dashboard);
+        NativeButton toggleAttached = new NativeButton("Toggle attached", e -> {
+            if (dashboard.getParent().isPresent()) {
+                dashboard.removeFromParent();
+            } else {
+                add(dashboard);
+            }
+        });
+        toggleAttached.setId("toggle-attached");
+
+        add(toggleAttached, dashboard);
     }
 }
