@@ -20,7 +20,7 @@ import com.vaadin.flow.router.Route;
 /**
  * @author Vaadin Ltd
  */
-@Route("vaadin-dashboard-widget")
+@Route("vaadin-dashboard/widget")
 public class DashboardWidgetPage extends Div {
 
     public DashboardWidgetPage() {

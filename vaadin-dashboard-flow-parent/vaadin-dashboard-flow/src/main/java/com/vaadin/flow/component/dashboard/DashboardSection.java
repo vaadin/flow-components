@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.dashboard;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -177,16 +176,11 @@ public class DashboardSection extends Component implements HasWidgets {
     }
 
     private DashboardChildDetachHandler getChildDetachHandler() {
-        return new DashboardChildDetachHandler() {
+        return new DashboardChildDetachHandler(this) {
             @Override
             void removeChild(Component child) {
                 widgets.remove(child);
                 updateClient();
-            }
-
-            @Override
-            Collection<Component> getDirectChildren() {
-                return DashboardSection.this.getChildren().toList();
             }
         };
     }
