@@ -11,11 +11,11 @@ package com.vaadin.flow.component.dashboard.tests;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.dashboard.testbench.DashboardElement;
-import com.vaadin.flow.component.dashboard.testbench.DashboardSectionElement;
-import com.vaadin.flow.component.dashboard.testbench.DashboardWidgetElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 /**
@@ -34,32 +34,31 @@ public class DashboardDragDropIT extends AbstractComponentIT {
 
     @Test
     public void reorderWidgetOnClientSide_itemsAreReorderedCorrectly() {
-        DashboardWidgetElement widgetToReorder = dashboardElement.getWidgets()
-                .get(0);
-        reorderRootLevelItem(1, 0);
-        Assert.assertEquals(widgetToReorder.getTitle(),
+        var draggedWidget = dashboardElement.getWidgets().get(0);
+        var targetWidget = dashboardElement.getWidgets().get(1);
+        dragDropElement(draggedWidget, targetWidget);
+        Assert.assertEquals(draggedWidget.getTitle(),
                 dashboardElement.getWidgets().get(1).getTitle());
     }
 
     @Test
     public void reorderSectionOnClientSide_itemsAreReorderedCorrectly() {
-        DashboardSectionElement sectionToReorder = dashboardElement
-                .getSections().get(0);
-        reorderRootLevelItem(2, 3);
-        Assert.assertEquals(sectionToReorder.getTitle(),
-                dashboardElement.getSections().get(1).getTitle());
+        var draggedSection = dashboardElement.getSections().get(1);
+        var targetWidget = dashboardElement.getWidgets().get(0);
+        dragDropElement(draggedSection, targetWidget);
+        Assert.assertEquals(draggedSection.getTitle(),
+                dashboardElement.getSections().get(0).getTitle());
     }
 
     @Test
     public void reorderWidgetInSectionOnClientSide_itemsAreReorderedCorrectly() {
-        DashboardSectionElement firstSection = dashboardElement.getSections()
-                .get(0);
-        DashboardWidgetElement widgetToReorder = firstSection.getWidgets()
-                .get(1);
-        reorderWidgetInSection(2, 0, 1);
+        var firstSection = dashboardElement.getSections().get(0);
+        var draggedWidget = firstSection.getWidgets().get(0);
+        var targetWidget = firstSection.getWidgets().get(1);
+        dragDropElement(draggedWidget, targetWidget);
         firstSection = dashboardElement.getSections().get(0);
-        Assert.assertEquals(widgetToReorder.getTitle(),
-                firstSection.getWidgets().get(0).getTitle());
+        Assert.assertEquals(draggedWidget.getTitle(),
+                firstSection.getWidgets().get(1).getTitle());
     }
 
     @Test
@@ -70,25 +69,43 @@ public class DashboardDragDropIT extends AbstractComponentIT {
         reorderWidgetOnClientSide_itemsAreReorderedCorrectly();
     }
 
-    private void reorderWidgetInSection(int sectionIndex, int initialIndex,
-            int targetIndex) {
-        executeScript(
-                """
-                        const sectionIndex = %d;
-                        const reorderedItem = arguments[0].items[sectionIndex].items.splice(%d, 1)[0];
-                        arguments[0].items[sectionIndex].items.splice(%d, 0, reorderedItem);
-                        arguments[0].dispatchEvent(new CustomEvent('dashboard-item-reorder-end'));"""
-                        .formatted(sectionIndex, initialIndex, targetIndex),
-                dashboardElement);
+    @Test
+    public void setDashboardNotEditable_widgetCannotBeDragged() {
+        var widget = dashboardElement.getWidgets().get(0);
+        Assert.assertTrue(isHeaderActionsVisible(widget));
+        clickElementWithJs("toggle-editable");
+        Assert.assertFalse(isHeaderActionsVisible(widget));
     }
 
-    private void reorderRootLevelItem(int initialIndex, int targetIndex) {
-        executeScript(
-                """
-                        const reorderedItem = arguments[0].items.splice(%d, 1)[0];
-                        arguments[0].items.splice(%d, 0, reorderedItem);
-                        arguments[0].dispatchEvent(new CustomEvent('dashboard-item-reorder-end'));"""
-                        .formatted(initialIndex, targetIndex),
-                dashboardElement);
+    @Test
+    public void setDashboardEditable_widgetCanBeDragged() {
+        clickElementWithJs("toggle-editable");
+        clickElementWithJs("toggle-editable");
+        Assert.assertTrue(
+                isHeaderActionsVisible(dashboardElement.getWidgets().get(0)));
+    }
+
+    private void dragDropElement(TestBenchElement draggedElement,
+            TestBenchElement targetElement) {
+        var dragHandle = getDragHandle(draggedElement);
+
+        var yOffset = draggedElement.getLocation().getY() < targetElement
+                .getLocation().getY() ? 10 : -10;
+        var xOffset = draggedElement.getLocation().getX() < targetElement
+                .getLocation().getX() ? 10 : -10;
+
+        new Actions(driver).clickAndHold(dragHandle)
+                .moveToElement(targetElement, xOffset, yOffset)
+                .release(targetElement).build().perform();
+    }
+
+    private static boolean isHeaderActionsVisible(TestBenchElement element) {
+        TestBenchElement headerActions = element.$("*").withId("header-actions")
+                .first();
+        return !"none".equals(headerActions.getCssValue("display"));
+    }
+
+    private static TestBenchElement getDragHandle(TestBenchElement element) {
+        return element.$("*").withClassName("drag-handle").first();
     }
 }

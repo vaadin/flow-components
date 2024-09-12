@@ -24,6 +24,8 @@ public class DashboardDragDropPage extends Div {
     public DashboardDragDropPage() {
         Dashboard dashboard = new Dashboard();
         dashboard.setEditable(true);
+        dashboard.setMinimumRowHeight("100px");
+        dashboard.setMaximumColumnWidth("400px");
 
         DashboardWidget widget1 = new DashboardWidget();
         widget1.setTitle("Widget 1");
@@ -61,6 +63,10 @@ public class DashboardDragDropPage extends Div {
         });
         toggleAttached.setId("toggle-attached");
 
-        add(toggleAttached, dashboard);
+        NativeButton toggleEditable = new NativeButton("Toggle editable",
+                e -> dashboard.setEditable(!dashboard.isEditable()));
+        toggleEditable.setId("toggle-editable");
+
+        add(toggleAttached, toggleEditable, dashboard);
     }
 }
