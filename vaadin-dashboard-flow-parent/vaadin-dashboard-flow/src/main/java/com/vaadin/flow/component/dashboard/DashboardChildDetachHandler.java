@@ -16,7 +16,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
-import com.vaadin.flow.internal.NullOwner;
 import com.vaadin.flow.shared.Registration;
 
 public abstract class DashboardChildDetachHandler
@@ -32,31 +31,17 @@ public abstract class DashboardChildDetachHandler
 
     @Override
     public void onDetach(ElementDetachEvent e) {
-        if (isComponentDetaching()) {
-            return;
-        }
         var detachedElement = e.getSource();
-        component.getChildren()
-                .filter(childComponent -> Objects.equals(detachedElement,
-                        childComponent.getElement()))
-                .findAny().ifPresent(detachedChild -> {
-                    // The child was removed from the component
-
-                    // Remove the registration for the child detach listener
-                    childDetachListenerMap.get(detachedChild.getElement())
-                            .remove();
-                    childDetachListenerMap.remove(detachedChild.getElement());
-
-                    removeChild(detachedChild);
-                });
-    }
-
-    private boolean isComponentDetaching() {
-        return component.isAttached()
-                && !NullOwner.get()
-                        .equals(component.getElement().getNode().getOwner())
-                && !component.getElement().getNode().getOwner()
-                        .hasNode(component.getElement().getNode());
+        var childDetachedFromContainer = component.getElement().getChildren()
+                .noneMatch(containerChild -> Objects.equals(detachedElement,
+                        containerChild));
+        if (childDetachedFromContainer) {
+            // The child was removed from the component
+            // Remove the registration for the child detach listener
+            childDetachListenerMap.get(detachedElement).remove();
+            childDetachListenerMap.remove(detachedElement);
+            detachedElement.getComponent().ifPresent(this::removeChild);
+        }
     }
 
     void refreshListeners() {
