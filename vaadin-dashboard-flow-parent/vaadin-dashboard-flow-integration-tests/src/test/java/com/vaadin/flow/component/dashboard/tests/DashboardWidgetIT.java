@@ -22,7 +22,7 @@ import com.vaadin.tests.AbstractComponentIT;
 /**
  * @author Vaadin Ltd
  */
-@TestPath("vaadin-dashboard-widget")
+@TestPath("vaadin-dashboard/widget")
 public class DashboardWidgetIT extends AbstractComponentIT {
 
     private DashboardElement dashboardElement;
