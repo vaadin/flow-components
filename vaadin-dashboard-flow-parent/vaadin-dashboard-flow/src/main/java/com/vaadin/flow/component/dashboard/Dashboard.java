@@ -54,7 +54,6 @@ public class Dashboard extends Component implements HasWidgets {
      */
     public Dashboard() {
         childDetachHandler = getChildDetachHandler();
-        setEditable(true);
         addItemReorderEndListener(this::onItemReorderEnd);
     }
 

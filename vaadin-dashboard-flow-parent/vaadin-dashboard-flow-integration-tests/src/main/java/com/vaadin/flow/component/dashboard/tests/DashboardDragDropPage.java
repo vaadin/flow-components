@@ -23,6 +23,7 @@ public class DashboardDragDropPage extends Div {
 
     public DashboardDragDropPage() {
         Dashboard dashboard = new Dashboard();
+        dashboard.setEditable(true);
 
         DashboardWidget widget1 = new DashboardWidget();
         widget1.setTitle("Widget 1");

@@ -779,8 +779,8 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void dashboardIsEditableByDefault() {
-        Assert.assertTrue(dashboard.isEditable());
+    public void dashboardIsNotEditableByDefault() {
+        Assert.assertFalse(dashboard.isEditable());
     }
 
     @Test
