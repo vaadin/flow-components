@@ -72,6 +72,8 @@ public class RichTextEditor
     private AsHtml asHtml;
     private AsDelta asDelta;
 
+    private boolean pendingPresentationUpdate = false;
+
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
@@ -218,8 +220,14 @@ public class RichTextEditor
         getElement().setProperty("htmlValue", presentationValue);
         // htmlValue property is not writeable, HTML value needs to be set using
         // method exposed by web component instead
-        getElement().callJsFunction("dangerouslySetHtmlValue",
-                presentationValue);
+        if (!pendingPresentationUpdate) {
+            pendingPresentationUpdate = true;
+            runBeforeClientResponse(ui -> {
+                getElement().callJsFunction("dangerouslySetHtmlValue",
+                        getElement().getProperty("htmlValue"));
+                pendingPresentationUpdate = false;
+            });
+        }
     }
 
     private static String presentationToModel(String htmlValue) {
