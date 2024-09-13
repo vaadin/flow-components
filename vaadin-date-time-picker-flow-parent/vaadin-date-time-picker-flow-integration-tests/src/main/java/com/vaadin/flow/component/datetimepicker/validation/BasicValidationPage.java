@@ -31,6 +31,7 @@ public class BasicValidationPage
 
     public static final String REQUIRED_ERROR_MESSAGE = "Field is required";
     public static final String BAD_INPUT_ERROR_MESSAGE = "Value has incorrect format";
+    public static final String INCOMPLETE_INPUT_ERROR_MESSAGE = "Incomplete input";
     public static final String MIN_ERROR_MESSAGE = "Value is too small";
     public static final String MAX_ERROR_MESSAGE = "Value is too big";
 
@@ -39,6 +40,7 @@ public class BasicValidationPage
 
         testField.setI18n(new DateTimePicker.DateTimePickerI18n()
                 .setRequiredErrorMessage(REQUIRED_ERROR_MESSAGE)
+                .setIncompleteInputErrorMessage(INCOMPLETE_INPUT_ERROR_MESSAGE)
                 .setBadInputErrorMessage(BAD_INPUT_ERROR_MESSAGE)
                 .setMinErrorMessage(MIN_ERROR_MESSAGE)
                 .setMaxErrorMessage(MAX_ERROR_MESSAGE));
@@ -63,6 +65,12 @@ public class BasicValidationPage
     }
 
     protected DateTimePicker createTestField() {
-        return new DateTimePicker();
+        return new DateTimePicker() {
+            @Override
+            protected void validate() {
+                super.validate();
+                incrementServerValidationCounter();
+            }
+        };
     }
 }

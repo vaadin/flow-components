@@ -24,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
 import com.vaadin.flow.component.AbstractField;
@@ -52,6 +53,7 @@ import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableFunction;
+import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
@@ -149,16 +151,49 @@ public class DateTimePicker
     private LocalDateTime max;
     private LocalDateTime min;
 
+    private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDateTime>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
+
     private Validator<LocalDateTime> defaultValidator = (value, context) -> {
         boolean fromComponent = context == null;
+        boolean isEmpty = Objects.equals(value, getEmptyValue());
+        boolean isDatePickerEmpty = datePicker.isEmpty();
+        boolean isTimePickerEmpty = timePicker.isEmpty();
 
-        boolean hasBadDatePickerInput = Objects.equals(datePicker.getValue(),
-                datePicker.getEmptyValue()) && datePicker.isInputValuePresent();
-        boolean hasBadTimePickerInput = Objects.equals(timePicker.getValue(),
-                timePicker.getEmptyValue()) && timePicker.isInputValuePresent();
+        // Report error if any of the pickers has bad input
+        boolean hasBadDatePickerInput = isDatePickerEmpty
+                && datePicker.isInputValuePresent();
+        boolean hasBadTimePickerInput = isTimePickerEmpty
+                && timePicker.isInputValuePresent();
         if (hasBadDatePickerInput || hasBadTimePickerInput) {
             return ValidationResult.error(getI18nErrorMessage(
                     DateTimePickerI18n::getBadInputErrorMessage));
+        }
+
+        // Report error if only date picker has a value, and it's outside the
+        // range.
+        if (isEmpty && !isDatePickerEmpty) {
+            LocalDate maxDate = max != null ? max.toLocalDate() : null;
+            LocalDate minDate = min != null ? min.toLocalDate() : null;
+
+            ValidationResult maxResult = ValidationUtil.validateMaxConstraint(
+                    getI18nErrorMessage(DateTimePickerI18n::getMaxErrorMessage),
+                    datePicker.getValue(), maxDate);
+            if (maxResult.isError()) {
+                return maxResult;
+            }
+
+            ValidationResult minResult = ValidationUtil.validateMinConstraint(
+                    getI18nErrorMessage(DateTimePickerI18n::getMinErrorMessage),
+                    datePicker.getValue(), minDate);
+            if (minResult.isError()) {
+                return minResult;
+            }
+        }
+
+        // Report error if only one of the pickers has a value
+        if (isEmpty && (!isDatePickerEmpty || !isTimePickerEmpty)) {
+            return ValidationResult.error(getI18nErrorMessage(
+                    DateTimePickerI18n::getIncompleteInputErrorMessage));
         }
 
         // Do the required check only if the validator is called from the
@@ -261,9 +296,9 @@ public class DateTimePicker
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
-        addValueChangeListener(e -> validate());
+        setSynchronizedEvent("change");
 
-        addClientValidatedEventListener(e -> validate());
+        addValidationListeners();
     }
 
     /**
@@ -351,6 +386,37 @@ public class DateTimePicker
         setLocale(locale);
     }
 
+    public void addValidationListeners() {
+        addValueChangeListener(event -> validate());
+
+        getElement().addEventListener("unparsable-change",
+                event -> validate(true));
+        getElement().addEventListener("incomplete-change",
+                event -> validate(true));
+
+        // Add listeners to invalidate a required DateTimePicker when:
+        // 1. It's initially empty
+        // 2. The user selects a value in one picker (date or time)
+        // 3. The user then removes that value
+        // 4. The user leaves the field without proceeding to the other picker
+        SerializableRunnable pickerValueChangeListener = () -> {
+            // If the component is already invalid, any picker value change
+            // will trigger one of the above listeners (unparsable-change,
+            // incomplete-change, or change event), which will then validate
+            // the component.
+            if (isInvalid()) {
+                return;
+            }
+
+            if (isEmpty() && timePicker.isEmpty() && datePicker.isEmpty()
+                    && !isInputValuePresent()) {
+                validate(true);
+            }
+        };
+        datePicker.addValueChangeListener(event -> pickerValueChangeListener.run());
+        timePicker.addValueChangeListener(event -> pickerValueChangeListener.run());
+    }
+
     /**
      * Sets the selected date and time value of the component. The value can be
      * cleared by setting null.
@@ -372,14 +438,13 @@ public class DateTimePicker
         value = sanitizeValue(value);
         super.setValue(value);
 
-        boolean isInputValuePresent = timePicker.isInputValuePresent()
-                || datePicker.isInputValuePresent();
+        boolean isInputValuePresent = isInputValuePresent();
         boolean isValueRemainedEmpty = valueEquals(oldValue, getEmptyValue())
                 && valueEquals(value, getEmptyValue());
         if (isValueRemainedEmpty && isInputValuePresent) {
             // Clear the input elements from possible bad input.
             synchronizeChildComponentValues(value);
-            fireEvent(new ClientValidatedEvent(this, false));
+            validate(true);
         } else {
             synchronizeChildComponentValues(value);
         }
@@ -766,6 +831,11 @@ public class DateTimePicker
         synchronizeTheme();
     }
 
+    private boolean isInputValuePresent() {
+        return datePicker.isInputValuePresent()
+                || timePicker.isInputValuePresent();
+    }
+
     @Override
     public Validator<LocalDateTime> getDefaultValidator() {
         return defaultValidator;
@@ -774,9 +844,8 @@ public class DateTimePicker
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalDateTime> listener) {
-        return addClientValidatedEventListener(event -> listener
-                .validationStatusChanged(new ValidationStatusChangeEvent<>(this,
-                        event.isValid())));
+        return Registration.addAndRemove(validationStatusChangeListeners,
+                listener);
     }
 
     @Override
@@ -795,6 +864,26 @@ public class DateTimePicker
      */
     protected void validate() {
         validationController.validate(getValue());
+    }
+
+    /**
+     * Delegates the call to {@link #validate()} and additionally fires
+     * {@link ValidationStatusChangeEvent} to notify Binder that it needs to
+     * revalidate since the component's own validity state may have changed.
+     * <p>
+     * NOTE: There is no need to notify Binder separately when running
+     * validation on {@link ValueChangeEvent}, as Binder already listens to this
+     * event and revalidates automatically.
+     */
+    private void validate(boolean shouldFireValidationStatusChangeEvent) {
+        validate();
+
+        if (shouldFireValidationStatusChangeEvent) {
+            ValidationStatusChangeEvent<LocalDateTime> event = new ValidationStatusChangeEvent<>(
+                    this, !isInvalid());
+            validationStatusChangeListeners.forEach(
+                    listener -> listener.validationStatusChanged(event));
+        }
     }
 
     /**
@@ -952,6 +1041,7 @@ public class DateTimePicker
         private String dateLabel;
         private String timeLabel;
         private String badInputErrorMessage;
+        private String incompleteInputErrorMessage;
         private String requiredErrorMessage;
         private String minErrorMessage;
         private String maxErrorMessage;
@@ -1040,6 +1130,16 @@ public class DateTimePicker
          */
         public DateTimePickerI18n setBadInputErrorMessage(String errorMessage) {
             badInputErrorMessage = errorMessage;
+            return this;
+        }
+
+        public String getIncompleteInputErrorMessage() {
+            return incompleteInputErrorMessage;
+        }
+
+        public DateTimePickerI18n setIncompleteInputErrorMessage(
+                String errorMessage) {
+            incompleteInputErrorMessage = errorMessage;
             return this;
         }
 
