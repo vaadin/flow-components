@@ -55,6 +55,7 @@ public class Dashboard extends Component implements HasWidgets {
     public Dashboard() {
         childDetachHandler = getChildDetachHandler();
         addItemReorderEndListener(this::onItemReorderEnd);
+        addItemResizeEndListener(this::onItemResizeEnd);
     }
 
     /**
@@ -325,6 +326,30 @@ public class Dashboard extends Component implements HasWidgets {
         return addListener(DashboardItemReorderEndEvent.class, listener);
     }
 
+    /**
+     * Adds an item resize start listener to this dashboard.
+     *
+     * @param listener
+     *            the listener to add, not <code>null</code>
+     * @return a handle that can be used for removing the listener
+     */
+    public Registration addItemResizeStartListener(
+            ComponentEventListener<DashboardItemResizeStartEvent> listener) {
+        return addListener(DashboardItemResizeStartEvent.class, listener);
+    }
+
+    /**
+     * Adds an item resize end listener to this dashboard.
+     *
+     * @param listener
+     *            the listener to add, not <code>null</code>
+     * @return a handle that can be used for removing the listener
+     */
+    public Registration addItemResizeEndListener(
+            ComponentEventListener<DashboardItemResizeEndEvent> listener) {
+        return addListener(DashboardItemResizeEndEvent.class, listener);
+    }
+
     @Override
     public Stream<Component> getChildren() {
         return childrenComponents.stream();
@@ -445,6 +470,17 @@ public class Dashboard extends Component implements HasWidgets {
                 .getItems();
         reorderItems(orderedItemsFromClient);
         updateClient();
+    }
+
+    private void onItemResizeEnd(
+            DashboardItemResizeEndEvent dashboardItemResizeEndEvent) {
+        int nodeId = dashboardItemResizeEndEvent.getNodeId();
+        getWidgets().stream().filter(
+                widget -> nodeId == widget.getElement().getNode().getId())
+                .findAny().ifPresent(widget -> {
+                    widget.setRowspan(dashboardItemResizeEndEvent.getRowspan());
+                    widget.setColspan(dashboardItemResizeEndEvent.getColspan());
+                });
     }
 
     private void reorderItems(JsonArray orderedItemsFromClient) {
