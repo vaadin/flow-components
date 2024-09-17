@@ -510,7 +510,11 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
             // Update the items in the grid cache or set an array of undefined items
             // to remove the page from the grid cache if there are no corresponding items
             // in the connector cache.
-            gridCache.setPage(page, items || Array.from({ length: grid.pageSize }));
+            if (items) {
+              gridCache.setPage(page, items);
+            } else {
+              gridCache.clearPage(page);
+            }
           }
 
           return items;
