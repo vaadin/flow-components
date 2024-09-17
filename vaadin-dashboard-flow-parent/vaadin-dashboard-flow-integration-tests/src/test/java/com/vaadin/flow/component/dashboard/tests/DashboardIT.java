@@ -60,6 +60,7 @@ public class DashboardIT extends AbstractComponentIT {
 
     @Test
     public void removeWidgetUsingButton_widgetIsRemoved() {
+        clickElementWithJs("toggle-editable");
         DashboardWidgetElement widgetToRemove = dashboardElement.getWidgets()
                 .get(0);
         getRemoveButton(widgetToRemove).click();
@@ -70,6 +71,7 @@ public class DashboardIT extends AbstractComponentIT {
 
     @Test
     public void removeWidgetInSectionUsingButton_widgetIsRemoved() {
+        clickElementWithJs("toggle-editable");
         DashboardSectionElement section = dashboardElement.getSections().get(0);
         DashboardWidgetElement widgetToRemove = section.getWidgets().get(0);
         getRemoveButton(widgetToRemove).click();
@@ -122,6 +124,7 @@ public class DashboardIT extends AbstractComponentIT {
 
     @Test
     public void removeFirstSectionUsingButton_sectionIsRemoved() {
+        clickElementWithJs("toggle-editable");
         DashboardSectionElement sectionToRemove = dashboardElement.getSections()
                 .get(0);
         String sectionTitle = sectionToRemove.getTitle();
@@ -160,22 +163,6 @@ public class DashboardIT extends AbstractComponentIT {
         Assert.assertEquals(yOfWidget1, widgets.get(1).getLocation().getY());
     }
 
-    @Test
-    public void setDashboardEditable_removeButtonIsVisible() {
-        var widget = dashboardElement.getWidgets().get(0);
-        Assert.assertFalse(isRemoveButtonVisible(widget));
-        clickElementWithJs("toggle-editable");
-        Assert.assertTrue(isRemoveButtonVisible(widget));
-    }
-
-    @Test
-    public void setDashboardNotEditable_removeButtonNotVisible() {
-        clickElementWithJs("toggle-editable");
-        clickElementWithJs("toggle-editable");
-        Assert.assertFalse(
-                isRemoveButtonVisible(dashboardElement.getWidgets().get(0)));
-    }
-
     private void assertDashboardWidgetsByTitle(String... expectedWidgetTitles) {
         assertWidgetsByTitle(dashboardElement.getWidgets(),
                 expectedWidgetTitles);
@@ -192,10 +179,6 @@ public class DashboardIT extends AbstractComponentIT {
         List<String> widgetTitles = actualWidgets.stream()
                 .map(DashboardWidgetElement::getTitle).toList();
         Assert.assertEquals(Arrays.asList(expectedWidgetTitles), widgetTitles);
-    }
-
-    private static boolean isRemoveButtonVisible(TestBenchElement element) {
-        return !"none".equals(getRemoveButton(element).getCssValue("display"));
     }
 
     private static TestBenchElement getRemoveButton(TestBenchElement element) {

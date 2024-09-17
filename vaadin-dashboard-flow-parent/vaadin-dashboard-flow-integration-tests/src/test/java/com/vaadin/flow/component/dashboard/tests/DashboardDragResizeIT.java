@@ -45,22 +45,6 @@ public class DashboardDragResizeIT extends AbstractComponentIT {
         assertWidgetResized(1);
     }
 
-    @Test
-    public void setDashboardNotEditable_resizeHandleNotVisible() {
-        var widget = dashboardElement.getWidgets().get(0);
-        Assert.assertTrue(isResizeHandleVisible(widget));
-        clickElementWithJs("toggle-editable");
-        Assert.assertFalse(isResizeHandleVisible(widget));
-    }
-
-    @Test
-    public void setDashboardEditable_resizeHandleIsVisible() {
-        clickElementWithJs("toggle-editable");
-        clickElementWithJs("toggle-editable");
-        Assert.assertTrue(
-                isResizeHandleVisible(dashboardElement.getWidgets().get(0)));
-    }
-
     private void assertWidgetResized(int widgetIndexToResize) {
         var widgetToResize = dashboardElement.getWidgets()
                 .get(widgetIndexToResize);

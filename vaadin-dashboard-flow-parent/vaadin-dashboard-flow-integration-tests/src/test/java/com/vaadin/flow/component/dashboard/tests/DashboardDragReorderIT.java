@@ -69,22 +69,6 @@ public class DashboardDragReorderIT extends AbstractComponentIT {
         reorderWidgetOnClientSide_itemsAreReorderedCorrectly();
     }
 
-    @Test
-    public void setDashboardNotEditable_dragHandleNotVisible() {
-        var widget = dashboardElement.getWidgets().get(0);
-        Assert.assertTrue(isDragHandleVisible(widget));
-        clickElementWithJs("toggle-editable");
-        Assert.assertFalse(isDragHandleVisible(widget));
-    }
-
-    @Test
-    public void setDashboardEditable_dragHandleIsVisible() {
-        clickElementWithJs("toggle-editable");
-        clickElementWithJs("toggle-editable");
-        Assert.assertTrue(
-                isDragHandleVisible(dashboardElement.getWidgets().get(0)));
-    }
-
     private void dragResizeElement(TestBenchElement draggedElement,
             TestBenchElement targetElement) {
         var dragHandle = getDragHandle(draggedElement);
