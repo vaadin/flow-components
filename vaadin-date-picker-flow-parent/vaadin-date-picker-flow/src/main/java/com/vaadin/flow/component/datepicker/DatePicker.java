@@ -395,15 +395,14 @@ public class DatePicker
     }
 
     /**
-     * Sets the minimum allowed date for this field. Dates before that will be
-     * disabled in the calendar overlay. Manual entry of dates before the
-     * minimum will cause the component to invalidate.
+     * Sets the minimum date allowed to be selected for this field. Dates before
+     * that will be disabled in the calendar overlay. Manual entry of such dates
+     * will cause the component to invalidate.
      * <p>
      * The minimum date is inclusive.
      *
      * @param min
-     *            the minimum date that is allowed to be selected, or
-     *            <code>null</code> to remove any minimum constraints
+     *            the minimum date, or {@code null} to remove this constraint
      * @see DatePickerI18n#setMinErrorMessage(String)
      */
     public void setMin(LocalDate min) {
@@ -413,10 +412,9 @@ public class DatePicker
     }
 
     /**
-     * Gets the minimum allowed date for this field.
+     * Gets the minimum date allowed to be selected for this field.
      *
-     * @return the minimum date that is allowed to be selected, or
-     *         <code>null</code> if there's no minimum
+     * @return the minimum date, or {@code null} if no minimum is set
      * @see #setMax(LocalDate)
      */
     public LocalDate getMin() {
@@ -424,15 +422,14 @@ public class DatePicker
     }
 
     /**
-     * Sets the maximum allowed date for this field. Dates after that will be
-     * disabled in the calendar overlay. Manual entry of dates after the maximum
+     * Sets the maximum date allowed to be selected for this field. Dates after
+     * that will be disabled in the calendar overlay. Manual entry of such dates
      * will cause the component to invalidate.
      * <p>
      * The maximum date is inclusive.
      *
      * @param max
-     *            the maximum date that is allowed to be selected, or
-     *            <code>null</code> to remove any maximum constraints
+     *            the maximum date, or {@code null} to remove this constraint
      * @see DatePickerI18n#setMaxErrorMessage(String)
      */
     public void setMax(LocalDate max) {
@@ -442,10 +439,9 @@ public class DatePicker
     }
 
     /**
-     * Gets the maximum allowed date for this field.
+     * Gets the maximum date allowed to be selected for this field.
      *
-     * @return the maximum date that is allowed to be selected, or
-     *         <code>null</code> if there's no maximum
+     * @return the maximum date, or {@code null} if no maximum is set
      * @see #setMax(LocalDate)
      */
     public LocalDate getMax() {
@@ -757,7 +753,8 @@ public class DatePicker
      * see {@link #setLabel(String)}.
      *
      * @param required
-     *            true to make the field required, false otherwise
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      * @see DatePickerI18n#setRequiredErrorMessage(String)
      */
     @Override
@@ -768,7 +765,7 @@ public class DatePicker
     /**
      * Gets whether the user is required to provide a value.
      *
-     * @return true if the field is required, false otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
      */
     @Override
@@ -780,7 +777,8 @@ public class DatePicker
      * Alias for {@link #setRequiredIndicatorVisible(boolean)}.
      *
      * @param required
-     *            true to make the field required, false otherwise
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      */
     public void setRequired(boolean required) {
         setRequiredIndicatorVisible(required);
@@ -789,7 +787,7 @@ public class DatePicker
     /**
      * Alias for {@link #isRequiredIndicatorVisible()}
      *
-     * @return true if the field is required, false otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
      */
     public boolean isRequired() {
         return isRequiredIndicatorVisible();

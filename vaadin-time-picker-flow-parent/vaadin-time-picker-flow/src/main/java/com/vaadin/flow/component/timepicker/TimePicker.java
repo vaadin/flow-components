@@ -467,7 +467,8 @@ public class TimePicker
      * see {@link #setLabel(String)}.
      *
      * @param required
-     *            true to make the field required, false otherwise
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      * @see TimePickerI18n#setRequiredErrorMessage(String)
      */
     @Override
@@ -478,7 +479,7 @@ public class TimePicker
     /**
      * Gets whether the user is required to provide a value.
      *
-     * @return true if the field is required, false otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
      */
     @Override
@@ -490,7 +491,8 @@ public class TimePicker
      * Alias for {@link #setRequiredIndicatorVisible(boolean)}.
      *
      * @param required
-     *            true to make the field required, false otherwise
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      */
     public void setRequired(boolean required) {
         setRequiredIndicatorVisible(required);
@@ -499,7 +501,7 @@ public class TimePicker
     /**
      * Alias for {@link #isRequiredIndicatorVisible()}
      *
-     * @return true if the field is required, false otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
      */
     public boolean isRequired() {
         return isRequiredIndicatorVisible();
@@ -700,15 +702,14 @@ public class TimePicker
     }
 
     /**
-     * Sets the minimum allowed time for this field. Times before that won't be
-     * displayed in the dropdown. Manual entry of times before the minimum will
+     * Sets the minimum time allowed to be selected for this field. Times before
+     * that won't be displayed in the dropdown. Manual entry of such times will
      * cause the component to invalidate.
      * <p>
      * The minimum time is inclusive.
      *
      * @param min
-     *            the minimum time that is allowed to be selected, or
-     *            <code>null</code> to remove any minimum constraints
+     *            the minimum time, or {@code null} to remove this constraint
      * @see TimePickerI18n#setMinErrorMessage(String)
      */
     public void setMin(LocalTime min) {
@@ -718,10 +719,9 @@ public class TimePicker
     }
 
     /**
-     * Gets the minimum allowed time for this field.
+     * Gets the minimum time allowed to be selected for this field.
      *
-     * @return the minimum time that is allowed to be selected, or
-     *         <code>null</code> if there's no minimum
+     * @return the minimum time, or {@code null} if no minimum is set
      * @see #setMax(LocalTime)
      */
     public LocalTime getMin() {
@@ -729,15 +729,14 @@ public class TimePicker
     }
 
     /**
-     * Sets the maximum allowed time for this field. Times after that won't be
-     * displayed in the dropdown. Manual entry of times after the maximum will
+     * Sets the maximum time allowed to be selected for this field. Times after
+     * that won't be displayed in the dropdown. Manual entry of such times will
      * cause the component to invalidate.
      * <p>
      * The maximum time is inclusive.
      *
      * @param max
-     *            the maximum time that is allowed to be selected, or
-     *            <code>null</code> to remove any maximum constraints
+     *            the maximum time, or {@code null} to remove this constraint
      * @see TimePickerI18n#setMaxErrorMessage(String)
      */
     public void setMax(LocalTime max) {
@@ -747,10 +746,9 @@ public class TimePicker
     }
 
     /**
-     * Gets the maximum allowed time for this field.
+     * Gets the maximum time allowed to be selected for this field.
      *
-     * @return the maximum time that is allowed to be selected, or
-     *         <code>null</code> if there's no maximum
+     * @return the maximum time, or {@code null} if no maximum is set
      * @see #setMin(LocalTime)
      */
     public LocalTime getMax() {
