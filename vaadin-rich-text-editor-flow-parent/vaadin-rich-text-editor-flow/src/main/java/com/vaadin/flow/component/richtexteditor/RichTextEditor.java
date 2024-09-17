@@ -58,9 +58,9 @@ import elemental.json.JsonObject;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.5.0-alpha11")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.5.0-beta1")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
@@ -71,6 +71,8 @@ public class RichTextEditor
     private RichTextEditorI18n i18n;
     private AsHtml asHtml;
     private AsDelta asDelta;
+
+    private boolean pendingPresentationUpdate = false;
 
     /**
      * Gets the internationalization object previously set for this component.
@@ -218,8 +220,14 @@ public class RichTextEditor
         getElement().setProperty("htmlValue", presentationValue);
         // htmlValue property is not writeable, HTML value needs to be set using
         // method exposed by web component instead
-        getElement().callJsFunction("dangerouslySetHtmlValue",
-                presentationValue);
+        if (!pendingPresentationUpdate) {
+            pendingPresentationUpdate = true;
+            runBeforeClientResponse(ui -> {
+                getElement().callJsFunction("dangerouslySetHtmlValue",
+                        getElement().getProperty("htmlValue"));
+                pendingPresentationUpdate = false;
+            });
+        }
     }
 
     private static String presentationToModel(String htmlValue) {
