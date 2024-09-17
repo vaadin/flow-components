@@ -240,7 +240,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
     /**
      * Sets whether the user is required to select the checkbox. When required,
      * an indicator appears next to the label and the field invalidates if the
-     * checkbox is deselected.
+     * checkbox is first selected and then deselected.
      * <p>
      * NOTE: The required indicator is only visible when the field has a label,
      * see {@link #setLabel(String)}.
