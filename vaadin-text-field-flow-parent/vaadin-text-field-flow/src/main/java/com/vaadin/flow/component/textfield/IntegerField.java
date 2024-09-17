@@ -214,8 +214,8 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer>
     }
 
     /**
-     * Gets the minimum value of the field. The constraint activates only if the
-     * value was explicitly set with {@link #setMin(int)}.
+     * Gets the minimum value for this field. The constraint activates only if
+     * the value was explicitly set with {@link #setMin(int)}.
      *
      * @return the minimum integer value
      * @see #setMin(int)
@@ -240,8 +240,8 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer>
     }
 
     /**
-     * Gets the maximum value of the field. The constraint activates only if the
-     * value was explicitly set with {@link #setMax(int)}.
+     * Gets the maximum value for the field. The constraint activates only if
+     * the value was explicitly set with {@link #setMax(int)}.
      *
      * @return the maximum integer value
      * @see #setMax(int)
@@ -251,7 +251,7 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer>
     }
 
     /**
-     * Sets the allowed number intervals of the field. This specifies how much
+     * Sets the allowed number intervals for this field. This specifies how much
      * the value will be increased/decreased when clicking on the
      * {@link #setStepButtonsVisible(boolean) step buttons}. It is also used to
      * invalidate the field, if the value doesn't align with the specified step
@@ -271,8 +271,8 @@ public class IntegerField extends AbstractNumberField<IntegerField, Integer>
     }
 
     /**
-     * Gets the allowed number intervals of the field. The constraint activates
-     * only if the step was explicitly set with {@link #setStep(int)}.
+     * Gets the allowed number intervals for this field. The constraint
+     * activates only if the step was explicitly set with {@link #setStep(int)}.
      *
      * @return the step property of the field
      * @see #setStep(int)

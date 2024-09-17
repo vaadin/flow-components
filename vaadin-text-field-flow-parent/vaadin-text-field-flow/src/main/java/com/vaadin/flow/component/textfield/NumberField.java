@@ -202,7 +202,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
     }
 
     /**
-     * Sets the minimum value for the field. This will configure the field to
+     * Sets the minimum value for this field. This will configure the field to
      * invalidate if the entered value is below the minimum. It will also limit
      * the decrementing of the value when step buttons are enabled.
      * <p>
@@ -218,8 +218,8 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
     }
 
     /**
-     * Gets the minimum value of the field. The constraint activates only if the
-     * value was explicitly set with {@link #setMin(int)}.
+     * Gets the minimum value for this field. The constraint activates only if
+     * the value was explicitly set with {@link #setMin(int)}.
      *
      * @return the minimum double value
      * @see #setMin(double)
@@ -229,7 +229,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
     }
 
     /**
-     * Sets the maximum value for the field. This will configure the field to
+     * Sets the maximum value for this field. This will configure the field to
      * invalidate if the entered value is above the maximum. It will also limit
      * the incrementing of the value when step buttons are enabled.
      * <p>
@@ -245,8 +245,8 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
     }
 
     /**
-     * Gets the maximum value of the field. The constraint activates only if the
-     * value was explicitly set with {@link #setMax(double)}.
+     * Gets the maximum value for this field. The constraint activates only if
+     * the value was explicitly set with {@link #setMax(double)}.
      *
      * @return the maximum double value
      * @see #setMax(double)
@@ -256,7 +256,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
     }
 
     /**
-     * Sets the allowed number intervals of the field. This specifies how much
+     * Sets the allowed number intervals for this field. This specifies how much
      * the value will be increased/decreased. It is also used to invalidate the
      * field, if the value doesn't align with the specified step and
      * {@link #setMin(double) min} (if explicitly specified by the developer).
@@ -277,7 +277,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
     }
 
     /**
-     * Specifies the allowed number intervals of the field.
+     * Gets the allowed number intervals for this field.
      *
      * @return the {@code step} property from the webcomponent
      * @see #setStep(double)
