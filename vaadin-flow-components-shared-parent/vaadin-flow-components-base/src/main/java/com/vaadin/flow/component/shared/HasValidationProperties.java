@@ -27,10 +27,10 @@ import com.vaadin.flow.component.HasValidation;
 public interface HasValidationProperties extends HasElement, HasValidation {
 
     /**
-     * Sets an error message to display for all constraint violations.
-     * <p>
-     * This error message takes priority over i18n error messages when both are
-     * set.
+     * Sets a single error message to display for all constraint violations. The
+     * error message will only appear when the component is flagged as invalid,
+     * either as a result of constraint validation or by the developer through
+     * {@link #setInvalid(boolean)} if manual validation mode is enabled.
      *
      * @param errorMessage
      *            the error message to set, or {@code null} to clear
@@ -42,7 +42,9 @@ public interface HasValidationProperties extends HasElement, HasValidation {
     }
 
     /**
-     * Gets the error message displayed for all constraint violations.
+     * Gets the error message displayed for all constraint violations if it has
+     * been set with {@link #setErrorMessage(String)}. Otherwise, gets the
+     * current i18n error message if the value is currently invalid.
      *
      * @return the error message
      */
@@ -54,10 +56,10 @@ public interface HasValidationProperties extends HasElement, HasValidation {
     /**
      * Sets the invalid state of the component.
      * <p>
-     * NOTE: If you need to manually control the invalid state, consider
-     * enabling manual validation mode with
-     * {@link #setManualValidation(boolean)} to avoid potential conflicts
-     * between your custom validation and the component's built-in validation.
+     * NOTE: If you need to manually control the invalid state, enable manual
+     * validation mode with {@link #setManualValidation(boolean)} to avoid
+     * potential conflicts between your custom validation and the component's
+     * constraint validation.
      *
      * @param invalid
      *            {@code true} for invalid, {@code false} for valid

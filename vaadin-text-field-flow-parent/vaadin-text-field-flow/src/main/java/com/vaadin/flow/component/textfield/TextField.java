@@ -38,6 +38,50 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * Text Field allows the user to input and edit text. Prefix and suffix
  * components, such as icons, are also supported.
  *
+ * <h2>Validation</h2>
+ * <p>
+ * Text Field comes with a built-in validation mechanism based on constraints.
+ * Validation is triggered whenever the user applies an input change, for
+ * example by pressing Enter or blurring the field. Programmatic value changes
+ * trigger validation as well. In eager and lazy value change modes, validation
+ * is also triggered on every character press with a delay according to the
+ * selected mode.
+ * <p>
+ * Validation verifies that the value satisfies the specified constraints. If
+ * any of the constraints are violated, the component is marked as invalid and
+ * an error message is displayed below the input.
+ * <p>
+ * The following constraints are supported:
+ * <ul>
+ * <li>{@link #setRequiredIndicatorVisible(boolean)}
+ * <li>{@link #setMinLength(int)}
+ * <li>{@link #setMaxLength(int)}
+ * <li>{@link #setPattern(String)}
+ * </ul>
+ * <p>
+ * Error messages for constraints can be configured with the
+ * {@link TextFieldI18n} object, using the respective properties. If you want to
+ * provide a single catch-all error message, you can also use the
+ * {@link #setErrorMessage(String)} method. Note that such an error message will
+ * take priority over i18n error messages if both are set.
+ * <p>
+ * In addition to validation, constraints may also limit user input. For
+ * example, the browser will prevent the user from entering more text than
+ * specified by the max length constraint.
+ * <p>
+ * For more advanced validation that requires custom rules, you can use
+ * {@link Binder}. By default, before running custom validators, Binder will
+ * also check the component constraints and display error messages from the
+ * {@link TextFieldI18n} object. The exception is the required constraint, for
+ * which Binder provides its own API, see
+ * {@link Binder.BindingBuilder#asRequired(String) asRequired()}.
+ * <p>
+ * However, if Binder doesn't fit your needs and you want to implement fully
+ * custom validation logic, you can disable the constraint validation by setting
+ * {@link #setManualValidation(boolean)} to true. This will allow you to control
+ * the invalid state and the error message manually using
+ * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
+ *
  * @author Vaadin Ltd
  */
 @Tag("vaadin-text-field")
@@ -231,21 +275,48 @@ public class TextField extends TextFieldBase<TextField, String>
     }
 
     /**
-     * Maximum number of characters (in Unicode code points) that the user can
-     * enter.
+     * {@inheritDoc}
+     * <p>
+     * Distinct error messages for different constraints can be configured with
+     * the {@link TextFieldI18n} object, using the respective properties.
+     * However, note that the error message set with
+     * {@link #setErrorMessage(String)} will take priority and override any i18n
+     * error messages if both are set.
+     */
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        super.setErrorMessage(errorMessage);
+    }
+
+    /**
+     * @see TextFieldI18n#setRequiredErrorMessage(String)
+     */
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
+    }
+
+    /**
+     * Sets the maximum number of characters (in Unicode code points) that the
+     * user can enter. Values with a length exceeding this limit will cause the
+     * component to invalidate.
+     * <p>
+     * The maximum length is inclusive.
      *
      * @param maxLength
      *            the maximum length
+     * @see TextFieldI18n#setMaxLengthErrorMessage(String)
      */
     public void setMaxLength(int maxLength) {
         getElement().setProperty("maxlength", maxLength);
     }
 
     /**
-     * Maximum number of characters (in Unicode code points) that the user can
-     * enter.
+     * Gets the maximum number of characters (in Unicode code points) that the
+     * user can enter.
      *
-     * @return the {@code maxlength} property from the webcomponent
+     * @return the maximum length
+     * @see #setMaxLength(int)
      */
     public int getMaxLength() {
         return (int) getElement().getProperty("maxlength", 0.0);
@@ -256,34 +327,42 @@ public class TextField extends TextFieldBase<TextField, String>
     }
 
     /**
-     * Minimum number of characters (in Unicode code points) that the user can
-     * enter.
+     * Sets the minimum number of characters (in Unicode code points) that the
+     * user can enter. Values with a length shorter than this limit will cause
+     * the component to invalidate.
+     * <p>
+     * The minimum length is inclusive.
      *
      * @param minLength
      *            the minimum length
+     * @see TextFieldI18n#setMinLengthErrorMessage(String)
      */
     public void setMinLength(int minLength) {
         getElement().setProperty("minlength", minLength);
     }
 
     /**
-     * Minimum number of characters (in Unicode code points) that the user can
-     * enter.
+     * Gests the minimum number of characters (in Unicode code points) that the
+     * user can enter.
      *
-     * @return the {@code minlength} property from the webcomponent
+     * @return the minimum length
+     * @see #setMinLength(int)
      */
     public int getMinLength() {
         return (int) getElement().getProperty("minlength", 0.0);
     }
 
     /**
-     * Sets a regular expression for the value to pass on the client-side. The
-     * pattern must be a valid JavaScript Regular Expression that matches the
-     * entire value, not just some subset.
+     * Sets a regular expression for the value to pass during validation. Values
+     * that do not match the pattern will cause the component to invalidate.
+     * <p>
+     * The pattern must be a valid JavaScript Regular Expression that matches
+     * the entire value, not just some subset.
      *
      * @param pattern
-     *            the new String pattern
+     *            the new String pattern or {@code null} to clear it
      *
+     * @see TextFieldI18n#setPatternErrorMessage(String)
      * @see <a href=
      *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern">
      *      https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern</>
@@ -296,10 +375,11 @@ public class TextField extends TextFieldBase<TextField, String>
     }
 
     /**
-     * A regular expression that the value is checked against. The pattern must
-     * match the entire value, not just some subset.
+     * Gets the regular expression that the value is checked against during
+     * validation.
      *
-     * @return the {@code pattern} property from the webcomponent
+     * @return the pattern or {@code null} if not set
+     * @see #setPattern(String)
      */
     public String getPattern() {
         return getElement().getProperty("pattern");
