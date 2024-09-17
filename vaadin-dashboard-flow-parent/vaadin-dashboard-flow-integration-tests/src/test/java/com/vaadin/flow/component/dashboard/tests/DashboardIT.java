@@ -19,6 +19,7 @@ import com.vaadin.flow.component.dashboard.testbench.DashboardElement;
 import com.vaadin.flow.component.dashboard.testbench.DashboardSectionElement;
 import com.vaadin.flow.component.dashboard.testbench.DashboardWidgetElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 /**
@@ -55,6 +56,27 @@ public class DashboardIT extends AbstractComponentIT {
         clickElementWithJs("remove-first-and-last-widgets");
         assertDashboardWidgetsByTitle("Widget 2", "Widget 3",
                 "Widget 1 in Section 1", "Widget 2 in Section 1");
+    }
+
+    @Test
+    public void removeWidgetUsingButton_widgetIsRemoved() {
+        clickElementWithJs("toggle-editable");
+        DashboardWidgetElement widgetToRemove = dashboardElement.getWidgets()
+                .get(0);
+        getRemoveButton(widgetToRemove).click();
+        assertDashboardWidgetsByTitle("Widget 2", "Widget 3",
+                "Widget 1 in Section 1", "Widget 2 in Section 1",
+                "Widget 1 in Section 2");
+    }
+
+    @Test
+    public void removeWidgetInSectionUsingButton_widgetIsRemoved() {
+        clickElementWithJs("toggle-editable");
+        DashboardSectionElement section = dashboardElement.getSections().get(0);
+        DashboardWidgetElement widgetToRemove = section.getWidgets().get(0);
+        getRemoveButton(widgetToRemove).click();
+        assertDashboardWidgetsByTitle("Widget 1", "Widget 2", "Widget 3",
+                "Widget 2 in Section 1", "Widget 1 in Section 2");
     }
 
     @Test
@@ -101,6 +123,20 @@ public class DashboardIT extends AbstractComponentIT {
     }
 
     @Test
+    public void removeFirstSectionUsingButton_sectionIsRemoved() {
+        clickElementWithJs("toggle-editable");
+        DashboardSectionElement sectionToRemove = dashboardElement.getSections()
+                .get(0);
+        String sectionTitle = sectionToRemove.getTitle();
+        getRemoveButton(sectionToRemove).click();
+        assertDashboardWidgetsByTitle("Widget 1", "Widget 2", "Widget 3",
+                "Widget 1 in Section 2");
+        List<String> sectionTitles = dashboardElement.getSections().stream()
+                .map(DashboardSectionElement::getTitle).toList();
+        Assert.assertFalse(sectionTitles.contains(sectionTitle));
+    }
+
+    @Test
     public void changeMaximumColumnCountTo1_widgetsShouldBeOnTheSameColumn() {
         List<DashboardWidgetElement> widgets = dashboardElement.getWidgets();
         // The first two widgets should initially be on the same horizontal line
@@ -143,5 +179,9 @@ public class DashboardIT extends AbstractComponentIT {
         List<String> widgetTitles = actualWidgets.stream()
                 .map(DashboardWidgetElement::getTitle).toList();
         Assert.assertEquals(Arrays.asList(expectedWidgetTitles), widgetTitles);
+    }
+
+    private static TestBenchElement getRemoveButton(TestBenchElement element) {
+        return element.$("button").withId("remove-button").first();
     }
 }

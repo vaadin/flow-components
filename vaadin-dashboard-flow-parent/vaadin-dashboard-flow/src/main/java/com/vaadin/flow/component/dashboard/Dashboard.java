@@ -56,6 +56,7 @@ public class Dashboard extends Component implements HasWidgets {
         childDetachHandler = getChildDetachHandler();
         addItemReorderEndListener(this::onItemReorderEnd);
         addItemResizeEndListener(this::onItemResizeEnd);
+        addItemRemovedListener(this::onItemRemoved);
     }
 
     /**
@@ -350,6 +351,18 @@ public class Dashboard extends Component implements HasWidgets {
         return addListener(DashboardItemResizeEndEvent.class, listener);
     }
 
+    /**
+     * Adds an item removed listener to this dashboard.
+     *
+     * @param listener
+     *            the listener to add, not <code>null</code>
+     * @return a handle that can be used for removing the listener
+     */
+    public Registration addItemRemovedListener(
+            ComponentEventListener<DashboardItemRemovedEvent> listener) {
+        return addListener(DashboardItemRemovedEvent.class, listener);
+    }
+
     @Override
     public Stream<Component> getChildren() {
         return childrenComponents.stream();
@@ -478,6 +491,11 @@ public class Dashboard extends Component implements HasWidgets {
                 .getResizedWidget();
         resizedWidget.setRowspan(dashboardItemResizeEndEvent.getRowspan());
         resizedWidget.setColspan(dashboardItemResizeEndEvent.getColspan());
+    }
+
+    private void onItemRemoved(
+            DashboardItemRemovedEvent dashboardItemRemovedEvent) {
+        dashboardItemRemovedEvent.getRemovedItem().removeFromParent();
     }
 
     private void reorderItems(JsonArray orderedItemsFromClient) {

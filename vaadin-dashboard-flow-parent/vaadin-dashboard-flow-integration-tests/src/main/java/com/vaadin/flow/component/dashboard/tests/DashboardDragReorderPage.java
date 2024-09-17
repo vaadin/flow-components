@@ -63,10 +63,6 @@ public class DashboardDragReorderPage extends Div {
         });
         toggleAttached.setId("toggle-attached");
 
-        NativeButton toggleEditable = new NativeButton("Toggle editable",
-                e -> dashboard.setEditable(!dashboard.isEditable()));
-        toggleEditable.setId("toggle-editable");
-
-        add(toggleAttached, toggleEditable, dashboard);
+        add(toggleAttached, dashboard);
     }
 }

@@ -121,7 +121,6 @@ public class DashboardDragReorderTest extends DashboardTestBase {
     }
 
     private void assertRootLevelItemReorder(int initialIndex, int finalIndex) {
-
         reorderRootLevelItem(initialIndex, finalIndex);
         List<Integer> expectedRootLevelNodeIds = getExpectedRootLevelItemNodeIds(
                 initialIndex, finalIndex);
