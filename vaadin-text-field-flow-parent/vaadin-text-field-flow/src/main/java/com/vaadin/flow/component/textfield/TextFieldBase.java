@@ -166,7 +166,8 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
      * see {@link #setLabel(String)}.
      *
      * @param required
-     *            true to make the field required, false otherwise
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
@@ -176,7 +177,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
     /**
      * Gets whether the user is required to provide a value.
      *
-     * @return true if the field is required, false otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
      */
     @Override
@@ -188,7 +189,8 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
      * Alias for {@link #setRequiredIndicatorVisible(boolean)}.
      *
      * @param required
-     *            true to make the field required, false otherwise
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      */
     public void setRequired(boolean required) {
         setRequiredIndicatorVisible(required);
@@ -197,7 +199,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
     /**
      * Alias for {@link #isRequiredIndicatorVisible()}
      *
-     * @return true if the field is required, false otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
      */
     public boolean isRequired() {
         return isRequiredIndicatorVisible();
