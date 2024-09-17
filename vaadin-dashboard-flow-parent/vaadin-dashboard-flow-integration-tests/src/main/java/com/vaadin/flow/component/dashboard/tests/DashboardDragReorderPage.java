@@ -18,10 +18,10 @@ import com.vaadin.flow.router.Route;
 /**
  * @author Vaadin Ltd
  */
-@Route("vaadin-dashboard/drag-drop")
-public class DashboardDragDropPage extends Div {
+@Route("vaadin-dashboard/drag-reorder")
+public class DashboardDragReorderPage extends Div {
 
-    public DashboardDragDropPage() {
+    public DashboardDragReorderPage() {
         Dashboard dashboard = new Dashboard();
         dashboard.setEditable(true);
         dashboard.setMinimumRowHeight("100px");

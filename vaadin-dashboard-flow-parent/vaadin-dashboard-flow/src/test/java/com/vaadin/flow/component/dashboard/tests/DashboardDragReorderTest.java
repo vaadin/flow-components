@@ -26,7 +26,7 @@ import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
-public class DashboardDragDropTest extends DashboardTestBase {
+public class DashboardDragReorderTest extends DashboardTestBase {
     private Dashboard dashboard;
 
     private JsonArray itemsArray;
