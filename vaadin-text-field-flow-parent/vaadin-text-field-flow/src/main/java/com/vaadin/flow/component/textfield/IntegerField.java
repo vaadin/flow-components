@@ -55,7 +55,7 @@ import com.vaadin.flow.function.SerializableFunction;
  * For more advanced validation that requires custom rules, you can use
  * {@link Binder}. By default, before running custom validators, Binder will
  * also check if the value is parsable and satisfies the component constraints,
- * displaying error messages from the {@link NumberFieldI18n} object. The
+ * displaying error messages from the {@link IntegerFieldI18n} object. The
  * exception is the required constraint, for which Binder provides its own API,
  * see {@link Binder.BindingBuilder#asRequired(String) asRequired()}.
  * <p>
