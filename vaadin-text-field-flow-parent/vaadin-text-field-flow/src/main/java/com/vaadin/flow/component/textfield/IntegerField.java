@@ -47,7 +47,7 @@ import com.vaadin.flow.function.SerializableFunction;
  * </ul>
  * <p>
  * Error messages for unparsable input and constraints can be configured with
- * the {@link NumberFieldI18n} object, using the respective properties. If you
+ * the {@link IntegerFieldI18n} object, using the respective properties. If you
  * want to provide a single catch-all error message, you can also use the
  * {@link #setErrorMessage(String)} method. Note that such an error message will
  * take priority over i18n error messages if both are set.
