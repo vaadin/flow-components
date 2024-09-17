@@ -65,6 +65,24 @@ public class RichTextEditorSanitizationTest {
                 RichTextEditor.sanitize("<h3>Foo</h3>"));
     }
 
+    // Style group sanitization
+
+    @Test
+    public void sanitizeStyleColor_StyleColorPersist() {
+        Assert.assertEquals(
+                "<p><span style=\"color: rgb(230, 0, 0);\">Foo</span></p>",
+                RichTextEditor.sanitize(
+                        "<p><span style=\"color: rgb(230, 0, 0);\">Foo</span></p>"));
+    }
+
+    @Test
+    public void sanitizeStyleBackgroundColor_StyleBackgroundColorPersist() {
+        Assert.assertEquals(
+                "<p><span style=\"background-color: rgb(230, 0, 0);\">Foo</span></p>",
+                RichTextEditor.sanitize(
+                        "<p><span style=\"background-color: rgb(230, 0, 0);\">Foo</span></p>"));
+    }
+
     // Super - / Sub - scripts group sanitization
 
     @Test

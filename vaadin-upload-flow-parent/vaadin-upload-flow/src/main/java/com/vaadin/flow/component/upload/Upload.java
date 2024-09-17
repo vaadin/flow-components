@@ -59,9 +59,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/upload", version = "24.5.0-alpha8")
+@NpmPackage(value = "@vaadin/upload", version = "24.5.0-beta1")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasSize, HasStyle {
 
@@ -209,6 +209,7 @@ public class Upload extends Component implements HasSize, HasStyle {
      */
     public void setMaxFiles(int maxFiles) {
         getElement().setProperty("maxFiles", maxFiles);
+        getElement().executeJs("this.maxFiles = $0", maxFiles);
     }
 
     /**
@@ -218,6 +219,11 @@ public class Upload extends Component implements HasSize, HasStyle {
      */
     public int getMaxFiles() {
         return (int) getElement().getProperty("maxFiles", 0.0);
+    }
+
+    private void removeMaxFiles() {
+        getElement().removeProperty("maxFiles");
+        getElement().executeJs("this.maxFiles = Infinity");
     }
 
     /**
@@ -632,13 +638,20 @@ public class Upload extends Component implements HasSize, HasStyle {
      *            receiver to use for file reception
      */
     public void setReceiver(Receiver receiver) {
+        Receiver oldReceiver = this.receiver;
         this.receiver = receiver;
-        if (receiver instanceof MultiFileReceiver) {
-            getElement().removeProperty("maxFiles");
-            getElement().executeJs("this.maxFiles = Infinity");
+
+        if (isMultiFileReceiver(receiver)) {
+            if (oldReceiver != null && !isMultiFileReceiver(oldReceiver)) {
+                removeMaxFiles();
+            }
         } else {
             setMaxFiles(1);
         }
+    }
+
+    private boolean isMultiFileReceiver(Receiver receiver) {
+        return receiver instanceof MultiFileReceiver;
     }
 
     /**
