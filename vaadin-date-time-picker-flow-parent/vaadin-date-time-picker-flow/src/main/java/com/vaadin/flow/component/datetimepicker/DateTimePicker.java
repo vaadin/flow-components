@@ -436,7 +436,6 @@ public class DateTimePicker
         LocalDateTime oldValue = getValue();
 
         value = sanitizeValue(value);
-        super.setValue(value);
 
         boolean isInputValuePresent = isInputValuePresent();
         boolean isValueRemainedEmpty = valueEquals(oldValue, getEmptyValue())
@@ -449,6 +448,7 @@ public class DateTimePicker
             synchronizeChildComponentValues(value);
         }
 
+        super.setValue(value);
     }
 
     /**

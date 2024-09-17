@@ -30,10 +30,10 @@ public class BasicValidationPage
     public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
 
     public static final String REQUIRED_ERROR_MESSAGE = "Field is required";
-    public static final String BAD_INPUT_ERROR_MESSAGE = "Value has incorrect format";
-    public static final String INCOMPLETE_INPUT_ERROR_MESSAGE = "Incomplete input";
-    public static final String MIN_ERROR_MESSAGE = "Value is too small";
-    public static final String MAX_ERROR_MESSAGE = "Value is too big";
+    public static final String BAD_INPUT_ERROR_MESSAGE = "Invalid date format";
+    public static final String INCOMPLETE_INPUT_ERROR_MESSAGE = "Must fill in both date and time";
+    public static final String MIN_ERROR_MESSAGE = "Date is too early";
+    public static final String MAX_ERROR_MESSAGE = "Date is too late";
 
     public BasicValidationPage() {
         super();
@@ -50,12 +50,12 @@ public class BasicValidationPage
         }));
 
         add(createInput(MIN_INPUT, "Set min date time", event -> {
-            var value = LocalDateTime.parse(event.getValue());
+            LocalDateTime value = LocalDateTime.parse(event.getValue());
             testField.setMin(value);
         }));
 
         add(createInput(MAX_INPUT, "Set max date time", event -> {
-            var value = LocalDateTime.parse(event.getValue());
+            LocalDateTime value = LocalDateTime.parse(event.getValue());
             testField.setMax(value);
         }));
 
