@@ -21,8 +21,8 @@ import com.vaadin.tests.AbstractComponentIT;
 /**
  * @author Vaadin Ltd
  */
-@TestPath("vaadin-dashboard/drag-drop")
-public class DashboardDragDropIT extends AbstractComponentIT {
+@TestPath("vaadin-dashboard/drag-reorder")
+public class DashboardDragReorderIT extends AbstractComponentIT {
 
     private DashboardElement dashboardElement;
 
@@ -36,7 +36,7 @@ public class DashboardDragDropIT extends AbstractComponentIT {
     public void reorderWidgetOnClientSide_itemsAreReorderedCorrectly() {
         var draggedWidget = dashboardElement.getWidgets().get(0);
         var targetWidget = dashboardElement.getWidgets().get(1);
-        dragDropElement(draggedWidget, targetWidget);
+        dragResizeElement(draggedWidget, targetWidget);
         Assert.assertEquals(draggedWidget.getTitle(),
                 dashboardElement.getWidgets().get(1).getTitle());
     }
@@ -45,7 +45,7 @@ public class DashboardDragDropIT extends AbstractComponentIT {
     public void reorderSectionOnClientSide_itemsAreReorderedCorrectly() {
         var draggedSection = dashboardElement.getSections().get(1);
         var targetWidget = dashboardElement.getWidgets().get(0);
-        dragDropElement(draggedSection, targetWidget);
+        dragResizeElement(draggedSection, targetWidget);
         Assert.assertEquals(draggedSection.getTitle(),
                 dashboardElement.getSections().get(0).getTitle());
     }
@@ -55,7 +55,7 @@ public class DashboardDragDropIT extends AbstractComponentIT {
         var firstSection = dashboardElement.getSections().get(0);
         var draggedWidget = firstSection.getWidgets().get(0);
         var targetWidget = firstSection.getWidgets().get(1);
-        dragDropElement(draggedWidget, targetWidget);
+        dragResizeElement(draggedWidget, targetWidget);
         firstSection = dashboardElement.getSections().get(0);
         Assert.assertEquals(draggedWidget.getTitle(),
                 firstSection.getWidgets().get(1).getTitle());
@@ -70,22 +70,22 @@ public class DashboardDragDropIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setDashboardNotEditable_widgetCannotBeDragged() {
+    public void setDashboardNotEditable_dragHandleNotVisible() {
         var widget = dashboardElement.getWidgets().get(0);
-        Assert.assertTrue(isHeaderActionsVisible(widget));
+        Assert.assertTrue(isDragHandleVisible(widget));
         clickElementWithJs("toggle-editable");
-        Assert.assertFalse(isHeaderActionsVisible(widget));
+        Assert.assertFalse(isDragHandleVisible(widget));
     }
 
     @Test
-    public void setDashboardEditable_widgetCanBeDragged() {
+    public void setDashboardEditable_dragHandleNotVisible() {
         clickElementWithJs("toggle-editable");
         clickElementWithJs("toggle-editable");
         Assert.assertTrue(
-                isHeaderActionsVisible(dashboardElement.getWidgets().get(0)));
+                isDragHandleVisible(dashboardElement.getWidgets().get(0)));
     }
 
-    private void dragDropElement(TestBenchElement draggedElement,
+    private void dragResizeElement(TestBenchElement draggedElement,
             TestBenchElement targetElement) {
         var dragHandle = getDragHandle(draggedElement);
 
@@ -99,10 +99,8 @@ public class DashboardDragDropIT extends AbstractComponentIT {
                 .release(targetElement).build().perform();
     }
 
-    private static boolean isHeaderActionsVisible(TestBenchElement element) {
-        TestBenchElement headerActions = element.$("*").withId("header-actions")
-                .first();
-        return !"none".equals(headerActions.getCssValue("display"));
+    private static boolean isDragHandleVisible(TestBenchElement element) {
+        return !"none".equals(getDragHandle(element).getCssValue("display"));
     }
 
     private static TestBenchElement getDragHandle(TestBenchElement element) {
