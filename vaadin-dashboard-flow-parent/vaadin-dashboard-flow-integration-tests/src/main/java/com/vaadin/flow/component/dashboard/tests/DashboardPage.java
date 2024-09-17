@@ -128,9 +128,14 @@ public class DashboardPage extends Div {
                 click -> dashboard.setMaximumColumnCount(null));
         setMaximumColumnCountNull.setId("set-maximum-column-count-null");
 
+        NativeButton toggleEditable = new NativeButton("Toggle editable",
+                e -> dashboard.setEditable(!dashboard.isEditable()));
+        toggleEditable.setId("toggle-editable");
+
         add(addMultipleWidgets, removeFirstAndLastWidgets, removeAll,
                 addSectionWithMultipleWidgets, removeFirstSection,
-                setMaximumColumnCount1, setMaximumColumnCountNull, dashboard);
+                setMaximumColumnCount1, setMaximumColumnCountNull,
+                toggleEditable, dashboard);
     }
 
     private static Optional<DashboardSection> getFirstSection(
