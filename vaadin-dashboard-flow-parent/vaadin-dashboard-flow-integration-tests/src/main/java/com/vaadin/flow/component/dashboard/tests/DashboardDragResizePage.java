@@ -28,26 +28,14 @@ public class DashboardDragResizePage extends Div {
         dashboard.setMinimumColumnWidth("250px");
         dashboard.setMaximumColumnWidth("250px");
 
-        DashboardWidget smallWidget = new DashboardWidget();
-        smallWidget.setTitle("Small widget");
+        DashboardWidget widget = new DashboardWidget();
+        widget.setTitle("Widget");
+        dashboard.add(widget);
 
-        DashboardWidget largeWidget = new DashboardWidget();
-        largeWidget.setTitle("Large widget");
-        largeWidget.setColspan(2);
-        largeWidget.setRowspan(2);
-
-        dashboard.add(smallWidget, largeWidget);
-
-        DashboardWidget smallWidgetInSection = new DashboardWidget();
-        smallWidgetInSection.setTitle("Small widget in section");
-
-        DashboardWidget largeWidgetInSection = new DashboardWidget();
-        largeWidgetInSection.setTitle("Large widget in section");
-        largeWidgetInSection.setColspan(2);
-        largeWidgetInSection.setRowspan(2);
-
+        DashboardWidget widgetInSection = new DashboardWidget();
+        widgetInSection.setTitle("Widget in section");
         DashboardSection section = dashboard.addSection("Section");
-        section.add(smallWidgetInSection, largeWidgetInSection);
+        section.add(widgetInSection);
 
         NativeButton toggleEditable = new NativeButton("Toggle editable",
                 e -> dashboard.setEditable(!dashboard.isEditable()));

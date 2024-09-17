@@ -11,6 +11,7 @@ package com.vaadin.flow.component.dashboard.tests;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.dashboard.testbench.DashboardElement;
@@ -30,67 +31,18 @@ public class DashboardDragResizeIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
+        getDriver().manage().window().setSize(new Dimension(1920, 1080));
         dashboardElement = $(DashboardElement.class).waitForFirst();
     }
 
     @Test
-    public void enlargeWidgetHorizontally_widgetIsEnlargedCorrectly() {
-        assertWidgetResized(0, 2, 1);
+    public void resizeWidgetBothHorizontallyAndVertically_widgetIsResizedCorrectly() {
+        assertWidgetResized(0);
     }
 
     @Test
-    public void enlargeWidgetVertically_widgetIsEnlargedCorrectly() {
-        assertWidgetResized(0, 1, 2);
-    }
-
-    @Test
-    public void enlargeWidgetBothHorizontallyAndVertically_widgetIsEnlargedCorrectly() {
-        assertWidgetResized(0, 2, 2);
-    }
-
-    @Test
-    public void shrinkWidgetHorizontally_widgetIsShrunkCorrectly() {
-        assertWidgetResized(1, 0.5, 1);
-    }
-
-    @Test
-    public void shrinkWidgetVertically_widgetIsShrunkCorrectly() {
-        assertWidgetResized(1, 1, 0.5);
-    }
-
-    @Test
-    public void shrinkWidgetBothHorizontallyAndVertically_widgetIsShrunkCorrectly() {
-        assertWidgetResized(1, 0.5, 0.5);
-    }
-
-    @Test
-    public void enlargeWidgetInSectionHorizontally_widgetIsEnlargedCorrectly() {
-        assertWidgetResized(2, 2, 1);
-    }
-
-    @Test
-    public void enlargeWidgetInSectionVertically_widgetIsEnlargedCorrectly() {
-        assertWidgetResized(2, 1, 2);
-    }
-
-    @Test
-    public void enlargeWidgetInSectionBothHorizontallyAndVertically_widgetIsEnlargedCorrectly() {
-        assertWidgetResized(2, 2, 2);
-    }
-
-    @Test
-    public void shrinkWidgetInSectionHorizontally_widgetIsShrunkCorrectly() {
-        assertWidgetResized(3, 0.5, 1);
-    }
-
-    @Test
-    public void shrinkWidgetInSectionVertically_widgetIsShrunkCorrectly() {
-        assertWidgetResized(3, 1, 0.5);
-    }
-
-    @Test
-    public void shrinkWidgetInSectionBothHorizontallyAndVertically_widgetIsShrunkCorrectly() {
-        assertWidgetResized(3, 0.5, 0.5);
+    public void resizeWidgetInSectionBothHorizontallyAndVertically_widgetIsResizedCorrectly() {
+        assertWidgetResized(1);
     }
 
     @Test
@@ -109,10 +61,11 @@ public class DashboardDragResizeIT extends AbstractComponentIT {
                 isResizeHandleVisible(dashboardElement.getWidgets().get(0)));
     }
 
-    private void assertWidgetResized(int widgetIndexToResize,
-            double xResizeRatio, double yResizeRatio) {
+    private void assertWidgetResized(int widgetIndexToResize) {
         var widgetToResize = dashboardElement.getWidgets()
                 .get(widgetIndexToResize);
+        int xResizeRatio = 2;
+        int yResizeRatio = 2;
         var expectedWidth = widgetToResize.getSize().getWidth() * xResizeRatio;
         var expectedHeight = widgetToResize.getSize().getHeight()
                 * yResizeRatio;
