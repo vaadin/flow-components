@@ -395,9 +395,9 @@ public class DatePicker
     }
 
     /**
-     * Sets the minimum date for the field. Dates before that will be disabled
-     * in the calendar overlay. Manual entry of dates before the minimum will
-     * cause the component to invalidate.
+     * Sets the minimum allowed date for this field. Dates before that will be
+     * disabled in the calendar overlay. Manual entry of dates before the
+     * minimum will cause the component to invalidate.
      * <p>
      * The minimum date is inclusive.
      *
@@ -413,7 +413,7 @@ public class DatePicker
     }
 
     /**
-     * Gets the minimum date of the field.
+     * Gets the minimum allowed date for this field.
      *
      * @return the minimum date that is allowed to be selected, or
      *         <code>null</code> if there's no minimum
@@ -424,9 +424,9 @@ public class DatePicker
     }
 
     /**
-     * Sets the maximum date for the field. Dates after that will be disabled in
-     * the calendar overlay. Manual entry of dates after the maximum will cause
-     * the component to invalidate.
+     * Sets the maximum allowed date for this field. Dates after that will be
+     * disabled in the calendar overlay. Manual entry of dates after the maximum
+     * will cause the component to invalidate.
      * <p>
      * The maximum date is inclusive.
      *
@@ -442,7 +442,7 @@ public class DatePicker
     }
 
     /**
-     * Gets the maximum date of the field.
+     * Gets the maximum allowed date for this field.
      *
      * @return the maximum date that is allowed to be selected, or
      *         <code>null</code> if there's no maximum

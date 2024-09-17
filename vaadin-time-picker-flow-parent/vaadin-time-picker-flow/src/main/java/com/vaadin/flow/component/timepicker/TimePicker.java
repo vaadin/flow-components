@@ -700,9 +700,9 @@ public class TimePicker
     }
 
     /**
-     * Sets the minimum time for the field. Times before that won't be displayed
-     * in the dropdown. Manual entry of times before the minimum will cause the
-     * component to invalidate.
+     * Sets the minimum allowed time for this field. Times before that won't be
+     * displayed in the dropdown. Manual entry of times before the minimum will
+     * cause the component to invalidate.
      * <p>
      * The minimum time is inclusive.
      *
@@ -718,7 +718,7 @@ public class TimePicker
     }
 
     /**
-     * Gets the minimum time of the field.
+     * Gets the minimum allowed time for this field.
      *
      * @return the minimum time that is allowed to be selected, or
      *         <code>null</code> if there's no minimum
@@ -729,9 +729,9 @@ public class TimePicker
     }
 
     /**
-     * Sets the maximum time for the field. Times after that won't be displayed
-     * in the dropdown. Manual entry of times after the maximum will cause the
-     * component to invalidate.
+     * Sets the maximum allowed time for this field. Times after that won't be
+     * displayed in the dropdown. Manual entry of times after the maximum will
+     * cause the component to invalidate.
      * <p>
      * The maximum time is inclusive.
      *
@@ -747,7 +747,7 @@ public class TimePicker
     }
 
     /**
-     * Gets the maximum time of the field.
+     * Gets the maximum allowed time for this field.
      *
      * @return the maximum time that is allowed to be selected, or
      *         <code>null</code> if there's no maximum
