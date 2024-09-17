@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.dashboard;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
@@ -22,7 +23,7 @@ import com.vaadin.flow.component.EventData;
 @DomEvent("dashboard-item-resize-start")
 public class DashboardItemResizeStartEvent extends ComponentEvent<Dashboard> {
 
-    private final int nodeId;
+    private final Component resizedItem;
 
     /**
      * Creates a dashboard item reorder start event.
@@ -38,15 +39,17 @@ public class DashboardItemResizeStartEvent extends ComponentEvent<Dashboard> {
     public DashboardItemResizeStartEvent(Dashboard source, boolean fromClient,
             @EventData("event.detail.item.nodeid") int nodeId) {
         super(source, fromClient);
-        this.nodeId = nodeId;
+        this.resizedItem = source.getWidgets().stream()
+                .filter(child -> nodeId == child.getElement().getNode().getId())
+                .findAny().orElse(null);
     }
 
     /**
-     * Returns the node ID of the resized item
+     * Returns the resized item
      *
-     * @return node ID of the resized item
+     * @return the resized item
      */
-    public int getNodeId() {
-        return nodeId;
+    public Component getResizedItem() {
+        return resizedItem;
     }
 }

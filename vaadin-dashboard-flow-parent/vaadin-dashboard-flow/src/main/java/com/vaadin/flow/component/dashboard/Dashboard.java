@@ -474,13 +474,10 @@ public class Dashboard extends Component implements HasWidgets {
 
     private void onItemResizeEnd(
             DashboardItemResizeEndEvent dashboardItemResizeEndEvent) {
-        int nodeId = dashboardItemResizeEndEvent.getNodeId();
-        getWidgets().stream().filter(
-                widget -> nodeId == widget.getElement().getNode().getId())
-                .findAny().ifPresent(widget -> {
-                    widget.setRowspan(dashboardItemResizeEndEvent.getRowspan());
-                    widget.setColspan(dashboardItemResizeEndEvent.getColspan());
-                });
+        DashboardWidget resizedWidget = (DashboardWidget) dashboardItemResizeEndEvent
+                .getResizedItem();
+        resizedWidget.setRowspan(dashboardItemResizeEndEvent.getRowspan());
+        resizedWidget.setColspan(dashboardItemResizeEndEvent.getColspan());
     }
 
     private void reorderItems(JsonArray orderedItemsFromClient) {
