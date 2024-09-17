@@ -82,10 +82,10 @@ import com.vaadin.flow.shared.Registration;
  * the value is cleared programmatically. This is because radio buttons, by
  * design, don't allow users to clear a selection through UI interaction. If the
  * required error occurs, the component is marked as invalid and an error
- * message is displayed below the input.
+ * message is displayed below the group.
  * <p>
  * The required error message can be configured using either
- * {@link SelectI18n#setRequiredErrorMessage(String)} or
+ * {@link RadioButtonGroupI18n#setRequiredErrorMessage(String)} or
  * {@link #setErrorMessage(String)}.
  * <p>
  * For more advanced validation that requires custom rules, you can use

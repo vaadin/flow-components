@@ -94,7 +94,7 @@ import elemental.json.JsonArray;
  * Validation is triggered whenever the user initiates a value change by
  * toggling a checkbox. Programmatic value changes trigger validation as well.
  * If validation fails, the component is marked as invalid and an error message
- * is displayed below the input.
+ * is displayed below the group.
  * <p>
  * The required error message can be configured using either
  * {@link CheckboxGroupI18n#setRequiredErrorMessage(String)} or
