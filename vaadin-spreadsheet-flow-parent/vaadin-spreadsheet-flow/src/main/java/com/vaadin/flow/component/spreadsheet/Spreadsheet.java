@@ -765,8 +765,9 @@ public class Spreadsheet extends Component
 
         @Override
         public void updateFormulaBar(String possibleName, int col, int row) {
-            getElement().callJsFunction("updateFormulaBar", possibleName, col,
-                    row);
+            getElement().executeJs(
+                    "queueMicrotask(() => this.updateFormulaBar($0, $1, $2));",
+                    possibleName, col, row);
         }
 
         @Override
@@ -6026,5 +6027,32 @@ public class Spreadsheet extends Component
             RowHeaderDoubleClickListener listener) {
         return addListener(RowHeaderDoubleClickEvent.class,
                 listener::onRowHeaderDoubleClick);
+    }
+
+    /**
+     * Define the theme of the Spreadsheet.
+     *
+     * @param theme
+     *            SpreadsheetTheme
+     */
+    public void setTheme(SpreadsheetTheme theme) {
+        getElement().setAttribute("theme", theme.getThemeName());
+    }
+
+    /**
+     * Themes for the Spreadsheet.
+     */
+    public enum SpreadsheetTheme {
+        LUMO("lumo"), VALO("");
+
+        private final String theme;
+
+        SpreadsheetTheme(String theme) {
+            this.theme = theme;
+        }
+
+        String getThemeName() {
+            return theme;
+        }
     }
 }
