@@ -474,8 +474,8 @@ public class Dashboard extends Component implements HasWidgets {
 
     private void onItemResizeEnd(
             DashboardItemResizeEndEvent dashboardItemResizeEndEvent) {
-        DashboardWidget resizedWidget = (DashboardWidget) dashboardItemResizeEndEvent
-                .getResizedItem();
+        DashboardWidget resizedWidget = dashboardItemResizeEndEvent
+                .getResizedWidget();
         resizedWidget.setRowspan(dashboardItemResizeEndEvent.getRowspan());
         resizedWidget.setColspan(dashboardItemResizeEndEvent.getColspan());
     }

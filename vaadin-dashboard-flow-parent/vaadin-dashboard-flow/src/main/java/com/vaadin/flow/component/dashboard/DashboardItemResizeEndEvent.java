@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.dashboard;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
@@ -23,33 +22,33 @@ import com.vaadin.flow.component.EventData;
 @DomEvent("dashboard-item-resize-end")
 public class DashboardItemResizeEndEvent extends ComponentEvent<Dashboard> {
 
-    private final Component resizedItem;
+    private final DashboardWidget resizedWidget;
 
     private final int colspan;
 
     private final int rowspan;
 
     /**
-     * Creates a dashboard item reorder end event.
+     * Creates a dashboard item resize end event.
      *
      * @param source
-     *            Dashboard that contains the item that was dragged
+     *            Dashboard that contains the widget that was dragged
      * @param fromClient
      *            <code>true</code> if the event originated from the client
      *            side, <code>false</code> otherwise
      * @param nodeId
-     *            Node ID the resized item
+     *            Node ID the resized widget
      * @param colspan
-     *            New colspan of the resized item
+     *            New colspan of the resized widget
      * @param rowspan
-     *            New rowspan of the resized item
+     *            New rowspan of the resized widget
      */
     public DashboardItemResizeEndEvent(Dashboard source, boolean fromClient,
             @EventData("event.detail.item.nodeid") int nodeId,
             @EventData("event.detail.item.colspan") int colspan,
             @EventData("event.detail.item.rowspan") int rowspan) {
         super(source, fromClient);
-        this.resizedItem = source.getWidgets().stream()
+        this.resizedWidget = source.getWidgets().stream()
                 .filter(child -> nodeId == child.getElement().getNode().getId())
                 .findAny().orElse(null);
         this.colspan = colspan;
@@ -57,12 +56,12 @@ public class DashboardItemResizeEndEvent extends ComponentEvent<Dashboard> {
     }
 
     /**
-     * Returns the resized item
+     * Returns the resized widget
      *
-     * @return the resized item
+     * @return the resized widget
      */
-    public Component getResizedItem() {
-        return resizedItem;
+    public DashboardWidget getResizedWidget() {
+        return resizedWidget;
     }
 
     /**
