@@ -43,6 +43,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -55,15 +56,23 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-popover")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
-@NpmPackage(value = "@vaadin/popover", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
+@NpmPackage(value = "@vaadin/popover", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
+@JsModule("./vaadin-popover/popover.ts")
 public class Popover extends Component implements HasAriaLabel, HasComponents,
         HasThemeVariant<PopoverVariant> {
 
+    private static Integer defaultHideDelay;
+    private static Integer defaultFocusDelay;
+    private static Integer defaultHoverDelay;
+    private static boolean uiInitListenerRegistered = false;
+
     private Component target;
     private Registration targetAttachRegistration;
+    private Registration targetDetachRegistration;
+    private boolean autoAddedToTheUi;
 
     private boolean openOnClick = true;
     private boolean openOnHover = false;
@@ -80,6 +89,100 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
         updateTrigger();
         setOverlayRole("dialog");
+    }
+
+    /**
+     * Creates a popover with given components inside.
+     *
+     * @param components
+     *            the components inside the popover
+     * @see #add(Component...)
+     */
+    public Popover(Component... components) {
+        this();
+        add(components);
+    }
+
+    /**
+     * Sets the default focus delay to be used by all popover instances (running
+     * in the same JVM), except for those that have focus delay configured using
+     * {@link #setFocusDelay(int)}.
+     *
+     * @param defaultFocusDelay
+     *            the default focus delay
+     */
+    public static void setDefaultFocusDelay(int defaultFocusDelay) {
+        Popover.defaultFocusDelay = defaultFocusDelay;
+        applyConfiguration();
+    }
+
+    /**
+     * Sets the default hide delay to be used by all popover instances (running
+     * in the same JVM), except for those that have hide delay configured using
+     * {@link #setHideDelay(int)}.
+     *
+     * @param defaultHideDelay
+     *            the default hide delay
+     */
+    public static void setDefaultHideDelay(int defaultHideDelay) {
+        Popover.defaultHideDelay = defaultHideDelay;
+        applyConfiguration();
+    }
+
+    /**
+     * Sets the default hover delay to be used by all popover instances (running
+     * in the same JVM), except for those that have hover delay configured using
+     * {@link #setHoverDelay(int)}.
+     *
+     * @param defaultHoverDelay
+     *            the default hover delay
+     */
+    public static void setDefaultHoverDelay(int defaultHoverDelay) {
+        Popover.defaultHoverDelay = defaultHoverDelay;
+        applyConfiguration();
+    }
+
+    private static void applyConfiguration() {
+        if (UI.getCurrent() != null) {
+            // Apply the default popover configuration for the current UI
+            applyConfigurationForUI(UI.getCurrent());
+        }
+
+        if (!uiInitListenerRegistered) {
+            // Apply the popover configuration for all new UIs
+            VaadinService.getCurrent()
+                    .addUIInitListener(e -> applyConfigurationForUI(e.getUI()));
+            uiInitListenerRegistered = true;
+        }
+    }
+
+    private static void applyConfigurationForUI(UI ui) {
+        ui.getElement().executeJs(
+                "((window.Vaadin ||= {}).Flow ||= {}).popover ||= {}");
+
+        if (defaultHideDelay != null) {
+            ui.getElement().executeJs(
+                    "const popover = window.Vaadin.Flow.popover;"
+                            + "popover.defaultHideDelay = $0;"
+                            + "popover.setDefaultHideDelay?.($0)",
+                    defaultHideDelay);
+        }
+
+        if (defaultFocusDelay != null) {
+            ui.getElement().executeJs(
+                    "const popover = window.Vaadin.Flow.popover;"
+                            + "popover.defaultFocusDelay = $0;"
+                            + "popover.setDefaultFocusDelay?.($0)",
+                    defaultFocusDelay);
+        }
+
+        if (defaultHoverDelay != null) {
+            ui.getElement().executeJs(
+                    "const popover = window.Vaadin.Flow.popover;"
+                            + "popover.defaultHoverDelay = $0;"
+                            + "popover.setDefaultHoverDelay?.($0)",
+                    defaultHoverDelay);
+        }
     }
 
     /**
@@ -154,6 +257,11 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * popover is modal, interacting with elements behind it will be prevented
      * until the popover is closed.
      * <p>
+     * Setting the modal to {@code true} does not enable showing the backdrop
+     * (modality curtain) automatically. This should be done separately using
+     * {@link #setBackdropVisible(boolean)} or optionally passed as a second
+     * parameter using {@link #setModal(boolean, boolean)}.
+     * <p>
      * NOTE: this setting does not involve server-side modality, as the modal
      * popover is typically not used to prevent anything else from happening
      * while it's open.
@@ -163,9 +271,33 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * @param modal
      *            {@code true} to enable popover to open as modal, {@code false}
      *            otherwise.
+     * @see #setBackdropVisible(boolean)
+     * @see #setModal(boolean, boolean)
      */
     public void setModal(boolean modal) {
         getElement().setProperty("modal", modal);
+    }
+
+    /**
+     * Sets whether component should open modal or modeless popover and whether
+     * the component should show a backdrop (modality curtain) when opened.
+     * <p>
+     * NOTE: this setting does not involve server-side modality, as the modal
+     * popover is typically not used to prevent anything else from happening
+     * while it's open.
+     * <p>
+     * By default, the popover is non-modal and has no modality curtain.
+     *
+     * @param modal
+     *            {@code true} to enable popover to open as modal, {@code false}
+     *            otherwise.
+     * @param backdropVisible
+     *            {@code true} to show the backdrop, {@code false} otherwise.
+     * @see #setBackdropVisible(boolean)
+     */
+    public void setModal(boolean modal, boolean backdropVisible) {
+        setModal(modal);
+        setBackdropVisible(backdropVisible);
     }
 
     /**
@@ -186,6 +318,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      *
      * @param backdropVisible
      *            {@code true} to show the backdrop, {@code false} otherwise.
+     * @see #setModal(boolean)
      */
     public void setBackdropVisible(boolean backdropVisible) {
         getElement().setProperty("withBackdrop", backdropVisible);
@@ -316,17 +449,25 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Sets position of the popover with respect to its target.
+     * Sets position of the popover with respect to its {@code target}.
+     * <p>
+     * NOTE: when the target component is not set, the position does not take
+     * any effect and the popover is rendered in the middle of the screen.
      *
      * @param position
      *            the position to set
+     * @see #setFor(String)
+     * @see #setTarget(Component)
      */
     public void setPosition(PopoverPosition position) {
         getElement().setProperty("position", position.getPosition());
     }
 
     /**
-     * Gets position of the popover with respect to its target.
+     * Gets position of the popover with respect to its {@code target}.
+     * <p>
+     * NOTE: when the target component is not set, the position does not take
+     * any effect and the popover is rendered in the middle of the screen.
      *
      * @return the position
      */
@@ -345,18 +486,18 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * otherwise a warning in the Javascript console is shown.
      *
      * @param id
-     *            the id of component for this popup, can be {@code null} to
-     *            remove the target
+     *            the id of target component for this popover, can be
+     *            {@code null} to remove the target
      */
     public void setFor(String id) {
         getElement().setProperty("for", id);
     }
 
     /**
-     * Gets the {@code id} of target component of this popup, or {@code null} if
-     * the {@code id} was not set.
+     * Gets the {@code id} of target component of the popover, or {@code null}
+     * if the {@code id} was not set.
      *
-     * @return the id of target component of this popup
+     * @return the id of target component for this popover
      * @see #setFor(String)
      */
     public String getFor() {
@@ -364,8 +505,8 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * The delay in milliseconds before the popover is opened on target keyboard
-     * focus.
+     * The delay in milliseconds before the popover is opened on target focus.
+     * Defaults to {@code 0}.
      *
      * @param focusDelay
      *            the delay in milliseconds
@@ -375,8 +516,8 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * The delay in milliseconds before the popover is opened on target keyboard
-     * focus.
+     * The delay in milliseconds before the popover is opened on target focus.
+     * Defaults to {@code 0}.
      *
      * @return the delay in milliseconds
      */
@@ -386,6 +527,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
     /**
      * The delay in milliseconds before the popover is opened on target hover.
+     * Defaults to {@code 0}.
      *
      * @param hoverDelay
      *            the delay in milliseconds
@@ -396,6 +538,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
     /**
      * The delay in milliseconds before the popover is opened on target hover.
+     * Defaults to {@code 0}.
      *
      * @return the delay in milliseconds
      */
@@ -405,7 +548,9 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
     /**
      * The delay in milliseconds before the popover is closed on losing hover.
-     * On target blur, the popover is closed immediately.
+     * Defaults to {@code 0}.
+     * <p>
+     * NOTE: on target blur, the popover is closed immediately.
      *
      * @param hideDelay
      *            the delay in milliseconds
@@ -416,7 +561,9 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
     /**
      * The delay in milliseconds before the popover is closed on losing hover.
-     * On target blur, the popover is closed immediately.
+     * Defaults to {@code 0}.
+     * <p>
+     * NOTE: on target blur, the popover is closed immediately.
      *
      * @return the delay in milliseconds
      */
@@ -425,7 +572,8 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Sets whether the popover can be opened via target click.
+     * Sets whether the popover can be opened via target click. Defaults to
+     * {@code true}.
      *
      * @param openOnClick
      *            {@code true} to allow opening the popover via target click,
@@ -437,8 +585,8 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Gets whether the popover can be opened via target click, which is
-     * {@code true} by default.
+     * Gets whether the popover can be opened via target click. Defaults to
+     * {@code true}.
      *
      * @return {@code true} if the popover can be opened with target click,
      *         {@code false} otherwise.
@@ -448,7 +596,8 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Sets whether the popover can be opened via target focus.
+     * Sets whether the popover can be opened via target focus. Defaults to
+     * {@code false}.
      *
      * @param openOnFocus
      *            {@code true} to allow opening the popover via target focus,
@@ -460,8 +609,8 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Gets whether the popover can be opened via target focus, which is
-     * {@code false} by default.
+     * Gets whether the popover can be opened via target focus. Defaults to
+     * {@code false}.
      *
      * @return {@code true} if the popover can be opened with target focus,
      *         {@code false} otherwise.
@@ -471,7 +620,8 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Sets whether the popover can be opened via target hover.
+     * Sets whether the popover can be opened via target hover. Defaults to
+     * {@code false}.
      *
      * @param openOnHover
      *            {@code true} to allow opening the popover via target hover,
@@ -483,8 +633,8 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Gets whether the popover can be opened via target hover, which is
-     * {@code false} by default.
+     * Gets whether the popover can be opened via target hover. Defaults to
+     * {@code false}.
      *
      * @return {@code true} if the popover can be opened with target hover,
      *         {@code false} otherwise.
@@ -516,6 +666,9 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * <p>
      * By default, the popover can be opened with a click on the target
      * component.
+     * <p>
+     * Note: setting target will also add the popover to the {@code <body>} if
+     * it's not yet attached anywhere.
      *
      * @param target
      *            the target component for this popover, can be {@code null} to
@@ -531,6 +684,12 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
         if (this.target != null) {
             targetAttachRegistration.remove();
+            targetDetachRegistration.remove();
+        }
+
+        if (autoAddedToTheUi) {
+            getElement().removeFromParent();
+            autoAddedToTheUi = false;
         }
 
         this.target = target;
@@ -545,10 +704,22 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
         target.getUI().ifPresent(this::onTargetAttach);
         targetAttachRegistration = target
                 .addAttachListener(e -> onTargetAttach(e.getUI()));
+        targetDetachRegistration = target.addDetachListener(e -> {
+            if (autoAddedToTheUi) {
+                getElement().removeFromParent();
+                autoAddedToTheUi = false;
+            }
+        });
     }
 
     private void onTargetAttach(UI ui) {
         if (target != null) {
+            ui.beforeClientResponse(ui, context -> {
+                if (getElement().getNode().getParent() == null) {
+                    ui.addToModalComponent(this);
+                    autoAddedToTheUi = true;
+                }
+            });
             getElement().executeJs("this.target = $0", target.getElement());
         }
     }

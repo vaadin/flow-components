@@ -75,9 +75,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/radio-group", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/radio-group", version = "24.5.0-beta1")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
@@ -628,9 +628,15 @@ public class RadioButtonGroup<T>
             // Ignore new size requests unless the last one has been executed
             // so as to avoid multiple beforeClientResponses.
             if (sizeRequest == null) {
-                sizeRequest = ui -> {
-                    fireSizeEvent();
-                    sizeRequest = null;
+                // Using anonymous class to fix serialization issue:
+                // https://github.com/vaadin/flow-components/issues/6555
+                // Do not replace with lambda
+                sizeRequest = new SerializableConsumer<>() {
+                    @Override
+                    public void accept(UI ui) {
+                        fireSizeEvent();
+                        sizeRequest = null;
+                    }
                 };
                 // Size event is fired before client response so as to avoid
                 // multiple size change events during server round trips

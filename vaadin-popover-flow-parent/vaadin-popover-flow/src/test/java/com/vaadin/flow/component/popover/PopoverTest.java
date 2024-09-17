@@ -265,6 +265,17 @@ public class PopoverTest {
     }
 
     @Test
+    public void setModalAndBackdropVisible() {
+        popover.setModal(true, true);
+        Assert.assertTrue(popover.isModal());
+        Assert.assertTrue(popover.isBackdropVisible());
+
+        popover.setModal(false, false);
+        Assert.assertFalse(popover.isModal());
+        Assert.assertFalse(popover.isBackdropVisible());
+    }
+
+    @Test
     public void setAutofocus_isAutofocus() {
         Assert.assertFalse(popover.isAutofocus());
         Assert.assertFalse(
@@ -273,5 +284,14 @@ public class PopoverTest {
         popover.setAutofocus(true);
         Assert.assertTrue(popover.isAutofocus());
         Assert.assertTrue(popover.getElement().getProperty("autofocus", false));
+    }
+
+    @Test
+    public void popoverWithContent() {
+        Div content = new Div();
+        Popover popoverWithContent = new Popover(content);
+        Assert.assertEquals(1, popoverWithContent.getChildren().count());
+        Assert.assertSame(content,
+                popoverWithContent.getChildren().findFirst().get());
     }
 }

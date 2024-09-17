@@ -212,10 +212,10 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.5.0-alpha7")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.5.0-alpha7")
+@NpmPackage(value = "@vaadin/grid", version = "24.5.0-beta1")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.5.0-beta1")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -440,7 +440,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha7")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -1624,15 +1624,47 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             Class<T> beanType,
             SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuilder,
             B dataCommunicatorBuilder) {
+        this(beanType, updateQueueBuilder, dataCommunicatorBuilder, true);
+    }
+
+    /**
+     * Creates a new grid with an initial set of columns for each of the bean's
+     * properties. The property-values of the bean will be converted to Strings.
+     * Full names of the properties will be used as the
+     * {@link Column#setKey(String) column keys} and the property captions will
+     * be used as the {@link Column#setHeader(String) column headers}.
+     * <p>
+     * When autoCreateColumns is <code>true</code>, only the direct properties
+     * of the bean are included and they will be in alphabetical order. Use
+     * {@link Grid#setColumns(String...)} to define which properties to include
+     * and in which order. You can also add a column for an individual property
+     * with {@link #addColumn(String)}. Both of these methods support also
+     * sub-properties with dot-notation, eg.
+     * <code>"property.nestedProperty"</code>.
+     *
+     * @param beanType
+     *            the bean type to use, not <code>null</code>
+     * @param updateQueueBuilder
+     *            the builder for new {@link UpdateQueue} instance
+     * @param dataCommunicatorBuilder
+     *            Builder for {@link DataCommunicator} implementation this Grid
+     *            uses to handle all data communication.
+     * @param <B>
+     *            the data communicator builder type
+     * @param <U>
+     *            the GridArrayUpdater type
+     * @param autoCreateColumns
+     *            when <code>true</code>, columns are created automatically for
+     *            the properties of the beanType
+     */
+    protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
+            Class<T> beanType,
+            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuilder,
+            B dataCommunicatorBuilder, boolean autoCreateColumns) {
         this(50, updateQueueBuilder, dataCommunicatorBuilder);
-        Objects.requireNonNull(beanType, "Bean type can't be null");
         Objects.requireNonNull(dataCommunicatorBuilder,
                 "Data communicator builder can't be null");
-        this.beanType = beanType;
-        propertySet = BeanPropertySet.get(beanType);
-        propertySet.getProperties()
-                .filter(property -> !property.isSubProperty())
-                .forEach(this::addColumn);
+        configureBeanType(beanType, autoCreateColumns);
     }
 
     /**
@@ -4033,8 +4065,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (autoCreateColumns) {
             propertySet.getProperties()
                     .filter(property -> !property.isSubProperty())
-                    .sorted((prop1, prop2) -> prop1.getName()
-                            .compareTo(prop2.getName()))
                     .forEach(this::addColumn);
         }
 
