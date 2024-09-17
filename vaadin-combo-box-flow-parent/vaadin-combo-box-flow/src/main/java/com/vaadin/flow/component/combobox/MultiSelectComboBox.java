@@ -320,7 +320,8 @@ public class MultiSelectComboBox<TItem>
      * see {@link #setLabel(String)}.
      *
      * @param required
-     *            true to make the field required, false otherwise
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      * @see MultiSelectComboBoxI18n#setRequiredErrorMessage(String)
      */
     @Override
@@ -331,7 +332,7 @@ public class MultiSelectComboBox<TItem>
     /**
      * Gets whether the user is required to provide a value.
      *
-     * @return true if the field is required, false otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
      */
     @Override

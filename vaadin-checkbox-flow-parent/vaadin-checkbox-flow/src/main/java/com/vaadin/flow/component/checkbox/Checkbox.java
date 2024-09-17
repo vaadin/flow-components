@@ -246,7 +246,8 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      * see {@link #setLabel(String)}.
      *
      * @param required
-     *            true to make the field required, false otherwise
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      * @see CheckboxI18n#setRequiredErrorMessage(String)
      */
     @Override
@@ -257,7 +258,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
     /**
      * Gets whether the user is required to select the checkbox.
      *
-     * @return true if the field is required, false otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
      */
     @Override

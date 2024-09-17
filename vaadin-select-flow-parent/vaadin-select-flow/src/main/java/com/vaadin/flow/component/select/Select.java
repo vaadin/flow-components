@@ -690,7 +690,8 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * see {@link #setLabel(String)}.
      *
      * @param required
-     *            true to make the field required, false otherwise
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
@@ -700,7 +701,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     /**
      * Gets whether the user is required to provide a value.
      *
-     * @return true if the field is required, false otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
      */
     @Override

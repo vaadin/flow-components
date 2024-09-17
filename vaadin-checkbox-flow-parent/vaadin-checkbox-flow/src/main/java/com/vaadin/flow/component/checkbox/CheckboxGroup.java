@@ -667,7 +667,8 @@ public class CheckboxGroup<T>
      * see {@link #setLabel(String)}.
      *
      * @param required
-     *            true to make the field required, false otherwise
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      * @see CheckboxGroupI18n#setRequiredErrorMessage(String)
      */
     @Override
@@ -678,7 +679,7 @@ public class CheckboxGroup<T>
     /**
      * Gets whether the user is required to select at least one checkbox.
      *
-     * @return true if the field is required, false otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
      */
     @Override
@@ -689,7 +690,7 @@ public class CheckboxGroup<T>
     /**
      * Alias for {@link #isRequiredIndicatorVisible()}
      *
-     * @return true if the field is required, false otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
      */
     public boolean isRequired() {
         return isRequiredIndicatorVisible();
@@ -699,7 +700,8 @@ public class CheckboxGroup<T>
      * Alias for {@link #setRequiredIndicatorVisible(boolean)}.
      *
      * @param required
-     *            true to make the field required, false otherwise
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      */
     public void setRequired(boolean required) {
         setRequiredIndicatorVisible(required);

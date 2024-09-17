@@ -544,7 +544,8 @@ public class RadioButtonGroup<T>
      * see {@link #setLabel(String)}.
      *
      * @param required
-     *            true to make the field required, false otherwise
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      * @see RadioButtonGroupI18n#setRequiredErrorMessage(String)
      */
     @Override
@@ -555,7 +556,7 @@ public class RadioButtonGroup<T>
     /**
      * Gets whether the user is required to select a radio button.
      *
-     * @return true if the field is required, false otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
      */
     @Override
@@ -566,7 +567,7 @@ public class RadioButtonGroup<T>
     /**
      * Alias for {@link #isRequiredIndicatorVisible()}
      *
-     * @return true if the field is required, false otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
      */
     public boolean isRequired() {
         return isRequiredIndicatorVisible();
@@ -576,7 +577,8 @@ public class RadioButtonGroup<T>
      * Alias for {@link #setRequiredIndicatorVisible(boolean)}.
      *
      * @param required
-     *            true to make the field required, false otherwise
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      */
     public void setRequired(boolean required) {
         setRequiredIndicatorVisible(required);

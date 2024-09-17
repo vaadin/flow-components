@@ -363,7 +363,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * see {@link #setLabel(String)}.
      *
      * @param required
-     *            true to make the field required, false otherwise
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      */
     @Override
     public void setRequiredIndicatorVisible(boolean required) {
@@ -373,7 +374,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     /**
      * Gets whether the user is required to provide a value.
      *
-     * @return true if the field is required, false otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
      * @see #setRequiredIndicatorVisible(boolean)
      */
     @Override
@@ -384,7 +385,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     /**
      * Alias for {@link #isRequiredIndicatorVisible()}
      *
-     * @return true if the field is required, false otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
      */
     public boolean isRequired() {
         return isRequiredIndicatorVisible();
@@ -394,7 +395,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * Alias for {@link #setRequiredIndicatorVisible(boolean)}.
      *
      * @param required
-     *            true to make the field required, false otherwise
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      */
     public void setRequired(boolean required) {
         setRequiredIndicatorVisible(required);
