@@ -12,7 +12,6 @@ import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardSection;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -37,10 +36,6 @@ public class DashboardDragResizePage extends Div {
         DashboardSection section = dashboard.addSection("Section");
         section.add(widgetInSection);
 
-        NativeButton toggleEditable = new NativeButton("Toggle editable",
-                e -> dashboard.setEditable(!dashboard.isEditable()));
-        toggleEditable.setId("toggle-editable");
-
-        add(toggleEditable, dashboard);
+        add(dashboard);
     }
 }
