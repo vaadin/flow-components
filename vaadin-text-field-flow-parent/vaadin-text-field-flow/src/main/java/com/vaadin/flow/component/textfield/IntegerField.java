@@ -41,9 +41,9 @@ import com.vaadin.flow.function.SerializableFunction;
  * The following constraints are supported:
  * <ul>
  * <li>{@link #setRequiredIndicatorVisible(boolean)}
- * <li>{@link #setMin(double)}
- * <li>{@link #setMax(double)}
- * <li>{@link #setStep(double)}
+ * <li>{@link #setMin(int)}
+ * <li>{@link #setMax(int)}
+ * <li>{@link #setStep(int)}
  * </ul>
  * <p>
  * Error messages for unparsable input and constraints can be configured with
