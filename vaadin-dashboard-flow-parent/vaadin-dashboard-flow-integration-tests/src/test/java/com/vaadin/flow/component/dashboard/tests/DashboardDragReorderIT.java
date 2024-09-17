@@ -78,7 +78,7 @@ public class DashboardDragReorderIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setDashboardEditable_dragHandleNotVisible() {
+    public void setDashboardEditable_dragHandleIsVisible() {
         clickElementWithJs("toggle-editable");
         clickElementWithJs("toggle-editable");
         Assert.assertTrue(

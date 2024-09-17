@@ -54,7 +54,7 @@ public class DashboardDragResizeIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setDashboardEditable_resizeHandleNotVisible() {
+    public void setDashboardEditable_resizeHandleIsVisible() {
         clickElementWithJs("toggle-editable");
         clickElementWithJs("toggle-editable");
         Assert.assertTrue(
