@@ -8,6 +8,12 @@
 const jsdom = require('jsdom');
 const fs = require('fs');
 const path = require('path');
+const customWidthsMap = require('./customWidthsMap.js');
+const defaultWidthsMap = require('string-pixel-width/lib/widthsMap.js');
+const pixelWidth = require('string-pixel-width');
+
+// Combine the default font widths map from string-pixel-width with our additions
+const widthsMap = { ...defaultWidthsMap, ...customWidthsMap };
 
 const { JSDOM } = jsdom;
 
@@ -45,6 +51,55 @@ require("highcharts/modules/bullet")(Highcharts);
 
 win.Date = Date;
 
+function processTextNodes(element, cb, parents = []) {
+    for (var childNode of element.childNodes) {
+        if (childNode.nodeType === Node.ELEMENT_NODE) {
+            processTextNodes(childNode, cb, [element, ...parents]);
+        } else if (childNode.nodeType === Node.TEXT_NODE) {
+            cb(childNode, element, parents);
+        }
+    }
+}
+
+/**
+ * Search up parent chain for an element with the requested attribute set
+ * 
+ * @param {*} ele 
+ * @param {*} attr 
+ * @returns Attribute, possibly inherited, or undefined if not found
+ */
+function findStyleAttr(ele, attr) {
+    while (ele) {
+        if (ele.style[attr]) {
+            return ele.style[attr];
+        }
+        ele = ele.parentElement;
+    }
+}
+
+const sizableFonts = Object.keys(widthsMap);
+
+/**
+ * The string-pixel-width library supports a limited set of fonts. Search a font-family
+ * list for a usable font, or find the next-best fallback
+ */
+function findSizableFont(fontFamily = "") {
+    let fonts = fontFamily.split(",")
+        .map(s => s.trim())
+        .map(s => s.replace(/^"(.*)"$/, '$1')) // Un-quote any quoted entries
+        .map(s => s.toLowerCase());
+
+    // Search the font list for one in our list of sizable fonts
+    let usableFont = fonts.find(f => sizableFonts.includes(f));
+
+    if (!usableFont) {
+        // None of those are sizable. Go with Highcharts default font
+        usableFont = 'times new roman';
+    }
+
+    return usableFont;
+}
+
 // Do some modifications to the jsdom document in order to get the SVG bounding
 // boxes right.
 let oldCreateElementNS = doc.createElementNS;
@@ -76,58 +131,63 @@ doc.createElementNS = (ns, tagName) => {
      */
     elem.getBBox = () => {
         let lineWidth = 0,
+            lineHeight = 0,
             width = 0,
-            height = 0;
+            height = 0,
+            newLine = false;
 
         let children = [].slice.call(
             elem.children.length ? elem.children : [elem]
         );
-
-        children
-            .filter(child => {
-                if (child.getAttribute('class') === 'highcharts-text-outline') {
-                    child.parentNode.removeChild(child);
-                    return false;
-                }
-                return true;
-            })
-            // title tags aren't rendered on screen, so shouldn't contribute to sizing calculations
-            .filter(child => child.tagName !== 'title')
-            .forEach(child => {
-                let fontSize = child.style.fontSize || elem.style.fontSize,
-                    lineHeight,
-                    textLength;
-
-                // The font size and lineHeight is based on empirical values,
-                // copied from the SVGRenderer.fontMetrics function in
-                // Highcharts.
-                if (/px/.test(fontSize)) {
-                    fontSize = parseInt(fontSize, 10);
-                } else {
-                    fontSize = /em/.test(fontSize) ?
-                        parseFloat(fontSize) * 12 :
-                        12;
-                }
-                lineHeight = fontSize < 24 ?
-                    fontSize + 3 :
-                    Math.round(fontSize * 1.2);
-                textLength = child.textContent.length * fontSize * 0.55;
-
-                // Tspans on the same line
-                if (child.getAttribute('dx') !== '0') {
-                    height += lineHeight;
-                }
-
-                // New line
-                if (child.getAttribute('dy') !== null) {
-                    lineWidth = 0;
-                }
-
-                lineWidth += textLength;
-                width = Math.max(width, lineWidth);
-
+        children.forEach(child => {
+            if (child.getAttribute('class') === 'highcharts-text-outline') {
+                child.parentNode.removeChild(child);
             }
-            );
+        });
+
+        processTextNodes(elem, (textNode, child, parents) => {
+            if (child.tagName === 'title') {
+                return;
+            }
+            let fontSize = findStyleAttr(child, 'fontSize'),
+            fontFamily = findStyleAttr(child, 'fontFamily'),
+            textLength;
+
+            // The font size and lineHeight is based on empirical values,
+            // copied from the SVGRenderer.fontMetrics function in
+            // Highcharts.
+            if (/px/.test(fontSize)) {
+                fontSize = parseInt(fontSize, 10);
+            } else {
+                fontSize = /em/.test(fontSize) ?
+                    parseFloat(fontSize) * 12 :
+                    12;
+            }
+            let nodeHeight =fontSize < 24 ?
+                fontSize + 3 :
+                Math.round(fontSize * 1.2);
+            lineHeight = Math.max(lineHeight, nodeHeight);
+            let fontToUse = findSizableFont(fontFamily);
+            textLength = pixelWidth(textNode.data, { size: fontSize, font: fontToUse, map: widthsMap });
+
+            // In practice, dy is used to trigger a new line
+            if (child.getAttribute('dy') !== null) {
+                lineWidth = 0;
+                newLine = true;
+            }
+
+            lineWidth += textLength;
+            width = Math.max(width, lineWidth);
+
+            if (newLine) {
+                height += lineHeight;
+                newLine = false;
+                lineHeight = 0;
+            }
+        });
+
+        // Add the height of the ongoing line
+        height += lineHeight;
 
         // If the width of the text box is 0, always return a 0 height (since the element indeed consumes no space)
         // Returning a non-zero height causes Highcharts to allocate vertical space in the chart for text that doesn't
@@ -157,49 +217,47 @@ doc.createElementNS = (ns, tagName) => {
             elem.children.length ? elem.children : [elem]
         );
 
-        children
-            .filter(child => {
-                if (child.getAttribute('class') === 'highcharts-text-outline') {
-                    child.parentNode.removeChild(child);
-                    return false;
-                }
-                return true;
-            })
-            // title tags aren't rendered on screen, so shouldn't contribute to sizing calculations
-            .filter(child => child.tagName !== 'title')
-            .forEach(child => {
-                if (remaining <= 0) {
-                    return;
-                }
-                let childLength = child.textContent.length;
+        children.forEach(child => {
+            if (child.getAttribute('class') === 'highcharts-text-outline') {
+                child.parentNode.removeChild(child);
+            }
+        });
 
-                if (childLength <= offset) {
-                    offset -= childLength;
+        processTextNodes(elem, (textNode, child, parents) => {
+            if (child.tagName === 'title') {
+                return;
+            }
+
+            if (remaining <= 0) {
+                return;
+            }
+            let childLength = textNode.length;
+
+            if (childLength <= offset) {
+                offset -= childLength;
+            } else {
+                let usedLength = Math.min(childLength - offset, remaining);
+                remaining -= usedLength;
+
+                let fontSize = findStyleAttr(child, 'fontSize'),
+                fontFamily = findStyleAttr(child, 'fontFamily');
+
+                // The font size is based on empirical values,
+                // copied from the SVGRenderer.fontMetrics function in
+                // Highcharts.
+                if (/px/.test(fontSize)) {
+                    fontSize = parseInt(fontSize, 10);
                 } else {
-                    let usedLength = Math.min(childLength - offset, remaining);
-                    remaining -= usedLength;
-
-                    let fontSize = child.style.fontSize || elem.style.fontSize;
-
-                    // The font size is based on empirical values,
-                    // copied from the SVGRenderer.fontMetrics function in
-                    // Highcharts.
-                    if (/px/.test(fontSize)) {
-                        fontSize = parseInt(fontSize, 10);
-                    } else {
-                        fontSize = /em/.test(fontSize) ?
-                            parseFloat(fontSize) * 12 :
-                            12;
-                    }
-                    // Estimate length by multiplying font size by a constant. I presume
-                    // this is intended to be an aspect ratio - or width of the average
-                    // character as a percentage of character height. 0.55 is used in
-                    // getBBox above, but, emperically, 0.7 seems to provide better results
-                    // here.
-                    textLength += usedLength * fontSize * 0.7;
+                    fontSize = /em/.test(fontSize) ?
+                        parseFloat(fontSize) * 12 :
+                        12;
                 }
-
-            });
+                let textToSize = textNode.data.substring(offset, offset + usedLength);
+                let fontToUse = findSizableFont(fontFamily);
+                let measuredWidth = pixelWidth(textToSize, { size: fontSize, font: fontToUse, map: widthsMap });
+                textLength += measuredWidth;
+            }
+        });
 
         return textLength;
     }
