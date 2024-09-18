@@ -65,7 +65,7 @@ public class FormulaFormatterTest {
         Locale locale = new Locale("en", "US");
         FormulaFormatter manager = new FormulaFormatter();
 
-        assertEquals("1000.20 + 2000.10",
+        assertEquals("1000.2 + 2000.1",
                 manager.unFormatFormulaValue("1000.20 + 2000.10", locale));
     }
 
@@ -114,8 +114,72 @@ public class FormulaFormatterTest {
         Locale locale = new Locale("en", "US");
         FormulaFormatter manager = new FormulaFormatter();
 
-        assertEquals("1000.20 + 2000.10",
+        assertEquals("1000.2 + 2000.1",
                 manager.reFormatFormulaValue("1000.20 + 2000.10", locale));
+    }
+
+    @Test
+    public void cellFormulaFormatter_numberWithDotAsSeparator() {
+        Locale locale = new Locale("en", "US");
+        FormulaFormatter manager = new FormulaFormatter();
+
+        assertEquals("1.123456789012346", manager.reFormatFormulaValue(
+                manager.unFormatFormulaValue("1.12345678901234567890", locale),
+                locale));
+        assertEquals("1.23456789012345E9", manager.reFormatFormulaValue(
+                manager.unFormatFormulaValue("1234567890.12345", locale),
+                locale));
+        assertEquals("1.234567890123457E9",
+                manager.reFormatFormulaValue(
+                        manager.unFormatFormulaValue(
+                                "1234567890.12345678901234567890", locale),
+                        locale));
+        assertEquals("1000000000000000", manager.reFormatFormulaValue(
+                manager.unFormatFormulaValue("1000000000000000", locale),
+                locale));
+        assertEquals("1.234567890123457E19", manager.reFormatFormulaValue(
+                manager.unFormatFormulaValue("12345678901234567890", locale),
+                locale));
+        assertEquals("1.234567890123457E39",
+                manager.reFormatFormulaValue(manager.unFormatFormulaValue(
+                        "1234567890123456789012345678901234567890", locale),
+                        locale));
+        assertEquals("1.234567890123457E19",
+                manager.reFormatFormulaValue(manager.unFormatFormulaValue(
+                        "12345678901234567890.12345678901234567890", locale),
+                        locale));
+    }
+
+    @Test
+    public void cellFormulaFormatter_numberWithCommaAsSeparator() {
+        Locale locale = new Locale("it", "IT");
+        FormulaFormatter manager = new FormulaFormatter();
+
+        assertEquals("1,123456789012346", manager.reFormatFormulaValue(
+                manager.unFormatFormulaValue("1,12345678901234567890", locale),
+                locale));
+        assertEquals("1,23456789012345E9", manager.reFormatFormulaValue(
+                manager.unFormatFormulaValue("1234567890,12345", locale),
+                locale));
+        assertEquals("1,234567890123457E9",
+                manager.reFormatFormulaValue(
+                        manager.unFormatFormulaValue(
+                                "1234567890,12345678901234567890", locale),
+                        locale));
+        assertEquals("1000000000000000", manager.reFormatFormulaValue(
+                manager.unFormatFormulaValue("1000000000000000", locale),
+                locale));
+        assertEquals("1,234567890123457E19", manager.reFormatFormulaValue(
+                manager.unFormatFormulaValue("12345678901234567890", locale),
+                locale));
+        assertEquals("1,234567890123457E39",
+                manager.reFormatFormulaValue(manager.unFormatFormulaValue(
+                        "1234567890123456789012345678901234567890", locale),
+                        locale));
+        assertEquals("1,234567890123457E19",
+                manager.reFormatFormulaValue(manager.unFormatFormulaValue(
+                        "12345678901234567890,12345678901234567890", locale),
+                        locale));
     }
 
     @Test
