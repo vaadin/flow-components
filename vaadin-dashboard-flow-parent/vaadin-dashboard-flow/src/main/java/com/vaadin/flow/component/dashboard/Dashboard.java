@@ -11,10 +11,8 @@ package com.vaadin.flow.component.dashboard;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,9 +26,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
 
 /**
  * @author Vaadin Ltd
@@ -482,9 +477,8 @@ public class Dashboard extends Component implements HasWidgets {
         if (!isEditable()) {
             return;
         }
-        JsonArray orderedItemsFromClient = dashboardItemReorderEndEvent
-                .getItems();
-        reorderItems(orderedItemsFromClient);
+        reorderItems(dashboardItemReorderEndEvent.getReorderedItemsParent(),
+                dashboardItemReorderEndEvent.getReorderedItems());
         updateClient();
     }
 
@@ -507,48 +501,15 @@ public class Dashboard extends Component implements HasWidgets {
         dashboardItemRemovedEvent.getRemovedItem().removeFromParent();
     }
 
-    private void reorderItems(JsonArray orderedItemsFromClient) {
-        // Keep references to the root level children before clearing them
-        Map<Integer, Component> nodeIdToComponent = childrenComponents.stream()
-                .collect(Collectors.toMap(
-                        component -> component.getElement().getNode().getId(),
-                        Function.identity()));
-        // Remove all children and add them back using the node IDs from client
-        // items
-        childrenComponents.clear();
-        for (int rootLevelItemIdx = 0; rootLevelItemIdx < orderedItemsFromClient
-                .length(); rootLevelItemIdx++) {
-            JsonObject rootLevelItemFromClient = orderedItemsFromClient
-                    .getObject(rootLevelItemIdx);
-            int rootLevelItemNodeId = (int) rootLevelItemFromClient
-                    .getNumber("nodeid");
-            Component componentMatch = nodeIdToComponent
-                    .get(rootLevelItemNodeId);
-            childrenComponents.add(componentMatch);
-            // Reorder the widgets in sections separately
-            if (componentMatch instanceof DashboardSection sectionMatch) {
-                reorderSectionWidgets(sectionMatch, rootLevelItemFromClient);
-            }
-        }
-    }
-
-    private void reorderSectionWidgets(DashboardSection section,
-            JsonObject rootLevelItem) {
-        // Keep references to the widgets before clearing them
-        Map<Integer, DashboardWidget> nodeIdToWidget = section.getWidgets()
-                .stream()
-                .collect(Collectors.toMap(
-                        widget -> widget.getElement().getNode().getId(),
-                        Function.identity()));
-        // Remove all widgets and add them back using the node IDs from client
-        // items
-        section.removeAll();
-        JsonArray sectionWidgetsFromClient = rootLevelItem.getArray("items");
-        for (int sectionWidgetIdx = 0; sectionWidgetIdx < sectionWidgetsFromClient
-                .length(); sectionWidgetIdx++) {
-            int sectionItemNodeId = (int) sectionWidgetsFromClient
-                    .getObject(sectionWidgetIdx).getNumber("nodeid");
-            section.add(nodeIdToWidget.get(sectionItemNodeId));
+    private void reorderItems(HasWidgets reorderedItemParent,
+            List<Component> items) {
+        if (reorderedItemParent instanceof DashboardSection parentSection) {
+            parentSection.removeAll();
+            items.stream().map(DashboardWidget.class::cast)
+                    .forEach(parentSection::add);
+        } else {
+            childrenComponents.clear();
+            childrenComponents.addAll(items);
         }
     }
 
