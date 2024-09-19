@@ -368,6 +368,26 @@ public class Dashboard extends Component implements HasWidgets {
         return childrenComponents.stream();
     }
 
+    /**
+     * @throws UnsupportedOperationException
+     *             Dashboard does not support setting visibility
+     */
+    @Override
+    public void setVisible(boolean visible) {
+        throw new UnsupportedOperationException(
+                "Dashboard does not support setting visibility");
+    }
+
+    /**
+     * @throws UnsupportedOperationException
+     *             Dashboard does not support setting visibility
+     */
+    @Override
+    public boolean isVisible() {
+        throw new UnsupportedOperationException(
+                "Dashboard does not support setting visibility");
+    }
+
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
