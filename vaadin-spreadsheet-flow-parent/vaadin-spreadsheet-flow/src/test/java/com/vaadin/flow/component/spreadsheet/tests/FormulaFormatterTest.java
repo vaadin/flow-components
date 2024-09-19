@@ -14,7 +14,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Locale;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.flow.component.spreadsheet.FormulaFormatter;
