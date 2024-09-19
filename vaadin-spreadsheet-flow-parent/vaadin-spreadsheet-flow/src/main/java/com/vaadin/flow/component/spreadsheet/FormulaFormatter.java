@@ -75,7 +75,6 @@ public class FormulaFormatter implements Serializable {
      * @return the non-localized formula
      */
     public String unFormatFormulaValue(String formulaValue, Locale locale) {
-        // if (formulaValue != null) {
         if (formulaValue != null && getCurrentDecimalSeparator(locale) == ',') {
             List<FormulaToken> tokens = tokenizeFormula(formulaValue, locale);
             List<FormulaToken> unLocalizedTokens = unLocalizeTokens(tokens,
@@ -96,7 +95,6 @@ public class FormulaFormatter implements Serializable {
      * @return the localized formula
      */
     public String reFormatFormulaValue(String formulaValue, Locale locale) {
-        // if (formulaValue != null) {
         if (formulaValue != null && getCurrentDecimalSeparator(locale) == ',') {
             List<FormulaToken> tokens = tokenizeFormula(formulaValue, null);
             List<FormulaToken> localizedTokens = localizeTokens(tokens, locale);
