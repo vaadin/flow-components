@@ -37,6 +37,7 @@ public class DashboardDragReorderTest extends DashboardTestBase {
         super.setup();
         dashboard = new Dashboard();
         dashboard.add(new DashboardWidget(), new DashboardWidget());
+        dashboard.setEditable(true);
         DashboardSection section = dashboard.addSection();
         section.add(new DashboardWidget(), new DashboardWidget());
         getUi().add(dashboard);
@@ -57,6 +58,15 @@ public class DashboardDragReorderTest extends DashboardTestBase {
     @Test
     public void reorderWidgetInSection_orderIsUpdated() {
         assertSectionWidgetReorder(2, 0, 1);
+    }
+
+    @Test
+    public void setDashboardNotEditable_reorderWidget_orderIsNotUpdated() {
+        dashboard.setEditable(false);
+        List<Integer> expectedRootLevelNodeIds = getRootLevelNodeIds();
+        reorderRootLevelItem(0, 1);
+        fireItemReorderEndEvent();
+        Assert.assertEquals(expectedRootLevelNodeIds, getRootLevelNodeIds());
     }
 
     private void fireItemReorderEndEvent() {

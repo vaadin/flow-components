@@ -27,6 +27,7 @@ public class DashboardDragResizeTest extends DashboardTestBase {
         super.setup();
         dashboard = new Dashboard();
         dashboard.add(new DashboardWidget());
+        dashboard.setEditable(true);
         DashboardSection section = dashboard.addSection();
         section.add(new DashboardWidget());
         getUi().add(dashboard);
@@ -61,6 +62,15 @@ public class DashboardDragResizeTest extends DashboardTestBase {
     @Test
     public void resizeWidgetInSectionBothHorizontallyAndVertically_sizeIsUpdated() {
         assertWidgetResized(1, 2, 2);
+    }
+
+    @Test
+    public void setDashboardNotEditable_resizeWidget_sizeIsNotUpdated() {
+        dashboard.setEditable(false);
+        DashboardWidget widgetToResize = dashboard.getWidgets().get(0);
+        fireItemResizeEndEvent(widgetToResize, 2, 2);
+        Assert.assertEquals(1, widgetToResize.getColspan());
+        Assert.assertEquals(1, widgetToResize.getRowspan());
     }
 
     private void assertWidgetResized(int widgetIndexToResize, int targetColspan,

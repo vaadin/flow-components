@@ -8,11 +8,16 @@
  */
 package com.vaadin.flow.component.dashboard.tests;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.dashboard.Dashboard;
+import com.vaadin.flow.component.dashboard.DashboardItemRemovedEvent;
 import com.vaadin.flow.component.dashboard.DashboardSection;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.html.Div;
@@ -814,5 +819,41 @@ public class DashboardTest extends DashboardTestBase {
         dashboard.add(widget);
         fakeClientCommunication();
         assertChildComponents(dashboard, widget);
+    }
+
+    @Test
+    public void dashboardNotEditable_removeWidget_widgetIsNotRemoved() {
+        DashboardWidget widgetToRemove = new DashboardWidget();
+        dashboard.add(widgetToRemove);
+        fakeClientCommunication();
+        int expectedWidgetCount = dashboard.getWidgets().size();
+        int expectedNodeId = widgetToRemove.getElement().getNode().getId();
+        fireItemRemovedEvent(expectedNodeId);
+        Assert.assertEquals(expectedWidgetCount, dashboard.getWidgets().size());
+        Set<Integer> actualNodeIds = dashboard.getWidgets().stream()
+                .map(widget -> widget.getElement().getNode().getId())
+                .collect(Collectors.toSet());
+        Assert.assertTrue(actualNodeIds.contains(expectedNodeId));
+    }
+
+    @Test
+    public void setDashboardEditable_removeWidget_widgetIsRemoved() {
+        DashboardWidget widgetToRemove = new DashboardWidget();
+        dashboard.add(widgetToRemove);
+        dashboard.setEditable(true);
+        fakeClientCommunication();
+        int expectedWidgetCount = dashboard.getWidgets().size() - 1;
+        int nodeIdToBeRemoved = widgetToRemove.getElement().getNode().getId();
+        fireItemRemovedEvent(nodeIdToBeRemoved);
+        Assert.assertEquals(expectedWidgetCount, dashboard.getWidgets().size());
+        Set<Integer> actualNodeIds = dashboard.getWidgets().stream()
+                .map(widget -> widget.getElement().getNode().getId())
+                .collect(Collectors.toSet());
+        Assert.assertFalse(actualNodeIds.contains(nodeIdToBeRemoved));
+    }
+
+    private void fireItemRemovedEvent(int nodeId) {
+        ComponentUtil.fireEvent(dashboard,
+                new DashboardItemRemovedEvent(dashboard, false, nodeId));
     }
 }
