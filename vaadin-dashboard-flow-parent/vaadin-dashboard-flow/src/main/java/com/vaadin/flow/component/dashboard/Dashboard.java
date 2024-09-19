@@ -479,6 +479,9 @@ public class Dashboard extends Component implements HasWidgets {
 
     private void onItemReorderEnd(
             DashboardItemReorderEndEvent dashboardItemReorderEndEvent) {
+        if (!isEditable()) {
+            return;
+        }
         JsonArray orderedItemsFromClient = dashboardItemReorderEndEvent
                 .getItems();
         reorderItems(orderedItemsFromClient);
@@ -487,6 +490,9 @@ public class Dashboard extends Component implements HasWidgets {
 
     private void onItemResizeEnd(
             DashboardItemResizeEndEvent dashboardItemResizeEndEvent) {
+        if (!isEditable()) {
+            return;
+        }
         DashboardWidget resizedWidget = dashboardItemResizeEndEvent
                 .getResizedWidget();
         resizedWidget.setRowspan(dashboardItemResizeEndEvent.getRowspan());
@@ -495,6 +501,9 @@ public class Dashboard extends Component implements HasWidgets {
 
     private void onItemRemoved(
             DashboardItemRemovedEvent dashboardItemRemovedEvent) {
+        if (!isEditable()) {
+            return;
+        }
         dashboardItemRemovedEvent.getRemovedItem().removeFromParent();
     }
 
