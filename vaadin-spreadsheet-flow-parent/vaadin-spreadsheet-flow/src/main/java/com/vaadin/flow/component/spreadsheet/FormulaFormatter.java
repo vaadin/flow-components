@@ -83,7 +83,7 @@ public class FormulaFormatter implements Serializable {
             return tokensToString(unLocalizedTokens);
         }
 
-        return null;
+        return formulaValue;
     }
 
     /**
@@ -103,7 +103,7 @@ public class FormulaFormatter implements Serializable {
             return tokensToString(localizedTokens);
         }
 
-        return null;
+        return formulaValue;
     }
 
     public boolean isFormulaFormat(String value) {
