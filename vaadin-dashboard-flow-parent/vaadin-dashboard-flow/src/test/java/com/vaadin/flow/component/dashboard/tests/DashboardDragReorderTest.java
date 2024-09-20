@@ -51,6 +51,11 @@ public class DashboardDragReorderTest extends DashboardTestBase {
     }
 
     @Test
+    public void reorderWidgetToSamePosition_orderIsNotUpdated() {
+        assertRootLevelItemReorder(0, 0);
+    }
+
+    @Test
     public void reorderSection_orderIsUpdated() {
         assertRootLevelItemReorder(2, 1);
     }
@@ -58,6 +63,11 @@ public class DashboardDragReorderTest extends DashboardTestBase {
     @Test
     public void reorderWidgetInSection_orderIsUpdated() {
         assertSectionWidgetReorder(2, 0, 1);
+    }
+
+    @Test
+    public void reorderWidgetInSectionToSamePosition_orderIsNotUpdated() {
+        assertSectionWidgetReorder(2, 0, 0);
     }
 
     @Test

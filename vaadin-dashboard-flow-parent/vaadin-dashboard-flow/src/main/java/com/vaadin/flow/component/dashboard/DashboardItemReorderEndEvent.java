@@ -54,7 +54,13 @@ public class DashboardItemReorderEndEvent extends ComponentEvent<Dashboard> {
             @EventData("event.detail.items") JsonArray items) {
         super(source, fromClient);
         setReorderedItemParent(source, items);
-        setReorderedItems();
+        if (reorderedItemsParent == null) {
+            // No reordering
+            reorderedItemsParent = source;
+            reorderedItems = source.getChildren().toList();
+        } else {
+            setReorderedItems();
+        }
     }
 
     /**
