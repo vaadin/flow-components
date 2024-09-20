@@ -14,13 +14,13 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 
 /**
- * Widget resize end event of {@link Dashboard}.
+ * Widget resized event of {@link Dashboard}.
  *
  * @author Vaadin Ltd.
- * @see Dashboard#addItemResizeEndListener(ComponentEventListener)
+ * @see Dashboard#addItemResizedListener(ComponentEventListener)
  */
-@DomEvent("dashboard-item-resize-end")
-public class DashboardItemResizeEndEvent extends ComponentEvent<Dashboard> {
+@DomEvent("dashboard-item-resized")
+public class DashboardItemResizedEvent extends ComponentEvent<Dashboard> {
 
     private final DashboardWidget resizedWidget;
 
@@ -29,10 +29,10 @@ public class DashboardItemResizeEndEvent extends ComponentEvent<Dashboard> {
     private final int rowspan;
 
     /**
-     * Creates a dashboard item resize end event.
+     * Creates a dashboard item resized event.
      *
      * @param source
-     *            Dashboard that contains the widget that was dragged
+     *            Dashboard that contains the widget that was resized
      * @param fromClient
      *            <code>true</code> if the event originated from the client
      *            side, <code>false</code> otherwise
@@ -43,7 +43,7 @@ public class DashboardItemResizeEndEvent extends ComponentEvent<Dashboard> {
      * @param rowspan
      *            New rowspan of the resized widget
      */
-    public DashboardItemResizeEndEvent(Dashboard source, boolean fromClient,
+    public DashboardItemResizedEvent(Dashboard source, boolean fromClient,
             @EventData("event.detail.item.nodeid") int nodeId,
             @EventData("event.detail.item.colspan") int colspan,
             @EventData("event.detail.item.rowspan") int rowspan) {

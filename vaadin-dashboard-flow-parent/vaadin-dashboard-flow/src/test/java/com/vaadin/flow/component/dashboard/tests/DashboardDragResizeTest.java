@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.dashboard.Dashboard;
-import com.vaadin.flow.component.dashboard.DashboardItemResizeEndEvent;
+import com.vaadin.flow.component.dashboard.DashboardItemResizedEvent;
 import com.vaadin.flow.component.dashboard.DashboardSection;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 
@@ -68,7 +68,7 @@ public class DashboardDragResizeTest extends DashboardTestBase {
     public void setDashboardNotEditable_resizeWidget_sizeIsNotUpdated() {
         dashboard.setEditable(false);
         DashboardWidget widgetToResize = dashboard.getWidgets().get(0);
-        fireItemResizeEndEvent(widgetToResize, 2, 2);
+        fireItemResizedEvent(widgetToResize, 2, 2);
         Assert.assertEquals(1, widgetToResize.getColspan());
         Assert.assertEquals(1, widgetToResize.getRowspan());
     }
@@ -78,19 +78,19 @@ public class DashboardDragResizeTest extends DashboardTestBase {
         DashboardWidget widgetToResize = dashboard.getWidgets()
                 .get(widgetIndexToResize);
         // Assert widget is enlarged
-        fireItemResizeEndEvent(widgetToResize, targetColspan, targetRowspan);
+        fireItemResizedEvent(widgetToResize, targetColspan, targetRowspan);
         Assert.assertEquals(targetColspan, widgetToResize.getColspan());
         Assert.assertEquals(targetRowspan, widgetToResize.getRowspan());
         // Assert widget is shrunk
-        fireItemResizeEndEvent(widgetToResize, 1, 1);
+        fireItemResizedEvent(widgetToResize, 1, 1);
         Assert.assertEquals(1, widgetToResize.getColspan());
         Assert.assertEquals(1, widgetToResize.getRowspan());
     }
 
-    private void fireItemResizeEndEvent(DashboardWidget widget,
-            int targetColspan, int targetRowspan) {
+    private void fireItemResizedEvent(DashboardWidget widget, int targetColspan,
+            int targetRowspan) {
         ComponentUtil.fireEvent(dashboard,
-                new DashboardItemResizeEndEvent(dashboard, false,
+                new DashboardItemResizedEvent(dashboard, false,
                         widget.getElement().getNode().getId(), targetColspan,
                         targetRowspan));
     }

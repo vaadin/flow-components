@@ -50,8 +50,8 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
      */
     public Dashboard() {
         childDetachHandler = getChildDetachHandler();
-        addItemReorderEndListener(this::onItemReorderEnd);
-        addItemResizeEndListener(this::onItemResizeEnd);
+        addItemMovedListener(this::onItemMoved);
+        addItemResizedListener(this::onItemResized);
         addItemRemovedListener(this::onItemRemoved);
     }
 
@@ -300,51 +300,27 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     }
 
     /**
-     * Adds an item reorder start listener to this dashboard.
+     * Adds an item moved listener to this dashboard.
      *
      * @param listener
      *            the listener to add, not <code>null</code>
      * @return a handle that can be used for removing the listener
      */
-    public Registration addItemReorderStartListener(
-            ComponentEventListener<DashboardItemReorderStartEvent> listener) {
-        return addListener(DashboardItemReorderStartEvent.class, listener);
+    public Registration addItemMovedListener(
+            ComponentEventListener<DashboardItemMovedEvent> listener) {
+        return addListener(DashboardItemMovedEvent.class, listener);
     }
 
     /**
-     * Adds an item reorder end listener to this dashboard.
+     * Adds an item resized listener to this dashboard.
      *
      * @param listener
      *            the listener to add, not <code>null</code>
      * @return a handle that can be used for removing the listener
      */
-    public Registration addItemReorderEndListener(
-            ComponentEventListener<DashboardItemReorderEndEvent> listener) {
-        return addListener(DashboardItemReorderEndEvent.class, listener);
-    }
-
-    /**
-     * Adds an item resize start listener to this dashboard.
-     *
-     * @param listener
-     *            the listener to add, not <code>null</code>
-     * @return a handle that can be used for removing the listener
-     */
-    public Registration addItemResizeStartListener(
-            ComponentEventListener<DashboardItemResizeStartEvent> listener) {
-        return addListener(DashboardItemResizeStartEvent.class, listener);
-    }
-
-    /**
-     * Adds an item resize end listener to this dashboard.
-     *
-     * @param listener
-     *            the listener to add, not <code>null</code>
-     * @return a handle that can be used for removing the listener
-     */
-    public Registration addItemResizeEndListener(
-            ComponentEventListener<DashboardItemResizeEndEvent> listener) {
-        return addListener(DashboardItemResizeEndEvent.class, listener);
+    public Registration addItemResizedListener(
+            ComponentEventListener<DashboardItemResizedEvent> listener) {
+        return addListener(DashboardItemResizedEvent.class, listener);
     }
 
     /**
@@ -384,7 +360,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         super.onAttach(attachEvent);
         getElement().executeJs(
                 "Vaadin.FlowComponentHost.patchVirtualContainer(this);");
-        customizeItemReorderEndEvent();
+        customizeItemMovedEvent();
         doUpdateClient();
     }
 
@@ -488,25 +464,24 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         };
     }
 
-    private void onItemReorderEnd(
-            DashboardItemReorderEndEvent dashboardItemReorderEndEvent) {
+    private void onItemMoved(DashboardItemMovedEvent dashboardItemMovedEvent) {
         if (!isEditable()) {
             return;
         }
-        reorderItems(dashboardItemReorderEndEvent.getReorderedItemsParent(),
-                dashboardItemReorderEndEvent.getReorderedItems());
+        reorderItems(dashboardItemMovedEvent.getReorderedItemsParent(),
+                dashboardItemMovedEvent.getReorderedItems());
         updateClient();
     }
 
-    private void onItemResizeEnd(
-            DashboardItemResizeEndEvent dashboardItemResizeEndEvent) {
+    private void onItemResized(
+            DashboardItemResizedEvent dashboardItemResizedEvent) {
         if (!isEditable()) {
             return;
         }
-        DashboardWidget resizedWidget = dashboardItemResizeEndEvent
+        DashboardWidget resizedWidget = dashboardItemResizedEvent
                 .getResizedWidget();
-        resizedWidget.setRowspan(dashboardItemResizeEndEvent.getRowspan());
-        resizedWidget.setColspan(dashboardItemResizeEndEvent.getColspan());
+        resizedWidget.setRowspan(dashboardItemResizedEvent.getRowspan());
+        resizedWidget.setColspan(dashboardItemResizedEvent.getColspan());
     }
 
     private void onItemRemoved(
@@ -517,7 +492,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         dashboardItemRemovedEvent.getRemovedItem().removeFromParent();
     }
 
-    private void reorderItems(HasWidgets reorderedItemParent,
+    private void reorderItems(Component reorderedItemParent,
             List<Component> items) {
         if (reorderedItemParent instanceof DashboardSection parentSection) {
             parentSection.removeAll();
@@ -529,20 +504,20 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
     }
 
-    private void customizeItemReorderEndEvent() {
+    private void customizeItemMovedEvent() {
         getElement().executeJs(
                 """
-                        this.addEventListener('dashboard-item-reorder-end', (e) => {
+                        this.addEventListener('dashboard-item-moved', (e) => {
                           function mapItems(items) {
                             return items.map(({nodeid, items}) => ({
                               nodeid,
                               ...(items && { items: mapItems(items) })
                             }));
                           }
-                          const flowReorderEvent = new CustomEvent('dashboard-item-reorder-end-flow', {
-                            detail: { items: mapItems(this.items) }
+                          const flowItemMovedEvent = new CustomEvent('dashboard-item-moved-flow', {
+                            detail: { items: mapItems(e.detail.items), section: e.detail.section?.nodeid }
                           });
-                          this.dispatchEvent(flowReorderEvent);
+                          this.dispatchEvent(flowItemMovedEvent);
                         });""");
     }
 }

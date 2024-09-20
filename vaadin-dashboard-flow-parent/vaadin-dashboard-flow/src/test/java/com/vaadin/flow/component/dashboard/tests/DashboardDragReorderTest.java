@@ -18,7 +18,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.dashboard.Dashboard;
-import com.vaadin.flow.component.dashboard.DashboardItemReorderEndEvent;
+import com.vaadin.flow.component.dashboard.DashboardItemMovedEvent;
 import com.vaadin.flow.component.dashboard.DashboardSection;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 
@@ -75,13 +75,17 @@ public class DashboardDragReorderTest extends DashboardTestBase {
         dashboard.setEditable(false);
         List<Integer> expectedRootLevelNodeIds = getRootLevelNodeIds();
         reorderRootLevelItem(0, 1);
-        fireItemReorderEndEvent();
+        fireItemMovedEvent();
         Assert.assertEquals(expectedRootLevelNodeIds, getRootLevelNodeIds());
     }
 
-    private void fireItemReorderEndEvent() {
-        ComponentUtil.fireEvent(dashboard,
-                new DashboardItemReorderEndEvent(dashboard, false, itemsArray));
+    private void fireItemMovedEvent() {
+        fireItemMovedEvent(null);
+    }
+
+    private void fireItemMovedEvent(Integer sectionNodeId) {
+        ComponentUtil.fireEvent(dashboard, new DashboardItemMovedEvent(
+                dashboard, false, itemsArray, sectionNodeId));
     }
 
     private List<Integer> getSectionWidgetNodeIds(int sectionIndex) {
@@ -132,10 +136,12 @@ public class DashboardDragReorderTest extends DashboardTestBase {
 
     private void assertSectionWidgetReorder(int sectionIndex, int initialIndex,
             int finalIndex) {
+        int sectionNodeId = dashboard.getChildren().toList().get(sectionIndex)
+                .getElement().getNode().getId();
         reorderSectionWidget(sectionIndex, initialIndex, finalIndex);
         List<Integer> expectedSectionWidgetNodeIds = getExpectedSectionWidgetNodeIds(
                 sectionIndex, initialIndex, finalIndex);
-        fireItemReorderEndEvent();
+        fireItemMovedEvent(sectionNodeId);
         Assert.assertEquals(expectedSectionWidgetNodeIds,
                 getSectionWidgetNodeIds(sectionIndex));
     }
@@ -144,7 +150,7 @@ public class DashboardDragReorderTest extends DashboardTestBase {
         reorderRootLevelItem(initialIndex, finalIndex);
         List<Integer> expectedRootLevelNodeIds = getExpectedRootLevelItemNodeIds(
                 initialIndex, finalIndex);
-        fireItemReorderEndEvent();
+        fireItemMovedEvent();
         Assert.assertEquals(expectedRootLevelNodeIds, getRootLevelNodeIds());
     }
 
