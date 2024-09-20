@@ -83,10 +83,6 @@ public class DashboardDragReorderIT extends AbstractComponentIT {
                 .release(targetElement).build().perform();
     }
 
-    private static boolean isDragHandleVisible(TestBenchElement element) {
-        return !"none".equals(getDragHandle(element).getCssValue("display"));
-    }
-
     private static TestBenchElement getDragHandle(TestBenchElement element) {
         return element.$("*").withClassName("drag-handle").first();
     }
