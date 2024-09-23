@@ -20,6 +20,8 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
@@ -79,7 +81,7 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
         getElement().addPropertyChangeListener(SELECTED, event -> {
             int oldIndex = selectedTab != null ? indexOf(selectedTab) : -1;
             int newIndex = getSelectedIndex();
-            if (newIndex >= getTabCount()) {
+            if (newIndex >= getComponentCount()) {
                 LoggerFactory.getLogger(getClass()).warn(String.format(
                         "The selected index is out of range: %d. Reverting to the previous index: %d.",
                         newIndex, oldIndex));
