@@ -8,21 +8,12 @@
  */
 package com.vaadin.flow.component.dashboard;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.EventData;
-
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
 
 /**
  * Widget or section moved event of {@link Dashboard}.
@@ -30,12 +21,13 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd.
  * @see Dashboard#addItemMovedListener(ComponentEventListener)
  */
-@DomEvent("dashboard-item-moved-flow")
 public class DashboardItemMovedEvent extends ComponentEvent<Dashboard> {
 
-    private final List<Component> reorderedItems;
+    private final Component item;
 
-    private final Component reorderedItemsParent;
+    private final List<Component> items;
+
+    private final DashboardSection section;
 
     /**
      * Creates a dashboard item moved event.
@@ -43,77 +35,50 @@ public class DashboardItemMovedEvent extends ComponentEvent<Dashboard> {
      * @param source
      *            Dashboard that contains the item that was moved
      * @param fromClient
-     *            <code>true</code> if the event originated from the client
-     *            side, <code>false</code> otherwise
+     *            {@code true} if the event originated from the client side,
+     *            {@code false} otherwise
+     * @param item
+     *            The moved item
      * @param items
-     *            The ordered items represented by node IDs as a
-     *            {@link JsonArray}
+     *            The root level items of the dashboard
+     * @param section
+     *            The section that contains the moved item, {@code null} if the
+     *            item is a direct child of the dashboard
      */
     public DashboardItemMovedEvent(Dashboard source, boolean fromClient,
-            @EventData("event.detail.items") JsonArray items,
-            @EventData("event.detail.section") Integer sectionNodeId) {
+            Component item, List<Component> items, DashboardSection section) {
         super(source, fromClient);
-        if (sectionNodeId == null) {
-            reorderedItemsParent = source;
-            reorderedItems = getReorderedItemsList(items);
-        } else {
-            reorderedItemsParent = source.getChildren()
-                    .filter(child -> sectionNodeId
-                            .equals(child.getElement().getNode().getId()))
-                    .map(DashboardSection.class::cast).findAny().orElseThrow();
-            reorderedItems = getReorderedItemsList(
-                    getSectionItems(items, sectionNodeId));
-        }
+        this.item = item;
+        this.items = items;
+        this.section = section;
     }
 
     /**
-     * Returns the parent of the reordered items. Either a dashboard or a
-     * section.
+     * Returns the moved item
      *
-     * @return the parent of the reordered items
+     * @return the moved item
      */
-    public Component getReorderedItemsParent() {
-        return reorderedItemsParent;
+    public Component getItem() {
+        return item;
     }
 
     /**
-     * Returns the list of the reordered item and its sibling items
+     * Returns the root level items of the dashboard
      *
-     * @return the list of the reordered item and its sibling items
+     * @return the root level items of the dashboard
      */
-    public List<Component> getReorderedItems() {
-        return reorderedItems;
-    }
-
-    private List<Component> getReorderedItemsList(
-            JsonArray reorderedItemsFromClient) {
-        Objects.requireNonNull(reorderedItemsFromClient);
-        Map<Integer, Component> nodeIdToItems = reorderedItemsParent
-                .getChildren()
-                .collect(Collectors.toMap(
-                        item -> item.getElement().getNode().getId(),
-                        Function.identity()));
-        List<Component> items = new ArrayList<>();
-        for (int index = 0; index < reorderedItemsFromClient
-                .length(); index++) {
-            int nodeIdFromClient = (int) ((JsonObject) reorderedItemsFromClient
-                    .get(index)).getNumber("nodeid");
-            items.add(nodeIdToItems.get(nodeIdFromClient));
-        }
+    public List<Component> getItems() {
         return items;
     }
 
-    private static JsonArray getSectionItems(JsonArray items,
-            int sectionNodeId) {
-        for (int rootLevelIdx = 0; rootLevelIdx < items
-                .length(); rootLevelIdx++) {
-            JsonObject item = items.get(rootLevelIdx);
-            int itemNodeId = (int) item.getNumber("nodeid");
-            if (sectionNodeId == itemNodeId) {
-                JsonObject sectionObj = items.get(rootLevelIdx);
-                return sectionObj.getArray("items");
-            }
-        }
-        return null;
+    /**
+     * Returns the section that contains the moved item, or an empty optional if
+     * the item is a direct child of the dashboard
+     *
+     * @return the section that contains the moved item, or an empty optional if
+     *         the item is a direct child of the dashboard
+     */
+    public Optional<DashboardSection> getSection() {
+        return Optional.ofNullable(section);
     }
 }

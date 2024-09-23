@@ -8,10 +8,11 @@
  */
 package com.vaadin.flow.component.dashboard;
 
+import java.util.List;
+
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.EventData;
 
 /**
  * Widget resized event of {@link Dashboard}.
@@ -19,14 +20,11 @@ import com.vaadin.flow.component.EventData;
  * @author Vaadin Ltd.
  * @see Dashboard#addItemResizedListener(ComponentEventListener)
  */
-@DomEvent("dashboard-item-resized")
 public class DashboardItemResizedEvent extends ComponentEvent<Dashboard> {
 
-    private final DashboardWidget resizedWidget;
+    private final DashboardWidget item;
 
-    private final int colspan;
-
-    private final int rowspan;
+    private final List<Component> items;
 
     /**
      * Creates a dashboard item resized event.
@@ -34,25 +32,18 @@ public class DashboardItemResizedEvent extends ComponentEvent<Dashboard> {
      * @param source
      *            Dashboard that contains the widget that was resized
      * @param fromClient
-     *            <code>true</code> if the event originated from the client
-     *            side, <code>false</code> otherwise
-     * @param nodeId
-     *            Node ID the resized widget
-     * @param colspan
-     *            New colspan of the resized widget
-     * @param rowspan
-     *            New rowspan of the resized widget
+     *            {@code true} if the event originated from the client side,
+     *            {@code false} otherwise
+     * @param item
+     *            The resized widget
+     * @param items
+     *            The root level items of the dashboard
      */
     public DashboardItemResizedEvent(Dashboard source, boolean fromClient,
-            @EventData("event.detail.item.nodeid") int nodeId,
-            @EventData("event.detail.item.colspan") int colspan,
-            @EventData("event.detail.item.rowspan") int rowspan) {
+            DashboardWidget item, List<Component> items) {
         super(source, fromClient);
-        this.resizedWidget = source.getWidgets().stream()
-                .filter(child -> nodeId == child.getElement().getNode().getId())
-                .findAny().orElse(null);
-        this.colspan = colspan;
-        this.rowspan = rowspan;
+        this.item = item;
+        this.items = items;
     }
 
     /**
@@ -60,25 +51,16 @@ public class DashboardItemResizedEvent extends ComponentEvent<Dashboard> {
      *
      * @return the resized widget
      */
-    public DashboardWidget getResizedWidget() {
-        return resizedWidget;
+    public DashboardWidget getItem() {
+        return item;
     }
 
     /**
-     * Returns the new colspan of the resized item
+     * Returns the root level items of the dashboard
      *
-     * @return new colspan of the resized item
+     * @return the root level items of the dashboard
      */
-    public int getColspan() {
-        return colspan;
-    }
-
-    /**
-     * Returns the new rowspan of the resized item
-     *
-     * @return new rowspan of the resized item
-     */
-    public int getRowspan() {
-        return rowspan;
+    public List<Component> getItems() {
+        return items;
     }
 }

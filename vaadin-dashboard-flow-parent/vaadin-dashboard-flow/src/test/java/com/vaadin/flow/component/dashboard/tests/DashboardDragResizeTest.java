@@ -8,15 +8,23 @@
  */
 package com.vaadin.flow.component.dashboard.tests;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.dashboard.Dashboard;
-import com.vaadin.flow.component.dashboard.DashboardItemResizedEvent;
 import com.vaadin.flow.component.dashboard.DashboardSection;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
+
+import elemental.json.Json;
+import elemental.json.JsonObject;
 
 public class DashboardDragResizeTest extends DashboardTestBase {
     private Dashboard dashboard;
@@ -73,6 +81,53 @@ public class DashboardDragResizeTest extends DashboardTestBase {
         Assert.assertEquals(1, widgetToResize.getRowspan());
     }
 
+    @Test
+    public void resizeWidget_eventCorrectlyFired() {
+        DashboardWidget resizedWidget = (DashboardWidget) dashboard
+                .getChildren().toList().get(0);
+        assertEventCorrectlyFired(resizedWidget, 1, resizedWidget,
+                dashboard.getChildren().toList());
+    }
+
+    @Test
+    public void resizeWidgetInSection_eventCorrectlyFired() {
+        DashboardSection section = (DashboardSection) dashboard.getChildren()
+                .toList().get(1);
+        DashboardWidget resizedWidget = section.getWidgets().get(0);
+        assertEventCorrectlyFired(resizedWidget, 1, resizedWidget,
+                dashboard.getChildren().toList());
+    }
+
+    @Test
+    public void setDashboardNotEditable_resizeWidget_eventNotFired() {
+        dashboard.setEditable(false);
+        DashboardWidget resizedWidget = (DashboardWidget) dashboard
+                .getChildren().toList().get(0);
+        assertEventCorrectlyFired(resizedWidget, 0, null, null);
+    }
+
+    private void assertEventCorrectlyFired(DashboardWidget widgetToResize,
+            int expectedListenerInvokedCount, Component expectedResizedWidget,
+            List<Component> expectedItems) {
+        AtomicInteger listenerInvokedCount = new AtomicInteger(0);
+        AtomicReference<Component> eventResizedWidget = new AtomicReference<>();
+        AtomicReference<List<Component>> eventItems = new AtomicReference<>();
+        dashboard.addItemResizedListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            eventResizedWidget.set(e.getItem());
+            eventItems.set(e.getItems());
+            e.unregisterListener();
+        });
+        fireItemResizedEvent(widgetToResize, 2, 2);
+        Assert.assertEquals(expectedListenerInvokedCount,
+                listenerInvokedCount.get());
+        if (expectedListenerInvokedCount > 0) {
+            Assert.assertEquals(expectedResizedWidget,
+                    eventResizedWidget.get());
+            Assert.assertEquals(expectedItems, eventItems.get());
+        }
+    }
+
     private void assertWidgetResized(int widgetIndexToResize, int targetColspan,
             int targetRowspan) {
         DashboardWidget widgetToResize = dashboard.getWidgets()
@@ -89,9 +144,14 @@ public class DashboardDragResizeTest extends DashboardTestBase {
 
     private void fireItemResizedEvent(DashboardWidget widget, int targetColspan,
             int targetRowspan) {
-        ComponentUtil.fireEvent(dashboard,
-                new DashboardItemResizedEvent(dashboard, false,
-                        widget.getElement().getNode().getId(), targetColspan,
-                        targetRowspan));
+        JsonObject eventData = Json.createObject();
+        eventData.put("event.detail.item.nodeid",
+                widget.getElement().getNode().getId());
+        eventData.put("event.detail.item.rowspan", targetRowspan);
+        eventData.put("event.detail.item.colspan", targetColspan);
+        DomEvent itemResizedDomEvent = new DomEvent(dashboard.getElement(),
+                "dashboard-item-resized", eventData);
+        dashboard.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(itemResizedDomEvent);
     }
 }

@@ -8,13 +8,11 @@
  */
 package com.vaadin.flow.component.dashboard;
 
-import java.util.Objects;
+import java.util.List;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.EventData;
 
 /**
  * Widget or section removed event of {@link Dashboard}.
@@ -22,10 +20,11 @@ import com.vaadin.flow.component.EventData;
  * @author Vaadin Ltd.
  * @see Dashboard#addItemRemovedListener(ComponentEventListener)
  */
-@DomEvent("dashboard-item-removed")
 public class DashboardItemRemovedEvent extends ComponentEvent<Dashboard> {
 
-    private final Component removedItem;
+    private final Component item;
+
+    private final List<Component> items;
 
     /**
      * Creates a dashboard item removed event.
@@ -33,13 +32,18 @@ public class DashboardItemRemovedEvent extends ComponentEvent<Dashboard> {
      * @param source
      *            Dashboard that contains the item that was removed
      * @param fromClient
-     *            <code>true</code> if the event originated from the client
-     *            side, <code>false</code> otherwise
+     *            {@code true} if the event originated from the client side,
+     *            {@code false} otherwise
+     * @param item
+     *            The removed item
+     * @param items
+     *            The root level items of the dashboard
      */
     public DashboardItemRemovedEvent(Dashboard source, boolean fromClient,
-            @EventData("event.detail.item.nodeid") int nodeId) {
+            Component item, List<Component> items) {
         super(source, fromClient);
-        this.removedItem = getRemovedItem(source, nodeId);
+        this.item = item;
+        this.items = items;
     }
 
     /**
@@ -47,22 +51,16 @@ public class DashboardItemRemovedEvent extends ComponentEvent<Dashboard> {
      *
      * @return the removed item
      */
-    public Component getRemovedItem() {
-        return removedItem;
+    public Component getItem() {
+        return item;
     }
 
-    private static Component getRemovedItem(Dashboard dashboard, int nodeId) {
-        return dashboard.getChildren().map(item -> {
-            if (nodeId == item.getElement().getNode().getId()) {
-                return item;
-            }
-            if (item instanceof DashboardSection section) {
-                return section.getWidgets().stream()
-                        .filter(sectionItem -> nodeId == sectionItem
-                                .getElement().getNode().getId())
-                        .findAny().orElse(null);
-            }
-            return null;
-        }).filter(Objects::nonNull).findAny().orElse(null);
+    /**
+     * Returns the root level items of the dashboard
+     *
+     * @return the root level items of the dashboard
+     */
+    public List<Component> getItems() {
+        return items;
     }
 }
