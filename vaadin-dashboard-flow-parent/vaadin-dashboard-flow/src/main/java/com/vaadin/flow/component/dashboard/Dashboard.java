@@ -378,14 +378,9 @@ public class Dashboard extends Component implements HasWidgets {
                 "Dashboard does not support setting visibility");
     }
 
-    /**
-     * @throws UnsupportedOperationException
-     *             Dashboard does not support setting visibility
-     */
     @Override
     public boolean isVisible() {
-        throw new UnsupportedOperationException(
-                "Dashboard does not support setting visibility");
+        return true;
     }
 
     @Override
