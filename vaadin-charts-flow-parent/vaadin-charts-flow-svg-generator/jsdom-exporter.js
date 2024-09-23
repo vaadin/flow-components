@@ -51,12 +51,12 @@ require("highcharts/modules/bullet")(Highcharts);
 
 win.Date = Date;
 
-function processTextNodes(element, cb, parents = []) {
+function processTextNodes(element, cb) {
     for (var childNode of element.childNodes) {
         if (childNode.nodeType === Node.ELEMENT_NODE) {
-            processTextNodes(childNode, cb, [element, ...parents]);
+            processTextNodes(childNode, cb);
         } else if (childNode.nodeType === Node.TEXT_NODE) {
-            cb(childNode, element, parents);
+            cb(childNode, element);
         }
     }
 }
@@ -100,6 +100,18 @@ function findSizableFont(fontFamily = "") {
     return usableFont;
 }
 
+function removeHighchartsTextOutlines(elem) {
+    let children = [].slice.call(
+        elem.children.length ? elem.children : [elem]
+    );
+    children.forEach(child => {
+        if (child.getAttribute('class') === 'highcharts-text-outline') {
+            child.parentNode.removeChild(child);
+        }
+    });
+
+}
+
 // Do some modifications to the jsdom document in order to get the SVG bounding
 // boxes right.
 let oldCreateElementNS = doc.createElementNS;
@@ -136,16 +148,9 @@ doc.createElementNS = (ns, tagName) => {
             height = 0,
             newLine = false;
 
-        let children = [].slice.call(
-            elem.children.length ? elem.children : [elem]
-        );
-        children.forEach(child => {
-            if (child.getAttribute('class') === 'highcharts-text-outline') {
-                child.parentNode.removeChild(child);
-            }
-        });
+        removeHighchartsTextOutlines(elem);
 
-        processTextNodes(elem, (textNode, child, parents) => {
+        processTextNodes(elem, (textNode, child) => {
             if (child.tagName === 'title') {
                 return;
             }
@@ -163,7 +168,7 @@ doc.createElementNS = (ns, tagName) => {
                     parseFloat(fontSize) * 12 :
                     12;
             }
-            let nodeHeight =fontSize < 24 ?
+            let nodeHeight = fontSize < 24 ?
                 fontSize + 3 :
                 Math.round(fontSize * 1.2);
             lineHeight = Math.max(lineHeight, nodeHeight);
@@ -213,17 +218,9 @@ doc.createElementNS = (ns, tagName) => {
             remaining = numchars,
             textLength = 0;
 
-        let children = [].slice.call(
-            elem.children.length ? elem.children : [elem]
-        );
+        removeHighchartsTextOutlines(elem);
 
-        children.forEach(child => {
-            if (child.getAttribute('class') === 'highcharts-text-outline') {
-                child.parentNode.removeChild(child);
-            }
-        });
-
-        processTextNodes(elem, (textNode, child, parents) => {
+        processTextNodes(elem, (textNode, child) => {
             if (child.tagName === 'title') {
                 return;
             }
