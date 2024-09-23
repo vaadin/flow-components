@@ -161,14 +161,9 @@ public class DashboardSection extends Component implements HasWidgets {
                 "Dashboard section does not support setting visibility");
     }
 
-    /**
-     * @throws UnsupportedOperationException
-     *             Dashboard section does not support setting visibility
-     */
     @Override
     public boolean isVisible() {
-        throw new UnsupportedOperationException(
-                "Dashboard section does not support setting visibility");
+        return true;
     }
 
     private void doRemoveAll() {

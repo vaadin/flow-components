@@ -260,9 +260,8 @@ public class DashboardWidgetTest extends DashboardTestBase {
     }
 
     @Test
-    public void getWidgetVisibility_exceptionIsThrown() {
+    public void getWidgetVisibility_returnsTrue() {
         DashboardWidget widget = new DashboardWidget();
-        Assert.assertThrows(UnsupportedOperationException.class,
-                widget::isVisible);
+        Assert.assertTrue(widget.isVisible());
     }
 }

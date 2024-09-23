@@ -165,14 +165,9 @@ public class DashboardWidget extends Component {
                 "Dashboard widget does not support setting visibility");
     }
 
-    /**
-     * @throws UnsupportedOperationException
-     *             Dashboard widget does not support setting visibility
-     */
     @Override
     public boolean isVisible() {
-        throw new UnsupportedOperationException(
-                "Dashboard widget does not support setting visibility");
+        return true;
     }
 
     private void notifyParentDashboardOrSection() {

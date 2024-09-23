@@ -870,16 +870,14 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void getDashboardVisibility_exceptionIsThrown() {
-        Assert.assertThrows(UnsupportedOperationException.class,
-                () -> dashboard.isVisible());
+    public void getDashboardVisibility_returnsTrue() {
+        Assert.assertTrue(dashboard.isVisible());
     }
 
     @Test
-    public void getSectionVisibility_exceptionIsThrown() {
+    public void getSectionVisibility_returnsTrue() {
         DashboardSection section = dashboard.addSection();
-        Assert.assertThrows(UnsupportedOperationException.class,
-                section::isVisible);
+        Assert.assertTrue(section.isVisible());
     }
 
     private void fireItemRemovedEvent(int nodeId) {
