@@ -8,19 +8,27 @@
  */
 package com.vaadin.flow.component.dashboard.tests;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.dashboard.Dashboard;
-import com.vaadin.flow.component.dashboard.DashboardItemRemovedEvent;
 import com.vaadin.flow.component.dashboard.DashboardSection;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
+
+import elemental.json.Json;
+import elemental.json.JsonObject;
 
 public class DashboardTest extends DashboardTestBase {
     private Dashboard dashboard;
@@ -852,6 +860,56 @@ public class DashboardTest extends DashboardTestBase {
         Assert.assertFalse(actualNodeIds.contains(nodeIdToBeRemoved));
     }
 
+    public void setDashboardEditable_removeWidget_eventCorrectlyFired() {
+        dashboard.setEditable(true);
+        DashboardWidget widget = new DashboardWidget();
+        dashboard.add(widget);
+        fakeClientCommunication();
+        int removedWidgetNodeId = widget.getElement().getNode().getId();
+        List<Component> expectedItems = dashboard.getChildren()
+                .collect(Collectors.toCollection(ArrayList::new));
+        expectedItems.remove(widget);
+        assertItemRemoveEventCorrectlyFired(removedWidgetNodeId, 1, widget,
+                expectedItems);
+    }
+
+    @Test
+    public void setDashboardEditable_removeSection_eventCorrectlyFired() {
+        dashboard.setEditable(true);
+        DashboardSection section = dashboard.addSection();
+        fakeClientCommunication();
+        int removedSectionNodeId = section.getElement().getNode().getId();
+        List<Component> expectedItems = dashboard.getChildren()
+                .collect(Collectors.toCollection(ArrayList::new));
+        expectedItems.remove(section);
+        assertItemRemoveEventCorrectlyFired(removedSectionNodeId, 1, section,
+                expectedItems);
+    }
+
+    @Test
+    public void setDashboardEditable_removeWidgetInSection_eventCorrectlyFired() {
+        dashboard.setEditable(true);
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget = new DashboardWidget();
+        section.add(widget);
+        fakeClientCommunication();
+        int removedWidgetNodeId = widget.getElement().getNode().getId();
+        List<Component> expectedItems = dashboard.getChildren()
+                .collect(Collectors.toCollection(ArrayList::new));
+        expectedItems.remove(widget);
+        assertItemRemoveEventCorrectlyFired(removedWidgetNodeId, 1, widget,
+                expectedItems);
+    }
+
+    @Test
+    public void dashboardNotEditable_removeWidget_eventNotFired() {
+        DashboardWidget widget = new DashboardWidget();
+        dashboard.add(widget);
+        fakeClientCommunication();
+        int removedWidgetNodeId = widget.getElement().getNode().getId();
+        assertItemRemoveEventCorrectlyFired(removedWidgetNodeId, 0, null, null);
+    }
+
     @Test
     public void setDashboardVisibility_exceptionIsThrown() {
         Assert.assertThrows(UnsupportedOperationException.class,
@@ -880,8 +938,33 @@ public class DashboardTest extends DashboardTestBase {
         Assert.assertTrue(section.isVisible());
     }
 
+    private void assertItemRemoveEventCorrectlyFired(int nodeIdToRemove,
+            int expectedListenerInvokedCount, Component expectedRemovedItem,
+            List<Component> expectedItems) {
+        AtomicInteger listenerInvokedCount = new AtomicInteger(0);
+        AtomicReference<Component> eventRemovedItem = new AtomicReference<>();
+        AtomicReference<List<Component>> eventItems = new AtomicReference<>();
+        dashboard.addItemRemovedListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            eventRemovedItem.set(e.getItem());
+            eventItems.set(e.getItems());
+            e.unregisterListener();
+        });
+        fireItemRemovedEvent(nodeIdToRemove);
+        Assert.assertEquals(expectedListenerInvokedCount,
+                listenerInvokedCount.get());
+        if (expectedListenerInvokedCount > 0) {
+            Assert.assertEquals(expectedRemovedItem, eventRemovedItem.get());
+            Assert.assertEquals(expectedItems, eventItems.get());
+        }
+    }
+
     private void fireItemRemovedEvent(int nodeId) {
-        ComponentUtil.fireEvent(dashboard,
-                new DashboardItemRemovedEvent(dashboard, false, nodeId));
+        JsonObject eventData = Json.createObject();
+        eventData.put("event.detail.item.nodeid", nodeId);
+        DomEvent itemRemovedDomEvent = new DomEvent(dashboard.getElement(),
+                "dashboard-item-removed", eventData);
+        dashboard.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(itemRemovedDomEvent);
     }
 }
