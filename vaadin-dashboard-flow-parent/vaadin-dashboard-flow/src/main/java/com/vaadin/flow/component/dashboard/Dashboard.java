@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.dashboard;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,10 +31,12 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
+import elemental.json.JsonType;
 
 /**
  * @author Vaadin Ltd
@@ -49,6 +52,8 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     private final List<Component> childrenComponents = new ArrayList<>();
 
     private final DashboardChildDetachHandler childDetachHandler;
+
+    private DashboardI18n i18n;
 
     private boolean pendingUpdate = false;
 
@@ -342,6 +347,36 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         return addListener(DashboardItemRemovedEvent.class, listener);
     }
 
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(DashboardI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public DashboardI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(DashboardI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, context -> {
+                    if (i18n.equals(this.i18n)) {
+                        setI18nWithJS();
+                    }
+                }));
+    }
+
     @Override
     public Stream<Component> getChildren() {
         return childrenComponents.stream();
@@ -417,6 +452,28 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
                 .formatted(String.join(",", itemRepresentations));
         getElement().executeJs(updateItemsSnippet,
                 flatOrderedComponents.toArray(Component[]::new));
+    }
+
+    private void setI18nWithJS() {
+        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(i18n);
+
+        // Remove properties with null values to prevent errors in web
+        // component
+        removeNullValuesFromJsonObject(i18nJson);
+
+        // Assign new I18N object to WC, by merging the existing
+        // WC I18N, and the values from the new DashboardI18n instance,
+        // into an empty object
+        getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
+                i18nJson);
+    }
+
+    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
+        for (String key : jsonObject.keys()) {
+            if (jsonObject.get(key).getType() == JsonType.NULL) {
+                jsonObject.remove(key);
+            }
+        }
     }
 
     private static String getWidgetRepresentation(DashboardWidget widget,
@@ -632,5 +689,342 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
             }
         }
         return null;
+    }
+
+    /**
+     * The internationalization properties for {@link Dashboard}.
+     */
+    public static class DashboardI18n implements Serializable {
+
+        private String selectSectionTitleForEditing;
+        private String selectWidgetTitleForEditing;
+        private String remove;
+        private String resize;
+        private String resizeApply;
+        private String resizeShrinkWidth;
+        private String resizeGrowWidth;
+        private String resizeShrinkHeight;
+        private String resizeGrowHeight;
+        private String move;
+        private String moveApply;
+        private String moveForward;
+        private String moveBackward;
+
+        /**
+         * Gets the text for the {@code aria-label} attribute of section focus
+         * buttons
+         *
+         * @return the section focus button {@code aria-label}, or {@code null}
+         *         if not set
+         */
+        public String getSelectSectionTitleForEditing() {
+            return selectSectionTitleForEditing;
+        }
+
+        /**
+         * Sets the text for the {@code aria-label} attribute of section focus
+         * buttons
+         *
+         * @param selectSectionTitleForEditing
+         *            the section focus button {@code aria-label} to set
+         * @return this instance for method chaining
+         */
+        public DashboardI18n setSelectSectionTitleForEditing(
+                String selectSectionTitleForEditing) {
+            this.selectSectionTitleForEditing = selectSectionTitleForEditing;
+            return this;
+        }
+
+        /**
+         * Gets the text for the {@code aria-label} attribute of widget focus
+         * buttons
+         *
+         * @return the widget focus button {@code aria-label}, or {@code null}
+         *         if not set
+         */
+        public String getSelectWidgetTitleForEditing() {
+            return selectWidgetTitleForEditing;
+        }
+
+        /**
+         * Sets the text for the {@code aria-label} attribute of widget focus
+         * buttons
+         *
+         * @param selectWidgetTitleForEditing
+         *            the widget focus button {@code aria-label} to set
+         * @return this instance for method chaining
+         */
+        public DashboardI18n setSelectWidgetTitleForEditing(
+                String selectWidgetTitleForEditing) {
+            this.selectWidgetTitleForEditing = selectWidgetTitleForEditing;
+            return this;
+        }
+
+        /**
+         * Gets the text for the {@code title} attribute of dashboard item
+         * remove buttons
+         *
+         * @return the dashboard item remove button {@code title}, or
+         *         {@code null} if not set
+         */
+        public String getRemove() {
+            return remove;
+        }
+
+        /**
+         * Sets the text for the {@code title} attribute of dashboard item
+         * remove buttons
+         *
+         * @param remove
+         *            the dashboard item remove button {@code title} to set
+         * @return this instance for method chaining
+         */
+        public DashboardI18n setRemove(String remove) {
+            this.remove = remove;
+            return this;
+        }
+
+        /**
+         * Gets the text for the {@code title} attribute of widget resize
+         * handles
+         *
+         * @return the widget resize handle {@code title}, or {@code null} if
+         *         not set
+         */
+        public String getResize() {
+            return resize;
+        }
+
+        /**
+         * Sets the text for the {@code title} attribute of widget resize
+         * handles
+         *
+         * @param resize
+         *            the widget resize handle {@code title} to set
+         * @return this instance for method chaining
+         */
+        public DashboardI18n setResize(String resize) {
+            this.resize = resize;
+            return this;
+        }
+
+        /**
+         * Gets the text for the {@code title} attribute of widget resize apply
+         * buttons
+         *
+         * @return the widget resize apply button {@code title}, or {@code null}
+         *         if not set
+         */
+        public String getResizeApply() {
+            return resizeApply;
+        }
+
+        /**
+         * Sets the text for the {@code title} attribute of widget resize apply
+         * buttons
+         *
+         * @param resizeApply
+         *            the widget resize apply button {@code title} to set
+         * @return this instance for method chaining
+         */
+        public DashboardI18n setResizeApply(String resizeApply) {
+            this.resizeApply = resizeApply;
+            return this;
+        }
+
+        /**
+         * Gets the text for the {@code title} attribute of widget resize shrink
+         * width buttons
+         *
+         * @return the widget resize shrink width button {@code title}, or
+         *         {@code null} if not set
+         */
+        public String getResizeShrinkWidth() {
+            return resizeShrinkWidth;
+        }
+
+        /**
+         * Sets the text for the {@code title} attribute of widget resize shrink
+         * width buttons
+         *
+         * @param resizeShrinkWidth
+         *            the widget resize shrink width button {@code title} to set
+         * @return this instance for method chaining
+         */
+        public DashboardI18n setResizeShrinkWidth(String resizeShrinkWidth) {
+            this.resizeShrinkWidth = resizeShrinkWidth;
+            return this;
+        }
+
+        /**
+         * Gets the text for the {@code title} attribute of widget resize grow
+         * width buttons
+         *
+         * @return the widget resize grow width button {@code title}, or
+         *         {@code null} if not set
+         */
+        public String getResizeGrowWidth() {
+            return resizeGrowWidth;
+        }
+
+        /**
+         * Sets the text for the {@code title} attribute of widget resize grow
+         * width buttons
+         *
+         * @param resizeGrowWidth
+         *            the widget resize grow width button {@code title} to set
+         * @return this instance for method chaining
+         */
+        public DashboardI18n setResizeGrowWidth(String resizeGrowWidth) {
+            this.resizeGrowWidth = resizeGrowWidth;
+            return this;
+        }
+
+        /**
+         * Gets the text for the {@code title} attribute of widget resize shrink
+         * height buttons
+         *
+         * @return the widget resize shrink height button {@code title}, or
+         *         {@code null} if not set
+         */
+        public String getResizeShrinkHeight() {
+            return resizeShrinkHeight;
+        }
+
+        /**
+         * Sets the text for the {@code title} attribute of widget resize shrink
+         * height buttons
+         *
+         * @param resizeShrinkHeight
+         *            the widget resize shrink height button {@code title} to
+         *            set
+         * @return this instance for method chaining
+         */
+        public DashboardI18n setResizeShrinkHeight(String resizeShrinkHeight) {
+            this.resizeShrinkHeight = resizeShrinkHeight;
+            return this;
+        }
+
+        /**
+         * Gets the text for the {@code title} attribute of widget resize grow
+         * height buttons
+         *
+         * @return the widget resize grow height button {@code title}, or
+         *         {@code null} if not set
+         */
+        public String getResizeGrowHeight() {
+            return resizeGrowHeight;
+        }
+
+        /**
+         * Sets the text for the {@code title} attribute of widget resize grow
+         * height buttons
+         *
+         * @param resizeGrowHeight
+         *            the widget resize grow height button {@code title} to set
+         * @return this instance for method chaining
+         */
+        public DashboardI18n setResizeGrowHeight(String resizeGrowHeight) {
+            this.resizeGrowHeight = resizeGrowHeight;
+            return this;
+        }
+
+        /**
+         * Gets the text for the {@code title} attribute of dashboard item drag
+         * handles
+         *
+         * @return the dashboard item drag handle {@code title}, or {@code null}
+         *         if not set
+         */
+        public String getMove() {
+            return move;
+        }
+
+        /**
+         * Sets the text for the {@code title} attribute of dashboard item drag
+         * handles
+         *
+         * @param move
+         *            the dashboard item drag handle {@code title} to set
+         * @return this instance for method chaining
+         */
+        public DashboardI18n setMove(String move) {
+            this.move = move;
+            return this;
+        }
+
+        /**
+         * Gets the text for the {@code title} attribute of dashboard item move
+         * apply buttons
+         *
+         * @return the dashboard item move apply button {@code title}, or
+         *         {@code null} if not set
+         */
+        public String getMoveApply() {
+            return moveApply;
+        }
+
+        /**
+         * Sets the text for the {@code title} attribute of dashboard item move
+         * apply buttons
+         *
+         * @param moveApply
+         *            the dashboard item move apply button {@code title} to set
+         * @return this instance for method chaining
+         */
+        public DashboardI18n setMoveApply(String moveApply) {
+            this.moveApply = moveApply;
+            return this;
+        }
+
+        /**
+         * Gets the text for the {@code title} attribute of dashboard item move
+         * forward buttons
+         *
+         * @return the dashboard item move forward button {@code title}, or
+         *         {@code null} if not set
+         */
+        public String getMoveForward() {
+            return moveForward;
+        }
+
+        /**
+         * Sets the text for the {@code title} attribute of dashboard item move
+         * forward buttons
+         *
+         * @param moveForward
+         *            the dashboard item move forward button {@code title} to
+         *            set
+         * @return this instance for method chaining
+         */
+        public DashboardI18n setMoveForward(String moveForward) {
+            this.moveForward = moveForward;
+            return this;
+        }
+
+        /**
+         * Gets the text for the {@code title} attribute of dashboard item move
+         * backward buttons
+         *
+         * @return the dashboard item move backward button {@code title}, or
+         *         {@code null} if not set
+         */
+        public String getMoveBackward() {
+            return moveBackward;
+        }
+
+        /**
+         * Sets the text for the {@code title} attribute of dashboard item move
+         * backward buttons
+         *
+         * @param moveBackward
+         *            the dashboard item move backward button {@code title} to
+         *            set
+         * @return this instance for method chaining
+         */
+        public DashboardI18n setMoveBackward(String moveBackward) {
+            this.moveBackward = moveBackward;
+            return this;
+        }
     }
 }
