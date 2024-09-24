@@ -937,10 +937,10 @@ public class DashboardTest extends DashboardTestBase {
         DashboardSection section = dashboard.addSection();
         Assert.assertTrue(section.isVisible());
     }
-    
+
     private void assertItemRemoveEventCorrectlyFired(int nodeIdToRemove,
-                                                     int expectedListenerInvokedCount, Component expectedRemovedItem,
-                                                     List<Component> expectedItems) {
+            int expectedListenerInvokedCount, Component expectedRemovedItem,
+            List<Component> expectedItems) {
         AtomicInteger listenerInvokedCount = new AtomicInteger(0);
         AtomicReference<Component> eventRemovedItem = new AtomicReference<>();
         AtomicReference<List<Component>> eventItems = new AtomicReference<>();
