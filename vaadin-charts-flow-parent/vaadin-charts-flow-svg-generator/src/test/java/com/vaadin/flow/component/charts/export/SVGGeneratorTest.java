@@ -261,8 +261,9 @@ public class SVGGeneratorTest {
 
         XAxis x = new XAxis();
         x.setCategories("January is a long month", "February is rather boring",
-                "Mar", "Apr", "May", "Jun", "Jul is a month to enjoy really nice weather",
-                "Aug", "Sep", "Oct", "Nov", "Dec");
+                "Mar", "Apr", "May", "Jun",
+                "Jul is a month to enjoy really nice weather", "Aug", "Sep",
+                "Oct", "Nov", "Dec");
         configuration.addxAxis(x);
 
         YAxis y = new YAxis();
