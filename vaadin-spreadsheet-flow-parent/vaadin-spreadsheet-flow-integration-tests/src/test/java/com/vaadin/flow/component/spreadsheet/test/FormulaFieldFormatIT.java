@@ -37,6 +37,16 @@ public class FormulaFieldFormatIT extends AbstractSpreadsheetIT {
     }
 
     @Test
+    public void formulaLocaleFormatting_selectCellUsingAddressField_formulaFieldContentsFormattedForLocale() {
+        setLocale(Locale.ITALY);
+        createNewSpreadsheet();
+        setCellValue("A1", "=0,123456");
+        clickCell("B1");
+        setAddressFieldValue("A1");
+        Assert.assertEquals("=0,123", getFormulaFieldValue());
+    }
+
+    @Test
     public void rounding_sheetWithNumberFormatRuleForNumericCells_formulaFieldContentsUnformatted() {
         loadFile("rounding.xlsx");
         assertFormat("B2", "5", "4.99999");

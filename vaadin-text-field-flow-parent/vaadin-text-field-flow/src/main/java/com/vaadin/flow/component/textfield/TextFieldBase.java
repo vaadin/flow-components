@@ -158,21 +158,48 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
     }
 
     /**
-     * Specifies that the user must fill in a value.
+     * Sets whether the user is required to provide a value. When required, an
+     * indicator appears next to the label and the field invalidates if the
+     * value is cleared.
      * <p>
-     * NOTE: The required indicator is only visible when the field has a label.
+     * NOTE: The required indicator is only visible when the field has a label,
+     * see {@link #setLabel(String)}.
      *
      * @param required
-     *            the boolean value to set
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
+     */
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
+    }
+
+    /**
+     * Gets whether the user is required to provide a value.
+     *
+     * @return {@code true} if the field is required, {@code false} otherwise
+     * @see #setRequiredIndicatorVisible(boolean)
+     */
+    @Override
+    public boolean isRequiredIndicatorVisible() {
+        return super.isRequiredIndicatorVisible();
+    }
+
+    /**
+     * Alias for {@link #setRequiredIndicatorVisible(boolean)}.
+     *
+     * @param required
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      */
     public void setRequired(boolean required) {
         setRequiredIndicatorVisible(required);
     }
 
     /**
-     * Determines whether the field is marked as input required.
+     * Alias for {@link #isRequiredIndicatorVisible()}
      *
-     * @return {@code true} if the input is required, {@code false} otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
      */
     public boolean isRequired() {
         return isRequiredIndicatorVisible();

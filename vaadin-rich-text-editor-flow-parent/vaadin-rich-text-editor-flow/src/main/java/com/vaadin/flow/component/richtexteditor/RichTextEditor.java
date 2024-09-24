@@ -9,6 +9,8 @@
 package com.vaadin.flow.component.richtexteditor;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
@@ -35,6 +37,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
+import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 /**
@@ -55,9 +58,9 @@ import elemental.json.JsonObject;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha10")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.5.0-alpha10")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.5.0-beta1")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
@@ -68,6 +71,8 @@ public class RichTextEditor
     private RichTextEditorI18n i18n;
     private AsHtml asHtml;
     private AsDelta asDelta;
+
+    private boolean pendingPresentationUpdate = false;
 
     /**
      * Gets the internationalization object previously set for this component.
@@ -215,8 +220,14 @@ public class RichTextEditor
         getElement().setProperty("htmlValue", presentationValue);
         // htmlValue property is not writeable, HTML value needs to be set using
         // method exposed by web component instead
-        getElement().callJsFunction("dangerouslySetHtmlValue",
-                presentationValue);
+        if (!pendingPresentationUpdate) {
+            pendingPresentationUpdate = true;
+            runBeforeClientResponse(ui -> {
+                getElement().callJsFunction("dangerouslySetHtmlValue",
+                        getElement().getProperty("htmlValue"));
+                pendingPresentationUpdate = false;
+            });
+        }
     }
 
     private static String presentationToModel(String htmlValue) {
@@ -266,6 +277,36 @@ public class RichTextEditor
     @Synchronize(property = "value", value = "value-changed")
     private String getDeltaValue() {
         return getElement().getProperty("value");
+    }
+
+    /**
+     * Gets an unmodifiable list of colors in HEX format used by the text color
+     * picker and background color picker controls of the text editor.
+     * <p>
+     * Returns {@code null} by default, which means the web component shows a
+     * default color palette.
+     *
+     * @since 24.5
+     * @return an unmodifiable list of colors options
+     */
+    public List<String> getColorOptions() {
+        List options = JsonSerializer.toObjects(String.class,
+                (JsonArray) getElement().getPropertyRaw("colorOptions"));
+        return Collections.unmodifiableList(options);
+    }
+
+    /**
+     * Sets the list of colors in HEX format to use by the text color picker and
+     * background color picker controls of the text editor.
+     *
+     * @since 24.5
+     * @param colorOptions
+     *            the list of colors to set, not null
+     */
+    public void setColorOptions(List<String> colorOptions) {
+        Objects.requireNonNull(colorOptions, "Color options must not be null");
+        getElement().setPropertyJson("colorOptions",
+                JsonSerializer.toJson(colorOptions));
     }
 
     static String sanitize(String html) {

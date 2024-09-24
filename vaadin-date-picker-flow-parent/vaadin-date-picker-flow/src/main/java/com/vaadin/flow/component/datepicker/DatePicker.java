@@ -56,6 +56,7 @@ import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -82,13 +83,53 @@ import elemental.json.JsonType;
  * the format of the current locale or through the date picker overlay. The
  * overlay opens when the field is clicked and/or any input is entered when the
  * field is focused.
+ * <h2>Validation</h2>
+ * <p>
+ * Date Picker comes with a built-in validation mechanism based on constraints.
+ * Validation is triggered whenever the user initiates a date change, for
+ * example by selection from the overlay or manual entry followed by Enter or
+ * blur. Programmatic value changes trigger validation as well.
+ * <p>
+ * Validation verifies that the value is parsable into {@link LocalDate} and
+ * satisfies the specified constraints. If validation fails, the component is
+ * marked as invalid and an error message is displayed below the input.
+ * <p>
+ * The following constraints are supported:
+ * <ul>
+ * <li>{@link #setRequiredIndicatorVisible(boolean)}
+ * <li>{@link #setMin(LocalDate)}
+ * <li>{@link #setMax(LocalDate)}
+ * </ul>
+ * <p>
+ * Error messages for unparsable input and constraints can be configured with
+ * the {@link DatePickerI18n} object, using the respective properties. If you
+ * want to provide a single catch-all error message, you can also use the
+ * {@link #setErrorMessage(String)} method. Note that such an error message will
+ * take priority over i18n error messages if both are set.
+ * <p>
+ * In addition to validation, constraints may also have a visual aspect. For
+ * example, dates before the minimum date are displayed as disabled in the
+ * overlay to prevent their selection.
+ * <p>
+ * For more advanced validation that requires custom rules, you can use
+ * {@link Binder}. By default, before running custom validators, Binder will
+ * also check if the date is parsable and satisfies the component constraints,
+ * displaying error messages from the {@link DatePickerI18n} object. The
+ * exception is the required constraint, for which Binder provides its own API,
+ * see {@link Binder.BindingBuilder#asRequired(String) asRequired()}.
+ * <p>
+ * However, if Binder doesn't fit your needs and you want to implement fully
+ * custom validation logic, you can disable the constraint validation by setting
+ * {@link #setManualValidation(boolean)} to true. This will allow you to control
+ * the invalid state and the error message manually using
+ * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha10")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-picker", version = "24.5.0-alpha10")
+@NpmPackage(value = "@vaadin/date-picker", version = "24.5.0-beta1")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.29.3")
@@ -340,12 +381,29 @@ public class DatePicker
     }
 
     /**
-     * Sets the minimum date in the date picker. Dates before that will be
-     * disabled in the popup.
+     * {@inheritDoc}
+     * <p>
+     * Distinct error messages for unparsable input and different constraints
+     * can be configured with the {@link DatePickerI18n} object, using the
+     * respective properties. However, note that the error message set with
+     * {@link #setErrorMessage(String)} will take priority and override any i18n
+     * error messages if both are set.
+     */
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        HasValidationProperties.super.setErrorMessage(errorMessage);
+    }
+
+    /**
+     * Sets the minimum date allowed to be selected for this field. Dates before
+     * that will be disabled in the calendar overlay. Manual entry of such dates
+     * will cause the component to invalidate.
+     * <p>
+     * The minimum date is inclusive.
      *
      * @param min
-     *            the minimum date that is allowed to be selected, or
-     *            <code>null</code> to remove any minimum constraints
+     *            the minimum date, or {@code null} to remove this constraint
+     * @see DatePickerI18n#setMinErrorMessage(String)
      */
     public void setMin(LocalDate min) {
         String minAsString = FORMATTER.apply(min);
@@ -354,23 +412,25 @@ public class DatePicker
     }
 
     /**
-     * Gets the minimum date in the date picker. Dates before that will be
-     * disabled in the popup.
+     * Gets the minimum date allowed to be selected for this field.
      *
-     * @return the minimum date that is allowed to be selected, or
-     *         <code>null</code> if there's no minimum
+     * @return the minimum date, or {@code null} if no minimum is set
+     * @see #setMax(LocalDate)
      */
     public LocalDate getMin() {
         return PARSER.apply(getElement().getProperty("min"));
     }
 
     /**
-     * Sets the maximum date in the date picker. Dates after that will be
-     * disabled in the popup.
+     * Sets the maximum date allowed to be selected for this field. Dates after
+     * that will be disabled in the calendar overlay. Manual entry of such dates
+     * will cause the component to invalidate.
+     * <p>
+     * The maximum date is inclusive.
      *
      * @param max
-     *            the maximum date that is allowed to be selected, or
-     *            <code>null</code> to remove any maximum constraints
+     *            the maximum date, or {@code null} to remove this constraint
+     * @see DatePickerI18n#setMaxErrorMessage(String)
      */
     public void setMax(LocalDate max) {
         String maxAsString = FORMATTER.apply(max);
@@ -379,11 +439,10 @@ public class DatePicker
     }
 
     /**
-     * Gets the maximum date in the date picker. Dates after that will be
-     * disabled in the popup.
+     * Gets the maximum date allowed to be selected for this field.
      *
-     * @return the maximum date that is allowed to be selected, or
-     *         <code>null</code> if there's no maximum
+     * @return the maximum date, or {@code null} if no maximum is set
+     * @see #setMax(LocalDate)
      */
     public LocalDate getMax() {
         return PARSER.apply(getElement().getProperty("max"));
@@ -686,22 +745,49 @@ public class DatePicker
     }
 
     /**
-     * Sets whether the date picker is marked as input required.
+     * Sets whether the user is required to provide a value. When required, an
+     * indicator appears next to the label and the field invalidates if the
+     * value is cleared.
+     * <p>
+     * NOTE: The required indicator is only visible when the field has a label,
+     * see {@link #setLabel(String)}.
      *
      * @param required
-     *            the boolean value to set
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
+     * @see DatePickerI18n#setRequiredErrorMessage(String)
+     */
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
+    }
+
+    /**
+     * Gets whether the user is required to provide a value.
+     *
+     * @return {@code true} if the field is required, {@code false} otherwise
+     * @see #setRequiredIndicatorVisible(boolean)
+     */
+    @Override
+    public boolean isRequiredIndicatorVisible() {
+        return super.isRequiredIndicatorVisible();
+    }
+
+    /**
+     * Alias for {@link #setRequiredIndicatorVisible(boolean)}.
+     *
+     * @param required
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      */
     public void setRequired(boolean required) {
         setRequiredIndicatorVisible(required);
     }
 
     /**
-     * Determines whether the datepicker is marked as input required.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
+     * Alias for {@link #isRequiredIndicatorVisible()}
      *
-     * @return {@code true} if the input is required, {@code false} otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
      */
     public boolean isRequired() {
         return isRequiredIndicatorVisible();

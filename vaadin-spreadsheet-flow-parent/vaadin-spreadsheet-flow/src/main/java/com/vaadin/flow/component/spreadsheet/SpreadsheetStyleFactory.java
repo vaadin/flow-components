@@ -830,7 +830,8 @@ public class SpreadsheetStyleFactory implements Serializable {
                 sb.append("font-style:italic;");
             }
             defaultFontHeightInPoints = defaultFont.getFontHeightInPoints();
-            sb.append("font-size:");
+            sb.append("font-size: var(--default-font-size);");
+            sb.append("--default-font-size:");
             sb.append(defaultFontHeightInPoints);
             sb.append("pt;");
             if (defaultFont.getUnderline() != Font.U_NONE) {
@@ -881,7 +882,8 @@ public class SpreadsheetStyleFactory implements Serializable {
 
     private String styleFontFamily(Font font) {
         StringBuilder sb = new StringBuilder();
-        sb.append("font-family:");
+        sb.append("font-family: var(--default-font-family);");
+        sb.append("--default-font-family:");
         String fontName = font.getFontName();
         if (fontName.contains(" ")) {
             sb.append("\"");

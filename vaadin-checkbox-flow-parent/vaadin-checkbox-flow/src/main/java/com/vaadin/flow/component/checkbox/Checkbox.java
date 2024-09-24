@@ -38,6 +38,7 @@ import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.dom.ElementConstants;
@@ -52,13 +53,37 @@ import com.vaadin.flow.dom.PropertyChangeListener;
  * Use {@link com.vaadin.flow.component.checkbox CheckboxGroup} to group related
  * items. Individual checkboxes should be used for options that are not related
  * to each other in any way.
+ * <h2>Validation</h2>
+ * <p>
+ * Checkbox comes with a built-in validation mechanism that verifies that the
+ * field is selected when {@link #setRequiredIndicatorVisible(boolean) required}
+ * is enabled.
+ * <p>
+ * Validation is triggered whenever the user toggles the checkbox. Programmatic
+ * toggling triggers validation as well. If validation fails, the component is
+ * marked as invalid and an error message is displayed below the input.
+ * <p>
+ * The required error message can be configured using either
+ * {@link CheckboxI18n#setRequiredErrorMessage(String)} or
+ * {@link #setErrorMessage(String)}.
+ * <p>
+ * For more advanced validation that requires custom rules, you can use
+ * {@link Binder}. Please note that Binder provides its own API for the required
+ * validation, see {@link Binder.BindingBuilder#asRequired(String)
+ * asRequired()}.
+ * <p>
+ * However, if Binder doesn't fit your needs and you want to implement fully
+ * custom validation logic, you can disable the built-in validation by setting
+ * {@link #setManualValidation(boolean)} to true. This will allow you to control
+ * the invalid state and the error message manually using
+ * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha10")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox", version = "24.5.0-alpha10")
+@NpmPackage(value = "@vaadin/checkbox", version = "24.5.0-beta1")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         implements ClickNotifier<Checkbox>, Focusable<Checkbox>, HasAriaLabel,
@@ -210,6 +235,35 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         super.onAttach(attachEvent);
 
         ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+    }
+
+    /**
+     * Sets whether the user is required to select the checkbox. When required,
+     * an indicator appears next to the label and the field invalidates if the
+     * checkbox is first selected and then deselected.
+     * <p>
+     * NOTE: The required indicator is only visible when the field has a label,
+     * see {@link #setLabel(String)}.
+     *
+     * @param required
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
+     * @see CheckboxI18n#setRequiredErrorMessage(String)
+     */
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
+    }
+
+    /**
+     * Gets whether the user is required to select the checkbox.
+     *
+     * @return {@code true} if the field is required, {@code false} otherwise
+     * @see #setRequiredIndicatorVisible(boolean)
+     */
+    @Override
+    public boolean isRequiredIndicatorVisible() {
+        return super.isRequiredIndicatorVisible();
     }
 
     /**

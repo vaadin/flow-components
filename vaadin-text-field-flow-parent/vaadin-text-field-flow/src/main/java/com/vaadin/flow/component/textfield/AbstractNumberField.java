@@ -286,7 +286,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * Sets the minimum value of the field.
+     * Sets the minimum value for this field.
      *
      * @param min
      *            the double value to set
@@ -298,14 +298,14 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * The minimum value of the field.
+     * Gets the minimum value for this field.
      */
     protected double getMinDouble() {
         return min;
     }
 
     /**
-     * Sets the maximum value of the field.
+     * Sets the maximum value for this field.
      *
      * @param max
      *            the double value to set
@@ -316,14 +316,14 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * The maximum value of the field.
+     * Gets the maximum value for this field.
      */
     protected double getMaxDouble() {
         return max;
     }
 
     /**
-     * Sets the allowed number intervals of the field.
+     * Sets the allowed number intervals for this field.
      *
      * @param step
      *            the double value to set
@@ -335,7 +335,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * The allowed number intervals of the field.
+     * Gets the allowed number intervals for this field.
      */
     protected double getStepDouble() {
         return step;
