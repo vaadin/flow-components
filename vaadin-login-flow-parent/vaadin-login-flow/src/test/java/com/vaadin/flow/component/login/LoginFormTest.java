@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.shared.Registration;
 
 public class LoginFormTest {
 
@@ -102,4 +103,73 @@ public class LoginFormTest {
         Assert.assertEquals("Custom username",
                 form.getI18n().getForm().getUsername());
     }
+
+    @Test
+    public void setAction_customLoginListeners_throws() {
+        final LoginForm form = new LoginForm();
+        Registration registration1 = form.addLoginListener(ev -> {
+        });
+        Registration registration2 = form.addLoginListener(ev -> {
+        });
+        Assert.assertThrows(IllegalStateException.class,
+                () -> form.setAction("login"));
+
+        registration1.remove();
+        Assert.assertThrows(IllegalStateException.class,
+                () -> form.setAction("login"));
+
+        registration2.remove();
+        form.setAction("login");
+    }
+
+    @Test
+    public void setAction_unregisterAndRegisterDefaultLoginListener() {
+        final LoginForm form = new LoginForm();
+        form.setAction("login");
+        form.setError(true);
+
+        ComponentUtil.fireEvent(form, new AbstractLogin.LoginEvent(form, true,
+                "username", "password"));
+        Assert.assertTrue(
+                "Expected form not being disabled by default listener",
+                form.isEnabled());
+        Assert.assertTrue(
+                "Expected error status not being reset by default listener",
+                form.isError());
+
+        form.setAction(null);
+        ComponentUtil.fireEvent(form, new AbstractLogin.LoginEvent(form, true,
+                "username", "password"));
+        Assert.assertFalse("Expected form being disabled by default listener",
+                form.isEnabled());
+        Assert.assertFalse(
+                "Expected error status being reset by default listener",
+                form.isError());
+    }
+
+    @Test
+    public void setAction_nullValue_restoreDefaultListener() {
+        final LoginForm form = new LoginForm();
+        form.setAction("login");
+        form.setError(true);
+
+        ComponentUtil.fireEvent(form, new AbstractLogin.LoginEvent(form, true,
+                "username", "password"));
+        Assert.assertTrue(form.isEnabled());
+        Assert.assertTrue(form.isError());
+    }
+
+    @Test
+    public void addLoginListener_actionSet_throws() {
+        final LoginForm form = new LoginForm();
+        form.setAction("login");
+        Assert.assertThrows(IllegalStateException.class,
+                () -> form.addLoginListener(ev -> {
+                }));
+
+        form.setAction(null);
+        form.addLoginListener(ev -> {
+        });
+    }
+
 }

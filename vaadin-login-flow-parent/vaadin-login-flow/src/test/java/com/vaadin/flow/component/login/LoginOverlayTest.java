@@ -18,6 +18,9 @@ package com.vaadin.flow.component.login;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.shared.Registration;
+
 public class LoginOverlayTest {
     @Test
     public void showErrorMessage_fromNullI18n() {
@@ -57,4 +60,73 @@ public class LoginOverlayTest {
         Assert.assertEquals("Custom username",
                 overlay.getI18n().getForm().getUsername());
     }
+
+    @Test
+    public void setAction_customLoginListeners_throws() {
+        final LoginOverlay overlay = new LoginOverlay();
+        Registration registration1 = overlay.addLoginListener(ev -> {
+        });
+        Registration registration2 = overlay.addLoginListener(ev -> {
+        });
+        Assert.assertThrows(IllegalStateException.class,
+                () -> overlay.setAction("login"));
+
+        registration1.remove();
+        Assert.assertThrows(IllegalStateException.class,
+                () -> overlay.setAction("login"));
+
+        registration2.remove();
+        overlay.setAction("login");
+    }
+
+    @Test
+    public void setAction_unregisterAndRegisterDefaultLoginListener() {
+        final LoginOverlay overlay = new LoginOverlay();
+        overlay.setAction("login");
+        overlay.setError(true);
+
+        ComponentUtil.fireEvent(overlay, new AbstractLogin.LoginEvent(overlay,
+                true, "username", "password"));
+        Assert.assertTrue(
+                "Expected form not being disabled by default listener",
+                overlay.isEnabled());
+        Assert.assertTrue(
+                "Expected error status not being reset by default listener",
+                overlay.isError());
+
+        overlay.setAction(null);
+        ComponentUtil.fireEvent(overlay, new AbstractLogin.LoginEvent(overlay,
+                true, "username", "password"));
+        Assert.assertFalse("Expected form being disabled by default listener",
+                overlay.isEnabled());
+        Assert.assertFalse(
+                "Expected error status being reset by default listener",
+                overlay.isError());
+    }
+
+    @Test
+    public void setAction_nullValue_restoreDefaultListener() {
+        final LoginOverlay overlay = new LoginOverlay();
+        overlay.setAction("login");
+        overlay.setError(true);
+
+        ComponentUtil.fireEvent(overlay, new AbstractLogin.LoginEvent(overlay,
+                true, "username", "password"));
+        Assert.assertTrue(overlay.isEnabled());
+        Assert.assertTrue(overlay.isError());
+    }
+
+    @Test
+    public void addLoginListener_actionSet_throws() {
+        final LoginOverlay overlay = new LoginOverlay();
+        overlay.setAction("login");
+        Assert.assertThrows(IllegalStateException.class,
+                () -> overlay.addLoginListener(ev -> {
+                }));
+
+        overlay.setAction(null);
+        overlay.addLoginListener(ev -> {
+        });
+    }
+
 }
