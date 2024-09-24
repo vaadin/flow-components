@@ -36,7 +36,7 @@ public class DashboardDragReorderIT extends AbstractComponentIT {
     public void reorderWidgetOnClientSide_itemsAreReorderedCorrectly() {
         var draggedWidget = dashboardElement.getWidgets().get(0);
         var targetWidget = dashboardElement.getWidgets().get(1);
-        dragResizeElement(draggedWidget, targetWidget);
+        dragReorderElement(draggedWidget, targetWidget);
         Assert.assertEquals(draggedWidget.getTitle(),
                 dashboardElement.getWidgets().get(1).getTitle());
     }
@@ -45,7 +45,7 @@ public class DashboardDragReorderIT extends AbstractComponentIT {
     public void reorderSectionOnClientSide_itemsAreReorderedCorrectly() {
         var draggedSection = dashboardElement.getSections().get(1);
         var targetWidget = dashboardElement.getWidgets().get(0);
-        dragResizeElement(draggedSection, targetWidget);
+        dragReorderElement(draggedSection, targetWidget);
         Assert.assertEquals(draggedSection.getTitle(),
                 dashboardElement.getSections().get(0).getTitle());
     }
@@ -55,7 +55,7 @@ public class DashboardDragReorderIT extends AbstractComponentIT {
         var firstSection = dashboardElement.getSections().get(0);
         var draggedWidget = firstSection.getWidgets().get(0);
         var targetWidget = firstSection.getWidgets().get(1);
-        dragResizeElement(draggedWidget, targetWidget);
+        dragReorderElement(draggedWidget, targetWidget);
         firstSection = dashboardElement.getSections().get(0);
         Assert.assertEquals(draggedWidget.getTitle(),
                 firstSection.getWidgets().get(1).getTitle());
@@ -69,7 +69,7 @@ public class DashboardDragReorderIT extends AbstractComponentIT {
         reorderWidgetOnClientSide_itemsAreReorderedCorrectly();
     }
 
-    private void dragResizeElement(TestBenchElement draggedElement,
+    private void dragReorderElement(TestBenchElement draggedElement,
             TestBenchElement targetElement) {
         var dragHandle = getDragHandle(draggedElement);
 
@@ -81,10 +81,6 @@ public class DashboardDragReorderIT extends AbstractComponentIT {
         new Actions(driver).clickAndHold(dragHandle)
                 .moveToElement(targetElement, xOffset, yOffset)
                 .release(targetElement).build().perform();
-    }
-
-    private static boolean isDragHandleVisible(TestBenchElement element) {
-        return !"none".equals(getDragHandle(element).getCssValue("display"));
     }
 
     private static TestBenchElement getDragHandle(TestBenchElement element) {
