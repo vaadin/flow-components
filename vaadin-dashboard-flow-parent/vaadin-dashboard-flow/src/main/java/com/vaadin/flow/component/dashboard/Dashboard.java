@@ -27,6 +27,8 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
@@ -55,9 +57,9 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
      */
     public Dashboard() {
         childDetachHandler = getChildDetachHandler();
-        addItemReorderEndListener(this::onItemReorderEnd);
-        addItemResizeEndListener(this::onItemResizeEnd);
-        addItemRemovedListener(this::onItemRemoved);
+        initItemMovedClientEventListener();
+        initItemResizedClientEventListener();
+        initItemRemovedClientEventListener();
     }
 
     /**
@@ -305,51 +307,27 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     }
 
     /**
-     * Adds an item reorder start listener to this dashboard.
+     * Adds an item moved listener to this dashboard.
      *
      * @param listener
      *            the listener to add, not <code>null</code>
      * @return a handle that can be used for removing the listener
      */
-    public Registration addItemReorderStartListener(
-            ComponentEventListener<DashboardItemReorderStartEvent> listener) {
-        return addListener(DashboardItemReorderStartEvent.class, listener);
+    public Registration addItemMovedListener(
+            ComponentEventListener<DashboardItemMovedEvent> listener) {
+        return addListener(DashboardItemMovedEvent.class, listener);
     }
 
     /**
-     * Adds an item reorder end listener to this dashboard.
+     * Adds an item resized listener to this dashboard.
      *
      * @param listener
      *            the listener to add, not <code>null</code>
      * @return a handle that can be used for removing the listener
      */
-    public Registration addItemReorderEndListener(
-            ComponentEventListener<DashboardItemReorderEndEvent> listener) {
-        return addListener(DashboardItemReorderEndEvent.class, listener);
-    }
-
-    /**
-     * Adds an item resize start listener to this dashboard.
-     *
-     * @param listener
-     *            the listener to add, not <code>null</code>
-     * @return a handle that can be used for removing the listener
-     */
-    public Registration addItemResizeStartListener(
-            ComponentEventListener<DashboardItemResizeStartEvent> listener) {
-        return addListener(DashboardItemResizeStartEvent.class, listener);
-    }
-
-    /**
-     * Adds an item resize end listener to this dashboard.
-     *
-     * @param listener
-     *            the listener to add, not <code>null</code>
-     * @return a handle that can be used for removing the listener
-     */
-    public Registration addItemResizeEndListener(
-            ComponentEventListener<DashboardItemResizeEndEvent> listener) {
-        return addListener(DashboardItemResizeEndEvent.class, listener);
+    public Registration addItemResizedListener(
+            ComponentEventListener<DashboardItemResizedEvent> listener) {
+        return addListener(DashboardItemResizedEvent.class, listener);
     }
 
     /**
@@ -389,7 +367,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         super.onAttach(attachEvent);
         getElement().executeJs(
                 "Vaadin.FlowComponentHost.patchVirtualContainer(this);");
-        customizeItemReorderEndEvent();
+        customizeItemMovedEvent();
         doUpdateClient();
     }
 
@@ -493,95 +471,166 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         };
     }
 
-    private void onItemReorderEnd(
-            DashboardItemReorderEndEvent dashboardItemReorderEndEvent) {
-        if (!isEditable()) {
-            return;
-        }
-        JsonArray orderedItemsFromClient = dashboardItemReorderEndEvent
-                .getItems();
-        reorderItems(orderedItemsFromClient);
-        updateClient();
-    }
-
-    private void onItemResizeEnd(
-            DashboardItemResizeEndEvent dashboardItemResizeEndEvent) {
-        if (!isEditable()) {
-            return;
-        }
-        DashboardWidget resizedWidget = dashboardItemResizeEndEvent
-                .getResizedWidget();
-        resizedWidget.setRowspan(dashboardItemResizeEndEvent.getRowspan());
-        resizedWidget.setColspan(dashboardItemResizeEndEvent.getColspan());
-    }
-
-    private void onItemRemoved(
-            DashboardItemRemovedEvent dashboardItemRemovedEvent) {
-        if (!isEditable()) {
-            return;
-        }
-        dashboardItemRemovedEvent.getRemovedItem().removeFromParent();
-    }
-
-    private void reorderItems(JsonArray orderedItemsFromClient) {
-        // Keep references to the root level children before clearing them
-        Map<Integer, Component> nodeIdToComponent = childrenComponents.stream()
-                .collect(Collectors.toMap(
-                        component -> component.getElement().getNode().getId(),
-                        Function.identity()));
-        // Remove all children and add them back using the node IDs from client
-        // items
-        childrenComponents.clear();
-        for (int rootLevelItemIdx = 0; rootLevelItemIdx < orderedItemsFromClient
-                .length(); rootLevelItemIdx++) {
-            JsonObject rootLevelItemFromClient = orderedItemsFromClient
-                    .getObject(rootLevelItemIdx);
-            int rootLevelItemNodeId = (int) rootLevelItemFromClient
-                    .getNumber("nodeid");
-            Component componentMatch = nodeIdToComponent
-                    .get(rootLevelItemNodeId);
-            childrenComponents.add(componentMatch);
-            // Reorder the widgets in sections separately
-            if (componentMatch instanceof DashboardSection sectionMatch) {
-                reorderSectionWidgets(sectionMatch, rootLevelItemFromClient);
+    private void initItemMovedClientEventListener() {
+        String itemKey = "event.detail.item";
+        String itemsKey = "event.detail.items";
+        String sectionKey = "event.detail.section";
+        getElement().addEventListener("dashboard-item-moved-flow", e -> {
+            if (!isEditable()) {
+                return;
             }
-        }
+            handleItemMovedClientEvent(e, itemKey, itemsKey, sectionKey);
+            updateClient();
+        }).addEventData(itemKey).addEventData(itemsKey)
+                .addEventData(sectionKey);
     }
 
-    private void reorderSectionWidgets(DashboardSection section,
-            JsonObject rootLevelItem) {
-        // Keep references to the widgets before clearing them
-        Map<Integer, DashboardWidget> nodeIdToWidget = section.getWidgets()
-                .stream()
-                .collect(Collectors.toMap(
-                        widget -> widget.getElement().getNode().getId(),
-                        Function.identity()));
-        // Remove all widgets and add them back using the node IDs from client
-        // items
-        section.removeAll();
-        JsonArray sectionWidgetsFromClient = rootLevelItem.getArray("items");
-        for (int sectionWidgetIdx = 0; sectionWidgetIdx < sectionWidgetsFromClient
-                .length(); sectionWidgetIdx++) {
-            int sectionItemNodeId = (int) sectionWidgetsFromClient
-                    .getObject(sectionWidgetIdx).getNumber("nodeid");
-            section.add(nodeIdToWidget.get(sectionItemNodeId));
+    private void handleItemMovedClientEvent(DomEvent e, String itemKey,
+            String itemsKey, String sectionKey) {
+        int itemNodeId = (int) e.getEventData().getNumber(itemKey);
+        JsonArray itemsNodeIds = e.getEventData().getArray(itemsKey);
+        Integer sectionNodeId = e.getEventData().hasKey(sectionKey)
+                ? (int) e.getEventData().getNumber(sectionKey)
+                : null;
+        DashboardSection section = null;
+        List<Component> reorderedItems;
+        if (sectionNodeId == null) {
+            reorderedItems = getReorderedItemsList(itemsNodeIds, this);
+            childrenComponents.clear();
+            childrenComponents.addAll(reorderedItems);
+        } else {
+            section = getChildren()
+                    .filter(child -> sectionNodeId
+                            .equals(child.getElement().getNode().getId()))
+                    .map(DashboardSection.class::cast).findAny().orElseThrow();
+            reorderedItems = getReorderedItemsList(
+                    getSectionItems(itemsNodeIds, sectionNodeId), section);
+            section.removeAll();
+            reorderedItems.stream().map(DashboardWidget.class::cast)
+                    .forEach(section::add);
         }
+        Component movedItem = reorderedItems.stream().filter(
+                item -> itemNodeId == item.getElement().getNode().getId())
+                .findAny().orElseThrow();
+        fireEvent(new DashboardItemMovedEvent(this, true, movedItem,
+                getChildren().toList(), section));
     }
 
-    private void customizeItemReorderEndEvent() {
+    private void initItemResizedClientEventListener() {
+        String nodeIdKey = "event.detail.item.nodeid";
+        String colspanKey = "event.detail.item.colspan";
+        String rowspanKey = "event.detail.item.rowspan";
+        getElement().addEventListener("dashboard-item-resized", e -> {
+            if (!isEditable()) {
+                return;
+            }
+            handleItemResizedClientEvent(e, nodeIdKey, colspanKey, rowspanKey);
+            updateClient();
+        }).addEventData(nodeIdKey).addEventData(colspanKey)
+                .addEventData(rowspanKey);
+    }
+
+    private void handleItemResizedClientEvent(DomEvent e, String nodeIdKey,
+            String colspanKey, String rowspanKey) {
+        int nodeId = (int) e.getEventData().getNumber(nodeIdKey);
+        int colspan = (int) e.getEventData().getNumber(colspanKey);
+        int rowspan = (int) e.getEventData().getNumber(rowspanKey);
+        DashboardWidget resizedWidget = getWidgets().stream()
+                .filter(child -> nodeId == child.getElement().getNode().getId())
+                .findAny().orElseThrow();
+        resizedWidget.setRowspan(rowspan);
+        resizedWidget.setColspan(colspan);
+        fireEvent(new DashboardItemResizedEvent(this, true, resizedWidget,
+                getChildren().toList()));
+    }
+
+    private void initItemRemovedClientEventListener() {
+        String nodeIdKey = "event.detail.item.nodeid";
+        DomListenerRegistration registration = getElement()
+                .addEventListener("dashboard-item-removed", e -> {
+                    if (!isEditable()) {
+                        return;
+                    }
+                    handleItemRemovedClientEvent(e, nodeIdKey);
+                    updateClient();
+                });
+        registration.addEventData(nodeIdKey);
+    }
+
+    private void handleItemRemovedClientEvent(DomEvent e, String nodeIdKey) {
+        int nodeId = (int) e.getEventData().getNumber(nodeIdKey);
+        Component removedItem = getRemovedItem(nodeId);
+        removedItem.removeFromParent();
+        fireEvent(new DashboardItemRemovedEvent(this, true, removedItem,
+                getChildren().toList()));
+    }
+
+    private Component getRemovedItem(int nodeId) {
+        return getChildren().map(item -> {
+            if (nodeId == item.getElement().getNode().getId()) {
+                return item;
+            }
+            if (item instanceof DashboardSection section) {
+                return section.getWidgets().stream()
+                        .filter(sectionItem -> nodeId == sectionItem
+                                .getElement().getNode().getId())
+                        .findAny().orElse(null);
+            }
+            return null;
+        }).filter(Objects::nonNull).findAny().orElseThrow();
+    }
+
+    private void customizeItemMovedEvent() {
         getElement().executeJs(
                 """
-                        this.addEventListener('dashboard-item-reorder-end', (e) => {
+                        this.addEventListener('dashboard-item-moved', (e) => {
                           function mapItems(items) {
                             return items.map(({nodeid, items}) => ({
                               nodeid,
                               ...(items && { items: mapItems(items) })
                             }));
                           }
-                          const flowReorderEvent = new CustomEvent('dashboard-item-reorder-end-flow', {
-                            detail: { items: mapItems(this.items) }
+                          const flowItemMovedEvent = new CustomEvent('dashboard-item-moved-flow', {
+                            detail: {
+                              item: e.detail.item.nodeid,
+                              items: mapItems(e.detail.items),
+                              section: e.detail.section?.nodeid
+                            }
                           });
-                          this.dispatchEvent(flowReorderEvent);
+                          this.dispatchEvent(flowItemMovedEvent);
                         });""");
+    }
+
+    private static List<Component> getReorderedItemsList(
+            JsonArray reorderedItemsFromClient,
+            Component reorderedItemsParent) {
+        Objects.requireNonNull(reorderedItemsFromClient);
+        Map<Integer, Component> nodeIdToItems = reorderedItemsParent
+                .getChildren()
+                .collect(Collectors.toMap(
+                        item -> item.getElement().getNode().getId(),
+                        Function.identity()));
+        List<Component> items = new ArrayList<>();
+        for (int index = 0; index < reorderedItemsFromClient
+                .length(); index++) {
+            int nodeIdFromClient = (int) ((JsonObject) reorderedItemsFromClient
+                    .get(index)).getNumber("nodeid");
+            items.add(nodeIdToItems.get(nodeIdFromClient));
+        }
+        return items;
+    }
+
+    private static JsonArray getSectionItems(JsonArray items,
+            int sectionNodeId) {
+        for (int rootLevelIdx = 0; rootLevelIdx < items
+                .length(); rootLevelIdx++) {
+            JsonObject item = items.get(rootLevelIdx);
+            int itemNodeId = (int) item.getNumber("nodeid");
+            if (sectionNodeId == itemNodeId) {
+                JsonObject sectionObj = items.get(rootLevelIdx);
+                return sectionObj.getArray("items");
+            }
+        }
+        return null;
     }
 }

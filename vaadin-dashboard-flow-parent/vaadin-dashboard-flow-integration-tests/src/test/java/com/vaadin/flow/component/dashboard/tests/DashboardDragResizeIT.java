@@ -81,12 +81,6 @@ public class DashboardDragResizeIT extends AbstractComponentIT {
                 .release().build().perform();
     }
 
-    private boolean isResizeHandleVisible(
-            DashboardWidgetElement widgetElement) {
-        return !"none"
-                .equals(getResizeHandle(widgetElement).getCssValue("display"));
-    }
-
     private static TestBenchElement getResizeHandle(
             DashboardWidgetElement widgetElement) {
         return widgetElement.$("*").withClassName("resize-handle").first();

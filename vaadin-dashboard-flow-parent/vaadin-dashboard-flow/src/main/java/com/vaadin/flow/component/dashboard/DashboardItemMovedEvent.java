@@ -9,47 +9,54 @@
 package com.vaadin.flow.component.dashboard;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 
 /**
- * Widget or section removed event of {@link Dashboard}.
+ * Widget or section moved event of {@link Dashboard}.
  *
  * @author Vaadin Ltd.
- * @see Dashboard#addItemRemovedListener(ComponentEventListener)
+ * @see Dashboard#addItemMovedListener(ComponentEventListener)
  */
-public class DashboardItemRemovedEvent extends ComponentEvent<Dashboard> {
+public class DashboardItemMovedEvent extends ComponentEvent<Dashboard> {
 
     private final Component item;
 
     private final List<Component> items;
 
+    private final DashboardSection section;
+
     /**
-     * Creates a dashboard item removed event.
+     * Creates a dashboard item moved event.
      *
      * @param source
-     *            Dashboard that contains the item that was removed
+     *            Dashboard that contains the item that was moved
      * @param fromClient
      *            {@code true} if the event originated from the client side,
      *            {@code false} otherwise
      * @param item
-     *            The removed item
+     *            The moved item
      * @param items
      *            The root level items of the dashboard
+     * @param section
+     *            The section that contains the moved item, {@code null} if the
+     *            item is a direct child of the dashboard
      */
-    public DashboardItemRemovedEvent(Dashboard source, boolean fromClient,
-            Component item, List<Component> items) {
+    public DashboardItemMovedEvent(Dashboard source, boolean fromClient,
+            Component item, List<Component> items, DashboardSection section) {
         super(source, fromClient);
         this.item = item;
         this.items = items;
+        this.section = section;
     }
 
     /**
-     * Returns the removed item
+     * Returns the moved item
      *
-     * @return the removed item
+     * @return the moved item
      */
     public Component getItem() {
         return item;
@@ -62,5 +69,16 @@ public class DashboardItemRemovedEvent extends ComponentEvent<Dashboard> {
      */
     public List<Component> getItems() {
         return items;
+    }
+
+    /**
+     * Returns the section that contains the moved item, or an empty optional if
+     * the item is a direct child of the dashboard
+     *
+     * @return the section that contains the moved item, or an empty optional if
+     *         the item is a direct child of the dashboard
+     */
+    public Optional<DashboardSection> getSection() {
+        return Optional.ofNullable(section);
     }
 }

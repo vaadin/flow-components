@@ -15,43 +15,43 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 
 /**
- * Widget or section removed event of {@link Dashboard}.
+ * Widget resized event of {@link Dashboard}.
  *
  * @author Vaadin Ltd.
- * @see Dashboard#addItemRemovedListener(ComponentEventListener)
+ * @see Dashboard#addItemResizedListener(ComponentEventListener)
  */
-public class DashboardItemRemovedEvent extends ComponentEvent<Dashboard> {
+public class DashboardItemResizedEvent extends ComponentEvent<Dashboard> {
 
-    private final Component item;
+    private final DashboardWidget item;
 
     private final List<Component> items;
 
     /**
-     * Creates a dashboard item removed event.
+     * Creates a dashboard item resized event.
      *
      * @param source
-     *            Dashboard that contains the item that was removed
+     *            Dashboard that contains the widget that was resized
      * @param fromClient
      *            {@code true} if the event originated from the client side,
      *            {@code false} otherwise
      * @param item
-     *            The removed item
+     *            The resized widget
      * @param items
      *            The root level items of the dashboard
      */
-    public DashboardItemRemovedEvent(Dashboard source, boolean fromClient,
-            Component item, List<Component> items) {
+    public DashboardItemResizedEvent(Dashboard source, boolean fromClient,
+            DashboardWidget item, List<Component> items) {
         super(source, fromClient);
         this.item = item;
         this.items = items;
     }
 
     /**
-     * Returns the removed item
+     * Returns the resized widget
      *
-     * @return the removed item
+     * @return the resized widget
      */
-    public Component getItem() {
+    public DashboardWidget getItem() {
         return item;
     }
 
