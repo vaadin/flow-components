@@ -852,6 +852,34 @@ public class DashboardTest extends DashboardTestBase {
         Assert.assertFalse(actualNodeIds.contains(nodeIdToBeRemoved));
     }
 
+    @Test
+    public void setDashboardVisibility_exceptionIsThrown() {
+        Assert.assertThrows(UnsupportedOperationException.class,
+                () -> dashboard.setVisible(false));
+        Assert.assertThrows(UnsupportedOperationException.class,
+                () -> dashboard.setVisible(true));
+    }
+
+    @Test
+    public void setDashboardSectionVisibility_exceptionIsThrown() {
+        DashboardSection section = dashboard.addSection();
+        Assert.assertThrows(UnsupportedOperationException.class,
+                () -> section.setVisible(false));
+        Assert.assertThrows(UnsupportedOperationException.class,
+                () -> section.setVisible(true));
+    }
+
+    @Test
+    public void getDashboardVisibility_returnsTrue() {
+        Assert.assertTrue(dashboard.isVisible());
+    }
+
+    @Test
+    public void getSectionVisibility_returnsTrue() {
+        DashboardSection section = dashboard.addSection();
+        Assert.assertTrue(section.isVisible());
+    }
+
     private void fireItemRemovedEvent(int nodeId) {
         ComponentUtil.fireEvent(dashboard,
                 new DashboardItemRemovedEvent(dashboard, false, nodeId));
