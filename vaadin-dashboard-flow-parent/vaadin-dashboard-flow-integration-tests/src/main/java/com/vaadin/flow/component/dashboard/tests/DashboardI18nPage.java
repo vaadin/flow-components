@@ -19,52 +19,44 @@ import com.vaadin.flow.router.Route;
 public class DashboardI18nPage extends Div {
 
     enum I18nEntry {
-        SELECT_SECTION_TITLE_FOR_EDITING("selectSectionTitleForEditing",
-                "Select section title for editing"),
+        SELECT_SECTION_TITLE_FOR_EDITING("selectSectionTitleForEditing"),
 
-        SELECT_WIDGET_TITLE_FOR_EDITING("selectWidgetTitleForEditing",
-                "Select widget title for editing"),
+        SELECT_WIDGET_TITLE_FOR_EDITING("selectWidgetTitleForEditing"),
 
-        REMOVE("remove", "Remove"),
+        REMOVE("remove"),
 
-        RESIZE("resize", "Resize"),
+        RESIZE("resize"),
 
-        RESIZE_APPLY("resizeApply", "Apply"),
+        RESIZE_APPLY("resizeApply"),
 
-        RESIZE_SHRINK_WIDTH("resizeShrinkWidth", "Shrink width"),
+        RESIZE_SHRINK_WIDTH("resizeShrinkWidth"),
 
-        RESIZE_GROW_WIDTH("resizeGrowWidth", "Grow width"),
+        RESIZE_GROW_WIDTH("resizeGrowWidth"),
 
-        RESIZE_SHRINK_HEIGHT("resizeShrinkHeight", "Shrink height"),
+        RESIZE_SHRINK_HEIGHT("resizeShrinkHeight"),
 
-        RESIZE_GROW_HEIGHT("resizeGrowHeight", "Grow height"),
+        RESIZE_GROW_HEIGHT("resizeGrowHeight"),
 
-        MOVE("move", "Move"),
+        MOVE("move"),
 
-        MOVE_APPLY("moveApply", "Apply"),
+        MOVE_APPLY("moveApply"),
 
-        MOVE_FORWARD("moveForward", "Move Forward"),
+        MOVE_FORWARD("moveForward"),
 
-        MOVE_BACKWARD("moveBackward", "Move Backward");
+        MOVE_BACKWARD("moveBackward");
 
         private final String key;
-        private final String defaultValue;
 
-        I18nEntry(String key, String defaultValue) {
+        I18nEntry(String key) {
             this.key = key;
-            this.defaultValue = defaultValue;
         }
 
         public String getKey() {
             return key;
         }
 
-        public String getDefaultValue() {
-            return defaultValue;
-        }
-
         public String getCustomValue() {
-            return "Custom " + defaultValue;
+            return "Custom " + key;
         }
     }
 

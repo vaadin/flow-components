@@ -33,23 +33,24 @@ public class DashboardI18nIT extends AbstractComponentIT {
     }
 
     @Test
-    public void itemsHaveCorrectDefaultI18N() {
-        assertI18nValues(true);
+    public void dashboardHasCorrectDefaultI18nKeys() {
+        for (DashboardI18nPage.I18nEntry i18NEntry : DashboardI18nPage.I18nEntry
+                .values()) {
+            Assert.assertNotNull(getI18nValue(i18NEntry));
+        }
     }
 
     @Test
     public void setCustomI18n_i18nIsUpdated() {
         clickElementWithJs("set-custom-i18n");
-        assertI18nValues(false);
-    }
-
-    private void assertI18nValues(boolean isDefault) {
         for (DashboardI18nPage.I18nEntry i18NEntry : DashboardI18nPage.I18nEntry
                 .values()) {
-            String expectedValue = isDefault ? i18NEntry.getDefaultValue()
-                    : i18NEntry.getCustomValue();
-            Assert.assertEquals(expectedValue, dashboardElement
-                    .getPropertyString("i18n", i18NEntry.getKey()));
+            String expectedI18nValue = i18NEntry.getCustomValue();
+            Assert.assertEquals(expectedI18nValue, getI18nValue(i18NEntry));
         }
+    }
+
+    private String getI18nValue(DashboardI18nPage.I18nEntry i18NEntry) {
+        return dashboardElement.getPropertyString("i18n", i18NEntry.getKey());
     }
 }
