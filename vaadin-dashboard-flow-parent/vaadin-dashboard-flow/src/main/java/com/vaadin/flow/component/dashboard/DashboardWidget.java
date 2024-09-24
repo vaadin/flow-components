@@ -155,6 +155,21 @@ public class DashboardWidget extends Component {
         SlotUtils.setSlot(this, "header", header);
     }
 
+    /**
+     * @throws UnsupportedOperationException
+     *             Dashboard widget does not support setting visibility
+     */
+    @Override
+    public void setVisible(boolean visible) {
+        throw new UnsupportedOperationException(
+                "Dashboard widget does not support setting visibility");
+    }
+
+    @Override
+    public boolean isVisible() {
+        return true;
+    }
+
     private void notifyParentDashboardOrSection() {
         getParent().ifPresent(parent -> {
             if (parent instanceof Dashboard dashboard) {
