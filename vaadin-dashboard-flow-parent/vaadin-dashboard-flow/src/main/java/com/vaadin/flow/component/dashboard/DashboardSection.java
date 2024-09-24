@@ -151,6 +151,21 @@ public class DashboardSection extends Component implements HasWidgets {
         getParent().ifPresent(parent -> ((Dashboard) parent).remove(this));
     }
 
+    /**
+     * @throws UnsupportedOperationException
+     *             Dashboard section does not support setting visibility
+     */
+    @Override
+    public void setVisible(boolean visible) {
+        throw new UnsupportedOperationException(
+                "Dashboard section does not support setting visibility");
+    }
+
+    @Override
+    public boolean isVisible() {
+        return true;
+    }
+
     private void doRemoveAll() {
         new ArrayList<>(widgets).forEach(this::doRemoveWidget);
     }

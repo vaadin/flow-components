@@ -249,4 +249,19 @@ public class DashboardWidgetTest extends DashboardTestBase {
         Assert.assertEquals(content, widget.getContent());
         Assert.assertEquals(header, widget.getHeader());
     }
+
+    @Test
+    public void setWidgetVisibility_exceptionIsThrown() {
+        DashboardWidget widget = new DashboardWidget();
+        Assert.assertThrows(UnsupportedOperationException.class,
+                () -> widget.setVisible(false));
+        Assert.assertThrows(UnsupportedOperationException.class,
+                () -> widget.setVisible(true));
+    }
+
+    @Test
+    public void getWidgetVisibility_returnsTrue() {
+        DashboardWidget widget = new DashboardWidget();
+        Assert.assertTrue(widget.isVisible());
+    }
 }
