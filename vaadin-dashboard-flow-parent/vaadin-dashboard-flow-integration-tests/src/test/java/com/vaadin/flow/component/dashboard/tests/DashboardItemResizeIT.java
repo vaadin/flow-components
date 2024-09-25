@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.dashboard.testbench.DashboardElement;
@@ -23,8 +24,8 @@ import com.vaadin.tests.AbstractComponentIT;
 /**
  * @author Vaadin Ltd
  */
-@TestPath("vaadin-dashboard/drag-resize")
-public class DashboardDragResizeIT extends AbstractComponentIT {
+@TestPath("vaadin-dashboard/item-resize")
+public class DashboardItemResizeIT extends AbstractComponentIT {
 
     private DashboardElement dashboardElement;
 
@@ -36,20 +37,39 @@ public class DashboardDragResizeIT extends AbstractComponentIT {
     }
 
     @Test
-    public void resizeWidgetBothHorizontallyAndVertically_widgetIsResizedCorrectly() {
+    public void dragResizeWidgetBothHorizontallyAndVertically_widgetIsResizedCorrectly() {
         assertWidgetResized(0);
     }
 
     @Test
-    public void resizeWidgetInSectionBothHorizontallyAndVertically_widgetIsResizedCorrectly() {
+    public void dragResizeWidgetInSectionBothHorizontallyAndVertically_widgetIsResizedCorrectly() {
         assertWidgetResized(1);
+    }
+
+    @Test
+    public void keyboardResizeWidget_widgetIsResizedCorrectly() {
+        var widgetToResize = dashboardElement.getWidgets().get(0);
+        var initialWidth = widgetToResize.getSize().getWidth();
+        // Select widget
+        widgetToResize.sendKeys(Keys.ENTER);
+        // Grow the widget
+        new Actions(getDriver()).keyDown(Keys.SHIFT).sendKeys(Keys.RIGHT)
+                .build().perform();
+        var delta = 20;
+        Assert.assertEquals(initialWidth * 2,
+                widgetToResize.getSize().getWidth(), delta);
+        // Shrink the widget back
+        new Actions(getDriver()).keyDown(Keys.SHIFT).sendKeys(Keys.LEFT).build()
+                .perform();
+        Assert.assertEquals(initialWidth, widgetToResize.getSize().getWidth(),
+                delta);
     }
 
     private void assertWidgetResized(int widgetIndexToResize) {
         var widgetToResize = dashboardElement.getWidgets()
                 .get(widgetIndexToResize);
-        int xResizeRatio = 2;
-        int yResizeRatio = 2;
+        var xResizeRatio = 2;
+        var yResizeRatio = 2;
         var expectedWidth = widgetToResize.getSize().getWidth() * xResizeRatio;
         var expectedHeight = widgetToResize.getSize().getHeight()
                 * yResizeRatio;
@@ -72,7 +92,7 @@ public class DashboardDragResizeIT extends AbstractComponentIT {
         var yOffset = (int) (widgetToResize.getSize().getHeight()
                 * (yResizeRatio - 1));
         TestBenchElement resizeHandle = getResizeHandle(widgetToResize);
-        int trackStartOffset = 5;
+        var trackStartOffset = 5;
         new Actions(driver).moveToElement(resizeHandle).clickAndHold()
                 // This is necessary for the Polymer track event to be fired.
                 .moveByOffset(trackStartOffset, trackStartOffset)

@@ -11,6 +11,7 @@ package com.vaadin.flow.component.dashboard.tests;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.dashboard.testbench.DashboardElement;
@@ -21,8 +22,8 @@ import com.vaadin.tests.AbstractComponentIT;
 /**
  * @author Vaadin Ltd
  */
-@TestPath("vaadin-dashboard/drag-reorder")
-public class DashboardDragReorderIT extends AbstractComponentIT {
+@TestPath("vaadin-dashboard/item-move")
+public class DashboardItemMoveIT extends AbstractComponentIT {
 
     private DashboardElement dashboardElement;
 
@@ -33,43 +34,57 @@ public class DashboardDragReorderIT extends AbstractComponentIT {
     }
 
     @Test
-    public void reorderWidgetOnClientSide_itemsAreReorderedCorrectly() {
+    public void dragMoveWidget_itemIsMovedCorrectly() {
         var draggedWidget = dashboardElement.getWidgets().get(0);
         var targetWidget = dashboardElement.getWidgets().get(1);
-        dragReorderElement(draggedWidget, targetWidget);
+        dragMoveElement(draggedWidget, targetWidget);
         Assert.assertEquals(draggedWidget.getTitle(),
                 dashboardElement.getWidgets().get(1).getTitle());
     }
 
     @Test
-    public void reorderSectionOnClientSide_itemsAreReorderedCorrectly() {
+    public void dragMoveSection_itemIsMovedCorrectly() {
         var draggedSection = dashboardElement.getSections().get(1);
         var targetWidget = dashboardElement.getWidgets().get(0);
-        dragReorderElement(draggedSection, targetWidget);
+        dragMoveElement(draggedSection, targetWidget);
         Assert.assertEquals(draggedSection.getTitle(),
                 dashboardElement.getSections().get(0).getTitle());
     }
 
     @Test
-    public void reorderWidgetInSectionOnClientSide_itemsAreReorderedCorrectly() {
+    public void dragMoveWidgetInSection_itemIsMovedCorrectly() {
         var firstSection = dashboardElement.getSections().get(0);
         var draggedWidget = firstSection.getWidgets().get(0);
         var targetWidget = firstSection.getWidgets().get(1);
-        dragReorderElement(draggedWidget, targetWidget);
+        dragMoveElement(draggedWidget, targetWidget);
         firstSection = dashboardElement.getSections().get(0);
         Assert.assertEquals(draggedWidget.getTitle(),
                 firstSection.getWidgets().get(1).getTitle());
     }
 
     @Test
-    public void detachReattach_reorderWidgetOnClientSide_itemsAreReorderedCorrectly() {
+    public void keyboardMoveWidget_itemIsMovedCorrectly() {
+        var widgetToMove = dashboardElement.getWidgets().get(0);
+        var expectedTitle = widgetToMove.getTitle();
+        // Select and move the widget
+        widgetToMove.sendKeys(Keys.ENTER, Keys.RIGHT);
+        var widgetAtIndex1 = dashboardElement.getWidgets().get(1);
+        Assert.assertEquals(expectedTitle, widgetAtIndex1.getTitle());
+        // Move the widget back
+        widgetToMove.sendKeys(Keys.LEFT);
+        Assert.assertEquals(expectedTitle,
+                dashboardElement.getWidgets().get(0).getTitle());
+    }
+
+    @Test
+    public void detachReattach_dragMoveWidget_itemIsMovedCorrectly() {
         clickElementWithJs("toggle-attached");
         clickElementWithJs("toggle-attached");
         dashboardElement = $(DashboardElement.class).waitForFirst();
-        reorderWidgetOnClientSide_itemsAreReorderedCorrectly();
+        dragMoveWidget_itemIsMovedCorrectly();
     }
 
-    private void dragReorderElement(TestBenchElement draggedElement,
+    private void dragMoveElement(TestBenchElement draggedElement,
             TestBenchElement targetElement) {
         var dragHandle = getDragHandle(draggedElement);
 
@@ -78,7 +93,7 @@ public class DashboardDragReorderIT extends AbstractComponentIT {
         var xOffset = draggedElement.getLocation().getX() < targetElement
                 .getLocation().getX() ? 10 : -10;
 
-        new Actions(driver).clickAndHold(dragHandle)
+        new Actions(getDriver()).clickAndHold(dragHandle)
                 .moveToElement(targetElement, xOffset, yOffset)
                 .release(targetElement).build().perform();
     }
