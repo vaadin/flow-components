@@ -19,9 +19,9 @@ import com.vaadin.flow.router.Route;
 public class DashboardI18nPage extends Div {
 
     enum I18nEntry {
-        SELECT_SECTION_TITLE_FOR_EDITING("selectSectionTitleForEditing"),
+        SELECT_SECTION("selectSection"),
 
-        SELECT_WIDGET_TITLE_FOR_EDITING("selectWidgetTitleForEditing"),
+        SELECT_WIDGET("selectWidget"),
 
         REMOVE("remove"),
 
@@ -77,10 +77,9 @@ public class DashboardI18nPage extends Div {
 
     private static Dashboard.DashboardI18n getCustomI18n() {
         Dashboard.DashboardI18n dashboardI18n = new Dashboard.DashboardI18n();
-        dashboardI18n.setSelectSectionTitleForEditing(
-                I18nEntry.SELECT_SECTION_TITLE_FOR_EDITING.getCustomValue());
-        dashboardI18n.setSelectWidgetTitleForEditing(
-                I18nEntry.SELECT_WIDGET_TITLE_FOR_EDITING.getCustomValue());
+        dashboardI18n
+                .setSelectSection(I18nEntry.SELECT_SECTION.getCustomValue());
+        dashboardI18n.setSelectWidget(I18nEntry.SELECT_WIDGET.getCustomValue());
         dashboardI18n.setRemove(I18nEntry.REMOVE.getCustomValue());
         dashboardI18n.setResize(I18nEntry.RESIZE.getCustomValue());
         dashboardI18n.setResizeApply(I18nEntry.RESIZE_APPLY.getCustomValue());

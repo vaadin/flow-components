@@ -696,8 +696,8 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
      */
     public static class DashboardI18n implements Serializable {
 
-        private String selectSectionTitleForEditing;
-        private String selectWidgetTitleForEditing;
+        private String selectSection;
+        private String selectWidget;
         private String remove;
         private String resize;
         private String resizeApply;
@@ -717,21 +717,20 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
          * @return the section focus button {@code aria-label}, or {@code null}
          *         if not set
          */
-        public String getSelectSectionTitleForEditing() {
-            return selectSectionTitleForEditing;
+        public String getSelectSection() {
+            return selectSection;
         }
 
         /**
          * Sets the text for the {@code aria-label} attribute of section focus
          * buttons
          *
-         * @param selectSectionTitleForEditing
+         * @param selectSection
          *            the section focus button {@code aria-label} to set
          * @return this instance for method chaining
          */
-        public DashboardI18n setSelectSectionTitleForEditing(
-                String selectSectionTitleForEditing) {
-            this.selectSectionTitleForEditing = selectSectionTitleForEditing;
+        public DashboardI18n setSelectSection(String selectSection) {
+            this.selectSection = selectSection;
             return this;
         }
 
@@ -742,21 +741,20 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
          * @return the widget focus button {@code aria-label}, or {@code null}
          *         if not set
          */
-        public String getSelectWidgetTitleForEditing() {
-            return selectWidgetTitleForEditing;
+        public String getSelectWidget() {
+            return selectWidget;
         }
 
         /**
          * Sets the text for the {@code aria-label} attribute of widget focus
          * buttons
          *
-         * @param selectWidgetTitleForEditing
+         * @param selectWidget
          *            the widget focus button {@code aria-label} to set
          * @return this instance for method chaining
          */
-        public DashboardI18n setSelectWidgetTitleForEditing(
-                String selectWidgetTitleForEditing) {
-            this.selectWidgetTitleForEditing = selectWidgetTitleForEditing;
+        public DashboardI18n setSelectWidget(String selectWidget) {
+            this.selectWidget = selectWidget;
             return this;
         }
 
