@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -124,7 +124,7 @@ public class GridHeaderFooterRowPage extends Div {
         add(grid2);
 
         IntStream.range(0, 4)
-                .forEach(i -> grid2.addColumn(ValueProvider.identity()));
+                .forEach(i -> grid2.addColumn(item -> item + "-" + (i + 1)));
 
         button = new NativeButton("Prepend header",
                 event -> grid2.prependHeaderRow().getCells()
@@ -162,6 +162,16 @@ public class GridHeaderFooterRowPage extends Div {
             b.setId("join-footers-" + i + (i + 1));
             add(b);
         });
+
+        NativeButton removeAllFooterRows = new NativeButton(
+                "removeAllFooterRows", event -> grid2.removeAllFooterRows());
+        removeAllFooterRows.setId("remove-all-footer-rows");
+        add(removeAllFooterRows);
+
+        NativeButton removeAllHeaderRows = new NativeButton(
+                "removeAllHeaderRows", event -> grid2.removeAllHeaderRows());
+        removeAllHeaderRows.setId("remove-all-header-rows");
+        add(removeAllHeaderRows);
     }
 
 }

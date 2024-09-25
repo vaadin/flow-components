@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,7 +35,15 @@ public class ProgressUpdateEvent extends ComponentEvent<Upload> {
     private final long contentLength;
 
     /**
+     * Name of file currently being uploaded
+     */
+    private final String fileName;
+
+    /**
      * Event constructor method to construct a new progress event.
+     *
+     * @deprecated since 24.4. Use
+     *             {@link #ProgressUpdateEvent(Upload, long, long, String)}
      *
      * @param source
      *            the source of the file
@@ -44,11 +52,30 @@ public class ProgressUpdateEvent extends ComponentEvent<Upload> {
      * @param contentLength
      *            total size of file currently being uploaded, -1 if unknown
      */
+    @Deprecated(since = "24.4")
     public ProgressUpdateEvent(Upload source, long readBytes,
             long contentLength) {
+        this(source, readBytes, contentLength, null);
+    }
+
+    /**
+     * Event constructor method to construct a new progress event.
+     *
+     * @param source
+     *            the source of the file
+     * @param readBytes
+     *            bytes transferred
+     * @param contentLength
+     *            total size of file currently being uploaded, -1 if unknown
+     * @param fileName
+     *            name of file currently being uploaded
+     */
+    public ProgressUpdateEvent(Upload source, long readBytes,
+            long contentLength, String fileName) {
         super(source, false);
         this.readBytes = readBytes;
         this.contentLength = contentLength;
+        this.fileName = fileName;
     }
 
     /**
@@ -76,5 +103,14 @@ public class ProgressUpdateEvent extends ComponentEvent<Upload> {
      */
     public long getContentLength() {
         return contentLength;
+    }
+
+    /**
+     * Get the file name.
+     *
+     * @return file name
+     */
+    public String getFileName() {
+        return fileName;
     }
 }

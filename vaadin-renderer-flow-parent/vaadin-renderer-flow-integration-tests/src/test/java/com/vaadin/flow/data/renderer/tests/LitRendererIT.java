@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,17 +15,16 @@
  */
 package com.vaadin.flow.data.renderer.tests;
 
+import java.util.logging.Level;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.tests.AbstractComponentIT;
-
-import java.util.logging.Level;
-
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-renderer-flow/lit-renderer")
 public class LitRendererIT extends AbstractComponentIT {
@@ -83,7 +82,18 @@ public class LitRendererIT extends AbstractComponentIT {
     public void shouldInvokeCallableFromEvent() {
         clickElementWithJs("content-0");
         Assert.assertEquals("event: clicked, item: 0",
-                getClientCallableLogArray());
+                getFirstClientCallableLogMessage());
+    }
+
+    @Test
+    public void shouldNotInvokeCallableFromEventWhenContentDiscardedAfterRefresh() {
+        // Start long refresh and click on the content-0 while the refresh is
+        // still running
+        this.executeScript(
+                "document.getElementById('longRefreshButton').click();"
+                        + "document.getElementById('content-0').click();");
+
+        Assert.assertTrue(noClientCallableLogMessageProduced());
     }
 
     @Test
@@ -91,7 +101,7 @@ public class LitRendererIT extends AbstractComponentIT {
         WebElement itemContent = findElement(By.id("content-0"));
         drag(itemContent);
         Assert.assertEquals("event: dragged, item: 0, argument count: 0",
-                getClientCallableLogArray());
+                getFirstClientCallableLogMessage());
     }
 
     @Test
@@ -99,7 +109,7 @@ public class LitRendererIT extends AbstractComponentIT {
         WebElement itemContent = findElement(By.id("content-0"));
         itemContent.sendKeys("a");
         Assert.assertEquals("event: keyPressed, item: 0, key: a",
-                getClientCallableLogArray());
+                getFirstClientCallableLogMessage());
     }
 
     @Test
@@ -119,13 +129,28 @@ public class LitRendererIT extends AbstractComponentIT {
         Assert.assertEquals("Details: 0 (details)", details.getText());
     }
 
-    private String getClientCallableLogArray() {
-        String message = getLogEntries(Level.WARNING).stream()
+    @Test
+    public void shouldBeAbleToUseLiveDirective() {
+        clickElementWithJs("setCheckboxRenderer");
+        WebElement checkbox = findElement(By.cssSelector("#item-0 input"));
+        checkbox.click();
+        clickElementWithJs("longRefreshButton");
+        checkbox = findElement(By.cssSelector("#item-0 input"));
+        Assert.assertFalse(checkbox.isSelected());
+    }
+
+    private String getFirstClientCallableLogMessage() {
+        return getLogEntries(Level.WARNING).stream()
                 // Discard all but event messages
                 .filter(m -> m.getMessage().contains("event:"))
                 // Return first warning message in console
-                .findFirst().get().getMessage();
-        return message.split("\"")[1];
+                .findFirst()
+                .map(logEntry -> logEntry.getMessage().split("\"")[1])
+                .orElse(null);
+    }
+
+    private boolean noClientCallableLogMessageProduced() {
+        return getFirstClientCallableLogMessage() == null;
     }
 
 }

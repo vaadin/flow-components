@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,9 +12,7 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
-
 package com.vaadin.flow.component.progressbar;
 
 import com.vaadin.flow.component.Component;
@@ -33,8 +31,8 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-progress-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha14")
-@NpmPackage(value = "@vaadin/progress-bar", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
+@NpmPackage(value = "@vaadin/progress-bar", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/progress-bar/src/vaadin-progress-bar.js")
 public class ProgressBar extends Component

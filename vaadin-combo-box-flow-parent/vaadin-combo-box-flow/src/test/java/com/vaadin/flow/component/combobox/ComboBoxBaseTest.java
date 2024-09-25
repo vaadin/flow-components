@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,9 +15,18 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Stream;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
@@ -31,14 +40,8 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.DataProviderListenersTest;
-import elemental.json.Json;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Mockito;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.stream.Stream;
+import elemental.json.Json;
 
 /**
  * Suite of basic tests that apply to both, ComboBox and MultiSelectComboBox
@@ -89,6 +92,13 @@ public abstract class ComboBoxBaseTest {
     public void implementsHasTooltip() {
         Assert.assertTrue("ComboBox should support setting a tooltip",
                 HasTooltip.class.isAssignableFrom(
+                        createComboBox(String.class).getClass()));
+    }
+
+    @Test
+    public void implementsHasPlaceholder() {
+        Assert.assertTrue("ComboBox should support setting a placeholder",
+                HasPlaceholder.class.isAssignableFrom(
                         createComboBox(String.class).getClass()));
     }
 

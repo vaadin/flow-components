@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,10 +27,13 @@ import com.vaadin.flow.component.HasValidation;
 public interface HasValidationProperties extends HasElement, HasValidation {
 
     /**
-     * Sets the error message to show to the user when the component is invalid.
+     * Sets a single error message to display for all constraint violations. The
+     * error message will only appear when the component is flagged as invalid,
+     * either as a result of constraint validation or by the developer through
+     * {@link #setInvalid(boolean)} if manual validation mode is enabled.
      *
      * @param errorMessage
-     *            the error message or {@code null} to clear it
+     *            the error message to set, or {@code null} to clear
      */
     @Override
     default void setErrorMessage(String errorMessage) {
@@ -39,9 +42,11 @@ public interface HasValidationProperties extends HasElement, HasValidation {
     }
 
     /**
-     * Gets the error message to show to the when the component is invalid.
+     * Gets the error message displayed for all constraint violations if it has
+     * been set with {@link #setErrorMessage(String)}. Otherwise, gets the
+     * current i18n error message if the value is currently invalid.
      *
-     * @return the error message or {@code null} if not set
+     * @return the error message
      */
     @Override
     default String getErrorMessage() {
@@ -51,10 +56,10 @@ public interface HasValidationProperties extends HasElement, HasValidation {
     /**
      * Sets the invalid state of the component.
      * <p>
-     * NOTE: If you need to manually control the invalid state, consider
-     * enabling manual validation mode with
-     * {@link #setManualValidation(boolean)} to avoid potential conflicts
-     * between your custom validation and the component's built-in validation.
+     * NOTE: If you need to manually control the invalid state, enable manual
+     * validation mode with {@link #setManualValidation(boolean)} to avoid
+     * potential conflicts between your custom validation and the component's
+     * constraint validation.
      *
      * @param invalid
      *            {@code true} for invalid, {@code false} for valid

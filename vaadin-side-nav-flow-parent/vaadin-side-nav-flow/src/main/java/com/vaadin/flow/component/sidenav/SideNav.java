@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.sidenav;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
@@ -23,9 +26,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JsonSerializer;
-
-import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * A side navigation menu with support for hierarchical and flat menus.
@@ -37,7 +37,7 @@ import java.util.Objects;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav")
-@NpmPackage(value = "@vaadin/side-nav", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/side-nav", version = "24.5.0-beta1")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
 public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
 
@@ -151,12 +151,10 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content that is gotten from this method will
-     * not update the lang on the component if not set back using
-     * {@link SideNav#setI18n(SideNavI18n)}
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using {@link #setI18n(SideNavI18n)}
      *
-     * @return the i18n object. It will be <code>null</code>, If the i18n
-     *         properties weren't set.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public SideNavI18n getI18n() {
         return i18n;
@@ -168,7 +166,7 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
      * web component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(SideNavI18n i18n) {
         Objects.requireNonNull(i18n,

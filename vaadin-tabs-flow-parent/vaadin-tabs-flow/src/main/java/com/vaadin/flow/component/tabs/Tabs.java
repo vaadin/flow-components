@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.tabs;
 
 import java.io.Serializable;
@@ -24,6 +23,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
+
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
@@ -40,7 +41,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
-import org.slf4j.LoggerFactory;
 
 /**
  * Tabs are used to organize and group content into sections that the user can
@@ -66,10 +66,10 @@ import org.slf4j.LoggerFactory;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabs")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/tabs/src/vaadin-tabs.js")
-@NpmPackage(value = "@vaadin/tabs", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/tabs", version = "24.5.0-beta1")
 public class Tabs extends Component
         implements HasEnabled, HasSize, HasStyle, HasThemeVariant<TabsVariant> {
 
@@ -92,8 +92,19 @@ public class Tabs extends Component
      */
     public Tabs() {
         setSelectedIndex(-1);
-        getElement().addPropertyChangeListener(SELECTED,
-                event -> updateSelectedTab(event.isUserOriginated()));
+        getElement().addPropertyChangeListener(SELECTED, event -> {
+            int oldIndex = selectedTab != null ? indexOf(selectedTab) : -1;
+            int newIndex = getSelectedIndex();
+            if (newIndex >= getTabCount()) {
+                LoggerFactory.getLogger(getClass()).warn(String.format(
+                        "The selected index is out of range: %d. Reverting to the previous index: %d.",
+                        newIndex, oldIndex));
+                setSelectedIndex(oldIndex);
+                return;
+            }
+
+            updateSelectedTab(event.isUserOriginated());
+        });
     }
 
     /**
@@ -173,7 +184,7 @@ public class Tabs extends Component
      */
     public void add(Tab... tabs) {
         Objects.requireNonNull(tabs, "Tabs should not be null");
-        boolean wasEmpty = getComponentCount() == 0;
+        boolean wasEmpty = getTabCount() == 0;
         Arrays.stream(tabs).map(
                 tab -> Objects.requireNonNull(tab, "Tab to add cannot be null"))
                 .map(Tab::getElement).forEach(getElement()::appendChild);
@@ -248,11 +259,11 @@ public class Tabs extends Component
         int newSelectedIndex = getSelectedIndex() - lowerIndices;
 
         // In case the last tab was removed
-        if (newSelectedIndex > 0 && newSelectedIndex >= getComponentCount()) {
-            newSelectedIndex = getComponentCount() - 1;
+        if (newSelectedIndex > 0 && newSelectedIndex >= getTabCount()) {
+            newSelectedIndex = getTabCount() - 1;
         }
 
-        if (getComponentCount() == 0 || (isSelectedTab && !isAutoselect())) {
+        if (getTabCount() == 0 || (isSelectedTab && !isAutoselect())) {
             newSelectedIndex = -1;
         }
 
@@ -671,7 +682,8 @@ public class Tabs extends Component
             return;
         }
 
-        if (currentlySelected == null || currentlySelected.isEnabled()) {
+        if (currentlySelected == null
+                || currentlySelected.getElement().getNode().isEnabledSelf()) {
             selectedTab = currentlySelected;
             getChildren().filter(Tab.class::isInstance).map(Tab.class::cast)
                     .forEach(tab -> tab.setSelected(false));
@@ -689,7 +701,7 @@ public class Tabs extends Component
     }
 
     private void updateEnabled(Tab tab) {
-        boolean enabled = tab.isEnabled();
+        boolean enabled = tab.getElement().getNode().isEnabledSelf();
         Serializable rawValue = tab.getElement().getPropertyRaw("disabled");
         if (rawValue instanceof Boolean) {
             // convert the boolean value to a String to force update the
@@ -748,8 +760,19 @@ public class Tabs extends Component
      * Gets the number of children tabs.
      *
      * @return the number of tabs
+     * @deprecated since 24.5, use {@link #getTabCount} instead.
      */
+    @Deprecated
     public int getComponentCount() {
+        return getTabCount();
+    }
+
+    /**
+     * Gets the number of tabs.
+     *
+     * @return the number of tabs
+     */
+    public int getTabCount() {
         return (int) getChildren().count();
     }
 

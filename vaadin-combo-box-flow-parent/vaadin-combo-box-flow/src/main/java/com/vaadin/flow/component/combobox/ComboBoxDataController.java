@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,6 +14,15 @@
  * the License.
  */
 package com.vaadin.flow.component.combobox;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
 
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -44,16 +53,8 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
-import elemental.json.JsonValue;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
+import elemental.json.JsonValue;
 
 /**
  * Internal class that encapsulates the data communication logic with the web
@@ -218,6 +219,8 @@ class ComboBoxDataController<TItem>
 
         clearFilterOnCloseRegistration = comboBox.getElement()
                 .addPropertyChangeListener("opened", this::clearFilterOnClose);
+
+        reset();
     }
 
     /**
@@ -288,25 +291,7 @@ class ComboBoxDataController<TItem>
      * Called by the client-side connector to reset the data communicator
      */
     void resetDataCommunicator() {
-        /*
-         * The client filter from combo box will be used in the data
-         * communicator only within 'setRequestedRange' calls to data provider,
-         * and then will be erased to not affect the data view item count
-         * handling methods. Thus, if the current client filter is not empty,
-         * then we need to re-set it in the data communicator.
-         */
-        if (lastFilter == null || lastFilter.isEmpty()) {
-            dataCommunicator.reset();
-        } else {
-            String filter = lastFilter;
-            lastFilter = null;
-            /*
-             * This filter slot will eventually call the filter consumer in data
-             * communicator and 'DataCommunicator::reset' is done inside this
-             * consumer, so we don't need to explicitly call it.
-             */
-            filterSlot.accept(filter);
-        }
+        dataCommunicator.reset();
     }
 
     // ****************************************************
@@ -521,7 +506,24 @@ class ComboBoxDataController<TItem>
                     dataGenerator, arrayUpdater,
                     data -> comboBox.getElement()
                             .callJsFunction("$connector.updateData", data),
-                    comboBox.getElement().getNode(), enableFetch);
+                    comboBox.getElement().getNode(), enableFetch) {
+
+                @Override
+                public void reset() {
+                    super.reset();
+                    if (comboBox instanceof MultiSelectComboBox) {
+                        // The data is destroyed and rebuilt on data
+                        // communicator reset. When component renderers are
+                        // used, this means that the nodeIds for the items
+                        // should also be updated. However, the "selectedItems"
+                        // property is manually set in "refreshValue()".
+                        // Therefore, the selected items can contain obsolete
+                        // nodeIds. For this reason, this value refresh is
+                        // necessary.
+                        comboBox.refreshValue();
+                    }
+                }
+            };
             dataCommunicator.setPageSize(comboBox.getPageSize());
         } else {
             // Enable/disable items fetch from data provider depending on the

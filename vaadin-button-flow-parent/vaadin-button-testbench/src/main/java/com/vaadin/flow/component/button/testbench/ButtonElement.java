@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.button.testbench;
 
+import com.vaadin.testbench.HasLabelAsText;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -23,7 +24,7 @@ import com.vaadin.testbench.elementsbase.Element;
  * element.
  */
 @Element("vaadin-button")
-public class ButtonElement extends TestBenchElement {
+public class ButtonElement extends TestBenchElement implements HasLabelAsText {
     @Override
     public String getText() {
         // The default implementation seems to use innerText, which adds a lot

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,14 +15,15 @@
  */
 package com.vaadin.flow.component.icon.tests;
 
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.icon.SvgIcon;
-import com.vaadin.flow.server.StreamResource;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.icon.SvgIcon;
+import com.vaadin.flow.server.StreamResource;
 
 public class SvgIconTest {
     @Test
@@ -41,6 +42,17 @@ public class SvgIconTest {
     }
 
     @Test
+    public void sourceWithSymbolConstructor_hasSrcAndSymbol() {
+        var path = "path/to/file.svg";
+        var symbol = "symbol";
+        var icon = new SvgIcon(path, symbol);
+        Assert.assertEquals(path, icon.getSrc());
+        Assert.assertEquals(path, icon.getElement().getAttribute("src"));
+        Assert.assertEquals(symbol, icon.getSymbol());
+        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+    }
+
+    @Test
     public void streamResourceConstructor_hasSrc() {
         UI.setCurrent(new UI());
         var resource = new StreamResource("image.svg",
@@ -53,12 +65,66 @@ public class SvgIconTest {
     }
 
     @Test
+    public void streamResourceConstructorWithSymbol_hasSrcAndSymbol() {
+        UI.setCurrent(new UI());
+        var resource = new StreamResource("image.svg",
+                () -> new ByteArrayInputStream(
+                        "<svg></svg>".getBytes(StandardCharsets.UTF_8)));
+        var symbol = "symbol";
+        var icon = new SvgIcon(resource, symbol);
+        Assert.assertTrue(icon.getSrc().contains("image.svg"));
+        Assert.assertTrue(
+                icon.getElement().getAttribute("src").contains("image.svg"));
+        Assert.assertEquals(symbol, icon.getSymbol());
+        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+    }
+
+    @Test
     public void setSrc_hasSrc() {
         var icon = new SvgIcon();
         var path = "path/to/file.svg";
         icon.setSrc(path);
         Assert.assertEquals(path, icon.getSrc());
         Assert.assertEquals(path, icon.getElement().getAttribute("src"));
+    }
+
+    @Test
+    public void setSrcWithSymbol_hasSrcAndSymbol() {
+        var icon = new SvgIcon();
+        var path = "path/to/file.svg";
+        var symbol = "symbol";
+        icon.setSrc(path, symbol);
+
+        Assert.assertEquals(path, icon.getSrc());
+        Assert.assertEquals(path, icon.getElement().getAttribute("src"));
+        Assert.assertEquals(symbol, icon.getSymbol());
+        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+    }
+
+    @Test
+    public void hasStreamResource_setSrcWithSymbol_hasSrcAndSymbol() {
+        UI.setCurrent(new UI());
+        var resource = new StreamResource("image.svg",
+                () -> new ByteArrayInputStream(
+                        "<svg></svg>".getBytes(StandardCharsets.UTF_8)));
+        var symbol = "symbol";
+        var icon = new SvgIcon();
+        icon.setSrc(resource, symbol);
+
+        Assert.assertTrue(icon.getSrc().contains("image.svg"));
+        Assert.assertTrue(
+                icon.getElement().getAttribute("src").contains("image.svg"));
+        Assert.assertEquals(symbol, icon.getSymbol());
+        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+    }
+
+    @Test
+    public void setSymbol_hasSymbol() {
+        var icon = new SvgIcon();
+        var symbol = "symbol";
+        icon.setSymbol(symbol);
+        Assert.assertEquals(symbol, icon.getSymbol());
+        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
     }
 
     @Test

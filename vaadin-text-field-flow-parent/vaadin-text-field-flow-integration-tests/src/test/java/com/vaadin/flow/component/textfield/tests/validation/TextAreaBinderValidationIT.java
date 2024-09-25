@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,18 +15,22 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
-import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.validation.AbstractValidationIT;
-import org.junit.Test;
-import org.openqa.selenium.Keys;
-
 import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.MAX_LENGTH_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.MIN_LENGTH_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.PATTERN_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.PATTERN_INPUT;
 import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.REQUIRED_ERROR_MESSAGE;
 import static com.vaadin.flow.component.textfield.tests.validation.TextAreaBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
+
+import org.junit.Test;
+import org.openqa.selenium.Keys;
+
+import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.validation.AbstractValidationIT;
 
 @TestPath("vaadin-text-area/validation/binder")
 public class TextAreaBinderValidationIT
@@ -41,9 +45,10 @@ public class TextAreaBinderValidationIT
     @Test
     public void required_triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -51,10 +56,12 @@ public class TextAreaBinderValidationIT
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("Value", Keys.ENTER);
 
         testField.setValue("Value");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
         testField.setValue("");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
@@ -67,18 +74,21 @@ public class TextAreaBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("A");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(MIN_LENGTH_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("AA");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
         testField.setValue("AAA");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
@@ -90,18 +100,21 @@ public class TextAreaBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("AAA");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(MAX_LENGTH_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("AA");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
         testField.setValue("A");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
@@ -113,22 +126,26 @@ public class TextAreaBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("Word");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(PATTERN_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("12");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
         testField.setValue("1234");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
 
+    @Override
     protected TextAreaElement getTestField() {
         return $(TextAreaElement.class).first();
     }

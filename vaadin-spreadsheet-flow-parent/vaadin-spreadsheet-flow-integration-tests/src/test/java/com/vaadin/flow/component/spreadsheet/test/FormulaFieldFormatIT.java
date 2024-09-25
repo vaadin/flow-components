@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.test;
 
 import java.util.Locale;
@@ -26,6 +34,16 @@ public class FormulaFieldFormatIT extends AbstractSpreadsheetIT {
         loadFile("number_format.xlsx");
         assertFormat("F3", "3,333.333", "3333.333");
         assertFormat("H3", "3,333.33 €", "3333.333");
+    }
+
+    @Test
+    public void formulaLocaleFormatting_selectCellUsingAddressField_formulaFieldContentsFormattedForLocale() {
+        setLocale(Locale.ITALY);
+        createNewSpreadsheet();
+        setCellValue("A1", "=0,123456");
+        clickCell("B1");
+        setAddressFieldValue("A1");
+        Assert.assertEquals("=0,123", getFormulaFieldValue());
     }
 
     @Test

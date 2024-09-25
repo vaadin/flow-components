@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,9 +19,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.Scroller.ScrollDirection;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public class ScrollerTest {
 
@@ -84,4 +87,20 @@ public class ScrollerTest {
         scroller.setScrollDirection(null);
     }
 
+    @Test
+    public void implementsFocusable() {
+        Assert.assertTrue("Scroller should be focusable",
+                Focusable.class.isAssignableFrom(scroller.getClass()));
+    }
+
+    @Test
+    public void setEnabled_disableChildren() {
+        Input input = new Input();
+
+        scroller.setContent(new VerticalLayout(input));
+        Assert.assertTrue(input.isEnabled());
+
+        scroller.setEnabled(false);
+        Assert.assertFalse(input.isEnabled());
+    }
 }

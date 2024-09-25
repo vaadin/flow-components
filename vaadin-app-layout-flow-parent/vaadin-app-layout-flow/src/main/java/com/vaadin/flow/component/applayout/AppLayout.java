@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -52,9 +52,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/app-layout", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/app-layout", version = "24.5.0-beta1")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
@@ -70,27 +70,25 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the i18n object that is returned from this method will not
-     * update the the component, unless it is set again using
-     * {@link AppLayout#setI18n(AppLayoutI18n)}
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(AppLayoutI18n)}
      *
-     * @return the i18n object. It will be <code>null</code>, if the i18n
-     *         properties are not set.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public AppLayoutI18n getI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Sets the internationalization object for this component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(AppLayoutI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
 
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {

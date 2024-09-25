@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -142,6 +142,50 @@ interface ColumnBase<T extends ColumnBase<T>> extends HasElement {
     default ColumnTextAlign getTextAlign() {
         return ColumnTextAlign
                 .fromPropertyValue(getElement().getProperty("textAlign"));
+    }
+
+    /**
+     * Sets a custom part name for the header cell.
+     *
+     * @param headerPartName
+     *            the part name to set
+     * @return this column, for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    default T setHeaderPartName(String headerPartName) {
+        getElement().setProperty("headerPartName", headerPartName);
+        return (T) this;
+    }
+
+    /**
+     * Gets the custom part name of the header cell.
+     *
+     * @return the part name
+     */
+    default String getHeaderPartName() {
+        return getElement().getProperty("headerPartName");
+    }
+
+    /**
+     * Sets a custom part name for the footer cell.
+     *
+     * @param footerPartName
+     *            the part name to set
+     * @return this column, for method chaining
+     */
+    @SuppressWarnings("unchecked")
+    default T setFooterPartName(String footerPartName) {
+        getElement().setProperty("footerPartName", footerPartName);
+        return (T) this;
+    }
+
+    /**
+     * Gets the custom part name of the footer cell.
+     *
+     * @return the part name
+     */
+    default String getFooterPartName() {
+        return getElement().getProperty("footerPartName");
     }
 
     /**

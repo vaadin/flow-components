@@ -1,12 +1,14 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.map;
+
+import java.util.Objects;
 
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -25,8 +27,6 @@ import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import com.vaadin.flow.component.map.configuration.source.Source;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 import com.vaadin.flow.component.map.configuration.source.XYZSource;
-
-import java.util.Objects;
 
 /**
  * Map is a component for displaying geographic maps from various sources. It
@@ -65,8 +65,8 @@ import java.util.Objects;
  * using {@link #defineProjection(String, String)}.
  */
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "24.2.0-alpha14")
-@NpmPackage(value = "proj4", version = "2.9.0")
+@NpmPackage(value = "@vaadin/map", version = "24.5.0-beta1")
+@NpmPackage(value = "proj4", version = "2.11.0")
 @JsModule("@vaadin/map/src/vaadin-map.js")
 @JsModule("./vaadin-map/mapConnector.js")
 public class Map extends MapBase {

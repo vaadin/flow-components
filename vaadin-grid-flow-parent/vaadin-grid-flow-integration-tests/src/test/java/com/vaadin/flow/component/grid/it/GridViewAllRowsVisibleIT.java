@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,18 +26,53 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-grid-it-demo/all-rows-visible")
 public class GridViewAllRowsVisibleIT extends AbstractComponentIT {
 
+    private GridElement grid;
+
     @Before
     public void init() {
         open();
+        grid = $(GridElement.class).id("grid-all-rows-visible");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() == 50);
     }
 
     @Test
     public void allRowsVisible_allRowsAreFetched() {
-        GridElement grid = $(GridElement.class).id("grid-all-rows-visible");
-        scrollToElement(grid);
-        waitUntil(driver -> grid.getRowCount() == 50);
-
         Assert.assertEquals("Grid should have allRowsVisible set to true",
                 "true", grid.getAttribute("allRowsVisible"));
     }
+
+    @Test
+    public void cellsRowIndexUtilMethod_returnsExpectedCells() {
+        for (var cell : grid.getCells(0)) {
+            Assert.assertEquals(grid.getCell(cell.getRow(), cell.getColumn()),
+                    cell);
+        }
+    }
+
+    @Test
+    public void cellsColumnElementsUtilMethod_returnsExpectedCells() {
+        for (var col : grid.getAllColumns()) {
+            for (var cell : grid.getCells(0, col)) {
+                Assert.assertEquals(
+                        grid.getCell(cell.getRow(), cell.getColumn()), cell);
+            }
+        }
+    }
+
+    @Test
+    public void indexesBasedRowsFetchingMethod_returnsExpectedRows() {
+        int expectedRowAmount = grid.getRowCount();
+        int actualRowAmount = grid.getRows(0, expectedRowAmount - 1).size();
+        Assert.assertEquals(expectedRowAmount, actualRowAmount);
+    }
+
+    @Test
+    public void indexesBasedRowsFetchingMethod_returnsSameElementAsSingularRowFetchingMethod() {
+        var rows = grid.getRows(0, grid.getRowCount() - 1);
+        for (int i = 0; i < rows.size(); i++) {
+            Assert.assertEquals(grid.getRow(i), rows.get(i));
+        }
+    }
+
 }

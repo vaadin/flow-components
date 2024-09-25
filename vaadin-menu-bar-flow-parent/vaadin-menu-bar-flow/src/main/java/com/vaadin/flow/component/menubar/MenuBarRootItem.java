@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -60,6 +60,67 @@ class MenuBarRootItem extends MenuBarItem {
     @Override
     public void removeThemeNames(String... themeNames) {
         super.removeThemeNames(themeNames);
+        menuBar.updateButtons();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void addClassName(String className) {
+        super.addClassName(className);
+        updateClassName();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void addClassNames(String... classNames) {
+        super.addClassNames(classNames);
+        updateClassName();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void setClassName(String className) {
+        super.setClassName(className);
+        updateClassName();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void setClassName(String className, boolean set) {
+        super.setClassName(className, set);
+        updateClassName();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public boolean removeClassName(String className) {
+        var result = super.removeClassName(className);
+        updateClassName();
+        return result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void removeClassNames(String... classNames) {
+        super.removeClassNames(classNames);
+        updateClassName();
+    }
+
+    private void updateClassName() {
+        getElement().executeJs(
+                "window.Vaadin.Flow.menubarConnector.setClassName(this)");
         menuBar.updateButtons();
     }
 }

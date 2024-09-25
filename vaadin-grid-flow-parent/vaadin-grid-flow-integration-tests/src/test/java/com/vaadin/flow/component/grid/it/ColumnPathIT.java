@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,8 +23,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/column-path")
 public class ColumnPathIT extends AbstractComponentIT {
@@ -42,6 +42,8 @@ public class ColumnPathIT extends AbstractComponentIT {
         // if the innerHTML contains Person 1
         Assert.assertTrue(grid.getCell(0, 2).getText().contains("Person 1"));
 
+        Assert.assertEquals("Person 1", grid.getCell(0, 3).getText());
+
         List<WebElement> columns = grid
                 .findElements(By.tagName("vaadin-grid-column"));
         Assert.assertNotNull(
@@ -51,8 +53,13 @@ public class ColumnPathIT extends AbstractComponentIT {
         Assert.assertNull("The path property should be undefined for column 1",
                 getPath(columns.get(1)));
 
-        Assert.assertNull("The path property should be undefined for column 2",
+        Assert.assertNotNull(
+                "The path property shouldn't be undefined for column 2",
                 getPath(columns.get(2)));
+
+        Assert.assertNotNull(
+                "The path property shouldn't be undefined for column 3",
+                getPath(columns.get(3)));
     }
 
     private String getPath(WebElement col) {

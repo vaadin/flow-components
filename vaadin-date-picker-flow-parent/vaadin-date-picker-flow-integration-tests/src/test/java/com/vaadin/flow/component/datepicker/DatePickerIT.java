@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.datepicker;
 
+import static org.junit.Assert.assertTrue;
+
 import java.time.LocalDate;
 import java.time.Month;
 
@@ -27,11 +29,9 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.TestBenchTestCase;
-
-import static org.junit.Assert.assertTrue;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the {@link DatePickerViewDemoPage}.

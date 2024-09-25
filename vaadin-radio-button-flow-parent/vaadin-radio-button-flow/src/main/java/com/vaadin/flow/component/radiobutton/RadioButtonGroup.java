@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,15 @@
  */
 package com.vaadin.flow.component.radiobutton;
 
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -22,7 +31,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -35,10 +43,13 @@ import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.component.shared.SelectionPreservationHandler;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ValidationController;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
-import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
-import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderWrapper;
@@ -58,28 +69,47 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
-
 /**
  * Radio Button Group allows the user to select exactly one value from a list of
  * related but mutually exclusive options.
+ * <h2>Validation</h2>
+ * <p>
+ * Radio Button Group comes with a built-in validation mechanism that verifies
+ * that a radio button is selected when
+ * {@link #setRequiredIndicatorVisible(boolean) required} is enabled. Validation
+ * is triggered whenever the user selects a radio button or the value is updated
+ * programmatically. In practice, however, the required error can only occur if
+ * the value is cleared programmatically. This is because radio buttons, by
+ * design, don't allow users to clear a selection through UI interaction. If the
+ * required error occurs, the component is marked as invalid and an error
+ * message is displayed below the group.
+ * <p>
+ * The required error message can be configured using either
+ * {@link RadioButtonGroupI18n#setRequiredErrorMessage(String)} or
+ * {@link #setErrorMessage(String)}.
+ * <p>
+ * For more advanced validation that requires custom rules, you can use
+ * {@link Binder}. Please note that Binder provides its own API for the required
+ * validation, see {@link Binder.BindingBuilder#asRequired(String)
+ * asRequired()}.
+ * <p>
+ * However, if Binder doesn't fit your needs and you want to implement fully
+ * custom validation logic, you can disable the built-in validation by setting
+ * {@link #setManualValidation(boolean)} to true. This will allow you to control
+ * the invalid state and the error message manually using
+ * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/radio-group", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/radio-group", version = "24.5.0-beta1")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
         implements HasAriaLabel, HasClientValidation,
-        HasDataView<T, Void, RadioButtonGroupDataView<T>>, HasHelper,
+        HasDataView<T, Void, RadioButtonGroupDataView<T>>,
         HasListDataView<T, RadioButtonGroupListDataView<T>>,
         InputField<AbstractField.ComponentValueChangeEvent<RadioButtonGroup<T>, T>, T>,
         HasThemeVariant<RadioGroupVariant>, HasValidationProperties,
@@ -105,7 +135,25 @@ public class RadioButtonGroup<T>
 
     private SerializableConsumer<UI> sizeRequest;
 
-    private boolean manualValidationEnabled = false;
+    private RadioButtonGroupI18n i18n;
+
+    private Validator<T> defaultValidator = (value, context) -> {
+        boolean fromComponent = context == null;
+
+        // Do the required check only if the validator is called from the
+        // component, and not from Binder. Binder has its own implementation
+        // of required validation.
+        boolean isRequired = fromComponent && isRequiredIndicatorVisible();
+        return ValidationUtil.validateRequiredConstraint(
+                getI18nErrorMessage(
+                        RadioButtonGroupI18n::getRequiredErrorMessage),
+                isRequired, getValue(), getEmptyValue());
+    };
+
+    private ValidationController<RadioButtonGroup<T>, T> validationController = new ValidationController<>(
+            this);
+
+    private SelectionPreservationHandler<T> selectionPreservationHandler;
 
     private static <T> T presentationToModel(
             RadioButtonGroup<T> radioButtonGroup, String presentation) {
@@ -136,7 +184,7 @@ public class RadioButtonGroup<T>
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        initSelectionPreservationHandler();
     }
 
     /**
@@ -285,7 +333,8 @@ public class RadioButtonGroup<T>
     @Override
     public RadioButtonGroupListDataView<T> getListDataView() {
         return new RadioButtonGroupListDataView<>(this::getDataProvider, this,
-                this::identifierProviderChanged, (filter, sorting) -> reset());
+                this::identifierProviderChanged,
+                (filter, sorting) -> rebuild());
     }
 
     /**
@@ -305,7 +354,12 @@ public class RadioButtonGroup<T>
     @Override
     protected boolean hasValidValue() {
         String selectedKey = getElement().getProperty("value");
-        return itemEnabledProvider.test(keyMapper.get(selectedKey));
+        T item = keyMapper.get(selectedKey);
+        // The item enabled provider should not be invoked for null values.
+        if (item == null) {
+            return true;
+        }
+        return itemEnabledProvider.test(item);
     }
 
     /**
@@ -321,7 +375,10 @@ public class RadioButtonGroup<T>
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         this.dataProvider.set(dataProvider);
         DataViewUtils.removeComponentFilterAndSortComparator(this);
-        reset();
+
+        keyMapper.removeAll();
+        clear();
+        rebuild();
 
         setupDataProviderListener(dataProvider);
     }
@@ -331,15 +388,7 @@ public class RadioButtonGroup<T>
             dataProviderListenerRegistration.remove();
         }
         dataProviderListenerRegistration = dataProvider
-                .addDataProviderListener(event -> {
-                    if (event instanceof DataChangeEvent.DataRefreshEvent) {
-                        resetRadioButton(
-                                ((DataChangeEvent.DataRefreshEvent<T>) event)
-                                        .getItem());
-                    } else {
-                        reset();
-                    }
-                });
+                .addDataProviderListener(this::handleDataChange);
     }
 
     /**
@@ -373,8 +422,12 @@ public class RadioButtonGroup<T>
     @Override
     public void setValue(T value) {
         super.setValue(value);
-        getRadioButtons().forEach(
-                rb -> rb.setChecked(Objects.equals(rb.getItem(), value)));
+        if (value == null) {
+            getRadioButtons().forEach(rb -> rb.setChecked(false));
+        } else {
+            getRadioButtons().forEach(
+                    rb -> rb.setChecked(valueEquals(rb.getItem(), value)));
+        }
         refreshButtons();
     }
 
@@ -483,28 +536,52 @@ public class RadioButtonGroup<T>
     }
 
     /**
-     * Specifies that the user must select in a value.
+     * Sets whether the user is required to select a radio button. When
+     * required, an indicator appears next to the label and the field
+     * invalidates if the selection is cleared programmatically.
      * <p>
-     * NOTE: The required indicator will not be visible, if there is no
-     * {@code label} property set for the RadioButtonGroup.
+     * NOTE: The required indicator is only visible when the field has a label,
+     * see {@link #setLabel(String)}.
      *
      * @param required
-     *            the boolean value to set
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
+     * @see RadioButtonGroupI18n#setRequiredErrorMessage(String)
      */
-    public void setRequired(boolean required) {
-        getElement().setProperty("required", required);
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
     }
 
     /**
-     * Specifies that the user must select a value
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
+     * Gets whether the user is required to select a radio button.
      *
-     * @return the {@code required} property from the webcomponent
+     * @return {@code true} if the field is required, {@code false} otherwise
+     * @see #setRequiredIndicatorVisible(boolean)
+     */
+    @Override
+    public boolean isRequiredIndicatorVisible() {
+        return super.isRequiredIndicatorVisible();
+    }
+
+    /**
+     * Alias for {@link #isRequiredIndicatorVisible()}
+     *
+     * @return {@code true} if the field is required, {@code false} otherwise
      */
     public boolean isRequired() {
-        return getElement().getProperty("required", false);
+        return isRequiredIndicatorVisible();
+    }
+
+    /**
+     * Alias for {@link #setRequiredIndicatorVisible(boolean)}.
+     *
+     * @param required
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
+     */
+    public void setRequired(boolean required) {
+        setRequiredIndicatorVisible(required);
     }
 
     /**
@@ -524,6 +601,34 @@ public class RadioButtonGroup<T>
      */
     public String getLabel() {
         return getElement().getProperty("label");
+    }
+
+    /**
+     * Sets the selection preservation mode. Determines what happens with the
+     * selection when {@link DataProvider#refreshAll} is called. The selection
+     * is discarded in any case when a new data provider is set. The default is
+     * {@link SelectionPreservationMode#DISCARD}.
+     *
+     * @param selectionPreservationMode
+     *            the selection preservation mode to switch to, not {@code null}
+     *
+     * @see SelectionPreservationMode
+     */
+    public void setSelectionPreservationMode(
+            SelectionPreservationMode selectionPreservationMode) {
+        selectionPreservationHandler
+                .setSelectionPreservationMode(selectionPreservationMode);
+    }
+
+    /**
+     * Gets the selection preservation mode.
+     *
+     * @return the selection preservation mode
+     *
+     * @see #setSelectionPreservationMode(SelectionPreservationMode)
+     */
+    public SelectionPreservationMode getSelectionPreservationMode() {
+        return selectionPreservationHandler.getSelectionPreservationMode();
     }
 
     @Override
@@ -548,10 +653,7 @@ public class RadioButtonGroup<T>
     }
 
     @SuppressWarnings("unchecked")
-    private void reset() {
-        keyMapper.removeAll();
-        clear();
-
+    private void rebuild() {
         synchronized (dataProvider) {
             // Cache helper component before removal
             Component helperComponent = getHelperComponent();
@@ -577,9 +679,15 @@ public class RadioButtonGroup<T>
             // Ignore new size requests unless the last one has been executed
             // so as to avoid multiple beforeClientResponses.
             if (sizeRequest == null) {
-                sizeRequest = ui -> {
-                    fireSizeEvent();
-                    sizeRequest = null;
+                // Using anonymous class to fix serialization issue:
+                // https://github.com/vaadin/flow-components/issues/6555
+                // Do not replace with lambda
+                sizeRequest = new SerializableConsumer<>() {
+                    @Override
+                    public void accept(UI ui) {
+                        fireSizeEvent();
+                        sizeRequest = null;
+                    }
                 };
                 // Size event is fired before client response so as to avoid
                 // multiple size change events during server round trips
@@ -719,27 +827,135 @@ public class RadioButtonGroup<T>
         keyMapper.setIdentifierGetter(identifierProvider);
     }
 
-    @Override
-    public void setManualValidation(boolean enabled) {
-        this.manualValidationEnabled = enabled;
+    private void initSelectionPreservationHandler() {
+        selectionPreservationHandler = new SelectionPreservationHandler<>(
+                SelectionPreservationMode.DISCARD) {
+
+            @Override
+            public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
+                // NO-OP
+            }
+
+            @Override
+            @SuppressWarnings("unchecked")
+            public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
+                T initialValue = getValue();
+                if (getDataProvider()
+                        .fetch(DataViewUtils.getQuery(RadioButtonGroup.this))
+                        .noneMatch(
+                                item -> valueEquals((T) item, initialValue))) {
+                    clear();
+                }
+            }
+
+            @Override
+            public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
+                clear();
+            }
+        };
     }
 
-    protected void validate() {
-        if (!this.manualValidationEnabled) {
-            boolean isRequired = isRequiredIndicatorVisible();
-            boolean isInvalid = ValidationUtil
-                    .checkRequired(isRequired, getValue(), getEmptyValue())
-                    .isError();
-
-            setInvalid(isInvalid);
+    private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
+        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent) {
+            resetRadioButton(
+                    ((DataChangeEvent.DataRefreshEvent<T>) dataChangeEvent)
+                            .getItem());
+        } else {
+            keyMapper.removeAll();
+            selectionPreservationHandler.handleDataChange(dataChangeEvent);
+            rebuild();
         }
     }
 
     @Override
-    public Registration addValidationStatusChangeListener(
-            ValidationStatusChangeListener<T> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<>(this, !isInvalid())));
+    public void setManualValidation(boolean enabled) {
+        validationController.setManualValidation(enabled);
+    }
+
+    @Override
+    public Validator<T> getDefaultValidator() {
+        return defaultValidator;
+    }
+
+    /**
+     * Validates the current value against the constraints and sets the
+     * {@code invalid} property and the {@code errorMessage} property based on
+     * the result. If a custom error message is provided with
+     * {@link #setErrorMessage(String)}, it is used. Otherwise, the error
+     * message defined in the i18n object is used.
+     * <p>
+     * The method does nothing if the manual validation mode is enabled.
+     */
+    protected void validate() {
+        validationController.validate(getValue());
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(RadioButtonGroupI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public RadioButtonGroupI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(RadioButtonGroupI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+    }
+
+    private String getI18nErrorMessage(
+            Function<RadioButtonGroupI18n, String> getter) {
+        return Optional.ofNullable(i18n).map(getter).orElse("");
+    }
+
+    /**
+     * The internationalization properties for {@link RadioButtonGroup}.
+     */
+    public static class RadioButtonGroupI18n implements Serializable {
+
+        private String requiredErrorMessage;
+
+        /**
+         * Gets the error message displayed when the field is required but
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         * @see RadioButtonGroup#isRequiredIndicatorVisible()
+         * @see RadioButtonGroup#setRequiredIndicatorVisible(boolean)
+         */
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field is required but
+         * empty.
+         * <p>
+         * Note, custom error messages set with
+         * {@link RadioButtonGroup#setErrorMessage(String)} take priority over
+         * i18n error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see RadioButtonGroup#isRequiredIndicatorVisible()
+         * @see RadioButtonGroup#setRequiredIndicatorVisible(boolean)
+         */
+        public RadioButtonGroupI18n setRequiredErrorMessage(
+                String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
     }
 }

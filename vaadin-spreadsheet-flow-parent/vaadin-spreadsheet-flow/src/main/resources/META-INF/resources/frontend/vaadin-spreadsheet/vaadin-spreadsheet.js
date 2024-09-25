@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -138,7 +138,9 @@ export class VaadinSpreadsheet extends LitElement {
 
       lockFormatRows: { type: Boolean },
 
-      namedRanges: { type: String }
+      namedRanges: { type: String },
+
+      theme: { type: String, reflectToAttribute: true }
     };
   }
 
@@ -168,8 +170,8 @@ export class VaadinSpreadsheet extends LitElement {
   updated(_changedProperties) {
     super.updated(_changedProperties);
     let initial = false;
+    let overlays = document.getElementById('spreadsheet-overlays');
     if (!this.api) {
-      let overlays = document.getElementById('spreadsheet-overlays');
       if (!overlays) {
         overlays = document.createElement('div');
         overlays.id = 'spreadsheet-overlays';
@@ -183,6 +185,7 @@ export class VaadinSpreadsheet extends LitElement {
 
       initial = true;
     }
+    overlays.setAttribute('theme', this.getAttribute('theme'));
     let propNames = [];
     let dirty = false;
     _changedProperties.forEach((oldValue, name) => {
@@ -296,6 +299,7 @@ export class VaadinSpreadsheet extends LitElement {
       } else if ('resources' == name) {
         this.api.setResources(this, newVal);
       } else if ('api' == name) {
+      } else if ('theme' == name) {
       } else {
         console.error('<vaadin-spreadsheet> unsupported property received from server: property=' + name);
       }

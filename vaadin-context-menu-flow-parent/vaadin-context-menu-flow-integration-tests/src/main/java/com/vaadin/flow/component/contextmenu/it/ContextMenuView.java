@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -121,6 +121,17 @@ public class ContextMenuView extends Div {
         });
         item2.setCheckable(true);
         item2.setChecked(true);
+
+        MenuItem item3 = contextMenu.addItem("Option 3", event -> {
+            if (event.getSource().isChecked()) {
+                message.setText("Selected option 3");
+            } else {
+                message.setText("Unselected option 3");
+            }
+        });
+        item3.setCheckable(true);
+        item3.setChecked(true);
+        item3.setKeepOpen(true);
 
         addCard("Checkable Menu Items", target, message);
         target.setId("checkable-menu-items-target");

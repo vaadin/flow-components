@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,10 +17,13 @@ package com.vaadin.flow.component.combobox.test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -34,6 +37,7 @@ public class ComponentRendererPage extends Div {
         itemsAfterRenderer();
         dataProviderBeforeRenderer();
         dataProviderAfterRenderer();
+        multiplePagesOfItems();
     }
 
     private ComponentRenderer<VerticalLayout, ComboBoxDemoPage.Song> renderer = new ComponentRenderer<>(
@@ -101,6 +105,22 @@ public class ComponentRendererPage extends Div {
 
         comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, "250px");
         comboBox.setId("dp-after-renderer");
+        add(comboBox);
+    }
+
+    private void multiplePagesOfItems() {
+        ComboBox<ComboBoxDemoPage.Song> comboBox = new ComboBox<>();
+        comboBox.setRenderer(
+                new ComponentRenderer<>(item -> new Span(item.getName())));
+
+        List<ComboBoxDemoPage.Song> longListOfSongs = IntStream.range(0, 1000)
+                .mapToObj(i -> new ComboBoxDemoPage.Song("Song " + i,
+                        "Artist " + i, "Album " + i))
+                .collect(Collectors.toList());
+        comboBox.setItems(longListOfSongs);
+
+        comboBox.getStyle().set(ElementConstants.STYLE_WIDTH, "250px");
+        comboBox.setId("multiple-pages-of-items");
         add(comboBox);
     }
 

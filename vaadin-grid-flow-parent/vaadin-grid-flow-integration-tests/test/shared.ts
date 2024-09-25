@@ -1,12 +1,13 @@
 import './env-setup.js';
 import '@vaadin/grid/all-imports.js';
-import '../frontend/generated/jar-resources/gridConnector.js';
+import '../frontend/generated/jar-resources/gridConnector.ts';
 import '../frontend/generated/jar-resources/vaadin-grid-flow-selection-column.js';
 // For some reason vaadin-grid-flow-selection-column doesn't import vaadin-checkbox
 import '@vaadin/checkbox';
 import sinon from 'sinon';
 import type { Grid, GridColumn } from '@vaadin/grid';
 import type {} from '@web/test-runner-mocha';
+import { GridSorter } from '@vaadin/grid/all-imports.js';
 
 export type GridConnector = {
   updateFlatData: (updatedItems: Item[]) => void;
@@ -17,10 +18,14 @@ export type GridConnector = {
   confirmParent: (index: number, parentKey: string, levelSize: number) => void;
   setSelectionMode: (mode: 'SINGLE' | 'NONE' | 'MULTI') => void;
   expandItems: (items: Item[]) => void;
+  collapseItems: (items: Item[]) => void;
   ensureHierarchy: () => void;
   reset: () => void;
   doSelection: (items: Item[] | [null], userOriginated: boolean) => void;
   doDeselection: (items: Item[], userOriginated: boolean) => void;
+  clear: (index: number, length: number, parentKey?: string) => void;
+  setSorterDirections: (sorters: { column: string, direction: string }[]) => void;
+  setHeaderRenderer: (column: GridColumn, options: { content: Node | string, showSorter: boolean, sorterPath?: string }) => void;
 };
 
 export type GridServer = {
@@ -34,11 +39,13 @@ export type GridServer = {
   setRequestedRange: ((firstIndex: number, size: number) => void) & sinon.SinonSpy;
   setParentRequestedRanges: ((ranges: { firstIndex: number; size: number; parentKey: string }[]) => void) &
     sinon.SinonSpy;
+  sortersChanged: ((sorters: { path: string, direction: string }[]) => void) & sinon.SinonSpy;
 };
 
 export type Item = {
   key: string;
   name?: string;
+  price?: number,
   selected?: boolean;
   detailsOpened?: boolean;
   style?: Record<string, string>;
@@ -50,9 +57,13 @@ export type FlowGrid = Grid<Item> & {
   $server: GridServer;
   __deselectDisallowed: boolean;
   __disallowDetailsOnClick: boolean;
-  _effectiveSize: number;
+  _flatSize: number;
   __updateVisibleRows: () => void;
   _updateItem: (index: number, item: Item) => void;
+};
+
+export type FlowGridSorter = GridSorter & {
+  _order?: number | null;
 };
 
 export type FlowGridSelectionColumn = GridColumn & {
@@ -70,6 +81,7 @@ const Vaadin = window.Vaadin as Vaadin;
 export const gridConnector = Vaadin.Flow.gridConnector;
 
 export const GRID_CONNECTOR_PARENT_REQUEST_DELAY = 50;
+export const GRID_CONNECTOR_ROOT_REQUEST_DELAY = 150;
 
 /**
  * Initializes the grid connector and the grid server mock.
@@ -84,7 +96,8 @@ export function init(grid: FlowGrid): void {
     deselectAll: sinon.spy(),
     setDetailsVisible: sinon.spy(),
     setRequestedRange: sinon.spy(),
-    setParentRequestedRanges: sinon.spy()
+    setParentRequestedRanges: sinon.spy(),
+    sortersChanged: sinon.spy()
   };
 
   gridConnector.initLazy(grid);
@@ -103,7 +116,7 @@ export function initSelectionColumn(grid: FlowGrid, column: FlowGridSelectionCol
  * Returns the number of rows in the grid body.
  */
 export function getBodyRowCount(grid: FlowGrid): number {
-  return grid._effectiveSize;
+  return grid._flatSize;
 }
 
 /**
@@ -150,9 +163,10 @@ export function getBodyCellText(grid: Grid, rowIndex: number, columnIndex: numbe
 /**
  * Sets the root level items for the grid connector.
  */
-export function setRootItems(gridConnector: GridConnector, items: Item[]): void {
+export function setRootItems(gridConnector: GridConnector, items: Item[], index = 0, length?: number): void {
   gridConnector.updateSize(items.length);
-  gridConnector.set(0, items, undefined);
+  const itemSlice = length ? items.slice(index, index + length) : items;
+  gridConnector.set(index, itemSlice, undefined);
   gridConnector.confirm(0);
 }
 
@@ -170,4 +184,18 @@ export function setChildItems(gridConnector: GridConnector, parent: Item, items:
 export function expandItems(gridConnector: GridConnector, items: Item[]): void {
   gridConnector.ensureHierarchy();
   gridConnector.expandItems(items);
+}
+
+/**
+ * Collapse the given items.
+ */
+export function collapseItems(gridConnector: GridConnector, items: Item[]): void {
+  gridConnector.collapseItems(items);
+}
+
+/**
+ * Clears the given range of the given parent's children.
+ */
+export function clear(gridConnector: GridConnector, index: number, length: number, parent?: Item): void {
+  gridConnector.clear(index, length, parent?.key);
 }

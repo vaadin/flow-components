@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -29,6 +29,7 @@ public enum TabSheetVariant implements ThemeVariant {
     LUMO_TABS_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
     LUMO_TABS_EQUAL_WIDTH_TABS( "equal-width-tabs"),
     LUMO_BORDERED("bordered"),
+    LUMO_NO_PADDING("no-padding"),
     MATERIAL_TABS_FIXED("fixed"),
     MATERIAL_BORDERED("bordered");
     //@formatter:on

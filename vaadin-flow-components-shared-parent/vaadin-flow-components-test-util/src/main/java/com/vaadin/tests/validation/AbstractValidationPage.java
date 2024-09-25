@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,11 +15,11 @@
  */
 package com.vaadin.tests.validation;
 
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
@@ -30,8 +30,13 @@ public abstract class AbstractValidationPage<T extends Component & HasValidation
     public static final String SERVER_VALIDITY_STATE = "server-validity-state";
     public static final String SERVER_VALIDITY_STATE_BUTTON = "server-validity-state-button";
 
+    public static final String SERVER_VALIDATION_COUNTER = "server-validation-counter";
+    public static final String SERVER_VALIDATION_COUNTER_RESET_BUTTON = "server-validation-counter-reset-button";
+
     public static final String ATTACH_FIELD_BUTTON = "attach-field-button";
     public static final String DETACH_FIELD_BUTTON = "detach-field-button";
+
+    private Div serverValidationCounter;
 
     protected T testField;
 
@@ -40,6 +45,7 @@ public abstract class AbstractValidationPage<T extends Component & HasValidation
         add(testField);
 
         addServerValidityStateControls();
+        addServerValidationCounter();
         addAttachDetachControls();
     }
 
@@ -55,6 +61,25 @@ public abstract class AbstractValidationPage<T extends Component & HasValidation
                 });
 
         add(new Div(validityState, validityStateButton));
+    }
+
+    private void addServerValidationCounter() {
+        serverValidationCounter = new Div();
+        serverValidationCounter.setId(SERVER_VALIDATION_COUNTER);
+        serverValidationCounter.setText("0");
+
+        NativeButton serverValidationCounterResetButton = createButton(
+                SERVER_VALIDATION_COUNTER_RESET_BUTTON,
+                "Reset server validation counter",
+                event -> serverValidationCounter.setText("0"));
+
+        add(new Div(serverValidationCounter,
+                serverValidationCounterResetButton));
+    }
+
+    protected void incrementServerValidationCounter() {
+        int count = Integer.parseInt(serverValidationCounter.getText());
+        serverValidationCounter.setText(String.valueOf(count + 1));
     }
 
     private void addAttachDetachControls() {

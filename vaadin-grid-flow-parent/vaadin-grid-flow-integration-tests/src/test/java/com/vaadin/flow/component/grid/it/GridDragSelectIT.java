@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,8 +14,6 @@
  * the License.
  */
 package com.vaadin.flow.component.grid.it;
-
-import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -80,12 +78,12 @@ public class GridDragSelectIT extends AbstractComponentIT {
     }
 
     private void assertRowsSelected(GridElement grid, int first, int last) {
-        IntStream.range(first, last).forEach(rowIndex -> Assert
-                .assertTrue(grid.getRow(rowIndex).isSelected()));
+        grid.getRows(first, last)
+                .forEach(row -> Assert.assertTrue(row.isSelected()));
     }
 
     private void assertRowsUnselected(GridElement grid, int first, int last) {
-        IntStream.range(first, last).forEach(rowIndex -> Assert
-                .assertFalse(grid.getRow(rowIndex).isSelected()));
+        grid.getRows(first, last)
+                .forEach(row -> Assert.assertFalse(row.isSelected()));
     }
 }

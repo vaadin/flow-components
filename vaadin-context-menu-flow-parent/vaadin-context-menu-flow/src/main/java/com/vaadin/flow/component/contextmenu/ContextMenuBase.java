@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -52,9 +52,9 @@ import elemental.json.JsonObject;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/context-menu", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/context-menu", version = "24.5.0-beta1")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")
@@ -120,8 +120,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         if (getTarget() != null) {
             targetBeforeOpenRegistration.remove();
             targetAttachRegistration.remove();
-            getTarget().getElement().callJsFunction(
-                    "$contextMenuTargetConnector.removeConnector");
+            getTarget().getElement().executeJs(
+                    "if (this.$contextMenuTargetConnector) { this.$contextMenuTargetConnector.removeConnector() }");
             if (isTargetJsPending()) {
                 targetJsRegistration.cancelExecution();
                 targetJsRegistration = null;
@@ -194,6 +194,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * Closes this context menu if it is currently open.
      */
     public void close() {
+        // See https://github.com/vaadin/flow-components/issues/6449
+        getElement().setProperty("opened", false);
         getElement().callJsFunction("close");
     }
 

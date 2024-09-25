@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,14 +15,15 @@
  */
 package com.vaadin.flow.component.grid;
 
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.EventData;
-import elemental.json.JsonArray;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.DomEvent;
+import com.vaadin.flow.component.EventData;
+
+import elemental.json.JsonArray;
 
 /**
  * Event fired when the columns in the Grid are reordered.

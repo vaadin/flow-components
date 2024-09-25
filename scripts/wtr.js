@@ -53,7 +53,13 @@ function runTests() {
       });
 
       // Install dependencies required to run the web-test-runner tests
-      execSync(`npm install @open-wc/testing @web/dev-server-esbuild @web/test-runner @web/test-runner-playwright sinon --save-dev`, {
+      execSync(`npm install @open-wc/testing @web/dev-server-esbuild @web/test-runner @web/test-runner-playwright @types/mocha sinon --save-dev`, {
+        cwd: itFolder,
+        stdio: 'inherit'
+      });
+
+      // Install Playwright Chromium
+      execSync(`npx playwright install chromium`, {
         cwd: itFolder,
         stdio: 'inherit'
       });

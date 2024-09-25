@@ -1,9 +1,18 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.gridpro.tests;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -14,7 +23,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
@@ -44,16 +52,35 @@ public class MainView extends VerticalLayout {
         mapLists(personList, cityList);
         grid.setItems(personList);
 
-        grid.addCellEditStartedListener(
-                e -> eventsPanel.add(e.getItem().toString()));
+        grid.addItemClickListener(e -> eventsPanel
+                .add("ItemClicked - " + e.getItem().toString()));
+        grid.addCellEditStartedListener(e -> eventsPanel
+                .add("CellEditStarted - " + e.getItem().toString()));
+        grid.addItemPropertyChangedListener(e -> eventsPanel
+                .add("ItemPropertyChanged - " + e.getItem().toString()));
 
         grid.addColumn(Person::getAge).setHeader("Age");
 
-        grid.addEditColumn(Person::getName, "name").text((item, newValue) -> {
-            item.setName(newValue);
-            itemDisplayPanel.setText(item.toString());
-            subPropertyDisplayPanel.setText(newValue);
-        }).setHeader("Name").setWidth("300px");
+        grid.addEditColumn(Person::getName, "name").withManualRefresh()
+                .text((item, newValue) -> {
+                    // Update the items in the underlying data to mimic back-end
+                    // update and refresh all
+                    AtomicReference<Person> updatedPerson = new AtomicReference<>();
+                    personList.replaceAll(person -> {
+                        if (person.getId() != item.getId()) {
+                            return person;
+                        }
+                        updatedPerson.set(new Person(newValue,
+                                item.isSubscriber(), item.getEmail(),
+                                item.getAge(), item.getDepartment(),
+                                item.getCity(), item.getEmploymentYear()));
+                        updatedPerson.get().setId(item.getId());
+                        return updatedPerson.get();
+                    });
+                    grid.getDataProvider().refreshAll();
+                    itemDisplayPanel.setText(item.toString());
+                    subPropertyDisplayPanel.setText(newValue);
+                }).setHeader("Name").setWidth("300px");
 
         ComboBox<Department> cb = new ComboBox<>();
         cb.setItems(Department.values());

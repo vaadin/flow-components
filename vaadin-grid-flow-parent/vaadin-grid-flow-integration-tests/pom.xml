@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-grid-flow-parent</artifactId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-grid-integration-tests</artifactId>
     <packaging>war</packaging>
@@ -98,6 +98,11 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-icons-flow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-core</artifactId>
             <scope>test</scope>
             <exclusions>
@@ -184,6 +189,8 @@
                                 <include>vite.generated.ts</include>
                                 <include>types.d.ts</include>
                                 <include>tsconfig.json</include>
+                                <include>frontend/routes.tsx</include>
+                                <include>frontend/App.tsx</include>
                             </includes>
                         </fileset>
                         <fileset>

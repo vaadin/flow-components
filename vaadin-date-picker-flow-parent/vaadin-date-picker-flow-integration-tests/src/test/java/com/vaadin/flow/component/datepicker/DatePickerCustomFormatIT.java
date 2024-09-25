@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,22 +12,23 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
-
 package com.vaadin.flow.component.datepicker;
 
-import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractComponentIT;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.logging.Level;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
-import java.util.logging.Level;
+import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-date-picker/date-picker-custom-format")
 public class DatePickerCustomFormatIT extends AbstractComponentIT {
@@ -270,6 +271,22 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
         submitValue(id, "foobar");
 
         Assert.assertEquals("", output.getText());
+    }
+
+    @Test
+    public void pickerWithOldReferenceDateAndShortFormat_openAndCloseOverlay_yearIsRetained() {
+        String id = DatePickerCustomFormatPage.OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_DATE_PICKER;
+        TestBenchElement output = $("span").id(
+                DatePickerCustomFormatPage.OLD_REFERENCE_DATE_WITH_SHORT_FORMAT_OUTPUT);
+
+        $(DatePickerElement.class).id(id).click();
+        waitForElementPresent(By.tagName("vaadin-date-picker-overlay"));
+        $(DatePickerElement.class).id(id).sendKeys(Keys.ESCAPE);
+        waitForElementNotPresent(By.tagName("vaadin-date-picker-overlay"));
+
+        String todayString = LocalDate.now()
+                .format(DateTimeFormatter.ISO_LOCAL_DATE);
+        Assert.assertEquals(todayString, output.getText());
     }
 
     private void submitValue(String id, String value) {

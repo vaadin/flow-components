@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,6 +14,9 @@
  * the License.
  */
 package com.vaadin.flow.component.confirmdialog;
+
+import java.util.Collection;
+import java.util.Optional;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -30,16 +33,14 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
-
-import java.util.Optional;
 
 /**
  * Confirm Dialog is a modal Dialog used to confirm user actions.
@@ -63,9 +64,9 @@ import java.util.Optional;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.5.0-beta1")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
@@ -375,7 +376,7 @@ public class ConfirmDialog extends Component
      *            the component to display instead of default Reject button
      */
     public void setRejectButton(Component component) {
-        setRejectButton(component.getElement());
+        SlotUtils.setSlot(this, "reject-button", component);
     }
 
     /**
@@ -383,7 +384,9 @@ public class ConfirmDialog extends Component
      *
      * @param element
      *            the element to display instead of default Reject button
+     * @deprecated Usage of Element API at Component level should be avoided
      */
+    @Deprecated(forRemoval = true)
     public void setRejectButton(Element element) {
         SlotUtils.setSlot(this, "reject-button", element);
     }
@@ -428,7 +431,7 @@ public class ConfirmDialog extends Component
      *            the component to display instead of default Cancel button
      */
     public void setCancelButton(Component component) {
-        setCancelButton(component.getElement());
+        SlotUtils.setSlot(this, "cancel-button", component);
     }
 
     /**
@@ -436,7 +439,9 @@ public class ConfirmDialog extends Component
      *
      * @param element
      *            the element to display instead of default Cancel button
+     * @deprecated Usage of Element API at Component level should be avoided
      */
+    @Deprecated(forRemoval = true)
     public void setCancelButton(Element element) {
         SlotUtils.setSlot(this, "cancel-button", element);
     }
@@ -477,10 +482,10 @@ public class ConfirmDialog extends Component
      * Sets custom confirm button
      *
      * @param component
-     *            the element to display instead of default Confirm button
+     *            the component to display instead of default Confirm button
      */
     public void setConfirmButton(Component component) {
-        setConfirmButton(component.getElement());
+        SlotUtils.setSlot(this, "confirm-button", component);
     }
 
     /**
@@ -488,7 +493,9 @@ public class ConfirmDialog extends Component
      *
      * @param element
      *            the element to display instead of default Confirm button
+     * @deprecated Usage of Element API at Component level should be avoided
      */
+    @Deprecated(forRemoval = true)
     public void setConfirmButton(Element element) {
         SlotUtils.setSlot(this, "confirm-button", element);
     }
@@ -501,14 +508,14 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets custom confirmation message element
+     * Sets custom confirmation message
      *
      * @param component
      *            the component to display instead of default confirmation text
      *            node
      */
     public void setText(Component component) {
-        setText(component.getElement());
+        getElement().appendChild(component.getElement());
     }
 
     /**
@@ -517,7 +524,9 @@ public class ConfirmDialog extends Component
      * @param element
      *            the element to display instead of default confirmation text
      *            node
+     * @deprecated Usage of Element API at Component level should be avoided
      */
+    @Deprecated(forRemoval = true)
     public void setText(Element element) {
         getElement().appendChild(element);
     }
@@ -597,13 +606,13 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets confirmation dialog custom header element
+     * Sets confirmation dialog custom header
      *
      * @param component
      *            the component to display instead of default header text
      */
     public void setHeader(Component component) {
-        setHeader(component.getElement());
+        SlotUtils.setSlot(this, "header", component);
     }
 
     /**
@@ -611,7 +620,9 @@ public class ConfirmDialog extends Component
      *
      * @param element
      *            the element to display instead of default header text
+     * @deprecated Usage of Element API at Component level should be avoided
      */
+    @Deprecated(forRemoval = true)
     public void setHeader(Element element) {
         SlotUtils.setSlot(this, "header", element);
     }
@@ -683,6 +694,179 @@ public class ConfirmDialog extends Component
      */
     public void setCloseOnEsc(boolean closeOnEsc) {
         getElement().setProperty("noCloseOnEsc", !closeOnEsc);
+    }
+
+    /**
+     * Confirm dialog does not support adding content. Use
+     * {@link #setText(Component)} instead to initialize content as a component.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public void add(Component... components) {
+        HasOrderedComponents.super.add(components);
+    }
+
+    /**
+     * Confirm dialog does not support adding content. Use
+     * {@link #setText(Component)} instead to initialize content as a component.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public void add(Collection<Component> components) {
+        HasOrderedComponents.super.add(components);
+    }
+
+    /**
+     * Confirm dialog does not support adding content. Use
+     * {@link #setText(String)} instead to initialize content as text.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public void add(String text) {
+        HasOrderedComponents.super.add(text);
+    }
+
+    /**
+     * Confirm dialog does not support removing content.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public void remove(Component... components) {
+        HasOrderedComponents.super.remove(components);
+    }
+
+    /**
+     * Confirm dialog does not support removing content.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public void remove(Collection<Component> components) {
+        HasOrderedComponents.super.remove(components);
+    }
+
+    /**
+     * Confirm dialog does not support removing content.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public void removeAll() {
+        HasOrderedComponents.super.removeAll();
+    }
+
+    /**
+     * Confirm dialog does not support adding content. Use
+     * {@link #setText(Component)} instead to initialize content as a component.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public void addComponentAtIndex(int index, Component component) {
+        HasOrderedComponents.super.addComponentAtIndex(index, component);
+    }
+
+    /**
+     * Confirm dialog does not support adding content. Use
+     * {@link #setText(Component)} instead to initialize content as a component.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public void addComponentAsFirst(Component component) {
+        HasOrderedComponents.super.addComponentAsFirst(component);
+    }
+
+    /**
+     * Confirm dialog does not support replacing content.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public void replace(Component oldComponent, Component newComponent) {
+        HasOrderedComponents.super.replace(oldComponent, newComponent);
+    }
+
+    /**
+     * Confirm dialog does not support multiple components.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public int indexOf(Component component) {
+        return HasOrderedComponents.super.indexOf(component);
+    }
+
+    /**
+     * Confirm dialog does not support multiple components.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public int getComponentCount() {
+        return HasOrderedComponents.super.getComponentCount();
+    }
+
+    /**
+     * Confirm dialog does not support multiple components.
+     * <p>
+     * This method is inherited from {@link HasOrderedComponents} and has been
+     * marked as deprecated to indicate that it is not supported.
+     *
+     * @deprecated since v24.4, not supported
+     */
+    @Deprecated
+    @Override
+    public Component getComponentAt(int index) {
+        return HasOrderedComponents.super.getComponentAt(index);
     }
 
     @Override

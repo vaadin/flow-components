@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,8 +28,11 @@ public class TextAreaBinderValidationPage
     public static final String MAX_LENGTH_INPUT = "max-length-input";
     public static final String EXPECTED_VALUE_INPUT = "expected-value-input";
 
-    public static final String REQUIRED_ERROR_MESSAGE = "The field is required";
-    public static final String UNEXPECTED_VALUE_ERROR_MESSAGE = "The field doesn't match the expected value";
+    public static final String REQUIRED_ERROR_MESSAGE = "Field is required";
+    public static final String MIN_LENGTH_ERROR_MESSAGE = "Value is too short";
+    public static final String MAX_LENGTH_ERROR_MESSAGE = "Value is too long";
+    public static final String PATTERN_ERROR_MESSAGE = "Value does not match the pattern";
+    public static final String UNEXPECTED_VALUE_ERROR_MESSAGE = "Value does not match the expected value";
 
     public static class Bean {
         private String property;
@@ -55,6 +58,14 @@ public class TextAreaBinderValidationPage
                 .withValidator(value -> value.equals(expectedValue),
                         UNEXPECTED_VALUE_ERROR_MESSAGE)
                 .bind("property");
+        binder.addStatusChangeListener(event -> {
+            incrementServerValidationCounter();
+        });
+
+        testField.setI18n(new TextArea.TextAreaI18n()
+                .setMinLengthErrorMessage(MIN_LENGTH_ERROR_MESSAGE)
+                .setMaxLengthErrorMessage(MAX_LENGTH_ERROR_MESSAGE)
+                .setPatternErrorMessage(PATTERN_ERROR_MESSAGE));
 
         add(createInput(EXPECTED_VALUE_INPUT, "Set expected value", event -> {
             expectedValue = event.getValue();
@@ -75,6 +86,7 @@ public class TextAreaBinderValidationPage
         }));
     }
 
+    @Override
     protected TextArea createTestField() {
         return new TextArea();
     }

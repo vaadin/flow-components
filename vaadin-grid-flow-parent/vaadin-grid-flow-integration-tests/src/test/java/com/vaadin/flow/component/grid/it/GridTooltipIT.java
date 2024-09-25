@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,15 +15,16 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
+
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/tooltip")
 public class GridTooltipIT extends AbstractComponentIT {
@@ -108,7 +109,10 @@ public class GridTooltipIT extends AbstractComponentIT {
         clickElementWithJs("set-grid-tooltip-button");
         // add new column
         clickElementWithJs("add-column-button");
-        showTooltip(grid.getCell(0, 13));
+        GridTHTDElement cell = grid.getCell(0, 13);
+        cell.scrollIntoView();
+        flushScrolling(grid);
+        showTooltip(cell);
         Assert.assertEquals("Grid's tooltip! Jack", getActiveTooltipText());
     }
 

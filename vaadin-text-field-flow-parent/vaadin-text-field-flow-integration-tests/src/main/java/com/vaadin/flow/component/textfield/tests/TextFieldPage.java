@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,8 +18,8 @@ package com.vaadin.flow.component.textfield.tests;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
@@ -83,10 +83,11 @@ public class TextFieldPage extends Div {
         addFocusShortcut();
         addHelperText();
         addHelperComponent();
+        addPlaceholderOnlyField();
     }
 
     private void handleTextFieldValue(TextField field) {
-        Label label = new Label(field.getValue());
+        NativeLabel label = new NativeLabel(field.getValue());
         label.addClassName("text-field-value");
         add(label);
     }
@@ -154,5 +155,12 @@ public class TextFieldPage extends Div {
         clearButton
                 .addClickListener(event -> textField.setHelperComponent(null));
         add(textField, clearButton);
+    }
+
+    private void addPlaceholderOnlyField() {
+        TextField textField = new TextField();
+        textField.setId("placeholder-field");
+        textField.setPlaceholder("Placeholder caption");
+        add(textField);
     }
 }

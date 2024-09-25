@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -37,11 +37,11 @@ import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonUtils;
-import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
 
@@ -66,9 +66,9 @@ import elemental.json.JsonValue;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/virtual-list", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/virtual-list", version = "24.5.0-beta1")
 @JsModule("@vaadin/virtual-list/src/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
@@ -293,5 +293,35 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setRequestedRange(int start, int length) {
         getDataCommunicator().setRequestedRange(start, length);
+    }
+
+    /**
+     * Scrolls to the given row index. Scrolls so that the element is shown at
+     * the start of the visible area whenever possible.
+     * <p>
+     * If the index parameter exceeds current item set size the grid will scroll
+     * to the end.
+     *
+     * @param rowIndex
+     *            zero based index of the item to scroll to in the current view.
+     */
+    public void scrollToIndex(int rowIndex) {
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, ctx -> getElement()
+                        .executeJs("this.scrollToIndex($0)", rowIndex)));
+    }
+
+    /**
+     * Scrolls to the first element.
+     */
+    public void scrollToStart() {
+        scrollToIndex(0);
+    }
+
+    /**
+     * Scrolls to the last element of the list.
+     */
+    public void scrollToEnd() {
+        scrollToIndex(Integer.MAX_VALUE);
     }
 }

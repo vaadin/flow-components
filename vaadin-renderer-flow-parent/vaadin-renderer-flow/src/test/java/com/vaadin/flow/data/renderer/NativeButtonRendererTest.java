@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,13 +16,18 @@
 package com.vaadin.flow.data.renderer;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.KeyMapper;
+import com.vaadin.flow.data.renderer.ClickableRenderer.ItemClickListener;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableBiConsumer;
+import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
 import elemental.json.JsonObject;
@@ -57,6 +62,36 @@ public class NativeButtonRendererTest {
         dataGenerator.generateData("something", json);
         Assert.assertTrue("The button should be disabled",
                 json.getBoolean(keyForDisabled));
+    }
+
+    @Test
+    public void removeListenerInListener_shouldNotThrowException() {
+        // Create a new renderer
+        var renderer = new NativeButtonRenderer<String>("Label");
+
+        // Create and add a listener that removes itself
+        var registration = new AtomicReference<Registration>();
+        ItemClickListener<String> listener = e -> registration.get().remove();
+        registration.set(renderer.addItemClickListener(listener));
+
+        // Invoke the listener
+        invokeClickListeners(renderer);
+    }
+
+    private void invokeClickListeners(NativeButtonRenderer<String> renderer) {
+        try {
+            var clientCallablesField = LitRenderer.class
+                    .getDeclaredField("clientCallables");
+            clientCallablesField.setAccessible(true);
+            var clientCallables = (Map<String, SerializableBiConsumer<String, JsonObject>>) clientCallablesField
+                    .get(renderer);
+            clientCallables.values()
+                    .forEach(listener -> listener.accept("foo", null));
+        } catch (NoSuchFieldException | IllegalArgumentException
+                | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void mockDisabled(Element container) {

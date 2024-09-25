@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,8 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.avatar;
+
+import java.io.Serializable;
+import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
@@ -25,10 +27,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.server.AbstractStreamResource;
-import elemental.json.JsonObject;
 
-import java.io.Serializable;
-import java.util.Objects;
+import elemental.json.JsonObject;
 
 /**
  * Avatar is a graphical representation of an object or entity, for example a
@@ -53,10 +53,10 @@ import java.util.Objects;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar/src/vaadin-avatar.js")
-@NpmPackage(value = "@vaadin/avatar", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/avatar", version = "24.5.0-beta1")
 public class Avatar extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarVariant> {
 
@@ -133,27 +133,24 @@ public class Avatar extends Component
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content that is gotten from this method will
-     * not update the lang on the component if not set back using
-     * {@link Avatar#setI18n(AvatarI18n)}
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using {@link #setI18n(AvatarI18n)}
      *
-     * @return the i18n object. It will be <code>null</code>, If the i18n
-     *         properties weren't set.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public AvatarI18n getI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Sets the internationalization object for this component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(AvatarI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
         JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
         getElement().setPropertyJson("i18n", i18nObject);
     }

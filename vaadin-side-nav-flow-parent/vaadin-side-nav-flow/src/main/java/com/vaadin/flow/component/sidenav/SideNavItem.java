@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,8 +15,18 @@
  */
 package com.vaadin.flow.component.sidenav;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -31,16 +41,8 @@ import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.internal.ConfigureRoutes;
-import elemental.json.JsonArray;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import elemental.json.JsonArray;
 
 /**
  * A menu item for the {@link SideNav} component.
@@ -53,10 +55,10 @@ import java.util.stream.Collectors;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav-item")
-@NpmPackage(value = "@vaadin/side-nav", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/side-nav", version = "24.5.0-beta1")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 public class SideNavItem extends SideNavItemContainer
-        implements HasPrefix, HasSuffix {
+        implements HasEnabled, HasPrefix, HasSuffix {
 
     private Element labelElement;
 
@@ -355,6 +357,117 @@ public class SideNavItem extends SideNavItemContainer
                     .collect(Collectors.toSet()));
             getElement().setPropertyJson("pathAliases", aliasesAsJson);
         }
+    }
+
+    /**
+     * Gets the target of this item.
+     *
+     * @return the target of this item
+     */
+    public String getTarget() {
+        return getElement().getProperty("target");
+    }
+
+    /**
+     * Where to display the linked URL, as the name for a browsing context.
+     * <p>
+     * The following keywords have special meanings for where to load the URL:
+     * <ul>
+     * <li><code>_self</code>: the current browsing context. (Default)</li>
+     * <li><code>_blank</code>: usually a new tab, but users can configure
+     * browsers to open a new window instead.</li>
+     * <li><code>_parent</code>: the parent browsing context of the current one.
+     * If no parent, behaves as <code>_self</code>.</li>
+     * <li><code>_top</code>: the topmost browsing context (the "highest"
+     * context that’s an ancestor of the current one). If no ancestors, behaves
+     * as <code>_self</code>.</li>
+     * </ul>
+     * </p>
+     *
+     * @param target
+     *            the target of this item
+     */
+    public void setTarget(String target) {
+        if (target == null) {
+            getElement().removeProperty("target");
+        } else {
+            getElement().setProperty("target", target);
+        }
+    }
+
+    /**
+     * Gets whether this item also matches nested paths / routes.
+     *
+     * @return true if this item also matches nested paths / routes, false
+     *         otherwise
+     */
+    public boolean isMatchNested() {
+        return getElement().getProperty("matchNested", false);
+    }
+
+    /**
+     * Sets whether to also match nested paths / routes. {@code false} by
+     * default.
+     * <p>
+     * When enabled, an item with the path {@code /path} is considered current
+     * when the browser URL is {@code /path}, {@code /path/child},
+     * {@code /path/child/grandchild}, etc.
+     * <p>
+     * Note that this only affects matching of the URLs path, not the base
+     * origin or query parameters.
+     *
+     * @param value
+     *            true to also match nested paths / routes, false otherwise
+     */
+    public void setMatchNested(boolean value) {
+        getElement().setProperty("matchNested", value);
+    }
+
+    /**
+     * @return true if this item should be ignored by the Vaadin router and
+     *         behave like a regular anchor.
+     */
+    public boolean isRouterIgnore() {
+        return getElement().getProperty("routerIgnore", false);
+    }
+
+    /**
+     * The routing mechanism in Vaadin by default intercepts all side nav items
+     * with a relative URL. This method can be used to make the router ignore
+     * this item. This makes it behave like a regular anchor, causing a full
+     * page load.
+     *
+     * @param ignore
+     *            true if this item should not be intercepted by the single-page
+     *            web application routing mechanism in Vaadin.
+     */
+    public void setRouterIgnore(boolean ignore) {
+        getElement().setProperty("routerIgnore", ignore);
+    }
+
+    /**
+     * Sets whether the target URL should be opened in a new browser tab.
+     * <p>
+     * This is a convenience method for setting the target to
+     * <code>_blank</code>. See {@link #setTarget(String)} for more information.
+     * </p>
+     *
+     * @param openInNewBrowserTab
+     *            true if the target URL should be opened in a new browser tab,
+     *            false otherwise
+     */
+    public void setOpenInNewBrowserTab(boolean openInNewBrowserTab) {
+        setTarget(openInNewBrowserTab ? "_blank" : null);
+    }
+
+    /**
+     * Gets whether the target URL should be opened in a new browser tab.
+     *
+     * @return true if the target URL should be opened in a new browser tab,
+     *         false otherwise
+     */
+    public boolean isOpenInNewBrowserTab() {
+        return "_blank".equals(getTarget());
     }
 
     private Set<String> getPathAliasesFromView(Class<? extends Component> view,

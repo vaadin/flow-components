@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.html.testbench.DivElement;
@@ -77,6 +78,59 @@ public class SplitterPositionIT extends AbstractComponentIT {
                 .id("mainContentInLayoutComponent")
                 .getPropertyString("style", "width");
         Assert.assertEquals("100%", width);
+    }
+
+    @Test
+    public void nestedSplitLayouts_moveParentSplitter_getSplitterPosition() {
+        $(NativeButtonElement.class).id("nested-split-layout-button").click();
+        var split = $(SplitLayoutElement.class).id("parent-layout");
+        WebElement splitter = (WebElement) executeScript(
+                "return arguments[0].$.splitter", split);
+
+        // Move splitter by 150px
+        Actions resizeAction = new Actions(getDriver());
+        resizeAction.dragAndDropBy(splitter, 0, 150);
+        resizeAction.perform();
+
+        $(NativeButtonElement.class).id("splitter-position-button").click();
+        var splitPosition = Double.parseDouble(
+                $(TestBenchElement.class).id("splitter-position").getText());
+
+        // The split layout has 500px height, so the splitter is about at 250px
+        // Moving it 150px down, it would be at 400px (around 80% of the layout)
+        Assert.assertTrue(splitPosition > 80);
+        Assert.assertTrue(splitPosition < 81);
+    }
+
+    @Test
+    public void setSplitterPositionFromServer_moveOnClient_resetToOriginal() {
+        // Add split layout with 30% splitter position
+        $(NativeButtonElement.class).id("createLayoutJavaApi").click();
+        $(NativeButtonElement.class).id("setSplitPositionJavaApi").click();
+
+        var split = $(SplitLayoutElement.class).id("splitLayoutJavaApi");
+        var primaryComponent = split.getPrimaryComponent();
+
+        var flexBasisInitial = primaryComponent.getCssValue("flex-basis");
+
+        // Move splitter by 150px
+        var splitter = split.getSplitter();
+        Actions resizeAction = new Actions(getDriver());
+        resizeAction.dragAndDropBy(splitter, 150, 0);
+        resizeAction.perform();
+
+        // Check that the splitter position is not 30% anymore
+        var flexBasisAfterDrag = primaryComponent.getCssValue("flex-basis");
+        Assert.assertNotEquals(flexBasisInitial, flexBasisAfterDrag);
+        // Check that splitter position still is in px
+        Assert.assertTrue(flexBasisAfterDrag.endsWith("px"));
+
+        // Reset splitter position to 30%
+        $(NativeButtonElement.class).id("setSplitPositionJavaApi").click();
+
+        // Check that the splitter is at 30%
+        var flexBasisFinal = primaryComponent.getCssValue("flex-basis");
+        Assert.assertEquals(flexBasisInitial, flexBasisFinal);
     }
 
     private void testSplitterPosition(String testId) {

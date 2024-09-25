@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-charts-flow-parent</artifactId>
     <packaging>pom</packaging>
@@ -16,6 +16,9 @@
             <url>https://vaadin.com/commercial-license-and-service-terms</url>
         </license>
     </licenses>
+    <properties>
+        <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/vaadin-commercial-license-header.txt</spotless.licence-header>
+    </properties>
     <modules>
         <module>vaadin-charts-flow</module>
         <module>vaadin-charts-testbench</module>

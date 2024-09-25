@@ -8,6 +8,7 @@ import {
   getSeparator,
   searchAmOrPmToken
 } from './helpers.js';
+import { TimePicker } from '@vaadin/time-picker/src/vaadin-time-picker.js';
 
 (function () {
   const tryCatchWrapper = function (callback) {
@@ -24,6 +25,20 @@ import {
     }
   }
 
+  function parseISO(text) {
+    // The default i18n parser of the web component is ISO 8601 compliant.
+    const timeObject = TimePicker.properties.i18n.value().parseTime(text);
+
+    // The web component returns an object with string values
+    // while the connector expects number values.
+    return {
+      hours: parseInt(timeObject.hours || 0),
+      minutes: parseInt(timeObject.minutes || 0),
+      seconds: parseInt(timeObject.seconds || 0),
+      milliseconds: parseInt(timeObject.milliseconds || 0)
+    }
+  };
+
   window.Vaadin.Flow.timepickerConnector = {
     initLazy: (timepicker) =>
       tryCatchWrapper(function (timepicker) {
@@ -38,7 +53,7 @@ import {
           // capture previous value if any
           let previousValueObject;
           if (timepicker.value && timepicker.value !== '') {
-            previousValueObject = timepicker.i18n.parseTime(timepicker.value);
+            previousValueObject = parseISO(timepicker.value);
           }
 
           try {

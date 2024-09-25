@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -54,13 +54,13 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-menu-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "24.2.0-alpha14")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/menu-bar", version = "24.5.0-beta1")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.5.0-beta1")
 public class MenuBar extends Component
         implements HasEnabled, HasMenuItems, HasOverlayClassName, HasSize,
         HasStyle, HasThemeVariant<MenuBarVariant> {
@@ -365,29 +365,72 @@ public class MenuBar extends Component
     }
 
     /**
+     * Sets reverse collapse order for the menu bar.
+     *
+     * @param reverseCollapseOrder
+     *            If {@code true}, the buttons will be collapsed into the
+     *            overflow menu starting from the "start" end of the bar instead
+     *            of the "end".
+     */
+    public void setReverseCollapseOrder(boolean reverseCollapseOrder) {
+        getElement().setProperty("reverseCollapse", reverseCollapseOrder);
+    }
+
+    /**
+     * Gets whether the menu bar uses reverse collapse order.
+     *
+     * @return {@code true} if the buttons will be collapsed into the overflow
+     *         menu starting from the "start" end of the bar instead of the
+     *         "end".
+     *
+     */
+    public boolean isReverseCollapseOrder() {
+        return getElement().getProperty("reverseCollapse", false);
+    }
+
+    /**
+     * Sets tab navigation for the menu bar.
+     *
+     * @param tabNavigation
+     *            If {@code true}, the top-level menu items is traversable by
+     *            tab instead of arrow keys (i.e. disabling roving tabindex)
+     */
+    public void setTabNavigation(boolean tabNavigation) {
+        getElement().setProperty("tabNavigation", tabNavigation);
+    }
+
+    /**
+     * Gets whether the menu bar uses tab navigation.
+     *
+     * @return {@code true} if the top-level menu items is traversable by tab
+     *         instead of arrow keys (i.e. disabling roving tabindex)
+     *
+     */
+    public boolean isTabNavigation() {
+        return getElement().getProperty("tabNavigation", false);
+    }
+
+    /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content that is gotten from this method will
-     * not update the lang on the component if not set back using
-     * {@link MenuBar#setI18n(MenuBarI18n)}
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using {@link #setI18n(MenuBarI18n)}
      *
-     * @return the i18n object. It will be <code>null</code>, If the i18n
-     *         properties weren't set.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public MenuBarI18n getI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Sets the internationalization object for this component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(MenuBarI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
 
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {
@@ -513,5 +556,12 @@ public class MenuBar extends Component
         }
 
         item.getElement().setProperty("tooltip", tooltipText);
+    }
+
+    /**
+     * Closes the current submenu.
+     */
+    public void close() {
+        getElement().callJsFunction("close");
     }
 }

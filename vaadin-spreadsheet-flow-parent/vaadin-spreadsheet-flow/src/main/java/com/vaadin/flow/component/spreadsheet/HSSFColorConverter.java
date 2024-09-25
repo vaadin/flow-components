@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet;
@@ -110,13 +110,13 @@ public class HSSFColorConverter implements ColorConverter {
         HSSFCellStyle cs = (HSSFCellStyle) cellStyle;
         defaultBackgroundColor = styleColor(cs.getFillBackgroundColor());
         if (defaultBackgroundColor == null) {
-            defaultBackgroundColor = "#ffffff;";
+            defaultBackgroundColor = "var(--default-background-color);";
         }
         sb.append("background-color:");
         sb.append(defaultBackgroundColor);
         defaultColor = styleColor(cs.getFont(wb).getColor());
         if (defaultColor == null) {
-            defaultColor = "#000000;";
+            defaultColor = "var(--default-color);";
         }
         sb.append("color:");
         sb.append(defaultColor);
@@ -184,7 +184,7 @@ public class HSSFColorConverter implements ColorConverter {
             short[] rgb = color.getTriplet();
             sb.append(String.format("#%02x%02x%02x;", rgb[0], rgb[1], rgb[2]));
         } else {
-            sb.append("#000;");
+            sb.append("var(--default-color);");
         }
     }
 

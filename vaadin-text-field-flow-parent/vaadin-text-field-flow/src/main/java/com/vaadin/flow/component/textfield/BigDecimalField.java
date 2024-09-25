@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,11 +15,14 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Synchronize;
@@ -31,6 +34,8 @@ import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ValidationController;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
@@ -47,18 +52,50 @@ import com.vaadin.flow.shared.Registration;
  * When setting values from the server-side, the {@code scale} of the provided
  * {@link BigDecimal} is preserved in the presentation format shown to the user,
  * as described in {@link #setValue(BigDecimal)}.
+ * <h2>Validation</h2>
+ * <p>
+ * BigDecimalField comes with a built-in validation mechanism that verifies that
+ * the value is parsable into {@link BigDecimal} and is not empty when the
+ * {@link #setRequiredIndicatorVisible(boolean) required constraint} is enabled.
+ * If validation fails, the component is marked as invalid and an error message
+ * is displayed below the input.
+ * <p>
+ * Validation is triggered whenever the user applies an input change, for
+ * example by pressing Enter or blurring the field. Programmatic value changes
+ * trigger validation as well. In eager and lazy value change modes, validation
+ * is also triggered on every character press with a delay according to the
+ * selected mode.
+ * <p>
+ * Error messages for unparsable input and required constraint can be configured
+ * with the {@link BigDecimalFieldI18n} object, using the respective properties.
+ * If you want to provide a single catch-all error message, you can also use the
+ * {@link #setErrorMessage(String)} method. Note that such an error message will
+ * take priority over i18n error messages if both are set.
+ * <p>
+ * For more advanced validation that requires custom rules, you can use
+ * {@link Binder}. By default, before running custom validators, Binder will
+ * also check if the value is parsable and display an error message from the
+ * {@link BigDecimalFieldI18n} object. For the required constraint, Binder
+ * provides its own API, see {@link Binder.BindingBuilder#asRequired(String)
+ * asRequired()}.
+ * <p>
+ * However, if Binder doesn't fit your needs and you want to implement fully
+ * custom validation logic, you can disable the constraint validation by setting
+ * {@link #setManualValidation(boolean)} to true. This will allow you to control
+ * the invalid state and the error message manually using
+ * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-big-decimal-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
 @Uses(TextField.class)
 public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         implements HasThemeVariant<TextFieldVariant> {
 
-    private boolean isConnectorAttached;
+    private BigDecimalFieldI18n i18n;
 
     private Locale locale;
 
@@ -80,7 +117,37 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
                     : valueFromModel.toPlainString().replace('.',
                             field.getDecimalSeparator());
 
-    private boolean manualValidationEnabled = false;
+    private final CopyOnWriteArrayList<ValidationStatusChangeListener<BigDecimal>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
+
+    private Validator<BigDecimal> defaultValidator = (value, context) -> {
+        boolean fromComponent = context == null;
+
+        boolean hasBadInput = valueEquals(value, getEmptyValue())
+                && isInputValuePresent();
+        if (hasBadInput) {
+            return ValidationResult.error(getI18nErrorMessage(
+                    BigDecimalFieldI18n::getBadInputErrorMessage));
+        }
+
+        // Do the required check only if the validator is called from the
+        // component, and not from Binder. Binder has its own implementation
+        // of required validation.
+        if (fromComponent) {
+            ValidationResult requiredResult = ValidationUtil
+                    .validateRequiredConstraint(getI18nErrorMessage(
+                            BigDecimalFieldI18n::getRequiredErrorMessage),
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
+            if (requiredResult.isError()) {
+                return requiredResult;
+            }
+        }
+
+        return ValidationResult.ok();
+    };
+
+    private ValidationController<BigDecimalField, BigDecimal> validationController = new ValidationController<>(
+            this);
 
     /**
      * Constructs an empty {@code BigDecimalField}.
@@ -97,8 +164,6 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
-
-        addClientValidatedEventListener(e -> validate());
     }
 
     /**
@@ -197,6 +262,28 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         addValueChangeListener(listener);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Distinct error messages for unparsable input and required constraint can
+     * be configured with the {@link BigDecimalFieldI18n} object, using the
+     * respective properties. However, note that the error message set with
+     * {@link #setErrorMessage(String)} will take priority and override any i18n
+     * error messages if both are set.
+     */
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        super.setErrorMessage(errorMessage);
+    }
+
+    /**
+     * @see BigDecimalFieldI18n#setRequiredErrorMessage(String)
+     */
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
+    }
+
     @Override
     public BigDecimal getEmptyValue() {
         return null;
@@ -221,22 +308,43 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     @Override
     public void setValue(BigDecimal value) {
         BigDecimal oldValue = getValue();
+        boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
+        boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
+        boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
+        boolean isInputValuePresent = isInputValuePresent();
+
+        // When the value is cleared programmatically, reset hasInputValue
+        // so that the following validation doesn't treat this as bad input.
+        if (isNewValueEmpty) {
+            getElement().setProperty("_hasInputValue", false);
+        }
 
         super.setValue(value);
 
-        if (Objects.equals(oldValue, getEmptyValue())
-                && Objects.equals(value, getEmptyValue())
-                && isInputValuePresent()) {
+        if (isValueRemainedEmpty && isInputValuePresent) {
             // Clear the input element from possible bad input.
             getElement().executeJs("this._inputElementValue = ''");
-            getElement().setProperty("_hasInputValue", false);
-            fireEvent(new ClientValidatedEvent(this, false));
+            validate();
+            fireValidationStatusChangeEvent();
         } else {
             // Restore the input element's value in case it was cleared
             // in the above branch. That can happen when setValue(null)
             // and setValue(...) are subsequently called within one round-trip
             // and there was bad input.
             getElement().executeJs("this._inputElementValue = this.value");
+        }
+    }
+
+    @Override
+    protected void setModelValue(BigDecimal newModelValue, boolean fromClient) {
+        BigDecimal oldModelValue = getValue();
+
+        super.setModelValue(newModelValue, fromClient);
+
+        if (fromClient && valueEquals(oldModelValue, getEmptyValue())
+                && valueEquals(newModelValue, getEmptyValue())) {
+            validate();
+            fireValidationStatusChangeEvent();
         }
     }
 
@@ -253,49 +361,45 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
 
     @Override
     public void setManualValidation(boolean enabled) {
-        this.manualValidationEnabled = enabled;
+        validationController.setManualValidation(enabled);
     }
 
     /**
-     * Performs server-side validation of the current value. This is needed
-     * because it is possible to circumvent the client-side validation
-     * constraints using browser development tools.
+     * Validates the current value against the constraints and sets the
+     * {@code invalid} property and the {@code errorMessage} property based on
+     * the result. If a custom error message is provided with
+     * {@link #setErrorMessage(String)}, it is used. Otherwise, the error
+     * message defined in the i18n object is used.
+     * <p>
+     * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            BigDecimal value = getValue();
-
-            boolean isRequired = isRequiredIndicatorVisible();
-            ValidationResult requiredValidation = ValidationUtil
-                    .checkRequired(isRequired, value, getEmptyValue());
-
-            setInvalid(requiredValidation.isError()
-                    || checkValidity(value).isError());
-        }
-    }
-
-    private ValidationResult checkValidity(BigDecimal value) {
-        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
-                && isInputValuePresent();
-        if (hasNonParsableValue) {
-            return ValidationResult.error("");
-        }
-
-        return ValidationResult.ok();
+        validationController.validate(getValue());
     }
 
     @Override
     public Validator<BigDecimal> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        return defaultValidator;
     }
 
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<BigDecimal> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<BigDecimal>(this,
-                                !isInvalid())));
+        return Registration.addAndRemove(validationStatusChangeListeners,
+                listener);
+    }
+
+    /**
+     * Notifies Binder that it needs to revalidate the component since the
+     * component's validity state may have changed. Note, there is no need to
+     * notify Binder separately in the case of a ValueChangeEvent, as Binder
+     * already listens to this event and revalidates automatically.
+     */
+    private void fireValidationStatusChangeEvent() {
+        ValidationStatusChangeEvent<BigDecimal> event = new ValidationStatusChangeEvent<>(
+                this, !isInvalid());
+        validationStatusChangeListeners
+                .forEach(listener -> listener.validationStatusChanged(event));
     }
 
     /**
@@ -354,5 +458,103 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(BigDecimalFieldI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public BigDecimalFieldI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(BigDecimalFieldI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+    }
+
+    private String getI18nErrorMessage(
+            Function<BigDecimalFieldI18n, String> getter) {
+        return Optional.ofNullable(i18n).map(getter).orElse("");
+    }
+
+    /**
+     * The internationalization properties for {@link BigDecimalField}.
+     */
+    public static class BigDecimalFieldI18n implements Serializable {
+
+        private String requiredErrorMessage;
+        private String badInputErrorMessage;
+
+        /**
+         * Gets the error message displayed when the field contains user input
+         * that the server is unable to convert to type {@link BigDecimal}.
+         *
+         * @return the error message or {@code null} if not set
+         */
+        public String getBadInputErrorMessage() {
+            return badInputErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field contains user input
+         * that the server is unable to convert to type {@link BigDecimal}.
+         * <p>
+         * Note, custom error messages set with
+         * {@link BigDecimalField#setErrorMessage(String)} take priority over
+         * i18n error messages.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         */
+        public BigDecimalFieldI18n setBadInputErrorMessage(
+                String errorMessage) {
+            badInputErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when the field is required but
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         * @see BigDecimalField#isRequiredIndicatorVisible()
+         * @see BigDecimalField#setRequiredIndicatorVisible(boolean)
+         */
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field is required but
+         * empty.
+         * <p>
+         * Note, custom error messages set with
+         * {@link BigDecimalField#setErrorMessage(String)} take priority over
+         * i18n error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see BigDecimalField#isRequiredIndicatorVisible()
+         * @see BigDecimalField#setRequiredIndicatorVisible(boolean)
+         */
+        public BigDecimalFieldI18n setRequiredErrorMessage(
+                String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
     }
 }

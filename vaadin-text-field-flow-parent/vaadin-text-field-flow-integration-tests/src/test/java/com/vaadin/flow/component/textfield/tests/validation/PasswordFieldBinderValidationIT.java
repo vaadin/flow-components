@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,19 +15,22 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.MAX_LENGTH_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.MIN_LENGTH_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.PATTERN_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.PATTERN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
+
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
-
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.PATTERN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.MIN_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.MAX_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
-import static com.vaadin.flow.component.textfield.tests.validation.PasswordFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
 @TestPath("vaadin-password-field/validation/binder")
 public class PasswordFieldBinderValidationIT
@@ -45,9 +48,10 @@ public class PasswordFieldBinderValidationIT
         testField.sendKeys(Keys.TAB);
         // Tab out of the field
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -55,10 +59,12 @@ public class PasswordFieldBinderValidationIT
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("Value", Keys.ENTER);
 
         testField.setValue("Value");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
 
         testField.setValue("");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
@@ -71,18 +77,21 @@ public class PasswordFieldBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("A");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(MIN_LENGTH_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("AA");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
         testField.setValue("AAA");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
@@ -94,18 +103,21 @@ public class PasswordFieldBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("AAA");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(MAX_LENGTH_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("AA");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
         testField.setValue("A");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
@@ -117,22 +129,26 @@ public class PasswordFieldBinderValidationIT
 
         // Constraint validation fails:
         testField.setValue("Word");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(PATTERN_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("12");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Both validations pass:
         testField.setValue("1234");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
     }
 
+    @Override
     protected PasswordFieldElement getTestField() {
         return $(PasswordFieldElement.class).first();
     }

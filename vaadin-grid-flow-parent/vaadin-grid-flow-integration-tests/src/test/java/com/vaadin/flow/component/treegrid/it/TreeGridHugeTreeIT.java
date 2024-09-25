@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,17 +15,14 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import java.util.List;
+import org.hamcrest.core.StringContains;
+import org.junit.Assert;
+import org.junit.Test;
 
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
 import com.vaadin.flow.data.performance.TreeGridMemory;
 import com.vaadin.flow.testutil.TestPath;
-
-import org.hamcrest.core.StringContains;
-import org.junit.Assert;
-import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
+import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-grid/treegrid-huge-tree")
 public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
@@ -36,10 +33,10 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
         setupTreeGrid();
 
         TreeGridElement grid = getTreeGrid();
-
-        List<WebElement> buttons = findElements(By.tagName("button"));
-        WebElement expandSecondRowButton = buttons.get(0);
-        WebElement collapseSecondRowButton = buttons.get(1);
+        TestBenchElement expandSecondRowButton = $("button")
+                .id("expand-second-row");
+        TestBenchElement collapseSecondRowButton = $("button")
+                .id("collapse-second-row");
 
         grid.expandWithClick(2);
         grid.expandWithClick(3);
@@ -80,6 +77,31 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
         grid.expandWithClick(1);
         assertCellTexts(0, 0,
                 new String[] { "Granddad 0", "Dad 0/0", "Son 0/0/0" });
+    }
+
+    @Test
+    public void root_keys_dropped_from_keymapper_properly() {
+        open();
+        setupTreeGrid();
+
+        TreeGridElement grid = getTreeGrid();
+
+        TestBenchElement checkFirstRootItemKey = $("button")
+                .id("check-first-root-item-key");
+        TestBenchElement initHugeDataSet = $("button").id("init-huge-data-set");
+
+        initHugeDataSet.click();
+        checkFirstRootItemKey.click();
+        Assert.assertEquals("First root key was not in KeyMapper as expected",
+                "true", checkFirstRootItemKey.getText());
+
+        // Scroll first root item way out of viewport and check that the key was
+        // dropped
+        grid.scrollToRow(200);
+        checkFirstRootItemKey.click();
+        Assert.assertEquals(
+                "First root key was in KeyMapper when it should not be",
+                "false", checkFirstRootItemKey.getText());
     }
 
     @Test
@@ -128,11 +150,8 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
 
         TreeGridElement grid = getTreeGrid();
 
-        List<WebElement> buttons = findElements(By.tagName("button"));
-        // Init larger data set -button
-        buttons.get(2).click();
-        // Expand recursively -button
-        buttons.get(3).click();
+        $("button").id("init-large-data-set").click();
+        $("button").id("expand-recursively").click();
 
         // Scroll as far as possible
         grid.scrollToRowAndWait(1000000);

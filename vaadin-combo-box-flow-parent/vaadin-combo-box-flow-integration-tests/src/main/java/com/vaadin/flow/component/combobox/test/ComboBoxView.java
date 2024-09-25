@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -475,8 +475,8 @@ public class ComboBoxView extends Div {
 
         ComboBox<Person> comboBox = new ComboBox<>("Person");
         comboBox.setPlaceholder("Enter minimum age to filter");
-        comboBox.setPattern("^\\d+$");
-        comboBox.setAllowedCharPattern("^\\d+$");
+        comboBox.setPattern("\\d+");
+        comboBox.setAllowedCharPattern("\\d");
 
         // Configuring fetch callback with a filter converter, so entered filter
         // strings can refer also to other typed properties like age (integer):

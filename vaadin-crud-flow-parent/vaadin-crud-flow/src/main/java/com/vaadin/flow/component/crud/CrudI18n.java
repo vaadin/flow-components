@@ -1,22 +1,24 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.crud;
 
-import com.vaadin.flow.internal.JsonSerializer;
-import elemental.json.JsonFactory;
-import elemental.json.JsonValue;
-import elemental.json.impl.JreJsonFactory;
-import org.apache.commons.io.IOUtils;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
+
+import org.apache.commons.io.IOUtils;
+
+import com.vaadin.flow.internal.JsonSerializer;
+
+import elemental.json.JsonFactory;
+import elemental.json.JsonValue;
+import elemental.json.impl.JreJsonFactory;
 
 /**
  * Internationalization object for customizing the component UI texts. An

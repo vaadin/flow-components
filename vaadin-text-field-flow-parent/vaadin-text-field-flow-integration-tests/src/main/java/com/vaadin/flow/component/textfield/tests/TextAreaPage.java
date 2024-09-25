@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -94,7 +94,19 @@ public class TextAreaPage extends Div {
         textArea.getStyle().set("maxHeight", "125px");
         textArea.getStyle().set("padding", "0");
         textArea.setId("text-area-with-max-height");
-        add(textArea, message);
+
+        NativeButton scrollToStart = new NativeButton("Scroll to start",
+                event -> {
+                    textArea.scrollToStart();
+                });
+        scrollToStart.setId("scroll-to-start");
+
+        NativeButton scrollToEnd = new NativeButton("Scroll to end", event -> {
+            textArea.scrollToEnd();
+        });
+        scrollToEnd.setId("scroll-to-end");
+
+        add(textArea, scrollToStart, scrollToEnd, message);
     }
 
     private void addMinHeightFeature() {

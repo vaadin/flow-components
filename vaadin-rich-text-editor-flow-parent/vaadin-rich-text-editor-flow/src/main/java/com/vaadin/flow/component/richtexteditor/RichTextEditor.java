@@ -1,14 +1,16 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.richtexteditor;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import com.vaadin.flow.component.AbstractSinglePropertyField;
@@ -34,6 +36,8 @@ import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
+
+import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 /**
@@ -54,9 +58,9 @@ import elemental.json.JsonObject;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.2.0-alpha14")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.5.0-beta1")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
@@ -68,30 +72,30 @@ public class RichTextEditor
     private AsHtml asHtml;
     private AsDelta asDelta;
 
+    private boolean pendingPresentationUpdate = false;
+
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content that is gotten from this method will
-     * not update the lang on the component if not set back using
-     * {@link RichTextEditor#setI18n(RichTextEditorI18n)}
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(RichTextEditorI18n)}
      *
-     * @return the i18n object. It will be <code>null</code>, If the i18n
-     *         properties weren't set.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public RichTextEditorI18n getI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Sets the internationalization object for this component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(RichTextEditorI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {
                 JsonObject i18nObject = (JsonObject) JsonSerializer
@@ -216,8 +220,14 @@ public class RichTextEditor
         getElement().setProperty("htmlValue", presentationValue);
         // htmlValue property is not writeable, HTML value needs to be set using
         // method exposed by web component instead
-        getElement().callJsFunction("dangerouslySetHtmlValue",
-                presentationValue);
+        if (!pendingPresentationUpdate) {
+            pendingPresentationUpdate = true;
+            runBeforeClientResponse(ui -> {
+                getElement().callJsFunction("dangerouslySetHtmlValue",
+                        getElement().getProperty("htmlValue"));
+                pendingPresentationUpdate = false;
+            });
+        }
     }
 
     private static String presentationToModel(String htmlValue) {
@@ -269,14 +279,48 @@ public class RichTextEditor
         return getElement().getProperty("value");
     }
 
+    /**
+     * Gets an unmodifiable list of colors in HEX format used by the text color
+     * picker and background color picker controls of the text editor.
+     * <p>
+     * Returns {@code null} by default, which means the web component shows a
+     * default color palette.
+     *
+     * @since 24.5
+     * @return an unmodifiable list of colors options
+     */
+    public List<String> getColorOptions() {
+        List options = JsonSerializer.toObjects(String.class,
+                (JsonArray) getElement().getPropertyRaw("colorOptions"));
+        return Collections.unmodifiableList(options);
+    }
+
+    /**
+     * Sets the list of colors in HEX format to use by the text color picker and
+     * background color picker controls of the text editor.
+     *
+     * @since 24.5
+     * @param colorOptions
+     *            the list of colors to set, not null
+     */
+    public void setColorOptions(List<String> colorOptions) {
+        Objects.requireNonNull(colorOptions, "Color options must not be null");
+        getElement().setPropertyJson("colorOptions",
+                JsonSerializer.toJson(colorOptions));
+    }
+
     static String sanitize(String html) {
-        return org.jsoup.Jsoup.clean(html,
+        var settings = new org.jsoup.nodes.Document.OutputSettings();
+        settings.prettyPrint(false);
+        var safeHtml = org.jsoup.Jsoup.clean(html, "",
                 org.jsoup.safety.Safelist.basic()
                         .addTags("img", "h1", "h2", "h3", "s")
                         .addAttributes("img", "align", "alt", "height", "src",
                                 "title", "width")
                         .addAttributes(":all", "style")
-                        .addProtocols("img", "src", "data"));
+                        .addProtocols("img", "src", "data"),
+                settings);
+        return safeHtml;
     }
 
     /**
@@ -292,6 +336,8 @@ public class RichTextEditor
         private String h1;
         private String h2;
         private String h3;
+        private String color;
+        private String background;
         private String subscript;
         private String superscript;
         private String listOrdered;
@@ -491,6 +537,48 @@ public class RichTextEditor
          */
         public RichTextEditorI18n setH3(String h3) {
             this.h3 = h3;
+            return this;
+        }
+
+        /**
+         * Gets the translated word for {@code color}
+         *
+         * @return the translated word for color
+         */
+        public String getColor() {
+            return color;
+        }
+
+        /**
+         * Sets the translated word for {@code color}.
+         *
+         * @param color
+         *            the translated word for color
+         * @return this instance for method chaining
+         */
+        public RichTextEditorI18n setColor(String color) {
+            this.color = color;
+            return this;
+        }
+
+        /**
+         * Gets the translated word for {@code background}
+         *
+         * @return the translated word for background
+         */
+        public String getBackground() {
+            return background;
+        }
+
+        /**
+         * Sets the translated word for {@code background}.
+         *
+         * @param background
+         *            the translated word for background
+         * @return this instance for method chaining
+         */
+        public RichTextEditorI18n setBackground(String background) {
+            this.background = background;
             return this;
         }
 
@@ -754,12 +842,12 @@ public class RichTextEditor
         @Override
         public String toString() {
             return "[" + undo + ", " + redo + ", " + bold + ", " + italic + ", "
-                    + underline + ", " + strike + ", " + h1 + ", " + h2 + ", "
-                    + h3 + ", " + subscript + ", " + superscript + ", "
-                    + listOrdered + ", " + listBullet + ", " + alignLeft + ", "
-                    + alignCenter + ", " + alignRight + ", " + image + ", "
-                    + link + ", " + blockquote + ", " + codeBlock + ", " + clean
-                    + "]";
+                    + underline + ", " + strike + ", " + color + ", "
+                    + background + ", " + h1 + ", " + h2 + ", " + h3 + ", "
+                    + subscript + ", " + superscript + ", " + listOrdered + ", "
+                    + listBullet + ", " + alignLeft + ", " + alignCenter + ", "
+                    + alignRight + ", " + image + ", " + link + ", "
+                    + blockquote + ", " + codeBlock + ", " + clean + "]";
         }
     }
 
@@ -1012,7 +1100,7 @@ public class RichTextEditor
         public void setValue(String value) {
             Objects.requireNonNull(value, "Delta value must not be null");
 
-            if (!Objects.equals(value, getValue())) {
+            if (!valueEquals(value, getValue())) {
                 RichTextEditor.this.getElement().setProperty("value", value);
                 // After setting delta value, manually sync back the updated
                 // HTML value, which will eventually trigger a server-side value

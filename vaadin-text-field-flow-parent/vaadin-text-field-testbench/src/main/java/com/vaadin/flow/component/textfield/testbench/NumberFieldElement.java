@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -33,9 +33,17 @@ public class NumberFieldElement extends TestBenchElement
         implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
 
     /**
-     * Emulates the user changing the value, which in practice means setting
-     * {@code value} of the {@code input} element to the given value and then
-     * triggering {@code input} and {@code change} DOM events.
+     * Emulates the user setting the value. This triggers server value change
+     * listeners and validation. The emulation is done by setting the value
+     * property of the input element to the given value and then triggering
+     * synthetic {@code input}, {@code change}, and {@code focusout} DOM events.
+     * <p>
+     * For more complex scenarios that require a full browser simulation of
+     * typing, use {@link #sendKeys(CharSequence...)} instead.
+     * <p>
+     * WARNING: This method does not support values that aren't parsable into a
+     * number. If you need to enter such values e.g. to test the validation
+     * workflow, use {@link #sendKeys(CharSequence...)} instead.
      *
      * @param string
      *            the value to set

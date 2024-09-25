@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-notification-flow-parent</artifactId>
-        <version>24.2-SNAPSHOT</version>
+        <version>24.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-notification-integration-tests</artifactId>
     <packaging>war</packaging>
@@ -105,6 +105,8 @@
                                 <include>vite.generated.ts</include>
                                 <include>types.d.ts</include>
                                 <include>tsconfig.json</include>
+                                <include>frontend/routes.tsx</include>
+                                <include>frontend/App.tsx</include>
                             </includes>
                         </fileset>
                         <fileset>

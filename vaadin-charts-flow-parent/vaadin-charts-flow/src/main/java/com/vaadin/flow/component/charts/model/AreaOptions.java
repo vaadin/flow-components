@@ -1,17 +1,17 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
 
-import com.vaadin.flow.component.charts.model.style.Color;
-
 import java.time.Instant;
 import java.util.Date;
+
+import com.vaadin.flow.component.charts.model.style.Color;
 
 public abstract class AreaOptions extends AbstractPlotOptions {
 

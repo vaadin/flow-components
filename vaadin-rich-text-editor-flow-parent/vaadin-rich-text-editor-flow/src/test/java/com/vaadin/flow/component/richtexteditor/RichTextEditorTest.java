@@ -1,6 +1,16 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.richtexteditor;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Rule;
@@ -16,6 +26,8 @@ import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
+
+import elemental.json.JsonArray;
 
 /**
  * Tests for the {@link RichTextEditor}.
@@ -221,5 +233,24 @@ public class RichTextEditorTest {
 
         RichTextEditor field = Component.from(element, RichTextEditor.class);
         Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
+    }
+
+    @Test
+    public void setColorOptions_propertyIsUpdated() {
+        RichTextEditor rte = new RichTextEditor();
+        rte.setColorOptions(
+                List.of("#000000", "#0066cc", "#008a00", "#e60000"));
+        JsonArray jsonArray = (JsonArray) rte.getElement()
+                .getPropertyRaw("colorOptions");
+        Assert.assertEquals(4, jsonArray.length());
+    }
+
+    @Test
+    public void setColorOptions_getColorOptions() {
+        RichTextEditor rte = new RichTextEditor();
+        rte.setColorOptions(
+                List.of("#000000", "#0066cc", "#008a00", "#e60000"));
+        List<String> options = rte.getColorOptions();
+        Assert.assertEquals(4, options.size());
     }
 }

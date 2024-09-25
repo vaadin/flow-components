@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,7 +24,6 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.HasAriaLabel;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -32,11 +31,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
@@ -361,6 +362,73 @@ public class MultiSelectListBoxTest {
         listBox.setAriaLabelledBy(null);
 
         Assert.assertTrue(listBox.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void discardSelectionOnDataChange_noExtraChangeEventsFired() {
+        listBox.setSelectionPreservationMode(SelectionPreservationMode.DISCARD);
+
+        Item selectedItem = items.get(0);
+        listBox.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNotNull(selectionEvent);
+        selectionEvent = null;
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assert.assertNotNull(selectionEvent);
+    }
+
+    @Test
+    public void preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
+        listBox.setSelectionPreservationMode(
+                SelectionPreservationMode.PRESERVE_EXISTING);
+
+        Item selectedItem = items.get(0);
+        listBox.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNotNull(selectionEvent);
+        selectionEvent = null;
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(items.get(1));
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(selectedItem);
+        listBox.getDataProvider().refreshAll();
+        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assert.assertNotNull(selectionEvent);
+    }
+
+    @Test
+    public void preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
+        listBox.setSelectionPreservationMode(
+                SelectionPreservationMode.PRESERVE_ALL);
+
+        Item selectedItem = items.get(0);
+        listBox.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNotNull(selectionEvent);
+        selectionEvent = null;
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(items.get(1));
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(selectedItem);
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
     }
 
     private void assertValueChangeEvents(Set<Item>... expectedValues) {

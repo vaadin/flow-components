@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,9 +15,9 @@
  */
 package com.vaadin.flow.component.shared;
 
-import com.vaadin.flow.data.binder.ValidationResult;
-
 import java.util.Objects;
+
+import com.vaadin.flow.data.binder.ValidationResult;
 
 /**
  * Util methods for component validation
@@ -28,72 +28,214 @@ public class ValidationUtil {
     }
 
     /**
-     * Checks the required validation constraint
+     * Checks if the value satistifies the required constraint and returns a
+     * {@code ValidationResult.ok()} or {@code ValidationResult.error()} with an
+     * empty error message depending on the result.
      *
-     * @param required
-     *            the required state of the component
-     * @param value
-     *            the current value set on the component
-     * @param emptyValue
-     *            the empty value for the component
-     * @return <code>Validation.ok()</code> if the validation passes,
-     *         <code>Validation.error()</code> otherwise
      * @param <V>
-     *            the type of the component value
+     *            the type of the value
+     * @param required
+     *            whether the constraint is enabled
+     * @param value
+     *            the value to validate
+     * @param emptyValue
+     *            the value considered to be empty
+     * @return {@code ValidationResult.ok()} if the value does not equal to the
+     *         empty value, {@code ValidationResult.error()} otherwise
+     * @deprecated since 24.5, use
+     *             {@link #validateRequiredConstraint(String, boolean, Object, Object)}
+     *             instead.
      */
+    @Deprecated
     public static <V> ValidationResult checkRequired(boolean required, V value,
             V emptyValue) {
-        final boolean isRequiredButEmpty = required
-                && Objects.equals(emptyValue, value);
-        if (isRequiredButEmpty) {
-            return ValidationResult.error("");
-        }
-        return ValidationResult.ok();
+        return validateRequiredConstraint("", required, value, emptyValue);
     }
 
     /**
-     * Checks if the value being set to the component is greater than the max
-     * value defined
+     * Checks if the value satistifies the required constraint and returns a
+     * {@code ValidationResult.ok()} or {@code ValidationResult.error()} with
+     * the given error message depending on the result.
      *
-     * @param value
-     *            the current value set on the component
-     * @param maxValue
-     *            the max value set on the component
-     * @return <code>Validation.ok()</code> if the validation passes,
-     *         <code>Validation.error()</code> otherwise
      * @param <V>
-     *            the type of the component value
+     *            the type of the value
+     * @param errorMessage
+     *            the error message to return if the check fails
+     * @param required
+     *            whether the constraint is enabled
+     * @param value
+     *            the value to validate
+     * @param emptyValue
+     *            the value considered to be empty
+     * @return {@code ValidationResult.ok()} if the value does not equal to the
+     *         empty value, {@code ValidationResult.error()} otherwise
      */
+    public static <V> ValidationResult validateRequiredConstraint(
+            String errorMessage, boolean required, V value, V emptyValue) {
+        boolean isError = required && Objects.equals(emptyValue, value);
+        return isError ? ValidationResult.error(errorMessage)
+                : ValidationResult.ok();
+    }
+
+    /**
+     * Checks if the value satisfies the maximum value constraint and returns a
+     * {@code ValidationResult.ok()} or {@code ValidationResult.error()} with an
+     * empty error message depending on the result.
+     *
+     * @param <V>
+     *            the type of the value
+     * @param value
+     *            the value to validate
+     * @param maxValue
+     *            the maximum allowed value
+     * @return {@code ValidationResult.ok()} if the value is smaller or equal to
+     *         the maximum value, {@code ValidationResult.error()} otherwise
+     * @deprecated since 24.5, use
+     *             {@link #validateMaxConstraint(String, Comparable, Comparable)}
+     *             instead.
+     */
+    @Deprecated
     public static <V extends Comparable<V>> ValidationResult checkGreaterThanMax(
             V value, V maxValue) {
-        final boolean isGreaterThanMax = value != null && maxValue != null
-                && value.compareTo(maxValue) > 0;
-        if (isGreaterThanMax) {
-            return ValidationResult.error("");
-        }
-        return ValidationResult.ok();
+        return validateMaxConstraint("", value, maxValue);
     }
 
     /**
-     * Checks if the value being set to the component is smaller than the max
-     * value defined
+     * Checks if the value satisfies the maximum value constraint and returns a
+     * {@code ValidationResult.ok()} or {@code ValidationResult.error()} with
+     * the given error message depending on the result.
      *
-     * @param value
-     *            the current value set on the component
-     * @param minValue
-     *            the min value set on the component
-     * @return <code>Validation.ok()</code> if the validation passes,
-     *         <code>Validation.error()</code> otherwise
      * @param <V>
-     *            the type of the component value
+     *            the type of the value
+     * @param errorMessage
+     *            the error message to return if the check fails
+     * @param value
+     *            the value to validate
+     * @param maxValue
+     *            the maximum allowed value
+     * @return {@code ValidationResult.ok()} if the value is smaller or equal to
+     *         the maximum value, {@code ValidationResult.error()} otherwise
      */
+    public static <V extends Comparable<V>> ValidationResult validateMaxConstraint(
+            String errorMessage, V value, V maxValue) {
+        boolean isError = value != null && maxValue != null
+                && value.compareTo(maxValue) > 0;
+        return isError ? ValidationResult.error(errorMessage)
+                : ValidationResult.ok();
+    }
+
+    /**
+     * Checks if the value satisfies the minimum value constraint and returns a
+     * {@code ValidationResult.ok()} or {@code ValidationResult.error()} with an
+     * empty error message depending on the result.
+     *
+     * @param <V>
+     *            the type of the value
+     * @param value
+     *            the value to validate
+     * @param minValue
+     *            the minimum allowed value
+     * @return {@code ValidationResult.ok()} if the value is greater or equal to
+     *         the minimum value, {@code ValidationResult.error()} otherwise
+     * @deprecated since 24.5, use
+     *             {@link #validateMinConstraint(String, Comparable, Comparable)}
+     *             instead.
+     */
+    @Deprecated
     public static <V extends Comparable<V>> ValidationResult checkSmallerThanMin(
             V value, V minValue) {
-        final boolean isSmallerThanMin = value != null && minValue != null
+        return validateMinConstraint("", value, minValue);
+    }
+
+    /**
+     * Checks if the value satisfies the minimum value constraint and returns a
+     * {@code ValidationResult.ok()} or {@code ValidationResult.error()} with
+     * the given error message depending on the result.
+     *
+     * @param <V>
+     *            the type of the value
+     * @param errorMessage
+     *            the error message to return if the check fails
+     * @param value
+     *            the value to validate
+     * @param minValue
+     *            the minimum allowed value
+     * @return {@code ValidationResult.ok()} if the value is greater or equal to
+     *         the minimum value, {@code ValidationResult.error()} otherwise
+     */
+    public static <V extends Comparable<V>> ValidationResult validateMinConstraint(
+            String errorMessage, V value, V minValue) {
+        boolean isError = value != null && minValue != null
                 && value.compareTo(minValue) < 0;
-        if (isSmallerThanMin) {
-            return ValidationResult.error("");
-        }
-        return ValidationResult.ok();
+        return isError ? ValidationResult.error(errorMessage)
+                : ValidationResult.ok();
+    }
+
+    /**
+     * Checks if the value satisfies the minimum length constraint and returns a
+     * {@code ValidationResult.ok()} or {@code ValidationResult.error()} with
+     * the given error message depending on the result.
+     *
+     * @param errorMessage
+     *            the error message to return if the check fails
+     * @param value
+     *            the value to validate
+     * @param minLength
+     *            the minimum allowed length
+     * @return {@code ValidationResult.ok()} if the value is longer than or
+     *         equal to the minimum length, {@code ValidationResult.error()}
+     *         otherwise
+     */
+    public static ValidationResult validateMinLengthConstraint(
+            String errorMessage, String value, Integer minLength) {
+        boolean isError = value != null && !value.isEmpty() && minLength != null
+                && value.length() < minLength;
+        return isError ? ValidationResult.error(errorMessage)
+                : ValidationResult.ok();
+    }
+
+    /**
+     * Checks if the value satisfies the maximum length constraint and returns a
+     * {@code ValidationResult.ok()} or {@code ValidationResult.error()} with
+     * the given error message depending on the result.
+     *
+     * @param errorMessage
+     *            the error message to return if the check fails
+     * @param value
+     *            the value to validate
+     * @param maxLength
+     *            the maximum allowed length
+     * @return {@code ValidationResult.ok()} if the value is shorter than or
+     *         equal to the maximum length, {@code ValidationResult.error()}
+     *         otherwise
+     */
+    public static ValidationResult validateMaxLengthConstraint(
+            String errorMessage, String value, Integer maxLength) {
+        boolean isError = value != null && maxLength != null
+                && value.length() > maxLength;
+        return isError ? ValidationResult.error(errorMessage)
+                : ValidationResult.ok();
+    }
+
+    /**
+     * Checks if the value satisfies the pattern constraint and returns a
+     * {@code ValidationResult.ok()} or {@code ValidationResult.error()} with
+     * the given error message depending on the result.
+     *
+     * @param errorMessage
+     *            the error message to return if the check fails
+     * @param value
+     *            the value to validate
+     * @param pattern
+     *            the pattern to match
+     * @return {@code ValidationResult.ok()} if the value matches the pattern,
+     *         {@code ValidationResult.error()} otherwise
+     */
+    public static ValidationResult validatePatternConstraint(
+            String errorMessage, String value, String pattern) {
+        boolean isError = value != null && !value.isEmpty() && pattern != null
+                && !pattern.isEmpty() && !value.matches(pattern);
+        return isError ? ValidationResult.error(errorMessage)
+                : ValidationResult.ok();
     }
 }

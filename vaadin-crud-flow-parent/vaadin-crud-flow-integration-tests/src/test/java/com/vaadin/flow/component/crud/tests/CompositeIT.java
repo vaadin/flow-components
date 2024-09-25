@@ -1,12 +1,20 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.crud.tests;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.TestBenchElement;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 public class CompositeIT extends AbstractParallelTest {
 
@@ -28,8 +36,8 @@ public class CompositeIT extends AbstractParallelTest {
         $(TextFieldElement.class).attribute("editor-role", "language-field")
                 .first().setValue("English");
 
-        $(TestBenchElement.class).id("overlay").$(ButtonElement.class).first()
-                .click();
+        $(TestBenchElement.class).withId("overlay").last()
+                .$(ButtonElement.class).first().click();
 
         Assert.assertTrue(
                 $(CrudElement.class).first().getEditorSaveButton().isEnabled());

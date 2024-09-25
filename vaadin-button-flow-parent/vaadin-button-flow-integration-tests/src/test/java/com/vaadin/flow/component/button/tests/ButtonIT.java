@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,10 +15,8 @@
  */
 package com.vaadin.flow.component.button.tests;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchTestCase;
-import com.vaadin.tests.AbstractComponentIT;
+import java.time.Duration;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -29,7 +27,10 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchTestCase;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the ButtonView.
@@ -44,6 +45,75 @@ public class ButtonIT extends AbstractComponentIT {
         open();
         layout = this;
         waitForElementPresent(By.tagName("vaadin-button"));
+    }
+
+    @Test
+    public void textMatches() {
+        List<ButtonElement> buttonElements = $(ButtonElement.class)
+                .withText("Vaadin button").all();
+        Assert.assertEquals(1, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class).withText("").all();
+        Assert.assertEquals(2, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class).withText("nonexistent").all();
+        Assert.assertEquals(0, buttonElements.size());
+    }
+
+    @Test
+    public void textContains() {
+        List<ButtonElement> buttonElements = $(ButtonElement.class)
+                .withTextContaining("Vaadin").all();
+        Assert.assertEquals(1, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class).withTextContaining("button")
+                .all();
+        Assert.assertEquals(4, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class)
+                .withTextContaining("nonexistent").all();
+        Assert.assertEquals(0, buttonElements.size());
+    }
+
+    @Test
+    public void textBiPredicate() {
+        List<ButtonElement> buttonElements = $(ButtonElement.class)
+                .withText("Vaadin", String::startsWith).all();
+        Assert.assertEquals(1, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class)
+                .withText("button", String::endsWith).all();
+        Assert.assertEquals(3, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class)
+                .withText("button", ButtonIT::containsIgnoreCase).all();
+        Assert.assertEquals(5, buttonElements.size());
+    }
+
+    @Test
+    public void captionMatches() {
+        List<ButtonElement> buttonElements = $(ButtonElement.class)
+                .withCaption("Vaadin button").all();
+        Assert.assertEquals(1, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class).withCaption("nonexistent")
+                .all();
+        Assert.assertEquals(0, buttonElements.size());
+    }
+
+    @Test
+    public void captionContains() {
+        List<ButtonElement> buttonElements = $(ButtonElement.class)
+                .withCaptionContaining("Vaadin").all();
+        Assert.assertEquals(1, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class).withCaptionContaining("button")
+                .all();
+        Assert.assertEquals(4, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class)
+                .withCaptionContaining("nonexistent").all();
+        Assert.assertEquals(0, buttonElements.size());
     }
 
     @Test
@@ -277,6 +347,51 @@ public class ButtonIT extends AbstractComponentIT {
     }
 
     @Test
+    public void disableOnClick_enableInSameRoundtrip_clientSideButtonIsEnabled() {
+        WebElement button = layout
+                .findElement(By.id("disable-on-click-re-enable-button"));
+        for (int i = 0; i < 3; i++) {
+            Boolean disabled = (Boolean) executeScript(
+                    "arguments[0].click(); return arguments[0].disabled",
+                    button);
+            Assert.assertTrue(disabled);
+
+            waitUntil(ExpectedConditions.elementToBeClickable(button));
+        }
+    }
+
+    @Test
+    public void disableOnClick_hideWhenDisabled_showWhenEnabled_clientSideButtonIsEnabled() {
+        WebElement button = layout
+                .findElement(By.id("disable-on-click-hidden-button"));
+        for (int i = 0; i < 3; i++) {
+            button.click();
+
+            waitUntil(ExpectedConditions.invisibilityOf(button));
+            waitUntil(ExpectedConditions
+                    .not(ExpectedConditions.elementToBeClickable(button)));
+
+            layout.findElement(By.id("enable-hidden-button")).click();
+            waitUntil(ExpectedConditions.visibilityOf(button));
+            waitUntil(ExpectedConditions.elementToBeClickable(button));
+        }
+    }
+
+    @Test
+    public void disabledAndPointerEventsAuto_disableOnClick_clientSideButtonIsDisabled() {
+        WebElement button = layout
+                .findElement(By.id("disable-on-click-pointer-events-auto"));
+
+        scrollToElement(button);
+        executeScript("arguments[0].dispatchEvent(new MouseEvent(\"click\"));",
+                button);
+
+        Assert.assertNotNull(
+                "The button should contain the 'disabled' attribute after click",
+                button.getAttribute("disabled"));
+    }
+
+    @Test
     public void buttonShortcuts_shortcutsWork() {
         WebElement button = findElement(By.id("shortcuts-enter-button"));
 
@@ -331,6 +446,10 @@ public class ButtonIT extends AbstractComponentIT {
 
     private int getCenterX(WebElement element) {
         return element.getLocation().getX() + element.getSize().getWidth() / 2;
+    }
+
+    private static boolean containsIgnoreCase(String a, String b) {
+        return a.toUpperCase().contains(b.toUpperCase());
     }
 
     @Override
