@@ -711,10 +711,9 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         private String moveBackward;
 
         /**
-         * Gets the text for the {@code aria-label} attribute of section focus
-         * buttons
+         * Gets the accessible name of section focus buttons
          *
-         * @return the section focus button {@code aria-label}, or {@code null}
+         * @return the accessible name of section focus button, or {@code null}
          *         if not set
          */
         public String getSelectSection() {
@@ -722,11 +721,10 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Sets the text for the {@code aria-label} attribute of section focus
-         * buttons
+         * Sets the accessible name of section focus buttons
          *
          * @param selectSection
-         *            the section focus button {@code aria-label} to set
+         *            the accessible name of section focus button to set
          * @return this instance for method chaining
          */
         public DashboardI18n setSelectSection(String selectSection) {
@@ -735,10 +733,9 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Gets the text for the {@code aria-label} attribute of widget focus
-         * buttons
+         * Gets the accessible name of widget focus buttons
          *
-         * @return the widget focus button {@code aria-label}, or {@code null}
+         * @return the accessible name of widget focus button, or {@code null}
          *         if not set
          */
         public String getSelectWidget() {
@@ -746,11 +743,10 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Sets the text for the {@code aria-label} attribute of widget focus
-         * buttons
+         * Sets the accessible name of widget focus buttons
          *
          * @param selectWidget
-         *            the widget focus button {@code aria-label} to set
+         *            the accessible name of widget focus button to set
          * @return this instance for method chaining
          */
         public DashboardI18n setSelectWidget(String selectWidget) {
@@ -759,10 +755,9 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Gets the text for the {@code title} attribute of dashboard item
-         * remove buttons
+         * Gets the accessible name of dashboard item remove buttons
          *
-         * @return the dashboard item remove button {@code title}, or
+         * @return the accessible name of dashboard item remove button, or
          *         {@code null} if not set
          */
         public String getRemove() {
@@ -770,11 +765,10 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Sets the text for the {@code title} attribute of dashboard item
-         * remove buttons
+         * Sets the accessible name of dashboard item remove buttons
          *
          * @param remove
-         *            the dashboard item remove button {@code title} to set
+         *            the accessible name of dashboard item remove button to set
          * @return this instance for method chaining
          */
         public DashboardI18n setRemove(String remove) {
@@ -783,22 +777,20 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Gets the text for the {@code title} attribute of widget resize
-         * handles
+         * Gets the accessible name of widget resize handles
          *
-         * @return the widget resize handle {@code title}, or {@code null} if
-         *         not set
+         * @return the accessible name of widget resize handle, or {@code null}
+         *         if not set
          */
         public String getResize() {
             return resize;
         }
 
         /**
-         * Sets the text for the {@code title} attribute of widget resize
-         * handles
+         * Sets the accessible name of widget resize handles
          *
          * @param resize
-         *            the widget resize handle {@code title} to set
+         *            the accessible name of widget resize handle to set
          * @return this instance for method chaining
          */
         public DashboardI18n setResize(String resize) {
@@ -807,22 +799,20 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Gets the text for the {@code title} attribute of widget resize apply
-         * buttons
+         * Gets the accessible name of widget resize apply buttons
          *
-         * @return the widget resize apply button {@code title}, or {@code null}
-         *         if not set
+         * @return the accessible name of widget resize apply button, or
+         *         {@code null} if not set
          */
         public String getResizeApply() {
             return resizeApply;
         }
 
         /**
-         * Sets the text for the {@code title} attribute of widget resize apply
-         * buttons
+         * Sets the accessible name of widget resize apply buttons
          *
          * @param resizeApply
-         *            the widget resize apply button {@code title} to set
+         *            the accessible name of widget resize apply button to set
          * @return this instance for method chaining
          */
         public DashboardI18n setResizeApply(String resizeApply) {
@@ -831,10 +821,9 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Gets the text for the {@code title} attribute of widget resize shrink
-         * width buttons
+         * Gets the accessible name of widget resize shrink width buttons
          *
-         * @return the widget resize shrink width button {@code title}, or
+         * @return the accessible name of widget resize shrink width button, or
          *         {@code null} if not set
          */
         public String getResizeShrinkWidth() {
@@ -842,11 +831,11 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Sets the text for the {@code title} attribute of widget resize shrink
-         * width buttons
+         * Sets the accessible name of widget resize shrink width buttons
          *
          * @param resizeShrinkWidth
-         *            the widget resize shrink width button {@code title} to set
+         *            the accessible name of widget resize shrink width button
+         *            to set
          * @return this instance for method chaining
          */
         public DashboardI18n setResizeShrinkWidth(String resizeShrinkWidth) {
@@ -855,10 +844,9 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Gets the text for the {@code title} attribute of widget resize grow
-         * width buttons
+         * Gets the accessible name of widget resize grow width buttons
          *
-         * @return the widget resize grow width button {@code title}, or
+         * @return the accessible name of widget resize grow width button, or
          *         {@code null} if not set
          */
         public String getResizeGrowWidth() {
@@ -866,11 +854,11 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Sets the text for the {@code title} attribute of widget resize grow
-         * width buttons
+         * Sets the accessible name of widget resize grow width buttons
          *
          * @param resizeGrowWidth
-         *            the widget resize grow width button {@code title} to set
+         *            the accessible name of widget resize grow width button to
+         *            set
          * @return this instance for method chaining
          */
         public DashboardI18n setResizeGrowWidth(String resizeGrowWidth) {
@@ -879,10 +867,9 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Gets the text for the {@code title} attribute of widget resize shrink
-         * height buttons
+         * Gets the accessible name of widget resize shrink height buttons
          *
-         * @return the widget resize shrink height button {@code title}, or
+         * @return the accessible name of widget resize shrink height button, or
          *         {@code null} if not set
          */
         public String getResizeShrinkHeight() {
@@ -890,12 +877,11 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Sets the text for the {@code title} attribute of widget resize shrink
-         * height buttons
+         * Sets the accessible name of widget resize shrink height buttons
          *
          * @param resizeShrinkHeight
-         *            the widget resize shrink height button {@code title} to
-         *            set
+         *            the accessible name of widget resize shrink height button
+         *            to set
          * @return this instance for method chaining
          */
         public DashboardI18n setResizeShrinkHeight(String resizeShrinkHeight) {
@@ -904,10 +890,9 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Gets the text for the {@code title} attribute of widget resize grow
-         * height buttons
+         * Gets the accessible name of widget resize grow height buttons
          *
-         * @return the widget resize grow height button {@code title}, or
+         * @return the accessible name of widget resize grow height button, or
          *         {@code null} if not set
          */
         public String getResizeGrowHeight() {
@@ -915,11 +900,11 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Sets the text for the {@code title} attribute of widget resize grow
-         * height buttons
+         * Sets the accessible name of widget resize grow height buttons
          *
          * @param resizeGrowHeight
-         *            the widget resize grow height button {@code title} to set
+         *            the accessible name of widget resize grow height button to
+         *            set
          * @return this instance for method chaining
          */
         public DashboardI18n setResizeGrowHeight(String resizeGrowHeight) {
@@ -928,22 +913,20 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Gets the text for the {@code title} attribute of dashboard item drag
-         * handles
+         * Gets the accessible name of dashboard item drag handles
          *
-         * @return the dashboard item drag handle {@code title}, or {@code null}
-         *         if not set
+         * @return the accessible name of dashboard item drag handle, or
+         *         {@code null} if not set
          */
         public String getMove() {
             return move;
         }
 
         /**
-         * Sets the text for the {@code title} attribute of dashboard item drag
-         * handles
+         * Sets the accessible name of dashboard item drag handles
          *
          * @param move
-         *            the dashboard item drag handle {@code title} to set
+         *            the accessible name of dashboard item drag handle to set
          * @return this instance for method chaining
          */
         public DashboardI18n setMove(String move) {
@@ -952,10 +935,9 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Gets the text for the {@code title} attribute of dashboard item move
-         * apply buttons
+         * Gets the accessible name of dashboard item move apply buttons
          *
-         * @return the dashboard item move apply button {@code title}, or
+         * @return the accessible name of dashboard item move apply button, or
          *         {@code null} if not set
          */
         public String getMoveApply() {
@@ -963,11 +945,11 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Sets the text for the {@code title} attribute of dashboard item move
-         * apply buttons
+         * Sets the accessible name of dashboard item move apply buttons
          *
          * @param moveApply
-         *            the dashboard item move apply button {@code title} to set
+         *            the accessible name of dashboard item move apply button to
+         *            set
          * @return this instance for method chaining
          */
         public DashboardI18n setMoveApply(String moveApply) {
@@ -976,10 +958,9 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Gets the text for the {@code title} attribute of dashboard item move
-         * forward buttons
+         * Gets the accessible name of dashboard item move forward buttons
          *
-         * @return the dashboard item move forward button {@code title}, or
+         * @return the accessible name of dashboard item move forward button, or
          *         {@code null} if not set
          */
         public String getMoveForward() {
@@ -987,12 +968,11 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Sets the text for the {@code title} attribute of dashboard item move
-         * forward buttons
+         * Sets the accessible name of dashboard item move forward buttons
          *
          * @param moveForward
-         *            the dashboard item move forward button {@code title} to
-         *            set
+         *            the accessible name of dashboard item move forward button
+         *            to set
          * @return this instance for method chaining
          */
         public DashboardI18n setMoveForward(String moveForward) {
@@ -1001,23 +981,21 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }
 
         /**
-         * Gets the text for the {@code title} attribute of dashboard item move
-         * backward buttons
+         * Gets the accessible name of dashboard item move backward buttons
          *
-         * @return the dashboard item move backward button {@code title}, or
-         *         {@code null} if not set
+         * @return the accessible name of dashboard item move backward button,
+         *         or {@code null} if not set
          */
         public String getMoveBackward() {
             return moveBackward;
         }
 
         /**
-         * Sets the text for the {@code title} attribute of dashboard item move
-         * backward buttons
+         * Sets the accessible name of dashboard item move backward buttons
          *
          * @param moveBackward
-         *            the dashboard item move backward button {@code title} to
-         *            set
+         *            the accessible name of dashboard item move backward button
+         *            to set
          * @return this instance for method chaining
          */
         public DashboardI18n setMoveBackward(String moveBackward) {
