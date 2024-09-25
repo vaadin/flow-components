@@ -439,6 +439,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         getElement().executeJs(
                 "Vaadin.FlowComponentHost.patchVirtualContainer(this);");
         customizeItemMovedEvent();
+        injectItemsArrayComparisonFunctions();
         doUpdateClient();
     }
 
@@ -499,8 +500,11 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
             }
             itemRepresentations.add(itemRepresentation);
         }
-        String updateItemsSnippet = "this.items = [ %s ];"
-                .formatted(String.join(",", itemRepresentations));
+        String updateItemsSnippet = """
+                const itemsArray = [ %s ];
+                if (!this.__areFlowItemArraysEqual(this.items, itemsArray)) {
+                  this.items = itemsArray;
+                }""".formatted(String.join(",", itemRepresentations));
         getElement().executeJs(updateItemsSnippet,
                 flatOrderedComponents.toArray(Component[]::new));
     }
@@ -588,7 +592,6 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
                 return;
             }
             handleItemMovedClientEvent(e, itemKey, itemsKey, sectionKey);
-            updateClient();
         }).addEventData(itemKey).addEventData(itemsKey)
                 .addEventData(sectionKey);
     }
@@ -613,9 +616,8 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
                     .map(DashboardSection.class::cast).findAny().orElseThrow();
             reorderedItems = getReorderedItemsList(
                     getSectionItems(itemsNodeIds, sectionNodeId), section);
-            section.removeAll();
-            reorderedItems.stream().map(DashboardWidget.class::cast)
-                    .forEach(section::add);
+            section.reorderWidgets(reorderedItems.stream()
+                    .map(DashboardWidget.class::cast).toList());
         }
         Component movedItem = reorderedItems.stream().filter(
                 item -> itemNodeId == item.getElement().getNode().getId())
@@ -633,7 +635,6 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
                 return;
             }
             handleItemResizedClientEvent(e, nodeIdKey, colspanKey, rowspanKey);
-            updateClient();
         }).addEventData(nodeIdKey).addEventData(colspanKey)
                 .addEventData(rowspanKey);
     }
@@ -660,7 +661,6 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
                         return;
                     }
                     handleItemRemovedClientEvent(e, nodeIdKey);
-                    updateClient();
                 });
         registration.addEventData(nodeIdKey);
     }
@@ -692,6 +692,50 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
                           });
                           this.dispatchEvent(flowItemMovedEvent);
                         });""");
+    }
+
+    private void injectItemsArrayComparisonFunctions() {
+        getElement().executeJs(
+                """
+                        this.__areFlowItemsEqual = function (item1, item2) {
+                          const arePropsEqual = item1.nodeid === item2.nodeid
+                            && item1.colspan === item2.colspan
+                            && item1.rowspan === item2.rowspan;
+                          if (!arePropsEqual) {
+                            return false;
+                          }
+                          const item1Items = item1.items;
+                          const item2Items = item2.items;
+                          if (item1Items && !item2Items
+                            || !item1Items && item2Items) {
+                            return false;
+                          }
+                          if (item1Items && item2Items) {
+                            if (item1Items.length !== item2Items.length) {
+                              return false;
+                            }
+                            for (let i = 0; i < item1Items.length; i++) {
+                              if (!this.__areFlowItemsEqual(item1Items[i], item2Items[i])) {
+                                return false;
+                              }
+                            }
+                          }
+                          return true;
+                        };
+                        this.__areFlowItemArraysEqual = function (itemArray1, itemArray2) {
+                          if (itemArray1 && !itemArray2 || !itemArray1 && itemArray2) {
+                            return false;
+                          }
+                          if (itemArray1.length !== itemArray2.length) {
+                            return false;
+                          }
+                          for (let i = 0; i < itemArray1.length; i++) {
+                            if (!this.__areFlowItemsEqual(itemArray1[i], itemArray2[i])) {
+                              return false;
+                            }
+                          }
+                          return true;
+                        };""");
     }
 
     private static List<Component> getReorderedItemsList(

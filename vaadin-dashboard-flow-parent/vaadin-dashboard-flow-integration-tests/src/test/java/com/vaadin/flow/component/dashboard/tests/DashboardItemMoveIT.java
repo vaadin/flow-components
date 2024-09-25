@@ -68,12 +68,40 @@ public class DashboardItemMoveIT extends AbstractComponentIT {
         var expectedTitle = widgetToMove.getTitle();
         // Select and move the widget
         widgetToMove.sendKeys(Keys.ENTER, Keys.RIGHT);
-        var widgetAtIndex1 = dashboardElement.getWidgets().get(1);
-        Assert.assertEquals(expectedTitle, widgetAtIndex1.getTitle());
+        widgetToMove = dashboardElement.getWidgets().get(1);
+        Assert.assertEquals(expectedTitle, widgetToMove.getTitle());
         // Move the widget back
         widgetToMove.sendKeys(Keys.LEFT);
         Assert.assertEquals(expectedTitle,
                 dashboardElement.getWidgets().get(0).getTitle());
+    }
+
+    @Test
+    public void keyboardMoveSection_itemIsMovedCorrectly() {
+        var sectionToMove = dashboardElement.getSections().get(0);
+        var expectedTitle = sectionToMove.getTitle();
+        // Select and move the section
+        sectionToMove.sendKeys(Keys.ENTER, Keys.RIGHT);
+        sectionToMove = dashboardElement.getSections().get(1);
+        Assert.assertEquals(expectedTitle, sectionToMove.getTitle());
+        // Move the section back
+        sectionToMove.sendKeys(Keys.LEFT);
+        Assert.assertEquals(expectedTitle,
+                dashboardElement.getSections().get(0).getTitle());
+    }
+
+    @Test
+    public void keyboardMoveWidgetInSection_itemIsMovedCorrectly() {
+        var widgetToMove = dashboardElement.getWidgets().get(2);
+        var expectedTitle = widgetToMove.getTitle();
+        // Select and move the widget
+        widgetToMove.sendKeys(Keys.ENTER, Keys.RIGHT);
+        widgetToMove = dashboardElement.getWidgets().get(3);
+        Assert.assertEquals(expectedTitle, widgetToMove.getTitle());
+        // Move the widget back
+        widgetToMove.sendKeys(Keys.LEFT);
+        Assert.assertEquals(expectedTitle,
+                dashboardElement.getWidgets().get(2).getTitle());
     }
 
     @Test

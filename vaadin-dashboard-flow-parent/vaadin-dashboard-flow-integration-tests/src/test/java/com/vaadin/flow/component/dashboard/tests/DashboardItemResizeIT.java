@@ -37,18 +37,28 @@ public class DashboardItemResizeIT extends AbstractComponentIT {
     }
 
     @Test
-    public void dragResizeWidgetBothHorizontallyAndVertically_widgetIsResizedCorrectly() {
+    public void dragResizeWidget_widgetIsResizedCorrectly() {
         assertWidgetResized(0);
     }
 
     @Test
-    public void dragResizeWidgetInSectionBothHorizontallyAndVertically_widgetIsResizedCorrectly() {
+    public void dragResizeWidgetInSection_widgetIsResizedCorrectly() {
         assertWidgetResized(1);
     }
 
     @Test
     public void keyboardResizeWidget_widgetIsResizedCorrectly() {
-        var widgetToResize = dashboardElement.getWidgets().get(0);
+        assertWidgetKeyboardResized(0);
+    }
+
+    @Test
+    public void keyboardResizeWidgetInSection_widgetIsResizedCorrectly() {
+        assertWidgetKeyboardResized(1);
+    }
+
+    private void assertWidgetKeyboardResized(int widgetIndexToResize) {
+        var widgetToResize = dashboardElement.getWidgets()
+                .get(widgetIndexToResize);
         var initialWidth = widgetToResize.getSize().getWidth();
         // Select widget
         widgetToResize.sendKeys(Keys.ENTER);
