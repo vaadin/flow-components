@@ -348,6 +348,42 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     }
 
     /**
+     * Adds an item selected change listener to this dashboard.
+     *
+     * @param listener
+     *            the listener to add, not <code>null</code>
+     * @return a handle that can be used for removing the listener
+     */
+    public Registration addItemSelectedChangedListener(
+            ComponentEventListener<DashboardItemSelectedChangedEvent> listener) {
+        return addListener(DashboardItemSelectedChangedEvent.class, listener);
+    }
+
+    /**
+     * Adds an item move mode change listener to this dashboard.
+     *
+     * @param listener
+     *            the listener to add, not <code>null</code>
+     * @return a handle that can be used for removing the listener
+     */
+    public Registration addItemMoveModeChangedListener(
+            ComponentEventListener<DashboardItemMoveModeChangedEvent> listener) {
+        return addListener(DashboardItemMoveModeChangedEvent.class, listener);
+    }
+
+    /**
+     * Adds an item resize mode change listener to this dashboard.
+     *
+     * @param listener
+     *            the listener to add, not <code>null</code>
+     * @return a handle that can be used for removing the listener
+     */
+    public Registration addItemResizeModeChangedListener(
+            ComponentEventListener<DashboardItemResizeModeChangedEvent> listener) {
+        return addListener(DashboardItemResizeModeChangedEvent.class, listener);
+    }
+
+    /**
      * Gets the internationalization object previously set for this component.
      * <p>
      * NOTE: Updating the instance that is returned from this method will not
@@ -404,6 +440,21 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
                 "Vaadin.FlowComponentHost.patchVirtualContainer(this);");
         customizeItemMovedEvent();
         doUpdateClient();
+    }
+
+    Component getItem(int nodeId) {
+        return getChildren().map(item -> {
+            if (nodeId == item.getElement().getNode().getId()) {
+                return item;
+            }
+            if (item instanceof DashboardSection section) {
+                return section.getWidgets().stream()
+                        .filter(sectionItem -> nodeId == sectionItem
+                                .getElement().getNode().getId())
+                        .findAny().orElse(null);
+            }
+            return null;
+        }).filter(Objects::nonNull).findAny().orElseThrow();
     }
 
     void updateClient() {
@@ -616,25 +667,10 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
 
     private void handleItemRemovedClientEvent(DomEvent e, String nodeIdKey) {
         int nodeId = (int) e.getEventData().getNumber(nodeIdKey);
-        Component removedItem = getRemovedItem(nodeId);
+        Component removedItem = getItem(nodeId);
         removedItem.removeFromParent();
         fireEvent(new DashboardItemRemovedEvent(this, true, removedItem,
                 getChildren().toList()));
-    }
-
-    private Component getRemovedItem(int nodeId) {
-        return getChildren().map(item -> {
-            if (nodeId == item.getElement().getNode().getId()) {
-                return item;
-            }
-            if (item instanceof DashboardSection section) {
-                return section.getWidgets().stream()
-                        .filter(sectionItem -> nodeId == sectionItem
-                                .getElement().getNode().getId())
-                        .findAny().orElse(null);
-            }
-            return null;
-        }).filter(Objects::nonNull).findAny().orElseThrow();
     }
 
     private void customizeItemMovedEvent() {
