@@ -29,7 +29,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.DomEvent;
-import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
@@ -588,6 +587,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
                 return;
             }
             handleItemMovedClientEvent(e, itemKey, itemsKey, sectionKey);
+            updateClient();
         }).addEventData(itemKey).addEventData(itemsKey)
                 .addEventData(sectionKey);
     }
@@ -631,6 +631,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
                 return;
             }
             handleItemResizedClientEvent(e, idKey, colspanKey, rowspanKey);
+            updateClient();
         }).addEventData(idKey).addEventData(colspanKey)
                 .addEventData(rowspanKey);
     }
@@ -651,14 +652,13 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
 
     private void initItemRemovedClientEventListener() {
         String idKey = "event.detail.item.id";
-        DomListenerRegistration registration = getElement()
-                .addEventListener("dashboard-item-removed", e -> {
-                    if (!isEditable()) {
-                        return;
-                    }
-                    handleItemRemovedClientEvent(e, idKey);
-                });
-        registration.addEventData(idKey);
+        getElement().addEventListener("dashboard-item-removed", e -> {
+            if (!isEditable()) {
+                return;
+            }
+            handleItemRemovedClientEvent(e, idKey);
+            updateClient();
+        }).addEventData(idKey);
     }
 
     private void handleItemRemovedClientEvent(DomEvent e, String idKey) {
