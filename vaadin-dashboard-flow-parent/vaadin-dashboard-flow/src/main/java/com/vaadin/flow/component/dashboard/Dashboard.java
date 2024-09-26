@@ -663,7 +663,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
 
     private void handleItemRemovedClientEvent(DomEvent e, String idKey) {
         int nodeId = (int) e.getEventData().getNumber(idKey);
-            Component removedItem = getItem(nodeId);
+        Component removedItem = getItem(nodeId);
         removedItem.removeFromParent();
         fireEvent(new DashboardItemRemovedEvent(this, true, removedItem,
                 getChildren().toList()));

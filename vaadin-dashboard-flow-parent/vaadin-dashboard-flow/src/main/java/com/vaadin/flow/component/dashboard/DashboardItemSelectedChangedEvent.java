@@ -37,18 +37,16 @@ public class DashboardItemSelectedChangedEvent
      * @param fromClient
      *            {@code true} if the event originated from the client side,
      *            {@code false} otherwise
-     * @param itemNodeId
-     *            The node ID of the item of which the selected state has
-     *            changed
+     * @param itemId
+     *            The ID of the item of which the selected state has changed
      * @param selected
      *            Whether the item is selected
      */
     public DashboardItemSelectedChangedEvent(Dashboard source,
-            boolean fromClient,
-            @EventData("event.detail.item.nodeid") int itemNodeId,
+            boolean fromClient, @EventData("event.detail.item.id") int itemId,
             @EventData("event.detail.value") boolean selected) {
         super(source, fromClient);
-        this.item = source.getItem(itemNodeId);
+        this.item = source.getItem(itemId);
         this.selected = selected;
     }
 
