@@ -439,7 +439,6 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         getElement().executeJs(
                 "Vaadin.FlowComponentHost.patchVirtualContainer(this);");
         customizeItemMovedEvent();
-        injectItemsArrayComparisonFunctions();
         doUpdateClient();
     }
 
@@ -490,7 +489,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
                         .map(widget -> getWidgetRepresentation(widget,
                                 itemIndex.getAndIncrement()))
                         .collect(Collectors.joining(","));
-                itemRepresentation = "{ component: $%d, items: [ %s ], nodeid: %d }"
+                itemRepresentation = "{ component: $%d, items: [ %s ], id: %d }"
                         .formatted(sectionIndex, sectionWidgetsRepresentation,
                                 section.getElement().getNode().getId());
             } else {
@@ -500,11 +499,8 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
             }
             itemRepresentations.add(itemRepresentation);
         }
-        String updateItemsSnippet = """
-                const itemsArray = [ %s ];
-                if (!this.__areFlowItemArraysEqual(this.items, itemsArray)) {
-                  this.items = itemsArray;
-                }""".formatted(String.join(",", itemRepresentations));
+        String updateItemsSnippet = "this.items = [ %s ];"
+                .formatted(String.join(",", itemRepresentations));
         getElement().executeJs(updateItemsSnippet,
                 flatOrderedComponents.toArray(Component[]::new));
     }
@@ -533,7 +529,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
 
     private static String getWidgetRepresentation(DashboardWidget widget,
             int itemIndex) {
-        return "{ component: $%d, colspan: %d, rowspan: %d, nodeid: %d  }"
+        return "{ component: $%d, colspan: %d, rowspan: %d, id: %d  }"
                 .formatted(itemIndex, widget.getColspan(), widget.getRowspan(),
                         widget.getElement().getNode().getId());
     }
@@ -627,21 +623,21 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     }
 
     private void initItemResizedClientEventListener() {
-        String nodeIdKey = "event.detail.item.nodeid";
+        String idKey = "event.detail.item.id";
         String colspanKey = "event.detail.item.colspan";
         String rowspanKey = "event.detail.item.rowspan";
         getElement().addEventListener("dashboard-item-resized", e -> {
             if (!isEditable()) {
                 return;
             }
-            handleItemResizedClientEvent(e, nodeIdKey, colspanKey, rowspanKey);
-        }).addEventData(nodeIdKey).addEventData(colspanKey)
+            handleItemResizedClientEvent(e, idKey, colspanKey, rowspanKey);
+        }).addEventData(idKey).addEventData(colspanKey)
                 .addEventData(rowspanKey);
     }
 
-    private void handleItemResizedClientEvent(DomEvent e, String nodeIdKey,
+    private void handleItemResizedClientEvent(DomEvent e, String idKey,
             String colspanKey, String rowspanKey) {
-        int nodeId = (int) e.getEventData().getNumber(nodeIdKey);
+        int nodeId = (int) e.getEventData().getNumber(idKey);
         int colspan = (int) e.getEventData().getNumber(colspanKey);
         int rowspan = (int) e.getEventData().getNumber(rowspanKey);
         DashboardWidget resizedWidget = getWidgets().stream()
@@ -654,20 +650,20 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     }
 
     private void initItemRemovedClientEventListener() {
-        String nodeIdKey = "event.detail.item.nodeid";
+        String idKey = "event.detail.item.id";
         DomListenerRegistration registration = getElement()
                 .addEventListener("dashboard-item-removed", e -> {
                     if (!isEditable()) {
                         return;
                     }
-                    handleItemRemovedClientEvent(e, nodeIdKey);
+                    handleItemRemovedClientEvent(e, idKey);
                 });
-        registration.addEventData(nodeIdKey);
+        registration.addEventData(idKey);
     }
 
-    private void handleItemRemovedClientEvent(DomEvent e, String nodeIdKey) {
-        int nodeId = (int) e.getEventData().getNumber(nodeIdKey);
-        Component removedItem = getItem(nodeId);
+    private void handleItemRemovedClientEvent(DomEvent e, String idKey) {
+        int nodeId = (int) e.getEventData().getNumber(idKey);
+            Component removedItem = getItem(nodeId);
         removedItem.removeFromParent();
         fireEvent(new DashboardItemRemovedEvent(this, true, removedItem,
                 getChildren().toList()));
@@ -678,64 +674,20 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
                 """
                         this.addEventListener('dashboard-item-moved', (e) => {
                           function mapItems(items) {
-                            return items.map(({nodeid, items}) => ({
-                              nodeid,
+                            return items.map(({id, items}) => ({
+                              id,
                               ...(items && { items: mapItems(items) })
                             }));
                           }
                           const flowItemMovedEvent = new CustomEvent('dashboard-item-moved-flow', {
                             detail: {
-                              item: e.detail.item.nodeid,
+                              item: e.detail.item.id,
                               items: mapItems(e.detail.items),
-                              section: e.detail.section?.nodeid
+                              section: e.detail.section?.id
                             }
                           });
                           this.dispatchEvent(flowItemMovedEvent);
                         });""");
-    }
-
-    private void injectItemsArrayComparisonFunctions() {
-        getElement().executeJs(
-                """
-                        this.__areFlowItemsEqual = function (item1, item2) {
-                          const arePropsEqual = item1.nodeid === item2.nodeid
-                            && item1.colspan === item2.colspan
-                            && item1.rowspan === item2.rowspan;
-                          if (!arePropsEqual) {
-                            return false;
-                          }
-                          const item1Items = item1.items;
-                          const item2Items = item2.items;
-                          if (item1Items && !item2Items
-                            || !item1Items && item2Items) {
-                            return false;
-                          }
-                          if (item1Items && item2Items) {
-                            if (item1Items.length !== item2Items.length) {
-                              return false;
-                            }
-                            for (let i = 0; i < item1Items.length; i++) {
-                              if (!this.__areFlowItemsEqual(item1Items[i], item2Items[i])) {
-                                return false;
-                              }
-                            }
-                          }
-                          return true;
-                        };
-                        this.__areFlowItemArraysEqual = function (itemArray1, itemArray2) {
-                          if (itemArray1 && !itemArray2 || !itemArray1 && itemArray2) {
-                            return false;
-                          }
-                          if (itemArray1.length !== itemArray2.length) {
-                            return false;
-                          }
-                          for (let i = 0; i < itemArray1.length; i++) {
-                            if (!this.__areFlowItemsEqual(itemArray1[i], itemArray2[i])) {
-                              return false;
-                            }
-                          }
-                          return true;
-                        };""");
     }
 
     private static List<Component> getReorderedItemsList(
@@ -751,7 +703,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         for (int index = 0; index < reorderedItemsFromClient
                 .length(); index++) {
             int nodeIdFromClient = (int) ((JsonObject) reorderedItemsFromClient
-                    .get(index)).getNumber("nodeid");
+                    .get(index)).getNumber("id");
             items.add(nodeIdToItems.get(nodeIdFromClient));
         }
         return items;
@@ -762,7 +714,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         for (int rootLevelIdx = 0; rootLevelIdx < items
                 .length(); rootLevelIdx++) {
             JsonObject item = items.get(rootLevelIdx);
-            int itemNodeId = (int) item.getNumber("nodeid");
+            int itemNodeId = (int) item.getNumber("id");
             if (sectionNodeId == itemNodeId) {
                 JsonObject sectionObj = items.get(rootLevelIdx);
                 return sectionObj.getArray("items");
