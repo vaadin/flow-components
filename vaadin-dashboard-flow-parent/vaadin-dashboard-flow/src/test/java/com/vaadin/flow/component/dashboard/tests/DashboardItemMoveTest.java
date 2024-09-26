@@ -23,14 +23,12 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardSection;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
-import com.vaadin.flow.dom.DomEvent;
-import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
-public class DashboardDragReorderTest extends DashboardTestBase {
+public class DashboardItemMoveTest extends DashboardTestBase {
     private Dashboard dashboard;
 
     private JsonArray itemsArray;
@@ -50,43 +48,44 @@ public class DashboardDragReorderTest extends DashboardTestBase {
     }
 
     @Test
-    public void reorderWidget_orderIsUpdated() {
-        assertRootLevelItemReorder(0, 1);
+    public void moveWidget_orderIsUpdated() {
+        assertRootLevelItemMoved(0, 1);
     }
 
     @Test
-    public void reorderWidgetToSamePosition_orderIsNotUpdated() {
-        assertRootLevelItemReorder(0, 0);
+    public void moveWidgetToSamePosition_orderIsNotUpdated() {
+        assertRootLevelItemMoved(0, 0);
     }
 
     @Test
-    public void reorderSection_orderIsUpdated() {
-        assertRootLevelItemReorder(2, 1);
+    public void moveSection_orderIsUpdated() {
+        assertRootLevelItemMoved(2, 1);
     }
 
     @Test
-    public void reorderWidgetInSection_orderIsUpdated() {
-        assertSectionWidgetReorder(2, 0, 1);
+    public void moveWidgetInSection_orderIsUpdated() {
+        assertSectionWidgetMoved(2, 0, 1);
     }
 
     @Test
-    public void reorderWidgetInSectionToSamePosition_orderIsNotUpdated() {
-        assertSectionWidgetReorder(2, 0, 0);
+    public void moveWidgetInSectionToSamePosition_orderIsNotUpdated() {
+        assertSectionWidgetMoved(2, 0, 0);
     }
 
     @Test
-    public void setDashboardNotEditable_reorderWidget_orderIsNotUpdated() {
+    public void setDashboardNotEditable_moveWidget_orderIsNotUpdated() {
         dashboard.setEditable(false);
         int movedWidgetNodeId = dashboard.getChildren().toList().get(0)
                 .getElement().getNode().getId();
         List<Integer> expectedRootLevelNodeIds = getRootLevelNodeIds();
-        reorderRootLevelItem(0, 1);
-        fireItemMovedEvent(movedWidgetNodeId);
+        moveRootLevelItem(0, 1);
+        DashboardTestHelper.fireItemMovedEvent(dashboard, movedWidgetNodeId,
+                itemsArray, null);
         Assert.assertEquals(expectedRootLevelNodeIds, getRootLevelNodeIds());
     }
 
     @Test
-    public void reorderWidget_eventCorrectlyFired() {
+    public void moveWidget_eventCorrectlyFired() {
         int initialIndex = 0;
         int finalIndex = 1;
         Component movedItem = dashboard.getChildren().toList()
@@ -96,15 +95,16 @@ public class DashboardDragReorderTest extends DashboardTestBase {
                 .collect(Collectors.toCollection(ArrayList::new));
         expectedItems.add(finalIndex, expectedItems.remove(initialIndex));
         Runnable itemMoveAction = () -> {
-            reorderRootLevelItem(initialIndex, finalIndex);
-            fireItemMovedEvent(movedItemNodeId);
+            moveRootLevelItem(initialIndex, finalIndex);
+            DashboardTestHelper.fireItemMovedEvent(dashboard, movedItemNodeId,
+                    itemsArray, null);
         };
-        assertEventCorrectlyFired(itemMoveAction, 1, movedItem, expectedItems,
-                null);
+        assertItemMovedEventCorrectlyFired(itemMoveAction, 1, movedItem,
+                expectedItems, null);
     }
 
     @Test
-    public void reorderSection_eventCorrectlyFired() {
+    public void moveSection_eventCorrectlyFired() {
         int initialIndex = 2;
         int finalIndex = 1;
         Component movedItem = dashboard.getChildren().toList()
@@ -114,15 +114,16 @@ public class DashboardDragReorderTest extends DashboardTestBase {
                 .collect(Collectors.toCollection(ArrayList::new));
         expectedItems.add(finalIndex, expectedItems.remove(initialIndex));
         Runnable itemMoveAction = () -> {
-            reorderRootLevelItem(initialIndex, finalIndex);
-            fireItemMovedEvent(movedItemNodeId);
+            moveRootLevelItem(initialIndex, finalIndex);
+            DashboardTestHelper.fireItemMovedEvent(dashboard, movedItemNodeId,
+                    itemsArray, null);
         };
-        assertEventCorrectlyFired(itemMoveAction, 1, movedItem, expectedItems,
-                null);
+        assertItemMovedEventCorrectlyFired(itemMoveAction, 1, movedItem,
+                expectedItems, null);
     }
 
     @Test
-    public void reorderWidgetInSection_eventCorrectlyFired() {
+    public void moveWidgetInSection_eventCorrectlyFired() {
         int sectionIndex = 2;
         int initialIndex = 0;
         int finalIndex = 1;
@@ -133,15 +134,16 @@ public class DashboardDragReorderTest extends DashboardTestBase {
         Component movedItem = section.getWidgets().get(initialIndex);
         int movedItemNodeId = movedItem.getElement().getNode().getId();
         Runnable itemMoveAction = () -> {
-            reorderSectionWidget(sectionIndex, initialIndex, finalIndex);
-            fireItemMovedEvent(movedItemNodeId, sectionNodeId);
+            moveSectionWidget(sectionIndex, initialIndex, finalIndex);
+            DashboardTestHelper.fireItemMovedEvent(dashboard, movedItemNodeId,
+                    itemsArray, sectionNodeId);
         };
-        assertEventCorrectlyFired(itemMoveAction, 1, movedItem, expectedItems,
-                section);
+        assertItemMovedEventCorrectlyFired(itemMoveAction, 1, movedItem,
+                expectedItems, section);
     }
 
     @Test
-    public void setDashboardNotEditable_reorderWidget_eventNotFired() {
+    public void setDashboardNotEditable_moveWidget_eventNotFired() {
         dashboard.setEditable(false);
         int initialIndex = 0;
         int finalIndex = 1;
@@ -149,13 +151,55 @@ public class DashboardDragReorderTest extends DashboardTestBase {
                 .get(initialIndex);
         int movedItemNodeId = movedItem.getElement().getNode().getId();
         Runnable itemMoveAction = () -> {
-            reorderRootLevelItem(initialIndex, finalIndex);
-            fireItemMovedEvent(movedItemNodeId);
+            moveRootLevelItem(initialIndex, finalIndex);
+            DashboardTestHelper.fireItemMovedEvent(dashboard, movedItemNodeId,
+                    itemsArray, null);
         };
-        assertEventCorrectlyFired(itemMoveAction, 0, null, null, null);
+        assertItemMovedEventCorrectlyFired(itemMoveAction, 0, null, null, null);
     }
 
-    private void assertEventCorrectlyFired(Runnable itemMoveAction,
+    @Test
+    public void changeWidgetMoveMode_eventCorrectlyFired() {
+        Component movedItem = dashboard.getChildren().toList().get(0);
+        assertItemMoveModeChangedEventCorrectlyFired(movedItem, true);
+        assertItemMoveModeChangedEventCorrectlyFired(movedItem, false);
+    }
+
+    @Test
+    public void changeSectionMoveMode_eventCorrectlyFired() {
+        Component movedItem = dashboard.getChildren().toList().get(2);
+        assertItemMoveModeChangedEventCorrectlyFired(movedItem, true);
+        assertItemMoveModeChangedEventCorrectlyFired(movedItem, false);
+    }
+
+    @Test
+    public void changeWidgetInSectionMoveMode_eventCorrectlyFired() {
+        DashboardSection section = (DashboardSection) dashboard.getChildren()
+                .toList().get(2);
+        Component movedItem = section.getWidgets().get(0);
+        assertItemMoveModeChangedEventCorrectlyFired(movedItem, true);
+        assertItemMoveModeChangedEventCorrectlyFired(movedItem, false);
+    }
+
+    private void assertItemMoveModeChangedEventCorrectlyFired(Component item,
+            boolean moveMode) {
+        AtomicInteger listenerInvokedCount = new AtomicInteger(0);
+        AtomicReference<Component> eventItem = new AtomicReference<>();
+        AtomicReference<Boolean> eventIsMoveMode = new AtomicReference<>();
+        dashboard.addItemMoveModeChangedListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            eventItem.set(e.getItem());
+            eventIsMoveMode.set(e.isMoveMode());
+            e.unregisterListener();
+        });
+        DashboardTestHelper.fireItemMoveModeChangedEvent(dashboard,
+                item.getElement().getNode().getId(), moveMode);
+        Assert.assertEquals(1, listenerInvokedCount.get());
+        Assert.assertEquals(item, eventItem.get());
+        Assert.assertEquals(moveMode, eventIsMoveMode.get());
+    }
+
+    private void assertItemMovedEventCorrectlyFired(Runnable itemMoveAction,
             int expectedListenerInvokedCount, Component expectedItem,
             List<Component> expectedItems, DashboardSection expectedSection) {
         AtomicInteger listenerInvokedCount = new AtomicInteger(0);
@@ -178,23 +222,6 @@ public class DashboardDragReorderTest extends DashboardTestBase {
             Assert.assertEquals(Optional.ofNullable(expectedSection),
                     eventSection.get());
         }
-    }
-
-    private void fireItemMovedEvent(int itemNodeId) {
-        fireItemMovedEvent(itemNodeId, null);
-    }
-
-    private void fireItemMovedEvent(int itemNodeId, Integer sectionNodeId) {
-        JsonObject eventData = Json.createObject();
-        eventData.put("event.detail.item", itemNodeId);
-        eventData.put("event.detail.items", itemsArray);
-        if (sectionNodeId != null) {
-            eventData.put("event.detail.section", sectionNodeId);
-        }
-        DomEvent itemMovedDomEvent = new DomEvent(dashboard.getElement(),
-                "dashboard-item-moved-flow", eventData);
-        dashboard.getElement().getNode().getFeature(ElementListenerMap.class)
-                .fireEvent(itemMovedDomEvent);
     }
 
     private List<Integer> getSectionWidgetNodeIds(int sectionIndex) {
@@ -230,45 +257,46 @@ public class DashboardDragReorderTest extends DashboardTestBase {
         return expectedRootLevelNodeIds;
     }
 
-    private void reorderSectionWidget(int sectionIndex, int initialIndex,
+    private void moveSectionWidget(int sectionIndex, int initialIndex,
             int finalIndex) {
         JsonObject sectionItem = itemsArray.get(sectionIndex);
         JsonArray sectionItems = sectionItem.getArray("items");
         sectionItem.put("items",
-                reorderItemInJsonArray(initialIndex, finalIndex, sectionItems));
+                moveItemInJsonArray(initialIndex, finalIndex, sectionItems));
     }
 
-    private void reorderRootLevelItem(int initialIndex, int finalIndex) {
-        itemsArray = reorderItemInJsonArray(initialIndex, finalIndex,
-                itemsArray);
+    private void moveRootLevelItem(int initialIndex, int finalIndex) {
+        itemsArray = moveItemInJsonArray(initialIndex, finalIndex, itemsArray);
     }
 
-    private void assertSectionWidgetReorder(int sectionIndex, int initialIndex,
+    private void assertSectionWidgetMoved(int sectionIndex, int initialIndex,
             int finalIndex) {
         DashboardSection section = (DashboardSection) dashboard.getChildren()
                 .toList().get(sectionIndex);
         int sectionNodeId = section.getElement().getNode().getId();
         int movedWidgetNodeId = section.getWidgets().get(initialIndex)
                 .getElement().getNode().getId();
-        reorderSectionWidget(sectionIndex, initialIndex, finalIndex);
+        moveSectionWidget(sectionIndex, initialIndex, finalIndex);
         List<Integer> expectedSectionWidgetNodeIds = getExpectedSectionWidgetNodeIds(
                 sectionIndex, initialIndex, finalIndex);
-        fireItemMovedEvent(movedWidgetNodeId, sectionNodeId);
+        DashboardTestHelper.fireItemMovedEvent(dashboard, movedWidgetNodeId,
+                itemsArray, sectionNodeId);
         Assert.assertEquals(expectedSectionWidgetNodeIds,
                 getSectionWidgetNodeIds(sectionIndex));
     }
 
-    private void assertRootLevelItemReorder(int initialIndex, int finalIndex) {
+    private void assertRootLevelItemMoved(int initialIndex, int finalIndex) {
         int movedItemNodeId = dashboard.getChildren().toList().get(initialIndex)
                 .getElement().getNode().getId();
-        reorderRootLevelItem(initialIndex, finalIndex);
+        moveRootLevelItem(initialIndex, finalIndex);
         List<Integer> expectedRootLevelNodeIds = getExpectedRootLevelItemNodeIds(
                 initialIndex, finalIndex);
-        fireItemMovedEvent(movedItemNodeId);
+        DashboardTestHelper.fireItemMovedEvent(dashboard, movedItemNodeId,
+                itemsArray, null);
         Assert.assertEquals(expectedRootLevelNodeIds, getRootLevelNodeIds());
     }
 
-    private static JsonArray reorderItemInJsonArray(int initialIndex,
+    private static JsonArray moveItemInJsonArray(int initialIndex,
             int finalIndex, JsonArray initialArray) {
         JsonObject itemToMove = initialArray.get(initialIndex);
         initialArray.remove(initialIndex);
