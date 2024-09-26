@@ -109,7 +109,10 @@ public class GridTooltipIT extends AbstractComponentIT {
         clickElementWithJs("set-grid-tooltip-button");
         // add new column
         clickElementWithJs("add-column-button");
-        showTooltip(grid.getCell(0, 13));
+        GridTHTDElement cell = grid.getCell(0, 13);
+        cell.scrollIntoView();
+        flushScrolling(grid);
+        showTooltip(cell);
         Assert.assertEquals("Grid's tooltip! Jack", getActiveTooltipText());
     }
 

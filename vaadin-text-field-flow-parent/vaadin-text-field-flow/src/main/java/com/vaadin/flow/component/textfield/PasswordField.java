@@ -39,12 +39,56 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * by default. On mobile devices the last typed letter is shown for a brief
  * moment. The masking can be toggled using an optional reveal button.
  *
+ * <h2>Validation</h2>
+ * <p>
+ * Password Field comes with a built-in validation mechanism based on
+ * constraints. Validation is triggered whenever the user applies an input
+ * change, for example by pressing Enter or blurring the field. Programmatic
+ * value changes trigger validation as well. In eager and lazy value change
+ * modes, validation is also triggered on every character press with a delay
+ * according to the selected mode.
+ * <p>
+ * Validation verifies that the value satisfies the specified constraints. If
+ * any of the constraints are violated, the component is marked as invalid and
+ * an error message is displayed below the input.
+ * <p>
+ * The following constraints are supported:
+ * <ul>
+ * <li>{@link #setRequiredIndicatorVisible(boolean)}
+ * <li>{@link #setMinLength(int)}
+ * <li>{@link #setMaxLength(int)}
+ * <li>{@link #setPattern(String)}
+ * </ul>
+ * <p>
+ * Error messages for constraints can be configured with the
+ * {@link PasswordFieldI18n} object, using the respective properties. If you
+ * want to provide a single catch-all error message, you can also use the
+ * {@link #setErrorMessage(String)} method. Note that such an error message will
+ * take priority over i18n error messages if both are set.
+ * <p>
+ * In addition to validation, constraints may also limit user input. For
+ * example, the browser will prevent the user from entering more text than
+ * specified by the max length constraint.
+ * <p>
+ * For more advanced validation that requires custom rules, you can use
+ * {@link Binder}. By default, before running custom validators, Binder will
+ * also check the component constraints and display error messages from the
+ * {@link PasswordFieldI18n} object. The exception is the required constraint,
+ * for which Binder provides its own API, see
+ * {@link Binder.BindingBuilder#asRequired(String) asRequired()}.
+ * <p>
+ * However, if Binder doesn't fit your needs and you want to implement fully
+ * custom validation logic, you can disable the constraint validation by setting
+ * {@link #setManualValidation(boolean)} to true. This will allow you to control
+ * the invalid state and the error message manually using
+ * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
+ *
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-password-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha11")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/password-field", version = "24.5.0-alpha11")
+@NpmPackage(value = "@vaadin/password-field", version = "24.5.0-beta1")
 @JsModule("@vaadin/password-field/src/vaadin-password-field.js")
 public class PasswordField extends TextFieldBase<PasswordField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
@@ -213,21 +257,48 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     }
 
     /**
-     * Maximum number of characters (in Unicode code points) that the user can
-     * enter.
+     * {@inheritDoc}
+     * <p>
+     * Distinct error messages for different constraints can be configured with
+     * the {@link PasswordFieldI18n} object, using the respective properties.
+     * However, note that the error message set with
+     * {@link #setErrorMessage(String)} will take priority and override any i18n
+     * error messages if both are set.
+     */
+    @Override
+    public void setErrorMessage(String errorMessage) {
+        super.setErrorMessage(errorMessage);
+    }
+
+    /**
+     * @see PasswordFieldI18n#setRequiredErrorMessage(String)
+     */
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
+    }
+
+    /**
+     * Sets the maximum number of characters (in Unicode code points) that the
+     * user can enter. Values with a length exceeding this limit will cause the
+     * component to invalidate.
+     * <p>
+     * The maximum length is inclusive.
      *
      * @param maxLength
      *            the maximum length
+     * @see PasswordFieldI18n#setMaxLengthErrorMessage(String)
      */
     public void setMaxLength(int maxLength) {
         getElement().setProperty("maxlength", maxLength);
     }
 
     /**
-     * Maximum number of characters (in Unicode code points) that the user can
-     * enter.
+     * Gets the maximum number of characters (in Unicode code points) that the
+     * user can enter.
      *
-     * @return the {@code maxlength} property from the webcomponent
+     * @return the maximum length
+     * @see #setMaxLength(int)
      */
     public int getMaxLength() {
         return (int) getElement().getProperty("maxlength", 0.0);
@@ -238,34 +309,42 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     }
 
     /**
-     * Minimum number of characters (in Unicode code points) that the user can
-     * enter.
+     * Sets the minimum number of characters (in Unicode code points) that the
+     * user can enter. Values with a length shorter than this limit will cause
+     * the component to invalidate.
+     * <p>
+     * The minimum length is inclusive.
      *
      * @param minLength
      *            the minimum length
+     * @see PasswordFieldI18n#setMinLengthErrorMessage(String)
      */
     public void setMinLength(int minLength) {
         getElement().setProperty("minlength", minLength);
     }
 
     /**
-     * Minimum number of characters (in Unicode code points) that the user can
-     * enter.
+     * Gets the minimum number of characters (in Unicode code points) that the
+     * user can enter.
      *
-     * @return the {@code minlength} property from the webcomponent
+     * @return the minimum length
+     * @see #setMinLength(int)
      */
     public int getMinLength() {
         return (int) getElement().getProperty("minlength", 0.0);
     }
 
     /**
-     * Sets a regular expression for the value to pass on the client-side. The
-     * pattern must be a valid JavaScript Regular Expression that matches the
-     * entire value, not just some subset.
+     * Sets a regular expression for the value to pass during validation. Values
+     * that do not match the pattern will cause the component to invalidate.
+     * <p>
+     * The pattern must be a valid JavaScript Regular Expression that matches
+     * the entire value, not just some subset.
      *
      * @param pattern
-     *            the new String pattern
+     *            the new String pattern or {@code null} to clear it
      *
+     * @see PasswordFieldI18n#setPatternErrorMessage(String)
      * @see <a href=
      *      "https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern">
      *      https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefpattern</>
@@ -278,10 +357,11 @@ public class PasswordField extends TextFieldBase<PasswordField, String>
     }
 
     /**
-     * A regular expression that the value is checked against. The pattern must
-     * match the entire value, not just some subset.
+     * Gets the regular expression that the value is checked against during
+     * validation.
      *
-     * @return the {@code pattern} property from the webcomponent
+     * @return the pattern or {@code null} if not set
+     * @see #setPattern(String)
      */
     public String getPattern() {
         return getElement().getProperty("pattern");
