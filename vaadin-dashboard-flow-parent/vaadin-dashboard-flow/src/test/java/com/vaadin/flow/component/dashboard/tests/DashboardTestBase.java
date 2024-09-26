@@ -61,12 +61,12 @@ public class DashboardTestBase {
         JsonArray itemsArray = Json.createArray();
         rootLevelComponents.forEach(child -> {
             JsonObject rootLevelItem = Json.createObject();
-            rootLevelItem.put("nodeid", child.getElement().getNode().getId());
+            rootLevelItem.put("id", child.getElement().getNode().getId());
             if (child instanceof DashboardSection section) {
                 JsonArray sectionItemsArray = Json.createArray();
                 section.getWidgets().forEach(widget -> {
                     JsonObject sectionItem = Json.createObject();
-                    sectionItem.put("nodeid",
+                    sectionItem.put("id",
                             widget.getElement().getNode().getId());
                     sectionItemsArray.set(sectionItemsArray.length(),
                             sectionItem);

@@ -17,10 +17,10 @@ import com.vaadin.flow.router.Route;
 /**
  * @author Vaadin Ltd
  */
-@Route("vaadin-dashboard/drag-resize")
-public class DashboardDragResizePage extends Div {
+@Route("vaadin-dashboard/item-resize")
+public class DashboardItemResizePage extends Div {
 
-    public DashboardDragResizePage() {
+    public DashboardItemResizePage() {
         Dashboard dashboard = new Dashboard();
         dashboard.setEditable(true);
         dashboard.setMinimumRowHeight("200px");

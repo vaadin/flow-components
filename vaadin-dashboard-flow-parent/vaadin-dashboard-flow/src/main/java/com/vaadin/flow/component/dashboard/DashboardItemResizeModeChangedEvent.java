@@ -37,19 +37,17 @@ public class DashboardItemResizeModeChangedEvent
      * @param fromClient
      *            {@code true} if the event originated from the client side,
      *            {@code false} otherwise
-     * @param itemNodeId
-     *            The node ID of the item of which the resize mode state has
-     *            changed
+     * @param itemId
+     *            The ID of the item of which the resize mode state has changed
      * @param resizeMode
      *            Whether the item is in resize mode
      */
     public DashboardItemResizeModeChangedEvent(Dashboard source,
-            boolean fromClient,
-            @EventData("event.detail.item.nodeid") int itemNodeId,
+            boolean fromClient, @EventData("event.detail.item.id") int itemId,
             @EventData("event.detail.value") boolean resizeMode) {
         super(source, fromClient);
         this.item = source.getWidgets().stream().filter(
-                widget -> itemNodeId == widget.getElement().getNode().getId())
+                widget -> itemId == widget.getElement().getNode().getId())
                 .findAny().orElseThrow();
         this.resizeMode = resizeMode;
     }

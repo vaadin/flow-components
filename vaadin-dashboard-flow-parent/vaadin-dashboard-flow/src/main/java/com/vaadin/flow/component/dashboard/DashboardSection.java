@@ -185,6 +185,11 @@ public class DashboardSection extends Component implements HasWidgets {
         widgets.add(widget);
     }
 
+    void reorderWidgets(List<DashboardWidget> orderedWidgets) {
+        widgets.clear();
+        widgets.addAll(orderedWidgets);
+    }
+
     void updateClient() {
         childDetachHandler.refreshListeners();
         getParent().ifPresent(parent -> ((Dashboard) parent).updateClient());
