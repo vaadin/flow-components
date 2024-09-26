@@ -20,13 +20,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardSection;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
-import com.vaadin.flow.dom.DomEvent;
-import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
-import elemental.json.Json;
-import elemental.json.JsonObject;
-
-public class DashboardDragResizeTest extends DashboardTestBase {
+public class DashboardItemResizeTest extends DashboardTestBase {
     private Dashboard dashboard;
 
     @Before
@@ -76,7 +71,8 @@ public class DashboardDragResizeTest extends DashboardTestBase {
     public void setDashboardNotEditable_resizeWidget_sizeIsNotUpdated() {
         dashboard.setEditable(false);
         DashboardWidget widgetToResize = dashboard.getWidgets().get(0);
-        fireItemResizedEvent(widgetToResize, 2, 2);
+        DashboardTestHelper.fireItemResizedEvent(dashboard, widgetToResize, 2,
+                2);
         Assert.assertEquals(1, widgetToResize.getColspan());
         Assert.assertEquals(1, widgetToResize.getRowspan());
     }
@@ -85,7 +81,7 @@ public class DashboardDragResizeTest extends DashboardTestBase {
     public void resizeWidget_eventCorrectlyFired() {
         DashboardWidget resizedWidget = (DashboardWidget) dashboard
                 .getChildren().toList().get(0);
-        assertEventCorrectlyFired(resizedWidget, 1, resizedWidget,
+        assertItemResizedEventCorrectlyFired(resizedWidget, 1, resizedWidget,
                 dashboard.getChildren().toList());
     }
 
@@ -94,7 +90,7 @@ public class DashboardDragResizeTest extends DashboardTestBase {
         DashboardSection section = (DashboardSection) dashboard.getChildren()
                 .toList().get(1);
         DashboardWidget resizedWidget = section.getWidgets().get(0);
-        assertEventCorrectlyFired(resizedWidget, 1, resizedWidget,
+        assertItemResizedEventCorrectlyFired(resizedWidget, 1, resizedWidget,
                 dashboard.getChildren().toList());
     }
 
@@ -103,12 +99,28 @@ public class DashboardDragResizeTest extends DashboardTestBase {
         dashboard.setEditable(false);
         DashboardWidget resizedWidget = (DashboardWidget) dashboard
                 .getChildren().toList().get(0);
-        assertEventCorrectlyFired(resizedWidget, 0, null, null);
+        assertItemResizedEventCorrectlyFired(resizedWidget, 0, null, null);
     }
 
-    private void assertEventCorrectlyFired(DashboardWidget widgetToResize,
-            int expectedListenerInvokedCount, Component expectedResizedWidget,
-            List<Component> expectedItems) {
+    @Test
+    public void changeWidgetResizeMode_eventCorrectlyFired() {
+        Component resizedItem = dashboard.getChildren().toList().get(0);
+        assertItemResizeModeChangedEventCorrectlyFired(resizedItem, true);
+        assertItemResizeModeChangedEventCorrectlyFired(resizedItem, false);
+    }
+
+    @Test
+    public void changeWidgetInSectionResizeMode_eventCorrectlyFired() {
+        DashboardSection section = (DashboardSection) dashboard.getChildren()
+                .toList().get(1);
+        Component resizedItem = section.getWidgets().get(0);
+        assertItemResizeModeChangedEventCorrectlyFired(resizedItem, true);
+        assertItemResizeModeChangedEventCorrectlyFired(resizedItem, false);
+    }
+
+    private void assertItemResizedEventCorrectlyFired(
+            DashboardWidget widgetToResize, int expectedListenerInvokedCount,
+            Component expectedResizedWidget, List<Component> expectedItems) {
         AtomicInteger listenerInvokedCount = new AtomicInteger(0);
         AtomicReference<Component> eventResizedWidget = new AtomicReference<>();
         AtomicReference<List<Component>> eventItems = new AtomicReference<>();
@@ -118,7 +130,8 @@ public class DashboardDragResizeTest extends DashboardTestBase {
             eventItems.set(e.getItems());
             e.unregisterListener();
         });
-        fireItemResizedEvent(widgetToResize, 2, 2);
+        DashboardTestHelper.fireItemResizedEvent(dashboard, widgetToResize, 2,
+                2);
         Assert.assertEquals(expectedListenerInvokedCount,
                 listenerInvokedCount.get());
         if (expectedListenerInvokedCount > 0) {
@@ -128,30 +141,37 @@ public class DashboardDragResizeTest extends DashboardTestBase {
         }
     }
 
+    private void assertItemResizeModeChangedEventCorrectlyFired(Component item,
+            boolean resizeMode) {
+        AtomicInteger listenerInvokedCount = new AtomicInteger(0);
+        AtomicReference<Component> eventItem = new AtomicReference<>();
+        AtomicReference<Boolean> eventIsResizeMode = new AtomicReference<>();
+        dashboard.addItemResizeModeChangedListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            eventItem.set(e.getItem());
+            eventIsResizeMode.set(e.isResizeMode());
+            e.unregisterListener();
+        });
+        DashboardTestHelper.fireItemResizeModeChangedEvent(dashboard,
+                item.getElement().getNode().getId(), resizeMode);
+        Assert.assertEquals(1, listenerInvokedCount.get());
+        Assert.assertEquals(item, eventItem.get());
+        Assert.assertEquals(resizeMode, eventIsResizeMode.get());
+    }
+
     private void assertWidgetResized(int widgetIndexToResize, int targetColspan,
             int targetRowspan) {
         DashboardWidget widgetToResize = dashboard.getWidgets()
                 .get(widgetIndexToResize);
         // Assert widget is enlarged
-        fireItemResizedEvent(widgetToResize, targetColspan, targetRowspan);
+        DashboardTestHelper.fireItemResizedEvent(dashboard, widgetToResize,
+                targetColspan, targetRowspan);
         Assert.assertEquals(targetColspan, widgetToResize.getColspan());
         Assert.assertEquals(targetRowspan, widgetToResize.getRowspan());
         // Assert widget is shrunk
-        fireItemResizedEvent(widgetToResize, 1, 1);
+        DashboardTestHelper.fireItemResizedEvent(dashboard, widgetToResize, 1,
+                1);
         Assert.assertEquals(1, widgetToResize.getColspan());
         Assert.assertEquals(1, widgetToResize.getRowspan());
-    }
-
-    private void fireItemResizedEvent(DashboardWidget widget, int targetColspan,
-            int targetRowspan) {
-        JsonObject eventData = Json.createObject();
-        eventData.put("event.detail.item.nodeid",
-                widget.getElement().getNode().getId());
-        eventData.put("event.detail.item.rowspan", targetRowspan);
-        eventData.put("event.detail.item.colspan", targetColspan);
-        DomEvent itemResizedDomEvent = new DomEvent(dashboard.getElement(),
-                "dashboard-item-resized", eventData);
-        dashboard.getElement().getNode().getFeature(ElementListenerMap.class)
-                .fireEvent(itemResizedDomEvent);
     }
 }

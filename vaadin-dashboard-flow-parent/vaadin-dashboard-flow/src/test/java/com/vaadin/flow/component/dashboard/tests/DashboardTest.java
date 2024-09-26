@@ -24,11 +24,6 @@ import com.vaadin.flow.component.dashboard.Dashboard;
 import com.vaadin.flow.component.dashboard.DashboardSection;
 import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.dom.DomEvent;
-import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
-
-import elemental.json.Json;
-import elemental.json.JsonObject;
 
 public class DashboardTest extends DashboardTestBase {
     private Dashboard dashboard;
@@ -836,7 +831,7 @@ public class DashboardTest extends DashboardTestBase {
         fakeClientCommunication();
         int expectedWidgetCount = dashboard.getWidgets().size();
         int expectedNodeId = widgetToRemove.getElement().getNode().getId();
-        fireItemRemovedEvent(expectedNodeId);
+        DashboardTestHelper.fireItemRemovedEvent(dashboard, expectedNodeId);
         Assert.assertEquals(expectedWidgetCount, dashboard.getWidgets().size());
         Set<Integer> actualNodeIds = dashboard.getWidgets().stream()
                 .map(widget -> widget.getElement().getNode().getId())
@@ -852,7 +847,7 @@ public class DashboardTest extends DashboardTestBase {
         fakeClientCommunication();
         int expectedWidgetCount = dashboard.getWidgets().size() - 1;
         int nodeIdToBeRemoved = widgetToRemove.getElement().getNode().getId();
-        fireItemRemovedEvent(nodeIdToBeRemoved);
+        DashboardTestHelper.fireItemRemovedEvent(dashboard, nodeIdToBeRemoved);
         Assert.assertEquals(expectedWidgetCount, dashboard.getWidgets().size());
         Set<Integer> actualNodeIds = dashboard.getWidgets().stream()
                 .map(widget -> widget.getElement().getNode().getId())
@@ -860,6 +855,7 @@ public class DashboardTest extends DashboardTestBase {
         Assert.assertFalse(actualNodeIds.contains(nodeIdToBeRemoved));
     }
 
+    @Test
     public void setDashboardEditable_removeWidget_eventCorrectlyFired() {
         dashboard.setEditable(true);
         DashboardWidget widget = new DashboardWidget();
@@ -938,6 +934,48 @@ public class DashboardTest extends DashboardTestBase {
         Assert.assertTrue(section.isVisible());
     }
 
+    @Test
+    public void changeWidgetSelectedState_eventCorrectlyFired() {
+        DashboardWidget widget = new DashboardWidget();
+        dashboard.add(widget);
+        assertItemSelectedChangedEventCorrectlyFired(widget, true);
+        assertItemSelectedChangedEventCorrectlyFired(widget, false);
+    }
+
+    @Test
+    public void changeSectionSelectedState_eventCorrectlyFired() {
+        DashboardSection section = dashboard.addSection();
+        assertItemSelectedChangedEventCorrectlyFired(section, true);
+        assertItemSelectedChangedEventCorrectlyFired(section, false);
+    }
+
+    @Test
+    public void changeWidgetInSectionSelectedState_eventCorrectlyFired() {
+        DashboardSection section = dashboard.addSection();
+        DashboardWidget widget = new DashboardWidget();
+        section.add(widget);
+        assertItemSelectedChangedEventCorrectlyFired(widget, true);
+        assertItemSelectedChangedEventCorrectlyFired(widget, false);
+    }
+
+    private void assertItemSelectedChangedEventCorrectlyFired(Component item,
+            boolean selected) {
+        AtomicInteger listenerInvokedCount = new AtomicInteger(0);
+        AtomicReference<Component> eventItem = new AtomicReference<>();
+        AtomicReference<Boolean> eventIsSelected = new AtomicReference<>();
+        dashboard.addItemSelectedChangedListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            eventItem.set(e.getItem());
+            eventIsSelected.set(e.isSelected());
+            e.unregisterListener();
+        });
+        DashboardTestHelper.fireItemSelectedChangedEvent(dashboard,
+                item.getElement().getNode().getId(), selected);
+        Assert.assertEquals(1, listenerInvokedCount.get());
+        Assert.assertEquals(item, eventItem.get());
+        Assert.assertEquals(selected, eventIsSelected.get());
+    }
+
     private void assertItemRemoveEventCorrectlyFired(int nodeIdToRemove,
             int expectedListenerInvokedCount, Component expectedRemovedItem,
             List<Component> expectedItems) {
@@ -950,21 +988,12 @@ public class DashboardTest extends DashboardTestBase {
             eventItems.set(e.getItems());
             e.unregisterListener();
         });
-        fireItemRemovedEvent(nodeIdToRemove);
+        DashboardTestHelper.fireItemRemovedEvent(dashboard, nodeIdToRemove);
         Assert.assertEquals(expectedListenerInvokedCount,
                 listenerInvokedCount.get());
         if (expectedListenerInvokedCount > 0) {
             Assert.assertEquals(expectedRemovedItem, eventRemovedItem.get());
             Assert.assertEquals(expectedItems, eventItems.get());
         }
-    }
-
-    private void fireItemRemovedEvent(int nodeId) {
-        JsonObject eventData = Json.createObject();
-        eventData.put("event.detail.item.nodeid", nodeId);
-        DomEvent itemRemovedDomEvent = new DomEvent(dashboard.getElement(),
-                "dashboard-item-removed", eventData);
-        dashboard.getElement().getNode().getFeature(ElementListenerMap.class)
-                .fireEvent(itemRemovedDomEvent);
     }
 }
