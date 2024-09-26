@@ -10,7 +10,6 @@ package com.vaadin.flow.component.dashboard;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -187,9 +186,6 @@ public class DashboardSection extends Component implements HasWidgets {
     }
 
     void reorderWidgets(List<DashboardWidget> orderedWidgets) {
-        if (!new HashSet<>(orderedWidgets).equals(new HashSet<>(widgets))) {
-            return;
-        }
         widgets.clear();
         widgets.addAll(orderedWidgets);
     }
