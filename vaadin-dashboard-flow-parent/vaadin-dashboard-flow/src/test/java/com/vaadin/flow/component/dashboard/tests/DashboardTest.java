@@ -805,6 +805,24 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
+    public void dashboardIsNotDenseLayoutByDefault() {
+        Assert.assertFalse(dashboard.isDenseLayout());
+    }
+
+    @Test
+    public void setDenseLayoutFalse_valueIsCorrectlyRetrieved() {
+        dashboard.setDenseLayout(false);
+        Assert.assertFalse(dashboard.isDenseLayout());
+    }
+
+    @Test
+    public void setDenseLayoutTrue_valueIsCorrectlyRetrieved() {
+        dashboard.setDenseLayout(false);
+        dashboard.setDenseLayout(true);
+        Assert.assertTrue(dashboard.isDenseLayout());
+    }
+
+    @Test
     public void addWidget_detachDashboard_widgetIsRetained() {
         DashboardWidget widget = new DashboardWidget();
         dashboard.add(widget);

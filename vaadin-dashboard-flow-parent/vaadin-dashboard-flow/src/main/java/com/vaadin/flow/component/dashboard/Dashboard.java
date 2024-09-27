@@ -304,10 +304,29 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     /**
      * Returns whether the dashboard is editable.
      *
-     * @return whether to set the dashboard editable
+     * @return whether the dashboard is editable
      */
     public boolean isEditable() {
         return getElement().getProperty("editable", false);
+    }
+
+    /**
+     * Sets the option to make the dashboard layout dense.
+     *
+     * @param dense
+     *            whether to set the dashboard layout dense
+     */
+    public void setDenseLayout(boolean dense) {
+        getElement().setProperty("dense", dense);
+    }
+
+    /**
+     * Returns whether the dashboard layout is dense.
+     *
+     * @return whether the dashboard layout is dense
+     */
+    public boolean isDenseLayout() {
+        return getElement().getProperty("dense", false);
     }
 
     /**
