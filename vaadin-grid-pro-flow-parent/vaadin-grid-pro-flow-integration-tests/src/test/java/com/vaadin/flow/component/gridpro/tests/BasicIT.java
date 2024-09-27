@@ -80,7 +80,7 @@ public class BasicIT extends AbstractParallelTest {
                 .$("vaadin-grid-pro-edit-text-field").first();
 
         textField.setProperty("value", "Person 999");
-        textField.dispatchEvent("focusout");
+        executeScript("arguments[0].blur();", textField);
         sorter.click();
         sorter.click();
         Assert.assertEquals("Person 999", bodyCell.getInnerHTML());
@@ -102,7 +102,7 @@ public class BasicIT extends AbstractParallelTest {
         TestBenchElement checkbox = cell.$("vaadin-grid-pro-edit-checkbox")
                 .first();
         checkbox.click();
-        checkbox.dispatchEvent("focusout");
+        executeScript("arguments[0].blur();", checkbox);
 
         waitUntil(driver -> cell.$("span").exists());
         Assert.assertEquals("Yes", cell.$("span").first().getText());
@@ -126,7 +126,7 @@ public class BasicIT extends AbstractParallelTest {
             return comboItems.size() > 0;
         });
         comboBox.setProperty("value", "2");
-        comboBox.dispatchEvent("focusout");
+        executeScript("arguments[0].blur();", comboBox);
 
         waitUntil(driver -> cell.$("span").exists());
         Assert.assertEquals("City 2", cell.$("span").first().getText());
@@ -326,7 +326,7 @@ public class BasicIT extends AbstractParallelTest {
                 .first();
 
         textField.setProperty("value", "Updated Person 1");
-        textField.dispatchEvent("focusout");
+        executeScript("arguments[0].blur();", textField);
 
         Assert.assertEquals("Updated Person 1",
                 grid.getCell(0, 1).getInnerHTML());
