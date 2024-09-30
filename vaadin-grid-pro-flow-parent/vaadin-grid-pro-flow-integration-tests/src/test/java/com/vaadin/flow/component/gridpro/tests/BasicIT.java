@@ -18,18 +18,18 @@ import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.gridpro.testbench.GridProElement;
 import com.vaadin.flow.component.gridpro.testbench.GridTHTDElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractParallelTest;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class BasicIT extends AbstractParallelTest {
+@TestPath("vaadin-grid-pro")
+public class BasicIT extends AbstractComponentIT {
 
     private GridProElement grid, beanGrid;
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-grid-pro");
-        getDriver().get(url);
+        open();
         grid = $(GridProElement.class).waitForFirst();
         beanGrid = $(GridProElement.class).get(1);
     }
