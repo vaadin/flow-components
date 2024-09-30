@@ -317,7 +317,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
      *            whether to set the dashboard layout dense
      */
     public void setDenseLayout(boolean dense) {
-        getElement().setProperty("dense", dense);
+        getElement().setProperty("denseLayout", dense);
     }
 
     /**
@@ -326,7 +326,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
      * @return whether the dashboard layout is dense
      */
     public boolean isDenseLayout() {
-        return getElement().getProperty("dense", false);
+        return getElement().getProperty("denseLayout", false);
     }
 
     /**
