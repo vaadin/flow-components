@@ -292,7 +292,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     }
 
     /**
-     * Sets the option to make the dashboard editable.
+     * Sets the dashboard editable.
      *
      * @param editable
      *            whether to set the dashboard editable
@@ -311,7 +311,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     }
 
     /**
-     * Sets the option to make the dashboard layout dense.
+     * Sets the dashboard layout dense.
      *
      * @param dense
      *            whether to set the dashboard layout dense
