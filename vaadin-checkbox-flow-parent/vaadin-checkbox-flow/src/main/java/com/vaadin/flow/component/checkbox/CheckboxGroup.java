@@ -51,6 +51,7 @@ import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
@@ -84,13 +85,38 @@ import elemental.json.JsonArray;
  * <p>
  * Use CheckBoxGroup to group related items. Individual checkboxes should be
  * used for options that are not related to each other in any way.
+ * <h2>Validation</h2>
+ * <p>
+ * CheckboxGroup comes with a built-in validation mechanism that verifies that
+ * at least one checkbox is selected when
+ * {@link #setRequiredIndicatorVisible(boolean) required} is enabled.
+ * <p>
+ * Validation is triggered whenever the user initiates a value change by
+ * toggling a checkbox. Programmatic value changes trigger validation as well.
+ * If validation fails, the component is marked as invalid and an error message
+ * is displayed below the group.
+ * <p>
+ * The required error message can be configured using either
+ * {@link CheckboxGroupI18n#setRequiredErrorMessage(String)} or
+ * {@link #setErrorMessage(String)}.
+ * <p>
+ * For more advanced validation that requires custom rules, you can use
+ * {@link Binder}. Please note that Binder provides its own API for the required
+ * validation, see {@link Binder.BindingBuilder#asRequired(String)
+ * asRequired()}.
+ * <p>
+ * However, if Binder doesn't fit your needs and you want to implement fully
+ * custom validation logic, you can disable the built-in validation by setting
+ * {@link #setManualValidation(boolean)} to true. This will allow you to control
+ * the invalid state and the error message manually using
+ * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "24.5.0-beta1")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "24.5.0-rc1")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
@@ -633,25 +659,52 @@ public class CheckboxGroup<T>
     }
 
     /**
-     * Specifies that the user must fill in a value.
+     * Sets whether the user is required to select at least one checkbox. When
+     * required, an indicator appears next to the label and the field
+     * invalidates if all previously selected checkboxes are deselected.
+     * <p>
+     * NOTE: The required indicator is only visible when the field has a label,
+     * see {@link #setLabel(String)}.
      *
      * @param required
-     *            the boolean value to set
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
+     * @see CheckboxGroupI18n#setRequiredErrorMessage(String)
      */
-    public void setRequired(boolean required) {
-        setRequiredIndicatorVisible(required);
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
     }
 
     /**
-     * Determines whether the checkbox group is marked as input required.
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
+     * Gets whether the user is required to select at least one checkbox.
      *
-     * @return {@code true} if the input is required, {@code false} otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
+     * @see #setRequiredIndicatorVisible(boolean)
+     */
+    @Override
+    public boolean isRequiredIndicatorVisible() {
+        return super.isRequiredIndicatorVisible();
+    }
+
+    /**
+     * Alias for {@link #isRequiredIndicatorVisible()}
+     *
+     * @return {@code true} if the field is required, {@code false} otherwise
      */
     public boolean isRequired() {
         return isRequiredIndicatorVisible();
+    }
+
+    /**
+     * Alias for {@link #setRequiredIndicatorVisible(boolean)}.
+     *
+     * @param required
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
+     */
+    public void setRequired(boolean required) {
+        setRequiredIndicatorVisible(required);
     }
 
     /**

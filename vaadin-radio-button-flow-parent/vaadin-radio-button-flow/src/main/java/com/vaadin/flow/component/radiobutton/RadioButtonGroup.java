@@ -47,6 +47,7 @@ import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.provider.DataChangeEvent;
@@ -71,13 +72,39 @@ import com.vaadin.flow.shared.Registration;
 /**
  * Radio Button Group allows the user to select exactly one value from a list of
  * related but mutually exclusive options.
+ * <h2>Validation</h2>
+ * <p>
+ * Radio Button Group comes with a built-in validation mechanism that verifies
+ * that a radio button is selected when
+ * {@link #setRequiredIndicatorVisible(boolean) required} is enabled. Validation
+ * is triggered whenever the user selects a radio button or the value is updated
+ * programmatically. In practice, however, the required error can only occur if
+ * the value is cleared programmatically. This is because radio buttons, by
+ * design, don't allow users to clear a selection through UI interaction. If the
+ * required error occurs, the component is marked as invalid and an error
+ * message is displayed below the group.
+ * <p>
+ * The required error message can be configured using either
+ * {@link RadioButtonGroupI18n#setRequiredErrorMessage(String)} or
+ * {@link #setErrorMessage(String)}.
+ * <p>
+ * For more advanced validation that requires custom rules, you can use
+ * {@link Binder}. Please note that Binder provides its own API for the required
+ * validation, see {@link Binder.BindingBuilder#asRequired(String)
+ * asRequired()}.
+ * <p>
+ * However, if Binder doesn't fit your needs and you want to implement fully
+ * custom validation logic, you can disable the built-in validation by setting
+ * {@link #setManualValidation(boolean)} to true. This will allow you to control
+ * the invalid state and the error message manually using
+ * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/radio-group", version = "24.5.0-beta1")
+@NpmPackage(value = "@vaadin/radio-group", version = "24.5.0-rc1")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
@@ -509,28 +536,52 @@ public class RadioButtonGroup<T>
     }
 
     /**
-     * Specifies that the user must select in a value.
+     * Sets whether the user is required to select a radio button. When
+     * required, an indicator appears next to the label and the field
+     * invalidates if the selection is cleared programmatically.
      * <p>
-     * NOTE: The required indicator will not be visible, if there is no
-     * {@code label} property set for the RadioButtonGroup.
+     * NOTE: The required indicator is only visible when the field has a label,
+     * see {@link #setLabel(String)}.
      *
      * @param required
-     *            the boolean value to set
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
+     * @see RadioButtonGroupI18n#setRequiredErrorMessage(String)
      */
-    public void setRequired(boolean required) {
-        setRequiredIndicatorVisible(required);
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
     }
 
     /**
-     * Specifies that the user must select a value
-     * <p>
-     * This property is not synchronized automatically from the client side, so
-     * the returned value may not be the same as in client side.
+     * Gets whether the user is required to select a radio button.
      *
-     * @return the {@code required} property from the webcomponent
+     * @return {@code true} if the field is required, {@code false} otherwise
+     * @see #setRequiredIndicatorVisible(boolean)
+     */
+    @Override
+    public boolean isRequiredIndicatorVisible() {
+        return super.isRequiredIndicatorVisible();
+    }
+
+    /**
+     * Alias for {@link #isRequiredIndicatorVisible()}
+     *
+     * @return {@code true} if the field is required, {@code false} otherwise
      */
     public boolean isRequired() {
         return isRequiredIndicatorVisible();
+    }
+
+    /**
+     * Alias for {@link #setRequiredIndicatorVisible(boolean)}.
+     *
+     * @param required
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
+     */
+    public void setRequired(boolean required) {
+        setRequiredIndicatorVisible(required);
     }
 
     /**

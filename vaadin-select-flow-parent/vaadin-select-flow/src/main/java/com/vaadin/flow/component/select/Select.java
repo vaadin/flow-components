@@ -54,6 +54,7 @@ import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
@@ -80,15 +81,40 @@ import com.vaadin.flow.shared.Registration;
  * Select allows users to choose a single value from a list of options presented
  * in an overlay. The dropdown can be opened with a click, up/down arrow keys,
  * or by typing the initial character for one of the options.
+ * <h2>Validation</h2>
+ * <p>
+ * Select comes with a built-in validation mechanism that verifies that the
+ * field is not empty when {@link #setRequiredIndicatorVisible(boolean)
+ * required} is enabled.
+ * <p>
+ * Validation is triggered whenever the user initiates a value change, for
+ * example by selecting an item from the dropdown. Programmatic value changes
+ * trigger validation as well. If validation fails, the component is marked as
+ * invalid and an error message is displayed below the input.
+ * <p>
+ * The required error message can be configured using either
+ * {@link SelectI18n#setRequiredErrorMessage(String)} or
+ * {@link #setErrorMessage(String)}.
+ * <p>
+ * For more advanced validation that requires custom rules, you can use
+ * {@link Binder}. Please note that Binder provides its own API for the required
+ * validation, see {@link Binder.BindingBuilder#asRequired(String)
+ * asRequired()}.
+ * <p>
+ * However, if Binder doesn't fit your needs and you want to implement fully
+ * custom validation logic, you can disable the built-in validation by setting
+ * {@link #setManualValidation(boolean)} to true. This will allow you to control
+ * the invalid state and the error message manually using
+ * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @param <T>
  *            the type of the items for the select
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-rc1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/select", version = "24.5.0-beta1")
+@NpmPackage(value = "@vaadin/select", version = "24.5.0-rc1")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 @JsModule("./selectConnector.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
@@ -268,7 +294,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-select-list-box")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-rc1")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox extends Component
             implements HasItemComponents<T> {
@@ -656,27 +682,31 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     }
 
     /**
-     * {@inheritDoc}
+     * Sets whether the user is required to provide a value. When required, an
+     * indicator appears next to the label and the field invalidates if the
+     * value is cleared.
+     * <p>
+     * NOTE: The required indicator is only visible when the field has a label,
+     * see {@link #setLabel(String)}.
      *
-     * <em>NOTE:</em> The required indicator will not be visible, if the
-     * {@link #setLabel(String)} property is not set for the select.
+     * @param required
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      */
     @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        // this would be the same as setRequired(boolean) but we don't expose
-        // both
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
     }
 
     /**
-     * {@inheritDoc}
+     * Gets whether the user is required to provide a value.
      *
-     * <em>NOTE:</em> The required indicator will not be visible, if the
-     * {@link #setLabel(String)} property is not set for the select.
+     * @return {@code true} if the field is required, {@code false} otherwise
+     * @see #setRequiredIndicatorVisible(boolean)
      */
     @Override
     public boolean isRequiredIndicatorVisible() {
-        return getElement().getProperty("required", false);
+        return super.isRequiredIndicatorVisible();
     }
 
     /**
