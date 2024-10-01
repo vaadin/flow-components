@@ -280,7 +280,7 @@ public class FormulaFormatter implements Serializable {
         DecimalFormat instance = (DecimalFormat) DecimalFormat
                 .getInstance(locale);
         instance.setGroupingUsed(false);
-        instance.setMaximumFractionDigits(15);
+        instance.setMaximumFractionDigits(16);
         return instance;
     }
 

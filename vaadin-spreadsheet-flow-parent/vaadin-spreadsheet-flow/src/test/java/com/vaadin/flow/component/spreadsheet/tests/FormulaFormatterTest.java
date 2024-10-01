@@ -123,13 +123,13 @@ public class FormulaFormatterTest {
         Locale locale = new Locale("it", "IT");
         FormulaFormatter manager = new FormulaFormatter();
 
-        assertEquals("1,123456789012346", manager.reFormatFormulaValue(
+        assertEquals("1,1234567890123457", manager.reFormatFormulaValue(
                 manager.unFormatFormulaValue("1,12345678901234567890", locale),
                 locale));
         assertEquals("1,23456789012345E9", manager.reFormatFormulaValue(
                 manager.unFormatFormulaValue("1234567890,12345", locale),
                 locale));
-        assertEquals("1,234567890123457E9",
+        assertEquals("1,2345678901234567E9",
                 manager.reFormatFormulaValue(
                         manager.unFormatFormulaValue(
                                 "1234567890,12345678901234567890", locale),
@@ -137,14 +137,14 @@ public class FormulaFormatterTest {
         assertEquals("1000000000000000", manager.reFormatFormulaValue(
                 manager.unFormatFormulaValue("1000000000000000", locale),
                 locale));
-        assertEquals("1,234567890123457E19", manager.reFormatFormulaValue(
+        assertEquals("1,2345678901234567E19", manager.reFormatFormulaValue(
                 manager.unFormatFormulaValue("12345678901234567890", locale),
                 locale));
-        assertEquals("1,234567890123457E39",
+        assertEquals("1,2345678901234567E39",
                 manager.reFormatFormulaValue(manager.unFormatFormulaValue(
                         "1234567890123456789012345678901234567890", locale),
                         locale));
-        assertEquals("1,234567890123457E19",
+        assertEquals("1,2345678901234567E19",
                 manager.reFormatFormulaValue(manager.unFormatFormulaValue(
                         "12345678901234567890,12345678901234567890", locale),
                         locale));
