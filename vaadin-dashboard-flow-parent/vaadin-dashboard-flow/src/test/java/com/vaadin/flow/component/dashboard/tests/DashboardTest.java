@@ -750,40 +750,41 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void setGap_valueIsCorrectlySet() {
-        String propertyName = "--vaadin-dashboard-gap";
+    public void setSpacing_valueIsCorrectlySet() {
+        String propertyName = "--vaadin-dashboard-spacing";
         String valueToSet = "10px";
         Assert.assertNull(dashboard.getStyle().get(propertyName));
-        dashboard.setGap(valueToSet);
+        dashboard.setSpacing(valueToSet);
         Assert.assertEquals(valueToSet, dashboard.getStyle().get(propertyName));
-        dashboard.setGap(null);
+        dashboard.setSpacing(null);
         Assert.assertNull(dashboard.getStyle().get(propertyName));
     }
 
     @Test
-    public void setGapNull_propertyIsRemoved() {
-        dashboard.setGap("10px");
-        dashboard.setGap(null);
-        Assert.assertNull(dashboard.getStyle().get("--vaadin-dashboard-gap"));
+    public void setSpacingNull_propertyIsRemoved() {
+        dashboard.setSpacing("10px");
+        dashboard.setSpacing(null);
+        Assert.assertNull(
+                dashboard.getStyle().get("--vaadin-dashboard-spacing"));
     }
 
     @Test
-    public void defaultGapValueIsCorrectlyRetrieved() {
-        Assert.assertNull(dashboard.getGap());
+    public void defaultSpacingValueIsCorrectlyRetrieved() {
+        Assert.assertNull(dashboard.getSpacing());
     }
 
     @Test
-    public void setGap_valueIsCorrectlyRetrieved() {
+    public void setSpacing_valueIsCorrectlyRetrieved() {
         String valueToSet = "10px";
-        dashboard.setGap(valueToSet);
-        Assert.assertEquals(valueToSet, dashboard.getGap());
+        dashboard.setSpacing(valueToSet);
+        Assert.assertEquals(valueToSet, dashboard.getSpacing());
     }
 
     @Test
-    public void setGapNull_valueIsCorrectlyRetrieved() {
-        dashboard.setGap("10px");
-        dashboard.setGap(null);
-        Assert.assertNull(dashboard.getGap());
+    public void setSpacingNull_valueIsCorrectlyRetrieved() {
+        dashboard.setSpacing("10px");
+        dashboard.setSpacing(null);
+        Assert.assertNull(dashboard.getSpacing());
     }
 
     @Test

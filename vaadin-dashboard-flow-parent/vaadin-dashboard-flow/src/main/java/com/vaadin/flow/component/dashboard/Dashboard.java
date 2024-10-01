@@ -272,23 +272,26 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     }
 
     /**
-     * Returns the gap between the cells of the dashboard.
+     * Returns the spacing of the dashboard. This value adjusts the spacing
+     * between elements within the component and the space around its outer
+     * edges.
      *
-     * @return the gap between the cells of the dashboard
+     * @return the spacing of the dashboard
      */
-    public String getGap() {
-        return getStyle().get("--vaadin-dashboard-gap");
+    public String getSpacing() {
+        return getStyle().get("--vaadin-dashboard-spacing");
     }
 
     /**
-     * Sets the gap between the cells of the dashboard.
+     * Sets the spacing of the dashboard. This value adjusts the spacing between
+     * elements within the component and the space around its outer edges.
      *
-     * @param gap
-     *            the new gap. Pass in {@code null} to set the gap back to the
-     *            default value.
+     * @param spacing
+     *            the new spacing. Pass in {@code null} to set the spacing back
+     *            to the default value.
      */
-    public void setGap(String gap) {
-        getStyle().set("--vaadin-dashboard-gap", gap);
+    public void setSpacing(String spacing) {
+        getStyle().set("--vaadin-dashboard-spacing", spacing);
     }
 
     /**
