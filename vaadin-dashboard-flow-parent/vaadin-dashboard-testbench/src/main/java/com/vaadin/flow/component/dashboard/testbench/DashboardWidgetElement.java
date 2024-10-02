@@ -67,7 +67,7 @@ public class DashboardWidgetElement extends TestBenchElement {
      */
     public TestBenchElement getHeader() {
         Object header = executeScript(
-                "return Array.from(arguments[0].children).filter(child => child.slot === 'header')[0]",
+                "return Array.from(arguments[0].children).filter(child => child.slot === 'header-content')[0]",
                 this);
         return header == null ? null : (TestBenchElement) header;
     }
