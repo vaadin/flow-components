@@ -391,8 +391,6 @@ public class DateTimePicker
 
         getElement().addEventListener("unparsable-change",
                 event -> validate(true));
-        getElement().addEventListener("incomplete-change",
-                event -> validate(true));
 
         // Add listeners to invalidate a required DateTimePicker when:
         // 1. It's initially empty
