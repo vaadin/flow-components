@@ -182,6 +182,7 @@ public class DashboardIT extends AbstractComponentIT {
     }
 
     private static TestBenchElement getRemoveButton(TestBenchElement element) {
-        return element.$("button").withId("remove-button").first();
+        return element.$("vaadin-dashboard-button").withId("remove-button")
+                .first();
     }
 }
