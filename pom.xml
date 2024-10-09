@@ -533,7 +533,7 @@
                 <configuration>
                     <java>
                         <eclipse>
-                            <file>https://raw.githubusercontent.com/vaadin/flow/main/eclipse/VaadinJavaConventions.xml</file>
+                            <file>${maven.multiModuleProjectDirectory}/eclipse/VaadinJavaConventions.xml</file>
                         </eclipse>
                         <excludes>
                             <!-- Do not modify GWT sources / license headers -->
