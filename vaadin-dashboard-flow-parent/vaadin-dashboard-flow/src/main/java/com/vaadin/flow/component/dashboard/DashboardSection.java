@@ -29,7 +29,7 @@ import com.vaadin.flow.dom.Element;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard-section.js")
-// @NpmPackage(value = "@vaadin/dashboard", version = "24.6.0-alpha0")
+@NpmPackage(value = "@vaadin/dashboard", version = "24.6.0-alpha2")
 public class DashboardSection extends Component implements HasWidgets {
 
     private final List<DashboardWidget> widgets = new ArrayList<>();
