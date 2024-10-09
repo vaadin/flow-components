@@ -22,6 +22,10 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  */
 public enum TabsVariant implements ThemeVariant {
     //@formatter:off
+    /**
+     * @deprecated Use {@code TabVariant.LUMO_ICON_ON_TOP} on individual {@code Tab} instances instead.
+     */
+    @Deprecated
     LUMO_ICON_ON_TOP("icon-on-top"),
     LUMO_CENTERED("centered"),
     LUMO_SMALL("small"),
