@@ -191,12 +191,12 @@ public class FormulaFormatter implements Serializable {
             Locale locale) {
         List<FormulaToken> unlocalizedTokens = new LinkedList<FormulaToken>();
 
+        var decimalFormat = getDecimalFormat(locale);
         for (FormulaToken token : tokens) {
             if (token instanceof NumberToken) {
                 try {
-                    unlocalizedTokens
-                            .add(new NumberToken(getDecimalFormat(locale)
-                                    .parse(token.toString()).toString()));
+                    unlocalizedTokens.add(new NumberToken(
+                            decimalFormat.parse(token.toString()).toString()));
                 } catch (ParseException e) {
                     LOGGER.info("ERROR parsing token: " + token, e);
                     unlocalizedTokens.add(token);
@@ -280,6 +280,7 @@ public class FormulaFormatter implements Serializable {
         DecimalFormat instance = (DecimalFormat) DecimalFormat
                 .getInstance(locale);
         instance.setGroupingUsed(false);
+        instance.setMaximumFractionDigits(16);
         return instance;
     }
 
