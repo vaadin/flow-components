@@ -14,6 +14,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.Dimension;
 
 import com.vaadin.flow.component.dashboard.testbench.DashboardElement;
 import com.vaadin.flow.component.dashboard.testbench.DashboardSectionElement;
@@ -33,6 +34,7 @@ public class DashboardIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
+        getDriver().manage().window().setSize(new Dimension(1920, 1080));
         dashboardElement = $(DashboardElement.class).waitForFirst();
     }
 
