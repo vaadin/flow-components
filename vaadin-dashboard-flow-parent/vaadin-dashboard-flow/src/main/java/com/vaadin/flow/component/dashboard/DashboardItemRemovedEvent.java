@@ -15,7 +15,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 
 /**
- * Widget or section removed event of {@link Dashboard}.
+ * Fired when an item was removed.
  *
  * @author Vaadin Ltd.
  * @see Dashboard#addItemRemovedListener(ComponentEventListener)

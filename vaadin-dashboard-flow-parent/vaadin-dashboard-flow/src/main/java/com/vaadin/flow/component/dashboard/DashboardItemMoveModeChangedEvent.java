@@ -15,7 +15,8 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 
 /**
- * Widget or section move mode state changed event of {@link Dashboard}.
+ * Fired when an item enters or exits move mode. Move mode enables using move
+ * buttons or keyboard to move items.
  *
  * @author Vaadin Ltd.
  * @see Dashboard#addItemMoveModeChangedListener(ComponentEventListener)

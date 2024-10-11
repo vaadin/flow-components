@@ -16,7 +16,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 
 /**
- * Widget or section moved event of {@link Dashboard}.
+ * Fired when an item was moved.
  *
  * @author Vaadin Ltd.
  * @see Dashboard#addItemMovedListener(ComponentEventListener)

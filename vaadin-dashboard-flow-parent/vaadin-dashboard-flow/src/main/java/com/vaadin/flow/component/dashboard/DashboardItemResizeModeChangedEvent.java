@@ -15,7 +15,8 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 
 /**
- * Widget resize mode state changed event of {@link Dashboard}.
+ * Fired when an item enters or exits resize mode. Resize mode enables using
+ * resize buttons or keyboard to resize items.
  *
  * @author Vaadin Ltd.
  * @see Dashboard#addItemResizeModeChangedListener(ComponentEventListener)

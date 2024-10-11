@@ -15,7 +15,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 
 /**
- * Widget resized event of {@link Dashboard}.
+ * Fired when a widget was resized.
  *
  * @author Vaadin Ltd.
  * @see Dashboard#addItemResizedListener(ComponentEventListener)

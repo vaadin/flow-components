@@ -15,7 +15,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 
 /**
- * Widget or section selected state changed event of {@link Dashboard}.
+ * Fired when an item was selected.
  *
  * @author Vaadin Ltd.
  * @see Dashboard#addItemSelectedChangedListener(ComponentEventListener)
