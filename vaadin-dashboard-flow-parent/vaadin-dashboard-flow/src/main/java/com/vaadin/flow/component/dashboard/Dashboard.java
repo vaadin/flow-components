@@ -157,7 +157,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
             }
         }
         if (!toRemove.isEmpty()) {
-            toRemove.forEach(this::doRemoveWidget);
+            toRemove.forEach(this::doRemoveItem);
             updateClient();
         }
     }
@@ -173,7 +173,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
      */
     public void remove(DashboardSection section) {
         Objects.requireNonNull(section, "Section to remove cannot be null.");
-        doRemoveSection(section);
+        doRemoveItem(section);
         updateClient();
     }
 
@@ -556,18 +556,12 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     }
 
     private void doRemoveAll() {
-        new ArrayList<>(childrenComponents).forEach(child -> {
-            if (child instanceof DashboardSection section) {
-                doRemoveSection(section);
-            } else {
-                doRemoveWidget((DashboardWidget) child);
-            }
-        });
+        new ArrayList<>(childrenComponents).forEach(this::doRemoveItem);
     }
 
-    private void doRemoveWidget(DashboardWidget widget) {
-        getElement().removeChild(widget.getElement());
-        childrenComponents.remove(widget);
+    private void doRemoveItem(Component item) {
+        getElement().removeChild(item.getElement());
+        childrenComponents.remove(item);
     }
 
     private void doAddWidgetAtIndex(int index, DashboardWidget widget) {
@@ -583,11 +577,6 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     private void doAddSection(DashboardSection section) {
         getElement().appendChild(section.getElement());
         childrenComponents.add(section);
-    }
-
-    private void doRemoveSection(DashboardSection section) {
-        getElement().removeChild(section.getElement());
-        childrenComponents.remove(section);
     }
 
     private DashboardChildDetachHandler getChildDetachHandler() {
