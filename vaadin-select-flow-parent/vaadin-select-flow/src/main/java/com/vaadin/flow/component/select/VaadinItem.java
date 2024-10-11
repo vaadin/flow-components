@@ -49,6 +49,10 @@ class VaadinItem<T> extends Component implements
         return item;
     }
 
+    void setItem(T item) {
+        this.item = item;
+    }
+
     @Override
     public void onEnabledStateChanged(boolean enabled) {
         // Not setting the disabled attribute because vaadin-item's that are
