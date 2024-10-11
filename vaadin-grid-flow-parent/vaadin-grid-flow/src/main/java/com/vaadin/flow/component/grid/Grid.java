@@ -1448,8 +1448,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private SerializableFunction<T, String> classNameGenerator = item -> null;
     private SerializableFunction<T, String> partNameGenerator = item -> null;
-    private SerializablePredicate<T> dropFilter = item -> true;
-    private SerializablePredicate<T> dragFilter = item -> true;
+    private SerializablePredicate<T> defaultDropFilter = item -> true;
+    private SerializablePredicate<T> defaultDragFilter = item -> true;
+    private SerializablePredicate<T> dropFilter = defaultDropFilter;
+    private SerializablePredicate<T> dragFilter = defaultDragFilter;
     private Map<String, SerializableFunction<T, String>> dragDataGenerators = new HashMap<>();
 
     private Registration dataProviderChangeRegistration;
@@ -4566,7 +4568,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void setDropMode(GridDropMode dropMode) {
         getElement().setProperty("dropMode",
                 dropMode == null ? null : dropMode.getClientName());
-        getDataCommunicator().reset();
+        if (dragFilter != defaultDragFilter || dropFilter != defaultDropFilter) {
+            getDataCommunicator().reset();
+        }
     }
 
     /**
