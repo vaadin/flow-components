@@ -4601,7 +4601,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setRowsDraggable(boolean rowsDraggable) {
         getElement().setProperty("rowsDraggable", rowsDraggable);
-        getDataCommunicator().reset();
+
+        // Workaround to prevent scroll position reset when setting dropMode
+        // dynamically on drag start in tree grids. This can be removed when
+        // Flow will provide a way to request refresh for only items that
+        // are in the viewport.
+        if (dragFilter != defaultDragFilter
+                || dropFilter != defaultDropFilter) {
+            getDataCommunicator().reset();
+        }
     }
 
     /**
