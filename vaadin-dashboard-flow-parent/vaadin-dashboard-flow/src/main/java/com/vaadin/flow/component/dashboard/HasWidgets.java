@@ -11,6 +11,15 @@ package com.vaadin.flow.component.dashboard;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * HasWidgets is an interface for components that can contain and manage
+ * multiple {@link DashboardWidget} instances. It defines methods for adding,
+ * removing, and accessing widgets within a component.
+ *
+ * @see DashboardWidget
+ *
+ * @author Vaadin Ltd
+ */
 public interface HasWidgets extends Serializable {
 
     /**

@@ -15,6 +15,12 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
 
 /**
+ * DashboardWidget represents a customizable widget that can be placed within a
+ * {@link Dashboard}. It supports layout options such as colspan and rowspan,
+ * and allows setting content and a header component.
+ *
+ * @see Dashboard
+ *
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dashboard-widget")

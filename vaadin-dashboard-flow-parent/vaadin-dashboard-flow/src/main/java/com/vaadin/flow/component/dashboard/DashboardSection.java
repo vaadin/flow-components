@@ -23,6 +23,12 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 
 /**
+ * DashboardSection is a container for organizing multiple
+ * {@link DashboardWidget} instances within a {@link Dashboard}.
+ *
+ * @see Dashboard
+ * @see DashboardWidget
+ *
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dashboard-section")

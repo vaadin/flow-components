@@ -38,6 +38,19 @@ import elemental.json.JsonObject;
 import elemental.json.JsonType;
 
 /**
+ * Dashboard is a responsive layout component that allows users to organize
+ * widgets either directly within the dashboard or optionally group them into
+ * sections. The component supports customizable layout options like maximum
+ * column count and spacing.
+ * <p>
+ * Internationalization (i18n) is supported through {@link DashboardI18n},
+ * allowing customization of accessible names for the dashboard controls. The
+ * i18n object can be set using {@link #setI18n(DashboardI18n)}.
+ *
+ * @see DashboardWidget
+ * @see DashboardSection
+ * @see DashboardI18n
+ *
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dashboard")
