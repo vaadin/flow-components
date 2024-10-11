@@ -1053,7 +1053,10 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
             getItems()
                     .filter(vaadinItem -> updatedItemId.equals(
                             identifierProvider.apply(vaadinItem.getItem())))
-                    .findAny().ifPresent(this::updateItem);
+                    .findAny().ifPresent(item -> {
+                        item.setItem(updatedItem);
+                        updateItem(item);
+                    });
         } else {
             reset();
         }
