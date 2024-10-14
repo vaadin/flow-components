@@ -901,6 +901,7 @@ import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js"
           if ((typeof mode === 'string' || mode instanceof String) && validSelectionModes.indexOf(mode) >= 0) {
             selectionMode = mode;
             selectedKeys = {};
+            grid.selectedItems = [];
             grid.$connector.updateMultiSelectable();
           } else {
             throw 'Attempted to set an invalid selection mode';
