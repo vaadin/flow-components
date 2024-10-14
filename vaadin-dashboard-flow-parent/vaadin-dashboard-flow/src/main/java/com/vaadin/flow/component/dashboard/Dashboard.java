@@ -109,6 +109,12 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         updateClient();
     }
 
+    /**
+     * Returns a flattened list of all the widgets in this dashboard. This
+     * includes the nested widgets in sections.
+     *
+     * @return The flattened list of all widgets in this dashboard
+     */
     @Override
     public List<DashboardWidget> getWidgets() {
         List<DashboardWidget> widgets = new ArrayList<>();
@@ -134,6 +140,26 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         updateClient();
     }
 
+    /**
+     * Adds the given widget as child of this dashboard at the specific index.
+     * <p>
+     * The index specifies the intended position within the root item list
+     * returned by {@code getChildren()}. It should not be used with
+     * {@code getWidgets()} since the position in the flattened widget list
+     * returned by {@code getWidgets()} might not match the intended position.
+     * <p>
+     * In case the specified widget has already been added to another parent, it
+     * will be removed from there and added to this one.
+     *
+     * @param index
+     *            the index, where the widget will be added. The index must be
+     *            non-negative and may not exceed the children count
+     * @param widget
+     *            the widget to add, not {@code null}
+     *
+     * @see #getWidgets()
+     * @see #getChildren()
+     */
     @Override
     public void addWidgetAtIndex(int index, DashboardWidget widget) {
         Objects.requireNonNull(widget, "Widget to add cannot be null.");
