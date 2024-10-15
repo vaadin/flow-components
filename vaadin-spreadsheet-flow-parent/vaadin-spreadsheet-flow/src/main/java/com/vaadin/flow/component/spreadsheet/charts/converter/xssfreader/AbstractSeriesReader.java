@@ -293,7 +293,7 @@ public abstract class AbstractSeriesReader<CT_SER_TYPE extends XmlObject, SERIES
             return;
         }
 
-        for (CellReference changedCell : event.getChangedCells()) {
+        for (CellReference changedCell : event.getChangedCells().getCells()) {
             // getChangedCell erroneously provides relative cell refs
             // if this gets fixed, this conversion method should be
             // removed
