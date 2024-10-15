@@ -24,6 +24,7 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
@@ -40,6 +41,17 @@ import elemental.json.JsonValue;
  * {@link com.vaadin.flow.component.HasEnabled#setEnabled(boolean)} method.
  * Setting error {@link #setError(boolean)} true makes component automatically
  * enabled for the next login attempt.
+ * <p>
+ * </p>
+ * Server side login listener do not work in combination with HTML form
+ * submission configured by setting the {@code action} attribute. The reason is
+ * that form submission, depending on the authentication process result, will
+ * cause a redirection to a different page or to current login view. In both
+ * cases a new Flow UI will be created and the event will potentially be
+ * forwarded to a dismissed UI. In addition, if the HTTP session ID is changed
+ * as a consequence of the authentication process, the server may respond to the
+ * login event with a session expiration error, cause a client resynchronization
+ * that can in turn cancel a potential redirect issued by the form submission.
  *
  * @author Vaadin Ltd
  */
@@ -54,19 +66,15 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
 
     private static final PropertyChangeListener NO_OP = event -> {
     };
+    private Registration registration;
 
     /**
      * Initializes a new AbstractLogin with a default localization.
      */
     public AbstractLogin() {
         this(LoginI18n.createDefault());
-        getElement().addPropertyChangeListener(PROP_DISABLED, LOGIN_EVENT,
-                NO_OP);
         getElement().setProperty("_preventAutoEnable", true);
-        addLoginListener(e -> {
-            setEnabled(false);
-            setError(false);
-        });
+        registerDefaultLoginListener();
     }
 
     /**
@@ -79,15 +87,47 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
         setI18n(i18n);
     }
 
+    private void registerDefaultLoginListener() {
+        DomListenerRegistration disabledPropertyRegistration = getElement()
+                .addPropertyChangeListener(PROP_DISABLED, LOGIN_EVENT, NO_OP);
+        Registration loginListenerRegistration = addLoginListener(e -> {
+            setEnabled(false);
+            setError(false);
+        });
+        this.registration = Registration.combine(disabledPropertyRegistration,
+                loginListenerRegistration);
+    }
+
     /**
      * Sets the path where to send the form-data when a form is submitted. Once
      * action is defined a {@link AbstractLogin.LoginEvent} is not fired
      * anymore.
+     * <p>
+     * </p>
+     * The {@code action} attribute cannot be set if login listeners have been
+     * previously added. See class Javadoc for more information.
      *
+     * @throws IllegalStateException
+     *             if any login listeners have been previously added.
      * @see #getAction()
+     * @see #addLoginListener(ComponentEventListener)
      */
     public void setAction(String action) {
-        getElement().setProperty(PROP_ACTION, action);
+        if (action == null) {
+            getElement().removeProperty(PROP_ACTION);
+            if (registration == null) {
+                registerDefaultLoginListener();
+            }
+        } else if (getListeners(LoginEvent.class).size() > 1) {
+            throw new IllegalStateException(
+                    "Action attribute cannot be set along with login listeners");
+        } else {
+            getElement().setProperty(PROP_ACTION, action);
+            if (registration != null) {
+                registration.remove();
+                registration = null;
+            }
+        }
     }
 
     /**
@@ -105,11 +145,10 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      *
      * Calling this method with {@code true} will also enable the component.
      *
-     * @see #isError()
-     *
      * @param error
      *            {@code true} to show the error message and enable component
      *            for next login attempt, {@code false} to hide an error
+     * @see #isError()
      */
     public void setError(boolean error) {
         if (error) {
@@ -132,10 +171,9 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * Sets whether to show or hide the forgot password button. The button is
      * visible by default
      *
-     * @see #isForgotPasswordButtonVisible()
-     *
      * @param forgotPasswordButtonVisible
      *            whether to display or hide the button
+     * @see #isForgotPasswordButtonVisible()
      */
     public void setForgotPasswordButtonVisible(
             boolean forgotPasswordButtonVisible) {
@@ -207,10 +245,23 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     }
 
     /**
-     * Adds `login` event listener
+     * Adds `login` event listener.
+     * <p>
+     * </p>
+     * Listeners cannot be added if {@code action} attribute has been previously
+     * set. See class Javadoc for more information.
+     *
+     * @throws IllegalStateException
+     *             if {@literal action} attribute has previously been set to a
+     *             not {@literal null} value.
+     * @see #setAction(String)
      */
     public Registration addLoginListener(
             ComponentEventListener<LoginEvent> listener) {
+        if (getElement().hasProperty(PROP_ACTION)) {
+            throw new IllegalStateException(
+                    "Login listener cannot work in combination with 'action' attribute");
+        }
         return ComponentUtil.addListener(this, LoginEvent.class, listener);
     }
 
