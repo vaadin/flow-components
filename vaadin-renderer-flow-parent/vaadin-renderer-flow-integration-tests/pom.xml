@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-renderer-flow-parent</artifactId>
-        <version>24.5-SNAPSHOT</version>
+        <version>24.6-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-renderer-flow-integration-tests</artifactId>
     <packaging>war</packaging>
@@ -134,8 +134,8 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
+                        <groupId>org.eclipse.jetty.ee10</groupId>
+                        <artifactId>jetty-ee10-maven-plugin</artifactId>
                         <configuration>
                             <scan>5</scan>
                         </configuration>

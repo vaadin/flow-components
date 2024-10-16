@@ -212,10 +212,10 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.5.0-beta1")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.5.0-beta1")
+@NpmPackage(value = "@vaadin/grid", version = "24.6.0-alpha2")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.6.0-alpha2")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -440,7 +440,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha2")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -1448,8 +1448,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private SerializableFunction<T, String> classNameGenerator = item -> null;
     private SerializableFunction<T, String> partNameGenerator = item -> null;
-    private SerializablePredicate<T> dropFilter = item -> true;
-    private SerializablePredicate<T> dragFilter = item -> true;
+    private SerializablePredicate<T> defaultDropFilter = item -> true;
+    private SerializablePredicate<T> defaultDragFilter = item -> true;
+    private SerializablePredicate<T> dropFilter = defaultDropFilter;
+    private SerializablePredicate<T> dragFilter = defaultDragFilter;
     private Map<String, SerializableFunction<T, String>> dragDataGenerators = new HashMap<>();
 
     private Registration dataProviderChangeRegistration;
@@ -4566,7 +4568,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void setDropMode(GridDropMode dropMode) {
         getElement().setProperty("dropMode",
                 dropMode == null ? null : dropMode.getClientName());
-        getDataCommunicator().reset();
+
+        // Do not reset the data communicator if no filters are applied in order
+        // to avoid unnecessary scroll position reset. This can be removed when
+        // Flow will provide a way to request refresh for only items that
+        // are in the viewport.
+        if (dragFilter != defaultDragFilter
+                || dropFilter != defaultDropFilter) {
+            getDataCommunicator().reset();
+        }
     }
 
     /**
@@ -4591,7 +4601,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setRowsDraggable(boolean rowsDraggable) {
         getElement().setProperty("rowsDraggable", rowsDraggable);
-        getDataCommunicator().reset();
+
+        // Do not reset the data communicator if no filters are applied in order
+        // to avoid unnecessary scroll position reset. This can be removed when
+        // Flow will provide a way to request refresh for only items that
+        // are in the viewport.
+        if (dragFilter != defaultDragFilter
+                || dropFilter != defaultDropFilter) {
+            getDataCommunicator().reset();
+        }
     }
 
     /**

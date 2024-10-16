@@ -25,6 +25,7 @@ import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.HasLazyDataView;
+import com.vaadin.flow.data.provider.IdentifierProvider;
 import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.shared.Registration;
@@ -71,6 +72,14 @@ public class ComboBoxLazyDataView<T> extends AbstractLazyDataView<T> {
     public void setItemCountCallback(
             CallbackDataProvider.CountCallback<T, String> callback) {
         getDataCommunicator().setCountCallback(callback);
+    }
+
+    @Override
+    public void setIdentifierProvider(
+            IdentifierProvider<T> identifierProvider) {
+        super.setIdentifierProvider(identifierProvider);
+        getDataCommunicator().getKeyMapper()
+                .setIdentifierGetter(identifierProvider);
     }
 
     /**

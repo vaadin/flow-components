@@ -56,8 +56,8 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-popover")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.5.0-beta1")
-@NpmPackage(value = "@vaadin/popover", version = "24.5.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha2")
+@NpmPackage(value = "@vaadin/popover", version = "24.6.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/popover/src/vaadin-popover.js")
 @JsModule("./vaadin-popover/popover.ts")
@@ -414,6 +414,11 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * Sets whether this popover can be closed by pressing the Esc key or not.
      * <p>
      * By default, the popover is closable with Esc.
+     * <p>
+     * NOTE: when none of the opening actions are specified by setting all of
+     * {@link #setOpenOnClick(boolean)}, {@link #setOpenOnHover(boolean)} and
+     * {@link #setOpenOnFocus(boolean)} to {@code false} this method does
+     * nothing as in this case the popover can be only closed programmatically.
      *
      * @param closeOnEsc
      *            {@code true} to enable closing this popover with the Esc key,
@@ -439,6 +444,11 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * Sets whether this popover can be closed by clicking outside of it or not.
      * <p>
      * By default, the popover is closable with an outside click.
+     * <p>
+     * NOTE: when none of the opening actions are specified by setting all of
+     * {@link #setOpenOnClick(boolean)}, {@link #setOpenOnHover(boolean)} and
+     * {@link #setOpenOnFocus(boolean)} to {@code false} this method does
+     * nothing as in this case the popover can be only closed programmatically.
      *
      * @param closeOnOutsideClick
      *            {@code true} to enable closing this popover with an outside
