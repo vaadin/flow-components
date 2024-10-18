@@ -1,7 +1,3 @@
-function tryCatchWrapper(callback) {
-  return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Context Menu');
-}
-
 function getContainer(appId, nodeId) {
   try {
     return window.Vaadin.Flow.clients[appId].getByNodeId(nodeId);
@@ -28,11 +24,11 @@ function initLazy(contextMenu, appId) {
      *
      * @param {number} nodeId
      */
-    generateItems: tryCatchWrapper((nodeId) => {
+    generateItems(nodeId) {
       const items = generateItemsTree(appId, nodeId);
 
       contextMenu.items = items;
-    })
+    }
   };
 }
 
@@ -118,23 +114,9 @@ function setTheme(component, theme) {
 }
 
 window.Vaadin.Flow.contextMenuConnector = {
-  initLazy(...args) {
-    return tryCatchWrapper(initLazy)(...args);
-  },
-
-  generateItemsTree(...args) {
-    return tryCatchWrapper(generateItemsTree)(...args);
-  },
-
-  setChecked(...args) {
-    return tryCatchWrapper(setChecked)(...args);
-  },
-
-  setKeepOpen(...args) {
-    return tryCatchWrapper(setKeepOpen)(...args);
-  },
-
-  setTheme(...args) {
-    return tryCatchWrapper(setTheme)(...args);
-  }
+  initLazy,
+  generateItemsTree,
+  setChecked,
+  setKeepOpen,
+  setTheme
 };
