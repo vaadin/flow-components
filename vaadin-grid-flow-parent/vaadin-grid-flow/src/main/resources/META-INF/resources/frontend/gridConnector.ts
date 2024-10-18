@@ -5,7 +5,8 @@ import { Grid } from '@vaadin/grid/src/vaadin-grid.js';
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 import { GridFlowSelectionColumn } from "./vaadin-grid-flow-selection-column.js";
 
-function initLazy(grid) {
+window.Vaadin.Flow.gridConnector = {};
+window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   // Check whether the connector was already initialized for the grid
   if (grid.$connector) {
     return;
@@ -1182,5 +1183,3 @@ function initLazy(grid) {
     }
   );
 };
-
-window.Vaadin.Flow.gridConnector = { initLazy };

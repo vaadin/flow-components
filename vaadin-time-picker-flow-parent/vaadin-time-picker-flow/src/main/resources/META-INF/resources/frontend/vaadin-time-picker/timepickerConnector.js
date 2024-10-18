@@ -34,7 +34,8 @@ function parseISO(text) {
   }
 };
 
-function initLazy(timepicker) {
+window.Vaadin.Flow.timepickerConnector = {};
+window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
   // Check whether the connector was already initialized for the timepicker
   if (timepicker.$connector) {
     return;
@@ -182,5 +183,3 @@ function initLazy(timepicker) {
     }
   };
 }
-
-window.Vaadin.Flow.timepickerConnector = { initLazy };
