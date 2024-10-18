@@ -3,7 +3,8 @@ import dateFnsParse from 'date-fns/parse';
 import dateFnsIsValid from 'date-fns/isValid';
 import { extractDateParts, parseDate as _parseDate } from '@vaadin/date-picker/src/vaadin-date-picker-helper.js';
 
-function initLazy(datepicker) {
+window.Vaadin.Flow.datepickerConnector = {};
+window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
   // Check whether the connector was already initialized for the datepicker
   if (datepicker.$connector) {
     return;
@@ -176,5 +177,3 @@ function initLazy(datepicker) {
 
   datepicker.addEventListener('opened-changed', () => (datepicker.$connector._lastParseStatus = undefined));
 }
-
-window.Vaadin.Flow.datepickerConnector = { initLazy };

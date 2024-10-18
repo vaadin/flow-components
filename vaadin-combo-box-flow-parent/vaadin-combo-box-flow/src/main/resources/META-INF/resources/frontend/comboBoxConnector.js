@@ -2,7 +2,8 @@ import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { timeOut } from '@polymer/polymer/lib/utils/async.js';
 import { ComboBoxPlaceholder } from '@vaadin/combo-box/src/vaadin-combo-box-placeholder.js';
 
-function initLazy() {
+window.Vaadin.Flow.comboBoxConnector = {}
+window.Vaadin.Flow.comboBoxConnector.initLazy = (comboBox) => {
   // Check whether the connector was already initialized for the ComboBox
   if (comboBox.$connector) {
     return;
@@ -274,4 +275,3 @@ function initLazy() {
 }
 
 window.Vaadin.ComboBoxPlaceholder = ComboBoxPlaceholder;
-window.Vaadin.Flow.comboBoxConnector = { initLazy };
