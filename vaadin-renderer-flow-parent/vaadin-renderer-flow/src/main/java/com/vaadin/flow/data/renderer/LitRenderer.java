@@ -229,6 +229,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         // is no longer used so the registration is cleared by the renderer
         // registration.
         registrations.add(container.addAttachListener(e -> {
+            System.out.println(UI.getCurrent());
             setElementRenderer(container, rendererName, getTemplateExpression(),
                     returnChannel, clientCallablesArray, propertyNamespace);
         }));
