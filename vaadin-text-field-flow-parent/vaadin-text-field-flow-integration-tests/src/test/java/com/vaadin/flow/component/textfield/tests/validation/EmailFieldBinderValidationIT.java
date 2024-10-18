@@ -15,19 +15,22 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.MAX_LENGTH_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.MAX_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.MIN_LENGTH_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.MIN_LENGTH_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.PATTERN_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.PATTERN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
+
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.EmailFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
-
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.PATTERN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.MIN_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.MAX_LENGTH_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.EXPECTED_VALUE_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.REQUIRED_ERROR_MESSAGE;
-import static com.vaadin.flow.component.textfield.tests.validation.EmailFieldBinderValidationPage.UNEXPECTED_VALUE_ERROR_MESSAGE;
 
 @TestPath("vaadin-email-field/validation/binder")
 public class EmailFieldBinderValidationIT
@@ -45,6 +48,7 @@ public class EmailFieldBinderValidationIT
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -75,7 +79,7 @@ public class EmailFieldBinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(MIN_LENGTH_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("aa@vaadin.com");
@@ -102,7 +106,7 @@ public class EmailFieldBinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(MAX_LENGTH_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("aa@vaadin.com");
@@ -127,7 +131,7 @@ public class EmailFieldBinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(PATTERN_ERROR_MESSAGE);
 
         testField.setValue("john@vaadin.com");
         assertValidationCount(1);
@@ -147,7 +151,7 @@ public class EmailFieldBinderValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
-        assertErrorMessage("");
+        assertErrorMessage(PATTERN_ERROR_MESSAGE);
 
         // Binder validation fails:
         testField.setValue("oliver@vaadin.com");

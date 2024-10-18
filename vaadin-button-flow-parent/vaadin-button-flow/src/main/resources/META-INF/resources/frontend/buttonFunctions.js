@@ -1,5 +1,7 @@
 function disableOnClickListener({currentTarget: button}) {
-  button.disabled = button.hasAttribute('disableOnClick');
+  if (button.hasAttribute('disableOnClick')) {
+    button.disabled = true;
+  }
 }
 
 window.Vaadin.Flow.button = {

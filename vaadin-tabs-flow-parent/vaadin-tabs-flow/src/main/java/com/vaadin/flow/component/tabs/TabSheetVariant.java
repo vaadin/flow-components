@@ -22,6 +22,10 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  */
 public enum TabSheetVariant implements ThemeVariant {
     //@formatter:off
+    /**
+     * @deprecated Use {@code TabVariant.LUMO_ICON_ON_TOP} on individual {@code Tab} instances instead.
+     */
+    @Deprecated
     LUMO_TABS_ICON_ON_TOP("icon-on-top"),
     LUMO_TABS_CENTERED("centered"),
     LUMO_TABS_SMALL("small"),
@@ -29,6 +33,7 @@ public enum TabSheetVariant implements ThemeVariant {
     LUMO_TABS_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
     LUMO_TABS_EQUAL_WIDTH_TABS( "equal-width-tabs"),
     LUMO_BORDERED("bordered"),
+    LUMO_NO_PADDING("no-padding"),
     MATERIAL_TABS_FIXED("fixed"),
     MATERIAL_BORDERED("bordered");
     //@formatter:on

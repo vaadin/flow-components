@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-flow-components</artifactId>
+        <version>24.6-SNAPSHOT</version>
+    </parent>
+    <artifactId>vaadin-dashboard-flow-parent</artifactId>
+    <packaging>pom</packaging>
+    <name>Vaadin Dashboard Parent</name>
+    <description>Vaadin Dashboard Parent</description>
+    <licenses>
+        <license>
+            <name>Vaadin Commercial License and Service Terms</name>
+            <url>https://vaadin.com/commercial-license-and-service-terms</url>
+        </license>
+    </licenses>
+    <properties>
+        <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/vaadin-commercial-license-header.txt</spotless.licence-header>
+    </properties>
+    <modules>
+        <module>vaadin-dashboard-flow</module>
+        <module>vaadin-dashboard-testbench</module>
+    </modules>
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <property>
+                    <name>!release</name>
+                </property>
+            </activation>
+            <modules>
+                <module>vaadin-dashboard-flow-integration-tests</module>
+            </modules>
+        </profile>
+    </profiles>
+    <dependencies/>
+</project>

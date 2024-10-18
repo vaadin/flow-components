@@ -22,7 +22,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.NotFoundException;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
@@ -32,18 +42,9 @@ import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.Router;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
+
 import elemental.json.JsonArray;
 import elemental.json.impl.JsonUtil;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.sidenav.SideNavItem;
-import com.vaadin.flow.dom.Element;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 public class SideNavItemTest {
 
@@ -602,6 +603,75 @@ public class SideNavItemTest {
             assertPath("foo/bar");
             assertPathAliases(Set.of("foo/baz", "foo/qux"));
         }, TestRouteWithAliases.class);
+    }
+
+    @Test
+    public void setTarget_hasTarget() {
+        sideNavItem.setTarget("_blank");
+        Assert.assertEquals("_blank",
+                sideNavItem.getElement().getProperty("target"));
+        Assert.assertEquals("_blank", sideNavItem.getTarget());
+    }
+
+    @Test
+    public void targetDefined_setToNull_noTarget() {
+        sideNavItem.setTarget("_blank");
+        sideNavItem.setTarget(null);
+        Assert.assertFalse(sideNavItem.getElement().hasProperty("target"));
+        Assert.assertNull(sideNavItem.getTarget());
+    }
+
+    @Test
+    public void isMatchNested_falseByDefault() {
+        Assert.assertFalse(sideNavItem.isMatchNested());
+    }
+
+    @Test
+    public void setMatchNested_isMatchNested() {
+        sideNavItem.setMatchNested(true);
+        Assert.assertTrue(
+                sideNavItem.getElement().getProperty("matchNested", false));
+        Assert.assertTrue(sideNavItem.isMatchNested());
+
+        sideNavItem.setMatchNested(false);
+        Assert.assertFalse(
+                sideNavItem.getElement().getProperty("matchNested", false));
+        Assert.assertFalse(sideNavItem.isMatchNested());
+    }
+
+    @Test
+    public void isRouterIgnore_falseByDefault() {
+        Assert.assertFalse(sideNavItem.isRouterIgnore());
+    }
+
+    @Test
+    public void setRouterIgnore_hasRouterIgnore() {
+        sideNavItem.setRouterIgnore(true);
+        Assert.assertTrue(
+                sideNavItem.getElement().getProperty("routerIgnore", false));
+        Assert.assertTrue(sideNavItem.isRouterIgnore());
+
+        sideNavItem.setRouterIgnore(false);
+        Assert.assertFalse(
+                sideNavItem.getElement().getProperty("routerIgnore", false));
+        Assert.assertFalse(sideNavItem.isRouterIgnore());
+    }
+
+    @Test
+    public void setOpenInNewBrowserTab_targetBlankDefinedOnProperty() {
+        // call setOpenInNewTab and check that getTarget returns "_blank"
+        sideNavItem.setOpenInNewBrowserTab(true);
+        Assert.assertEquals("_blank",
+                sideNavItem.getElement().getProperty("target"));
+        Assert.assertTrue(sideNavItem.isOpenInNewBrowserTab());
+    }
+
+    @Test
+    public void openInNewBrowserTabDefined_setOpenInNewBrowserTabToFalse() {
+        sideNavItem.setOpenInNewBrowserTab(true);
+        sideNavItem.setOpenInNewBrowserTab(false);
+        Assert.assertFalse(sideNavItem.getElement().hasProperty("target"));
+        Assert.assertFalse(sideNavItem.isOpenInNewBrowserTab());
     }
 
     private boolean sideNavItemHasLabelElement() {

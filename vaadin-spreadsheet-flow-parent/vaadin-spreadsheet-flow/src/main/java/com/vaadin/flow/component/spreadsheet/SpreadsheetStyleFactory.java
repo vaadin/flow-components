@@ -3,7 +3,7 @@
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet;
@@ -830,7 +830,8 @@ public class SpreadsheetStyleFactory implements Serializable {
                 sb.append("font-style:italic;");
             }
             defaultFontHeightInPoints = defaultFont.getFontHeightInPoints();
-            sb.append("font-size:");
+            sb.append("font-size: var(--default-font-size);");
+            sb.append("--default-font-size:");
             sb.append(defaultFontHeightInPoints);
             sb.append("pt;");
             if (defaultFont.getUnderline() != Font.U_NONE) {
@@ -881,7 +882,8 @@ public class SpreadsheetStyleFactory implements Serializable {
 
     private String styleFontFamily(Font font) {
         StringBuilder sb = new StringBuilder();
-        sb.append("font-family:");
+        sb.append("font-family: var(--default-font-family);");
+        sb.append("--default-font-family:");
         String fontName = font.getFontName();
         if (fontName.contains(" ")) {
             sb.append("\"");

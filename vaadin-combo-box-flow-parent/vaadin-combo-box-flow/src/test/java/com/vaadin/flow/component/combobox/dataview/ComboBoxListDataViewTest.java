@@ -13,14 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.combobox.dataview;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Stream;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.provider.AbstractListDataViewListenerTest;
@@ -28,9 +30,6 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.HasListDataView;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
 
@@ -153,53 +152,4 @@ public class ComboBoxListDataViewTest extends AbstractListDataViewListenerTest {
         return new ComboBox<>();
     }
 
-    private static class Item {
-        private long id;
-        private String value;
-
-        public Item(long id) {
-            this.id = id;
-        }
-
-        public Item(long id, String value) {
-            this.id = id;
-            this.value = value;
-        }
-
-        public long getId() {
-            return id;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setId(long id) {
-            this.id = id;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o)
-                return true;
-            if (o == null || getClass() != o.getClass())
-                return false;
-            Item item = (Item) o;
-            return id == item.id && Objects.equals(value, item.value);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(id, value);
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-    }
 }

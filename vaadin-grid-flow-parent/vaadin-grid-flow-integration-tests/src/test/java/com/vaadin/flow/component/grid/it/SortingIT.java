@@ -21,12 +21,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-import org.openqa.selenium.WebElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/sorting")
 public class SortingIT extends AbstractComponentIT {
@@ -102,6 +102,24 @@ public class SortingIT extends AbstractComponentIT {
         assertAscendingSorter("Age");
         findElement(By.id("change-header-text-component")).click();
         assertAscendingSorter("Age (updated)");
+    }
+
+    @Test
+    public void setInitialSortOrder_sortByTwoColumns_sortCountIncreases() {
+        findElement(By.id("sort-by-age")).click();
+        WebElement count = findElement(By.id("sort-listener-count"));
+        Assert.assertEquals(count.getText(), "Sort count: 1");
+        findElement(By.id("sort-by-two-columns")).click();
+        Assert.assertEquals(count.getText(), "Sort count: 2");
+    }
+
+    @Test
+    public void setInitialSortOrder_updateTwoColumnHeaders_sortCountDoesNotIncrease() {
+        findElement(By.id("sort-by-age")).click();
+        WebElement count = findElement(By.id("sort-listener-count"));
+        Assert.assertEquals(count.getText(), "Sort count: 1");
+        findElement(By.id("change-two-column-headers")).click();
+        Assert.assertEquals(count.getText(), "Sort count: 1");
     }
 
     @Test

@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>24.4-SNAPSHOT</version>
+        <version>24.6-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-board-flow-parent</artifactId>
     <packaging>pom</packaging>
@@ -20,6 +20,9 @@
         <module>vaadin-board-flow</module>
         <module>vaadin-board-testbench</module>
     </modules>
+    <properties>
+        <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/vaadin-commercial-license-header.txt</spotless.licence-header>
+    </properties>
     <profiles>
         <profile>
             <id>default</id>

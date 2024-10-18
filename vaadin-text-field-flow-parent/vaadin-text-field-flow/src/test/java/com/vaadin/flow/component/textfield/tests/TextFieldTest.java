@@ -15,6 +15,15 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
@@ -29,17 +38,6 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
-
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.mockito.Mockito;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.time.LocalDate;
 
 /**
  * Tests for the {@link TextField}.
@@ -206,5 +204,17 @@ public class TextFieldTest {
         TextField field = new TextField();
         Assert.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<TextField, String>, String>);
+    }
+
+    @Test
+    public void setI18n_getI18n() {
+        TextField textField = new TextField();
+        TextField.TextFieldI18n i18n = new TextField.TextFieldI18n()
+                .setRequiredErrorMessage("Required error")
+                .setMinLengthErrorMessage("Min length error")
+                .setMaxLengthErrorMessage("Max length error")
+                .setPatternErrorMessage("Pattern error");
+        textField.setI18n(i18n);
+        Assert.assertEquals(i18n, textField.getI18n());
     }
 }

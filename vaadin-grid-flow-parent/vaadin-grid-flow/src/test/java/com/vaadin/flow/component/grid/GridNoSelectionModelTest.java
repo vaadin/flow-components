@@ -25,8 +25,6 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 
 public class GridNoSelectionModelTest {

@@ -19,19 +19,19 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-import org.openqa.selenium.interactions.Actions;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/context-menu-grid")
 public class ContextMenuGridIT extends AbstractComponentIT {
@@ -241,9 +241,10 @@ public class ContextMenuGridIT extends AbstractComponentIT {
         grid.getCell(23, 0).contextClick();
         assertMessage("pre-open: name=Person 23, colId=Name-Id");
 
-        // ensure closing
+        // click another cell, open another context menu
         grid.getCell(29, 1).contextClick();
-        verifyClosed();
+        waitUntil(driver -> $("span").id("message").getText()
+                .equals("pre-open: name=Person 29, colId=Born-Id"));
     }
 
     @Test
@@ -251,9 +252,10 @@ public class ContextMenuGridIT extends AbstractComponentIT {
         grid.getCell(6, 1).contextClick();
         assertMessage("pre-open: name=Person 6, colId=Born-Id");
 
-        // ensure closing
+        // click another cell, open another context menu
         grid.getCell(19, 1).contextClick();
-        verifyClosed();
+        waitUntil(driver -> $("span").id("message").getText()
+                .equals("pre-open: name=Person 19, colId=Born-Id"));
     }
 
     private void assertMessage(String expected) {

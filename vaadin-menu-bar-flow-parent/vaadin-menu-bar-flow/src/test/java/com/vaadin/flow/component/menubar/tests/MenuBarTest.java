@@ -93,6 +93,36 @@ public class MenuBarTest {
                         .isAssignableFrom(new MenuBar().getClass()));
     }
 
+    @Test
+    public void isReverseCollapseOrder() {
+        Assert.assertFalse(menuBar.isReverseCollapseOrder());
+        Assert.assertFalse(
+                menuBar.getElement().getProperty("reverseCollapse", false));
+    }
+
+    @Test
+    public void setReverseCollapseOrder_isReverseCollapseOrder() {
+        menuBar.setReverseCollapseOrder(true);
+        Assert.assertTrue(menuBar.isReverseCollapseOrder());
+        Assert.assertTrue(
+                menuBar.getElement().getProperty("reverseCollapse", false));
+    }
+
+    @Test
+    public void isTabNavigation() {
+        Assert.assertFalse(menuBar.isTabNavigation());
+        Assert.assertFalse(
+                menuBar.getElement().getProperty("tabNavigation", false));
+    }
+
+    @Test
+    public void setTabNavigation_isTabNavigation() {
+        menuBar.setTabNavigation(true);
+        Assert.assertTrue(menuBar.isTabNavigation());
+        Assert.assertTrue(
+                menuBar.getElement().getProperty("tabNavigation", false));
+    }
+
     private void assertChildrenAndItems(MenuItem... expected) {
         Object[] menuItems = menuBar.getChildren().toArray();
         Assert.assertArrayEquals(expected, menuItems);

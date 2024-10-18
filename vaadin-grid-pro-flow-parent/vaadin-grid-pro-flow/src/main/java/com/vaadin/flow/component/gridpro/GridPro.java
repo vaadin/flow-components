@@ -3,7 +3,7 @@
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.gridpro;
@@ -15,6 +15,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -36,18 +38,19 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
+import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
-import org.slf4j.LoggerFactory;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid-pro", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/grid-pro", version = "24.6.0-alpha2")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -108,6 +111,8 @@ public class GridPro<E> extends Grid<E> {
     }
 
     private void setup() {
+        addDataGenerator(this::generateCellEditableData);
+
         addItemPropertyChangedListener(e -> {
             if (e.getItem() == null) {
                 return;
@@ -185,13 +190,14 @@ public class GridPro<E> extends Grid<E> {
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-pro-edit-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha3")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha2")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class EditColumn<T> extends Column<T> {
 
         private ItemUpdater<T, String> itemUpdater;
         private HasValueAndElement editorField;
         private ValueProvider<T, ?> valueProvider;
+        private SerializablePredicate<T> cellEditableProvider;
         private boolean manualRefresh = false;
 
         /**
@@ -208,6 +214,10 @@ public class GridPro<E> extends Grid<E> {
         public EditColumn(GridPro<T> grid, String columnId,
                 Renderer<T> renderer) {
             super(grid, columnId, renderer);
+
+            addAttachListener(e -> this.getElement().executeJs(
+                    "window.Vaadin.Flow.gridProConnector.initCellEditableProvider($0)",
+                    this.getElement()));
         }
 
         /**
@@ -304,6 +314,17 @@ public class GridPro<E> extends Grid<E> {
 
         void setManualRefresh(boolean manualRefresh) {
             this.manualRefresh = manualRefresh;
+        }
+
+        void setCellEditableProvider(
+                SerializablePredicate<T> cellEditableProvider) {
+            this.cellEditableProvider = cellEditableProvider;
+        }
+
+        // Expose protected method from Column to GridPro
+        @Override
+        protected String getInternalId() {
+            return super.getInternalId();
         }
     }
 
@@ -511,6 +532,29 @@ public class GridPro<E> extends Grid<E> {
         return column;
     }
 
+    private void generateCellEditableData(E item, JsonObject jsonObject) {
+        // Get edit columns with cell editable providers
+        List<EditColumn<E>> editColumns = getColumns().stream()
+                .filter(column -> column instanceof EditColumn<E> editColumn
+                        && editColumn.cellEditableProvider != null)
+                .map(column -> (EditColumn<E>) column).toList();
+
+        // Don't generate any data if there are no columns with cell editable
+        // providers, assuming that all cells are editable
+        if (editColumns.isEmpty()) {
+            return;
+        }
+
+        // Generate data for each column
+        JsonObject cellEditableData = Json.createObject();
+        editColumns.forEach(column -> {
+            boolean cellEditable = column.cellEditableProvider.test(item);
+            cellEditableData.put(column.getInternalId(), cellEditable);
+        });
+
+        jsonObject.put("cellEditable", cellEditableData);
+    }
+
     /**
      * Event fired when the user starts to edit an existing item.
      *
@@ -656,8 +700,20 @@ public class GridPro<E> extends Grid<E> {
      */
     public Registration addItemPropertyChangedListener(
             ComponentEventListener<ItemPropertyChangedEvent<E>> listener) {
+        // Wrap the listener to filter out events for cells that are not
+        // editable
+        ComponentEventListener<ItemPropertyChangedEvent<E>> wrapper = event -> {
+            EditColumn<E> column = (EditColumn<E>) this.idToColumnMap
+                    .get(event.getPath());
+
+            if (column.cellEditableProvider == null
+                    || column.cellEditableProvider.test(event.getItem())) {
+                listener.onComponentEvent(event);
+            }
+        };
+
         return ComponentUtil.addListener(this, ItemPropertyChangedEvent.class,
-                (ComponentEventListener) listener);
+                (ComponentEventListener) wrapper);
     }
 
     /**

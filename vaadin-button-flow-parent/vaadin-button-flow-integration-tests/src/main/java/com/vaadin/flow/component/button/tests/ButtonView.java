@@ -49,6 +49,9 @@ public class ButtonView extends Div {
         createButtonsWithTabIndex();
         createDisabledButton();
         createButtonWithDisableOnClick();
+        createButtonWithDisableOnClickThatEnablesInSameRoundtrip();
+        createButtonWithDisableOnClickThatIsHidden();
+        createButtonWithDisableOnClickAndPointerEventsAuto();
         addVariantsFeature();
         createButtonsWithShortcuts();
 
@@ -248,6 +251,45 @@ public class ButtonView extends Div {
         disableOnClickButton.setId("disable-on-click-button");
         temporarilyDisabledButton.setId("temporarily-disabled-button");
         enable.setId("enable-button");
+    }
+
+    private void createButtonWithDisableOnClickThatEnablesInSameRoundtrip() {
+        Button button = new Button(
+                "Disabled on click and re-enabled in same roundtrip", event -> {
+                    event.getSource().setEnabled(true);
+                });
+        button.setDisableOnClick(true);
+        button.setId("disable-on-click-re-enable-button");
+        addCard("Button disabled on click and re-enabled in same roundtrip",
+                button);
+    }
+
+    private void createButtonWithDisableOnClickThatIsHidden() {
+        Button button = new Button("Disabled on click and hide", event -> {
+            event.getSource().setVisible(false);
+        });
+        button.setDisableOnClick(true);
+        button.setId("disable-on-click-hidden-button");
+
+        Button enableButton = new Button("Enable hidden button and show",
+                event -> {
+                    button.setEnabled(true);
+                    button.setVisible(true);
+                });
+        enableButton.setId("enable-hidden-button");
+
+        addCard("Button disabled on click and hidden", button, enableButton);
+    }
+
+    private void createButtonWithDisableOnClickAndPointerEventsAuto() {
+        Button button = new Button("Disabled and pointer events auto");
+        button.setEnabled(false);
+        button.getStyle().set("pointer-events", "auto");
+        button.setDisableOnClick(true);
+        button.setDisableOnClick(false);
+        button.setId("disable-on-click-pointer-events-auto");
+
+        addCard("Button disabled on click and pointer events auto", button);
     }
 
     private void addCard(String title, Component... components) {

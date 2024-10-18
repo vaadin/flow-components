@@ -20,11 +20,14 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -53,15 +56,41 @@ import elemental.json.JsonObject;
  * override the {@code pageSize} to be bigger than the size of your data set.
  * However, then the full data set will be sent to the client immediately, and
  * you will lose the benefits of lazy loading.
+ * <h2>Validation</h2>
+ * <p>
+ * Combo Box comes with a built-in validation mechanism that verifies that the
+ * field is not empty when {@link #setRequiredIndicatorVisible(boolean)
+ * required} is enabled.
+ * <p>
+ * Validation is triggered whenever the user initiates a value change, for
+ * example by selection from the dropdown or manual entry followed by Enter or
+ * blur. Programmatic value changes trigger validation as well. If validation
+ * fails, the component is marked as invalid and an error message is displayed
+ * below the input.
+ * <p>
+ * The required error message can be configured using either
+ * {@link ComboBoxI18n#setRequiredErrorMessage(String)} or
+ * {@link #setErrorMessage(String)}.
+ * <p>
+ * For more advanced validation that requires custom rules, you can use
+ * {@link Binder}. Please note that Binder provides its own API for the required
+ * validation, see {@link Binder.BindingBuilder#asRequired(String)
+ * asRequired()}.
+ * <p>
+ * However, if Binder doesn't fit your needs and you want to implement fully
+ * custom validation logic, you can disable the built-in validation by setting
+ * {@link #setManualValidation(boolean)} to true. This will allow you to control
+ * the invalid state and the error message manually using
+ * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @param <T>
  *            the type of the items to be selectable from the combo box
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/combo-box", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/combo-box", version = "24.6.0-alpha2")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
@@ -260,6 +289,14 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     }
 
     /**
+     * @see ComboBoxI18n#setRequiredErrorMessage(String)
+     */
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
+    }
+
+    /**
      * The pattern to validate the input with
      *
      * @return the pattern to validate the input with
@@ -325,5 +362,92 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
     @Override
     public T getEmptyValue() {
         return null;
+    }
+
+    /**
+     * Sets the dropdown overlay width.
+     *
+     * @param width
+     *            the new dropdown width. Pass in null to set the dropdown width
+     *            back to the default value.
+     */
+    public void setOverlayWidth(String width) {
+        getStyle().set("--vaadin-combo-box-overlay-width", width);
+    }
+
+    /**
+     * Sets the dropdown overlay width. Negative number implies unspecified size
+     * (the dropdown width is reverted back to the default value).
+     *
+     * @param width
+     *            the width of the dropdown.
+     * @param unit
+     *            the unit used for the dropdown.
+     */
+    public void setOverlayWidth(float width, Unit unit) {
+        Objects.requireNonNull(unit, "Unit can not be null");
+        setOverlayWidth(HasSize.getCssSize(width, unit));
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(ComboBoxI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public ComboBoxI18n getI18n() {
+        return (ComboBoxI18n) super.getI18n();
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(ComboBoxI18n i18n) {
+        super.setI18n(i18n);
+    }
+
+    /**
+     * The internationalization properties for {@link ComboBox}.
+     */
+    public static class ComboBoxI18n implements ComboBoxBaseI18n {
+
+        private String requiredErrorMessage;
+
+        /**
+         * Gets the error message displayed when the field is required but
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         * @see ComboBox#isRequiredIndicatorVisible()
+         * @see ComboBox#setRequiredIndicatorVisible(boolean)
+         */
+        public String getRequiredErrorMessage() {
+            return requiredErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when the field is required but
+         * empty.
+         * <p>
+         * Note, custom error messages set with
+         * {@link ComboBox#setErrorMessage(String)} take priority over i18n
+         * error messages.
+         *
+         * @param errorMessage
+         *            the error message or {@code null} to clear it
+         * @return this instance for method chaining
+         * @see ComboBox#isRequiredIndicatorVisible()
+         * @see ComboBox#setRequiredIndicatorVisible(boolean)
+         */
+        public ComboBoxI18n setRequiredErrorMessage(String errorMessage) {
+            requiredErrorMessage = errorMessage;
+            return this;
+        }
     }
 }

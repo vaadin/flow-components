@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import static com.vaadin.flow.component.combobox.test.ComboBoxClientSideDataRangePage.ITEMS_COUNT;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
-
-import static com.vaadin.flow.component.combobox.test.ComboBoxClientSideDataRangePage.ITEMS_COUNT;
 
 @TestPath("vaadin-combo-box/client-side-data-range")
 public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {

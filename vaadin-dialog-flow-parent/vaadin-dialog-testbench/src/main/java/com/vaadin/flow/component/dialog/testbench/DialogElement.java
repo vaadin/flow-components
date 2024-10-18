@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.dialog.testbench;
 
-import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 

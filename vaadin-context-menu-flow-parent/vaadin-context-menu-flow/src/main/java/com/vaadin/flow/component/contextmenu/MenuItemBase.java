@@ -15,6 +15,12 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
@@ -23,12 +29,6 @@ import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Base class for item component used inside {@link ContextMenu}s.
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu-item")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends Component

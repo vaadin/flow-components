@@ -1,17 +1,32 @@
+/*
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.splitlayout.tests;
 
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Div;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.SplitterDragendEvent;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class SplitLayoutUnitTest {
 
@@ -79,6 +94,50 @@ public class SplitLayoutUnitTest {
         splitLayout.addToSecondary(secondaryComponent);
         splitLayout.addToPrimary(new Div());
         Assert.assertEquals(0, detachCounter.get());
+    }
+
+    @Test
+    public void splitLayoutWithPrimaryComponent_primaryComponentRemoved_referenceUpdated() {
+        var ui = new UI();
+        var splitLayout = new SplitLayout();
+        ui.add(splitLayout);
+
+        var primaryComponent = new Div();
+        splitLayout.addToPrimary(primaryComponent);
+        Assert.assertEquals(primaryComponent,
+                splitLayout.getPrimaryComponent());
+
+        splitLayout.remove(primaryComponent);
+        Assert.assertNull(splitLayout.getPrimaryComponent());
+    }
+
+    @Test
+    public void splitLayoutWithSecondaryComponent_secondaryComponentRemoved_referenceUpdated() {
+        var ui = new UI();
+        var splitLayout = new SplitLayout();
+        ui.add(splitLayout);
+
+        var secondaryComponent = new Div();
+        splitLayout.addToSecondary(secondaryComponent);
+        Assert.assertEquals(secondaryComponent,
+                splitLayout.getSecondaryComponent());
+
+        splitLayout.remove(secondaryComponent);
+        Assert.assertNull(splitLayout.getSecondaryComponent());
+    }
+
+    @Test
+    public void splitLayoutTwoComponents_removeAll_bothReferencesUpdated() {
+        var ui = new UI();
+        var splitLayout = new SplitLayout();
+        ui.add(splitLayout);
+
+        splitLayout.addToPrimary(new Div());
+        splitLayout.addToSecondary(new Div());
+
+        splitLayout.removeAll();
+        Assert.assertNull(splitLayout.getPrimaryComponent());
+        Assert.assertNull(splitLayout.getSecondaryComponent());
     }
 
     @Test

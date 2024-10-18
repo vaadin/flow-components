@@ -75,7 +75,7 @@ describe('grid connector - tree', () => {
     await nextFrame();
 
     // This number may come down from further optimization
-    expect(spy.callCount).to.equal(3);
+    expect(spy.callCount).to.equal(2);
   });
 
   it('should not compute column auto-width prematurely', async () => {

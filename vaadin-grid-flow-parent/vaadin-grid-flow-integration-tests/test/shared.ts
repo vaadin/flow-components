@@ -163,9 +163,10 @@ export function getBodyCellText(grid: Grid, rowIndex: number, columnIndex: numbe
 /**
  * Sets the root level items for the grid connector.
  */
-export function setRootItems(gridConnector: GridConnector, items: Item[]): void {
+export function setRootItems(gridConnector: GridConnector, items: Item[], index = 0, length?: number): void {
   gridConnector.updateSize(items.length);
-  gridConnector.set(0, items, undefined);
+  const itemSlice = length ? items.slice(index, index + length) : items;
+  gridConnector.set(index, itemSlice, undefined);
   gridConnector.confirm(0);
 }
 

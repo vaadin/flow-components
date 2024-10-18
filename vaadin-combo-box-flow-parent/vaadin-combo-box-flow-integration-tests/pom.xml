@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-combo-box-flow-parent</artifactId>
-        <version>24.4-SNAPSHOT</version>
+        <version>24.6-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-combo-box-integration-tests</artifactId>
     <packaging>war</packaging>
@@ -122,6 +122,8 @@
                                 <include>vite.generated.ts</include>
                                 <include>types.d.ts</include>
                                 <include>tsconfig.json</include>
+                                <include>frontend/routes.tsx</include>
+                                <include>frontend/App.tsx</include>
                             </includes>
                         </fileset>
                         <fileset>
@@ -183,8 +185,8 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
+                        <groupId>org.eclipse.jetty.ee10</groupId>
+                        <artifactId>jetty-ee10-maven-plugin</artifactId>
                         <configuration>
                             <scan>5</scan>
                         </configuration>

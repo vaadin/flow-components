@@ -3,7 +3,7 @@
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet;
@@ -18,11 +18,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.spreadsheet.PopupButton.PopupCloseEvent;
 import com.vaadin.flow.component.spreadsheet.PopupButton.PopupCloseListener;
@@ -122,6 +122,7 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
                         if (latestFilteredValues.isEmpty()
                                 || latestFilteredValues
                                         .containsAll(allCellValues)) {
+                            allItems.setIndeterminate(false);
                             allItems.setValue(true);
                             filterCheckbox
                                     .setValue(new HashSet<>(allCellValues));
@@ -131,6 +132,7 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
                         }
                     } else {
                         if (currentValue.containsAll(allCellValues)) {
+                            allItems.setIndeterminate(false);
                             allItems.setValue(true);
                         }
                     }
@@ -188,12 +190,14 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
                         updateFilteredItems(value);
                         cancelValueChangeUpdate = true;
                         if (value.containsAll(allCellValues)) {
+                            allItems.setIndeterminate(false);
                             if (!allItems.getValue()) {
                                 allItems.setValue(true);
                             }
                         } else {
                             if (allItems.getValue()) {
                                 allItems.setValue(false);
+                                allItems.setIndeterminate(true);
                             }
                         }
                         cancelValueChangeUpdate = false;
@@ -237,6 +241,7 @@ public class ItemFilter extends Div implements SpreadsheetFilter {
 
         Set<String> visibleValues = getVisibleValues();
         cancelValueChangeUpdate = true;
+        allItems.setIndeterminate(!visibleValues.containsAll(allCellValues));
         allItems.setValue(visibleValues.containsAll(allCellValues));
         cancelValueChangeUpdate = false;
         filterOptionsProvider = new ListDataProvider<>(filterOptions);

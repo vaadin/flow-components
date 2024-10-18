@@ -13,16 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.combobox.dataview;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.data.provider.CallbackDataProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -33,8 +33,10 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
+import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.function.SerializableConsumer;
 
@@ -332,4 +334,29 @@ public class ComboBoxLazyDataViewTest {
         dataView.getItem(1234567);
     }
 
+    @Test
+    public void setIdentifierProvider_customIdentifier_keyMapperUsesIdentifier() {
+        Item first = new Item(1L, "first");
+        Item second = new Item(2L, "middle");
+
+        List<Item> items = new ArrayList<>(Arrays.asList(first, second));
+
+        ComboBox<Item> component = new ComboBox<>();
+
+        DataCommunicator<Item> dataCommunicator = new DataCommunicator<>(
+                (item, jsonObject) -> {
+                }, null, null, component.getElement().getNode());
+        dataCommunicator.setDataProvider(
+                new CallbackDataProvider<>(query -> Stream.of(), query -> 0),
+                "", true);
+
+        ComboBoxLazyDataView<Item> dataView = new ComboBoxLazyDataView<>(
+                dataCommunicator, component);
+        DataKeyMapper<Item> keyMapper = dataCommunicator.getKeyMapper();
+        items.forEach(keyMapper::key);
+
+        Assert.assertFalse(keyMapper.has(new Item(1L, "non-present")));
+        dataView.setIdentifierProvider(Item::getId);
+        Assert.assertTrue(keyMapper.has(new Item(1L, "non-present")));
+    }
 }

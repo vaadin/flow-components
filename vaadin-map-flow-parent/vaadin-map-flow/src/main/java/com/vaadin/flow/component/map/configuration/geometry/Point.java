@@ -3,16 +3,16 @@
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.map.configuration.geometry;
 
+import java.util.Objects;
+
 import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Coordinate;
-
-import java.util.Objects;
 
 /**
  * Geometry that is represented by a single point and coordinate.

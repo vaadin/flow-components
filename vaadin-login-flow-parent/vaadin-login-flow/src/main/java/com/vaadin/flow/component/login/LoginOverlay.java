@@ -25,8 +25,8 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
@@ -47,9 +47,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/login", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/login", version = "24.6.0-alpha2")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
 public class LoginOverlay extends AbstractLogin implements HasStyle {
 
@@ -241,6 +241,11 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
      * Gets the object from which components can be added or removed from the
      * overlay custom form area. This area is displayed only if there's at least
      * one component added with {@link LoginOverlayContent#add(Component...)}.
+     *
+     * Fields that are part of custom form area are not automatically submitted
+     * as part of the {@link LoginForm.LoginEvent}, and are not supported when
+     * setting {@code action} as their values will not be part of the login
+     * request.
      *
      * @since 24.2
      * @return the custom form area object

@@ -12,26 +12,26 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
-
 package com.vaadin.flow.component.upload.tests;
 
-import com.vaadin.flow.component.upload.UploadI18N;
-import com.vaadin.flow.component.upload.testbench.UploadElement;
-import com.vaadin.flow.internal.JsonSerializer;
-import com.vaadin.flow.testutil.TestPath;
-import elemental.json.Json;
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
-import elemental.json.JsonValue;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.vaadin.flow.component.upload.UploadI18N;
+import com.vaadin.flow.component.upload.testbench.UploadElement;
+import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.testutil.TestPath;
+
+import elemental.json.Json;
+import elemental.json.JsonObject;
+import elemental.json.JsonType;
+import elemental.json.JsonValue;
 
 @TestPath("vaadin-upload/i18n")
 public class UploadI18nIT extends AbstractUploadIT {
@@ -69,6 +69,7 @@ public class UploadI18nIT extends AbstractUploadIT {
 
         UploadI18N expected = UploadTestsI18N.RUSSIAN_FULL;
         JsonObject expectedJson = (JsonObject) JsonSerializer.toJson(expected);
+        deeplyRemoveNullValuesFromJsonObject(expectedJson);
         Map<String, String> expectedMap = jsonToMap(expectedJson);
 
         assertTranslationMapsAreEqual(expectedMap, translationMap);
@@ -111,7 +112,9 @@ public class UploadI18nIT extends AbstractUploadIT {
         UploadI18N fullTranslation = UploadTestsI18N.RUSSIAN_FULL;
         JsonObject fullTranslationJson = (JsonObject) JsonSerializer
                 .toJson(fullTranslation);
+        deeplyRemoveNullValuesFromJsonObject(fullTranslationJson);
         Map<String, String> fullTranslationMap = jsonToMap(fullTranslationJson);
+        UploadTestsI18N.OPTIONAL_KEYS.forEach(fullTranslationMap::remove);
 
         assertTranslationMapsHaveSameKeys(fullTranslationMap, translationMap);
         assertTranslationMapHasNoMissingTranslations(translationMap);
@@ -213,5 +216,15 @@ public class UploadI18nIT extends AbstractUploadIT {
                 .executeScript("return JSON.stringify(arguments[0].i18n)",
                         upload);
         return Json.parse(i18nJsonString);
+    }
+
+    private void deeplyRemoveNullValuesFromJsonObject(JsonObject jsonObject) {
+        for (String key : jsonObject.keys()) {
+            if (jsonObject.get(key).getType() == JsonType.OBJECT) {
+                deeplyRemoveNullValuesFromJsonObject(jsonObject.get(key));
+            } else if (jsonObject.get(key).getType() == JsonType.NULL) {
+                jsonObject.remove(key);
+            }
+        }
     }
 }

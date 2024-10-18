@@ -15,11 +15,11 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import com.vaadin.flow.component.grid.it.SelectComponentColumnAfterExpandPage;
-import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
+
+import com.vaadin.flow.testutil.TestPath;
 
 @TestPath(SelectComponentColumnAfterExpandPage.VIEW)
 public class SelectComponentColumnAfterExpandIT extends AbstractTreeGridIT {

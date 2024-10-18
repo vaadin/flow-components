@@ -1,12 +1,20 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.crud.tests;
-
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.crud.testbench.CrudElement;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.crud.testbench.CrudElement;
 
 public class EditOnClickIT extends AbstractParallelTest {
 

@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
+import static org.junit.Assert.assertThat;
+
 import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
@@ -29,8 +31,6 @@ import org.openqa.selenium.logging.LogEntry;
 
 import com.vaadin.flow.component.upload.testbench.UploadElement;
 import com.vaadin.flow.testutil.TestPath;
-
-import static org.junit.Assert.assertThat;
 
 /**
  * Upload component test class.

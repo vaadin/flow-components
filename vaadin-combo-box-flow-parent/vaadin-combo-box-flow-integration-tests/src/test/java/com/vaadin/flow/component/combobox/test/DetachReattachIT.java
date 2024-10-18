@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -81,6 +83,23 @@ public class DetachReattachIT extends AbstractComboBoxIT {
 
         combo = $(ComboBoxElement.class).first();
         Assert.assertEquals("foo", combo.getInputElementValue());
+    }
+
+    @Test
+    public void withComponentRenderer_renderComponentsInitially_detachAndReattach_componentRenderersRestored() {
+        clickButton("set-component-renderer");
+
+        combo.openPopup();
+        combo.closePopup();
+
+        clickButton("detach-attach");
+
+        combo = $(ComboBoxElement.class).waitForFirst();
+        combo.openPopup();
+
+        TestBenchElement overlay = $("vaadin-combo-box-overlay").waitForFirst();
+        List<TestBenchElement> items = overlay.$("vaadin-combo-box-item").all();
+        items.forEach(item -> Assert.assertTrue(item.$("label").exists()));
     }
 
     private void assertValueChanges(String... expected) {

@@ -3,10 +3,14 @@
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.export;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -38,10 +42,6 @@ import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.themes.LumoDarkTheme;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class SVGGeneratorTest {
 
@@ -261,8 +261,9 @@ public class SVGGeneratorTest {
 
         XAxis x = new XAxis();
         x.setCategories("January is a long month", "February is rather boring",
-                "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
-                "Dec");
+                "Mar", "Apr", "May", "Jun",
+                "Jul is a month to enjoy really nice weather", "Aug", "Sep",
+                "Oct", "Nov", "Dec");
         configuration.addxAxis(x);
 
         YAxis y = new YAxis();

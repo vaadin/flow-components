@@ -21,9 +21,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the {@link TimePickerPage}.
@@ -141,6 +141,14 @@ public class TimePickerIT extends AbstractComponentIT {
 
         $("button").id("button-clear-helper-component").click();
         Assert.assertNull(picker.getHelperComponent());
+    }
+
+    @Test
+    public void timePickerWithSmallMs_msNotRoundedDownToZero() {
+        TimePickerElement picker = $(TimePickerElement.class)
+                .id("picker-with-small-ms");
+
+        validatePickerValue(picker, "00:00:00.050");
     }
 
     private void selectStep(String step) {

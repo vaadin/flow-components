@@ -27,8 +27,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/grid-header-footer-rows")
 public class GridHeaderFooterRowIT extends AbstractComponentIT {
@@ -332,6 +333,36 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
         clickButton("join-headers-01");
         assertHeaderOrder(25, 16, 17, 0, 1, 2, 3);
         assertFooterOrder(8, 9, 10, 11, 19, 18, 24);
+    }
+
+    @Test
+    public void prependMultipleHeaders_removeAllHeaders_columnOrderPreserved() {
+        grid = $(GridElement.class).id("grid2");
+        clickButton("prepend-header-2");
+        clickButton("prepend-header-2");
+        clickButton("prepend-header-2");
+        clickButton("remove-all-header-rows");
+
+        assertColumnOrderPreserved();
+    }
+
+    @Test
+    public void prependMultipleFooters_removeAllFooters_columnOrderPreserved() {
+        grid = $(GridElement.class).id("grid2");
+        clickButton("append-footer-2");
+        clickButton("append-footer-2");
+        clickButton("append-footer-2");
+        clickButton("remove-all-footer-rows");
+
+        assertColumnOrderPreserved();
+    }
+
+    private void assertColumnOrderPreserved() {
+        List<GridTHTDElement> cells = grid.getCells(0);
+        Assert.assertEquals(4, cells.size());
+        for (int i = 0; i < cells.size(); i++) {
+            Assert.assertEquals("Item 1-" + (i + 1), cells.get(i).getText());
+        }
     }
 
     private void assertHeaderHasGridSorter(int headerIndexFromTop) {

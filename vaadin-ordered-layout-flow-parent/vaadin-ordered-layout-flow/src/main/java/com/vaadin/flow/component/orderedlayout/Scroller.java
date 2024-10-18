@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.orderedlayout;
 
+import static java.util.Objects.requireNonNull;
+
+import java.util.Locale;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
@@ -24,10 +28,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.Locale;
-
 /**
  * Scroller is a component container which enables scrolling overflowing
  * content.
@@ -36,9 +36,9 @@ import java.util.Locale;
  * {@link #setScrollDirection(ScrollDirection)}
  */
 @Tag("vaadin-scroller")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/scroller", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/scroller", version = "24.6.0-alpha2")
 @JsModule("@vaadin/scroller/src/vaadin-scroller.js")
 public class Scroller extends Component implements Focusable<Scroller>, HasSize,
         HasStyle, HasThemeVariant<ScrollerVariant> {
@@ -175,4 +175,21 @@ public class Scroller extends Component implements Focusable<Scroller>, HasSize,
                     : BOTH;
         }
     }
+
+    /**
+     * Scrolls the scroller to the top.
+     */
+    public void scrollToTop() {
+        getElement().executeJs("this.scrollTop = 0");
+    }
+
+    /**
+     * Scrolls the scroller to the bottom.
+     */
+    public void scrollToBottom() {
+
+        getElement().executeJs(
+                "this.scrollTop = this.scrollHeight - this.clientHeight");
+    }
+
 }

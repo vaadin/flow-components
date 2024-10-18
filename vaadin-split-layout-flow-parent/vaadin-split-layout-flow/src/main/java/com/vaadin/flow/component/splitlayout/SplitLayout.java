@@ -43,9 +43,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-split-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/split-layout", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/split-layout", version = "24.6.0-alpha2")
 @JsModule("@vaadin/split-layout/src/vaadin-split-layout.js")
 public class SplitLayout extends Component
         implements ClickNotifier<SplitLayout>, HasSize, HasStyle,
@@ -81,11 +81,14 @@ public class SplitLayout extends Component
         addAttachListener(
                 e -> this.requestStylesUpdatesForSplitterPosition(e.getUI()));
         addSplitterDragendListener(e -> {
-            var splitterPosition = calcNewSplitterPosition(
+            splitterPosition = calcNewSplitterPosition(
                     e.primaryComponentFlexBasis, e.secondaryComponentFlexBasis);
-            setSplitterPosition(splitterPosition);
-        });
 
+            setPrimaryStyle("flex",
+                    String.format("1 1 %s", e.primaryComponentFlexBasis));
+            setSecondaryStyle("flex",
+                    String.format("1 1 %s", e.secondaryComponentFlexBasis));
+        });
     }
 
     /**
@@ -312,6 +315,11 @@ public class SplitLayout extends Component
     public void remove(Component... components) {
         for (Component component : components) {
             if (getElement().equals(component.getElement().getParent())) {
+                if (component.equals(primaryComponent)) {
+                    primaryComponent = null;
+                } else if (component.equals(secondaryComponent)) {
+                    secondaryComponent = null;
+                }
                 component.getElement().removeAttribute("slot");
                 getElement().removeChild(component.getElement());
             } else {
@@ -328,6 +336,8 @@ public class SplitLayout extends Component
         getElement().getChildren()
                 .forEach(child -> child.removeAttribute("slot"));
         getElement().removeAllChildren();
+        primaryComponent = null;
+        secondaryComponent = null;
     }
 
     @DomEvent("splitter-dragend")

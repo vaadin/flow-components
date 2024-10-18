@@ -15,19 +15,23 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
-import org.junit.Ignore;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.BAD_INPUT_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.CLEAR_VALUE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.MAX_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.MAX_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.MIN_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.MIN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.STEP_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.STEP_INPUT;
+
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
-
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.MIN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.MAX_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.STEP_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.REQUIRED_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.CLEAR_VALUE_BUTTON;
 
 @TestPath("vaadin-integer-field/validation/basic")
 public class IntegerFieldBasicValidationIT
@@ -36,6 +40,7 @@ public class IntegerFieldBasicValidationIT
     public void fieldIsInitiallyValid() {
         assertClientValid();
         assertServerValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -44,6 +49,7 @@ public class IntegerFieldBasicValidationIT
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -54,6 +60,7 @@ public class IntegerFieldBasicValidationIT
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -64,11 +71,25 @@ public class IntegerFieldBasicValidationIT
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         testField.setValue("");
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
+
+        testField.setValue("");
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -79,21 +100,25 @@ public class IntegerFieldBasicValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(MIN_ERROR_MESSAGE);
 
         testField.setValue("2");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         testField.setValue("3");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         testField.setValue("");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -104,21 +129,25 @@ public class IntegerFieldBasicValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(MAX_ERROR_MESSAGE);
 
         testField.setValue("2");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         testField.setValue("1");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         testField.setValue("");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -129,21 +158,25 @@ public class IntegerFieldBasicValidationIT
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(STEP_ERROR_MESSAGE);
 
         testField.setValue("2");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         testField.setValue("3");
         assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(STEP_ERROR_MESSAGE);
 
         testField.setValue("");
         assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -152,21 +185,25 @@ public class IntegerFieldBasicValidationIT
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         testField.setValue("2");
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         testField.sendKeys("--2", Keys.ENTER);
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         testField.setValue("");
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -174,10 +211,12 @@ public class IntegerFieldBasicValidationIT
         testField.setValue("2");
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -186,11 +225,13 @@ public class IntegerFieldBasicValidationIT
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -199,11 +240,13 @@ public class IntegerFieldBasicValidationIT
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         testField.setValue("");
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -212,11 +255,13 @@ public class IntegerFieldBasicValidationIT
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         testField.setValue("");
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
     }
 
     @Test

@@ -22,8 +22,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/drag-and-drop")
 public class DragAndDropGridIT extends AbstractComponentIT {
@@ -206,6 +206,26 @@ public class DragAndDropGridIT extends AbstractComponentIT {
         click("no-drop-mode");
         click("set-filters");
         fireDrop(2, "on-top");
+        assertMessages("", "", "");
+    }
+
+    @Test
+    public void setDragFilter_setRowsDraggable_filtersApply() {
+        click("toggle-rows-draggable");
+
+        click("set-filters");
+        click("toggle-rows-draggable");
+        fireDragStart(0);
+        assertMessages("", "", "");
+    }
+
+    @Test
+    public void setDropFilter_setDropMode_filtersApply() {
+        click("no-drop-mode");
+
+        click("set-filters");
+        click("BETWEEN");
+        fireDrop(0, "below");
         assertMessages("", "", "");
     }
 

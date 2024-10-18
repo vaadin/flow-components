@@ -15,10 +15,10 @@
  */
 package com.vaadin.flow.component.textfield.validation;
 
+import java.util.Objects;
+
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.function.SerializablePredicate;
-
-import java.util.Objects;
 
 public class PasswordFieldBinderValidationTest
         extends AbstractBinderValidationTest<String, PasswordField> {

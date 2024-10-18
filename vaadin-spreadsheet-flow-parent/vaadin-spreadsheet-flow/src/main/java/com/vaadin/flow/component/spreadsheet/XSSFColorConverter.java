@@ -3,7 +3,7 @@
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet;
@@ -103,13 +103,13 @@ public class XSSFColorConverter implements ColorConverter {
         sb.append(attr);
         sb.append(":");
         if (color == null || color.isAuto()) {
-            sb.append("#000;");
+            sb.append("var(--default-color);");
             return sb.toString();
         }
 
         byte[] argb = color.getARGB();
         if (argb == null) {
-            sb.append("#000;");
+            sb.append("var(--default-color);");
             return sb.toString();
         }
 
@@ -147,7 +147,7 @@ public class XSSFColorConverter implements ColorConverter {
         sb.append(attr);
         sb.append(":");
         if (color == null || color.getAuto()) {
-            sb.append("#000;");
+            sb.append("var(--default-color);");
             return sb.toString();
         }
 
@@ -161,7 +161,7 @@ public class XSSFColorConverter implements ColorConverter {
         }
 
         if (argb == null) {
-            sb.append("#000;");
+            sb.append("var(--default-color);");
             return sb.toString();
         }
 
@@ -241,7 +241,7 @@ public class XSSFColorConverter implements ColorConverter {
         defaultBackgroundColor = styleColor(fillBackgroundColorColor);
 
         if (defaultBackgroundColor == null) {
-            defaultBackgroundColor = "rgba(255,255,255,1.0);";
+            defaultBackgroundColor = "var(--default-background-color);";
         }
         sb.append("background-color:");
         sb.append(defaultBackgroundColor);
@@ -249,8 +249,9 @@ public class XSSFColorConverter implements ColorConverter {
         XSSFColor xssfColor = cs.getFont().getXSSFColor();
         defaultColor = styleColor(xssfColor);
 
-        if (defaultColor == null) {
-            defaultColor = "rgba(0,0,0,1.0);";
+        if (defaultColor == null
+                || defaultColor.equals("rgba(0, 0, 0, 1.0);")) {
+            defaultColor = "var(--default-color);";
         }
         sb.append("color:");
         sb.append(defaultColor);

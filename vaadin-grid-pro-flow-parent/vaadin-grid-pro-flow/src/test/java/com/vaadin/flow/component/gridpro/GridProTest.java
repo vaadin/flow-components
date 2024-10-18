@@ -1,21 +1,31 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.gridpro;
 
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.data.provider.DataCommunicator;
-import com.vaadin.flow.data.provider.KeyMapper;
-import com.vaadin.flow.data.provider.DataProvider;
-import elemental.json.JsonObject;
-import elemental.json.impl.JreJsonFactory;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.mockito.Mockito;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.KeyMapper;
+
+import elemental.json.JsonObject;
+import elemental.json.impl.JreJsonFactory;
 
 public class GridProTest {
 
@@ -109,5 +119,47 @@ public class GridProTest {
                         "col1"));
         Mockito.verify(mock, Mockito.never()).accept(Mockito.isNull(),
                 Mockito.anyString());
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Test
+    public void itemPropertyChangedListener_onlyCalledWhenCellIsEditable() {
+        ComponentEventListener listener = Mockito
+                .mock(ComponentEventListener.class);
+        grid.addItemPropertyChangedListener(listener);
+
+        ItemUpdater<Person, String> itemUpdater = Mockito
+                .mock(ItemUpdater.class);
+        GridPro.EditColumn<Person> column = (GridPro.EditColumn<Person>) grid
+                .addEditColumn(Person::getName).text(itemUpdater);
+        JsonObject item = new JreJsonFactory()
+                .parse("{\"key\": \"1\", \"col1\":\"foo\"}");
+        GridPro.ItemPropertyChangedEvent<Person> event = new GridPro.ItemPropertyChangedEvent<>(
+                grid, true, item, "col1");
+
+        // No editable provider - should fire event
+        ComponentUtil.fireEvent(grid, event);
+        Mockito.verify(listener, Mockito.times(1))
+                .onComponentEvent(Mockito.any());
+        Mockito.verify(itemUpdater, Mockito.times(1)).accept(Mockito.any(),
+                Mockito.any());
+
+        // Cell is not editable - should not fire event
+        column.setCellEditableProvider(person -> false);
+        Mockito.reset(listener, itemUpdater);
+        ComponentUtil.fireEvent(grid, event);
+        Mockito.verify(listener, Mockito.never())
+                .onComponentEvent(Mockito.any());
+        Mockito.verify(itemUpdater, Mockito.never()).accept(Mockito.any(),
+                Mockito.any());
+
+        // Cell is editable - should fire event
+        column.setCellEditableProvider(person -> true);
+        Mockito.reset(listener, itemUpdater);
+        ComponentUtil.fireEvent(grid, event);
+        Mockito.verify(listener, Mockito.times(1))
+                .onComponentEvent(Mockito.any());
+        Mockito.verify(itemUpdater, Mockito.times(1)).accept(Mockito.any(),
+                Mockito.any());
     }
 }

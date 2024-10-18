@@ -20,8 +20,8 @@ import java.util.Arrays;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-renderer-flow/lit-renderer")
@@ -49,6 +49,15 @@ public class LitRendererPage extends Div {
                         .setRenderer(LitRenderer.of("<div>${index}</div>")));
         setSimpleLitRendererButton.setId("setSimpleLitRendererButton");
         add(setSimpleLitRendererButton);
+
+        NativeButton setCheckboxRenderer = new NativeButton(
+                "Set LitRenderer with checkbox", e -> {
+                    component.setRenderer(LitRenderer.<String> of(
+                            "<input type='checkbox' .checked='${live(item.checked)}'>")
+                            .withProperty("checked", "2"::equals));
+                });
+        setCheckboxRenderer.setId("setCheckboxRenderer");
+        add(setCheckboxRenderer);
 
         NativeButton removeRendererButton = new NativeButton("Remove renderer",
                 e -> component.setRenderer(null));
@@ -86,7 +95,6 @@ public class LitRendererPage extends Div {
                 });
         toggleAttachedButton.setId("toggleAttachedButton");
         add(toggleAttachedButton);
-
     }
 
     private void setLitRenderer(LitRendererTestComponent component) {

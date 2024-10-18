@@ -3,13 +3,12 @@
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.addon.spreadsheet.client;
 
 import com.google.gwt.dom.client.Element;
-
 import com.google.gwt.dom.client.StyleElement;
 
 public class SheetJsniUtil {
@@ -43,7 +42,7 @@ public class SheetJsniUtil {
         }
         this.@com.vaadin.addon.spreadsheet.client.SheetJsniUtil::parsedRow = r;
         this.@com.vaadin.addon.spreadsheet.client.SheetJsniUtil::parsedCol = c;
-
+    
     }-*/;
 
     public int getParsedCol() {

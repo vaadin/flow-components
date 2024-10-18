@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.select.data;
 
 import java.util.ArrayList;
@@ -21,6 +20,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.provider.AbstractComponentDataViewTest;
@@ -35,9 +38,6 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Mockito;
 
 public class SelectDataViewTest extends AbstractComponentDataViewTest {
 
@@ -63,10 +63,9 @@ public class SelectDataViewTest extends AbstractComponentDataViewTest {
 
         dataView.setIdentifierProvider(Item::getId);
 
-        first.setValue("changed-1");
         second.setValue("changed-2");
 
-        dataProvider.refreshItem(new Item(1L));
+        dataProvider.refreshItem(new Item(1L, "changed-1"));
 
         Assert.assertTrue(containsItem(component, "changed-1"));
         Assert.assertFalse(containsItem(component, "changed-2"));
@@ -85,10 +84,9 @@ public class SelectDataViewTest extends AbstractComponentDataViewTest {
         Select<Item> component = new Select<>();
         component.setItems(dataProvider);
 
-        first.setValue("changed-1");
         second.setValue("changed-2");
 
-        dataProvider.refreshItem(new Item(1L));
+        dataProvider.refreshItem(new Item(1L, "changed-1"));
 
         Assert.assertTrue(containsItem(component, "changed-1"));
         Assert.assertFalse(containsItem(component, "changed-2"));

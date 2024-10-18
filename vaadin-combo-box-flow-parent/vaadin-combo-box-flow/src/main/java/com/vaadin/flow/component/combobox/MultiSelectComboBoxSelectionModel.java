@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.flow.function.SerializableFunction;
-
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
+import com.vaadin.flow.function.SerializableFunction;
 
 /**
  * Selection model for the {@link MultiSelectComboBox}, which implements the

@@ -27,11 +27,22 @@ public class TextAreaBasicValidationPage
     public static final String MIN_LENGTH_INPUT = "min-length-input";
     public static final String MAX_LENGTH_INPUT = "max-length-input";
 
+    public static final String REQUIRED_ERROR_MESSAGE = "Field is required";
+    public static final String MIN_LENGTH_ERROR_MESSAGE = "Value is too short";
+    public static final String MAX_LENGTH_ERROR_MESSAGE = "Value is too long";
+    public static final String PATTERN_ERROR_MESSAGE = "Value does not match the pattern";
+
     public TextAreaBasicValidationPage() {
         super();
 
+        testField.setI18n(new TextArea.TextAreaI18n()
+                .setRequiredErrorMessage(REQUIRED_ERROR_MESSAGE)
+                .setMinLengthErrorMessage(MIN_LENGTH_ERROR_MESSAGE)
+                .setMaxLengthErrorMessage(MAX_LENGTH_ERROR_MESSAGE)
+                .setPatternErrorMessage(PATTERN_ERROR_MESSAGE));
+
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
-            testField.setRequiredIndicatorVisible(true);
+            testField.setRequired(true);
         }));
 
         add(createInput(PATTERN_INPUT, "Set pattern", event -> {

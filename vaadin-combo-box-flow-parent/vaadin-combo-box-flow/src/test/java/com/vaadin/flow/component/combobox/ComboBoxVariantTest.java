@@ -15,9 +15,10 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.flow.dom.ThemeList;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.vaadin.flow.dom.ThemeList;
 
 public class ComboBoxVariantTest {
 

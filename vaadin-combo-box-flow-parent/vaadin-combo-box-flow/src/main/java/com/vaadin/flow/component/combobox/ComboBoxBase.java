@@ -15,6 +15,12 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import java.util.Collection;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -27,11 +33,6 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasPlaceholder;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
-import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.Synchronize;
@@ -39,12 +40,18 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasAutoOpen;
+import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
@@ -66,11 +73,6 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.Registration;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
-
 /**
  * Provides base functionality for combo box related components, such as
  * {@link ComboBox}
@@ -86,7 +88,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements Focusable<TComponent>, HasAllowedCharPattern, HasAriaLabel,
         HasAutoOpen, HasClearButton, HasClientValidation, HasOverlayClassName,
-        HasDataView<TItem, String, ComboBoxDataView<TItem>>, HasHelper,
+        HasDataView<TItem, String, ComboBoxDataView<TItem>>,
         InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue>,
         HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>, HasTheme,
@@ -119,11 +121,27 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     private ItemLabelGenerator<TItem> itemLabelGenerator = String::valueOf;
+    private SerializableFunction<TItem, String> classNameGenerator = item -> null;
     private final ComboBoxRenderManager<TItem> renderManager;
     private final ComboBoxDataController<TItem> dataController;
     private int customValueListenersCount;
 
-    private boolean manualValidationEnabled = false;
+    private ComboBoxBaseI18n i18n;
+
+    private Validator<TValue> defaultValidator = (value, context) -> {
+        boolean fromComponent = context == null;
+
+        // Do the required check only if the validator is called from the
+        // component, and not from Binder. Binder has its own implementation
+        // of required validation.
+        boolean isRequired = fromComponent && isRequiredIndicatorVisible();
+        return ValidationUtil.validateRequiredConstraint(
+                getI18nErrorMessage(ComboBoxBaseI18n::getRequiredErrorMessage),
+                isRequired, getValue(), getEmptyValue());
+    };
+
+    private ValidationController<ComboBoxBase<TComponent, TItem, TValue>, TValue> validationController = new ValidationController<>(
+            this);
 
     /**
      * Constructs a new ComboBoxBase instance
@@ -166,6 +184,9 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         dataController = new ComboBoxDataController<>(this, localeSupplier);
         dataController.getDataGenerator().addDataGenerator((item,
                 jsonObject) -> jsonObject.put("label", generateLabel(item)));
+        dataController.getDataGenerator()
+                .addDataGenerator((item, jsonObject) -> jsonObject
+                        .put("className", generateClassName(item)));
 
         // Configure web component to use key property from the generated
         // wrapper items for identification
@@ -334,23 +355,51 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
     }
 
     /**
-     * Sets whether the component requires a value to be considered in a valid
-     * state.
+     * Sets whether the user is required to provide a value. When required, an
+     * indicator appears next to the label and the field invalidates if the
+     * value is cleared.
+     * <p>
+     * NOTE: The required indicator is only visible when the field has a label,
+     * see {@link #setLabel(String)}.
      *
-     * @return {@code true} if the component requires a value to be valid
+     * @param required
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      */
-    public boolean isRequired() {
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
+    }
+
+    /**
+     * Gets whether the user is required to provide a value.
+     *
+     * @return {@code true} if the field is required, {@code false} otherwise
+     * @see #setRequiredIndicatorVisible(boolean)
+     */
+    @Override
+    public boolean isRequiredIndicatorVisible() {
         return super.isRequiredIndicatorVisible();
     }
 
     /**
-     * Whether the component requires a value to be considered in a valid state.
+     * Alias for {@link #isRequiredIndicatorVisible()}
+     *
+     * @return {@code true} if the field is required, {@code false} otherwise
+     */
+    public boolean isRequired() {
+        return isRequiredIndicatorVisible();
+    }
+
+    /**
+     * Alias for {@link #setRequiredIndicatorVisible(boolean)}.
      *
      * @param required
-     *            {@code true} if the component requires a value to be valid
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      */
     public void setRequired(boolean required) {
-        super.setRequiredIndicatorVisible(required);
+        setRequiredIndicatorVisible(required);
     }
 
     @Override
@@ -424,6 +473,56 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
                     "Got 'null' as a label value for the item '%s'. "
                             + "'%s' instance may not return 'null' values",
                     item, ItemLabelGenerator.class.getSimpleName()));
+        }
+        return label;
+    }
+
+    /**
+     * Sets the function that is used for generating CSS class names for the
+     * dropdown items in the ComboBox. Returning {@code null} from the generator
+     * results in no custom class name being set. Multiple class names can be
+     * returned from the generator as space-separated.
+     *
+     * @since 24.5
+     * @param classNameGenerator
+     *            the class name generator to set, not {@code null}
+     * @throws NullPointerException
+     *             if {@code classNameGenerator} is {@code null}
+     */
+    public void setClassNameGenerator(
+            SerializableFunction<TItem, String> classNameGenerator) {
+        Objects.requireNonNull(classNameGenerator,
+                "Class name generator can not be null");
+        this.classNameGenerator = classNameGenerator;
+        dataController.reset();
+    }
+
+    /**
+     * Gets the item class name generator that is used for generating CSS class
+     * names for the dropdown items in the ComboBox.
+     *
+     * @since 24.5
+     * @return the item class name generator, not null
+     */
+    public SerializableFunction<TItem, String> getItemClassNameGenerator() {
+        return classNameGenerator;
+    }
+
+    /**
+     * Generates a string class name for a data item using the current item
+     * class name generator
+     *
+     * @param item
+     *            the data item
+     * @return string class name for the data item
+     */
+    protected String generateClassName(TItem item) {
+        if (item == null) {
+            return "";
+        }
+        String label = getItemClassNameGenerator().apply(item);
+        if (label == null) {
+            return "";
         }
         return label;
     }
@@ -1134,18 +1233,25 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
 
     @Override
     public void setManualValidation(boolean enabled) {
-        this.manualValidationEnabled = enabled;
+        validationController.setManualValidation(enabled);
     }
 
-    protected void validate() {
-        if (!this.manualValidationEnabled) {
-            boolean isRequired = isRequiredIndicatorVisible();
-            boolean isInvalid = ValidationUtil
-                    .checkRequired(isRequired, getValue(), getEmptyValue())
-                    .isError();
+    @Override
+    public Validator<TValue> getDefaultValidator() {
+        return defaultValidator;
+    }
 
-            setInvalid(isInvalid);
-        }
+    /**
+     * Validates the current value against the constraints and sets the
+     * {@code invalid} property and the {@code errorMessage} property based on
+     * the result. If a custom error message is provided with
+     * {@link #setErrorMessage(String)}, it is used. Otherwise, the error
+     * message defined in the i18n object is used.
+     * <p>
+     * The method does nothing if the manual validation mode is enabled.
+     */
+    protected void validate() {
+        validationController.validate(getValue());
     }
 
     /**
@@ -1170,5 +1276,34 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         public String getDetail() {
             return detail;
         }
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(ComboBoxBaseI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    protected ComboBoxBaseI18n getI18n() {
+        return i18n;
+    }
+
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    protected void setI18n(ComboBoxBaseI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+    }
+
+    private String getI18nErrorMessage(
+            Function<ComboBoxBaseI18n, String> getter) {
+        return Optional.ofNullable(i18n).map(getter).orElse("");
     }
 }

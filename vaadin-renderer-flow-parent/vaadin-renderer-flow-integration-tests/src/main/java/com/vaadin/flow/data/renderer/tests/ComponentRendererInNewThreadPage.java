@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.data.renderer.tests;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.UI;
@@ -27,9 +30,6 @@ import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.shared.communication.PushMode;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 
 /**
  * Page created for testing purposes. Not suitable for demos.

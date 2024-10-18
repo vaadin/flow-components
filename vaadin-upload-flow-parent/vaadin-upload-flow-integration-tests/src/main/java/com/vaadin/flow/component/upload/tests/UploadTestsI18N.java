@@ -12,15 +12,14 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
-
 package com.vaadin.flow.component.upload.tests;
 
-import com.vaadin.flow.component.upload.UploadI18N;
-
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.vaadin.flow.component.upload.UploadI18N;
 
 class UploadTestsI18N {
     static final UploadI18N RUSSIAN_FULL = new UploadI18N()
@@ -56,7 +55,7 @@ class UploadTestsI18N {
             .setUnits(Stream
                     .of("Б", "Кбайт", "Мбайт", "Гбайт", "Тбайт", "Пбайт",
                             "Эбайт", "Збайт", "Ибайт")
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList()), 1024);
 
     static final UploadI18N RUSSIAN_PARTIAL = new UploadI18N()
             // Only translate a single property from dropFiles
@@ -64,4 +63,6 @@ class UploadTestsI18N {
                     .setOne("Перетащите файл сюда..."))
             // Set an empty object into addFiles, but don't translate anything
             .setAddFiles(new UploadI18N.AddFiles());
+
+    static final Set<String> OPTIONAL_KEYS = Set.of("units.sizeBase");
 }

@@ -1,27 +1,35 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.gridpro.tests;
 
-import com.vaadin.flow.component.gridpro.testbench.GridProElement;
-import com.vaadin.flow.component.gridpro.testbench.GridTHTDElement;
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractParallelTest;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.vaadin.flow.component.gridpro.testbench.GridProElement;
+import com.vaadin.flow.component.gridpro.testbench.GridTHTDElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class BasicIT extends AbstractParallelTest {
+@TestPath("vaadin-grid-pro")
+public class BasicIT extends AbstractComponentIT {
 
     private GridProElement grid, beanGrid;
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-grid-pro");
-        getDriver().get(url);
+        open();
         grid = $(GridProElement.class).waitForFirst();
         beanGrid = $(GridProElement.class).get(1);
     }
@@ -72,7 +80,7 @@ public class BasicIT extends AbstractParallelTest {
                 .$("vaadin-grid-pro-edit-text-field").first();
 
         textField.setProperty("value", "Person 999");
-        textField.dispatchEvent("focusout");
+        executeScript("arguments[0].blur();", textField);
         sorter.click();
         sorter.click();
         Assert.assertEquals("Person 999", bodyCell.getInnerHTML());
@@ -94,7 +102,7 @@ public class BasicIT extends AbstractParallelTest {
         TestBenchElement checkbox = cell.$("vaadin-grid-pro-edit-checkbox")
                 .first();
         checkbox.click();
-        checkbox.dispatchEvent("focusout");
+        executeScript("arguments[0].blur();", checkbox);
 
         waitUntil(driver -> cell.$("span").exists());
         Assert.assertEquals("Yes", cell.$("span").first().getText());
@@ -118,7 +126,7 @@ public class BasicIT extends AbstractParallelTest {
             return comboItems.size() > 0;
         });
         comboBox.setProperty("value", "2");
-        comboBox.dispatchEvent("focusout");
+        executeScript("arguments[0].blur();", comboBox);
 
         waitUntil(driver -> cell.$("span").exists());
         Assert.assertEquals("City 2", cell.$("span").first().getText());
@@ -139,6 +147,19 @@ public class BasicIT extends AbstractParallelTest {
         String eventsPanelText = getPanelText("events-panel");
         Assert.assertEquals(1,
                 eventsPanelText.split("CellEditStarted").length - 1);
+        Assert.assertTrue(eventsPanelText
+                .contains("Person{id=1, age=23, name='Person 1', "
+                        + "isSubscriber=false, email='person1@vaadin.com', "
+                        + "department=sales, city='City 1', employmentYear=2019}"));
+    }
+
+    @Test
+    public void itemClickListenerListenerCalledOnce() {
+        GridTHTDElement cell = grid.getCell(0, 2);
+        cell.click();
+
+        String eventsPanelText = getPanelText("events-panel");
+        Assert.assertEquals(1, eventsPanelText.split("ItemClicked").length - 1);
         Assert.assertTrue(eventsPanelText
                 .contains("Person{id=1, age=23, name='Person 1', "
                         + "isSubscriber=false, email='person1@vaadin.com', "
@@ -305,7 +326,7 @@ public class BasicIT extends AbstractParallelTest {
                 .first();
 
         textField.setProperty("value", "Updated Person 1");
-        textField.dispatchEvent("focusout");
+        executeScript("arguments[0].blur();", textField);
 
         Assert.assertEquals("Updated Person 1",
                 grid.getCell(0, 1).getInnerHTML());

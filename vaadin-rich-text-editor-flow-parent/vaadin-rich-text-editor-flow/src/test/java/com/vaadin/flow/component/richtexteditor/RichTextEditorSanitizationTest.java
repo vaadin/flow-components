@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.richtexteditor;
 
 import org.junit.Assert;
@@ -55,6 +63,24 @@ public class RichTextEditorSanitizationTest {
     public void sanitizeH3Tag_H3TagPersist() {
         Assert.assertEquals("<h3>Foo</h3>",
                 RichTextEditor.sanitize("<h3>Foo</h3>"));
+    }
+
+    // Style group sanitization
+
+    @Test
+    public void sanitizeStyleColor_StyleColorPersist() {
+        Assert.assertEquals(
+                "<p><span style=\"color: rgb(230, 0, 0);\">Foo</span></p>",
+                RichTextEditor.sanitize(
+                        "<p><span style=\"color: rgb(230, 0, 0);\">Foo</span></p>"));
+    }
+
+    @Test
+    public void sanitizeStyleBackgroundColor_StyleBackgroundColorPersist() {
+        Assert.assertEquals(
+                "<p><span style=\"background-color: rgb(230, 0, 0);\">Foo</span></p>",
+                RichTextEditor.sanitize(
+                        "<p><span style=\"background-color: rgb(230, 0, 0);\">Foo</span></p>"));
     }
 
     // Super - / Sub - scripts group sanitization

@@ -15,13 +15,14 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.component.grid.CellFocusEvent;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * IT for grid's Flow based cell focus event.

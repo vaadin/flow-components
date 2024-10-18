@@ -110,7 +110,7 @@ public class NumberFieldPage extends Div {
 
         dollarField.setId("dollar-field");
         euroField.setId("euro-field");
-        stepperField.setId("step-number-field");
+        stepperField.setId("step-number-field-2");
 
         add(dollarField, euroField, stepperField);
     }

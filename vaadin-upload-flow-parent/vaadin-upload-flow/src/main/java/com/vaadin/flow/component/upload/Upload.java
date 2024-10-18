@@ -34,8 +34,8 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -59,9 +59,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/upload", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/upload", version = "24.6.0-alpha2")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasSize, HasStyle {
 
@@ -209,6 +209,7 @@ public class Upload extends Component implements HasSize, HasStyle {
      */
     public void setMaxFiles(int maxFiles) {
         getElement().setProperty("maxFiles", maxFiles);
+        getElement().executeJs("this.maxFiles = $0", maxFiles);
     }
 
     /**
@@ -218,6 +219,11 @@ public class Upload extends Component implements HasSize, HasStyle {
      */
     public int getMaxFiles() {
         return (int) getElement().getProperty("maxFiles", 0.0);
+    }
+
+    private void removeMaxFiles() {
+        getElement().removeProperty("maxFiles");
+        getElement().executeJs("this.maxFiles = Infinity");
     }
 
     /**
@@ -500,7 +506,24 @@ public class Upload extends Component implements HasSize, HasStyle {
      *            bytes received so far
      * @param contentLength
      *            actual size of the file being uploaded, if known
+     *
+     * @deprecated since 24.4. Use
+     *             {@link #fireUpdateProgress(long, long, String)}
+     */
+    @Deprecated(since = "24.4")
+    protected void fireUpdateProgress(long totalBytes, long contentLength) {
+        fireEvent(
+                new ProgressUpdateEvent(this, totalBytes, contentLength, null));
+    }
+
+    /**
+     * Emit the progress event.
+     *
+     * @param totalBytes
+     *            bytes received so far
      * @param contentLength
+     *            actual size of the file being uploaded, if known
+     * @param fileName
      *            name of the file being uploaded
      */
     protected void fireUpdateProgress(long totalBytes, long contentLength,
@@ -615,24 +638,31 @@ public class Upload extends Component implements HasSize, HasStyle {
      *            receiver to use for file reception
      */
     public void setReceiver(Receiver receiver) {
+        Receiver oldReceiver = this.receiver;
         this.receiver = receiver;
-        if (!(receiver instanceof MultiFileReceiver)) {
-            setMaxFiles(1);
+
+        if (isMultiFileReceiver(receiver)) {
+            if (oldReceiver != null && !isMultiFileReceiver(oldReceiver)) {
+                removeMaxFiles();
+            }
         } else {
-            getElement().removeAttribute("maxFiles");
+            setMaxFiles(1);
         }
+    }
+
+    private boolean isMultiFileReceiver(Receiver receiver) {
+        return receiver instanceof MultiFileReceiver;
     }
 
     /**
      * Set the internationalization properties for this component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(UploadI18N i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
 
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {
@@ -696,12 +726,10 @@ public class Upload extends Component implements HasSize, HasStyle {
     /**
      * Get the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content that is gotten from this method will
-     * not update the language on the component if not set back using
-     * {@link Upload#setI18n(UploadI18N)}
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using {@link #setI18n(UploadI18N)}
      *
-     * @return the object with the i18n properties. If the i18n properties
-     *         weren't set, the object will return <code>null</code>.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public UploadI18N getI18n() {
         return i18n;

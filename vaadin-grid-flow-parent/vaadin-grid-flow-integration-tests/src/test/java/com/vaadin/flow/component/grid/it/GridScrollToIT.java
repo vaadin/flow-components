@@ -22,8 +22,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the GridPageSizePage view.
@@ -82,6 +82,26 @@ public class GridScrollToIT extends AbstractComponentIT {
     @Test
     public void grid_addItem_scrollToIndex() {
         $("button").id("add-row-and-scroll-to-index").click();
+
+        checkLogsForErrors();
+        Assert.assertEquals(1001, grid.getLastVisibleRowIndex());
+        Assert.assertEquals("1001",
+                grid.getCell(grid.getLastVisibleRowIndex(), 0).getText());
+    }
+
+    @Test
+    public void grid_scrollToItem500() {
+        $("button").id("scroll-to-item-500").click();
+
+        checkLogsForErrors();
+        Assert.assertEquals(500, grid.getFirstVisibleRowIndex());
+        Assert.assertEquals("500",
+                grid.getCell(grid.getFirstVisibleRowIndex(), 0).getText());
+    }
+
+    @Test
+    public void grid_addItem_scrollToItem() {
+        $("button").id("add-row-and-scroll-to-item").click();
 
         checkLogsForErrors();
         Assert.assertEquals(1001, grid.getLastVisibleRowIndex());

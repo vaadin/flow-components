@@ -15,13 +15,14 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import java.util.Optional;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
@@ -36,8 +37,6 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
 
-import java.util.Optional;
-
 /**
  * Internal class that provides base functionality for input field components,
  * such as {@link TextField}. Not intended to be used publicly.
@@ -51,9 +50,9 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements CompositionNotifier, Focusable<TComponent>, HasAriaLabel,
         HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
-        HasClientValidation, HasHelper, HasPrefixAndSuffix,
-        HasValidationProperties, HasValidator<TValue>, HasValueChangeMode,
-        HasPlaceholder, InputNotifier, KeyNotifier,
+        HasClientValidation, HasPrefixAndSuffix, HasValidationProperties,
+        HasValidator<TValue>, HasValueChangeMode, HasPlaceholder, InputNotifier,
+        KeyNotifier,
         InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue> {
 
     private ValueChangeMode currentMode;
@@ -159,22 +158,51 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
     }
 
     /**
-     * Specifies that the user must fill in a value.
+     * Sets whether the user is required to provide a value. When required, an
+     * indicator appears next to the label and the field invalidates if the
+     * value is cleared.
+     * <p>
+     * NOTE: The required indicator is only visible when the field has a label,
+     * see {@link #setLabel(String)}.
      *
      * @param required
-     *            the boolean value to set
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      */
-    public void setRequired(boolean required) {
-        getElement().setProperty("required", required);
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
     }
 
     /**
-     * Determines whether the field is marked as input required.
+     * Gets whether the user is required to provide a value.
      *
-     * @return {@code true} if the input is required, {@code false} otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
+     * @see #setRequiredIndicatorVisible(boolean)
+     */
+    @Override
+    public boolean isRequiredIndicatorVisible() {
+        return super.isRequiredIndicatorVisible();
+    }
+
+    /**
+     * Alias for {@link #setRequiredIndicatorVisible(boolean)}.
+     *
+     * @param required
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
+     */
+    public void setRequired(boolean required) {
+        setRequiredIndicatorVisible(required);
+    }
+
+    /**
+     * Alias for {@link #isRequiredIndicatorVisible()}
+     *
+     * @return {@code true} if the field is required, {@code false} otherwise
      */
     public boolean isRequired() {
-        return getElement().getProperty("required", false);
+        return isRequiredIndicatorVisible();
     }
 
     @Override

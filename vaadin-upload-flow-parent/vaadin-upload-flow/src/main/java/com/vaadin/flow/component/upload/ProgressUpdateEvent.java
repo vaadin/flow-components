@@ -42,6 +42,25 @@ public class ProgressUpdateEvent extends ComponentEvent<Upload> {
     /**
      * Event constructor method to construct a new progress event.
      *
+     * @deprecated since 24.4. Use
+     *             {@link #ProgressUpdateEvent(Upload, long, long, String)}
+     *
+     * @param source
+     *            the source of the file
+     * @param readBytes
+     *            bytes transferred
+     * @param contentLength
+     *            total size of file currently being uploaded, -1 if unknown
+     */
+    @Deprecated(since = "24.4")
+    public ProgressUpdateEvent(Upload source, long readBytes,
+            long contentLength) {
+        this(source, readBytes, contentLength, null);
+    }
+
+    /**
+     * Event constructor method to construct a new progress event.
+     *
      * @param source
      *            the source of the file
      * @param readBytes

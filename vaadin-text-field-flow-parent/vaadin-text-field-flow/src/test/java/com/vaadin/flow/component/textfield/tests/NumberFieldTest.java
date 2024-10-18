@@ -15,6 +15,16 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import java.util.Arrays;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.UI;
@@ -27,16 +37,6 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 /**
  * Tests for the {@link NumberField}.
@@ -190,6 +190,13 @@ public class NumberFieldTest extends TextFieldTest {
         assertInvalidValues(-4.5, 0.0, 1.0, 4.5);
     }
 
+    @Test
+    public void setMinNegativeInfinity_doesNotThrow() {
+        field.setStep(1.0);
+        field.setMin(Double.NEGATIVE_INFINITY);
+        field.setValue(6.0);
+    }
+
     @Override
     @Test
     public void elementHasValue_wrapIntoTextField_propertyIsNotSetToInitialValue() {
@@ -292,5 +299,17 @@ public class NumberFieldTest extends TextFieldTest {
 
         field.setAriaLabelledBy(null);
         Assert.assertTrue(field.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void setI18n_getI18n() {
+        NumberField textField = new NumberField();
+        NumberField.NumberFieldI18n i18n = new NumberField.NumberFieldI18n()
+                .setBadInputErrorMessage("Bad input error")
+                .setRequiredErrorMessage("Required error")
+                .setMinErrorMessage("Min error").setMaxErrorMessage("Max error")
+                .setStepErrorMessage("Step error");
+        textField.setI18n(i18n);
+        Assert.assertEquals(i18n, textField.getI18n());
     }
 }

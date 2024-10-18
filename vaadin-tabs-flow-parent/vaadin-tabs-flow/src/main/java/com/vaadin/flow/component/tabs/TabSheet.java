@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.tabs;
 
 import java.util.HashMap;
@@ -46,7 +45,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabsheet")
-@NpmPackage(value = "@vaadin/tabsheet", version = "24.4.0-alpha3")
+@NpmPackage(value = "@vaadin/tabsheet", version = "24.6.0-alpha2")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
         HasSuffix, HasThemeVariant<TabSheetVariant> {
@@ -248,6 +247,15 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
      */
     public void setSelectedTab(Tab selectedTab) {
         tabs.setSelectedTab(selectedTab);
+    }
+
+    /**
+     * Gets the number of tabs.
+     *
+     * @return the number of tabs
+     */
+    public int getTabCount() {
+        return tabs.getTabCount();
     }
 
     /**

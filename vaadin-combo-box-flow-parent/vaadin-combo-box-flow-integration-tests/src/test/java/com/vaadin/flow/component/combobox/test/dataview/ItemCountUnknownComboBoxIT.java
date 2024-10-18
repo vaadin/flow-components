@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.combobox.test.dataview;
 
 import static com.vaadin.flow.component.combobox.test.dataview.AbstractItemCountComboBoxPage.DEFAULT_DATA_PROVIDER_SIZE;
@@ -146,6 +145,8 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
     @Test
     public void undefinedItemCount_enterClientFilter_displaysFilteredItem() {
         open(300);
+
+        comboBoxElement.openPopup();
 
         assertLoadedItemsCount("Should be 50 items before filtering", 50,
                 comboBoxElement);

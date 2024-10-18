@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.html.Span;
 import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Assert;
@@ -34,6 +33,7 @@ import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.server.VaadinSession;
 
@@ -159,6 +159,31 @@ public class DialogTest {
     }
 
     @Test
+    public void getOverlayRole_defaultDialog() {
+        Dialog dialog = new Dialog();
+
+        Assert.assertEquals("dialog", dialog.getOverlayRole());
+        Assert.assertEquals("dialog",
+                dialog.getElement().getProperty("overlayRole"));
+    }
+
+    @Test
+    public void setOverlayRole_getOverlayRole() {
+        Dialog dialog = new Dialog();
+        dialog.setOverlayRole("alertdialog");
+
+        Assert.assertEquals("alertdialog", dialog.getOverlayRole());
+        Assert.assertEquals("alertdialog",
+                dialog.getElement().getProperty("overlayRole"));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setOverlayRole_null_throws() {
+        Dialog dialog = new Dialog();
+        dialog.setOverlayRole(null);
+    }
+
+    @Test
     public void setModal_dialogCanBeModeless() {
         Dialog dialog = new Dialog();
         dialog.setModal(false);
@@ -224,6 +249,18 @@ public class DialogTest {
 
         Assert.assertTrue(thirdContent.getParent().isPresent());
         Assert.assertEquals(thirdContent.getParent().get(), dialog);
+
+        Span fourthContent = new Span("fourth_content");
+        dialog.getHeader().addComponentAsFirst(fourthContent);
+
+        Assert.assertTrue(fourthContent.getParent().isPresent());
+        Assert.assertEquals(fourthContent.getParent().get(), dialog);
+
+        Span fifthContent = new Span("fifth_content");
+        dialog.getHeader().addComponentAtIndex(2, fifthContent);
+
+        Assert.assertTrue(fifthContent.getParent().isPresent());
+        Assert.assertEquals(fifthContent.getParent().get(), dialog);
     }
 
     @Test
@@ -279,7 +316,7 @@ public class DialogTest {
     @Test(expected = NullPointerException.class)
     public void callAddToHeaderOrFooter_withNull_shouldThrowError() {
         Dialog dialog = new Dialog();
-        dialog.getHeader().add(null);
+        dialog.getHeader().add((Component) null);
     }
 
     @Test(expected = NullPointerException.class)
