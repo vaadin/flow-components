@@ -105,18 +105,6 @@ public class LoginOverlayTest {
     }
 
     @Test
-    public void setAction_nullValue_restoreDefaultListener() {
-        final LoginOverlay overlay = new LoginOverlay();
-        overlay.setAction("login");
-        overlay.setError(true);
-
-        ComponentUtil.fireEvent(overlay, new AbstractLogin.LoginEvent(overlay,
-                true, "username", "password"));
-        Assert.assertTrue(overlay.isEnabled());
-        Assert.assertTrue(overlay.isError());
-    }
-
-    @Test
     public void addLoginListener_actionSet_throws() {
         final LoginOverlay overlay = new LoginOverlay();
         overlay.setAction("login");

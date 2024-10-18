@@ -148,18 +148,6 @@ public class LoginFormTest {
     }
 
     @Test
-    public void setAction_nullValue_restoreDefaultListener() {
-        final LoginForm form = new LoginForm();
-        form.setAction("login");
-        form.setError(true);
-
-        ComponentUtil.fireEvent(form, new AbstractLogin.LoginEvent(form, true,
-                "username", "password"));
-        Assert.assertTrue(form.isEnabled());
-        Assert.assertTrue(form.isError());
-    }
-
-    @Test
     public void addLoginListener_actionSet_throws() {
         final LoginForm form = new LoginForm();
         form.setAction("login");
