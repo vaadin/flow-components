@@ -5056,9 +5056,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             SerializableComparator<T> sortComparator) {
         updateInMemorySorting(sortComparator);
         updateInMemoryFiltering(filter);
-
-        // Call refreshAll as data may have changed due filter change
-        getDataProvider().refreshAll();
     }
 
     private void updateInMemoryFiltering(
