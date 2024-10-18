@@ -15,10 +15,6 @@
  */
 import './contextMenuConnector.js';
 
-const tryCatchWrapper = function (callback) {
-  return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Menu Bar');
-};
-
 /**
  * Initializes the connector for a menu bar element.
  *
@@ -52,7 +48,7 @@ function initLazy(menubar, appId) {
      *
      * @param {number | undefined} nodeId
      */
-    generateItems: tryCatchWrapper((nodeId) => {
+    generateItems(nodeId) {
       if (!menubar.shadowRoot) {
         // workaround for https://github.com/vaadin/flow/issues/5722
         setTimeout(() => menubar.$connector.generateItems(nodeId));
@@ -111,7 +107,7 @@ function initLazy(menubar, appId) {
           });
         }
       });
-    })
+    }
   };
 }
 
@@ -123,11 +119,4 @@ function setClassName(component) {
   }
 }
 
-window.Vaadin.Flow.menubarConnector = {
-  initLazy(...args) {
-    return tryCatchWrapper(initLazy)(...args);
-  },
-  setClassName(...args) {
-    return tryCatchWrapper(setClassName)(...args);
-  }
-};
+window.Vaadin.Flow.menubarConnector = { initLazy, setClassName };
