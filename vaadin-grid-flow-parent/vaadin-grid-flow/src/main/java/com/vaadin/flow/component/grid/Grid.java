@@ -1413,6 +1413,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private GridSelectionModel<T> selectionModel;
     private SelectionMode selectionMode;
+    private SerializablePredicate<T> selectableProvider = item -> true;
 
     private final DetailsManager detailsManager;
 
@@ -1710,6 +1711,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         gridDataGenerator.addDataGenerator(this::generateTooltipTextData);
         gridDataGenerator.addDataGenerator(this::generateRowsDragAndDropAccess);
         gridDataGenerator.addDataGenerator(this::generateDragData);
+        gridDataGenerator.addDataGenerator(this::generateSelectableData);
 
         dataCommunicator = dataCommunicatorBuilder.build(getElement(),
                 gridDataGenerator, (U) arrayUpdater,
@@ -3068,6 +3070,30 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return model;
     }
 
+    SerializablePredicate<T> getItemSelectableProvider() {
+        return selectableProvider;
+    }
+
+    /**
+     * Sets a predicate to check whether a specific item in the grid may be
+     * selected or deselected by the user. The predicate receives an item
+     * instance and should return {@code true} if a user may change the
+     * selection state of that item, or {@code false} otherwise.
+     * <p>
+     * This function does not prevent programmatic selection/deselection of
+     * items. Changing the function does not modify the currently selected
+     * items.
+     *
+     * @param provider
+     *            the function to use to determine whether an item may be
+     *            selected or deselected by the user, not {@code null}
+     */
+    public void setItemSelectableProvider(SerializablePredicate<T> provider) {
+        Objects.requireNonNull(provider, "Provider cannot be null");
+        this.selectableProvider = provider;
+        getDataCommunicator().reset();
+    }
+
     /**
      * Use this grid as a single select in {@link Binder}.
      * <p>
@@ -4365,6 +4391,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (dragData.keys().length > 0) {
             jsonObject.put("dragData", dragData);
         }
+    }
+
+    private void generateSelectableData(T item, JsonObject jsonObject) {
+        boolean selectable = selectableProvider == null
+                || selectableProvider.test(item);
+
+        jsonObject.put("selectable", selectable);
     }
 
     /**

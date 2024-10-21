@@ -105,7 +105,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public void selectFromClient(T item) {
-        if (isSelected(item)) {
+        boolean selectable = getGrid().getItemSelectableProvider().test(item);
+        if (isSelected(item) || !selectable) {
             return;
         }
 
@@ -131,7 +132,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public void deselectFromClient(T item) {
-        if (!isSelected(item)) {
+        boolean selectable = getGrid().getItemSelectableProvider().test(item);
+        if (!isSelected(item) || !selectable) {
             return;
         }
 

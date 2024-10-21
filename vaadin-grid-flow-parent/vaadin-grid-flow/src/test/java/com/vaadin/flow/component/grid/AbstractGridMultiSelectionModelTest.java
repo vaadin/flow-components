@@ -471,6 +471,93 @@ public class AbstractGridMultiSelectionModelTest {
                 grid.getSelectedItems().contains(items.get(0)));
     }
 
+    @Test
+    public void selectFromClient_withItemSelectableProvider_preventsSelection() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItemSelectableProvider(item -> !item.equals("foo"));
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        // prevents selection of non-selectable item
+        selectionModel.selectFromClient("foo");
+        Assert.assertEquals(Set.of(), grid.getSelectedItems());
+
+        // allows selection of selectable item
+        selectionModel.selectFromClient("bar");
+        Assert.assertEquals(Set.of("bar"), grid.getSelectedItems());
+    }
+
+    @Test
+    public void deselectFromClient_withItemSelectableProvider_preventsDeselection() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItemSelectableProvider(item -> !item.equals("foo"));
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        // prevents deselection of non-selectable item
+        selectionModel.select("foo");
+        selectionModel.deselectFromClient("foo");
+        Assert.assertEquals(Set.of("foo"), grid.getSelectedItems());
+
+        // allows deselection of selectable item
+        selectionModel.select("bar");
+        selectionModel.deselectFromClient("bar");
+        Assert.assertEquals(Set.of("foo"), grid.getSelectedItems());
+    }
+
+    @Test
+    public void select_withItemSelectableProvider_allowsSelection() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItemSelectableProvider(item -> !item.equals("foo"));
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        // allows selection using select
+        selectionModel.select("foo");
+        Assert.assertEquals(Set.of("foo"), grid.getSelectedItems());
+
+        // allows selection using selectItems
+        selectionModel.deselectAll();
+        selectionModel.selectItems("foo", "bar");
+        Assert.assertEquals(Set.of("foo", "bar"), grid.getSelectedItems());
+
+        // allows selection using updateSelection
+        selectionModel.deselectAll();
+        selectionModel.updateSelection(Set.of("foo", "bar"), Set.of());
+        Assert.assertEquals(Set.of("foo", "bar"), grid.getSelectedItems());
+    }
+
+    @Test
+    public void deselect_withItemSelectableProvider_allowsDeselection() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItemSelectableProvider(item -> !item.equals("foo"));
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        // allows deselection using deselect
+        selectionModel.select("foo");
+        selectionModel.deselect("foo");
+        Assert.assertEquals(Set.of(), grid.getSelectedItems());
+
+        // allows deselection using deselectItems
+        selectionModel.selectItems("foo", "bar");
+        selectionModel.deselectItems("foo", "bar");
+        Assert.assertEquals(Set.of(), grid.getSelectedItems());
+
+        // allows deselection using updateSelection
+        selectionModel.updateSelection(Set.of("foo", "bar"), Set.of());
+        selectionModel.updateSelection(Set.of(), Set.of("foo", "bar"));
+        Assert.assertEquals(Set.of(), grid.getSelectedItems());
+    }
+
     private void verifySelectAllCheckboxVisibilityInMultiSelectMode(
             boolean inMemory, boolean unknownItemCount,
             boolean expectedVisibility,
