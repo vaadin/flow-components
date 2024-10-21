@@ -174,8 +174,8 @@ class GridColumnOrderHelper<T> {
 
         // holds the current immediate child columns.
         final Set<AbstractColumn<?>> childColumns = new HashSet<>();
-        column.getChildren().filter(c -> !(c instanceof GridSelectionColumn))
-                .forEach(it -> childColumns.add((AbstractColumn) it));
+        column.getChildren().filter(c -> c instanceof AbstractColumn<?>)
+                .forEach(it -> childColumns.add((AbstractColumn<?>) it));
         // the new order of the children is computed here.
         final List<AbstractColumn<?>> newOrder = new ArrayList<>();
 
