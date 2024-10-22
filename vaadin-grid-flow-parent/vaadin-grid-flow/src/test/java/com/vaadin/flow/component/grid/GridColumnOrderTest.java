@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.data.renderer.IconRenderer;
 
@@ -312,6 +313,16 @@ public class GridColumnOrderTest {
                 thirdColumn);
         assertArrayEquals(new Object[] { firstColumn, fourthColumn,
                 secondColumn, thirdColumn }, grid.getColumns().toArray());
+    }
+
+    @Test
+    public void setColumnOrder_ignoresNonColumnChildren() {
+        grid.setEmptyStateComponent(new Div());
+
+        grid.setColumnOrder(fourthColumn, thirdColumn, secondColumn,
+                firstColumn);
+        assertArrayEquals(new Object[] { fourthColumn, thirdColumn,
+                secondColumn, firstColumn }, grid.getColumns().toArray());
     }
 
     private String dumpColumnHierarchyFromDOM() {

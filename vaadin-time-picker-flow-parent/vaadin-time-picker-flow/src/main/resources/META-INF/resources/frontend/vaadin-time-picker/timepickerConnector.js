@@ -10,184 +10,182 @@ import {
 } from './helpers.js';
 import { TimePicker } from '@vaadin/time-picker/src/vaadin-time-picker.js';
 
-(function () {
-  const tryCatchWrapper = function (callback) {
-    return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Time Picker');
-  };
+const tryCatchWrapper = function (callback) {
+  return window.Vaadin.Flow.tryCatchWrapper(callback, 'Vaadin Time Picker');
+};
 
-  // Execute callback when predicate returns true.
-  // Try again later if predicate returns false.
-  function when(predicate, callback, timeout = 0) {
-    if (predicate()) {
-      callback();
-    } else {
-      setTimeout(() => when(predicate, callback, 200), timeout);
-    }
+// Execute callback when predicate returns true.
+// Try again later if predicate returns false.
+function when(predicate, callback, timeout = 0) {
+  if (predicate()) {
+    callback();
+  } else {
+    setTimeout(() => when(predicate, callback, 200), timeout);
   }
+}
 
-  function parseISO(text) {
-    // The default i18n parser of the web component is ISO 8601 compliant.
-    const timeObject = TimePicker.properties.i18n.value().parseTime(text);
+function parseISO(text) {
+  // The default i18n parser of the web component is ISO 8601 compliant.
+  const timeObject = TimePicker.properties.i18n.value().parseTime(text);
 
-    // The web component returns an object with string values
-    // while the connector expects number values.
-    return {
-      hours: parseInt(timeObject.hours || 0),
-      minutes: parseInt(timeObject.minutes || 0),
-      seconds: parseInt(timeObject.seconds || 0),
-      milliseconds: parseInt(timeObject.milliseconds || 0)
-    }
-  };
+  // The web component returns an object with string values
+  // while the connector expects number values.
+  return {
+    hours: parseInt(timeObject.hours || 0),
+    minutes: parseInt(timeObject.minutes || 0),
+    seconds: parseInt(timeObject.seconds || 0),
+    milliseconds: parseInt(timeObject.milliseconds || 0)
+  }
+};
 
-  window.Vaadin.Flow.timepickerConnector = {
-    initLazy: (timepicker) =>
-      tryCatchWrapper(function (timepicker) {
-        // Check whether the connector was already initialized for the timepicker
-        if (timepicker.$connector) {
-          return;
+window.Vaadin.Flow.timepickerConnector = {
+  initLazy: (timepicker) =>
+    tryCatchWrapper(function (timepicker) {
+      // Check whether the connector was already initialized for the timepicker
+      if (timepicker.$connector) {
+        return;
+      }
+
+      timepicker.$connector = {};
+
+      timepicker.$connector.setLocale = tryCatchWrapper(function (locale) {
+        // capture previous value if any
+        let previousValueObject;
+        if (timepicker.value && timepicker.value !== '') {
+          previousValueObject = parseISO(timepicker.value);
         }
 
-        timepicker.$connector = {};
+        try {
+          // Check whether the locale is supported by the browser or not
+          TEST_PM_TIME.toLocaleTimeString(locale);
+        } catch (e) {
+          locale = 'en-US';
+          // FIXME should do a callback for server to throw an exception ?
+          throw new Error(
+            'vaadin-time-picker: The locale ' +
+              locale +
+              ' is not supported, falling back to default locale setting(en-US).'
+          );
+        }
 
-        timepicker.$connector.setLocale = tryCatchWrapper(function (locale) {
-          // capture previous value if any
-          let previousValueObject;
-          if (timepicker.value && timepicker.value !== '') {
-            previousValueObject = parseISO(timepicker.value);
-          }
+        // 1. 24 or 12 hour clock, if latter then what are the am/pm strings ?
+        const pmString = getPmString(locale);
+        const amString = getAmString(locale);
 
-          try {
-            // Check whether the locale is supported by the browser or not
-            TEST_PM_TIME.toLocaleTimeString(locale);
-          } catch (e) {
-            locale = 'en-US';
-            // FIXME should do a callback for server to throw an exception ?
-            throw new Error(
-              'vaadin-time-picker: The locale ' +
-                locale +
-                ' is not supported, falling back to default locale setting(en-US).'
-            );
-          }
+        // 2. What is the separator ?
+        const separator = getSeparator(locale);
 
-          // 1. 24 or 12 hour clock, if latter then what are the am/pm strings ?
-          const pmString = getPmString(locale);
-          const amString = getAmString(locale);
+        const includeSeconds = function () {
+          return timepicker.step && timepicker.step < 60;
+        };
 
-          // 2. What is the separator ?
-          const separator = getSeparator(locale);
+        const includeMilliSeconds = function () {
+          return timepicker.step && timepicker.step < 1;
+        };
 
-          const includeSeconds = function () {
-            return timepicker.step && timepicker.step < 60;
-          };
+        let cachedTimeString;
+        let cachedTimeObject;
 
-          const includeMilliSeconds = function () {
-            return timepicker.step && timepicker.step < 1;
-          };
+        timepicker.i18n = {
+          formatTime: tryCatchWrapper(function (timeObject) {
+            if (!timeObject) return;
 
-          let cachedTimeString;
-          let cachedTimeObject;
+            const timeToBeFormatted = new Date();
+            timeToBeFormatted.setHours(timeObject.hours);
+            timeToBeFormatted.setMinutes(timeObject.minutes);
+            timeToBeFormatted.setSeconds(timeObject.seconds !== undefined ? timeObject.seconds : 0);
 
-          timepicker.i18n = {
-            formatTime: tryCatchWrapper(function (timeObject) {
-              if (!timeObject) return;
+            // the web component expects the correct granularity used for the time string,
+            // thus need to format the time object in correct granularity by passing the format options
+            let localeTimeString = timeToBeFormatted.toLocaleTimeString(locale, {
+              hour: 'numeric',
+              minute: 'numeric',
+              second: includeSeconds() ? 'numeric' : undefined
+            });
 
-              const timeToBeFormatted = new Date();
-              timeToBeFormatted.setHours(timeObject.hours);
-              timeToBeFormatted.setMinutes(timeObject.minutes);
-              timeToBeFormatted.setSeconds(timeObject.seconds !== undefined ? timeObject.seconds : 0);
+            // milliseconds not part of the time format API
+            if (includeMilliSeconds()) {
+              localeTimeString = formatMilliseconds(localeTimeString, timeObject.milliseconds, amString, pmString);
+            }
 
-              // the web component expects the correct granularity used for the time string,
-              // thus need to format the time object in correct granularity by passing the format options
-              let localeTimeString = timeToBeFormatted.toLocaleTimeString(locale, {
-                hour: 'numeric',
-                minute: 'numeric',
-                second: includeSeconds() ? 'numeric' : undefined
-              });
+            return localeTimeString;
+          }),
 
-              // milliseconds not part of the time format API
-              if (includeMilliSeconds()) {
-                localeTimeString = formatMilliseconds(localeTimeString, timeObject.milliseconds, amString, pmString);
-              }
+          parseTime: tryCatchWrapper(function (timeString) {
+            if (timeString && timeString === cachedTimeString && cachedTimeObject) {
+              return cachedTimeObject;
+            }
 
-              return localeTimeString;
-            }),
+            if (!timeString) {
+              // when nothing is returned, the component shows the invalid state for the input
+              return;
+            }
 
-            parseTime: tryCatchWrapper(function (timeString) {
-              if (timeString && timeString === cachedTimeString && cachedTimeObject) {
-                return cachedTimeObject;
-              }
+            const amToken = searchAmOrPmToken(timeString, amString);
+            const pmToken = searchAmOrPmToken(timeString, pmString);
 
-              if (!timeString) {
-                // when nothing is returned, the component shows the invalid state for the input
-                return;
-              }
+            const numbersOnlyTimeString = timeString
+              .replace(amToken || '', '')
+              .replace(pmToken || '', '')
+              .trim();
 
-              const amToken = searchAmOrPmToken(timeString, amString);
-              const pmToken = searchAmOrPmToken(timeString, pmString);
+            // A regexp that allows to find the numbers with optional separator and continuing searching after it.
+            const numbersRegExp = new RegExp('([\\d\\u0660-\\u0669]){1,2}(?:' + separator + ')?', 'g');
 
-              const numbersOnlyTimeString = timeString
-                .replace(amToken || '', '')
-                .replace(pmToken || '', '')
-                .trim();
-
-              // A regexp that allows to find the numbers with optional separator and continuing searching after it.
-              const numbersRegExp = new RegExp('([\\d\\u0660-\\u0669]){1,2}(?:' + separator + ')?', 'g');
-
-              let hours = numbersRegExp.exec(numbersOnlyTimeString);
-              if (hours) {
-                hours = parseDigitsIntoInteger(hours[0].replace(separator, ''));
-                // handle 12 am -> 0
-                // do not do anything if am & pm are not used or if those are the same,
-                // as with locale bg-BG there is always ч. at the end of the time
-                if (amToken !== pmToken) {
-                  if (hours === 12 && amToken) {
-                    hours = 0;
-                  }
-                  if (hours !== 12 && pmToken) {
-                    hours += 12;
-                  }
+            let hours = numbersRegExp.exec(numbersOnlyTimeString);
+            if (hours) {
+              hours = parseDigitsIntoInteger(hours[0].replace(separator, ''));
+              // handle 12 am -> 0
+              // do not do anything if am & pm are not used or if those are the same,
+              // as with locale bg-BG there is always ч. at the end of the time
+              if (amToken !== pmToken) {
+                if (hours === 12 && amToken) {
+                  hours = 0;
                 }
-                const minutes = numbersRegExp.exec(numbersOnlyTimeString);
-                const seconds = minutes && numbersRegExp.exec(numbersOnlyTimeString);
-                // detecting milliseconds from input, expects am/pm removed from end, eg. .0 or .00 or .000
-                const millisecondRegExp = /[[\.][\d\u0660-\u0669]{1,3}$/;
-                // reset to end or things can explode
-                let milliseconds = seconds && includeMilliSeconds() && millisecondRegExp.exec(numbersOnlyTimeString);
-                // handle case where last numbers are seconds and . is the separator (invalid regexp match)
-                if (milliseconds && milliseconds['index'] <= seconds['index']) {
-                  milliseconds = undefined;
-                }
-                // hours is a number at this point, others are either arrays or null
-                // the string in [0] from the arrays includes the separator too
-                cachedTimeObject = hours !== undefined && {
-                  hours: hours,
-                  minutes: minutes ? parseDigitsIntoInteger(minutes[0].replace(separator, '')) : 0,
-                  seconds: seconds ? parseDigitsIntoInteger(seconds[0].replace(separator, '')) : 0,
-                  milliseconds:
-                    minutes && seconds && milliseconds
-                      ? parseMillisecondsIntoInteger(milliseconds[0].replace('.', ''))
-                      : 0
-                };
-                cachedTimeString = timeString;
-                return cachedTimeObject;
-              }
-            })
-          };
-
-          if (previousValueObject) {
-            when(
-              () => timepicker.$,
-              () => {
-                const newValue = timepicker.i18n.formatTime(previousValueObject);
-                // FIXME works but uses private API, needs fixes in web component
-                if (timepicker.inputElement.value !== newValue) {
-                  timepicker.inputElement.value = newValue;
-                  timepicker.$.comboBox.value = newValue;
+                if (hours !== 12 && pmToken) {
+                  hours += 12;
                 }
               }
-            );
-          }
-        });
-      })(timepicker)
-  };
-})();
+              const minutes = numbersRegExp.exec(numbersOnlyTimeString);
+              const seconds = minutes && numbersRegExp.exec(numbersOnlyTimeString);
+              // detecting milliseconds from input, expects am/pm removed from end, eg. .0 or .00 or .000
+              const millisecondRegExp = /[[\.][\d\u0660-\u0669]{1,3}$/;
+              // reset to end or things can explode
+              let milliseconds = seconds && includeMilliSeconds() && millisecondRegExp.exec(numbersOnlyTimeString);
+              // handle case where last numbers are seconds and . is the separator (invalid regexp match)
+              if (milliseconds && milliseconds['index'] <= seconds['index']) {
+                milliseconds = undefined;
+              }
+              // hours is a number at this point, others are either arrays or null
+              // the string in [0] from the arrays includes the separator too
+              cachedTimeObject = hours !== undefined && {
+                hours: hours,
+                minutes: minutes ? parseDigitsIntoInteger(minutes[0].replace(separator, '')) : 0,
+                seconds: seconds ? parseDigitsIntoInteger(seconds[0].replace(separator, '')) : 0,
+                milliseconds:
+                  minutes && seconds && milliseconds
+                    ? parseMillisecondsIntoInteger(milliseconds[0].replace('.', ''))
+                    : 0
+              };
+              cachedTimeString = timeString;
+              return cachedTimeObject;
+            }
+          })
+        };
+
+        if (previousValueObject) {
+          when(
+            () => timepicker.$,
+            () => {
+              const newValue = timepicker.i18n.formatTime(previousValueObject);
+              // FIXME works but uses private API, needs fixes in web component
+              if (timepicker.inputElement.value !== newValue) {
+                timepicker.inputElement.value = newValue;
+                timepicker.$.comboBox.value = newValue;
+              }
+            }
+          );
+        }
+      });
+    })(timepicker)
+};
