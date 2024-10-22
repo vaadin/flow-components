@@ -1413,7 +1413,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private GridSelectionModel<T> selectionModel;
     private SelectionMode selectionMode;
-    private SerializablePredicate<T> selectableProvider = item -> true;
+    private SerializablePredicate<T> selectableProvider;
 
     private final DetailsManager detailsManager;
 
@@ -3070,10 +3070,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return model;
     }
 
-    SerializablePredicate<T> getItemSelectableProvider() {
-        return selectableProvider;
-    }
-
     /**
      * Sets a predicate to check whether a specific item in the grid may be
      * selected or deselected by the user. The predicate receives an item
@@ -3086,12 +3082,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param provider
      *            the function to use to determine whether an item may be
-     *            selected or deselected by the user, not {@code null}
+     *            selected or deselected by the user, or {@code null} to allow
+     *            all items to be selected or deselected
      */
     public void setItemSelectableProvider(SerializablePredicate<T> provider) {
-        Objects.requireNonNull(provider, "Provider cannot be null");
-        this.selectableProvider = provider;
+        selectableProvider = provider;
         getDataCommunicator().reset();
+    }
+
+    boolean isItemSelectable(T item) {
+        return selectableProvider == null || selectableProvider.test(item);
     }
 
     /**
@@ -4394,10 +4394,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     private void generateSelectableData(T item, JsonObject jsonObject) {
-        boolean selectable = selectableProvider == null
-                || selectableProvider.test(item);
-
-        jsonObject.put("selectable", selectable);
+        if (selectableProvider != null) {
+            boolean selectable = selectableProvider.test(item);
+            jsonObject.put("selectable", selectable);
+        }
     }
 
     /**

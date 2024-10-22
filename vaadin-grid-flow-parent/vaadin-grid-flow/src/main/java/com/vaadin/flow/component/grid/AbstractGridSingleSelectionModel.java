@@ -60,7 +60,7 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
 
     @Override
     public void selectFromClient(T item) {
-        boolean selectable = getGrid().getItemSelectableProvider().test(item);
+        boolean selectable = getGrid().isItemSelectable(item);
         if (isSelected(item) || !selectable) {
             return;
         }
@@ -79,7 +79,7 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
 
     @Override
     public void deselectFromClient(T item) {
-        boolean selectable = getGrid().getItemSelectableProvider().test(item);
+        boolean selectable = getGrid().isItemSelectable(item);
         if (isSelected(item) && selectable && isDeselectAllowed()) {
             doSelect(null, true);
         }

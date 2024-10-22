@@ -58,12 +58,6 @@ public class ItemSelectableProviderPage extends Div {
                 });
         enableMultiSelect.setId("enable-multi-selection");
 
-        NativeButton enableNoneSelect = new NativeButton("Disable selection",
-                e -> {
-                    grid.setSelectionMode(Grid.SelectionMode.NONE);
-                });
-        enableNoneSelect.setId("disable-selection");
-
         NativeButton disableSelectionFirstFive = new NativeButton(
                 "Disable selection for first five items", e -> {
                     grid.setItemSelectableProvider(item -> item >= 5);
@@ -77,7 +71,7 @@ public class ItemSelectableProviderPage extends Div {
         allowSelectionFirstFive.setId("allow-selection-first-five");
 
         add(grid);
-        add(new Div(enableSingleSelect, enableMultiSelect, enableNoneSelect));
+        add(new Div(enableSingleSelect, enableMultiSelect));
         add(new Div(disableSelectionFirstFive, allowSelectionFirstFive));
         add(new Div(new Span("Selected items: "), selectedItems));
     }
