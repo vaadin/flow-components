@@ -1205,7 +1205,8 @@ window.Vaadin.Flow.gridConnector = {
       );
 
       grid.isItemSelectable = tryCatchWrapper((item) => {
-        return item.selectable !== false;
+        // If there is no selectable data, assume the item is selectable
+        return item.selectable === undefined || item.selectable;
       });
     })(grid)
 };
