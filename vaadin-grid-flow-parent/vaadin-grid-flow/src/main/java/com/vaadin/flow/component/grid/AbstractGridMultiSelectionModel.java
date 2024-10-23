@@ -75,8 +75,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 this::clientDeselectAll);
         selectAllCheckBoxVisibility = SelectAllCheckboxVisibility.DEFAULT;
 
-        selectionColumn
-                .setSelectAllCheckBoxVisibility(isSelectAllCheckboxVisible());
+        updateSelectAllCheckBoxVisibility();
 
         if (grid.getElement().getNode().isAttached()) {
             this.insertSelectionColumn(grid, selectionColumn);
@@ -87,6 +86,11 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 }
             });
         }
+    }
+
+    void updateSelectAllCheckBoxVisibility() {
+        selectionColumn
+                .setSelectAllCheckBoxVisibility(isSelectAllCheckboxVisible());
     }
 
     private void insertSelectionColumn(Grid<T> grid,
@@ -322,6 +326,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public boolean isSelectAllCheckboxVisible() {
+        if (getGrid().getItemSelectableProvider() != null) {
+            return false;
+        }
+
         switch (selectAllCheckBoxVisibility) {
         case DEFAULT:
             return getGrid().getDataCommunicator().getDataProvider()

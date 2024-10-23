@@ -3070,6 +3070,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return model;
     }
 
+    SerializablePredicate<T> getItemSelectableProvider() {
+        return selectableProvider;
+    }
+
     /**
      * Sets a predicate to check whether a specific item in the grid may be
      * selected or deselected by the user. The predicate receives an item
@@ -3079,6 +3083,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * This function does not prevent programmatic selection/deselection of
      * items. Changing the function does not modify the currently selected
      * items.
+     * <p>
+     * When using multi-selection, setting a provider will hide the select all
+     * checkbox.
      *
      * @param provider
      *            the function to use to determine whether an item may be
@@ -3088,6 +3095,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void setItemSelectableProvider(SerializablePredicate<T> provider) {
         selectableProvider = provider;
         getDataCommunicator().reset();
+
+        if (selectionModel instanceof AbstractGridMultiSelectionModel<T> multiSelectionModel) {
+            multiSelectionModel.updateSelectAllCheckBoxVisibility();
+        }
     }
 
     boolean isItemSelectable(T item) {

@@ -558,6 +558,30 @@ public class AbstractGridMultiSelectionModelTest {
         Assert.assertEquals(Set.of(), grid.getSelectedItems());
     }
 
+    @Test
+    public void setItemSelectableProvider_updatesSelectAllVisibility() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+        GridSelectionColumn selectionColumn = selectionModel
+                .getSelectionColumn();
+
+        // Visible initially
+        Assert.assertFalse(selectionColumn.getElement()
+                .getProperty("_selectAllHidden", false));
+
+        // Set provider, should hide select all checkbox
+        grid.setItemSelectableProvider(item -> false);
+        Assert.assertTrue(selectionColumn.getElement()
+                .getProperty("_selectAllHidden", false));
+
+        // Remove provider, should show select all checkbox
+        grid.setItemSelectableProvider(null);
+        Assert.assertFalse(selectionColumn.getElement()
+                .getProperty("_selectAllHidden", false));
+    }
+
     private void verifySelectAllCheckboxVisibilityInMultiSelectMode(
             boolean inMemory, boolean unknownItemCount,
             boolean expectedVisibility,
