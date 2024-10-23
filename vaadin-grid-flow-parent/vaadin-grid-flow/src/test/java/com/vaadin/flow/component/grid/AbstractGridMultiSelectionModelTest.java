@@ -559,6 +559,64 @@ public class AbstractGridMultiSelectionModelTest {
     }
 
     @Test
+    public void selectAll_withItemSelectableProvider_works() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItemSelectableProvider(item -> true);
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        selectionModel.selectAll();
+
+        Assert.assertEquals(2, selectionModel.getSelectedItems().size());
+    }
+
+    @Test
+    public void deselectAll_withItemSelectableProvider_works() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItemSelectableProvider(item -> true);
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        selectionModel.selectAll();
+        selectionModel.deselectAll();
+
+        Assert.assertEquals(0, selectionModel.getSelectedItems().size());
+    }
+
+    @Test
+    public void clientSelectAll_withItemSelectableProvider_ignored() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItemSelectableProvider(item -> true);
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        selectionModel.clientSelectAll();
+
+        Assert.assertEquals(0, selectionModel.getSelectedItems().size());
+    }
+
+    @Test
+    public void clientDeselectAll_withItemSelectableProvider_ignored() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItemSelectableProvider(item -> true);
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+        selectionModel.selectAll();
+
+        selectionModel.clientSelectAll();
+
+        Assert.assertEquals(2, selectionModel.getSelectedItems().size());
+    }
+
+    @Test
     public void setItemSelectableProvider_updatesSelectAllVisibility() {
         grid.setSelectionMode(SelectionMode.MULTI);
 
@@ -573,6 +631,12 @@ public class AbstractGridMultiSelectionModelTest {
 
         // Set provider, should hide select all checkbox
         grid.setItemSelectableProvider(item -> false);
+        Assert.assertTrue(selectionColumn.getElement()
+                .getProperty("_selectAllHidden", false));
+
+        // Try to explicitly make the checkbox visible, should still be hidden
+        selectionModel.setSelectAllCheckboxVisibility(
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
         Assert.assertTrue(selectionColumn.getElement()
                 .getProperty("_selectAllHidden", false));
 

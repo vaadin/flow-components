@@ -386,8 +386,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
             SelectionEvent<Grid<T>, T> event);
 
     protected void clientSelectAll() {
+        // ignore call if the checkbox is hidden
         if (!isSelectAllCheckboxVisible()) {
-            // ignore event if the checkBox was meant to be hidden
             return;
         }
         Stream<T> allItemsStream;
@@ -449,8 +449,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
     }
 
     protected void clientDeselectAll() {
+        // ignore call if the checkbox is hidden
         if (!isSelectAllCheckboxVisible()) {
-            // ignore event if the checkBox was meant to be hidden
             return;
         }
         doUpdateSelection(Collections.emptySet(), getSelectedItems(), true);
