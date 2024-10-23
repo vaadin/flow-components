@@ -19,6 +19,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.data.selection.SelectionModel;
+import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -125,7 +126,9 @@ public interface GridMultiSelectionModel<T>
      * <p>
      * The select all checkbox will never be shown if the Grid uses lazy loading
      * with unknown item count, meaning that no count callback has been
-     * provided.
+     * provided. It will also not be shown if the grid is configured to use
+     * conditional selection via
+     * {@link Grid#setItemSelectableProvider(SerializablePredicate)}
      *
      * @return {@code true} if the checkbox will be visible with the current
      *         settings

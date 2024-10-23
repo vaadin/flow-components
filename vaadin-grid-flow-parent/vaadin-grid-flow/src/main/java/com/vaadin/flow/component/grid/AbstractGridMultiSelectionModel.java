@@ -75,8 +75,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 this::clientDeselectAll);
         selectAllCheckBoxVisibility = SelectAllCheckboxVisibility.DEFAULT;
 
-        selectionColumn
-                .setSelectAllCheckBoxVisibility(isSelectAllCheckboxVisible());
+        updateSelectAllCheckBoxVisibility();
 
         if (grid.getElement().getNode().isAttached()) {
             this.insertSelectionColumn(grid, selectionColumn);
@@ -87,6 +86,11 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 }
             });
         }
+    }
+
+    void updateSelectAllCheckBoxVisibility() {
+        selectionColumn
+                .setSelectAllCheckBoxVisibility(isSelectAllCheckboxVisible());
     }
 
     private void insertSelectionColumn(Grid<T> grid,
@@ -105,7 +109,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public void selectFromClient(T item) {
-        if (isSelected(item)) {
+        boolean selectable = getGrid().isItemSelectable(item);
+        if (isSelected(item) || !selectable) {
             return;
         }
 
@@ -131,7 +136,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public void deselectFromClient(T item) {
-        if (!isSelected(item)) {
+        boolean selectable = getGrid().isItemSelectable(item);
+        if (!isSelected(item) || !selectable) {
             return;
         }
 
@@ -320,6 +326,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public boolean isSelectAllCheckboxVisible() {
+        if (getGrid().getItemSelectableProvider() != null) {
+            return false;
+        }
+
         switch (selectAllCheckBoxVisibility) {
         case DEFAULT:
             return getGrid().getDataCommunicator().getDataProvider()
@@ -376,8 +386,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
             SelectionEvent<Grid<T>, T> event);
 
     protected void clientSelectAll() {
+        // ignore call if the checkbox is hidden
         if (!isSelectAllCheckboxVisible()) {
-            // ignore event if the checkBox was meant to be hidden
             return;
         }
         Stream<T> allItemsStream;
@@ -439,8 +449,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
     }
 
     protected void clientDeselectAll() {
+        // ignore call if the checkbox is hidden
         if (!isSelectAllCheckboxVisible()) {
-            // ignore event if the checkBox was meant to be hidden
             return;
         }
         doUpdateSelection(Collections.emptySet(), getSelectedItems(), true);

@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.grid;
 
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.Assert;
@@ -31,14 +32,17 @@ public class AbstractGridSingleSelectionModelTest {
     private CallbackDataProvider<TestEntity, Void> dataProviderWithIdentityProvider;
     private SelectionListener<Grid<TestEntity>, TestEntity> selectionListenerMock;
 
+    private final TestEntity entity1 = new TestEntity(1, "Name");
+    private final TestEntity entity2 = new TestEntity(2, "Name");
+    private final TestEntity entity3 = new TestEntity(3, "Name");
+
     @Before
     @SuppressWarnings("unchecked")
     public void setup() {
         grid = new Grid<>();
         dataProviderWithIdentityProvider = new CallbackDataProvider<>(
-                query -> Stream.of(new TestEntity(1, "Name"),
-                        new TestEntity(2, "Name"), new TestEntity(3, "Name")),
-                query -> 3, TestEntity::getId);
+                query -> Stream.of(entity1, entity2, entity3), query -> 3,
+                TestEntity::getId);
         selectionListenerMock = Mockito.mock(SelectionListener.class);
         grid.getSelectionModel().addSelectionListener(selectionListenerMock);
     }
@@ -118,6 +122,76 @@ public class AbstractGridSingleSelectionModelTest {
         // selected
         Assert.assertTrue(
                 selectionModel.isSelected(new TestEntity(1, "Joseph")));
+    }
+
+    @Test
+    public void selectFromClient_withItemSelectableProvider_preventsDeselection() {
+        grid.setItems(dataProviderWithIdentityProvider);
+        grid.setItemSelectableProvider(item -> item.getId() != entity1.id);
+
+        GridSelectionModel<TestEntity> selectionModel = grid
+                .getSelectionModel();
+
+        // prevent client selection of non-selectable item
+        selectionModel.selectFromClient(entity1);
+        Assert.assertEquals(Set.of(), selectionModel.getSelectedItems());
+
+        // allow client selection of selectable item
+        selectionModel.selectFromClient(entity2);
+        Assert.assertEquals(Set.of(entity2), selectionModel.getSelectedItems());
+    }
+
+    @Test
+    public void deselectFromClient_withItemSelectableProvider_preventsDeselection() {
+        grid.setItems(dataProviderWithIdentityProvider);
+        grid.setItemSelectableProvider(item -> item.getId() != entity1.id);
+
+        GridSelectionModel<TestEntity> selectionModel = grid
+                .getSelectionModel();
+
+        // prevent client deselection of non-selectable item
+        selectionModel.select(entity1);
+        selectionModel.deselectFromClient(entity1);
+        Assert.assertEquals(Set.of(entity1), selectionModel.getSelectedItems());
+
+        // allow client deselection of selectable item
+        selectionModel.select(entity2);
+        selectionModel.deselectFromClient(entity2);
+        Assert.assertEquals(Set.of(), selectionModel.getSelectedItems());
+    }
+
+    @Test
+    public void select_withItemSelectableProvider_allowsSelection() {
+        grid.setItems(dataProviderWithIdentityProvider);
+        grid.setItemSelectableProvider(item -> item.getId() != entity1.id);
+
+        GridSelectionModel<TestEntity> selectionModel = grid
+                .getSelectionModel();
+
+        // allow programmatic selection of any item
+        selectionModel.select(entity1);
+        Assert.assertEquals(Set.of(entity1), selectionModel.getSelectedItems());
+
+        selectionModel.select(entity2);
+        Assert.assertEquals(Set.of(entity2), selectionModel.getSelectedItems());
+    }
+
+    @Test
+    public void deselect_withItemSelectableProvider_allowsDeselection() {
+        grid.setItems(dataProviderWithIdentityProvider);
+        grid.setItemSelectableProvider(item -> item.getId() != entity1.id);
+
+        GridSelectionModel<TestEntity> selectionModel = grid
+                .getSelectionModel();
+
+        // allow programmatic deselection of any item
+        selectionModel.select(entity1);
+        selectionModel.deselect(entity1);
+        Assert.assertEquals(Set.of(), selectionModel.getSelectedItems());
+
+        selectionModel.select(entity2);
+        selectionModel.select(entity2);
+        Assert.assertEquals(Set.of(entity2), selectionModel.getSelectedItems());
     }
 
     public static class TestEntity {
