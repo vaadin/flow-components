@@ -18,6 +18,7 @@ package com.vaadin.flow.component.datepicker;
 import java.time.LocalDate;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.binder.Result;
 import com.vaadin.flow.router.Route;
 
@@ -32,9 +33,23 @@ public class DatePickerFallbackParserPage extends Div {
                 return Result.error("Invalid date format");
             }
         });
+
+        Div valueChangeLog = new Div();
+        valueChangeLog.setId("value-change-log");
+
         datePicker.addValueChangeListener(event -> {
-            System.out.println(event.getValue());
+            String record = String.join(",",
+                    String.valueOf(event.getOldValue()),
+                    String.valueOf(event.getValue()),
+                    String.valueOf(datePicker.getValue()));
+            valueChangeLog.add(new Div(record));
         });
-        add(datePicker);
+
+        NativeButton clearValueChangeLog = new NativeButton("Clear value change log", event -> {
+            valueChangeLog.removeAll();
+        });
+        clearValueChangeLog.setId("clear-value-change-log");
+
+        add(datePicker, valueChangeLog, clearValueChangeLog);
     }
 }

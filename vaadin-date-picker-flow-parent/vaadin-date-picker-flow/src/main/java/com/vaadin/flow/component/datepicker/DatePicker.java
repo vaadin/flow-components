@@ -697,7 +697,8 @@ public class DatePicker
     }
 
     private Result<LocalDate> runFallbackParser(String s) {
-        return Objects.requireNonNull(fallbackParser.apply(s), "Result cannot be null");
+        return Objects.requireNonNull(fallbackParser.apply(s),
+                "Result cannot be null");
     }
 
     @Override
@@ -734,7 +735,8 @@ public class DatePicker
         if (fallbackParser != null && fromClient && isInputUnparsable) {
             isFallbackParserRunning = true;
 
-            Result<LocalDate> result = runFallbackParser(getInputElementValue());
+            Result<LocalDate> result = runFallbackParser(
+                    getInputElementValue());
             if (result.isError()) {
                 fallbackParserErrorMessage = result.getMessage().orElse(null);
             } else {

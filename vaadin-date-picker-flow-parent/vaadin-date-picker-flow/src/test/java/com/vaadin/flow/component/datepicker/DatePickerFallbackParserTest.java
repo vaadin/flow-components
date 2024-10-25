@@ -15,15 +15,33 @@
  */
 package com.vaadin.flow.component.datepicker;
 
+import java.time.LocalDate;
+
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.function.SerializableFunction;
+
 public class DatePickerFallbackParserTest {
+    private SerializableFunction<String, Result<LocalDate>> fallbackParser = (
+            s) -> {
+        if (s.equals("tomorrow")) {
+            return Result.ok(LocalDate.now().plusDays(1));
+        } else {
+            return Result.error("Invalid date format");
+        }
+    };
 
     @Test
-    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
-        DatePicker picker = new DatePicker();
-        Assert.assertNull(picker.getValue());
-        Assert.assertEquals("", picker.getElement().getProperty("value"));
+    public void setFallbackParser_getFallbackParser() {
+        DatePicker datePicker = new DatePicker();
+        Assert.assertNull(datePicker.getFallbackParser());
+
+        datePicker.setFallbackParser(fallbackParser);
+        Assert.assertEquals(fallbackParser, datePicker.getFallbackParser());
+
+        datePicker.setFallbackParser(null);
+        Assert.assertNull(datePicker.getFallbackParser());
     }
 }
