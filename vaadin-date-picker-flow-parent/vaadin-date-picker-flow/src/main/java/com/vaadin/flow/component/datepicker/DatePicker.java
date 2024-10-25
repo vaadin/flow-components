@@ -58,6 +58,7 @@ import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.Result;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
@@ -158,6 +159,12 @@ public class DatePicker
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
 
+    private boolean setModelValueInProgress = false;
+
+    private SerializableFunction<String, Result<LocalDate>> fallbackParser;
+    private String fallbackParserErrorMessage;
+    private boolean isFallbackParserRunning = false;
+
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
     private Validator<LocalDate> defaultValidator = (value, context) -> {
@@ -165,7 +172,9 @@ public class DatePicker
 
         boolean hasBadInput = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
-        if (hasBadInput) {
+        if (hasBadInput && fallbackParserErrorMessage != null) {
+            return ValidationResult.error(fallbackParserErrorMessage);
+        } else if (hasBadInput) {
             return ValidationResult.error(getI18nErrorMessage(
                     DatePickerI18n::getBadInputErrorMessage));
         }
@@ -254,9 +263,14 @@ public class DatePicker
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
-        addValueChangeListener(e -> validate());
+        setSynchronizedEvent("change");
+
+        addValueChangeListener(e -> {
+            validate();
+        });
 
         getElement().addEventListener("unparsable-change", event -> {
+            setModelValue(getValue(), true);
             validate();
             fireValidationStatusChangeEvent();
         });
@@ -658,9 +672,32 @@ public class DatePicker
      * @return <code>true</code> if the input element's value is populated,
      *         <code>false</code> otherwise
      */
-    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
     protected boolean isInputValuePresent() {
-        return getElement().getProperty("_hasInputValue", false);
+        return !getInputElementValue().equals("");
+    }
+
+    @Synchronize(property = "_inputElementValue", value = { "change",
+            "unparsable-change" })
+    protected String getInputElementValue() {
+        return getElement().getProperty("_inputElementValue", "");
+    }
+
+    protected void setInputElementValue(String value) {
+        getElement().setProperty("_inputElementValue", value);
+    }
+
+    public void setFallbackParser(
+            SerializableFunction<String, Result<LocalDate>> fallbackParser) {
+        this.fallbackParser = fallbackParser;
+        this.fallbackParserErrorMessage = null;
+    }
+
+    public SerializableFunction<String, Result<LocalDate>> getFallbackParser() {
+        return fallbackParser;
+    }
+
+    private Result<LocalDate> runFallbackParser(String s) {
+        return Objects.requireNonNull(fallbackParser.apply(s), "Result cannot be null");
     }
 
     @Override
@@ -674,25 +711,42 @@ public class DatePicker
         // When the value is cleared programmatically, reset hasInputValue
         // so that the following validation doesn't treat this as bad input.
         if (isNewValueEmpty) {
-            getElement().setProperty("_hasInputValue", false);
+            setInputElementValue("");
         }
 
         super.setValue(value);
 
         // Clear the input element from possible bad input.
         if (isValueRemainedEmpty && isInputValuePresent) {
-            // The check for value presence guarantees that a non-empty value
-            // won't get cleared when setValue(null) and setValue(...) are
-            // subsequently called within one round-trip.
-            // Flow only sends the final component value to the client
-            // when you update the value multiple times during a round-trip
-            // and the final value is sent in place of the first one, so
-            // `executeJs` can end up invoked after a non-empty value is set.
-            getElement()
-                    .executeJs("if (!this.value) this._inputElementValue = ''");
             validate();
             fireValidationStatusChangeEvent();
         }
+    }
+
+    @Override
+    protected void setModelValue(LocalDate newModelValue, boolean fromClient) {
+        if (isFallbackParserRunning) {
+            return;
+        }
+
+        boolean isInputUnparsable = newModelValue == null
+                && !getInputElementValue().isEmpty();
+        if (fallbackParser != null && fromClient && isInputUnparsable) {
+            isFallbackParserRunning = true;
+
+            Result<LocalDate> result = runFallbackParser(getInputElementValue());
+            if (result.isError()) {
+                fallbackParserErrorMessage = result.getMessage().orElse(null);
+            } else {
+                fallbackParserErrorMessage = null;
+                newModelValue = result.getOrThrow(IllegalStateException::new);
+                setPresentationValue(newModelValue);
+            }
+
+            isFallbackParserRunning = false;
+        }
+
+        super.setModelValue(newModelValue, fromClient);
     }
 
     /**
