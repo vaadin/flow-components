@@ -84,17 +84,20 @@ public class DatePickerFallbackParserIT extends AbstractComponentIT {
     private void assertValueChange(String expectedOldValue,
             String expectedNewValue) {
         List<TestBenchElement> records = valueChangeLog.$("div").all();
-        Assert.assertEquals(1, records.size());
+        Assert.assertEquals("ValueChangeEvent should be fired only once", 1, records.size());
 
         JsonObject record = Json.parse(records.get(0).getText());
-        Assert.assertEquals(expectedOldValue,
-                record.getString("eventOldValue"));
-        Assert.assertEquals(expectedNewValue,
-                record.getString("eventNewValue"));
-        Assert.assertEquals(expectedNewValue,
-                record.getString("componentValue"));
-        Assert.assertEquals(expectedNewValue,
-                record.getString("componentValueProperty"));
+
+        Assert.assertTrue("eventFromClient should be true",
+                record.getBoolean("eventFromClient"));
+        Assert.assertEquals("eventOldValue should contain old value",
+                expectedOldValue, record.getString("eventOldValue"));
+        Assert.assertEquals("eventNewValue should contain new value",
+                expectedNewValue, record.getString("eventNewValue"));
+        Assert.assertEquals("componentValue should contain new value",
+                expectedNewValue, record.getString("componentValue"));
+        Assert.assertEquals("componentValueProperty should contain new value",
+                expectedNewValue, record.getString("componentValueProperty"));
 
         $("button").id("clear-value-change-log").click();
     }

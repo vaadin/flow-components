@@ -42,6 +42,7 @@ public class DatePickerFallbackParserPage extends Div {
 
         datePicker.addValueChangeListener(event -> {
             JsonObject record = Json.createObject();
+            record.put("eventFromClient", event.isFromClient());
             record.put("eventOldValue", formatDate(event.getOldValue()));
             record.put("eventNewValue", formatDate(event.getValue()));
             record.put("componentValue", formatDate(datePicker.getValue()));

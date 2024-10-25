@@ -37,13 +37,13 @@ public class BasicValidationTest
         });
 
         // Trigger ValidationStatusChangeEvent
-        testField.getElement().setProperty("_hasInputValue", true);
+        testField.getElement().setProperty("_inputElementValue", "1/1/2022");
         testField.clear();
     }
 
     @Test
     public void badInput_validate_emptyErrorMessageDisplayed() {
-        testField.getElement().setProperty("_hasInputValue", true);
+        testField.getElement().setProperty("_inputElementValue", "foo");
         fireUnparsableChangeDomEvent();
         Assert.assertEquals("", testField.getErrorMessage());
     }
@@ -52,7 +52,7 @@ public class BasicValidationTest
     public void badInput_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setI18n(new DatePicker.DatePickerI18n()
                 .setBadInputErrorMessage("Date has invalid format"));
-        testField.getElement().setProperty("_hasInputValue", true);
+        testField.getElement().setProperty("_inputElementValue", "foo");
         fireUnparsableChangeDomEvent();
         Assert.assertEquals("Date has invalid format",
                 testField.getErrorMessage());
