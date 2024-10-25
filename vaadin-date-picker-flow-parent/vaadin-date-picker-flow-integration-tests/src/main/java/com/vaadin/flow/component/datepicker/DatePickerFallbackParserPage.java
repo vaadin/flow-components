@@ -22,13 +22,16 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.binder.Result;
 import com.vaadin.flow.router.Route;
 
+import elemental.json.Json;
+import elemental.json.JsonObject;
+
 @Route("vaadin-date-picker/fallback-parser")
 public class DatePickerFallbackParserPage extends Div {
     public DatePickerFallbackParserPage() {
         DatePicker datePicker = new DatePicker();
         datePicker.setFallbackParser((s) -> {
-            if (s.equals("tomorrow")) {
-                return Result.ok(LocalDate.now().plusDays(1));
+            if (s.equals("newyear")) {
+                return Result.ok(LocalDate.of(2024, 1, 1));
             } else {
                 return Result.error("Invalid date format");
             }
@@ -38,18 +41,26 @@ public class DatePickerFallbackParserPage extends Div {
         valueChangeLog.setId("value-change-log");
 
         datePicker.addValueChangeListener(event -> {
-            String record = String.join(",",
-                    String.valueOf(event.getOldValue()),
-                    String.valueOf(event.getValue()),
-                    String.valueOf(datePicker.getValue()));
-            valueChangeLog.add(new Div(record));
+            JsonObject record = Json.createObject();
+            record.put("eventOldValue", formatDate(event.getOldValue()));
+            record.put("eventNewValue", formatDate(event.getValue()));
+            record.put("componentValue", formatDate(datePicker.getValue()));
+            record.put("componentValueProperty",
+                    datePicker.getElement().getProperty("value", ""));
+
+            valueChangeLog.add(new Div(record.toString()));
         });
 
-        NativeButton clearValueChangeLog = new NativeButton("Clear value change log", event -> {
-            valueChangeLog.removeAll();
-        });
+        NativeButton clearValueChangeLog = new NativeButton(
+                "Clear value change log", event -> {
+                    valueChangeLog.removeAll();
+                });
         clearValueChangeLog.setId("clear-value-change-log");
 
         add(datePicker, valueChangeLog, clearValueChangeLog);
+    }
+
+    private String formatDate(LocalDate date) {
+        return date == null ? "" : date.toString();
     }
 }

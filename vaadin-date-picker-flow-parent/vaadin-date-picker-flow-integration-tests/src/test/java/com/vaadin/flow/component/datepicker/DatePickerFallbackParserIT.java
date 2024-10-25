@@ -15,18 +15,19 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
+
+import elemental.json.Json;
+import elemental.json.JsonObject;
 
 /**
  * Integration tests for the {@link DatePickerViewDemoPage}.
@@ -44,32 +45,65 @@ public class DatePickerFallbackParserIT extends AbstractComponentIT {
     }
 
     @Test
-    public void enterDateShortcut_assertValueChange() {
-        datePicker.sendKeys("tomorrow", Keys.ENTER);
-        assertValueChange(null, LocalDate.now().plusDays(1));
+    public void enterShortcutValue_clearShortcutValue() {
+        datePicker.setInputValue("newyear");
+        assertValueChange("", "2024-01-01");
+        assertInputValue("1/1/2024");
+
+        datePicker.setInputValue("newyear");
+        assertNoValueChange();
+        assertInputValue("1/1/2024");
+
+        datePicker.setInputValue("");
+        assertValueChange("2024-01-01", "");
+        assertInputValue("");
     }
 
-    private void assertValueChange(LocalDate expectedOldValue,
-            LocalDate expectedNewValue) {
+    @Test
+    public void enterUnparsableValue_enterShortcutValue() {
+        datePicker.setInputValue("foo");
+        assertNoValueChange();
+        assertInputValue("foo");
+
+        datePicker.setInputValue("newyear");
+        assertValueChange("", "2024-01-01");
+        assertInputValue("1/1/2024");
+    }
+
+    @Test
+    public void enterParsableValue_enterShortcutValue() {
+        datePicker.setInputValue("2/2/2000");
+        assertValueChange("", "2000-02-02");
+        assertInputValue("2/2/2000");
+
+        datePicker.setInputValue("newyear");
+        assertValueChange("2000-02-02", "2024-01-01");
+        assertInputValue("1/1/2024");
+    }
+
+    private void assertValueChange(String expectedOldValue,
+            String expectedNewValue) {
         List<TestBenchElement> records = valueChangeLog.$("div").all();
         Assert.assertEquals(1, records.size());
 
-        String[] parts = records.get(0).getText().split(",");
-        LocalDate actualEventOldValue = parts[0].equals("null") ? null
-                : LocalDate.parse(parts[0]);
-        LocalDate actualEventNewValue = parts[1].equals("null") ? null
-                : LocalDate.parse(parts[1]);
-        LocalDate actualComponentValue = parts[2].equals("null") ? null
-                : LocalDate.parse(parts[2]);
-
-        Assert.assertEquals(expectedOldValue, actualEventOldValue);
-        Assert.assertEquals(expectedNewValue, actualEventNewValue);
-        Assert.assertEquals(expectedNewValue, actualComponentValue);
+        JsonObject record = Json.parse(records.get(0).getText());
+        Assert.assertEquals(expectedOldValue,
+                record.getString("eventOldValue"));
+        Assert.assertEquals(expectedNewValue,
+                record.getString("eventNewValue"));
+        Assert.assertEquals(expectedNewValue,
+                record.getString("componentValue"));
+        Assert.assertEquals(expectedNewValue,
+                record.getString("componentValueProperty"));
 
         $("button").id("clear-value-change-log").click();
     }
 
     private void assertNoValueChange() {
         Assert.assertEquals("", valueChangeLog.getText());
+    }
+
+    private void assertInputValue(String expected) {
+        Assert.assertEquals(expected, datePicker.getInputValue());
     }
 }
