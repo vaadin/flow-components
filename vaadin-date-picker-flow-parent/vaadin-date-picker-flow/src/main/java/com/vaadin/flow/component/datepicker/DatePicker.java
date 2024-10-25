@@ -159,10 +159,8 @@ public class DatePicker
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
 
-    private boolean setModelValueInProgress = false;
-
     private SerializableFunction<String, Result<LocalDate>> fallbackParser;
-    private String fallbackParserErrorMessage;
+    private String fallbackParserErrorMessage = null;
     private boolean isFallbackParserRunning = false;
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
