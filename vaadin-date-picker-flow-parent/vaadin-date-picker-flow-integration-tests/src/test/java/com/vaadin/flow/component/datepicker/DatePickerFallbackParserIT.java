@@ -84,7 +84,8 @@ public class DatePickerFallbackParserIT extends AbstractComponentIT {
     private void assertValueChange(String expectedOldValue,
             String expectedNewValue) {
         List<TestBenchElement> records = valueChangeLog.$("div").all();
-        Assert.assertEquals("ValueChangeEvent should be fired only once", 1, records.size());
+        Assert.assertEquals("ValueChangeEvent should be fired only once", 1,
+                records.size());
 
         JsonObject record = Json.parse(records.get(0).getText());
 
