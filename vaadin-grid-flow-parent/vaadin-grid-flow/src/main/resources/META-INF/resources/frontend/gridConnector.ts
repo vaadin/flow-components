@@ -119,9 +119,9 @@ window.Vaadin.Flow.gridConnector = {
         let selectedItemsChanged = false;
         items.forEach((item) => {
           const selectable = !userOriginated || grid.isItemSelectable(item);
+          selectedItemsChanged = selectedItemsChanged || selectable;
           if (item && selectable) {
             selectedKeys[item.key] = item;
-            selectedItemsChanged = true;
             item.selected = true;
             if (userOriginated) {
               grid.$server.select(item.key);
