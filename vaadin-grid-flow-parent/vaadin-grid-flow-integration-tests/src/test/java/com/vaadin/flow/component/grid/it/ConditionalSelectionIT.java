@@ -29,8 +29,8 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-grid/item-selectable-provider")
-public class ItemSelectableProviderIT extends AbstractComponentIT {
+@TestPath("vaadin-grid/conditional-selection")
+public class ConditionalSelectionIT extends AbstractComponentIT {
     private GridElement grid;
 
     @Before
@@ -64,10 +64,6 @@ public class ItemSelectableProviderIT extends AbstractComponentIT {
         grid.deselect(0);
         assertSelectedItems(Set.of(0));
 
-        // Prevents deselection when clicking other non-selectable item
-        grid.select(1);
-        assertSelectedItems(Set.of(0));
-
         // Allows deselection of selectable item
         grid.select(5);
         grid.deselect(5);
@@ -97,48 +93,8 @@ public class ItemSelectableProviderIT extends AbstractComponentIT {
         Assert.assertFalse(getItemCheckbox(5).isDisplayed());
     }
 
-    @Test
-    public void multiSelect_clickCheckbox_preventsSelection() {
-        $("button").id("enable-multi-selection").click();
-        $("button").id("disable-selection-first-five").click();
-
-        // Prevents selection of non-selectable item
-        clickItemCheckbox(0);
-        assertSelectedItems(Set.of());
-
-        // Allows selection of selectable item
-        clickItemCheckbox(5);
-        assertSelectedItems(Set.of(5));
-    }
-
-    @Test
-    public void multiSelect_clickCheckbox_preventsDeselection() {
-        $("button").id("enable-multi-selection").click();
-        grid.select(0);
-        grid.select(5);
-        assertSelectedItems(Set.of(0, 5));
-
-        $("button").id("disable-selection-first-five").click();
-
-        // Prevents selection of non-selectable item
-        clickItemCheckbox(0);
-        assertSelectedItems(Set.of(0, 5));
-
-        // Allows selection of selectable item
-        clickItemCheckbox(5);
-        assertSelectedItems(Set.of(0));
-    }
-
     private TestBenchElement getItemCheckbox(int index) {
         return grid.getCell(index, 0).$("vaadin-checkbox").first();
-    }
-
-    private void clickItemCheckbox(int index) {
-        var checkbox = getItemCheckbox(index);
-        // Make checkboxes for non-selectable items interactable
-        checkbox.setProperty("hidden", false);
-        checkbox.setProperty("readonly", false);
-        checkbox.click();
     }
 
     private Set<Integer> getServerSelectedItems() {

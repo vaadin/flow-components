@@ -46,6 +46,7 @@ export type Item = {
   key: string;
   name?: string;
   price?: number,
+  selectable?: boolean;
   selected?: boolean;
   detailsOpened?: boolean;
   style?: Record<string, string>;

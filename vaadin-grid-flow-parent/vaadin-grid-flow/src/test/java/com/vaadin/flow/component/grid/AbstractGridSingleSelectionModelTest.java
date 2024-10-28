@@ -125,7 +125,7 @@ public class AbstractGridSingleSelectionModelTest {
     }
 
     @Test
-    public void selectFromClient_withItemSelectableProvider_preventsDeselection() {
+    public void selectFromClient_withItemSelectableProvider_preventsSelection() {
         grid.setItems(dataProviderWithIdentityProvider);
         grid.setItemSelectableProvider(item -> item.getId() != entity1.id);
 

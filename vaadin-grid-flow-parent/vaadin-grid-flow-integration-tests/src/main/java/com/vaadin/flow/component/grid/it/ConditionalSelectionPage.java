@@ -22,39 +22,32 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-grid/item-selectable-provider")
-public class ItemSelectableProviderPage extends Div {
-    public ItemSelectableProviderPage() {
+@Route("vaadin-grid/conditional-selection")
+public class ConditionalSelectionPage extends Div {
+    private final Span selectedItems;
+
+    public ConditionalSelectionPage() {
         Grid<Integer> grid = new Grid<>();
-        grid.setItems(IntStream.range(0, 1000).boxed().toList());
+        grid.setItems(IntStream.range(0, 10).boxed().toList());
         grid.addColumn(i -> i).setHeader("Item");
 
-        Span selectedItems = new Span();
+        selectedItems = new Span();
         selectedItems.setId("selected-items");
 
         NativeButton enableSingleSelect = new NativeButton(
                 "Enable single selection", e -> {
                     grid.setSelectionMode(Grid.SelectionMode.SINGLE);
-                    grid.addSelectionListener(selectionEvent -> {
-                        String items = selectionEvent.getAllSelectedItems()
-                                .stream().map(Object::toString)
-                                .collect(Collectors.joining(","));
-                        selectedItems.setText(items);
-                    });
+                    grid.addSelectionListener(this::updateSelection);
                 });
         enableSingleSelect.setId("enable-single-selection");
 
         NativeButton enableMultiSelect = new NativeButton(
                 "Enable multi selection", e -> {
                     grid.setSelectionMode(Grid.SelectionMode.MULTI);
-                    grid.addSelectionListener(selectionEvent -> {
-                        String items = selectionEvent.getAllSelectedItems()
-                                .stream().map(Object::toString)
-                                .collect(Collectors.joining(","));
-                        selectedItems.setText(items);
-                    });
+                    grid.addSelectionListener(this::updateSelection);
                 });
         enableMultiSelect.setId("enable-multi-selection");
 
@@ -74,5 +67,12 @@ public class ItemSelectableProviderPage extends Div {
         add(new Div(enableSingleSelect, enableMultiSelect));
         add(new Div(disableSelectionFirstFive, allowSelectionFirstFive));
         add(new Div(new Span("Selected items: "), selectedItems));
+    }
+
+    private void updateSelection(
+            SelectionEvent<Grid<Integer>, Integer> selectionEvent) {
+        String items = selectionEvent.getAllSelectedItems().stream()
+                .map(Object::toString).collect(Collectors.joining(","));
+        selectedItems.setText(items);
     }
 }
