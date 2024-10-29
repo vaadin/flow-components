@@ -380,7 +380,8 @@ public class DatePickerTest {
         DatePicker datePicker = new DatePicker();
         Assert.assertNull(datePicker.getFallbackParser());
 
-        SerializableFunction<String, Result<LocalDate>> fallbackParser = (s) -> {
+        SerializableFunction<String, Result<LocalDate>> fallbackParser = (
+                s) -> {
             if (s.equals("tomorrow")) {
                 return Result.ok(LocalDate.now().plusDays(1));
             } else {

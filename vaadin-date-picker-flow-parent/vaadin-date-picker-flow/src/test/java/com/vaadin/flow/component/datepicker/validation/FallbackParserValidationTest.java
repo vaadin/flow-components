@@ -57,21 +57,25 @@ public class FallbackParserValidationTest {
         datePicker.getElement().setProperty("_inputElementValue", "foobar");
         fireUnparsableChangeDomEvent();
         Assert.assertTrue(datePicker.isInvalid());
-        Assert.assertEquals("Invalid date format", datePicker.getErrorMessage());
+        Assert.assertEquals("Invalid date format",
+                datePicker.getErrorMessage());
     }
 
     @Test
     public void setI18nErrorMessage_enterUnparsableValue_validate_fallbackParserErrorMessageDisplayed() {
-        datePicker.setI18n(new DatePickerI18n().setBadInputErrorMessage("I18n error message"));
+        datePicker.setI18n(new DatePickerI18n()
+                .setBadInputErrorMessage("I18n error message"));
         datePicker.getElement().setProperty("_inputElementValue", "foobar");
         fireUnparsableChangeDomEvent();
         Assert.assertTrue(datePicker.isInvalid());
-        Assert.assertEquals("Invalid date format", datePicker.getErrorMessage());
+        Assert.assertEquals("Invalid date format",
+                datePicker.getErrorMessage());
     }
 
     @Test
     public void setI18nErrorMessage_removeFallbackParser_validate_i18nErrorMessageDisplayed() {
-        datePicker.setI18n(new DatePickerI18n().setBadInputErrorMessage("I18n error message"));
+        datePicker.setI18n(new DatePickerI18n()
+                .setBadInputErrorMessage("I18n error message"));
         datePicker.setFallbackParser(null);
         datePicker.getElement().setProperty("_inputElementValue", "foobar");
         fireUnparsableChangeDomEvent();
@@ -80,8 +84,9 @@ public class FallbackParserValidationTest {
     }
 
     private void fireUnparsableChangeDomEvent() {
-        DomEvent unparsableChangeDomEvent = new DomEvent(datePicker.getElement(),
-                "unparsable-change", Json.createObject());
+        DomEvent unparsableChangeDomEvent = new DomEvent(
+                datePicker.getElement(), "unparsable-change",
+                Json.createObject());
         datePicker.getElement().getNode().getFeature(ElementListenerMap.class)
                 .fireEvent(unparsableChangeDomEvent);
     }
