@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.login;
 
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -103,12 +105,10 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * action is defined a {@link AbstractLogin.LoginEvent} is not fired
      * anymore.
      * <p>
-     * </p>
-     * The {@code action} attribute cannot be set if login listeners have been
-     * previously added. See class Javadoc for more information.
+     * The {@code action} attribute should not be used together with login
+     * listeners added with {@link #addLoginListener(ComponentEventListener)}.
+     * See class Javadoc for more information.
      *
-     * @throws IllegalStateException
-     *             if any login listeners have been previously added.
      * @see #getAction()
      * @see #addLoginListener(ComponentEventListener)
      */
@@ -118,15 +118,13 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
             if (registration == null) {
                 registerDefaultLoginListener();
             }
-        } else if (getListeners(LoginEvent.class).size() > 1) {
-            throw new IllegalStateException(
-                    "Action attribute cannot be set along with login listeners");
         } else {
             getElement().setProperty(PROP_ACTION, action);
             if (registration != null) {
                 registration.remove();
                 registration = null;
             }
+            checkActionAttributeUsedWithLoginListeners();
         }
     }
 
@@ -247,22 +245,17 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     /**
      * Adds `login` event listener.
      * <p>
-     * </p>
-     * Listeners cannot be added if {@code action} attribute has been previously
-     * set. See class Javadoc for more information.
+     * Login listeners should not be used together with the {@code action}
+     * attribute. See class Javadoc for more information.
      *
-     * @throws IllegalStateException
-     *             if {@literal action} attribute has previously been set to a
-     *             not {@literal null} value.
      * @see #setAction(String)
      */
     public Registration addLoginListener(
             ComponentEventListener<LoginEvent> listener) {
-        if (getElement().hasProperty(PROP_ACTION)) {
-            throw new IllegalStateException(
-                    "Login listener cannot work in combination with 'action' attribute");
-        }
-        return ComponentUtil.addListener(this, LoginEvent.class, listener);
+        Registration registration = ComponentUtil.addListener(this,
+                LoginEvent.class, listener);
+        checkActionAttributeUsedWithLoginListeners();
+        return registration;
     }
 
     /**
@@ -317,5 +310,13 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     @Override
     public void onEnabledStateChanged(boolean enabled) {
         getElement().setProperty(PROP_DISABLED, !enabled);
+    }
+
+    private void checkActionAttributeUsedWithLoginListeners() {
+        if (getElement().hasProperty(PROP_ACTION)
+                && !getListeners(LoginEvent.class).isEmpty()) {
+            LoggerFactory.getLogger(getClass()).warn(
+                    "Using the action attribute together with login listeners is discouraged. See the AbstractLogin JavaDoc for more information. This may throw an exception in the future.");
+        }
     }
 }

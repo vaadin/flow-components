@@ -17,14 +17,36 @@ package com.vaadin.flow.component.login;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.shared.Registration;
 
 public class LoginFormTest {
+
+    private MockedStatic<LoggerFactory> mockedLoggerFactory;
+    private Logger mockLogger;
+
+    @Before
+    public void setUp() {
+        mockedLoggerFactory = Mockito.mockStatic(LoggerFactory.class);
+        mockLogger = Mockito.mock(Logger.class);
+        mockedLoggerFactory.when(() -> LoggerFactory.getLogger(LoginForm.class))
+                .thenReturn(mockLogger);
+    }
+
+    @After
+    public void tearDown() {
+        mockedLoggerFactory.close();
+    }
 
     @Test
     public void onForgotPasswordEvent() {
@@ -105,21 +127,40 @@ public class LoginFormTest {
     }
 
     @Test
-    public void setAction_customLoginListeners_throws() {
+    public void addLoginListeners_setAction_logsWarning() {
         final LoginForm form = new LoginForm();
         Registration registration1 = form.addLoginListener(ev -> {
         });
         Registration registration2 = form.addLoginListener(ev -> {
         });
-        Assert.assertThrows(IllegalStateException.class,
-                () -> form.setAction("login"));
+
+        form.setAction("login1");
+        Mockito.verify(mockLogger, Mockito.times(1)).warn(Mockito.anyString());
+        Mockito.reset(mockLogger);
 
         registration1.remove();
-        Assert.assertThrows(IllegalStateException.class,
-                () -> form.setAction("login"));
+        form.setAction("login2");
+        Mockito.verify(mockLogger, Mockito.times(1)).warn(Mockito.anyString());
+        Mockito.reset(mockLogger);
 
         registration2.remove();
+        form.setAction("login3");
+        Mockito.verify(mockLogger, Mockito.never()).warn(Mockito.anyString());
+    }
+
+    @Test
+    public void setAction_addLoginListener_logsWarning() {
+        final LoginForm form = new LoginForm();
         form.setAction("login");
+        form.addLoginListener(ev -> {
+        });
+        Mockito.verify(mockLogger, Mockito.times(1)).warn(Mockito.anyString());
+        Mockito.reset(mockLogger);
+
+        form.setAction(null);
+        form.addLoginListener(ev -> {
+        });
+        Mockito.verify(mockLogger, Mockito.never()).warn(Mockito.anyString());
     }
 
     @Test
@@ -146,18 +187,4 @@ public class LoginFormTest {
                 "Expected error status being reset by default listener",
                 form.isError());
     }
-
-    @Test
-    public void addLoginListener_actionSet_throws() {
-        final LoginForm form = new LoginForm();
-        form.setAction("login");
-        Assert.assertThrows(IllegalStateException.class,
-                () -> form.addLoginListener(ev -> {
-                }));
-
-        form.setAction(null);
-        form.addLoginListener(ev -> {
-        });
-    }
-
 }

@@ -15,13 +15,36 @@
  */
 package com.vaadin.flow.component.login;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.shared.Registration;
 
 public class LoginOverlayTest {
+    private MockedStatic<LoggerFactory> mockedLoggerFactory;
+    private Logger mockLogger;
+
+    @Before
+    public void setUp() {
+        mockedLoggerFactory = Mockito.mockStatic(LoggerFactory.class);
+        mockLogger = Mockito.mock(Logger.class);
+        mockedLoggerFactory
+                .when(() -> LoggerFactory.getLogger(LoginOverlay.class))
+                .thenReturn(mockLogger);
+    }
+
+    @After
+    public void tearDown() {
+        mockedLoggerFactory.close();
+    }
+
     @Test
     public void showErrorMessage_fromNullI18n() {
         final LoginOverlay overlay = new LoginOverlay(null);
@@ -62,21 +85,40 @@ public class LoginOverlayTest {
     }
 
     @Test
-    public void setAction_customLoginListeners_throws() {
+    public void addLoginListeners_setAction_logsWarning() {
         final LoginOverlay overlay = new LoginOverlay();
         Registration registration1 = overlay.addLoginListener(ev -> {
         });
         Registration registration2 = overlay.addLoginListener(ev -> {
         });
-        Assert.assertThrows(IllegalStateException.class,
-                () -> overlay.setAction("login"));
+
+        overlay.setAction("login1");
+        Mockito.verify(mockLogger, Mockito.times(1)).warn(Mockito.anyString());
+        Mockito.reset(mockLogger);
 
         registration1.remove();
-        Assert.assertThrows(IllegalStateException.class,
-                () -> overlay.setAction("login"));
+        overlay.setAction("login2");
+        Mockito.verify(mockLogger, Mockito.times(1)).warn(Mockito.anyString());
+        Mockito.reset(mockLogger);
 
         registration2.remove();
+        overlay.setAction("login3");
+        Mockito.verify(mockLogger, Mockito.never()).warn(Mockito.anyString());
+    }
+
+    @Test
+    public void setAction_addLoginListener_logsWarning() {
+        final LoginOverlay overlay = new LoginOverlay();
         overlay.setAction("login");
+        overlay.addLoginListener(ev -> {
+        });
+        Mockito.verify(mockLogger, Mockito.times(1)).warn(Mockito.anyString());
+        Mockito.reset(mockLogger);
+
+        overlay.setAction(null);
+        overlay.addLoginListener(ev -> {
+        });
+        Mockito.verify(mockLogger, Mockito.never()).warn(Mockito.anyString());
     }
 
     @Test
@@ -103,18 +145,4 @@ public class LoginOverlayTest {
                 "Expected error status being reset by default listener",
                 overlay.isError());
     }
-
-    @Test
-    public void addLoginListener_actionSet_throws() {
-        final LoginOverlay overlay = new LoginOverlay();
-        overlay.setAction("login");
-        Assert.assertThrows(IllegalStateException.class,
-                () -> overlay.addLoginListener(ev -> {
-                }));
-
-        overlay.setAction(null);
-        overlay.addLoginListener(ev -> {
-        });
-    }
-
 }
