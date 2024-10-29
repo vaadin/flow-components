@@ -58,7 +58,11 @@ public class DatePickerFallbackParserPage extends Div {
                 });
         clearValueChangeLog.setId("clear-value-change-log");
 
-        add(datePicker, valueChangeLog, clearValueChangeLog);
+        NativeButton setValue = new NativeButton("Set value", event -> {
+            datePicker.setValue(LocalDate.now());
+        });
+
+        add(datePicker, valueChangeLog, clearValueChangeLog, setValue);
     }
 
     private String formatDate(LocalDate date) {
