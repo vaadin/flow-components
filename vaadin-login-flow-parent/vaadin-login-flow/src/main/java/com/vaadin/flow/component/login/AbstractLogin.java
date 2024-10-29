@@ -124,7 +124,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
                 registration.remove();
                 registration = null;
             }
-            checkActionAttributeUsedWithLoginListeners();
+            warnIfActionAndLoginListenerUsedTogether();
         }
     }
 
@@ -254,7 +254,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
             ComponentEventListener<LoginEvent> listener) {
         Registration registration = ComponentUtil.addListener(this,
                 LoginEvent.class, listener);
-        checkActionAttributeUsedWithLoginListeners();
+        warnIfActionAndLoginListenerUsedTogether();
         return registration;
     }
 
@@ -312,7 +312,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
         getElement().setProperty(PROP_DISABLED, !enabled);
     }
 
-    private void checkActionAttributeUsedWithLoginListeners() {
+    private void warnIfActionAndLoginListenerUsedTogether() {
         if (getElement().hasProperty(PROP_ACTION)
                 && !getListeners(LoginEvent.class).isEmpty()) {
             LoggerFactory.getLogger(getClass()).warn(
