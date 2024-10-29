@@ -65,17 +65,6 @@ class DateTimePickerDatePicker
         // Should not change invalid state
     }
 
-    void passThroughPresentationValue(LocalDate newPresentationValue) {
-        super.setPresentationValue(newPresentationValue);
-
-        if (valueEquals(newPresentationValue, getEmptyValue())
-                && isInputValuePresent()) {
-            // Clear the input element from possible bad input.
-            getElement().executeJs("this.inputElement.value = ''");
-            getElement().setProperty("_hasInputValue", false);
-        }
-    }
-
     @Override
     protected boolean isInputValuePresent() {
         return super.isInputValuePresent();
@@ -88,17 +77,6 @@ class DateTimePickerTimePicker
     @Override
     protected void validate() {
         // Should not change invalid state
-    }
-
-    void passThroughPresentationValue(LocalTime newPresentationValue) {
-        super.setPresentationValue(newPresentationValue);
-
-        if (valueEquals(newPresentationValue, getEmptyValue())
-                && isInputValuePresent()) {
-            // Clear the input element from possible bad input.
-            getElement().executeJs("this.inputElement.value = ''");
-            getElement().setProperty("_hasInputValue", false);
-        }
     }
 
     @Override
@@ -407,11 +385,11 @@ public class DateTimePicker
 
     private void synchronizeChildComponentValues(LocalDateTime value) {
         if (value != null) {
-            datePicker.passThroughPresentationValue(value.toLocalDate());
-            timePicker.passThroughPresentationValue(value.toLocalTime());
+            datePicker.setValue(value.toLocalDate());
+            timePicker.setValue(value.toLocalTime());
         } else {
-            datePicker.passThroughPresentationValue(null);
-            timePicker.passThroughPresentationValue(null);
+            datePicker.setValue(null);
+            timePicker.setValue(null);
         }
     }
 
