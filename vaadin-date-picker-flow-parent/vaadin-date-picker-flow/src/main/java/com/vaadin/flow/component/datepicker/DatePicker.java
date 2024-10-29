@@ -261,10 +261,12 @@ public class DatePicker
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
+        setSynchronizedEvent("change");
+
         addValueChangeListener(e -> validate());
 
         getElement().addEventListener("unparsable-change", event -> {
-            setModelValue(getValue(), true);
+            setModelValue(getEmptyValue(), true);
             validate();
             fireValidationStatusChangeEvent();
         });
@@ -667,7 +669,7 @@ public class DatePicker
      *         <code>false</code> otherwise
      */
     protected boolean isInputValuePresent() {
-        return !getInputElementValue().equals("");
+        return !getInputElementValue().isEmpty();
     }
 
     @Synchronize(property = "_inputElementValue", value = { "change",
@@ -701,18 +703,20 @@ public class DatePicker
         boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
         boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
         boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
-        boolean isInputValuePresent = isInputValuePresent();
+        boolean isInputElementValueEmpty = getInputElementValue().isEmpty();
 
-        // When the value is cleared programmatically, reset hasInputValue
-        // so that the following validation doesn't treat this as bad input.
+        // When the value is cleared programmatically, there is no change event
+        // that would synchronize _inputElementValue, so we reset it ourselves
+        // to prevent the following validation from treating this as bad input.
         if (isNewValueEmpty) {
             setInputElementValue("");
         }
 
         super.setValue(value);
 
-        // Clear the input element from possible bad input.
-        if (isValueRemainedEmpty && isInputValuePresent) {
+        // Revalidate if setValue(null) didn't result in a value change but
+        // cleared bad input
+        if (isValueRemainedEmpty && !isInputElementValueEmpty) {
             validate();
             fireValidationStatusChangeEvent();
         }
