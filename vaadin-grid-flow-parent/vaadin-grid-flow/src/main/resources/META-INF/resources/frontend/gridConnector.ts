@@ -116,8 +116,11 @@ window.Vaadin.Flow.gridConnector = {
           selectedKeys = {};
         }
 
+        let selectedItemsChanged = false;
         items.forEach((item) => {
-          if (item) {
+          const selectable = !userOriginated || grid.isItemSelectable(item);
+          selectedItemsChanged = selectedItemsChanged || selectable;
+          if (item && selectable) {
             selectedKeys[item.key] = item;
             item.selected = true;
             if (userOriginated) {
@@ -133,7 +136,9 @@ window.Vaadin.Flow.gridConnector = {
           }
         });
 
-        grid.selectedItems = Object.values(selectedKeys);
+        if (selectedItemsChanged) {
+          grid.selectedItems = Object.values(selectedKeys);
+        }
       });
 
       grid.$connector.doDeselection = tryCatchWrapper(function (items, userOriginated) {
@@ -144,6 +149,10 @@ window.Vaadin.Flow.gridConnector = {
         const updatedSelectedItems = grid.selectedItems.slice();
         while (items.length) {
           const itemToDeselect = items.shift();
+          const selectable = !userOriginated || grid.isItemSelectable(itemToDeselect);
+          if (!selectable) {
+            continue;
+          }
           for (let i = 0; i < updatedSelectedItems.length; i++) {
             const selectedItem = updatedSelectedItems[i];
             if (itemToDeselect?.key === selectedItem.key) {
@@ -171,6 +180,11 @@ window.Vaadin.Flow.gridConnector = {
             if (grid.__deselectDisallowed) {
               grid.activeItem = oldVal;
             } else {
+              // The item instance may have changed since the item was stored as active item
+              // and information such as whether the item may be selected or deselected may
+              // be stale. Use data provider controller to get updated instance from grid
+              // cache.
+              oldVal = dataProviderController.getItemContext(oldVal).item;
               grid.$connector.doDeselection([oldVal], true);
             }
           }
@@ -1189,5 +1203,10 @@ window.Vaadin.Flow.gridConnector = {
           }
         })
       );
+
+      grid.isItemSelectable = tryCatchWrapper((item) => {
+        // If there is no selectable data, assume the item is selectable
+        return item?.selectable === undefined || item.selectable;
+      });
     })(grid)
 };
