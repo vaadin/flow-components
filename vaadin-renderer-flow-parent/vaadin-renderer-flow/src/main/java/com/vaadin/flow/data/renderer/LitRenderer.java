@@ -24,7 +24,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
@@ -70,8 +69,6 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
     private final String templateExpression;
 
-    private final String propertyNamespace;
-
     private final Map<String, ValueProvider<SOURCE, ?>> valueProviders = new HashMap<>();
     private final Map<String, SerializableBiConsumer<SOURCE, JsonArray>> clientCallables = new HashMap<>();
 
@@ -79,18 +76,6 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
     private LitRenderer(String templateExpression) {
         this.templateExpression = templateExpression;
-
-        int litRendererCount = 0;
-        if (UI.getCurrent() != null) {
-            // Generate a unique (in scope of the UI) namespace for the renderer
-            // properties.
-            litRendererCount = UI.getCurrent().getElement()
-                    .getProperty("__litRendererCount", 0);
-            UI.getCurrent().getElement().setProperty("__litRendererCount",
-                    litRendererCount + 1);
-
-        }
-        propertyNamespace = "lr_" + litRendererCount + "_";
     }
 
     LitRenderer() {
@@ -144,9 +129,20 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     @Override
     public Rendering<SOURCE> render(Element container,
             DataKeyMapper<SOURCE> keyMapper, String rendererName) {
-        DataGenerator<SOURCE> dataGenerator = createDataGenerator();
+        // Generate the namespace used to prefix property names when sending
+        // them to the client as part of an item.
+        String propertyNamespace = "_lr_" + container.getNode().getId() + "_"
+                + rendererName + "_";
+
+        return render(container, keyMapper, rendererName, propertyNamespace);
+    }
+
+    Rendering<SOURCE> render(Element container, DataKeyMapper<SOURCE> keyMapper,
+            String rendererName, String propertyNamespace) {
+        DataGenerator<SOURCE> dataGenerator = createDataGenerator(
+                propertyNamespace);
         Registration registration = createJsRendererFunction(container,
-                keyMapper, rendererName);
+                keyMapper, rendererName, propertyNamespace);
 
         return new Rendering<SOURCE>() {
             @Override
@@ -187,18 +183,9 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         return templateExpression;
     }
 
-    /**
-     * Returns the namespace used to prefix property names when sending them to
-     * the client as part of an item.
-     *
-     * @return the property namespace
-     */
-    String getPropertyNamespace() {
-        return propertyNamespace;
-    }
-
     private Registration createJsRendererFunction(Element container,
-            DataKeyMapper<SOURCE> keyMapper, String rendererName) {
+            DataKeyMapper<SOURCE> keyMapper, String rendererName,
+            String propertyNamespace) {
         ReturnChannelRegistration returnChannel = container.getNode()
                 .getFeature(ReturnChannelMap.class)
                 .registerChannel(arguments -> {
@@ -247,7 +234,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         return () -> registrations.forEach(Registration::remove);
     }
 
-    private DataGenerator<SOURCE> createDataGenerator() {
+    private DataGenerator<SOURCE> createDataGenerator(
+            String propertyNamespace) {
         // Use an anonymous class instead of Lambda to prevent potential
         // deserialization issues when used with Grid
         // see https://github.com/vaadin/flow-components/issues/6256
