@@ -34,13 +34,14 @@ _window.Vaadin.setLitRenderer = (
   returnChannel: (name: string, itemKey: string, args: any[]) => void,
   clientCallables: string[],
   propertyNamespace: string,
+  appId: string
 ) => {
   // Dynamically created function that renders the templateExpression
   // inside the given root element using Lit
   const renderFunction = Function(`
     "use strict";
 
-    const [render, html, live, returnChannel] = arguments;
+    const [render, html, live, appId, returnChannel] = arguments;
 
     return (root, model, itemKey) => {
       const { item, index } = model;
@@ -58,7 +59,7 @@ _window.Vaadin.setLitRenderer = (
 
       render(html\`${templateExpression}\`, root)
     }
-  `)(render, html, live, returnChannel);
+  `)(render, html, live, appId, returnChannel);
 
   const renderer: Renderer = (root, _, model) => {
     const { item } = model;
