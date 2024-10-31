@@ -45,8 +45,10 @@ public class LitRendererTestComponentWrapper extends Div
 
                 @Override
                 public void set(int start, List<JsonValue> items) {
-                    getElement().executeJs("this.items = $0",
-                            items.stream().collect(JsonUtils.asArray()));
+                    getChildren().forEach((component) -> {
+                        component.getElement().executeJs("this.items = $0",
+                                items.stream().collect(JsonUtils.asArray()));
+                    });
                 }
 
                 @Override

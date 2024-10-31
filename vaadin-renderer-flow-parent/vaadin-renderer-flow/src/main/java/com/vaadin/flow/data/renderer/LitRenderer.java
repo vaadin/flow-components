@@ -131,8 +131,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
             DataKeyMapper<SOURCE> keyMapper, String rendererName) {
         // Generate the namespace used to prefix property names when sending
         // them to the client as part of an item.
-        String propertyNamespace = "";
-        // "_lr_" + container.getNode().getId() + "_" + rendererName + "_";
+        String propertyNamespace = String.format("_lr_%s_%s_",
+                container.getNode().getId(), rendererName);
 
         return render(container, keyMapper, rendererName, propertyNamespace);
     }
