@@ -18,7 +18,6 @@ package com.vaadin.flow.data.renderer;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
@@ -144,12 +143,7 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
 
     @Override
     protected String getTemplateExpression() {
-        var appId = UI.getCurrent() != null
-                ? UI.getCurrent().getInternals().getAppId()
-                : "";
-
-        return "${Vaadin.FlowComponentHost.getNode('" + appId
-                + "', item.nodeid)}";
+        return "${Vaadin.FlowComponentHost.getNode(appId, item.nodeid)}";
     }
 
     Element getOwner() {

@@ -15,20 +15,14 @@
  */
 package com.vaadin.flow.data.renderer.tests;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
-
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.function.SerializableBiConsumer;
-import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.communication.PushMode;
 
 /**
@@ -39,77 +33,40 @@ import com.vaadin.flow.shared.communication.PushMode;
  */
 @Route("vaadin-renderer-flow/component-renderer-in-new-thread")
 public class ComponentRendererInNewThreadPage extends Div {
-
-    private final AtomicInteger nullUiCountOnTemplateExpression = new AtomicInteger(
-            0);
-    private final AtomicInteger nonNullUiCountOnTemplateExpression = new AtomicInteger(
-            0);
-
     public ComponentRendererInNewThreadPage() {
         UI.getCurrent().getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
-        NativeButton addComponentButton = new NativeButton("Add component",
-                e -> {
-                    LongRunningTask longRunningTask = new LongRunningTask(
-                            component -> e.getSource().getUI()
-                                    .ifPresent(ui -> ui.access(() -> {
-                                        add(component);
 
-                                        Span nullUiCountOnTemplateExpressionLog = new Span(
-                                                nullUiCountOnTemplateExpression
-                                                        .toString());
-                                        nullUiCountOnTemplateExpressionLog
-                                                .setId("null-ui-count");
+        LitRendererTestComponent component = new LitRendererTestComponent();
+        component.setItems("Item");
 
-                                        Span nonNullUiCountOnTemplateExpressionLog = new Span(
-                                                nonNullUiCountOnTemplateExpression
-                                                        .toString());
-                                        nonNullUiCountOnTemplateExpressionLog
-                                                .setId("non-null-ui-count");
+        ComponentRenderer<Span, String> componentRenderer = new ComponentRenderer<Span, String>(
+                item -> new Span(item));
 
-                                        add(nullUiCountOnTemplateExpressionLog,
-                                                nonNullUiCountOnTemplateExpressionLog);
-                                    })));
-                    longRunningTask.start();
+        NativeButton addComponentRendererBeforeAttach = new NativeButton(
+                "Add component renderer before attach", (event) -> {
+                    runInBackgroundThread(() -> {
+                        component.setRenderer(componentRenderer);
+                        add(component);
+                    });
                 });
-        addComponentButton.setId("add-component");
-        add(addComponentButton);
+        addComponentRendererBeforeAttach
+                .setId("add-component-renderer-before-attach");
+
+        NativeButton addComponentRendererAfterAttach = new NativeButton(
+                "Add component renderer after attach", (event) -> {
+                    runInBackgroundThread(() -> {
+                        add(component);
+                        component.setRenderer(componentRenderer);
+                    });
+                });
+        addComponentRendererAfterAttach
+                .setId("add-component-renderer-after-attach");
+
+        add(addComponentRendererBeforeAttach, addComponentRendererAfterAttach);
     }
 
-    class LongRunningTask extends Thread {
-        private final Consumer<Component> finishedCallback;
-
-        public LongRunningTask(Consumer<Component> finishedCallback) {
-            this.finishedCallback = finishedCallback;
-        }
-
-        @Override
-        public void run() {
-            LitRendererTestComponent component = new LitRendererTestComponent();
-            component.setItems("Item");
-            RendererWithCustomTemplateExpression renderer = new RendererWithCustomTemplateExpression(
-                    NativeLabel::new, HasText::setText);
-            component.setRenderer(renderer);
-            finishedCallback.accept(component);
-        }
-    }
-
-    class RendererWithCustomTemplateExpression
-            extends ComponentRenderer<NativeLabel, String> {
-
-        public RendererWithCustomTemplateExpression(
-                SerializableSupplier<NativeLabel> componentSupplier,
-                SerializableBiConsumer<NativeLabel, String> itemConsumer) {
-            super(componentSupplier, itemConsumer);
-        }
-
-        @Override
-        protected String getTemplateExpression() {
-            if (UI.getCurrent() == null) {
-                nullUiCountOnTemplateExpression.incrementAndGet();
-            } else {
-                nonNullUiCountOnTemplateExpression.incrementAndGet();
-            }
-            return "DummyExpression";
-        }
+    private void runInBackgroundThread(Command command) {
+        VaadinSession session = VaadinSession.getCurrent();
+        new Thread(() -> session.accessSynchronously(command)).start();
     }
 }
