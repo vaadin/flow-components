@@ -33,7 +33,8 @@ _window.Vaadin.setLitRenderer = (
   templateExpression: string,
   returnChannel: (name: string, itemKey: string, args: any[]) => void,
   clientCallables: string[],
-  propertyNamespace: string
+  propertyNamespace: string,
+  appId: string
 ) => {
   const callablesCreator = (itemKey: string) => {
     return clientCallables.map((clientCallable) => (...args: any[]) => {
@@ -46,6 +47,7 @@ _window.Vaadin.setLitRenderer = (
     'html',
     'root',
     'live',
+    'appId',
     'itemKey',
     'model',
     'item',
@@ -56,7 +58,7 @@ _window.Vaadin.setLitRenderer = (
   const htmlGenerator = new Function(...fnArgs);
   const renderFunction = (root: RenderRoot, model: ItemModel, itemKey: string) => {
     const { item, index } = model;
-    render(htmlGenerator(html, root, live, itemKey, model, item, index, ...callablesCreator(itemKey)), root);
+    render(htmlGenerator(html, root, live, appId, itemKey, model, item, index, ...callablesCreator(itemKey)), root);
   };
 
   const renderer: Renderer = (root, _, model) => {
