@@ -25,49 +25,50 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-renderer-flow/lit-renderer-property-namespace")
 public class LitRendererPropertyNamespacePage extends Div {
     public LitRendererPropertyNamespacePage() {
+        // Create a wrapper component with two LitRendererTestComponents
         LitRendererTestComponentWrapper wrapper = new LitRendererTestComponentWrapper(
                 2);
-        wrapper.setItems("0");
+        wrapper.setItems("Item 0");
 
         NativeButton setLitRenderersButton = new NativeButton(
                 "Set LitRenderers", e -> {
-                    wrapper.setRenderer(createDefaultLitRenderer());
-                    wrapper.setDetailsRenderer(createDetailsLitRenderer());
+                    for (int i = 0; i < wrapper.getComponentCount(); i++) {
+                        wrapper.setRenderer(i, createLitRenderer(
+                                "Component " + i + " : Default Renderer"));
+                        wrapper.setDetailsRenderer(i, createLitRenderer(
+                                "Component " + i + " : Details Renderer"));
+                    }
                 });
         setLitRenderersButton.setId("set-lit-renderers");
 
         NativeButton setComponentRenderersButton = new NativeButton(
                 "Set ComponentRenderers", e -> {
-                    wrapper.setRenderer(createDefaultComponentRenderer());
-                    wrapper.setDetailsRenderer(
-                            createDetailsComponentRenderer());
+                    for (int i = 0; i < wrapper.getComponentCount(); i++) {
+                        wrapper.setRenderer(i, createComponentRenderer(
+                                "Component " + i + " : Default Renderer"));
+                        wrapper.setDetailsRenderer(i, createComponentRenderer(
+                                "Component " + i + " : Details Renderer"));
+                    }
                 });
         setComponentRenderersButton.setId("set-component-renderers");
 
-        add(wrapper, setLitRenderersButton, setComponentRenderersButton);
+        NativeButton attachButton = new NativeButton("Attach", e -> {
+            add(wrapper);
+        });
+        attachButton.setId("attach");
+
+        add(setLitRenderersButton, setComponentRenderersButton, attachButton);
     }
 
-    private LitRenderer<String> createDefaultLitRenderer() {
+    private LitRenderer<String> createLitRenderer(String prefix) {
         LitRenderer<String> renderer = LitRenderer
                 .of("<span>${item.content}</span>");
-        renderer.withProperty("content", item -> "Default renderer: " + item);
+        renderer.withProperty("content", item -> prefix + " : " + item);
         return renderer;
     }
 
-    private LitRenderer<String> createDetailsLitRenderer() {
-        LitRenderer<String> renderer = LitRenderer
-                .of("<span>${item.content}</span>");
-        renderer.withProperty("content", item -> "Details renderer: " + item);
-        return renderer;
-    }
-
-    private ComponentRenderer<Span, String> createDefaultComponentRenderer() {
-        return new ComponentRenderer<>(
-                item -> new Span("Default renderer: " + item));
-    }
-
-    private ComponentRenderer<Span, String> createDetailsComponentRenderer() {
-        return new ComponentRenderer<>(
-                item -> new Span("Details renderer: " + item));
+    private ComponentRenderer<Span, String> createComponentRenderer(
+            String prefix) {
+        return new ComponentRenderer<>(item -> new Span(prefix + " : " + item));
     }
 }

@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.data.renderer.tests;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,32 +34,48 @@ public class LitRendererPropertyNamespaceIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setLitRenderers_componentsAreRendered() {
+    public void attach_setLitRenderers_componentsAreRendered() {
+        findElement(By.id("attach")).click();
         findElement(By.id("set-lit-renderers")).click();
-
-        findElements(By.tagName("lit-renderer-test-component"))
-                .forEach((component) -> {
-                    WebElement item = findElement(By.className("main"));
-                    Assert.assertEquals("Default renderer: 0", item.getText());
-
-                    WebElement details = findElement(By.className("details"));
-                    Assert.assertEquals("Details renderer: 0",
-                            details.getText());
-                });
+        assertComponentsAreRendered();
     }
 
     @Test
-    public void setComponentRenderers_componentsAreRendered() {
+    public void attach_setComponentRenderers_componentsAreRendered() {
+        findElement(By.id("attach")).click();
         findElement(By.id("set-component-renderers")).click();
+        assertComponentsAreRendered();
+    }
 
-        findElements(By.tagName("lit-renderer-test-component"))
-                .forEach((component) -> {
-                    WebElement item = findElement(By.className("main"));
-                    Assert.assertEquals("Default renderer: 0", item.getText());
+    @Test
+    public void setLitRenderers_attach_componentsAreRendered() {
+        findElement(By.id("set-lit-renderers")).click();
+        findElement(By.id("attach")).click();
+        assertComponentsAreRendered();
+    }
 
-                    WebElement details = findElement(By.className("details"));
-                    Assert.assertEquals("Details renderer: 0",
-                            details.getText());
-                });
+    @Test
+    public void setComponentRenderers_attach_componentsAreRendered() {
+        findElement(By.id("set-component-renderers")).click();
+        findElement(By.id("attach")).click();
+        assertComponentsAreRendered();
+    }
+
+    private void assertComponentsAreRendered() {
+        List<WebElement> components = findElements(
+                By.tagName("lit-renderer-test-component"));
+        for (int i = 0; i < components.size(); i++) {
+            WebElement component = components.get(i);
+
+            WebElement main = component.findElement(By.className("main"));
+            Assert.assertEquals(
+                    "Component " + i + " : Default Renderer : Item 0",
+                    main.getText());
+
+            WebElement details = component.findElement(By.className("details"));
+            Assert.assertEquals(
+                    "Component " + i + " : Details Renderer : Item 0",
+                    details.getText());
+        }
     }
 }

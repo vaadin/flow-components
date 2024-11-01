@@ -17,6 +17,7 @@ package com.vaadin.flow.data.renderer.tests;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.binder.HasDataProvider;
@@ -91,18 +92,38 @@ public class LitRendererTestComponentWrapper extends Div
      * Sets the renderer for all children.
      */
     public void setRenderer(LitRenderer<String> renderer) {
-        getChildren().forEach(child -> {
-            ((LitRendererTestComponent) child).setRenderer(renderer);
+        getComponents().forEach(component -> {
+            component.setRenderer(renderer);
         });
+    }
+
+    /**
+     * Sets the renderer for the component at the given index.
+     */
+    public void setRenderer(int componentIndex, LitRenderer<String> renderer) {
+        getComponents().get(componentIndex).setRenderer(renderer);
     }
 
     /**
      * Sets the details renderer for all children.
      */
     public void setDetailsRenderer(LitRenderer<String> renderer) {
-        getChildren().forEach(child -> {
-            ((LitRendererTestComponent) child).setDetailsRenderer(renderer);
+        getComponents().forEach(component -> {
+            component.setDetailsRenderer(renderer);
         });
+    }
+
+    /**
+     * Sets the details renderer for the component at the given index.
+     */
+    public void setDetailsRenderer(int componentIndex,
+            LitRenderer<String> renderer) {
+        getComponents().get(componentIndex).setDetailsRenderer(renderer);
+    }
+
+    private List<LitRendererTestComponent> getComponents() {
+        return getChildren().map(LitRendererTestComponent.class::cast)
+                .collect(Collectors.toList());
     }
 
     @Override
