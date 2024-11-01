@@ -151,8 +151,8 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
     }
 
     @Override
-    Rendering<SOURCE> render(Element owner, DataKeyMapper<SOURCE> keyMapper,
-            String rendererName, String propertyNamespace) {
+    public Rendering<SOURCE> render(Element owner,
+            DataKeyMapper<SOURCE> keyMapper, String rendererName) {
         this.owner = owner;
         this.container = new Element("div");
         this.container.addAttachListener(event -> {
@@ -160,10 +160,9 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
                     "Vaadin.FlowComponentHost.patchVirtualContainer(this)");
         });
         owner.appendVirtualChild(container);
-        var rendering = super.render(owner, keyMapper, rendererName,
-                propertyNamespace);
+        var rendering = super.render(owner, keyMapper, rendererName);
 
-        return configureRendering(rendering, keyMapper, propertyNamespace);
+        return configureRendering(rendering, keyMapper);
     }
 
     /**
@@ -174,12 +173,10 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
      *            the rendering instance
      * @param keyMapper
      *            the key mapper
-     * @param propertyNamespace
-     *            the property namespace
      * @return a rendering instance configured for the purposes of this renderer
      */
     Rendering<SOURCE> configureRendering(Rendering<SOURCE> rendering,
-            DataKeyMapper<SOURCE> keyMapper, String propertyNamespace) {
+            DataKeyMapper<SOURCE> keyMapper) {
         return new Rendering<SOURCE>() {
             @Override
             public Optional<DataGenerator<SOURCE>> getDataGenerator() {
@@ -189,8 +186,8 @@ public class ComponentRenderer<COMPONENT extends Component, SOURCE>
                         ComponentRenderer.this,
                         keyMapper == null ? null : keyMapper::key);
                 componentDataGenerator.setContainer(container);
-                componentDataGenerator
-                        .setNodeIdPropertyName(propertyNamespace + "nodeid");
+                componentDataGenerator.setNodeIdPropertyName(
+                        getPropertyNamespace() + "nodeid");
                 generator.addDataGenerator(componentDataGenerator);
 
                 generator.addDataGenerator(rendering.getDataGenerator().get());

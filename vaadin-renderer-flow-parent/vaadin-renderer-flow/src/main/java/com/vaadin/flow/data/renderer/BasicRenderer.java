@@ -87,13 +87,11 @@ public abstract class BasicRenderer<SOURCE, TARGET>
      *            the rendering instance
      * @param keyMapper
      *            the key mapper
-     * @param propertyNamespace
-     *            the property namespace
      * @return a rendering instance configured for the purposes of this renderer
      */
     @Override
     Rendering<SOURCE> configureRendering(Rendering<SOURCE> rendering,
-            DataKeyMapper<SOURCE> keyMapper, String propertyNamespace) {
+            DataKeyMapper<SOURCE> keyMapper) {
         return rendering;
     }
 
