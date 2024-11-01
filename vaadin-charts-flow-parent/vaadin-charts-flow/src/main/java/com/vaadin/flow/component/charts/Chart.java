@@ -127,12 +127,6 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
         getConfiguration().getChart().setType(type);
     }
 
-    static String wrapJSExpressionInTryCatchWrapper(String expression) {
-        return String.format("const f = function(){return %s;}.bind(this);"
-                + "return Vaadin.Flow.tryCatchWrapper(f, 'Vaadin Charts', 'vaadin-charts-flow')();",
-                expression);
-    }
-
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
@@ -706,8 +700,8 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
         private void callClientSideAddSeriesAsDrilldown(int seriesIndex,
                 int pointIndex, Series drilldownSeries) {
-            final String JS = "this.__callChartFunction($0, this.configuration.series[$1].data[$2], $3)";
-            getElement().executeJs(wrapJSExpressionInTryCatchWrapper(JS),
+            getElement().executeJs(
+                    "this.__callChartFunction($0, this.configuration.series[$1].data[$2], $3)",
                     "addSeriesAsDrilldown", seriesIndex, pointIndex,
                     toJsonValue((AbstractConfigurationObject) drilldownSeries));
         }
