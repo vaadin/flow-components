@@ -129,7 +129,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     });
 
     grid.selectedItems = Object.values(selectedKeys);
-  });
+  };
 
   grid.$connector.doDeselection = function (items, userOriginated) {
     if (selectionMode === 'NONE' || !items.length || (userOriginated && grid.hasAttribute('disabled'))) {
@@ -155,7 +155,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       }
     }
     grid.selectedItems = updatedSelectedItems;
-  });
+  };
 
   grid.__activeItemChanged = function (newVal, oldVal) {
     if (selectionMode != 'SINGLE') {
