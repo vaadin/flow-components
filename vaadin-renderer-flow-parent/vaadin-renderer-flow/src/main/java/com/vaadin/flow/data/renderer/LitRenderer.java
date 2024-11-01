@@ -81,8 +81,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     private LitRenderer(String templateExpression) {
         this.templateExpression = templateExpression;
 
-        propertyNamespace = String.format("lr_%s_", UUID.randomUUID().toString()
-                .replace("-", "").substring(0, 16));
+        propertyNamespace = String.format("lr_%s_",
+                UUID.randomUUID().toString().replace("-", "").substring(0, 16));
     }
 
     LitRenderer() {
