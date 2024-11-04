@@ -382,6 +382,16 @@ public class DialogTest {
         Assert.assertNull(dialog.getElement().getParent());
     }
 
+    @Test
+    public void position_setTopLeft_positionIsDefined() {
+        Dialog dialog = new Dialog();
+        dialog.setTop("10px");
+        dialog.setLeft("20px");
+
+        Assert.assertEquals("10px", dialog.getTop());
+        Assert.assertEquals("20px", dialog.getLeft());
+    }
+
     private void fakeClientResponse() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {

@@ -141,6 +141,51 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
+     * Gets the top position of the overlay.
+     *
+     * @return the top position of the overlay
+     */
+    public String getTop() {
+        return getElement().getProperty("top");
+    }
+
+    /**
+     * Sets the top position of the overlay. If a unitless number is provided,
+     * pixels are assumed.
+     * <p>
+     * Note that the overlay top edge may not be the same as the viewport top
+     * edge (e.g. the "Lumo" theme defines some spacing to prevent the overlay
+     * from stretching all the way to the top of the viewport).
+     *
+     * @param top
+     *            the top position of the overlay
+     */
+    public void setTop(String top) {
+        getElement().setProperty("top", top);
+    }
+
+    /**
+     * Gets the left position of the overlay.
+     *
+     * @return the left position of the overlay
+     */
+    public String getLeft() {
+        return getElement().getProperty("left");
+    }
+
+    /**
+     * Sets the distance of the overlay from the left of its container. If a
+     * unitless number is provided, pixels are assumed.
+     * <p>
+     * Note that the overlay left edge may not be the same as the viewport left
+     * edge (e.g. the "Lumo" theme defines some spacing to prevent the overlay
+     * from stretching all the way to the left of the viewport).
+     */
+    public void setLeft(String left) {
+        getElement().setProperty("left", left);
+    }
+
+    /**
      * `resize` event is sent when the user finishes resizing the overlay.
      */
     @DomEvent("resize")
