@@ -76,7 +76,7 @@ _window.Vaadin.setLitRenderer = (
     // this specific LitRenderer instance. The renderer instance specific
     // "propertyNamespace" prefix is stripped from the property name at this point:
     //
-    // item: { key: "2", lr_3_lastName: "Tyler"}
+    // item: { key: "2", lr_3769df5394a74ef3_lastName: "Tyler"}
     // ->
     // mappedItem: { lastName: "Tyler" }
     const mappedItem: { [key: string]: any } = {};
