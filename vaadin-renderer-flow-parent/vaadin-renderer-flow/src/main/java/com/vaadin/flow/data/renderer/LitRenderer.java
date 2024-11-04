@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import com.vaadin.flow.component.UI;
@@ -80,17 +81,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     private LitRenderer(String templateExpression) {
         this.templateExpression = templateExpression;
 
-        int litRendererCount = 0;
-        if (UI.getCurrent() != null) {
-            // Generate a unique (in scope of the UI) namespace for the renderer
-            // properties.
-            litRendererCount = UI.getCurrent().getElement()
-                    .getProperty("__litRendererCount", 0);
-            UI.getCurrent().getElement().setProperty("__litRendererCount",
-                    litRendererCount + 1);
-
-        }
-        propertyNamespace = "lr_" + litRendererCount + "_";
+        propertyNamespace = String.format("lr_%s_",
+                UUID.randomUUID().toString().replace("-", "").substring(0, 16));
     }
 
     LitRenderer() {
