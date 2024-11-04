@@ -138,7 +138,8 @@ public class ComboBoxIT extends AbstractComboBoxIT {
 
         Map<String, ?> firstItem = items.get(0);
         Assert.assertEquals("A V Club Disagrees", firstItem.get("label"));
-        Assert.assertEquals("A V Club Disagrees\nHaircuts for Men", $("vaadin-combo-box-item").get(0).getText());
+        Assert.assertEquals("A V Club Disagrees\nHaircuts for Men",
+                $("vaadin-combo-box-item").get(0).getText());
 
         executeScript(
                 "arguments[0].selectedItem = arguments[0].filteredItems[1]",
@@ -169,9 +170,10 @@ public class ComboBoxIT extends AbstractComboBoxIT {
         List<Map<String, ?>> items = (List<Map<String, ?>>) executeScript(
                 "return arguments[0].filteredItems", comboBox);
 
-
-        Assert.assertEquals("A V Club Disagrees\nHaircuts for Men", $("vaadin-combo-box-item").get(0).getText());
-        Assert.assertEquals("Sculpted\nHaywyre", $("vaadin-combo-box-item").get(1).getText());
+        Assert.assertEquals("A V Club Disagrees\nHaircuts for Men",
+                $("vaadin-combo-box-item").get(0).getText());
+        Assert.assertEquals("Sculpted\nHaywyre",
+                $("vaadin-combo-box-item").get(1).getText());
     }
 
     @Test
