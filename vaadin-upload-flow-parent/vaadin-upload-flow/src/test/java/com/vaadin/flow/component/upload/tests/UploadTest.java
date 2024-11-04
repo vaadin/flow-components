@@ -18,6 +18,7 @@ package com.vaadin.flow.component.upload.tests;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
@@ -28,6 +29,11 @@ public class UploadTest {
     public void uploadNewUpload() {
         // Test no NPE due missing UI when setAttribute is called.
         Upload upload = new Upload();
+    }
+
+    @Test
+    public void implementsHasEnabled() {
+        Assert.assertTrue(HasEnabled.class.isAssignableFrom(Upload.class));
     }
 
     @Test

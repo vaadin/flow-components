@@ -27,6 +27,7 @@ import java.util.stream.IntStream;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -63,7 +64,7 @@ import elemental.json.JsonType;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/upload", version = "24.6.0-alpha7")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
-public class Upload extends Component implements HasSize, HasStyle {
+public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
     /**
      * Server-side component for the default {@code <vaadin-upload>} icon.
@@ -193,7 +194,7 @@ public class Upload extends Component implements HasSize, HasStyle {
         return addListener(AllFinishedEvent.class, listener);
     }
 
-    private StreamVariable getStreamVariable() {
+    StreamVariable getStreamVariable() {
         if (streamVariable == null) {
             streamVariable = new DefaultStreamVariable(this);
         }
@@ -425,6 +426,10 @@ public class Upload extends Component implements HasSize, HasStyle {
      * accepted on same component.
      */
     private void startUpload() {
+        if (!isEnabled()) {
+            throw new IllegalStateException(
+                    "Cannot start upload because the Upload component is disabled");
+        }
         if (getMaxFiles() != 0 && getMaxFiles() <= activeUploads) {
             throw new IllegalStateException(
                     "Maximum supported amount of uploads already started");
