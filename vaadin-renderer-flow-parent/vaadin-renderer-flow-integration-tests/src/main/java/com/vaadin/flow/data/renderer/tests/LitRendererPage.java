@@ -29,7 +29,7 @@ public class LitRendererPage extends Div {
 
     public LitRendererPage() {
 
-        LitRendererTestComponent component = new LitRendererTestComponent();
+        LitRendererTestComponentWrapper component = new LitRendererTestComponentWrapper();
         component.setItems(Arrays.asList("0", "1", "2", "3", "4"));
         setLitRenderer(component);
 
@@ -97,7 +97,7 @@ public class LitRendererPage extends Div {
         add(toggleAttachedButton);
     }
 
-    private void setLitRenderer(LitRendererTestComponent component) {
+    private void setLitRenderer(LitRendererTestComponentWrapper component) {
         component.setRenderer(LitRenderer.<String> of(new StringBuilder()
                 .append("<div tabindex=\"0\"")
                 .append("  id=\"content-${index}\"")
@@ -122,7 +122,8 @@ public class LitRendererPage extends Div {
                 }));
     }
 
-    private void setDetailsLitRenderer(LitRendererTestComponent component) {
+    private void setDetailsLitRenderer(
+            LitRendererTestComponentWrapper component) {
         LitRenderer<String> renderer = LitRenderer.<String> of(
                 "<div id=\"details-${index}\">Details: ${item.value}</div>");
         component.setDetailsRenderer(renderer);

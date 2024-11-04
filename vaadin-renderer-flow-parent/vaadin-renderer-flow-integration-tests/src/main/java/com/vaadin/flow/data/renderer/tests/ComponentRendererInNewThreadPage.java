@@ -36,7 +36,7 @@ public class ComponentRendererInNewThreadPage extends Div {
     public ComponentRendererInNewThreadPage() {
         UI.getCurrent().getPushConfiguration().setPushMode(PushMode.AUTOMATIC);
 
-        LitRendererTestComponent component = new LitRendererTestComponent();
+        LitRendererTestComponentWrapper component = new LitRendererTestComponentWrapper();
         component.setItems("Item");
 
         ComponentRenderer<Span, String> componentRenderer = new ComponentRenderer<Span, String>(
