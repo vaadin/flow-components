@@ -8,7 +8,7 @@ import {
   getSeparator,
   searchAmOrPmToken
 } from './helpers.js';
-import { TimePicker } from '@vaadin/time-picker/src/vaadin-time-picker.js';
+import { parseISOTime } from '@vaadin/time-picker/src/vaadin-time-picker-helper.js';
 
 // Execute callback when predicate returns true.
 // Try again later if predicate returns false.
@@ -22,7 +22,7 @@ function when(predicate, callback, timeout = 0) {
 
 function parseISO(text) {
   // The default i18n parser of the web component is ISO 8601 compliant.
-  const timeObject = TimePicker.properties.i18n.value().parseTime(text);
+  const timeObject = parseISOTime(text);
 
   // The web component returns an object with string values
   // while the connector expects number values.
