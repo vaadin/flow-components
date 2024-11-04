@@ -151,7 +151,7 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
 
         refresh(item);
 
-        if (isBuffered()) {
+        if (isBuffered() || item.getClass().isRecord()) {
             binder.readBean(item);
         } else {
             binder.setBean(item);
