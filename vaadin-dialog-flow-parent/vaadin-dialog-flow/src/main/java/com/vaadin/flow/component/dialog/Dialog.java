@@ -77,9 +77,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/dialog", version = "24.6.0-alpha4")
+@NpmPackage(value = "@vaadin/dialog", version = "24.6.0-alpha7")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
@@ -89,10 +89,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     private boolean autoAddedToTheUi;
     private int configuredCloseActionListeners;
-    private String width;
     private String minWidth;
     private String maxWidth;
-    private String height;
     private String minHeight;
     private String maxHeight;
     private DialogHeader dialogHeader;
@@ -145,6 +143,54 @@ public class Dialog extends Component implements HasComponents, HasSize,
         public DialogCloseActionEvent(Dialog source, boolean fromClient) {
             super(source, fromClient);
         }
+    }
+
+    /**
+     * Gets the top position of the overlay.
+     *
+     * @return the top position of the overlay
+     */
+    public String getTop() {
+        return getElement().getProperty("top");
+    }
+
+    /**
+     * Sets the top position of the overlay. If a unitless number is provided,
+     * pixels are assumed.
+     * <p>
+     * Note that the overlay top edge may not be the same as the viewport top
+     * edge (e.g. the "Lumo" theme defines some spacing to prevent the overlay
+     * from stretching all the way to the top of the viewport).
+     *
+     * @param top
+     *            the top position of the overlay
+     */
+    public void setTop(String top) {
+        getElement().setProperty("top", top);
+    }
+
+    /**
+     * Gets the left position of the overlay.
+     *
+     * @return the left position of the overlay
+     */
+    public String getLeft() {
+        return getElement().getProperty("left");
+    }
+
+    /**
+     * Sets the distance of the overlay from the left of its container. If a
+     * unitless number is provided, pixels are assumed.
+     * <p>
+     * Note that the overlay left edge may not be the same as the viewport left
+     * edge (e.g. the "Lumo" theme defines some spacing to prevent the overlay
+     * from stretching all the way to the left of the viewport).
+     *
+     * @param left
+     *            the left position of the overlay
+     */
+    public void setLeft(String left) {
+        getElement().setProperty("left", left);
     }
 
     /**
@@ -261,8 +307,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public void setWidth(String value) {
-        width = value;
-        setDimension(ElementConstants.STYLE_WIDTH, value);
+        getElement().setProperty("width", value);
     }
 
     @Override
@@ -279,8 +324,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public void setHeight(String value) {
-        height = value;
-        setDimension(ElementConstants.STYLE_HEIGHT, value);
+        getElement().setProperty("height", value);
     }
 
     @Override
@@ -297,7 +341,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public String getWidth() {
-        return width;
+        return getElement().getProperty("width");
     }
 
     @Override
@@ -312,7 +356,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public String getHeight() {
-        return height;
+        return getElement().getProperty("height");
     }
 
     @Override
@@ -1140,10 +1184,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
                 "this.renderer = (root) => Vaadin.FlowComponentHost.setChildNodes($0, this.virtualChildNodeIds, root)",
                 appId);
 
-        setDimension(ElementConstants.STYLE_WIDTH, width);
         setDimension(ElementConstants.STYLE_MIN_WIDTH, minWidth);
         setDimension(ElementConstants.STYLE_MAX_WIDTH, maxWidth);
-        setDimension(ElementConstants.STYLE_HEIGHT, height);
         setDimension(ElementConstants.STYLE_MIN_HEIGHT, minHeight);
         setDimension(ElementConstants.STYLE_MAX_HEIGHT, maxHeight);
     }
