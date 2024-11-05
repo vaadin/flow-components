@@ -440,6 +440,18 @@ public class DialogTestPageIT extends AbstractComponentIT {
         Assert.assertNotEquals(overlayTop, overlay.getCssValue("top"));
     }
 
+    @Test
+    public void setDialogPosition() {
+        findElement(By.id("dialog-resizable-draggable-set-position-button"))
+                .click();
+        findElement(By.id("dialog-resizable-draggable-open-button")).click();
+
+        TestBenchElement dialogOverlay = $("*").id("overlay");
+        TestBenchElement overlay = dialogOverlay.$("*").id("overlay");
+        Assert.assertEquals("100px", overlay.getCssValue("top"));
+        Assert.assertEquals("200px", overlay.getCssValue("left"));
+    }
+
     /**
      * Get the number for a css value with px suffix
      *
