@@ -162,18 +162,6 @@ public class DialogTestPageIT extends AbstractComponentIT {
         assertButtonText(1);
     }
 
-    @Test
-    public void setDialogPosition() {
-        findElement(By.id("dialog-resizable-draggable-set-position-button"))
-                .click();
-        findElement(By.id("dialog-resizable-draggable-open-button")).click();
-
-        TestBenchElement dialogOverlay = $("*").id("overlay");
-        TestBenchElement overlay = dialogOverlay.$("*").id("overlay");
-        Assert.assertEquals("100px", overlay.getCssValue("top"));
-        Assert.assertEquals("200px", overlay.getCssValue("left"));
-    }
-
     private void assertButtonText(int index) {
         Assert.assertEquals("Button Text is not correct", "Added Button",
                 findElements(By.cssSelector(DIALOG_OVERLAY_TAG)).get(0)
@@ -450,6 +438,18 @@ public class DialogTestPageIT extends AbstractComponentIT {
 
         Assert.assertNotEquals(overlayLeft, overlay.getCssValue("left"));
         Assert.assertNotEquals(overlayTop, overlay.getCssValue("top"));
+    }
+
+    @Test
+    public void setDialogPosition() {
+        findElement(By.id("dialog-resizable-draggable-set-position-button"))
+                .click();
+        findElement(By.id("dialog-resizable-draggable-open-button")).click();
+
+        TestBenchElement dialogOverlay = $("*").id("overlay");
+        TestBenchElement overlay = dialogOverlay.$("*").id("overlay");
+        Assert.assertEquals("100px", overlay.getCssValue("top"));
+        Assert.assertEquals("200px", overlay.getCssValue("left"));
     }
 
     /**
