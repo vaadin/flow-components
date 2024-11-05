@@ -32,4 +32,12 @@ public class Slot extends Widget {
             }
         });
     }
+
+    public Element[] getAssignedElements() {
+        return _getAssignedElements(getElement());
+    }
+
+    private native Element[] _getAssignedElements(Element elem) /*-{
+        return elem.assignedElements();
+    }-*/;
 }

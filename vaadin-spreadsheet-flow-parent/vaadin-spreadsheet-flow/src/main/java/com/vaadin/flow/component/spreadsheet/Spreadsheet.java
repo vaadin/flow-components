@@ -4557,6 +4557,10 @@ public class Spreadsheet extends Component
                     Component customComponent = customComponentFactory
                             .getCustomComponentForCell(cell, r, c, this,
                                     getActiveSheet());
+                    if (customComponent == null) {
+                        customComponent = customComponentFactory.getCustomEditorForCell(
+                                cell, r, c, this, getActiveSheet());
+                    }
                     if (customComponent != null) {
                         final String key = SpreadsheetUtil.toKey(c + 1, r + 1);
                         if (!customComponents.contains(customComponent)) {

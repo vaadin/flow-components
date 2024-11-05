@@ -9,7 +9,11 @@
 package com.vaadin.flow.component.spreadsheet.tests;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.combobox.ComboBox;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 
@@ -114,6 +118,7 @@ public class PreserveOnRefreshPage extends Div {
     private static class CustomEditorFactory
             implements SpreadsheetComponentFactory {
 
+        private final Map<String, Component> cellToComponent = new HashMap<>();
         private TextField textField;
 
         @Override
@@ -126,14 +131,25 @@ public class PreserveOnRefreshPage extends Div {
         public Component getCustomEditorForCell(Cell cell, final int rowIndex,
                 final int columnIndex, final Spreadsheet spreadsheet,
                 Sheet sheet) {
-            if (rowIndex != 1 || columnIndex != 1) {
+            if (rowIndex != 1 || columnIndex > 1) {
                 return null;
             }
-            if (textField == null) {
+            var key = rowIndex + ":" + columnIndex;
+            if (cellToComponent.containsKey(key)) {
+                return cellToComponent.get(key);
+            }
+            if (columnIndex == 0) {
                 textField = new TextField();
                 textField.addValueChangeListener(
                         e -> spreadsheet.refreshCells(spreadsheet.createCell(
                                 rowIndex, columnIndex, e.getValue())));
+                cellToComponent.put(key, textField);
+            } else {
+                ComboBox<String> comboBox = new ComboBox<>();
+                comboBox.setItems("Option 1", "Option 2", "Option 3");
+                comboBox.addValueChangeListener(e -> spreadsheet.refreshCells(
+                        spreadsheet.createCell(rowIndex, columnIndex, e.getValue())));
+                cellToComponent.put(key, comboBox);
             }
             return textField;
         }

@@ -5027,8 +5027,14 @@ public class SheetWidget extends Panel {
         if (parent == null || (parent != null && !equals(parent))) {
             adopt(customEditorWidget);
         }
-
-        focusSheet();
+        if (customEditorWidget instanceof Slot) {
+            Slot slot = (Slot) customEditorWidget;
+            var elems = slot.getAssignedElements();
+            if (elems.length > 0) {
+//                elems[0].focus();
+            }
+        }
+//                focusSheet();
     }
 
     public void removeCustomCellEditor() {
