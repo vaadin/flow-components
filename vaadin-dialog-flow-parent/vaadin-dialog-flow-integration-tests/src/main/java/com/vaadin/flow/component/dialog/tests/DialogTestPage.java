@@ -185,6 +185,9 @@ public class DialogTestPage extends Div {
     }
 
     private int getDimension(String dimension) {
+        if (dimension == null) {
+            return -1;
+        }
         return (int) Math.round(Float.parseFloat(dimension.replace("px", "")));
     }
 
@@ -219,6 +222,14 @@ public class DialogTestPage extends Div {
         closeButton.setId("dialog-resizable-draggable-close-button");
         dialog.add(closeButton);
 
+        NativeButton setInitialPosition = new NativeButton(
+                "set initial position", e -> {
+                    dialog.setTop("50px");
+                    dialog.setLeft("50px");
+                });
+        setInitialPosition.setId(
+                "dialog-resizable-draggable-set-initial-position-button");
+
         NativeButton openDialog = new NativeButton("open resizable dialog",
                 e -> dialog.open());
         openDialog.setId("dialog-resizable-draggable-open-button");
@@ -239,7 +250,8 @@ public class DialogTestPage extends Div {
                 });
         sizeRestrictions.setId("dialog-resizing-restrictions-button");
 
-        add(openDialog, setPosition, message, sizeRestrictions);
+        add(openDialog, setInitialPosition, setPosition, message,
+                sizeRestrictions);
     }
 
     private void changeDialogDimensions() {

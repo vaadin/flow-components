@@ -162,24 +162,6 @@ public class DialogTestPageIT extends AbstractComponentIT {
         assertButtonText(1);
     }
 
-    @Test
-    public void dragDialog_draggedEventFired() {
-        findElement(By.id("dialog-resizable-draggable-set-position-button"))
-                .click();
-        findElement(By.id("dialog-resizable-draggable-open-button")).click();
-
-        TestBenchElement dialogOverlay = $("*").id("overlay");
-        TestBenchElement content = dialogOverlay.$("*").id("content");
-
-        Actions draggingAction = new Actions(getDriver());
-        draggingAction.dragAndDropBy(content, 20, 20);
-        draggingAction.perform();
-        Assert.assertEquals(
-                "Dragged listener called with top (120) and left (220)",
-                findElement(By.id("dialog-resizable-draggable-message"))
-                        .getText());
-    }
-
     private void assertButtonText(int index) {
         Assert.assertEquals("Button Text is not correct", "Added Button",
                 findElements(By.cssSelector(DIALOG_OVERLAY_TAG)).get(0)
@@ -357,11 +339,15 @@ public class DialogTestPageIT extends AbstractComponentIT {
 
     @Test
     public void resizableDialogListenerIsCalled() {
+        findElement(
+                By.id("dialog-resizable-draggable-set-initial-position-button"))
+                .click();
         findElement(By.id("dialog-resizable-draggable-open-button")).click();
         WebElement message = findElement(
                 By.id("dialog-resizable-draggable-message"));
 
-        Assert.assertEquals("Initial size with top (50), left (50), width (200) and height (200)",
+        Assert.assertEquals(
+                "Initial size with top (50), left (50), width (200) and height (200)",
                 message.getText());
 
         TestBenchElement overlayContent = getOverlayContent();
@@ -374,17 +360,20 @@ public class DialogTestPageIT extends AbstractComponentIT {
 
         resizeDialog(overlayContent, -50, -50, "nw");
 
-        Assert.assertEquals("Resize listener called with top (0), left (0), width (300) and height (300)",
+        Assert.assertEquals(
+                "Resize listener called with top (0), left (0), width (300) and height (300)",
                 message.getText());
     }
 
     private void resizeDialog(TestBenchElement overlayContent, int xOffset,
-        int yOffset) {
+            int yOffset) {
         resizeDialog(overlayContent, xOffset, yOffset, "se");
     }
+
     private void resizeDialog(TestBenchElement overlayContent, int xOffset,
             int yOffset, String direction) {
-        WebElement resizerSE = overlayContent.$(".resizer." + direction).first();
+        WebElement resizerSE = overlayContent.$(".resizer." + direction)
+                .first();
 
         Actions resizeAction = new Actions(getDriver());
         resizeAction.dragAndDropBy(resizerSE, xOffset, yOffset);
@@ -465,6 +454,24 @@ public class DialogTestPageIT extends AbstractComponentIT {
 
         Assert.assertNotEquals(overlayLeft, overlay.getCssValue("left"));
         Assert.assertNotEquals(overlayTop, overlay.getCssValue("top"));
+    }
+
+    @Test
+    public void dragDialog_draggedEventFired() {
+        findElement(By.id("dialog-resizable-draggable-set-position-button"))
+                .click();
+        findElement(By.id("dialog-resizable-draggable-open-button")).click();
+
+        TestBenchElement dialogOverlay = $("*").id("overlay");
+        TestBenchElement content = dialogOverlay.$("*").id("content");
+
+        Actions draggingAction = new Actions(getDriver());
+        draggingAction.dragAndDropBy(content, 20, 20);
+        draggingAction.perform();
+        Assert.assertEquals(
+                "Dragged listener called with top (120) and left (220)",
+                findElement(By.id("dialog-resizable-draggable-message"))
+                        .getText());
     }
 
     @Test
