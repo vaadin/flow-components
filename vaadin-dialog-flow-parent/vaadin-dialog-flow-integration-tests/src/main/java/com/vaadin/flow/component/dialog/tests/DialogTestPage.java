@@ -192,8 +192,6 @@ public class DialogTestPage extends Div {
         dialog.setDraggable(true);
         dialog.setWidth("200px");
         dialog.setHeight("200px");
-        dialog.setTop("50px");
-        dialog.setLeft("50px");
 
         Div message = new Div();
         message.setId("dialog-resizable-draggable-message");
