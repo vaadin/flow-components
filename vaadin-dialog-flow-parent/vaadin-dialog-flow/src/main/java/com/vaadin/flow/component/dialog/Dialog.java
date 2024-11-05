@@ -89,10 +89,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     private boolean autoAddedToTheUi;
     private int configuredCloseActionListeners;
-    private String width;
     private String minWidth;
     private String maxWidth;
-    private String height;
     private String minHeight;
     private String maxHeight;
     private DialogHeader dialogHeader;
@@ -122,8 +120,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
         });
 
         addListener(DialogResizeEvent.class, event -> {
-            width = event.getWidth();
-            height = event.getHeight();
+            setWidth(event.getWidth());
+            setHeight(event.getHeight());
         });
 
         setOverlayRole("dialog");
@@ -243,8 +241,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public void setWidth(String value) {
-        width = value;
-        setDimension(ElementConstants.STYLE_WIDTH, value);
+        getElement().setProperty("width", value);
     }
 
     @Override
@@ -261,8 +258,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public void setHeight(String value) {
-        height = value;
-        setDimension(ElementConstants.STYLE_HEIGHT, value);
+        getElement().setProperty("height", value);
     }
 
     @Override
@@ -279,7 +275,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public String getWidth() {
-        return width;
+        return getElement().getProperty("width");
     }
 
     @Override
@@ -294,7 +290,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public String getHeight() {
-        return height;
+        return getElement().getProperty("height");
     }
 
     @Override
@@ -1107,10 +1103,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
                 "this.renderer = (root) => Vaadin.FlowComponentHost.setChildNodes($0, this.virtualChildNodeIds, root)",
                 appId);
 
-        setDimension(ElementConstants.STYLE_WIDTH, width);
         setDimension(ElementConstants.STYLE_MIN_WIDTH, minWidth);
         setDimension(ElementConstants.STYLE_MAX_WIDTH, maxWidth);
-        setDimension(ElementConstants.STYLE_HEIGHT, height);
         setDimension(ElementConstants.STYLE_MIN_HEIGHT, minHeight);
         setDimension(ElementConstants.STYLE_MAX_HEIGHT, maxHeight);
     }
