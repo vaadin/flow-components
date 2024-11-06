@@ -420,8 +420,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * It is called only if resizing is enabled (see
      * {@link Dialog#setResizable(boolean)}).
      * <p>
-     * Note: By default, the component will sync the width/height values after
-     * every resizing.
+     * Note: By default, the component will sync the width/height and top/left
+     * values after every resizing.
      *
      * @param listener
      *            the listener to add

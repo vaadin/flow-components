@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
@@ -129,6 +130,32 @@ public class DialogTest {
 
         Assert.assertTrue("draggable can be set to true",
                 dialog.getElement().getProperty("draggable", false));
+    }
+
+    @Test
+    public void draggedEvent_TopLeftPropertiesSynced() {
+        Dialog dialog = new Dialog();
+
+        // Emulate a drag event
+        ComponentUtil.fireEvent(dialog,
+                new Dialog.DialogDraggedEvent(dialog, true, "20", "10"));
+
+        Assert.assertEquals("20", dialog.getLeft());
+        Assert.assertEquals("10", dialog.getTop());
+    }
+
+    @Test
+    public void resizeEvent_WidthHeightTopLeftPropertiesSynced() {
+        Dialog dialog = new Dialog();
+
+        // Emulate a resize event
+        ComponentUtil.fireEvent(dialog, new Dialog.DialogResizeEvent(dialog,
+                true, "200", "100", "10", "20"));
+
+        Assert.assertEquals("200", dialog.getWidth());
+        Assert.assertEquals("100", dialog.getHeight());
+        Assert.assertEquals("10", dialog.getLeft());
+        Assert.assertEquals("20", dialog.getTop());
     }
 
     @Test

@@ -84,10 +84,7 @@ public class DialogTestPage extends Div {
             eventSourceMessage.setText("The event came from "
                     + (event.isFromClient() ? "client" : "server"));
         });
-        add(button, new NativeButton("set top/left", e -> {
-            dialog.setTop("100px");
-            dialog.setLeft("300px");
-        }), message, eventCounterMessage, eventSourceMessage, dialog);
+        add(button, message, eventCounterMessage, eventSourceMessage, dialog);
     }
 
     private void createDialogWithoutAddingToTheUi() {
