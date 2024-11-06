@@ -31,7 +31,6 @@ import java.util.stream.Stream;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasAriaLabel;
@@ -42,7 +41,6 @@ import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupDataView;
 import com.vaadin.flow.component.checkbox.dataview.CheckboxGroupListDataView;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
@@ -177,6 +175,8 @@ public class CheckboxGroup<T>
                 CheckboxGroup::presentationToModel,
                 CheckboxGroup::modelToPresentation);
 
+        getElement().setProperty("manualValidation", true);
+
         addValueChangeListener(e -> validate());
 
         initSelectionPreservationHandler();
@@ -279,13 +279,6 @@ public class CheckboxGroup<T>
             T... items) {
         this(label, listener);
         setItems(items);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-
-        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     @Override
