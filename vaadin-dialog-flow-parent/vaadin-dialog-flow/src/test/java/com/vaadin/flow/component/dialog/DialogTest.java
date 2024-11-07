@@ -133,7 +133,7 @@ public class DialogTest {
     }
 
     @Test
-    public void draggedEvent_TopLeftPropertiesSynced() {
+    public void draggedEvent_topLeftPropertiesSynced() {
         Dialog dialog = new Dialog();
 
         // Emulate a drag event
@@ -145,7 +145,7 @@ public class DialogTest {
     }
 
     @Test
-    public void resizeEvent_WidthHeightTopLeftPropertiesSynced() {
+    public void resizeEvent_widthHeightTopLeftPropertiesSynced() {
         Dialog dialog = new Dialog();
 
         // Emulate a resize event
