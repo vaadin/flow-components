@@ -29,7 +29,7 @@ import com.vaadin.flow.shared.Registration;
  * Mixin interface for subscribing to the client-side `validated` event from a
  * component.
  *
- * @deprecated This interface is no longer supported and will be removed in 24.7.
+ * @deprecated This interface is no longer supported and will be removed in 25.0
  */
 @Deprecated
 public interface HasClientValidation extends Serializable {
@@ -40,7 +40,7 @@ public interface HasClientValidation extends Serializable {
      * @param listener
      *            the listener, not null.
      * @return a {@link Registration} for removing the event listener.
-     * @deprecated This event is no longer supported and will be removed in 24.7.
+     * @deprecated This event is no longer supported and will be removed in 25.0
      */
     @Deprecated
     default Registration addClientValidatedEventListener(
@@ -53,7 +53,7 @@ public interface HasClientValidation extends Serializable {
      * An event fired by the web component whenever it is validated on the
      * client-side.
      *
-     * @deprecated This event is no longer supported and will be removed in 24.7.
+     * @deprecated This event is no longer supported and will be removed in 25.0
      */
     @DomEvent("validated")
     @Deprecated
