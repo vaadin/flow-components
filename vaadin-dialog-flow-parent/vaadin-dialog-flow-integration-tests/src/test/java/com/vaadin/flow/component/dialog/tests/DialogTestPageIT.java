@@ -371,11 +371,11 @@ public class DialogTestPageIT extends AbstractComponentIT {
     }
 
     private void resizeDialog(TestBenchElement overlayContent, int xOffset,
-            int yOffset, String resizer) {
-        WebElement resizerSE = overlayContent.$(".resizer." + resizer).first();
+            int yOffset, String direction) {
+        WebElement resizer = overlayContent.$(".resizer." + direction).first();
 
         Actions resizeAction = new Actions(getDriver());
-        resizeAction.dragAndDropBy(resizerSE, xOffset, yOffset);
+        resizeAction.dragAndDropBy(resizer, xOffset, yOffset);
         resizeAction.perform();
     }
 
