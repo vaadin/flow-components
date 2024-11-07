@@ -530,7 +530,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             this.renderer = Objects.requireNonNull(renderer,
                     "Renderer must not be null.");
             clearRendering();
-            rendererSetupScheduled = true;
             getElement().getNode()
                     .runWhenAttached(ui -> scheduleRendererSetup());
             addAttachListener(e -> scheduleRendererSetup());
