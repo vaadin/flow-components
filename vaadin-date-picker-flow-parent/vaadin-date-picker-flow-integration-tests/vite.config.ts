@@ -14,7 +14,7 @@ const customConfig: UserConfigFn = (env) => ({
   // folder
   // DO NOT COMMIT THESE CHANGES!
   plugins: [
-    useLocalWebComponents('/Users/vursen/dev/vaadin/web-components/node_modules')
+    // useLocalWebComponents('/Users/vursen/dev/vaadin/web-components/node_modules')
   ]
 });
 
