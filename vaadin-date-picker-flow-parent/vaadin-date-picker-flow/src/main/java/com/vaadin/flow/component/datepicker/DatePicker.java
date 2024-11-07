@@ -261,8 +261,6 @@ public class DatePicker
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
-        setSynchronizedEvent("change");
-
         addValueChangeListener(e -> validate());
 
         getElement().addEventListener("unparsable-change", event -> {
