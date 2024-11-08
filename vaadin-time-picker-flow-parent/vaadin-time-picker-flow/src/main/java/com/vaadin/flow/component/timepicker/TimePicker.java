@@ -230,6 +230,8 @@ public class TimePicker
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
+        setSynchronizedEvent("change");
+
         addValueChangeListener(e -> validate());
 
         getElement().addEventListener("unparsable-change", event -> {
