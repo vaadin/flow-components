@@ -680,9 +680,8 @@ public class DatePicker
      * @return the value of the input element
      */
     @Synchronize(property = "_inputElementValue", value = { "change",
-            "unparsable-change",
-            "has-input-value-changed" /* For backward compatibility */ })
-    protected String getInputElementValue() {
+            "unparsable-change" })
+    private String getInputElementValue() {
         return getElement().getProperty("_inputElementValue", "");
     }
 
@@ -692,7 +691,7 @@ public class DatePicker
      * @param value
      *            the value to set
      */
-    protected void setInputElementValue(String value) {
+    private void setInputElementValue(String value) {
         getElement().setProperty("_inputElementValue", value);
     }
 
