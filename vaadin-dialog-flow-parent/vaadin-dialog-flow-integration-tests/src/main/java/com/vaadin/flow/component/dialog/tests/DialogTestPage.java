@@ -182,6 +182,9 @@ public class DialogTestPage extends Div {
     }
 
     private int getDimension(String dimension) {
+        if (dimension == null) {
+            return -1;
+        }
         return (int) Math.round(Float.parseFloat(dimension.replace("px", "")));
     }
 
@@ -197,18 +200,32 @@ public class DialogTestPage extends Div {
         message.setId("dialog-resizable-draggable-message");
 
         dialog.addResizeListener(e -> message.setText(String.format(
-                "Resize listener called with width (%d) and height (%d)",
+                "Resize listener called with top (%d), left (%d), width (%d) and height (%d)",
+                getDimension(e.getTop()), getDimension(e.getLeft()),
                 getDimension(e.getWidth()), getDimension(e.getHeight()))));
 
-        dialog.addOpenedChangeListener(e -> message.setText(
-                String.format("Initial size with width (%d) and height (%d)",
-                        getDimension(dialog.getWidth()),
-                        getDimension(dialog.getHeight()))));
+        dialog.addDraggedListener(e -> message.setText(String.format(
+                "Dragged listener called with top (%d) and left (%d)",
+                getDimension(e.getTop()), getDimension(e.getLeft()))));
+
+        dialog.addOpenedChangeListener(e -> message.setText(String.format(
+                "Initial size with top (%d), left (%d), width (%d) and height (%d)",
+                getDimension(dialog.getTop()), getDimension(dialog.getLeft()),
+                getDimension(dialog.getWidth()),
+                getDimension(dialog.getHeight()))));
 
         NativeButton closeButton = new NativeButton(CLOSE_CAPTION,
                 e -> dialog.close());
         closeButton.setId("dialog-resizable-draggable-close-button");
         dialog.add(closeButton);
+
+        NativeButton setInitialPosition = new NativeButton(
+                "set initial position", e -> {
+                    dialog.setTop("50px");
+                    dialog.setLeft("50px");
+                });
+        setInitialPosition.setId(
+                "dialog-resizable-draggable-set-initial-position-button");
 
         NativeButton openDialog = new NativeButton("open resizable dialog",
                 e -> dialog.open());
@@ -230,7 +247,8 @@ public class DialogTestPage extends Div {
                 });
         sizeRestrictions.setId("dialog-resizing-restrictions-button");
 
-        add(openDialog, setPosition, message, sizeRestrictions);
+        add(openDialog, setInitialPosition, setPosition, message,
+                sizeRestrictions);
     }
 
     private void changeDialogDimensions() {
