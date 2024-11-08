@@ -25,6 +25,7 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.data.binder.Result;
 import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
 import elemental.json.Json;
@@ -47,7 +48,7 @@ public class FallbackParserValidationTest {
     @Test
     public void enterShortcutValue_validate_noErrorMessageDisplayed() {
         datePicker.getElement().setProperty("_inputElementValue", "tomorrow");
-        fireUnparsableChangeDomEvent();
+        fireDomEvent(datePicker.getElement(), "unparsable-change");
         Assert.assertFalse(datePicker.isInvalid());
         Assert.assertEquals("", datePicker.getErrorMessage());
     }
@@ -55,7 +56,7 @@ public class FallbackParserValidationTest {
     @Test
     public void enterUnparsableValue_validate_fallbackParserErrorMessageDisplayed() {
         datePicker.getElement().setProperty("_inputElementValue", "foobar");
-        fireUnparsableChangeDomEvent();
+        fireDomEvent(datePicker.getElement(), "unparsable-change");
         Assert.assertTrue(datePicker.isInvalid());
         Assert.assertEquals("Invalid date format",
                 datePicker.getErrorMessage());
@@ -66,7 +67,7 @@ public class FallbackParserValidationTest {
         datePicker.setI18n(new DatePickerI18n()
                 .setBadInputErrorMessage("I18n error message"));
         datePicker.getElement().setProperty("_inputElementValue", "foobar");
-        fireUnparsableChangeDomEvent();
+        fireDomEvent(datePicker.getElement(), "unparsable-change");
         Assert.assertTrue(datePicker.isInvalid());
         Assert.assertEquals("Invalid date format",
                 datePicker.getErrorMessage());
@@ -78,16 +79,13 @@ public class FallbackParserValidationTest {
                 .setBadInputErrorMessage("I18n error message"));
         datePicker.setFallbackParser(null);
         datePicker.getElement().setProperty("_inputElementValue", "foobar");
-        fireUnparsableChangeDomEvent();
+        fireDomEvent(datePicker.getElement(), "unparsable-change");
         Assert.assertTrue(datePicker.isInvalid());
         Assert.assertEquals("I18n error message", datePicker.getErrorMessage());
     }
 
-    private void fireUnparsableChangeDomEvent() {
-        DomEvent unparsableChangeDomEvent = new DomEvent(
-                datePicker.getElement(), "unparsable-change",
-                Json.createObject());
-        datePicker.getElement().getNode().getFeature(ElementListenerMap.class)
-                .fireEvent(unparsableChangeDomEvent);
+    private void fireDomEvent(Element source, String eventType) {
+        DomEvent event = new DomEvent(source, eventType, Json.createObject());
+        source.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
     }
 }
