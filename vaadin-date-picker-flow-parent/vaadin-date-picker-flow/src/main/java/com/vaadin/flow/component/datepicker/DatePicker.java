@@ -670,29 +670,60 @@ public class DatePicker
         return !getInputElementValue().isEmpty();
     }
 
+    /**
+     * Gets the value of the input element. This value is updated on the server
+     * when the web component dispatches a `change` or `unparsable-change`
+     * event. Except when clearing the value, {@link #setValue(LocalDate)} does
+     * not update the input element value on the server because it requires date
+     * formatting, which is implemented on the web component's side.
+     *
+     * @return the value of the input element
+     */
     @Synchronize(property = "_inputElementValue", value = { "change",
             "unparsable-change" })
     protected String getInputElementValue() {
         return getElement().getProperty("_inputElementValue", "");
     }
 
+    /**
+     * Sets the value of the input element.
+     *
+     * @param value
+     *            the value to set
+     */
     protected void setInputElementValue(String value) {
         getElement().setProperty("_inputElementValue", value);
     }
 
+    /**
+     * Sets a parser to use when user input fails to be parsed using i18n
+     * formats.
+     * <p>
+     * The parser is a function that receives the user-entered string and
+     * returns a {@link Result} with the parsed date or an error message. If the
+     * parser returns an error message, the field will be marked as invalid,
+     * displaying that message as a validation error.
+     * <p>
+     * NOTE: When a fallback parser is set, the i18n error message from
+     * {@link DatePickerI18n#getBadInputErrorMessage()} is not used.
+     *
+     * @param fallbackParser
+     *            the parser function
+     */
     public void setFallbackParser(
             SerializableFunction<String, Result<LocalDate>> fallbackParser) {
         this.fallbackParser = fallbackParser;
         this.fallbackParserErrorMessage = null;
     }
 
+    /**
+     * Gets the parser that is used when user input fails to be parsed using
+     * i18n formats.
+     *
+     * @return the parser function
+     */
     public SerializableFunction<String, Result<LocalDate>> getFallbackParser() {
         return fallbackParser;
-    }
-
-    private Result<LocalDate> runFallbackParser(String s) {
-        return Objects.requireNonNull(fallbackParser.apply(s),
-                "Result cannot be null");
     }
 
     @Override
@@ -735,8 +766,10 @@ public class DatePicker
         if (fallbackParser != null && isInputUnparsable) {
             isFallbackParserRunning = true;
 
-            Result<LocalDate> result = runFallbackParser(
-                    getInputElementValue());
+            Result<LocalDate> result = fallbackParser
+                    .apply(getInputElementValue());
+            Objects.requireNonNull(result, "Result cannot be null");
+
             if (result.isError()) {
                 fallbackParserErrorMessage = result.getMessage().orElse(null);
             } else {
