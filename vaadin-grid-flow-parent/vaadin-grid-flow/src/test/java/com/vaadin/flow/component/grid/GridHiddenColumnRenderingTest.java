@@ -28,6 +28,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.ValueProvider;
@@ -216,6 +217,42 @@ public class GridHiddenColumnRenderingTest {
         Grid.Column<String> column = addColumnWithCustomRenderer();
         initiallyHiddenColumn_detachAndReattachGrid_assertRendererNotCalled(
                 column);
+    }
+
+    @Test
+    public void columnWithCustomRenderer_setAnotherRenderer_onlyNewRendererCalled() {
+        Grid.Column<String> column = addColumnWithCustomRenderer();
+        fakeClientCommunication();
+        callCount.set(0);
+        AtomicInteger newRendererCallCount = new AtomicInteger(0);
+        Renderer<String> newRenderer = LitRenderer
+                .<String> of("<span>${item.displayName}</span>")
+                .withProperty("displayName", s -> {
+                    newRendererCallCount.incrementAndGet();
+                    return s;
+                });
+        column.setRenderer(newRenderer);
+        fakeClientCommunication();
+        Assert.assertEquals(0, callCount.get());
+        Assert.assertEquals(ITEM_COUNT, newRendererCallCount.get());
+    }
+
+    @Test
+    public void addColumn_itemsSentOnlyOnce() {
+        List<String> items = getItems();
+        AtomicInteger fetchCount = new AtomicInteger(0);
+        DataProvider<String, Void> dataProvider = DataProvider
+                .fromCallbacks(query -> {
+                    fetchCount.incrementAndGet();
+                    return items.stream().skip(query.getOffset())
+                            .limit(query.getLimit());
+                }, query -> items.size());
+        grid.setDataProvider(dataProvider);
+        fakeClientCommunication();
+        fetchCount.set(0);
+        addColumnWithValueProvider();
+        fakeClientCommunication();
+        Assert.assertEquals(1, fetchCount.get());
     }
 
     private Grid.Column<String> addColumnWithValueProvider() {

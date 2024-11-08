@@ -533,7 +533,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             getElement().getNode()
                     .runWhenAttached(ui -> scheduleRendererSetup());
             addAttachListener(e -> scheduleRendererSetup());
-            getGrid().getDataCommunicator().reset();
             return this;
         }
 
