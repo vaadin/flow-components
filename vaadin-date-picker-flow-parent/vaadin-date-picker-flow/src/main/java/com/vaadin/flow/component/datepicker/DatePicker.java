@@ -696,13 +696,24 @@ public class DatePicker
     }
 
     /**
-     * Sets a parser to use when user input fails to be parsed using i18n
-     * formats.
+     * Sets a parser to handle user input that cannot be parsed using the i18n
+     * date formats.
      * <p>
      * The parser is a function that receives the user-entered string and
      * returns a {@link Result} with the parsed date or an error message. If the
      * parser returns an error message, the field will be marked as invalid,
      * displaying that message as a validation error.
+     * <p>
+     * Example:
+     * <pre>
+     * datePicker.setFallbackParser(s -> {
+     *     if (s.equals("tomorrow")) {
+     *         return Result.ok(LocalDate.now().plusDays(1));
+     *     } else {
+     *         return Result.error("Invalid date format");
+     *     }
+     * });
+     * </pre>
      * <p>
      * NOTE: When a fallback parser is set, the i18n error message from
      * {@link DatePickerI18n#getBadInputErrorMessage()} is not used.
@@ -717,8 +728,8 @@ public class DatePicker
     }
 
     /**
-     * Gets the parser that is used when user input fails to be parsed using
-     * i18n formats.
+     * Gets the parser that is used as a fallback when user input cannot be
+     * parsed using the i18n date formats.
      *
      * @return the parser function
      */
