@@ -169,7 +169,7 @@ public class DatePicker
         boolean fromComponent = context == null;
 
         boolean hasBadInput = valueEquals(value, getEmptyValue())
-                && isInputValuePresent();
+                && !getInputElementValue().isEmpty();
         if (hasBadInput && fallbackParserErrorMessage != null) {
             return ValidationResult.error(fallbackParserErrorMessage);
         } else if (hasBadInput) {
@@ -680,7 +680,8 @@ public class DatePicker
      * @return the value of the input element
      */
     @Synchronize(property = "_inputElementValue", value = { "change",
-            "unparsable-change" })
+            "unparsable-change",
+            "has-input-value-changed" /* For backward compatibility */ })
     protected String getInputElementValue() {
         return getElement().getProperty("_inputElementValue", "");
     }
