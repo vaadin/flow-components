@@ -68,7 +68,7 @@ public class DatePickerIT extends AbstractComponentIT {
     @Test
     public void selectDateOnMinMaxDatePicker() {
         DatePickerElement picker = $(DatePickerElement.class)
-                .id("min-max-picker");
+                .id("min-and-max-picker");
         WebElement message = findElement(By.id("min-and-max-picker-message"));
 
         LocalDate now = LocalDate.now();
@@ -154,7 +154,7 @@ public class DatePickerIT extends AbstractComponentIT {
     @Test
     public void selectDatesOnCustomLocaleDatePickers() {
         DatePickerElement localePicker = $(DatePickerElement.class)
-                .id("locale-picker");
+                .id("locale-change-picker");
         WebElement message = findElement(
                 By.id("Customize-locale-picker-message"));
         localePicker.setDate(LocalDate.of(2018, 3, 27));
