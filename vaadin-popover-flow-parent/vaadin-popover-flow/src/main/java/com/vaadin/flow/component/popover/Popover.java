@@ -726,6 +726,8 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
         if (target != null) {
             ui.beforeClientResponse(ui, context -> {
                 if (getElement().getNode().getParent() == null) {
+                    // Remove the popover from its current state tree
+                    getElement().removeFromTree(false);
                     ui.addToModalComponent(this);
                     autoAddedToTheUi = true;
                 }
