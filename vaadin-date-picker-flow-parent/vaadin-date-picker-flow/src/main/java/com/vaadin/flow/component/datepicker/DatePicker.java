@@ -169,7 +169,7 @@ public class DatePicker
         boolean fromComponent = context == null;
 
         boolean hasBadInput = valueEquals(value, getEmptyValue())
-                && !getInputElementValue().isEmpty();
+                && isInputValuePresent();
         if (hasBadInput && fallbackParserErrorMessage != null) {
             return ValidationResult.error(fallbackParserErrorMessage);
         } else if (hasBadInput) {
@@ -732,7 +732,7 @@ public class DatePicker
         boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
         boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
         boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
-        boolean isInputElementValueEmpty = getInputElementValue().isEmpty();
+        boolean isInputValuePresent = isInputValuePresent();
 
         // When the value is cleared programmatically, there is no change event
         // that would synchronize _inputElementValue, so we reset it ourselves
@@ -745,7 +745,7 @@ public class DatePicker
 
         // Revalidate if setValue(null) didn't result in a value change but
         // cleared bad input
-        if (isValueRemainedEmpty && !isInputElementValueEmpty) {
+        if (isValueRemainedEmpty && isInputValuePresent) {
             validate();
             fireValidationStatusChangeEvent();
         }
@@ -762,7 +762,7 @@ public class DatePicker
         }
 
         boolean isInputUnparsable = fromClient && newModelValue == null
-                && !getInputElementValue().isEmpty();
+                && isInputValuePresent();
         if (fallbackParser != null && isInputUnparsable) {
             isFallbackParserRunning = true;
 
