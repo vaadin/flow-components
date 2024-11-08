@@ -500,10 +500,24 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     .getDataGenerator();
 
             if (dataGenerator.isPresent()) {
+                var generator = dataGenerator.get();
+
+                DataGenerator<T> conditionalDataGenerator = (item, jsonObject) -> {
+                    if (Column.this.isVisible()) {
+                        generator.generateData(item, jsonObject);
+                    }
+                };
+
                 columnDataGeneratorRegistration = grid
-                        .addDataGenerator(dataGenerator.get());
+                        .addDataGenerator(conditionalDataGenerator);
             }
         }
+        
+        @Override
+        public void setVisible(boolean visible) {
+            super.setVisible(visible);
+            getGrid().getDataCommunicator().reset();
+        };
 
         protected void destroyDataGenerators() {
             if (columnDataGeneratorRegistration != null) {
