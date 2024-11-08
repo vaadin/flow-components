@@ -722,13 +722,17 @@ public class DatePicker
 
     @Override
     protected void setModelValue(LocalDate newModelValue, boolean fromClient) {
+        // Ignore setModelValue calls triggered by setPresentationValue
+        // when the fallback parser applies a parsed value (see below).
+        // This ensures that the ValueChangeEvent fires from the original
+        // setModelValue call with `fromClient` value: `true`.
         if (isFallbackParserRunning) {
             return;
         }
 
-        boolean isInputUnparsable = newModelValue == null
+        boolean isInputUnparsable = fromClient && newModelValue == null
                 && !getInputElementValue().isEmpty();
-        if (fallbackParser != null && fromClient && isInputUnparsable) {
+        if (fallbackParser != null && isInputUnparsable) {
             isFallbackParserRunning = true;
 
             Result<LocalDate> result = runFallbackParser(

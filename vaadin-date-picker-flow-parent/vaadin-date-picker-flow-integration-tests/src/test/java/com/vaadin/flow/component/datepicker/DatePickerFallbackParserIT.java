@@ -29,9 +29,6 @@ import com.vaadin.tests.AbstractComponentIT;
 import elemental.json.Json;
 import elemental.json.JsonObject;
 
-/**
- * Integration tests for the {@link DatePickerViewDemoPage}.
- */
 @TestPath("vaadin-date-picker/fallback-parser")
 public class DatePickerFallbackParserIT extends AbstractComponentIT {
     private DatePickerElement datePicker;
