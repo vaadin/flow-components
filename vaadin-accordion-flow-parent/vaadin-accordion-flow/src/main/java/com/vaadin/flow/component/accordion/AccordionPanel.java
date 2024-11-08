@@ -28,7 +28,7 @@ import com.vaadin.flow.component.details.Details;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/accordion", version = "24.6.0-alpha9")
-@JsModule("@vaadin/accordion/src/vaadin-accordion-panel.js")
+@JsModule("@vaadin/accordion/src/vaadin-lit-accordion-panel.js")
 public class AccordionPanel extends Details {
 
     /**
