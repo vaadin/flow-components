@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.timepicker.testbench;
 
+import java.util.Collections;
 import java.util.Objects;
 
 import org.openqa.selenium.By;
@@ -185,6 +186,12 @@ public class TimePickerElement extends TestBenchElement
     public void scrollToItem(int index) {
         executeScript("arguments[0]._scroller.scrollIntoView(arguments[1])",
                 getTimePickerComboBox(), index);
+    }
+
+    @Override
+    public void setValue(String value) {
+        setProperty("value", value);
+        dispatchEvent("change", Collections.singletonMap("bubbles", true));
     }
 
     /**

@@ -90,7 +90,7 @@ public class TimePickerIT extends AbstractComponentIT {
         Assert.assertEquals("Item in the dropdown is not correct", "1:00 AM",
                 picker.getItemText(1));
         picker.closeDropDown();
-        executeScript("arguments[0].value = '12:31'", picker);
+        picker.setValue("12:31");
 
         selectStep("0.5s");
         validatePickerValue(picker, "12:31:00.000");
@@ -100,7 +100,7 @@ public class TimePickerIT extends AbstractComponentIT {
 
         // for the auto formatting of the value to work, it needs to match the
         // new step
-        executeScript("arguments[0].value = '12:30:00'", picker);
+        picker.setValue("12:30:00");
         selectStep("30m"); // using smaller step will cause the drop down to be
                            // big and then drop down iron list does magic that
                            // messes the item indexes
