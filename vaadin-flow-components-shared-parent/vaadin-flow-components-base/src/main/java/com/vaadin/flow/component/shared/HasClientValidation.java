@@ -23,13 +23,17 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.HasValidation;
+import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.shared.Registration;
 
 /**
  * Mixin interface for subscribing to the client-side `validated` event from a
  * component.
  *
- * @deprecated This interface is no longer supported and will be removed in 25.0
+ * @deprecated Since 24.6, this interface is no longer supported. Consider
+ *             {@link HasValidation} or {@link HasValidator} as an alternative.
  */
 @Deprecated
 public interface HasClientValidation extends Serializable {
@@ -40,7 +44,9 @@ public interface HasClientValidation extends Serializable {
      * @param listener
      *            the listener, not null.
      * @return a {@link Registration} for removing the event listener.
-     * @deprecated This event is no longer supported and will be removed in 25.0
+     * @deprecated Since 24.6, this event is no longer supported. Consider
+     *             subscribing to {@link ValidationStatusChangeEvent} to get
+     *             notified when the user enters input that cannot be parsed.
      */
     @Deprecated
     default Registration addClientValidatedEventListener(
@@ -53,7 +59,9 @@ public interface HasClientValidation extends Serializable {
      * An event fired by the web component whenever it is validated on the
      * client-side.
      *
-     * @deprecated This event is no longer supported and will be removed in 25.0
+     * @deprecated Since 24.6, this event is no longer supported. Consider
+     *             subscribing to {@link ValidationStatusChangeEvent} to get
+     *             notified when the user enters input that cannot be parsed.
      */
     @DomEvent("validated")
     @Deprecated
