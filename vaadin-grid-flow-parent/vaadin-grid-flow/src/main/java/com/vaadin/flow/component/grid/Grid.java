@@ -527,6 +527,15 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             }
         }
 
+        @Override
+        public void setVisible(boolean visible) {
+            boolean resetDataCommunicator = visible && !isVisible();
+            super.setVisible(visible);
+            if (resetDataCommunicator) {
+                getGrid().getDataCommunicator().reset();
+            }
+        }
+
         protected void destroyDataGenerators() {
             if (columnDataGeneratorRegistration != null) {
                 columnDataGeneratorRegistration.remove();
