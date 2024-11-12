@@ -89,9 +89,9 @@ public class GridHiddenColumnRenderingTest {
     }
 
     @Test
-    public void columnWithValueProvider_toggleHiddenTwiceInRoundTrip_rendererCalledAtMostOncePerItem() {
+    public void columnWithValueProvider_toggleHiddenTwiceInRoundTrip_rendererCalledOncePerItem() {
         Grid.Column<String> column = addColumnWithValueProvider();
-        initiallyVisibleColumn_toggleHiddenTwiceInRoundTrip_assertRendererCalledAtMostOncePerItem(
+        initiallyVisibleColumn_toggleHiddenTwiceInRoundTrip_assertRendererCalledOncePerItem(
                 column);
     }
 
@@ -128,9 +128,9 @@ public class GridHiddenColumnRenderingTest {
     }
 
     @Test
-    public void componentColumn_toggleHiddenTwiceInRoundTrip_rendererCalledAtMostOncePerItem() {
+    public void componentColumn_toggleHiddenTwiceInRoundTrip_rendererCalledOncePerItem() {
         Grid.Column<String> column = addComponentColumn();
-        initiallyVisibleColumn_toggleHiddenTwiceInRoundTrip_assertRendererCalledAtMostOncePerItem(
+        initiallyVisibleColumn_toggleHiddenTwiceInRoundTrip_assertRendererCalledOncePerItem(
                 column);
     }
 
@@ -167,9 +167,9 @@ public class GridHiddenColumnRenderingTest {
     }
 
     @Test
-    public void columnWithCustomRenderer_toggleHiddenTwiceInRoundTrip_rendererCalledAtMostOncePerItem() {
+    public void columnWithCustomRenderer_toggleHiddenTwiceInRoundTrip_rendererCalledOncePerItem() {
         Grid.Column<String> column = addColumnWithCustomRenderer();
-        initiallyVisibleColumn_toggleHiddenTwiceInRoundTrip_assertRendererCalledAtMostOncePerItem(
+        initiallyVisibleColumn_toggleHiddenTwiceInRoundTrip_assertRendererCalledOncePerItem(
                 column);
     }
 
@@ -316,14 +316,14 @@ public class GridHiddenColumnRenderingTest {
         Assert.assertEquals(ITEM_COUNT, callCount.get());
     }
 
-    private void initiallyVisibleColumn_toggleHiddenTwiceInRoundTrip_assertRendererCalledAtMostOncePerItem(
+    private void initiallyVisibleColumn_toggleHiddenTwiceInRoundTrip_assertRendererCalledOncePerItem(
             Grid.Column<String> column) {
         fakeClientCommunication();
         column.setVisible(false);
         column.setVisible(true);
         callCount.set(0);
         fakeClientCommunication();
-        Assert.assertTrue(callCount.get() <= ITEM_COUNT);
+        Assert.assertEquals(ITEM_COUNT, callCount.get());
     }
 
     private void initiallyHiddenColumn_toggleHiddenTwiceInRoundTrip_assertRendererNotCalled(
