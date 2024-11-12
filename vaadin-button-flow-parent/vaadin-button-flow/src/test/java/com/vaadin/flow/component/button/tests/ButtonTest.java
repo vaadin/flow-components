@@ -360,8 +360,8 @@ public class ButtonTest {
         button.setDisableOnClick(false);
         button.setDisableOnClick(true);
 
-        Mockito.verify(element, Mockito.times(1))
-                .executeJs("window.Vaadin.Flow.button.initDisableOnClick($0)");
+        Mockito.verify(element, Mockito.times(1)).executeJs(
+                "window.Vaadin.Flow.disableOnClick.initDisableOnClick($0)");
     }
 
     private void assertButtonHasThemeAttribute(String theme) {

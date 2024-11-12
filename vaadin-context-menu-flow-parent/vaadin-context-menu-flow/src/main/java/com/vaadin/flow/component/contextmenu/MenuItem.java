@@ -17,6 +17,7 @@ package com.vaadin.flow.component.contextmenu;
 
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.shared.DisableOnClickController;
 import com.vaadin.flow.function.SerializableRunnable;
 
 /**
@@ -32,11 +33,42 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
         implements ClickNotifier<MenuItem> {
 
     private final SerializableRunnable contentReset;
+    private final DisableOnClickController disableOnClickController = new DisableOnClickController(
+            this);
 
     public MenuItem(ContextMenu contextMenu,
             SerializableRunnable contentReset) {
         super(contextMenu);
         this.contentReset = contentReset;
+    }
+
+    /**
+     * Sets whether the item should be disabled when clicked.
+     * <p>
+     * When set to {@code true}, the item will be immediately disabled on the
+     * client-side when clicked, preventing further clicks until re-enabled from
+     * the server-side.
+     *
+     * @param disableOnClick
+     *            whether the item should be disabled when clicked
+     */
+    public void setDisableOnClick(boolean disableOnClick) {
+        disableOnClickController.setDisableOnClick(disableOnClick);
+    }
+
+    /**
+     * Gets whether the item is set to be disabled when clicked.
+     *
+     * @return whether the item is set to be disabled on click
+     */
+    public boolean isDisableOnClick() {
+        return disableOnClickController.isDisableOnClick();
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        disableOnClickController.onSetEnabled(enabled);
     }
 
     @Override
