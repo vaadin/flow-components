@@ -495,10 +495,31 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
             if (dataGenerator.isPresent()) {
                 var generator = dataGenerator.get();
-                DataGenerator<T> conditionalDataGenerator = (item,
-                        jsonObject) -> {
-                    if (Column.this.isVisible()) {
-                        generator.generateData(item, jsonObject);
+
+                // Use an anonymous class instead of Lambda to prevent potential
+                // deserialization issues when used with Grid
+                // see https://github.com/vaadin/flow-components/issues/6256
+                var conditionalDataGenerator = new DataGenerator<T>() {
+                    @Override
+                    public void generateData(T item, JsonObject jsonObject) {
+                        if (Column.this.isVisible()) {
+                            generator.generateData(item, jsonObject);
+                        }
+                    }
+
+                    @Override
+                    public void destroyData(T item) {
+                        generator.destroyData(item);
+                    }
+
+                    @Override
+                    public void destroyAllData() {
+                        generator.destroyAllData();
+                    }
+
+                    @Override
+                    public void refreshData(T item) {
+                        generator.refreshData(item);
                     }
                 };
                 columnDataGeneratorRegistration = grid
