@@ -77,9 +77,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/dialog", version = "24.6.0-alpha7")
+@NpmPackage(value = "@vaadin/dialog", version = "24.6.0-alpha8")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
@@ -122,6 +122,13 @@ public class Dialog extends Component implements HasComponents, HasSize,
         addListener(DialogResizeEvent.class, event -> {
             setWidth(event.getWidth());
             setHeight(event.getHeight());
+            setTop(event.getTop());
+            setLeft(event.getLeft());
+        });
+
+        addListener(DialogDraggedEvent.class, event -> {
+            setTop(event.getTop());
+            setLeft(event.getLeft());
         });
 
         setOverlayRole("dialog");
@@ -194,13 +201,19 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
         private final String width;
         private final String height;
+        private final String left;
+        private final String top;
 
         public DialogResizeEvent(Dialog source, boolean fromClient,
                 @EventData("event.detail.width") String width,
-                @EventData("event.detail.height") String height) {
+                @EventData("event.detail.height") String height,
+                @EventData("event.detail.left") String left,
+                @EventData("event.detail.top") String top) {
             super(source, fromClient);
             this.width = width;
             this.height = height;
+            this.left = left;
+            this.top = top;
         }
 
         /**
@@ -219,6 +232,59 @@ public class Dialog extends Component implements HasComponents, HasSize,
          */
         public String getHeight() {
             return height;
+        }
+
+        /**
+         * Gets the left position of the overlay after resize is done
+         *
+         * @return the left position in pixels of the overlay
+         */
+        public String getLeft() {
+            return left;
+        }
+
+        /**
+         * Gets the top position of the overlay after resize is done
+         *
+         * @return the top position in pixels of the overlay
+         */
+        public String getTop() {
+            return top;
+        }
+    }
+
+    /**
+     * `dragged` event is sent when the user finishes dragging the overlay.
+     */
+    @DomEvent("dragged")
+    public static class DialogDraggedEvent extends ComponentEvent<Dialog> {
+        private final String left;
+        private final String top;
+
+        public DialogDraggedEvent(Dialog source, boolean fromClient,
+                @EventData("event.detail.left") String left,
+                @EventData("event.detail.top") String top) {
+            super(source, fromClient);
+            this.left = left;
+            this.top = top;
+        }
+
+        /**
+         * Gets the left position of the overlay after dragging is done
+         *
+         * @return the left position in pixels of the overlay
+         */
+        public String getLeft() {
+            return left;
+        }
+
+        /**
+         * Gets the top position of the overlay after dragging is done
+         *
+         * @return the top position in pixels of the overlay
+         */
+        public String getTop() {
+            return top;
         }
     }
 
@@ -317,11 +383,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * {@link #close()} method should be called explicitly to close the dialog
      * in case there are close listeners.
      *
-     * @see #close()
-     *
      * @param listener
      *            the listener to add
      * @return registration for removal of listener
+     * @see #close()
      */
     public Registration addDialogCloseActionListener(
             ComponentEventListener<DialogCloseActionEvent> listener) {
@@ -355,8 +420,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * It is called only if resizing is enabled (see
      * {@link Dialog#setResizable(boolean)}).
      * <p>
-     * Note: By default, the component will sync the width/height values after
-     * every resizing.
+     * Note: By default, the component will sync the width/height and top/left
+     * values after every resizing.
      *
      * @param listener
      *            the listener to add
@@ -365,6 +430,23 @@ public class Dialog extends Component implements HasComponents, HasSize,
     public Registration addResizeListener(
             ComponentEventListener<DialogResizeEvent> listener) {
         return addListener(DialogResizeEvent.class, listener);
+    }
+
+    /**
+     * Adds a listener that is called after user finishes dragging the overlay.
+     * It is called only if dragging is enabled (see
+     * {@link Dialog#setDraggable(boolean)}).
+     * <p>
+     * Note: By default, the component will sync the top/left values after every
+     * dragging.
+     *
+     * @param listener
+     *            the listener to add
+     * @return registration for removal of listener
+     */
+    public Registration addDraggedListener(
+            ComponentEventListener<DialogDraggedEvent> listener) {
+        return addListener(DialogDraggedEvent.class, listener);
     }
 
     /**
@@ -429,7 +511,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @param index
      *            the index, where the component will be added.
-     *
      * @param component
      *            the component to add
      */
@@ -791,9 +872,9 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * For a modal dialog the server-side modality will be removed when dialog
      * is not visible so that interactions can be made in the application.
      *
-     * @see Component#setVisible(boolean)
      * @param visible
      *            dialog visibility
+     * @see Component#setVisible(boolean)
      */
     @Override
     public void setVisible(boolean visible) {
