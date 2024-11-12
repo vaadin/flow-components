@@ -30,12 +30,13 @@ import com.vaadin.flow.server.VaadinSession;
  */
 public class PopoverAutoAddTest {
     private UI ui = new UI();
+    private VaadinSession session;
 
     @Before
     public void setup() {
         UI.setCurrent(ui);
 
-        VaadinSession session = Mockito.mock(VaadinSession.class);
+        session = Mockito.mock(VaadinSession.class);
         Mockito.when(session.hasLock()).thenReturn(true);
         ui.getInternals().setSession(session);
     }
@@ -131,6 +132,25 @@ public class PopoverAutoAddTest {
         fakeClientResponse();
 
         Assert.assertNull(popover.getElement().getParent());
+    }
+
+    @Test
+    public void setTarget_changeUI_autoAdded() {
+        Popover popover = new Popover();
+        Div target = new Div();
+        popover.setTarget(target);
+        ui.add(target);
+        fakeClientResponse();
+
+        // Create a new UI and move the component to it (@PreserveOnRefresh)
+        ui = new UI();
+        UI.setCurrent(ui);
+        ui.getInternals().setSession(session);
+        target.getElement().removeFromTree(false);
+        ui.add(target);
+
+        fakeClientResponse();
+        Assert.assertEquals(ui.getElement(), popover.getElement().getParent());
     }
 
     private void fakeClientResponse() {

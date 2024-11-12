@@ -26,17 +26,17 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.details.testbench.DetailsElement;
-import com.vaadin.tests.AbstractParallelTest;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class BasicIT extends AbstractParallelTest {
+@TestPath("vaadin-details")
+public class BasicIT extends AbstractComponentIT {
 
     private List<DetailsElement> detailsElements;
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-details");
-        getDriver().get(url);
+        open();
         detailsElements = $(DetailsElement.class).all();
 
         Assert.assertEquals(3, detailsElements.size());
