@@ -41,7 +41,6 @@ import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.Validator;
-import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.PropertyChangeListener;
 
 /**
@@ -94,8 +93,6 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
 
     private static final PropertyChangeListener NO_OP = event -> {
     };
-    private String ariaLabel;
-    private String ariaLabelledBy;
 
     private CheckboxI18n i18n;
 
@@ -307,37 +304,23 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
 
     @Override
     public void setAriaLabel(String ariaLabel) {
-        toggleInputElementAttribute(ElementConstants.ARIA_LABEL_ATTRIBUTE_NAME,
-                ariaLabel);
-        this.ariaLabel = ariaLabel;
+        getElement().setProperty("accessibleName", ariaLabel);
     }
 
     @Override
     public Optional<String> getAriaLabel() {
-        return Optional.ofNullable(ariaLabel);
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
     }
 
     @Override
     public void setAriaLabelledBy(String ariaLabelledBy) {
-        toggleInputElementAttribute(
-                ElementConstants.ARIA_LABELLEDBY_ATTRIBUTE_NAME,
-                ariaLabelledBy);
-        this.ariaLabelledBy = ariaLabelledBy;
+        getElement().setProperty("accessibleNameRef", ariaLabelledBy);
     }
 
     @Override
     public Optional<String> getAriaLabelledBy() {
-        return Optional.ofNullable(ariaLabelledBy);
-    }
-
-    private void toggleInputElementAttribute(String attribute, String value) {
-        if (value != null) {
-            getElement().executeJs("this.inputElement.setAttribute($0, $1)",
-                    attribute, value);
-        } else {
-            getElement().executeJs("this.inputElement.removeAttribute($0)",
-                    attribute);
-        }
+        return Optional
+                .ofNullable(getElement().getProperty("accessibleNameRef"));
     }
 
     /**
