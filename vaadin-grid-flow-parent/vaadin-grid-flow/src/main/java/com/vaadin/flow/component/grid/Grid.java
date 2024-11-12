@@ -212,10 +212,10 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.6.0-alpha2")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.6.0-alpha2")
+@NpmPackage(value = "@vaadin/grid", version = "24.6.0-alpha8")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.6.0-alpha8")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -440,7 +440,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha2")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha8")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -1413,6 +1413,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private GridSelectionModel<T> selectionModel;
     private SelectionMode selectionMode;
+    private SerializablePredicate<T> selectableProvider;
 
     private final DetailsManager detailsManager;
 
@@ -1710,6 +1711,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         gridDataGenerator.addDataGenerator(this::generateTooltipTextData);
         gridDataGenerator.addDataGenerator(this::generateRowsDragAndDropAccess);
         gridDataGenerator.addDataGenerator(this::generateDragData);
+        gridDataGenerator.addDataGenerator(this::generateSelectableData);
 
         dataCommunicator = dataCommunicatorBuilder.build(getElement(),
                 gridDataGenerator, (U) arrayUpdater,
@@ -3068,6 +3070,41 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return model;
     }
 
+    SerializablePredicate<T> getItemSelectableProvider() {
+        return selectableProvider;
+    }
+
+    /**
+     * Sets a predicate to check whether a specific item in the grid may be
+     * selected or deselected by the user. The predicate receives an item
+     * instance and should return {@code true} if a user may change the
+     * selection state of that item, or {@code false} otherwise.
+     * <p>
+     * This function does not prevent programmatic selection/deselection of
+     * items. Changing the function does not modify the currently selected
+     * items.
+     * <p>
+     * When using multi-selection, setting a provider will hide the select all
+     * checkbox.
+     *
+     * @param provider
+     *            the function to use to determine whether an item may be
+     *            selected or deselected by the user, or {@code null} to allow
+     *            all items to be selected or deselected
+     */
+    public void setItemSelectableProvider(SerializablePredicate<T> provider) {
+        selectableProvider = provider;
+        getDataCommunicator().reset();
+
+        if (selectionModel instanceof AbstractGridMultiSelectionModel<T> multiSelectionModel) {
+            multiSelectionModel.updateSelectAllCheckBoxVisibility();
+        }
+    }
+
+    boolean isItemSelectable(T item) {
+        return selectableProvider == null || selectableProvider.test(item);
+    }
+
     /**
      * Use this grid as a single select in {@link Binder}.
      * <p>
@@ -4364,6 +4401,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         if (dragData.keys().length > 0) {
             jsonObject.put("dragData", dragData);
+        }
+    }
+
+    private void generateSelectableData(T item, JsonObject jsonObject) {
+        if (selectableProvider != null) {
+            boolean selectable = selectableProvider.test(item);
+            jsonObject.put("selectable", selectable);
         }
     }
 

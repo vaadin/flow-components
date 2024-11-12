@@ -77,9 +77,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/dialog", version = "24.6.0-alpha2")
+@NpmPackage(value = "@vaadin/dialog", version = "24.6.0-alpha8")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
@@ -89,10 +89,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     private boolean autoAddedToTheUi;
     private int configuredCloseActionListeners;
-    private String width;
     private String minWidth;
     private String maxWidth;
-    private String height;
     private String minHeight;
     private String maxHeight;
     private DialogHeader dialogHeader;
@@ -122,8 +120,15 @@ public class Dialog extends Component implements HasComponents, HasSize,
         });
 
         addListener(DialogResizeEvent.class, event -> {
-            width = event.getWidth();
-            height = event.getHeight();
+            setWidth(event.getWidth());
+            setHeight(event.getHeight());
+            setTop(event.getTop());
+            setLeft(event.getLeft());
+        });
+
+        addListener(DialogDraggedEvent.class, event -> {
+            setTop(event.getTop());
+            setLeft(event.getLeft());
         });
 
         setOverlayRole("dialog");
@@ -141,6 +146,54 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
+     * Gets the top position of the overlay.
+     *
+     * @return the top position of the overlay
+     */
+    public String getTop() {
+        return getElement().getProperty("top");
+    }
+
+    /**
+     * Sets the top position of the overlay. If a unitless number is provided,
+     * pixels are assumed.
+     * <p>
+     * Note that the overlay top edge may not be the same as the viewport top
+     * edge (e.g. the "Lumo" theme defines some spacing to prevent the overlay
+     * from stretching all the way to the top of the viewport).
+     *
+     * @param top
+     *            the top position of the overlay
+     */
+    public void setTop(String top) {
+        getElement().setProperty("top", top);
+    }
+
+    /**
+     * Gets the left position of the overlay.
+     *
+     * @return the left position of the overlay
+     */
+    public String getLeft() {
+        return getElement().getProperty("left");
+    }
+
+    /**
+     * Sets the distance of the overlay from the left of its container. If a
+     * unitless number is provided, pixels are assumed.
+     * <p>
+     * Note that the overlay left edge may not be the same as the viewport left
+     * edge (e.g. the "Lumo" theme defines some spacing to prevent the overlay
+     * from stretching all the way to the left of the viewport).
+     *
+     * @param left
+     *            the left position of the overlay
+     */
+    public void setLeft(String left) {
+        getElement().setProperty("left", left);
+    }
+
+    /**
      * `resize` event is sent when the user finishes resizing the overlay.
      */
     @DomEvent("resize")
@@ -148,13 +201,19 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
         private final String width;
         private final String height;
+        private final String left;
+        private final String top;
 
         public DialogResizeEvent(Dialog source, boolean fromClient,
                 @EventData("event.detail.width") String width,
-                @EventData("event.detail.height") String height) {
+                @EventData("event.detail.height") String height,
+                @EventData("event.detail.left") String left,
+                @EventData("event.detail.top") String top) {
             super(source, fromClient);
             this.width = width;
             this.height = height;
+            this.left = left;
+            this.top = top;
         }
 
         /**
@@ -173,6 +232,59 @@ public class Dialog extends Component implements HasComponents, HasSize,
          */
         public String getHeight() {
             return height;
+        }
+
+        /**
+         * Gets the left position of the overlay after resize is done
+         *
+         * @return the left position in pixels of the overlay
+         */
+        public String getLeft() {
+            return left;
+        }
+
+        /**
+         * Gets the top position of the overlay after resize is done
+         *
+         * @return the top position in pixels of the overlay
+         */
+        public String getTop() {
+            return top;
+        }
+    }
+
+    /**
+     * `dragged` event is sent when the user finishes dragging the overlay.
+     */
+    @DomEvent("dragged")
+    public static class DialogDraggedEvent extends ComponentEvent<Dialog> {
+        private final String left;
+        private final String top;
+
+        public DialogDraggedEvent(Dialog source, boolean fromClient,
+                @EventData("event.detail.left") String left,
+                @EventData("event.detail.top") String top) {
+            super(source, fromClient);
+            this.left = left;
+            this.top = top;
+        }
+
+        /**
+         * Gets the left position of the overlay after dragging is done
+         *
+         * @return the left position in pixels of the overlay
+         */
+        public String getLeft() {
+            return left;
+        }
+
+        /**
+         * Gets the top position of the overlay after dragging is done
+         *
+         * @return the top position in pixels of the overlay
+         */
+        public String getTop() {
+            return top;
         }
     }
 
@@ -195,8 +307,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public void setWidth(String value) {
-        width = value;
-        setDimension(ElementConstants.STYLE_WIDTH, value);
+        getElement().setProperty("width", value);
     }
 
     @Override
@@ -213,8 +324,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public void setHeight(String value) {
-        height = value;
-        setDimension(ElementConstants.STYLE_HEIGHT, value);
+        getElement().setProperty("height", value);
     }
 
     @Override
@@ -231,7 +341,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public String getWidth() {
-        return width;
+        return getElement().getProperty("width");
     }
 
     @Override
@@ -246,7 +356,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public String getHeight() {
-        return height;
+        return getElement().getProperty("height");
     }
 
     @Override
@@ -273,11 +383,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * {@link #close()} method should be called explicitly to close the dialog
      * in case there are close listeners.
      *
-     * @see #close()
-     *
      * @param listener
      *            the listener to add
      * @return registration for removal of listener
+     * @see #close()
      */
     public Registration addDialogCloseActionListener(
             ComponentEventListener<DialogCloseActionEvent> listener) {
@@ -311,8 +420,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * It is called only if resizing is enabled (see
      * {@link Dialog#setResizable(boolean)}).
      * <p>
-     * Note: By default, the component will sync the width/height values after
-     * every resizing.
+     * Note: By default, the component will sync the width/height and top/left
+     * values after every resizing.
      *
      * @param listener
      *            the listener to add
@@ -321,6 +430,23 @@ public class Dialog extends Component implements HasComponents, HasSize,
     public Registration addResizeListener(
             ComponentEventListener<DialogResizeEvent> listener) {
         return addListener(DialogResizeEvent.class, listener);
+    }
+
+    /**
+     * Adds a listener that is called after user finishes dragging the overlay.
+     * It is called only if dragging is enabled (see
+     * {@link Dialog#setDraggable(boolean)}).
+     * <p>
+     * Note: By default, the component will sync the top/left values after every
+     * dragging.
+     *
+     * @param listener
+     *            the listener to add
+     * @return registration for removal of listener
+     */
+    public Registration addDraggedListener(
+            ComponentEventListener<DialogDraggedEvent> listener) {
+        return addListener(DialogDraggedEvent.class, listener);
     }
 
     /**
@@ -385,7 +511,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @param index
      *            the index, where the component will be added.
-     *
      * @param component
      *            the component to add
      */
@@ -747,9 +872,9 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * For a modal dialog the server-side modality will be removed when dialog
      * is not visible so that interactions can be made in the application.
      *
-     * @see Component#setVisible(boolean)
      * @param visible
      *            dialog visibility
+     * @see Component#setVisible(boolean)
      */
     @Override
     public void setVisible(boolean visible) {
@@ -1059,10 +1184,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
                 "this.renderer = (root) => Vaadin.FlowComponentHost.setChildNodes($0, this.virtualChildNodeIds, root)",
                 appId);
 
-        setDimension(ElementConstants.STYLE_WIDTH, width);
         setDimension(ElementConstants.STYLE_MIN_WIDTH, minWidth);
         setDimension(ElementConstants.STYLE_MAX_WIDTH, maxWidth);
-        setDimension(ElementConstants.STYLE_HEIGHT, height);
         setDimension(ElementConstants.STYLE_MIN_HEIGHT, minHeight);
         setDimension(ElementConstants.STYLE_MAX_HEIGHT, maxHeight);
     }

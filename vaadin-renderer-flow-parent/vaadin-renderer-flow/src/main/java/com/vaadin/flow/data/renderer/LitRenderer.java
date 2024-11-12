@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import com.vaadin.flow.component.UI;
@@ -34,6 +35,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelMap;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
@@ -79,17 +81,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     private LitRenderer(String templateExpression) {
         this.templateExpression = templateExpression;
 
-        int litRendererCount = 0;
-        if (UI.getCurrent() != null) {
-            // Generate a unique (in scope of the UI) namespace for the renderer
-            // properties.
-            litRendererCount = UI.getCurrent().getElement()
-                    .getProperty("__litRendererCount", 0);
-            UI.getCurrent().getElement().setProperty("__litRendererCount",
-                    litRendererCount + 1);
-
-        }
-        propertyNamespace = "lr_" + litRendererCount + "_";
+        propertyNamespace = String.format("lr_%s_",
+                UUID.randomUUID().toString().replace("-", "").substring(0, 16));
     }
 
     LitRenderer() {
@@ -160,13 +153,21 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         };
     }
 
+    private UI getElementUI(Element element) {
+        return ((StateTree) element.getNode().getOwner()).getUI();
+    }
+
     private void setElementRenderer(Element container, String rendererName,
             String templateExpression, ReturnChannelRegistration returnChannel,
             JsonArray clientCallablesArray, String propertyNamespace) {
+        assert container.getNode().isAttached() : "Container must be attached";
+
+        String appId = getElementUI(container).getInternals().getAppId();
+
         container.executeJs(
-                "window.Vaadin.setLitRenderer(this, $0, $1, $2, $3, $4)",
+                "window.Vaadin.setLitRenderer(this, $0, $1, $2, $3, $4, $5)",
                 rendererName, templateExpression, returnChannel,
-                clientCallablesArray, propertyNamespace);
+                clientCallablesArray, propertyNamespace, appId);
     }
 
     /**

@@ -86,9 +86,9 @@ import elemental.json.impl.JreJsonFactory;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-chart")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/charts", version = "24.6.0-alpha2")
+@NpmPackage(value = "@vaadin/charts", version = "24.6.0-alpha8")
 @JsModule("@vaadin/charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
@@ -125,12 +125,6 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     public Chart(ChartType type) {
         this();
         getConfiguration().getChart().setType(type);
-    }
-
-    static String wrapJSExpressionInTryCatchWrapper(String expression) {
-        return String.format("const f = function(){return %s;}.bind(this);"
-                + "return Vaadin.Flow.tryCatchWrapper(f, 'Vaadin Charts', 'vaadin-charts-flow')();",
-                expression);
     }
 
     @Override
@@ -706,8 +700,8 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
         private void callClientSideAddSeriesAsDrilldown(int seriesIndex,
                 int pointIndex, Series drilldownSeries) {
-            final String JS = "this.__callChartFunction($0, this.configuration.series[$1].data[$2], $3)";
-            getElement().executeJs(wrapJSExpressionInTryCatchWrapper(JS),
+            getElement().executeJs(
+                    "this.__callChartFunction($0, this.configuration.series[$1].data[$2], $3)",
                     "addSeriesAsDrilldown", seriesIndex, pointIndex,
                     toJsonValue((AbstractConfigurationObject) drilldownSeries));
         }

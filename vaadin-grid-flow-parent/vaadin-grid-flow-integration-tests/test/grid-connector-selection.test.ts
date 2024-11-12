@@ -141,6 +141,95 @@ describe('grid connector - selection', () => {
         expect(grid.$server.deselect).not.to.be.called;
       });
     });
+
+    describe('conditional selection', () => {
+      let items;
+
+      beforeEach(async () => {
+        items = Array.from({ length: 4 }, (_, i) => ({
+          key: i.toString(),
+          name: i.toString(),
+          selectable: i >= 2
+        }));
+        setRootItems(grid.$connector, items);
+        await nextFrame();
+        grid.requestContentUpdate();
+      });
+
+      it('should prevent selection of non-selectable items on click', () => {
+        getBodyCellContent(grid, 0, 0)!.click();
+        expect(grid.selectedItems).to.be.empty;
+        expect(grid.$server.select).to.not.be.called;
+      });
+
+      it('should allow selection of selectable items on click', async () => {
+        getBodyCellContent(grid, 2, 0)!.click();
+        expect(grid.selectedItems).to.deep.equal([items[2]]);
+        expect(grid.$server.select).to.be.calledWith(items[2].key);
+      });
+
+      it('should prevent deselection of non-selectable items on click', () => {
+        grid.$connector.doSelection([items[0]], false);
+        getBodyCellContent(grid, 0, 0)!.click();
+        expect(grid.selectedItems).to.deep.equal([items[0]]);
+        expect(grid.$server.deselect).to.not.be.called;
+      });
+
+      it('should prevent deselection of non-selectable items when clicking another non-selectable item', () => {
+        grid.$connector.doSelection([items[0]], false);
+        getBodyCellContent(grid, 1, 0)!.click();
+        expect(grid.selectedItems).to.deep.equal([items[0]]);
+        expect(grid.$server.deselect).to.not.be.called;
+      });
+
+      it('should prevent deselection of non-selectable items on row click when active item data is stale', () => {
+        // item is selectable initially and is selected
+        grid.$connector.doSelection([items[2]], false);
+
+        // update grid items to make the item non-selectable
+        const updatedItems = items.map((item) => ({ ...item, selectable: false }));
+        setRootItems(grid.$connector, updatedItems);
+
+        // active item still references the original item with selectable: true
+        expect(grid.activeItem.selectable).to.be.true;
+
+        // however clicking the row should not deselect the item
+        getBodyCellContent(grid, 2, 0)!.click();
+        expect(grid.selectedItems).to.deep.equal([updatedItems[2]]);
+        expect(grid.$server.deselect).to.not.be.called;
+      });
+
+      it('should allow deselection of selectable items on row click', () => {
+        grid.$connector.doSelection([items[2]], false);
+        getBodyCellContent(grid, 2, 0)!.click();
+        expect(grid.selectedItems).to.be.empty;
+        expect(grid.$server.deselect).to.be.calledWith(items[2].key);
+      });
+
+      it('should always allow selection from server', () => {
+        // non-selectable item
+        grid.$connector.doSelection([items[0]], false);
+        expect(grid.selectedItems).to.deep.equal([items[0]]);
+        expect(grid.activeItem).to.deep.equal(items[0]);
+
+        // selectable item
+        grid.$connector.doSelection([items[2]], false);
+        expect(grid.selectedItems).to.deep.equal([items[2]]);
+        expect(grid.activeItem).to.deep.equal(items[2]);
+      })
+
+      it('should always allow deselection from server', () => {
+        // non-selectable item
+        grid.$connector.doSelection([items[0]], false);
+        grid.$connector.doDeselection([items[0]], false);
+        expect(grid.selectedItems).to.deep.equal([]);
+
+        // selectable item
+        grid.$connector.doSelection([items[2]], false);
+        grid.$connector.doDeselection([items[2]], false);
+        expect(grid.selectedItems).to.deep.equal([]);
+      })
+    });
   });
 
   describe('none selection mode', () => {

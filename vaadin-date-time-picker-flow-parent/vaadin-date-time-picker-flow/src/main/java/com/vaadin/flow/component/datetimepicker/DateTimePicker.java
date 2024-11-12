@@ -17,9 +17,7 @@ package com.vaadin.flow.component.datetimepicker;
 
 import java.io.Serializable;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
@@ -65,17 +63,6 @@ class DateTimePickerDatePicker
         // Should not change invalid state
     }
 
-    void passThroughPresentationValue(LocalDate newPresentationValue) {
-        super.setPresentationValue(newPresentationValue);
-
-        if (valueEquals(newPresentationValue, getEmptyValue())
-                && isInputValuePresent()) {
-            // Clear the input element from possible bad input.
-            getElement().executeJs("this.inputElement.value = ''");
-            getElement().setProperty("_hasInputValue", false);
-        }
-    }
-
     @Override
     protected boolean isInputValuePresent() {
         return super.isInputValuePresent();
@@ -88,17 +75,6 @@ class DateTimePickerTimePicker
     @Override
     protected void validate() {
         // Should not change invalid state
-    }
-
-    void passThroughPresentationValue(LocalTime newPresentationValue) {
-        super.setPresentationValue(newPresentationValue);
-
-        if (valueEquals(newPresentationValue, getEmptyValue())
-                && isInputValuePresent()) {
-            // Clear the input element from possible bad input.
-            getElement().executeJs("this.inputElement.value = ''");
-            getElement().setProperty("_hasInputValue", false);
-        }
     }
 
     @Override
@@ -117,9 +93,9 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "24.6.0-alpha2")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "24.6.0-alpha8")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -407,11 +383,11 @@ public class DateTimePicker
 
     private void synchronizeChildComponentValues(LocalDateTime value) {
         if (value != null) {
-            datePicker.passThroughPresentationValue(value.toLocalDate());
-            timePicker.passThroughPresentationValue(value.toLocalTime());
+            datePicker.setValue(value.toLocalDate());
+            timePicker.setValue(value.toLocalTime());
         } else {
-            datePicker.passThroughPresentationValue(null);
-            timePicker.passThroughPresentationValue(null);
+            datePicker.setValue(null);
+            timePicker.setValue(null);
         }
     }
 
