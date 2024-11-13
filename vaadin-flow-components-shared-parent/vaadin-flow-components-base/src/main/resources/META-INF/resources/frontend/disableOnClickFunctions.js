@@ -1,6 +1,6 @@
 function disableOnClickListener({currentTarget: element}) {
   if (element.hasAttribute('disableOnClick')) {
-    element.disabled = true;
+    requestAnimationFrame(() => element.disabled = true);
   }
 }
 

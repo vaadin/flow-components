@@ -256,7 +256,13 @@ public class ButtonView extends Div {
     private void createButtonWithDisableOnClickThatEnablesInSameRoundtrip() {
         Button button = new Button(
                 "Disabled on click and re-enabled in same roundtrip", event -> {
-                    event.getSource().setEnabled(true);
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    } finally {
+                        event.getSource().setEnabled(true);
+                    }
                 });
         button.setDisableOnClick(true);
         button.setId("disable-on-click-re-enable-button");

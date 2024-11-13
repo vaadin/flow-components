@@ -292,22 +292,15 @@ public class ButtonIT extends AbstractComponentIT {
 
     @Test // https://github.com/vaadin/vaadin-button-flow/issues/115
     public void disableButtonOnClick_canBeEnabled() {
+        var itemId = "temporarily-disabled-button";
         getCommandExecutor().disableWaitForVaadin();
-        ButtonElement button = $(ButtonElement.class)
-                .id("temporarily-disabled-button");
-
         for (int i = 0; i < 3; i++) {
-            button.click();
-
-            Assert.assertFalse("button should be disabled", button.isEnabled());
-            waitUntil(ExpectedConditions.elementToBeClickable(
-                    $(ButtonElement.class).id("temporarily-disabled-button")),
-                    2000);
-
-            Assert.assertTrue("button should be enabled again",
-                    button.isEnabled());
+            clickElementWithJs(itemId);
+            Assert.assertFalse(findElement(By.id(itemId)).isEnabled());
+            waitUntil(ExpectedConditions.elementToBeClickable(By.id(itemId)),
+                    2);
+            Assert.assertTrue(findElement(By.id(itemId)).isEnabled());
         }
-
         getCommandExecutor().enableWaitForVaadin();
     }
 
@@ -347,16 +340,23 @@ public class ButtonIT extends AbstractComponentIT {
     }
 
     @Test
-    public void disableOnClick_enableInSameRoundtrip_clientSideButtonIsEnabled() {
-        WebElement button = layout
-                .findElement(By.id("disable-on-click-re-enable-button"));
+    public void disableOnClick_enableInSameRoundTrip_clientSideButtonIsEnabled() {
+        var itemId = "disable-on-click-re-enable-button";
+        waitForElementPresent(By.id(itemId));
+        waitUntil(ExpectedConditions
+                .elementToBeClickable(findElement(By.id(itemId))), 2);
         for (int i = 0; i < 3; i++) {
-            Boolean disabled = (Boolean) executeScript(
-                    "arguments[0].click(); return arguments[0].disabled",
-                    button);
+            var button = findElement(By.id(itemId));
+            var disabled = (Boolean) getCommandExecutor().getDriver()
+                    .executeAsyncScript("""
+                            var callback = arguments[arguments.length - 1];
+                            var element = arguments[0];
+                            element.click();
+                            requestAnimationFrame(function() {
+                              callback(element.disabled);
+                            });""", button);
             Assert.assertTrue(disabled);
-
-            waitUntil(ExpectedConditions.elementToBeClickable(button));
+            waitUntil(driver -> findElement(By.id(itemId)).isEnabled());
         }
     }
 

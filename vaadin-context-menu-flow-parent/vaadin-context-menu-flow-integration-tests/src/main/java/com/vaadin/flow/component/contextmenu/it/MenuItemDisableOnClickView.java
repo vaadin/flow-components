@@ -41,11 +41,17 @@ public class MenuItemDisableOnClickView extends Div {
         addItemWithDisableAndHideOnClick();
         addItemWithDisableOnClickAndPointerEventsAuto();
         addDetachReattachItem();
+        contextMenu.getItems().forEach(item -> item.setKeepOpen(true));
+
+        var toggleKeepOpen = new NativeButton("Toggle keep open",
+                click -> contextMenu.getItems()
+                        .forEach(item -> item.setKeepOpen(!item.isKeepOpen())));
+        toggleKeepOpen.setId("toggle-keep-open");
+        add(toggleKeepOpen);
 
         var target = new Div("Target");
         target.setId("target-div");
         contextMenu.setTarget(target);
-        contextMenu.getItems().forEach(item -> item.setKeepOpen(true));
         add(target);
     }
 
@@ -103,7 +109,15 @@ public class MenuItemDisableOnClickView extends Div {
     private void addItemWithDisableOnClickThatEnablesInSameRoundTrip() {
         var item = contextMenu.addItem(
                 "Disabled on click and re-enabled in same round-trip",
-                event -> event.getSource().setEnabled(true));
+                event -> {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    } finally {
+                        event.getSource().setEnabled(true);
+                    }
+                });
         item.setDisableOnClick(true);
         item.setId("disable-on-click-re-enable-menu-item");
     }
