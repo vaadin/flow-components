@@ -24,7 +24,12 @@ editorPlaceholder.addEventListener('keydown', (e) => {
 });
 
 window.Vaadin.Flow.gridProConnector = {
-  selectAll: (editor) => {
+  selectAll: (editor, itemKey) => {
+    if (editorPlaceholder.__itemKey !== itemKey) {
+      // This is an outdated call from an earlier edit, don't unhide the editor yet.
+      return;
+    }
+
     // Remove the placeholder element
     editorPlaceholder.remove();
     // Unhide the updated editor component
@@ -54,6 +59,7 @@ window.Vaadin.Flow.gridProConnector = {
       component.style.visibility = 'hidden';
       component.after(editorPlaceholder);
       editorPlaceholder.focus();
+      editorPlaceholder.__itemKey = rowData.item.key;
     };
 
     // Not needed in case of custom editor as value is set on server-side.

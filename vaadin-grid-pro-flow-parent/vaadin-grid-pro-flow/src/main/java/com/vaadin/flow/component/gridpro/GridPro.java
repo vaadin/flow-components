@@ -148,9 +148,10 @@ public class GridPro<E> extends Grid<E> {
             if (column.getEditorType().equals("custom")) {
                 column.getEditorField()
                         .setValue(column.getValueProvider().apply(e.getItem()));
+                var itemKey = getDataCommunicator().getKeyMapper().key(e.getItem());
                 UI.getCurrent().getPage().executeJs(
-                        "window.Vaadin.Flow.gridProConnector.selectAll($0)",
-                        column.getEditorField().getElement());
+                        "window.Vaadin.Flow.gridProConnector.selectAll($0, $1)",
+                        column.getEditorField().getElement(), itemKey);
             }
         });
     }
