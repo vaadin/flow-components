@@ -11,17 +11,31 @@ function isEditedRow(grid, rowData) {
   return grid.__edited && grid.__edited.model.item.key === rowData.item.key;
 }
 
+// Create a placeholder element to focus on when a custom editor is being loaded.
+const editorPlaceholder = document.createElement('div');
+editorPlaceholder.style.opacity = '0';
+editorPlaceholder.tabIndex = -1;
+editorPlaceholder.addEventListener('keydown', (e) => {
+  if (!['Tab', 'Escape', 'Enter'].includes(e.key)) {
+    // Power users might try yo hit Space, arrow keys, etc. before the actual editor is shown.
+    // Cancel the events to avoid side effects like scrolling the page.
+    e.preventDefault();
+  }
+});
+
 window.Vaadin.Flow.gridProConnector = {
   selectAll: (editor) => {
+    // Remove the placeholder element
+    editorPlaceholder.remove();
+    // Unhide the updated editor component
+    editor.style.removeProperty('visibility');
+    editor.focus();
+
     if (editor instanceof HTMLInputElement) {
       editor.select();
     } else if (editor.focusElement && editor.focusElement instanceof HTMLInputElement) {
       editor.focusElement.select();
     }
-
-    // Unhide the updated editor component
-    editor.style.removeProperty('opacity');
-    editor.style.removeProperty('pointer-events');
   },
 
   setEditModeRenderer(column, component) {
@@ -35,15 +49,11 @@ window.Vaadin.Flow.gridProConnector = {
         return;
       }
 
-      // Hide the editor component until it is updated with the correct value (after a server roundtrip)
-      // Using "visibility" or "display" is not an option as it would prevent the component from being focused.
-      // Let's use "opacity" and "pointer-events" as the best compromise.
-      component.style.opacity = '0';
-      component.style.pointerEvents = 'none';
-
       root.appendChild(component);
       this._grid._cancelStopEdit();
-      component.focus();
+      component.style.visibility = 'hidden';
+      component.after(editorPlaceholder);
+      editorPlaceholder.focus();
     };
 
     // Not needed in case of custom editor as value is set on server-side.
@@ -69,10 +79,10 @@ window.Vaadin.Flow.gridProConnector = {
   },
 
   initCellEditableProvider(column) {
-    column.isCellEditable = function(model) {
+    column.isCellEditable = function (model) {
       // If there is no cell editable data, assume the cell is editable
       const isEditable = model.item.cellEditable && model.item.cellEditable[column._flowId];
       return isEditable === undefined || isEditable;
     };
-  },
+  }
 };

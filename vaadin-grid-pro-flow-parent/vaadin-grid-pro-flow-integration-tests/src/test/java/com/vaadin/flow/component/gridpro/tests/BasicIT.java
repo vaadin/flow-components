@@ -137,7 +137,7 @@ public class BasicIT extends AbstractComponentIT {
 
     @Test
     public void customComboBox_hiddenAnUnhiddenOnEdit() {
-        GridTHTDElement cell = grid.getCell(0, 4);
+        var cell = grid.getCell(0, 4);
 
         var editorHiddenOnEditStart = (Boolean) executeScript(
                 """
@@ -148,16 +148,23 @@ public class BasicIT extends AbstractComponentIT {
 
                             const editor = cell._content.firstElementChild;
                             // Synchronously check if the editor is hidden
-                            return getComputedStyle(editor).opacity === '0';
+                            return getComputedStyle(editor).visibility === 'hidden';
                         """,
                 cell);
         // Expect the editor to be hidden when the edit starts
         Assert.assertTrue(editorHiddenOnEditStart);
 
-        // After the round trip to the server, the editor should be visible
+        // After the round trip to the server...
         var editor = cell.$("vaadin-combo-box").first();
-        Assert.assertNotEquals("0", editor.getCssValue("opacity"));
-        Assert.assertNotEquals("none", editor.getCssValue("pointer-events"));
+        // The editor should be visible
+        Assert.assertTrue(editor.isDisplayed());
+        // The editor should have focus
+        Assert.assertTrue("Editor should have focus",
+                (Boolean) executeScript(
+                        "return arguments[0].contains(document.activeElement)",
+                        editor));
+        // The editor should not have sibling elements (the placeholder)
+        Assert.assertEquals(1L, executeScript("return arguments[0].parentElement.children.length", editor));
     }
 
     @Test
