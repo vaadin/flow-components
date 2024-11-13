@@ -18,6 +18,10 @@ window.Vaadin.Flow.gridProConnector = {
     } else if (editor.focusElement && editor.focusElement instanceof HTMLInputElement) {
       editor.focusElement.select();
     }
+
+    // Unhide the updated editor component
+    editor.style.removeProperty('opacity');
+    editor.style.removeProperty('pointer-events');
   },
 
   setEditModeRenderer(column, component) {
@@ -30,6 +34,12 @@ window.Vaadin.Flow.gridProConnector = {
       if (component.parentNode === root) {
         return;
       }
+
+      // Hide the editor component until it is updated with the correct value (after a server roundtrip)
+      // Using "visibility" or "display" is not an option as it would prevent the component from being focused.
+      // Let's use "opacity" and "pointer-events" as the best compromise.
+      component.style.opacity = '0';
+      component.style.pointerEvents = 'none';
 
       root.appendChild(component);
       this._grid._cancelStopEdit();

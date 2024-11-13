@@ -136,6 +136,31 @@ public class BasicIT extends AbstractComponentIT {
     }
 
     @Test
+    public void customComboBox_hiddenAnUnhiddenOnEdit() {
+        GridTHTDElement cell = grid.getCell(0, 4);
+
+        var editorHiddenOnEditStart = (Boolean) executeScript(
+                """
+                            const [cell] = arguments;
+
+                            // Enter edit mode with double click
+                            cell.dispatchEvent(new CustomEvent('dblclick', {composed: true, bubbles: true}));
+
+                            const editor = cell._content.firstElementChild;
+                            // Synchronously check if the editor is hidden
+                            return getComputedStyle(editor).opacity === '0';
+                        """,
+                cell);
+        // Expect the editor to be hidden when the edit starts
+        Assert.assertTrue(editorHiddenOnEditStart);
+
+        // After the round trip to the server, the editor should be visible
+        var editor = cell.$("vaadin-combo-box").first();
+        Assert.assertNotEquals("0", editor.getCssValue("opacity"));
+        Assert.assertNotEquals("none", editor.getCssValue("pointer-events"));
+    }
+
+    @Test
     public void textEditorIsUsedForTextColumn() {
         assertCellEnterEditModeOnDoubleClick(0, 1,
                 "vaadin-grid-pro-edit-text-field");
