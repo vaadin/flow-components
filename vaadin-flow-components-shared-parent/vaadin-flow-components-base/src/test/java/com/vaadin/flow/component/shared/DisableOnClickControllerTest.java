@@ -139,6 +139,6 @@ public class DisableOnClickControllerTest {
 
     @Tag("test")
     private static class HasEnabledComponent extends Component
-            implements HasEnabled, ClickNotifier<TestComponent> {
+            implements HasEnabled {
     }
 }
