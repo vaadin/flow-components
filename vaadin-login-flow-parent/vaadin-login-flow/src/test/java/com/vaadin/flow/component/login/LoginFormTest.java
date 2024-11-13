@@ -17,9 +17,7 @@ package com.vaadin.flow.component.login;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -31,22 +29,6 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.shared.Registration;
 
 public class LoginFormTest {
-
-    private MockedStatic<LoggerFactory> mockedLoggerFactory;
-    private Logger mockLogger;
-
-    @Before
-    public void setUp() {
-        mockedLoggerFactory = Mockito.mockStatic(LoggerFactory.class);
-        mockLogger = Mockito.mock(Logger.class);
-        mockedLoggerFactory.when(() -> LoggerFactory.getLogger(LoginForm.class))
-                .thenReturn(mockLogger);
-    }
-
-    @After
-    public void tearDown() {
-        mockedLoggerFactory.close();
-    }
 
     @Test
     public void onForgotPasswordEvent() {
@@ -134,33 +116,53 @@ public class LoginFormTest {
         Registration registration2 = form.addLoginListener(ev -> {
         });
 
-        form.setAction("login1");
-        Mockito.verify(mockLogger, Mockito.times(1)).warn(Mockito.anyString());
-        Mockito.reset(mockLogger);
+        Logger mockedLogger = Mockito.mock(Logger.class);
+        try (MockedStatic<LoggerFactory> context = Mockito
+                .mockStatic(LoggerFactory.class)) {
+            context.when(() -> LoggerFactory.getLogger(LoginForm.class))
+                    .thenReturn(mockedLogger);
 
-        registration1.remove();
-        form.setAction("login2");
-        Mockito.verify(mockLogger, Mockito.times(1)).warn(Mockito.anyString());
-        Mockito.reset(mockLogger);
+            form.setAction("login1");
+            Mockito.verify(mockedLogger, Mockito.times(1))
+                    .warn(Mockito.anyString());
+            Mockito.reset(mockedLogger);
 
-        registration2.remove();
-        form.setAction("login3");
-        Mockito.verify(mockLogger, Mockito.never()).warn(Mockito.anyString());
+            registration1.remove();
+            form.setAction("login2");
+            Mockito.verify(mockedLogger, Mockito.times(1))
+                    .warn(Mockito.anyString());
+            Mockito.reset(mockedLogger);
+
+            registration2.remove();
+            form.setAction("login3");
+            Mockito.verify(mockedLogger, Mockito.never())
+                    .warn(Mockito.anyString());
+        }
     }
 
     @Test
     public void setAction_addLoginListener_logsWarning() {
         final LoginForm form = new LoginForm();
         form.setAction("login");
-        form.addLoginListener(ev -> {
-        });
-        Mockito.verify(mockLogger, Mockito.times(1)).warn(Mockito.anyString());
-        Mockito.reset(mockLogger);
 
-        form.setAction(null);
-        form.addLoginListener(ev -> {
-        });
-        Mockito.verify(mockLogger, Mockito.never()).warn(Mockito.anyString());
+        Logger mockedLogger = Mockito.mock(Logger.class);
+        try (MockedStatic<LoggerFactory> context = Mockito
+                .mockStatic(LoggerFactory.class)) {
+            context.when(() -> LoggerFactory.getLogger(LoginForm.class))
+                    .thenReturn(mockedLogger);
+
+            form.addLoginListener(ev -> {
+            });
+            Mockito.verify(mockedLogger, Mockito.times(1))
+                    .warn(Mockito.anyString());
+            Mockito.reset(mockedLogger);
+
+            form.setAction(null);
+            form.addLoginListener(ev -> {
+            });
+            Mockito.verify(mockedLogger, Mockito.never())
+                    .warn(Mockito.anyString());
+        }
     }
 
     @Test

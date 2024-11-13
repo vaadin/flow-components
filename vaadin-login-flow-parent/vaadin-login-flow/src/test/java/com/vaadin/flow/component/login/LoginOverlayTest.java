@@ -15,9 +15,7 @@
  */
 package com.vaadin.flow.component.login;
 
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
@@ -28,23 +26,6 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.shared.Registration;
 
 public class LoginOverlayTest {
-    private MockedStatic<LoggerFactory> mockedLoggerFactory;
-    private Logger mockLogger;
-
-    @Before
-    public void setUp() {
-        mockedLoggerFactory = Mockito.mockStatic(LoggerFactory.class);
-        mockLogger = Mockito.mock(Logger.class);
-        mockedLoggerFactory
-                .when(() -> LoggerFactory.getLogger(LoginOverlay.class))
-                .thenReturn(mockLogger);
-    }
-
-    @After
-    public void tearDown() {
-        mockedLoggerFactory.close();
-    }
-
     @Test
     public void showErrorMessage_fromNullI18n() {
         final LoginOverlay overlay = new LoginOverlay(null);
@@ -92,33 +73,53 @@ public class LoginOverlayTest {
         Registration registration2 = overlay.addLoginListener(ev -> {
         });
 
-        overlay.setAction("login1");
-        Mockito.verify(mockLogger, Mockito.times(1)).warn(Mockito.anyString());
-        Mockito.reset(mockLogger);
+        Logger mockedLogger = Mockito.mock(Logger.class);
+        try (MockedStatic<LoggerFactory> context = Mockito
+                .mockStatic(LoggerFactory.class)) {
+            context.when(() -> LoggerFactory.getLogger(LoginOverlay.class))
+                    .thenReturn(mockedLogger);
 
-        registration1.remove();
-        overlay.setAction("login2");
-        Mockito.verify(mockLogger, Mockito.times(1)).warn(Mockito.anyString());
-        Mockito.reset(mockLogger);
+            overlay.setAction("login1");
+            Mockito.verify(mockedLogger, Mockito.times(1))
+                    .warn(Mockito.anyString());
+            Mockito.reset(mockedLogger);
 
-        registration2.remove();
-        overlay.setAction("login3");
-        Mockito.verify(mockLogger, Mockito.never()).warn(Mockito.anyString());
+            registration1.remove();
+            overlay.setAction("login2");
+            Mockito.verify(mockedLogger, Mockito.times(1))
+                    .warn(Mockito.anyString());
+            Mockito.reset(mockedLogger);
+
+            registration2.remove();
+            overlay.setAction("login3");
+            Mockito.verify(mockedLogger, Mockito.never())
+                    .warn(Mockito.anyString());
+        }
     }
 
     @Test
     public void setAction_addLoginListener_logsWarning() {
         final LoginOverlay overlay = new LoginOverlay();
         overlay.setAction("login");
-        overlay.addLoginListener(ev -> {
-        });
-        Mockito.verify(mockLogger, Mockito.times(1)).warn(Mockito.anyString());
-        Mockito.reset(mockLogger);
 
-        overlay.setAction(null);
-        overlay.addLoginListener(ev -> {
-        });
-        Mockito.verify(mockLogger, Mockito.never()).warn(Mockito.anyString());
+        Logger mockedLogger = Mockito.mock(Logger.class);
+        try (MockedStatic<LoggerFactory> context = Mockito
+                .mockStatic(LoggerFactory.class)) {
+            context.when(() -> LoggerFactory.getLogger(LoginOverlay.class))
+                    .thenReturn(mockedLogger);
+
+            overlay.addLoginListener(ev -> {
+            });
+            Mockito.verify(mockedLogger, Mockito.times(1))
+                    .warn(Mockito.anyString());
+            Mockito.reset(mockedLogger);
+
+            overlay.setAction(null);
+            overlay.addLoginListener(ev -> {
+            });
+            Mockito.verify(mockedLogger, Mockito.never())
+                    .warn(Mockito.anyString());
+        }
     }
 
     @Test
