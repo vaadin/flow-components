@@ -164,7 +164,32 @@ public class BasicIT extends AbstractComponentIT {
                         "return arguments[0].contains(document.activeElement)",
                         editor));
         // The editor should not have sibling elements (the placeholder)
-        Assert.assertEquals(1L, executeScript("return arguments[0].parentElement.children.length", editor));
+        Assert.assertEquals(1L, executeScript(
+                "return arguments[0].parentElement.children.length", editor));
+    }
+
+    @Test
+    public void customComboBox_keyDownWhileLoading() {
+        var cell = grid.getCell(0, 4);
+
+        var eventsCanceledCorrectly = (Boolean) executeScript(
+                """
+                            const [cell] = arguments;
+
+                            // Enter edit mode with double click
+                            cell.dispatchEvent(new CustomEvent('dblclick', {composed: true, bubbles: true}));
+
+                            // Press keys while the editor is loading
+                            const canceledEvent = new KeyboardEvent('keydown', {key: 'ArrowDown', composed: true, bubbles: true, cancelable: true});
+                            const event = new KeyboardEvent('keydown', {key: 'Enter', composed: true, bubbles: true, cancelable: true});
+                            document.activeElement.dispatchEvent(canceledEvent);
+                            document.activeElement.dispatchEvent(event);
+
+                            return canceledEvent.defaultPrevented && !event.defaultPrevented;
+                        """,
+                cell);
+
+        Assert.assertTrue(eventsCanceledCorrectly);
     }
 
     @Test

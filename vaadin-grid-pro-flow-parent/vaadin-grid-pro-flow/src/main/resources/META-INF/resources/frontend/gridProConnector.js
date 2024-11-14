@@ -17,7 +17,7 @@ editorPlaceholder.style.opacity = '0';
 editorPlaceholder.tabIndex = -1;
 editorPlaceholder.addEventListener('keydown', (e) => {
   if (!['Tab', 'Escape', 'Enter'].includes(e.key)) {
-    // Power users might try yo hit Space, arrow keys, etc. before the actual editor is shown.
+    // Power users might try to hit Space, arrow keys, etc. before the actual editor is shown.
     // Cancel the events to avoid side effects like scrolling the page.
     e.preventDefault();
   }
@@ -26,7 +26,9 @@ editorPlaceholder.addEventListener('keydown', (e) => {
 window.Vaadin.Flow.gridProConnector = {
   selectAll: (editor, itemKey) => {
     if (editorPlaceholder.__itemKey !== itemKey) {
-      // This is an outdated call from an earlier edit, don't unhide the editor yet.
+      // This is an outdated call that can occur if the user starts editing a cell,
+      // and quickly starts editing another cell on the same column before the editor
+      // is unhidden for the first cell. Don't unhide the editor yet.
       return;
     }
 
@@ -85,10 +87,10 @@ window.Vaadin.Flow.gridProConnector = {
   },
 
   initCellEditableProvider(column) {
-    column.isCellEditable = function (model) {
+    column.isCellEditable = function(model) {
       // If there is no cell editable data, assume the cell is editable
       const isEditable = model.item.cellEditable && model.item.cellEditable[column._flowId];
       return isEditable === undefined || isEditable;
     };
-  }
+  },
 };
