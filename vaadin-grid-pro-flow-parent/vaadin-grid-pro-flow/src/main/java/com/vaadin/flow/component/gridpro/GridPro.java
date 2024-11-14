@@ -151,8 +151,9 @@ public class GridPro<E> extends Grid<E> {
                 var itemKey = getDataCommunicator().getKeyMapper()
                         .key(e.getItem());
                 UI.getCurrent().getPage().executeJs(
-                        "window.Vaadin.Flow.gridProConnector.selectAll($0, $1)",
-                        column.getEditorField().getElement(), itemKey);
+                        "window.Vaadin.Flow.gridProConnector.selectAll($0, $1, $2)",
+                        column.getEditorField().getElement(), itemKey,
+                        this.getElement());
             }
         });
     }

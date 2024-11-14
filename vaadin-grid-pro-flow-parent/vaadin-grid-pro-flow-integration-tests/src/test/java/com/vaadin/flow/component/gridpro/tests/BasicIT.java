@@ -193,6 +193,48 @@ public class BasicIT extends AbstractComponentIT {
     }
 
     @Test
+    public void customComboBox_togglingLoadingEditorCellAttribute() {
+        var cell = grid.getCell(0, 4);
+        var attribute = "loading-editor-cell";
+
+        var hasattributeOnEdit = (Boolean) executeScript(
+                """
+                            const [cell, attribute, grid] = arguments;
+
+                            // Enter edit mode with double click
+                            cell.dispatchEvent(new CustomEvent('dblclick', {composed: true, bubbles: true}));
+                            return grid.hasAttribute(attribute);
+                        """,
+                cell, attribute, grid);
+
+        Assert.assertTrue(hasattributeOnEdit);
+
+        // Expect the attribute to be cleared after the server round trip
+        Assert.assertFalse(grid.hasAttribute(attribute));
+    }
+
+    @Test
+    public void customComboBox_togglingLoadingEditorCellAttribute_shouldNotThrow() {
+        var cell = grid.getCell(0, 4);
+        var attribute = "loading-editor-cell";
+
+        executeScript(
+                """
+                            const [cell, attribute, grid] = arguments;
+
+                            // Enter edit mode with double click
+                            cell.dispatchEvent(new CustomEvent('dblclick', {composed: true, bubbles: true}));
+
+                            // Press esc to cancel the edit
+                            const event = new KeyboardEvent('keydown', {key: 'Escape', composed: true, bubbles: true, cancelable: true});
+                            cell.dispatchEvent(event);
+                        """,
+                cell, attribute, grid);
+
+        checkLogsForErrors();
+    }
+
+    @Test
     public void textEditorIsUsedForTextColumn() {
         assertCellEnterEditModeOnDoubleClick(0, 1,
                 "vaadin-grid-pro-edit-text-field");
