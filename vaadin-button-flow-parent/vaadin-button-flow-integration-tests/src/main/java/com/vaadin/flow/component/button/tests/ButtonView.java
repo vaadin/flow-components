@@ -225,6 +225,9 @@ public class ButtonView extends Div {
         });
         toggle.setId("toggle-button");
 
+        addCard("Button disabled on click", disableOnClickButton, enable,
+                toggle, disabledMessage);
+
         disableOnClickButton.addClickListener(evt -> disabledMessage
                 .setText("Button " + evt.getSource().getText()
                         + " was clicked and enabled state was changed to "

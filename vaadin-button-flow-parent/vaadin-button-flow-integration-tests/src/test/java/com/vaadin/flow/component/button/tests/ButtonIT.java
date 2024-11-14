@@ -68,7 +68,7 @@ public class ButtonIT extends AbstractComponentIT {
 
         buttonElements = $(ButtonElement.class).withTextContaining("button")
                 .all();
-        Assert.assertEquals(4, buttonElements.size());
+        Assert.assertEquals(3, buttonElements.size());
 
         buttonElements = $(ButtonElement.class)
                 .withTextContaining("nonexistent").all();
@@ -83,11 +83,11 @@ public class ButtonIT extends AbstractComponentIT {
 
         buttonElements = $(ButtonElement.class)
                 .withText("button", String::endsWith).all();
-        Assert.assertEquals(3, buttonElements.size());
+        Assert.assertEquals(2, buttonElements.size());
 
         buttonElements = $(ButtonElement.class)
                 .withText("button", ButtonIT::containsIgnoreCase).all();
-        Assert.assertEquals(5, buttonElements.size());
+        Assert.assertEquals(4, buttonElements.size());
     }
 
     @Test
@@ -109,7 +109,7 @@ public class ButtonIT extends AbstractComponentIT {
 
         buttonElements = $(ButtonElement.class).withCaptionContaining("button")
                 .all();
-        Assert.assertEquals(4, buttonElements.size());
+        Assert.assertEquals(3, buttonElements.size());
 
         buttonElements = $(ButtonElement.class)
                 .withCaptionContaining("nonexistent").all();
