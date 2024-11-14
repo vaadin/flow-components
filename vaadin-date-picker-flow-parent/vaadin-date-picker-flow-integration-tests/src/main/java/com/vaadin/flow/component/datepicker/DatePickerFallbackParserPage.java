@@ -32,6 +32,8 @@ public class DatePickerFallbackParserPage extends Div {
         datePicker.setFallbackParser((s) -> {
             if (s.equals("newyear")) {
                 return Result.ok(LocalDate.of(2024, 1, 1));
+            } else if (s.equals("exception")) {
+                throw new RuntimeException("Exception in fallback parser");
             } else {
                 return Result.error("Invalid date format");
             }

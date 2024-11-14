@@ -705,7 +705,7 @@ public class DatePicker
      * displaying that message as a validation error.
      * <p>
      * Example:
-     * 
+     *
      * <pre>
      * datePicker.setFallbackParser(s -> {
      *     if (s.equals("tomorrow")) {
@@ -773,23 +773,27 @@ public class DatePicker
             return;
         }
 
-        boolean isInputUnparsable = fromClient && newModelValue == null
-                && isInputValuePresent();
-        if (fallbackParser != null && isInputUnparsable) {
+        try {
             isFallbackParserRunning = true;
 
-            Result<LocalDate> result = fallbackParser
-                    .apply(getInputElementValue());
-            Objects.requireNonNull(result, "Result cannot be null");
+            boolean isInputUnparsable = fromClient && newModelValue == null
+                    && isInputValuePresent();
+            if (fallbackParser != null && isInputUnparsable) {
+                Result<LocalDate> result = fallbackParser
+                        .apply(getInputElementValue());
+                Objects.requireNonNull(result, "Result cannot be null");
 
-            if (result.isError()) {
-                fallbackParserErrorMessage = result.getMessage().orElse(null);
-            } else {
-                fallbackParserErrorMessage = null;
-                newModelValue = result.getOrThrow(IllegalStateException::new);
-                setPresentationValue(newModelValue);
+                if (result.isError()) {
+                    fallbackParserErrorMessage = result.getMessage()
+                            .orElse(null);
+                } else {
+                    fallbackParserErrorMessage = null;
+                    newModelValue = result
+                            .getOrThrow(IllegalStateException::new);
+                    setPresentationValue(newModelValue);
+                }
             }
-
+        } finally {
             isFallbackParserRunning = false;
         }
 

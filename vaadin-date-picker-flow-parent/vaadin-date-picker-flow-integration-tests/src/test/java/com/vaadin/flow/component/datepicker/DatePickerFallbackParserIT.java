@@ -78,6 +78,17 @@ public class DatePickerFallbackParserIT extends AbstractComponentIT {
         assertInputValue("1/1/2024");
     }
 
+    @Test
+    public void enterShortcutValueThrowingException_enterParsableValue() {
+        datePicker.setInputValue("exception");
+        assertNoValueChange();
+        assertInputValue("exception");
+
+        datePicker.setInputValue("2/2/2000");
+        assertValueChange("", "2000-02-02");
+        assertInputValue("2/2/2000");
+    }
+
     private void assertValueChange(String expectedOldValue,
             String expectedNewValue) {
         List<TestBenchElement> records = valueChangeLog.$("div").all();
