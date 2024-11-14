@@ -135,103 +135,59 @@ public class BasicIT extends AbstractComponentIT {
                 getPanelText("prop-panel"));
     }
 
+    private String LOADING_EDITOR_ATTRIBUTE = "loading-editor";
+
     @Test
-    public void customComboBox_hiddenAnUnhiddenOnEdit() {
+    public void customComboBox_loadingEditorStateOnEdit() {
         var cell = grid.getCell(0, 4);
 
-        var editorHiddenOnEditStart = (Boolean) executeScript(
+        var hasLoadingStateOnEditStart = (Boolean) executeScript(
                 """
-                            const [cell] = arguments;
+                            const [cell, grid, attribute] = arguments;
 
                             // Enter edit mode with double click
                             cell.dispatchEvent(new CustomEvent('dblclick', {composed: true, bubbles: true}));
 
-                            const editor = cell._content.firstElementChild;
-                            // Synchronously check if the editor is hidden
-                            return getComputedStyle(editor).visibility === 'hidden';
+                            return grid.hasAttribute(attribute);
                         """,
-                cell);
+                cell, grid, LOADING_EDITOR_ATTRIBUTE);
         // Expect the editor to be hidden when the edit starts
-        Assert.assertTrue(editorHiddenOnEditStart);
+        Assert.assertTrue(hasLoadingStateOnEditStart);
 
         // After the round trip to the server...
         var editor = cell.$("vaadin-combo-box").first();
         // The editor should be visible
-        Assert.assertTrue(editor.isDisplayed());
+        Assert.assertFalse(grid.hasAttribute(LOADING_EDITOR_ATTRIBUTE));
         // The editor should have focus
         Assert.assertTrue("Editor should have focus",
                 (Boolean) executeScript(
                         "return arguments[0].contains(document.activeElement)",
                         editor));
-        // The editor should not have sibling elements (the placeholder)
-        Assert.assertEquals(1L, executeScript(
-                "return arguments[0].parentElement.children.length", editor));
     }
 
     @Test
-    public void customComboBox_keyDownWhileLoading() {
+    public void customComboBox_loadingEditorStateClearedOnEditStop() {
         var cell = grid.getCell(0, 4);
+        var nonCustomEditorCell = grid.getCell(0, 1);
 
-        var eventsCanceledCorrectly = (Boolean) executeScript(
+        var hasLoadingStateAttribute = (Boolean) executeScript(
                 """
-                            const [cell] = arguments;
+                            const [cell, nonCustomEditorCell, grid, attribute] = arguments;
 
                             // Enter edit mode with double click
                             cell.dispatchEvent(new CustomEvent('dblclick', {composed: true, bubbles: true}));
+                            await new Promise(resolve => requestAnimationFrame(resolve));
 
-                            // Press keys while the editor is loading
-                            const canceledEvent = new KeyboardEvent('keydown', {key: 'ArrowDown', composed: true, bubbles: true, cancelable: true});
-                            const event = new KeyboardEvent('keydown', {key: 'Enter', composed: true, bubbles: true, cancelable: true});
-                            document.activeElement.dispatchEvent(canceledEvent);
-                            document.activeElement.dispatchEvent(event);
+                            // Focus another cell
+                            nonCustomEditorCell.focus();
+                            await new Promise(resolve => requestAnimationFrame(resolve));
 
-                            return canceledEvent.defaultPrevented && !event.defaultPrevented;
-                        """,
-                cell);
-
-        Assert.assertTrue(eventsCanceledCorrectly);
-    }
-
-    @Test
-    public void customComboBox_togglingLoadingEditorCellAttribute() {
-        var cell = grid.getCell(0, 4);
-        var attribute = "loading-editor-cell";
-
-        var hasattributeOnEdit = (Boolean) executeScript(
-                """
-                            const [cell, attribute, grid] = arguments;
-
-                            // Enter edit mode with double click
-                            cell.dispatchEvent(new CustomEvent('dblclick', {composed: true, bubbles: true}));
                             return grid.hasAttribute(attribute);
+
                         """,
-                cell, attribute, grid);
+                cell, nonCustomEditorCell, grid, LOADING_EDITOR_ATTRIBUTE);
 
-        Assert.assertTrue(hasattributeOnEdit);
-
-        // Expect the attribute to be cleared after the server round trip
-        Assert.assertFalse(grid.hasAttribute(attribute));
-    }
-
-    @Test
-    public void customComboBox_togglingLoadingEditorCellAttribute_shouldNotThrow() {
-        var cell = grid.getCell(0, 4);
-        var attribute = "loading-editor-cell";
-
-        executeScript(
-                """
-                            const [cell, attribute, grid] = arguments;
-
-                            // Enter edit mode with double click
-                            cell.dispatchEvent(new CustomEvent('dblclick', {composed: true, bubbles: true}));
-
-                            // Press esc to cancel the edit
-                            const event = new KeyboardEvent('keydown', {key: 'Escape', composed: true, bubbles: true, cancelable: true});
-                            cell.dispatchEvent(event);
-                        """,
-                cell, attribute, grid);
-
-        checkLogsForErrors();
+        Assert.assertFalse(hasLoadingStateAttribute);
     }
 
     @Test
