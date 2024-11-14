@@ -88,23 +88,28 @@ public class MenuItemDisableOnClickIT extends AbstractContextMenuIT {
     }
 
     @Test
-    public void disableMenuItemOnClick_canBeEnabled() {
-        var itemId = "temporarily-disabled-menu-item";
-        getCommandExecutor().disableWaitForVaadin();
+    public void disableOnClick_enableInSameRoundTrip_clientSideMenuItemIsEnabled() {
+        var itemId = "disable-on-click-re-enable-menu-item";
         rightClickOn(TARGET_ID);
-        waitForElementPresent(By.id(itemId));
+        waitUntil(ExpectedConditions
+                .elementToBeClickable(findElement(By.id(itemId))), 2);
         for (int i = 0; i < 3; i++) {
-            clickElementWithJs(itemId);
-            Assert.assertFalse(findElement(By.id(itemId)).isEnabled());
-            waitUntil(ExpectedConditions.elementToBeClickable(By.id(itemId)),
-                    2);
-            Assert.assertTrue(findElement(By.id(itemId)).isEnabled());
+            var menuItem = findElement(By.id(itemId));
+            var disabled = (Boolean) getCommandExecutor().getDriver()
+                    .executeAsyncScript("""
+                            var callback = arguments[arguments.length - 1];
+                            var element = arguments[0];
+                            element.click();
+                            requestAnimationFrame(function() {
+                              callback(element.disabled);
+                            });""", menuItem);
+            Assert.assertTrue(disabled);
+            waitUntil(driver -> findElement(By.id(itemId)).isEnabled());
         }
-        getCommandExecutor().enableWaitForVaadin();
     }
 
     @Test
-    public void removeDisabled_itemWorksNormally() {
+    public void removeDisableOnClick_itemWorksNormally() {
         var itemId = "disable-on-click-menu-item";
         rightClickOn(TARGET_ID);
         waitForElementPresent(By.id(itemId));
@@ -123,28 +128,6 @@ public class MenuItemDisableOnClickIT extends AbstractContextMenuIT {
                 "Disabled on click", true, 2);
         Assert.assertEquals(enabledStateChangeMessage,
                 findElement(By.id("disabled-message")).getText());
-    }
-
-    @Test
-    public void disableOnClick_enableInSameRoundTrip_clientSideMenuItemIsEnabled() {
-        var itemId = "disable-on-click-re-enable-menu-item";
-        rightClickOn(TARGET_ID);
-        waitForElementPresent(By.id(itemId));
-        waitUntil(ExpectedConditions
-                .elementToBeClickable(findElement(By.id(itemId))), 2);
-        for (int i = 0; i < 3; i++) {
-            var menuItem = findElement(By.id(itemId));
-            var disabled = (Boolean) getCommandExecutor().getDriver()
-                    .executeAsyncScript("""
-                            var callback = arguments[arguments.length - 1];
-                            var element = arguments[0];
-                            element.click();
-                            requestAnimationFrame(function() {
-                              callback(element.disabled);
-                            });""", menuItem);
-            Assert.assertTrue(disabled);
-            waitUntil(driver -> findElement(By.id(itemId)).isEnabled());
-        }
     }
 
     @Test
@@ -179,5 +162,42 @@ public class MenuItemDisableOnClickIT extends AbstractContextMenuIT {
         executeScript("arguments[0].dispatchEvent(new MouseEvent(\"click\"));",
                 menuItem);
         Assert.assertFalse(findElement(By.id(itemId)).isEnabled());
+    }
+
+    @Test
+    public void itemDisabledOnClick_detachAndReattach_itemStillDisableOnClick() {
+        var itemId = "disable-on-click-re-enable-menu-item";
+        clickElementWithJs("toggle-keep-open");
+        rightClickOn(TARGET_ID);
+        waitUntil(ExpectedConditions
+                .elementToBeClickable(findElement(By.id(itemId))), 2);
+        Assert.assertTrue(findElement(By.id(itemId)).isEnabled());
+
+        // Detach and reattach
+        clickElementWithJs("remove-re-enable-in-same-round-trip-menu-item");
+        rightClickOn(TARGET_ID);
+        waitForElementPresent(
+                By.id("add-re-enable-in-same-round-trip-menu-item"));
+        waitForElementNotPresent(By.id(itemId));
+        clickElementWithJs("add-re-enable-in-same-round-trip-menu-item");
+        rightClickOn(TARGET_ID);
+        waitForElementPresent(By.id(itemId));
+        Assert.assertTrue(findElement(By.id(itemId)).isEnabled());
+
+        clickBody();
+        verifyClosed();
+        clickElementWithJs("toggle-keep-open");
+        rightClickOn(TARGET_ID);
+        waitForElementPresent(By.id(itemId));
+
+        // Test whether the item is still disable on click
+        getCommandExecutor().disableWaitForVaadin();
+        Assert.assertTrue(findElement(By.id(itemId)).isEnabled());
+        clickElementWithJs(itemId);
+        Assert.assertFalse(findElement(By.id(itemId)).isEnabled());
+        waitUntil(ExpectedConditions
+                .elementToBeClickable(findElement(By.id(itemId))), 2);
+        Assert.assertTrue(findElement(By.id(itemId)).isEnabled());
+        getCommandExecutor().enableWaitForVaadin();
     }
 }

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.shared;
+package com.vaadin.flow.component.shared.internal;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -25,7 +25,8 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 
 /**
- * Controller that handles disabling a component when it is clicked.
+ * An internal controller for handling disabling a component when it is clicked.
+ * Not intended to be used publicly.
  * <p>
  * When {@link #setDisableOnClick(boolean)} is enabled, the component will be
  * immediately disabled upon clicking, both on the client-side and server-side,
@@ -34,11 +35,15 @@ import com.vaadin.flow.component.page.PendingJavaScriptResult;
  * <p>
  * This controller requires that the component implements both
  * {@link HasEnabled} and {@link ClickNotifier}.
+ *
+ * @param <C>
+ *            Type of the component that uses this controller.
  */
 @JsModule("./disableOnClickFunctions.js")
-public class DisableOnClickController implements Serializable {
+public class DisableOnClickController<C extends Component & HasEnabled & ClickNotifier<C>>
+        implements Serializable {
 
-    private final Component component;
+    private final C component;
     private boolean disableOnClick = false;
     private PendingJavaScriptResult initDisableOnClick;
 
@@ -50,26 +55,14 @@ public class DisableOnClickController implements Serializable {
      *
      * @param component
      *            the component to control, not {@code null}
-     * @throws IllegalArgumentException
-     *             if the component does not implement {@link HasEnabled} or
-     *             {@link ClickNotifier}
      */
-    public DisableOnClickController(Component component) {
+    public DisableOnClickController(C component) {
         this.component = Objects.requireNonNull(component);
-        if (!(component instanceof HasEnabled)) {
-            throw new IllegalArgumentException(
-                    "The component has to implement HasEnabled");
-        }
-        if (!(component instanceof ClickNotifier)) {
-            throw new IllegalArgumentException(
-                    "The component has to implement ClickNotifier");
-        }
-        ((ClickNotifier<Component>) component)
-                .addClickListener(itemClickEvent -> {
-                    if (disableOnClick) {
-                        ((HasEnabled) component).setEnabled(false);
-                    }
-                });
+        component.addClickListener(itemClickEvent -> {
+            if (isDisableOnClick()) {
+                component.setEnabled(false);
+            }
+        });
         component.addAttachListener(aAttachEvent -> {
             if (isDisableOnClick()) {
                 initDisableOnClick();
@@ -123,10 +116,17 @@ public class DisableOnClickController implements Serializable {
         component.getElement().executeJs("this.disabled = $0", !enabled);
     }
 
+    /**
+     * Initialize client side disabling so disabled if immediate on click even
+     * if server-side handling takes some time.
+     */
     private void initDisableOnClick() {
         if (initDisableOnClick == null) {
-            initDisableOnClick = component.getElement().executeJs(
-                    "window.Vaadin.Flow.disableOnClick.initDisableOnClick($0)");
+            initDisableOnClick = component.getElement().executeJs("""
+                    const el = $0;
+                    if (el) {
+                      window.Vaadin.Flow.disableOnClick.initDisableOnClick(el);
+                    }""");
             component.getElement().getNode()
                     .runWhenAttached(ui -> ui.beforeClientResponse(component,
                             executionContext -> initDisableOnClick = null));

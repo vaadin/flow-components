@@ -34,11 +34,11 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.shared.DisableOnClickController;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -59,7 +59,7 @@ public class Button extends Component
 
     private Component iconComponent;
     private boolean iconAfterText;
-    private final DisableOnClickController disableOnClickController = new DisableOnClickController(
+    private final DisableOnClickController<Button> disableOnClickController = new DisableOnClickController<>(
             this);
 
     /**

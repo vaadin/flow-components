@@ -17,7 +17,7 @@ package com.vaadin.flow.component.contextmenu;
 
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.shared.DisableOnClickController;
+import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 import com.vaadin.flow.function.SerializableRunnable;
 
 /**
@@ -33,7 +33,7 @@ public class MenuItem extends MenuItemBase<ContextMenu, MenuItem, SubMenu>
         implements ClickNotifier<MenuItem> {
 
     private final SerializableRunnable contentReset;
-    private final DisableOnClickController disableOnClickController = new DisableOnClickController(
+    private final DisableOnClickController<MenuItem> disableOnClickController = new DisableOnClickController<>(
             this);
 
     public MenuItem(ContextMenu contextMenu,

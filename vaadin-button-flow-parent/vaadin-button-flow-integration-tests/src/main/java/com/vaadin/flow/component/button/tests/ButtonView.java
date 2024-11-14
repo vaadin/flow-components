@@ -49,7 +49,7 @@ public class ButtonView extends Div {
         createButtonsWithTabIndex();
         createDisabledButton();
         createButtonWithDisableOnClick();
-        createButtonWithDisableOnClickThatEnablesInSameRoundtrip();
+        createButtonWithDisableOnClickThatEnablesInSameRoundTrip();
         createButtonWithDisableOnClickThatIsHidden();
         createButtonWithDisableOnClickAndPointerEventsAuto();
         addVariantsFeature();
@@ -207,20 +207,6 @@ public class ButtonView extends Div {
         });
         disableOnClickButton.setDisableOnClick(true);
 
-        Button temporarilyDisabledButton = new Button(
-                "Temporarily disabled button", event -> {
-                    try {
-                        // Blocking the user from clicking the button
-                        // multiple times, due to a long running request that
-                        // is not running asynchronously.
-                        Thread.sleep(1500);
-                        event.getSource().setEnabled(true);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                });
-        temporarilyDisabledButton.setDisableOnClick(true);
-
         final Div disabledMessage = new Div();
         disabledMessage.setId("disabled-message");
 
@@ -239,9 +225,6 @@ public class ButtonView extends Div {
         });
         toggle.setId("toggle-button");
 
-        addCard("Button disabled on click", disableOnClickButton, enable,
-                toggle, disabledMessage, new Div(temporarilyDisabledButton));
-
         disableOnClickButton.addClickListener(evt -> disabledMessage
                 .setText("Button " + evt.getSource().getText()
                         + " was clicked and enabled state was changed to "
@@ -249,14 +232,17 @@ public class ButtonView extends Div {
                         + runCount.incrementAndGet() + " clicks"));
 
         disableOnClickButton.setId("disable-on-click-button");
-        temporarilyDisabledButton.setId("temporarily-disabled-button");
         enable.setId("enable-button");
     }
 
-    private void createButtonWithDisableOnClickThatEnablesInSameRoundtrip() {
+    private void createButtonWithDisableOnClickThatEnablesInSameRoundTrip() {
         Button button = new Button(
-                "Disabled on click and re-enabled in same roundtrip", event -> {
+                "Disabled on click and re-enabled in same round-trip",
+                event -> {
                     try {
+                        // Blocking the user from clicking the button
+                        // multiple times, due to a long-running request that
+                        // is not running asynchronously.
                         Thread.sleep(500);
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);

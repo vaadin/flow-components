@@ -290,22 +290,8 @@ public class ButtonIT extends AbstractComponentIT {
         }
     }
 
-    @Test // https://github.com/vaadin/vaadin-button-flow/issues/115
-    public void disableButtonOnClick_canBeEnabled() {
-        var itemId = "temporarily-disabled-button";
-        getCommandExecutor().disableWaitForVaadin();
-        for (int i = 0; i < 3; i++) {
-            clickElementWithJs(itemId);
-            Assert.assertFalse(findElement(By.id(itemId)).isEnabled());
-            waitUntil(ExpectedConditions.elementToBeClickable(By.id(itemId)),
-                    2);
-            Assert.assertTrue(findElement(By.id(itemId)).isEnabled());
-        }
-        getCommandExecutor().enableWaitForVaadin();
-    }
-
     @Test
-    public void removeDisabled_buttonWorksNormally() {
+    public void removeDisableOnClick_buttonWorksNormally() {
         WebElement button = layout
                 .findElement(By.id("disable-on-click-button"));
         Assert.assertTrue(

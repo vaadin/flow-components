@@ -15,21 +15,15 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.SerializableRunnable;
-import com.vaadin.flow.internal.StateNode;
 
 /**
  * Unit tests for MenuItem.
@@ -111,29 +105,6 @@ public class MenuItemTest {
         item.setDisableOnClick(true);
         clickMenuItem(item);
         Assert.assertTrue(item.isEnabled());
-    }
-
-    @Test
-    public void initDisableOnClick_onlyCalledOnceForServerRoundTrip() {
-        SerializableRunnable contentReset = Mockito
-                .mock(SerializableRunnable.class);
-        item = Mockito.mock(MenuItem.class,
-                Mockito.withSettings().useConstructor(contextMenu, contentReset)
-                        .defaultAnswer(Mockito.CALLS_REAL_METHODS));
-
-        Element element = Mockito.mock(Element.class);
-        Mockito.when(item.getElement()).thenReturn(element);
-        Mockito.when(element.executeJs(Mockito.anyString()))
-                .thenReturn(Mockito.mock(PendingJavaScriptInvocation.class));
-        Mockito.when(element.getComponent()).thenReturn(Optional.of(item));
-        Mockito.when(element.getNode()).thenReturn(new StateNode());
-
-        item.setDisableOnClick(true);
-        item.setDisableOnClick(false);
-        item.setDisableOnClick(true);
-
-        Mockito.verify(element, Mockito.times(1)).executeJs(
-                "window.Vaadin.Flow.disableOnClick.initDisableOnClick($0)");
     }
 
     private static void clickMenuItem(MenuItem menuItem) {

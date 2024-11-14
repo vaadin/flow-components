@@ -40,7 +40,6 @@ public class MenuItemDisableOnClickView extends Div {
         addItemWithDisableOnClickThatEnablesInSameRoundTrip();
         addItemWithDisableAndHideOnClick();
         addItemWithDisableOnClickAndPointerEventsAuto();
-        addDetachReattachItem();
         contextMenu.getItems().forEach(item -> item.setKeepOpen(true));
 
         var toggleKeepOpen = new NativeButton("Toggle keep open",
@@ -61,20 +60,6 @@ public class MenuItemDisableOnClickView extends Div {
                     // Triggering an action that can be started only once
                 });
         disableOnClickMenuItem.setDisableOnClick(true);
-
-        var temporarilyDisabledMenuItem = contextMenu
-                .addItem("Temporarily disabled menu item", event -> {
-                    try {
-                        // Blocking the user from clicking the item
-                        // multiple times, due to a long-running request that
-                        // is not running asynchronously.
-                        Thread.sleep(1500);
-                        event.getSource().setEnabled(true);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                });
-        temporarilyDisabledMenuItem.setDisableOnClick(true);
 
         var disabledMessage = new Div();
         disabledMessage.setId("disabled-message");
@@ -102,7 +87,6 @@ public class MenuItemDisableOnClickView extends Div {
                         runCount.incrementAndGet())));
 
         disableOnClickMenuItem.setId("disable-on-click-menu-item");
-        temporarilyDisabledMenuItem.setId("temporarily-disabled-menu-item");
         enable.setId("enable-menu-item");
     }
 
@@ -120,6 +104,18 @@ public class MenuItemDisableOnClickView extends Div {
                 });
         item.setDisableOnClick(true);
         item.setId("disable-on-click-re-enable-menu-item");
+
+        var removeReEnableInSameRoundTripItem = contextMenu.addItem(
+                "Remove re-enable in same round-trip item",
+                event -> contextMenu.remove(item));
+        removeReEnableInSameRoundTripItem
+                .setId("remove-re-enable-in-same-round-trip-menu-item");
+
+        var addReEnableInSameRoundTripItem = contextMenu.addItem(
+                "Add re-enable in same round-trip item",
+                event -> contextMenu.add(item));
+        addReEnableInSameRoundTripItem
+                .setId("add-re-enable-in-same-round-trip-menu-item");
     }
 
     private void addItemWithDisableAndHideOnClick() {
@@ -143,30 +139,5 @@ public class MenuItemDisableOnClickView extends Div {
         item.setDisableOnClick(true);
         item.setDisableOnClick(false);
         item.setId("disable-on-click-pointer-events-auto");
-    }
-
-    private void addDetachReattachItem() {
-        var detachReattachItem = contextMenu.addItem("Detach reattach item",
-                event -> {
-                    try {
-                        Thread.sleep(1500);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    } finally {
-                        event.getSource().setEnabled(true);
-                    }
-                });
-        detachReattachItem.setId("detach-reattach-item");
-        detachReattachItem.setDisableOnClick(true);
-
-        var removeDetachReattachItem = new NativeButton(
-                "Remove detach reattach item",
-                event -> contextMenu.remove(detachReattachItem));
-        removeDetachReattachItem.setId("remove-detach-reattach-item");
-        var addDetachReattachItem = new NativeButton("Add detach reattach item",
-                event -> contextMenu.add(detachReattachItem));
-        addDetachReattachItem.setId("add-detach-reattach-item");
-
-        add(removeDetachReattachItem, addDetachReattachItem);
     }
 }

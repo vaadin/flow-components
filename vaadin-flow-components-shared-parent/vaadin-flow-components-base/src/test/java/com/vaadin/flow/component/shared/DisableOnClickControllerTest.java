@@ -29,6 +29,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.StateNode;
 
@@ -39,20 +40,6 @@ public class DisableOnClickControllerTest {
     @Before
     public void setup() {
         component = new TestComponent();
-    }
-
-    @Test
-    public void componentOnlyImplementsHasEnabled_controllerConstructorThrows() {
-        var hasEnabledComponent = new HasEnabledComponent();
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> new DisableOnClickController(hasEnabledComponent));
-    }
-
-    @Test
-    public void componentOnlyImplementsClickNotifier_controllerConstructorThrows() {
-        var clickNotifierComponent = new ClickNotifierComponent();
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> new DisableOnClickController(clickNotifierComponent));
     }
 
     @Test
@@ -100,14 +87,17 @@ public class DisableOnClickControllerTest {
         component.setDisableOnClick(false);
         component.setDisableOnClick(true);
 
-        Mockito.verify(element, Mockito.times(1)).executeJs(
-                "window.Vaadin.Flow.disableOnClick.initDisableOnClick($0)");
+        Mockito.verify(element, Mockito.times(1)).executeJs("""
+                const el = $0;
+                if (el) {
+                  window.Vaadin.Flow.disableOnClick.initDisableOnClick(el);
+                }""");
     }
 
     @Tag("test")
     private static class TestComponent extends Component
             implements HasEnabled, ClickNotifier<TestComponent> {
-        private final DisableOnClickController disableOnClickController = new DisableOnClickController(
+        private final DisableOnClickController<TestComponent> disableOnClickController = new DisableOnClickController<>(
                 this);
 
         public void setDisableOnClick(boolean disableOnClick) {
@@ -130,15 +120,5 @@ public class DisableOnClickControllerTest {
             HasEnabled.super.setEnabled(enabled);
             disableOnClickController.onSetEnabled(enabled);
         }
-    }
-
-    @Tag("test")
-    private static class ClickNotifierComponent extends Component
-            implements ClickNotifier<TestComponent> {
-    }
-
-    @Tag("test")
-    private static class HasEnabledComponent extends Component
-            implements HasEnabled {
     }
 }
