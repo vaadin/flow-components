@@ -286,6 +286,8 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
                 .filter(log -> log.getLevel().equals(Level.WARNING))
                 .filter(log -> !log.getMessage().contains("deprecated"))
                 .filter(log -> !log.getMessage().contains("Lit is in dev mode"))
+                .filter(log -> !log.getMessage()
+                        .contains("React Router Future Flag Warning"))
                 .collect(Collectors.toList());
     }
 
