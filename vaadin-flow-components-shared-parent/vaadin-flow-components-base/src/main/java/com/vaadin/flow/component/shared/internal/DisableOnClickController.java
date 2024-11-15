@@ -63,7 +63,7 @@ public class DisableOnClickController<C extends Component & HasEnabled & ClickNo
                 component.setEnabled(false);
             }
         });
-        component.addAttachListener(aAttachEvent -> {
+        component.addAttachListener(event -> {
             if (isDisableOnClick()) {
                 initDisableOnClick();
             }
