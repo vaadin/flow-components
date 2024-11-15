@@ -58,7 +58,7 @@ public class DisableOnClickController<C extends Component & HasEnabled & ClickNo
      */
     public DisableOnClickController(C component) {
         this.component = Objects.requireNonNull(component);
-        component.addClickListener(itemClickEvent -> {
+        component.addClickListener(event -> {
             if (isDisableOnClick()) {
                 component.setEnabled(false);
             }
