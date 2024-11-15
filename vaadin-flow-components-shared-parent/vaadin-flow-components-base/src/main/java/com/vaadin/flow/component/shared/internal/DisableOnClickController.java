@@ -22,7 +22,6 @@ import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.page.PendingJavaScriptResult;
 
 /**
  * An internal controller for handling disabling a component when it is clicked.
@@ -45,13 +44,10 @@ public class DisableOnClickController<C extends Component & HasEnabled & ClickNo
 
     private final C component;
     private boolean disableOnClick = false;
-    private PendingJavaScriptResult initDisableOnClick;
+    private boolean initializedInCurrentRoundTrip;
 
     /**
      * Creates a new controller for the given component.
-     * <p>
-     * The component must implement {@link HasEnabled} and
-     * {@link ClickNotifier}.
      *
      * @param component
      *            the component to control, not {@code null}
@@ -61,11 +57,6 @@ public class DisableOnClickController<C extends Component & HasEnabled & ClickNo
         component.addClickListener(event -> {
             if (isDisableOnClick()) {
                 component.setEnabled(false);
-            }
-        });
-        component.addAttachListener(event -> {
-            if (isDisableOnClick()) {
-                initDisableOnClick();
             }
         });
     }
@@ -83,10 +74,10 @@ public class DisableOnClickController<C extends Component & HasEnabled & ClickNo
     public void setDisableOnClick(boolean disableOnClick) {
         this.disableOnClick = disableOnClick;
         if (disableOnClick) {
-            component.getElement().setAttribute("disable-on-click", "true");
+            component.getElement().setProperty("disableOnClick", "true");
             initDisableOnClick();
         } else {
-            component.getElement().removeAttribute("disableOnClick");
+            component.getElement().removeProperty("disableOnClick");
         }
     }
 
@@ -121,15 +112,21 @@ public class DisableOnClickController<C extends Component & HasEnabled & ClickNo
      * if server-side handling takes some time.
      */
     private void initDisableOnClick() {
-        if (initDisableOnClick == null) {
-            initDisableOnClick = component.getElement().executeJs("""
-                    const el = $0;
-                    if (el) {
-                      window.Vaadin.Flow.disableOnClick.initDisableOnClick(el);
-                    }""");
-            component.getElement().getNode()
-                    .runWhenAttached(ui -> ui.beforeClientResponse(component,
-                            executionContext -> initDisableOnClick = null));
+        if (initializedInCurrentRoundTrip) {
+            return;
         }
+        initializedInCurrentRoundTrip = true;
+        if (component.isAttached()) {
+            doInitDisableOnClick();
+        }
+        component.addAttachListener(event -> {
+            doInitDisableOnClick();
+            initializedInCurrentRoundTrip = false;
+        });
+    }
+
+    private void doInitDisableOnClick() {
+        component.getElement().executeJs(
+                "window.Vaadin.Flow.disableOnClick.initDisableOnClick(this);");
     }
 }

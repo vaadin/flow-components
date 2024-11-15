@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.shared;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Assert;
@@ -28,12 +27,15 @@ import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.internal.StateNode;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
 
 public class DisableOnClickControllerTest {
+
+    private static final String INIT_DISABLE_ON_CLICK_JS = "window.Vaadin.Flow.disableOnClick.initDisableOnClick(this);";
 
     private TestComponent component;
 
@@ -43,8 +45,21 @@ public class DisableOnClickControllerTest {
     }
 
     @Test
+    public void disableOnClickFalseByDefault() {
+        Assert.assertFalse(component.isDisableOnClick());
+    }
+
+    @Test
+    public void setDisableOnClick_disableOnClickUpdated() {
+        component.setDisableOnClick(true);
+        Assert.assertTrue(component.isDisableOnClick());
+        component.setDisableOnClick(false);
+        Assert.assertFalse(component.isDisableOnClick());
+    }
+
+    @Test
     public void disableOnClickNotSetUp_click_componentIsStillEnabled() {
-        AtomicBoolean componentIsEnabled = new AtomicBoolean(true);
+        var componentIsEnabled = new AtomicBoolean(true);
         component.addClickListener(
                 event -> componentIsEnabled.set(event.getSource().isEnabled()));
         component.click();
@@ -53,7 +68,7 @@ public class DisableOnClickControllerTest {
 
     @Test
     public void setDisableOnClick_click_componentIsDisabled() {
-        AtomicBoolean componentIsEnabled = new AtomicBoolean(true);
+        var componentIsEnabled = new AtomicBoolean(true);
         component.addClickListener(
                 event -> componentIsEnabled.set(event.getSource().isEnabled()));
         component.setDisableOnClick(true);
@@ -70,28 +85,75 @@ public class DisableOnClickControllerTest {
     }
 
     @Test
-    public void initDisableOnClick_onlyCalledOnceForSeverRoundTrip() {
-        final Element element = Mockito.mock(Element.class);
-        StateNode node = new StateNode();
-        component = Mockito.spy(TestComponent.class);
+    public void itemNotDisableOnClick_attach_initNotCalled() {
+        var spiedElement = getSpiedElement();
 
-        Mockito.when(component.getElement()).thenReturn(element);
+        var ui = initUi();
+        ui.add(component);
+        fakeClientCommunication(ui);
+        Assert.assertTrue(component.isAttached());
 
-        Mockito.when(element.executeJs(Mockito.anyString()))
-                .thenReturn(Mockito.mock(PendingJavaScriptInvocation.class));
-        Mockito.when(element.getComponent()).thenReturn(Optional.of(component));
-        Mockito.when(element.getParent()).thenReturn(null);
-        Mockito.when(element.getNode()).thenReturn(node);
+        Mockito.verify(spiedElement, Mockito.never())
+                .executeJs(INIT_DISABLE_ON_CLICK_JS);
+    }
+
+    @Test
+    public void itemDisableOnClick_notAttached_initNotCalled() {
+        var spiedElement = getSpiedElement();
+
+        component.setDisableOnClick(true);
+
+        var ui = initUi();
+        fakeClientCommunication(ui);
+
+        Mockito.verify(spiedElement, Mockito.never())
+                .executeJs(INIT_DISABLE_ON_CLICK_JS);
+    }
+
+    @Test
+    public void itemAlreadyAttached_setDisableOnClickMultipleTimesInRoundTrip_initCalledOnce() {
+        var spiedElement = getSpiedElement();
+
+        var ui = initUi();
+        ui.add(component);
+        fakeClientCommunication(ui);
+        Assert.assertTrue(component.isAttached());
 
         component.setDisableOnClick(true);
         component.setDisableOnClick(false);
         component.setDisableOnClick(true);
+        fakeClientCommunication(ui);
 
-        Mockito.verify(element, Mockito.times(1)).executeJs("""
-                const el = $0;
-                if (el) {
-                  window.Vaadin.Flow.disableOnClick.initDisableOnClick(el);
-                }""");
+        Mockito.verify(spiedElement, Mockito.times(1))
+                .executeJs(INIT_DISABLE_ON_CLICK_JS);
+    }
+
+    private UI initUi() {
+        var ui = new UI();
+        UI.setCurrent(ui);
+        var session = Mockito.mock(VaadinSession.class);
+        ui.getInternals().setSession(session);
+        var service = Mockito.mock(VaadinService.class);
+        Mockito.when(session.getService()).thenReturn(service);
+        return ui;
+    }
+
+    private void fakeClientCommunication(UI ui) {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
+    }
+
+    private Element getSpiedElement() {
+        var spiedElement = Mockito.spy(component.getElement());
+        try {
+            var elementField = Component.class.getDeclaredField("element");
+            elementField.setAccessible(true);
+            elementField.set(component, spiedElement);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return spiedElement;
     }
 
     @Tag("test")

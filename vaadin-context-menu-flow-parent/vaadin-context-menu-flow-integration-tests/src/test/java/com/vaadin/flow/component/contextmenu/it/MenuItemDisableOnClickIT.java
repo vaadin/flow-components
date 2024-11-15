@@ -194,7 +194,7 @@ public class MenuItemDisableOnClickIT extends AbstractContextMenuIT {
         getCommandExecutor().disableWaitForVaadin();
         Assert.assertTrue(findElement(By.id(itemId)).isEnabled());
         clickElementWithJs(itemId);
-        Assert.assertFalse(findElement(By.id(itemId)).isEnabled());
+        waitUntil(driver -> !findElement(By.id(itemId)).isEnabled(), 2);
         waitUntil(ExpectedConditions
                 .elementToBeClickable(findElement(By.id(itemId))), 2);
         Assert.assertTrue(findElement(By.id(itemId)).isEnabled());
