@@ -328,22 +328,16 @@ public class ButtonIT extends AbstractComponentIT {
     @Test
     public void disableOnClick_enableInSameRoundTrip_clientSideButtonIsEnabled() {
         var itemId = "disable-on-click-re-enable-button";
-        waitForElementPresent(By.id(itemId));
-        waitUntil(ExpectedConditions
-                .elementToBeClickable(findElement(By.id(itemId))), 2);
+        getCommandExecutor().disableWaitForVaadin();
+        var button = findElement(By.id(itemId));
         for (int i = 0; i < 3; i++) {
-            var button = findElement(By.id(itemId));
-            var disabled = (Boolean) getCommandExecutor().getDriver()
-                    .executeAsyncScript("""
-                            var callback = arguments[arguments.length - 1];
-                            var element = arguments[0];
-                            element.click();
-                            requestAnimationFrame(function() {
-                              callback(element.disabled);
-                            });""", button);
-            Assert.assertTrue(disabled);
-            waitUntil(driver -> findElement(By.id(itemId)).isEnabled());
+            button.click();
+            getCommandExecutor().getDriver()
+                    .executeAsyncScript("requestAnimationFrame(arguments[0])");
+            Assert.assertFalse(button.isEnabled());
+            waitUntil(driver -> button.isEnabled());
         }
+        getCommandExecutor().enableWaitForVaadin();
     }
 
     @Test
