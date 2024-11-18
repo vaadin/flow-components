@@ -24,6 +24,10 @@ import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.shared.HasClientValidation.ClientValidatedEvent;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
+
+import elemental.json.Json;
 
 /**
  * An abstract class that provides tests verifying that a component correctly
@@ -44,6 +48,15 @@ public abstract class AbstractBasicValidationTest<C extends AbstractField<C, V> 
 
         ComponentUtil.fireEvent(testField, new ComponentValueChangeEvent<>(
                 testField, testField, testField.getEmptyValue(), false));
+        Assert.assertFalse(testField.isInvalid());
+    }
+
+    @Test
+    public void setRequired_setManualValidation_fireUnparsableChangeEvent_noValidation() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setManualValidation(true);
+
+        fireUnparsableChangeDomEvent();
         Assert.assertFalse(testField.isInvalid());
     }
 
@@ -82,4 +95,11 @@ public abstract class AbstractBasicValidationTest<C extends AbstractField<C, V> 
     }
 
     protected abstract C createTestField();
+
+    private void fireUnparsableChangeDomEvent() {
+        DomEvent unparsableChangeDomEvent = new DomEvent(testField.getElement(),
+                "unparsable-change", Json.createObject());
+        testField.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(unparsableChangeDomEvent);
+    }
 }
