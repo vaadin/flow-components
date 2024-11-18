@@ -15,10 +15,14 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasAriaLabel;
 
 /**
@@ -82,4 +86,29 @@ public class MenuItemTest {
         Assert.assertTrue(item.getAriaLabelledBy().isEmpty());
     }
 
+    @Test
+    public void disableOnClick_click_componentIsDisabled() {
+        AtomicBoolean itemIsEnabled = new AtomicBoolean(true);
+
+        item = contextMenu.addItem("foo",
+                event -> itemIsEnabled.set(event.getSource().isEnabled()));
+        item.setDisableOnClick(true);
+        clickMenuItem(item);
+
+        Assert.assertFalse(itemIsEnabled.get());
+    }
+
+    @Test
+    public void disableOnClick_clickRevertsDisabled_componentIsEnabled() {
+        item = contextMenu.addItem("foo",
+                event -> event.getSource().setEnabled(true));
+        item.setDisableOnClick(true);
+        clickMenuItem(item);
+        Assert.assertTrue(item.isEnabled());
+    }
+
+    private static void clickMenuItem(MenuItem menuItem) {
+        ComponentUtil.fireEvent(menuItem, new ClickEvent<>(menuItem, false, 0,
+                0, 0, 0, 0, 0, false, false, false, false));
+    }
 }

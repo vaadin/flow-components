@@ -20,7 +20,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
@@ -35,13 +34,12 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.shared.Registration;
 
 /**
  * The Button component allows users to perform actions. It comes in several
@@ -54,7 +52,6 @@ import com.vaadin.flow.shared.Registration;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/button", version = "24.6.0-alpha8")
 @JsModule("@vaadin/button/src/vaadin-button.js")
-@JsModule("./buttonFunctions.js")
 public class Button extends Component
         implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,
         HasEnabled, HasPrefix, HasSize, HasStyle, HasSuffix, HasText,
@@ -62,16 +59,8 @@ public class Button extends Component
 
     private Component iconComponent;
     private boolean iconAfterText;
-    private boolean disableOnClick = false;
-    private PendingJavaScriptResult initDisableOnClick;
-
-    // Register immediately as first listener
-    private final Registration disableListener = addClickListener(
-            buttonClickEvent -> {
-                if (disableOnClick) {
-                    setEnabled(false);
-                }
-            });
+    private final DisableOnClickController<Button> disableOnClickController = new DisableOnClickController<>(
+            this);
 
     /**
      * Default constructor. Creates an empty button.
@@ -330,55 +319,32 @@ public class Button extends Component
     }
 
     /**
-     * Set the button so that it is disabled on click.
+     * Sets whether the button should be disabled when clicked.
      * <p>
-     * Enabling the button needs to happen from the server.
+     * When set to {@code true}, the button will be immediately disabled on the
+     * client-side when clicked, preventing further clicks until re-enabled from
+     * the server-side.
      *
      * @param disableOnClick
-     *            true to disable button immediately when clicked
+     *            whether the button should be disabled when clicked
      */
     public void setDisableOnClick(boolean disableOnClick) {
-        this.disableOnClick = disableOnClick;
-        if (disableOnClick) {
-            getElement().setAttribute("disableOnClick", "true");
-            initDisableOnClick();
-        } else {
-            getElement().removeAttribute("disableOnClick");
-        }
+        disableOnClickController.setDisableOnClick(disableOnClick);
     }
 
     /**
-     * Get if button is set to be disabled on click.
+     * Gets whether the button is set to be disabled when clicked.
      *
-     * @return {@code true} if button gets disabled on click, else {@code false}
+     * @return whether button is set to be disabled on click
      */
     public boolean isDisableOnClick() {
-        return disableOnClick;
-    }
-
-    /**
-     * Initialize client side disabling so disabled if immediate on click even
-     * if server-side handling takes some time.
-     */
-    private void initDisableOnClick() {
-        if (initDisableOnClick == null) {
-            initDisableOnClick = getElement().executeJs(
-                    "window.Vaadin.Flow.button.initDisableOnClick($0)");
-            getElement().getNode()
-                    .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                            executionContext -> this.initDisableOnClick = null));
-        }
+        return disableOnClickController.isDisableOnClick();
     }
 
     @Override
     public void setEnabled(boolean enabled) {
         Focusable.super.setEnabled(enabled);
-        // Force updating the disabled state on the client
-        // When using disable on click, the client side will immediately
-        // run JS to disable the button. If the button is then disabled and
-        // re-enabled during the same round trip, Flow will not detect any
-        // changes and the client side button would not be enabled again.
-        getElement().executeJs("this.disabled = $0", !enabled);
+        disableOnClickController.onSetEnabled(enabled);
     }
 
     private void updateIconSlot() {
@@ -442,13 +408,6 @@ public class Button extends Component
             getThemeNames().add("icon");
         } else {
             getThemeNames().remove("icon");
-        }
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        if (isDisableOnClick()) {
-            initDisableOnClick();
         }
     }
 }
