@@ -738,6 +738,21 @@ public class DatePicker
         return fallbackParser;
     }
 
+    private Result<LocalDate> runFallbackParser(String s) {
+        Result<LocalDate> result = null;
+
+        try {
+            result = fallbackParser.apply(s);
+        } catch (Exception e) {
+            LoggerFactory.getLogger(DatePicker.class)
+                    .error("Fallback parser threw an exception", e);
+            result = Result.error(getI18nErrorMessage(
+                    DatePickerI18n::getBadInputErrorMessage));
+        }
+
+        return Objects.requireNonNull(result, "Result cannot be null");
+    }
+
     @Override
     public void setValue(LocalDate value) {
         LocalDate oldValue = getValue();
@@ -778,11 +793,10 @@ public class DatePicker
 
             boolean isInputUnparsable = fromClient && newModelValue == null
                     && isInputValuePresent();
-            if (fallbackParser != null && isInputUnparsable) {
-                Result<LocalDate> result = fallbackParser
-                        .apply(getInputElementValue());
-                Objects.requireNonNull(result, "Result cannot be null");
 
+            if (fallbackParser != null && isInputUnparsable) {
+                Result<LocalDate> result = runFallbackParser(
+                        getInputElementValue());
                 if (result.isError()) {
                     fallbackParserErrorMessage = result.getMessage()
                             .orElse(null);

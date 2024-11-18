@@ -40,6 +40,8 @@ public class FallbackParserValidationTest {
         datePicker.setFallbackParser((s) -> {
             if (s.equals("tomorrow")) {
                 return Result.ok(LocalDate.now().plusDays(1));
+            } else if (s.equals("exception")) {
+                throw new RuntimeException("Exception in fallback parser");
             } else {
                 return Result.error("Invalid date format");
             }
@@ -47,7 +49,7 @@ public class FallbackParserValidationTest {
     }
 
     @Test
-    public void enterShortcutValue_noErrorMessageDisplayed() {
+    public void enterShortcutValue_isValid() {
         fakeClientPropertyChange(datePicker, "_inputElementValue", "tomorrow");
         fakeClientDomEvent(datePicker, "unparsable-change");
 
@@ -56,7 +58,16 @@ public class FallbackParserValidationTest {
     }
 
     @Test
-    public void enterUnparsableValue_fallbackParserErrorMessageDisplayed() {
+    public void enterShortcutValueThrowingException_isInvalidWithoutErrorMessage() {
+        fakeClientPropertyChange(datePicker, "_inputElementValue", "exception");
+        fakeClientDomEvent(datePicker, "unparsable-change");
+
+        Assert.assertTrue(datePicker.isInvalid());
+        Assert.assertEquals("", datePicker.getErrorMessage());
+    }
+
+    @Test
+    public void enterUnparsableValue_isInvalidWithFallbackParserErrorMessage() {
         fakeClientPropertyChange(datePicker, "_inputElementValue", "foobar");
         fakeClientDomEvent(datePicker, "unparsable-change");
 
@@ -66,7 +77,7 @@ public class FallbackParserValidationTest {
     }
 
     @Test
-    public void setValue_enterShortcutValue_noErrorMessageDisplayed() {
+    public void setValue_enterShortcutValue_isValid() {
         datePicker.setValue(LocalDate.now());
 
         fakeClientPropertyChange(datePicker, "_inputElementValue", "tomorrow");
@@ -77,7 +88,7 @@ public class FallbackParserValidationTest {
     }
 
     @Test
-    public void setValue_enterUnparsableValue_fallbackParserErrorMessageDisplayed() {
+    public void setValue_enterUnparsableValue_isInvalidWithFallbackParserErrorMessage() {
         datePicker.setValue(LocalDate.now());
 
         fakeClientPropertyChange(datePicker, "_inputElementValue", "foobar");
@@ -89,7 +100,19 @@ public class FallbackParserValidationTest {
     }
 
     @Test
-    public void setI18nErrorMessage_enterUnparsableValue_fallbackParserErrorMessageDisplayed() {
+    public void setI18nErrorMessage_enterShortcutValueThrowingException_isInvalidWithI18nErrorMessage() {
+        datePicker.setI18n(new DatePickerI18n()
+                .setBadInputErrorMessage("I18n error message"));
+
+        fakeClientPropertyChange(datePicker, "_inputElementValue", "exception");
+        fakeClientDomEvent(datePicker, "unparsable-change");
+
+        Assert.assertTrue(datePicker.isInvalid());
+        Assert.assertEquals("I18n error message", datePicker.getErrorMessage());
+    }
+
+    @Test
+    public void setI18nErrorMessage_enterUnparsableValue_isInvalidWithFallbackParserErrorMessage() {
         datePicker.setI18n(new DatePickerI18n()
                 .setBadInputErrorMessage("I18n error message"));
 
@@ -102,7 +125,7 @@ public class FallbackParserValidationTest {
     }
 
     @Test
-    public void setI18nErrorMessage_removeFallbackParser_enterUnparsableValue_i18nErrorMessageDisplayed() {
+    public void setI18nErrorMessage_removeFallbackParser_enterUnparsableValue_isInvalidWithI18nErrorMessage() {
         datePicker.setI18n(new DatePickerI18n()
                 .setBadInputErrorMessage("I18n error message"));
 
