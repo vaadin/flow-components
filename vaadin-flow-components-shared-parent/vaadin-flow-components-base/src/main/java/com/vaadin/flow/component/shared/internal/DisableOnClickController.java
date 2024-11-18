@@ -44,7 +44,7 @@ public class DisableOnClickController<C extends Component & HasEnabled & ClickNo
 
     private final C component;
     private boolean disableOnClick = false;
-    private boolean initializedInCurrentRoundTrip;
+    private boolean disableOnClickInitialized;
 
     /**
      * Creates a new controller for the given component.
@@ -75,7 +75,7 @@ public class DisableOnClickController<C extends Component & HasEnabled & ClickNo
         this.disableOnClick = disableOnClick;
         if (disableOnClick) {
             component.getElement().setProperty("disableOnClick", "true");
-            initDisableOnClick();
+            ensureDisableOnClickInitialized();
         } else {
             component.getElement().removeProperty("disableOnClick");
         }
@@ -111,21 +111,18 @@ public class DisableOnClickController<C extends Component & HasEnabled & ClickNo
      * Initialize client side disabling so disabled if immediate on click even
      * if server-side handling takes some time.
      */
-    private void initDisableOnClick() {
-        if (initializedInCurrentRoundTrip) {
+    private void ensureDisableOnClickInitialized() {
+        if (disableOnClickInitialized) {
             return;
         }
-        initializedInCurrentRoundTrip = true;
+        disableOnClickInitialized = true;
         if (component.isAttached()) {
-            doInitDisableOnClick();
+            initDisableOnClick();
         }
-        component.addAttachListener(event -> {
-            doInitDisableOnClick();
-            initializedInCurrentRoundTrip = false;
-        });
+        component.addAttachListener(event -> initDisableOnClick());
     }
 
-    private void doInitDisableOnClick() {
+    private void initDisableOnClick() {
         component.getElement().executeJs(
                 "window.Vaadin.Flow.disableOnClick.initDisableOnClick(this);");
     }
