@@ -399,6 +399,59 @@ public class TextArea extends TextFieldBase<TextArea, String>
         return getElement().getProperty("pattern");
     }
 
+    /**
+     * The minimum number of rows to show.
+     *
+     * @return the minimum number of rows
+     */
+    public int getMinRows() {
+        return getElement().getProperty("minRows", 2);
+    }
+
+    /**
+     * Sets the minimum number of rows to show. Default is two rows.
+     *
+     * @param minRows
+     *            the minimum number of rows to show
+     */
+    public void setMinRows(int minRows) {
+        getElement().setProperty("minRows", minRows);
+    }
+
+    /**
+     * Maximum number of rows to expand to before the component starts
+     * scrolling.
+     *
+     * @return the maximum number of rows, or {@code null} if the maximum has
+     *         not been set
+     */
+    public Integer getMaxRows() {
+        String maxRows = getElement().getProperty("maxRows");
+        if (maxRows != null && !maxRows.isEmpty()) {
+            return Integer.parseInt(maxRows);
+        }
+
+        return null;
+    }
+
+    /**
+     * Sets the maximum number of rows to expand to before the component starts
+     * scrolling. This effectively sets a max-height on the {@code input-field}
+     * part. By default, the value is {@code null}, which means the component
+     * grows with the content without constraints.
+     *
+     * @param maxRows
+     *            the maximum number of rows, or {@code null} to remove the
+     *            maximum
+     */
+    public void setMaxRows(Integer maxRows) {
+        if (maxRows != null) {
+            getElement().setProperty("maxRows", maxRows);
+        } else {
+            getElement().setProperty("maxRows", null);
+        }
+    }
+
     @Override
     public String getEmptyValue() {
         return "";
