@@ -14,16 +14,19 @@ public class ColorConverterUtil implements Serializable {
 
     public static String toRGBA(byte[] argb) {
         int rgba[] = new int[3];
-        for (int i = 1; i < argb.length; i++) {
+        boolean hasAlpha = argb.length == 4;
+        float alpha = hasAlpha ? argb[0] : 1.0f;
+        int channelOffset = hasAlpha ? 1 : 0;
+
+        for (int i = channelOffset; i < argb.length; i++) {
             int x = argb[i];
             if (x < 0) {
                 x += 256;
             }
-            rgba[i - 1] = x;
+            rgba[i - channelOffset] = x;
         }
 
-        float x = argb[0];
-        return buildRgba(rgba, x);
+        return buildRgba(rgba, alpha);
     }
 
     public static String toRGBA(String hexARGB) {
