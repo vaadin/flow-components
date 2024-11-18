@@ -185,6 +185,12 @@ public class GridPro<E> extends Grid<E> {
     /**
      * Server-side component for the {@code <vaadin-grid-edit-column>} element.
      *
+     * <p>
+     * By default, every added column sends data to the client side regardless
+     * of its visibility state. To avoid sending extra data, either remove the
+     * column using {@link #removeColumn(Column)} or use
+     * {@link Column#setGenerateDataWhenHidden(boolean)}.
+     *
      * @param <T>
      *            type of the underlying grid this column is compatible with
      */

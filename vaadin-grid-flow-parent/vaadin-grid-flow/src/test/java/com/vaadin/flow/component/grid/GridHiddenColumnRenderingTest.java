@@ -17,6 +17,8 @@ package com.vaadin.flow.component.grid;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import org.junit.After;
@@ -48,7 +50,7 @@ public class GridHiddenColumnRenderingTest {
     public void setup() {
         ui = new UI();
         UI.setCurrent(ui);
-        VaadinSession session = Mockito.mock(VaadinSession.class);
+        var session = Mockito.mock(VaadinSession.class);
         Mockito.when(session.hasLock()).thenReturn(true);
         ui.getInternals().setSession(session);
         grid = new Grid<>();
@@ -64,168 +66,214 @@ public class GridHiddenColumnRenderingTest {
     }
 
     @Test
-    public void columnWithValueProvider_rendererCalledOncePerItem() {
-        addColumnWithValueProvider();
-        initiallyVisibleColumn_assertRendererCalledOncePerItem();
+    public void generateDataWhenHiddenTrueByDefault() {
+        var column = grid.addColumn(s -> s);
+        Assert.assertTrue(column.isGenerateDataWhenHidden());
     }
 
     @Test
-    public void initiallyHiddenColumnWithValueProvider_rendererNotCalled() {
-        Grid.Column<String> column = addColumnWithValueProvider();
-        initiallyHiddenColumn_assertRendererNotCalled(column);
+    public void setGenerateDataWhenHidden_valueIsCorrectlySet() {
+        var column = grid.addColumn(s -> s).setGenerateDataWhenHidden(false);
+        Assert.assertFalse(column.isGenerateDataWhenHidden());
+        column.setGenerateDataWhenHidden(true);
+        Assert.assertTrue(column.isGenerateDataWhenHidden());
     }
 
     @Test
-    public void columnWithValueProvider_setHidden_rendererNotCalled() {
-        Grid.Column<String> column = addColumnWithValueProvider();
-        initiallyVisibleColumn_setHidden_assertRendererNotCalled(column);
+    public void dataGeneratorCalledOncePerItem() {
+        runTestCodeForMultipleColumns(column -> {
+            fakeClientCommunication();
+            assertCalledOncePerItem();
+        });
     }
 
     @Test
-    public void initiallyHiddenColumnWithValueProvider_setVisible_rendererCalledOncePerItem() {
-        Grid.Column<String> column = addColumnWithValueProvider();
-        initiallyHiddenColumn_setVisible_assertRendererCalledOncePerItem(
-                column);
+    public void setGenerateDataWhenHiddenFalse_dataGeneratorCalledOncePerItem() {
+        runTestCodeForMultipleColumns(column -> {
+            column.setGenerateDataWhenHidden(false);
+            fakeClientCommunication();
+            assertCalledOncePerItem();
+        });
     }
 
     @Test
-    public void columnWithValueProvider_toggleHiddenTwiceInRoundTrip_rendererCalledOncePerItem() {
-        Grid.Column<String> column = addColumnWithValueProvider();
-        initiallyVisibleColumn_toggleHiddenTwiceInRoundTrip_assertRendererCalledOncePerItem(
-                column);
+    public void initiallyHiddenColumn_dataGeneratorCalledOncePerItem() {
+        runTestCodeForMultipleColumns(column -> {
+            column.setVisible(false);
+            fakeClientCommunication();
+            assertCalledOncePerItem();
+        });
     }
 
     @Test
-    public void initiallyHiddenColumnWithValueProvider_toggleHiddenTwiceInRoundTrip_rendererNotCalled() {
-        Grid.Column<String> column = addColumnWithValueProvider();
-        initiallyHiddenColumn_toggleHiddenTwiceInRoundTrip_assertRendererNotCalled(
-                column);
+    public void initiallyHiddenColumn_setGenerateDataWhenHiddenFalse_dataGeneratorNotCalled() {
+        runTestCodeForMultipleColumns(column -> {
+            column.setVisible(false);
+            fakeClientCommunication();
+            resetCallCount();
+            column.setGenerateDataWhenHidden(false);
+            fakeClientCommunication();
+            assertNotCalled();
+        });
     }
 
     @Test
-    public void componentColumn_rendererCalledOncePerItem() {
-        addComponentColumn();
-        initiallyVisibleColumn_assertRendererCalledOncePerItem();
+    public void setHidden_dataGeneratorNotCalled() {
+        runTestCodeForMultipleColumns(column -> {
+            fakeClientCommunication();
+            resetCallCount();
+            column.setVisible(false);
+            fakeClientCommunication();
+            assertNotCalled();
+        });
     }
 
     @Test
-    public void initiallyHiddenComponentColumn_rendererNotCalled() {
-        Grid.Column<String> column = addComponentColumn();
-        initiallyHiddenColumn_assertRendererNotCalled(column);
+    public void setGenerateDataWhenHiddenFalse_setHidden_dataGeneratorNotCalled() {
+        runTestCodeForMultipleColumns(column -> {
+            column.setGenerateDataWhenHidden(false);
+            fakeClientCommunication();
+            resetCallCount();
+            column.setVisible(false);
+            fakeClientCommunication();
+            assertNotCalled();
+        });
     }
 
     @Test
-    public void componentColumn_setHidden_rendererNotCalled() {
-        Grid.Column<String> column = addComponentColumn();
-        initiallyVisibleColumn_setHidden_assertRendererNotCalled(column);
+    public void initiallyHiddenColumn_setVisible_dataGeneratorNotCalled() {
+        runTestCodeForMultipleColumns(column -> {
+            column.setVisible(false);
+            fakeClientCommunication();
+            resetCallCount();
+            column.setVisible(true);
+            fakeClientCommunication();
+            assertNotCalled();
+        });
     }
 
     @Test
-    public void initiallyHiddenComponentColumn_setVisible_rendererCalledOncePerItem() {
-        Grid.Column<String> column = addComponentColumn();
-        initiallyHiddenColumn_setVisible_assertRendererCalledOncePerItem(
-                column);
+    public void initiallyHiddenColumn_setGenerateDataWhenHiddenFalse_setVisible_dataGeneratorCalledOncePerItem() {
+        runTestCodeForMultipleColumns(column -> {
+            column.setGenerateDataWhenHidden(false);
+            column.setVisible(false);
+            fakeClientCommunication();
+            column.setVisible(true);
+            fakeClientCommunication();
+            assertCalledOncePerItem();
+        });
     }
 
     @Test
-    public void componentColumn_toggleHiddenTwiceInRoundTrip_rendererCalledOncePerItem() {
-        Grid.Column<String> column = addComponentColumn();
-        initiallyVisibleColumn_toggleHiddenTwiceInRoundTrip_assertRendererCalledOncePerItem(
-                column);
+    public void toggleHiddenTwiceInRoundTrip_dataGeneratorNotCalled() {
+        runTestCodeForMultipleColumns(column -> {
+            fakeClientCommunication();
+            column.setVisible(false);
+            column.setVisible(true);
+            resetCallCount();
+            fakeClientCommunication();
+            assertNotCalled();
+        });
     }
 
     @Test
-    public void initiallyHiddenComponentColumn_toggleHiddenTwiceInRoundTrip_rendererNotCalled() {
-        Grid.Column<String> column = addComponentColumn();
-        initiallyHiddenColumn_toggleHiddenTwiceInRoundTrip_assertRendererNotCalled(
-                column);
+    public void setGenerateDataWhenHiddenFalse_toggleHiddenTwiceInRoundTrip_dataGeneratorCalledOncePerItem() {
+        runTestCodeForMultipleColumns(column -> {
+            column.setGenerateDataWhenHidden(false);
+            fakeClientCommunication();
+            column.setVisible(false);
+            column.setVisible(true);
+            resetCallCount();
+            fakeClientCommunication();
+            assertCalledOncePerItem();
+        });
     }
 
     @Test
-    public void columnWithCustomRenderer_rendererCalledOncePerItem() {
-        addColumnWithCustomRenderer();
-        initiallyVisibleColumn_assertRendererCalledOncePerItem();
+    public void initiallyHiddenColumn_toggleHiddenTwiceInRoundTrip_dataGeneratorNotCalled() {
+        runTestCodeForMultipleColumns(column -> {
+            column.setVisible(false);
+            fakeClientCommunication();
+            resetCallCount();
+            column.setVisible(true);
+            column.setVisible(false);
+            fakeClientCommunication();
+            assertNotCalled();
+        });
     }
 
     @Test
-    public void initiallyHiddenColumnWithCustomRenderer_rendererNotCalled() {
-        Grid.Column<String> column = addColumnWithCustomRenderer();
-        initiallyHiddenColumn_assertRendererNotCalled(column);
+    public void initiallyHiddenColumn_setGenerateDataWhenHiddenFalse_toggleHiddenTwiceInRoundTrip_dataGeneratorNotCalled() {
+        runTestCodeForMultipleColumns(column -> {
+            column.setVisible(false);
+            fakeClientCommunication();
+            resetCallCount();
+            column.setGenerateDataWhenHidden(false);
+            column.setVisible(true);
+            column.setVisible(false);
+            fakeClientCommunication();
+            assertNotCalled();
+        });
     }
 
     @Test
-    public void columnWithCustomRenderer_setHidden_rendererNotCalled() {
-        Grid.Column<String> column = addColumnWithCustomRenderer();
-        initiallyVisibleColumn_setHidden_assertRendererNotCalled(column);
+    public void detachAndReattachGrid_dataGeneratorCalledOncePerItem() {
+        runTestCodeForMultipleColumns(column -> {
+            ui.remove(grid);
+            fakeClientCommunication();
+            resetCallCount();
+            ui.add(grid);
+            fakeClientCommunication();
+            assertCalledOncePerItem();
+        });
     }
 
     @Test
-    public void initiallyHiddenColumnWithCustomRenderer_setVisible_rendererCalledOncePerItem() {
-        Grid.Column<String> column = addColumnWithCustomRenderer();
-        initiallyHiddenColumn_setVisible_assertRendererCalledOncePerItem(
-                column);
+    public void setGenerateDataWhenHiddenFalse_detachAndReattachGrid_dataGeneratorCalledOncePerItem() {
+        runTestCodeForMultipleColumns(column -> {
+            column.setGenerateDataWhenHidden(false);
+            ui.remove(grid);
+            fakeClientCommunication();
+            resetCallCount();
+            ui.add(grid);
+            fakeClientCommunication();
+            assertCalledOncePerItem();
+        });
     }
 
     @Test
-    public void columnWithCustomRenderer_toggleHiddenTwiceInRoundTrip_rendererCalledOncePerItem() {
-        Grid.Column<String> column = addColumnWithCustomRenderer();
-        initiallyVisibleColumn_toggleHiddenTwiceInRoundTrip_assertRendererCalledOncePerItem(
-                column);
+    public void initiallyHiddenColumn_detachAndReattachGrid_dataGeneratorCalledOncePerItem() {
+        runTestCodeForMultipleColumns(column -> {
+            column.setVisible(false);
+            ui.remove(grid);
+            fakeClientCommunication();
+            resetCallCount();
+            ui.add(grid);
+            fakeClientCommunication();
+            assertCalledOncePerItem();
+        });
     }
 
     @Test
-    public void initiallyHiddenColumnWithCustomRenderer_toggleHiddenTwiceInRoundTrip_rendererNotCalled() {
-        Grid.Column<String> column = addColumnWithCustomRenderer();
-        initiallyHiddenColumn_toggleHiddenTwiceInRoundTrip_assertRendererNotCalled(
-                column);
-    }
-
-    @Test
-    public void columnWithValueProvider_detachAndReattachGrid_rendererCalledOncePerItem() {
-        addColumnWithValueProvider();
-        initiallyVisibleColumn_detachAndReattachGrid_assertRendererCalledOncePerItem();
-    }
-
-    @Test
-    public void initiallyHiddenColumnWithValueProvider_detachAndReattachGrid_rendererNotCalled() {
-        Grid.Column<String> column = addColumnWithValueProvider();
-        initiallyHiddenColumn_detachAndReattachGrid_assertRendererNotCalled(
-                column);
-    }
-
-    @Test
-    public void componentColumn_detachAndReattachGrid_rendererCalledOncePerItem() {
-        addComponentColumn();
-        initiallyVisibleColumn_detachAndReattachGrid_assertRendererCalledOncePerItem();
-    }
-
-    @Test
-    public void initiallyHiddenComponentColumn_detachAndReattachGrid_rendererNotCalled() {
-        Grid.Column<String> column = addComponentColumn();
-        initiallyHiddenColumn_detachAndReattachGrid_assertRendererNotCalled(
-                column);
-    }
-
-    @Test
-    public void columnWithCustomRenderer_detachAndReattachGrid_rendererCalledOncePerItem() {
-        addColumnWithCustomRenderer();
-        initiallyVisibleColumn_detachAndReattachGrid_assertRendererCalledOncePerItem();
-    }
-
-    @Test
-    public void initiallyHiddenColumnWithCustomRenderer_detachAndReattachGrid_rendererNotCalled() {
-        Grid.Column<String> column = addColumnWithCustomRenderer();
-        initiallyHiddenColumn_detachAndReattachGrid_assertRendererNotCalled(
-                column);
+    public void initiallyHiddenColumn_setGenerateDataWhenHiddenFalse_detachAndReattachGrid_dataGeneratorNotCalled() {
+        runTestCodeForMultipleColumns(column -> {
+            column.setGenerateDataWhenHidden(false);
+            column.setVisible(false);
+            ui.remove(grid);
+            fakeClientCommunication();
+            ui.add(grid);
+            fakeClientCommunication();
+            assertNotCalled();
+        });
     }
 
     @Test
     public void columnWithCustomRenderer_setAnotherRenderer_onlyNewRendererCalled() {
-        Grid.Column<String> column = addColumnWithCustomRenderer();
+        var column = addColumnWithCustomRenderer();
         fakeClientCommunication();
-        callCount.set(0);
-        AtomicInteger newRendererCallCount = new AtomicInteger(0);
-        Renderer<String> newRenderer = LitRenderer
+        resetCallCount();
+        var newRendererCallCount = new AtomicInteger(0);
+        var newRenderer = LitRenderer
                 .<String> of("<span>${item.displayName}</span>")
                 .withProperty("displayName", s -> {
                     newRendererCallCount.incrementAndGet();
@@ -233,26 +281,76 @@ public class GridHiddenColumnRenderingTest {
                 });
         column.setRenderer(newRenderer);
         fakeClientCommunication();
-        Assert.assertEquals(0, callCount.get());
+        assertNotCalled();
+        Assert.assertEquals(ITEM_COUNT, newRendererCallCount.get());
+    }
+
+    @Test
+    public void columnWithCustomRenderer_setGenerateDataWhenHiddenFalse_setAnotherRenderer_onlyNewRendererCalled() {
+        var column = addColumnWithCustomRenderer()
+                .setGenerateDataWhenHidden(false);
+        fakeClientCommunication();
+        resetCallCount();
+        var newRendererCallCount = new AtomicInteger(0);
+        var newRenderer = LitRenderer
+                .<String> of("<span>${item.displayName}</span>")
+                .withProperty("displayName", s -> {
+                    newRendererCallCount.incrementAndGet();
+                    return s;
+                });
+        column.setRenderer(newRenderer);
+        fakeClientCommunication();
+        assertNotCalled();
         Assert.assertEquals(ITEM_COUNT, newRendererCallCount.get());
     }
 
     @Test
     public void addColumn_itemsSentOnlyOnce() {
-        List<String> items = getItems();
-        AtomicInteger fetchCount = new AtomicInteger(0);
-        DataProvider<String, Void> dataProvider = DataProvider
-                .fromCallbacks(query -> {
-                    fetchCount.incrementAndGet();
-                    return items.stream().skip(query.getOffset())
-                            .limit(query.getLimit());
-                }, query -> items.size());
+        var items = getItems();
+        var fetchCount = new AtomicInteger(0);
+        var dataProvider = DataProvider.<String> fromCallbacks(query -> {
+            fetchCount.incrementAndGet();
+            return items.stream().skip(query.getOffset())
+                    .limit(query.getLimit());
+        }, query -> items.size());
         grid.setDataProvider(dataProvider);
         fakeClientCommunication();
         fetchCount.set(0);
         addColumnWithValueProvider();
         fakeClientCommunication();
         Assert.assertEquals(1, fetchCount.get());
+    }
+
+    @Test
+    public void addColumn_setGenerateDataWhenHiddenFalse_itemsSentOnlyOnce() {
+        var items = getItems();
+        var fetchCount = new AtomicInteger(0);
+        var dataProvider = DataProvider.<String> fromCallbacks(query -> {
+            fetchCount.incrementAndGet();
+            return items.stream().skip(query.getOffset())
+                    .limit(query.getLimit());
+        }, query -> items.size());
+        grid.setDataProvider(dataProvider);
+        fakeClientCommunication();
+        fetchCount.set(0);
+        addColumnWithValueProvider().setGenerateDataWhenHidden(false);
+        fakeClientCommunication();
+        Assert.assertEquals(1, fetchCount.get());
+    }
+
+    private void runTestCodeForMultipleColumns(
+            Consumer<Grid.Column<String>> testCode) {
+        getColumnSuppliers().forEach(columnSupplier -> {
+            resetCallCount();
+            var column = columnSupplier.get();
+            testCode.accept(column);
+            grid.removeColumn(column);
+        });
+    }
+
+    private List<Supplier<Grid.Column<String>>> getColumnSuppliers() {
+        return List.of(this::addColumnWithValueProvider,
+                this::addComponentColumn, this::addColumnWithCustomRenderer);
     }
 
     private Grid.Column<String> addColumnWithValueProvider() {
@@ -265,75 +363,6 @@ public class GridHiddenColumnRenderingTest {
 
     private Grid.Column<String> addColumnWithCustomRenderer() {
         return grid.addColumn(getCustomRenderer());
-    }
-
-    private void initiallyHiddenColumn_detachAndReattachGrid_assertRendererNotCalled(
-            Grid.Column<String> column) {
-        column.setVisible(false);
-        ui.remove(grid);
-        fakeClientCommunication();
-        ui.add(grid);
-        fakeClientCommunication();
-        Assert.assertEquals(0, callCount.get());
-    }
-
-    private void initiallyVisibleColumn_detachAndReattachGrid_assertRendererCalledOncePerItem() {
-        ui.remove(grid);
-        fakeClientCommunication();
-        callCount.set(0);
-        ui.add(grid);
-        fakeClientCommunication();
-        Assert.assertEquals(ITEM_COUNT, callCount.get());
-    }
-
-    private void initiallyHiddenColumn_assertRendererNotCalled(
-            Grid.Column<String> column) {
-        column.setVisible(false);
-        fakeClientCommunication();
-        Assert.assertEquals(0, callCount.get());
-    }
-
-    private void initiallyVisibleColumn_assertRendererCalledOncePerItem() {
-        fakeClientCommunication();
-        Assert.assertEquals(ITEM_COUNT, callCount.get());
-    }
-
-    private void initiallyVisibleColumn_setHidden_assertRendererNotCalled(
-            Grid.Column<String> column) {
-        fakeClientCommunication();
-        callCount.set(0);
-        column.setVisible(false);
-        fakeClientCommunication();
-        Assert.assertEquals(0, callCount.get());
-    }
-
-    private void initiallyHiddenColumn_setVisible_assertRendererCalledOncePerItem(
-            Grid.Column<String> column) {
-        column.setVisible(false);
-        fakeClientCommunication();
-        column.setVisible(true);
-        fakeClientCommunication();
-        Assert.assertEquals(ITEM_COUNT, callCount.get());
-    }
-
-    private void initiallyVisibleColumn_toggleHiddenTwiceInRoundTrip_assertRendererCalledOncePerItem(
-            Grid.Column<String> column) {
-        fakeClientCommunication();
-        column.setVisible(false);
-        column.setVisible(true);
-        callCount.set(0);
-        fakeClientCommunication();
-        Assert.assertEquals(ITEM_COUNT, callCount.get());
-    }
-
-    private void initiallyHiddenColumn_toggleHiddenTwiceInRoundTrip_assertRendererNotCalled(
-            Grid.Column<String> column) {
-        column.setVisible(false);
-        fakeClientCommunication();
-        column.setVisible(true);
-        column.setVisible(false);
-        fakeClientCommunication();
-        Assert.assertEquals(0, callCount.get());
     }
 
     private ValueProvider<String, ?> getValueProvider() {
@@ -362,5 +391,21 @@ public class GridHiddenColumnRenderingTest {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
         });
+    }
+
+    private void assertNotCalled() {
+        Assert.assertEquals(0, getCallCount());
+    }
+
+    private void assertCalledOncePerItem() {
+        Assert.assertEquals(ITEM_COUNT, getCallCount());
+    }
+
+    private int getCallCount() {
+        return callCount.get();
+    }
+
+    private void resetCallCount() {
+        callCount.set(0);
     }
 }
