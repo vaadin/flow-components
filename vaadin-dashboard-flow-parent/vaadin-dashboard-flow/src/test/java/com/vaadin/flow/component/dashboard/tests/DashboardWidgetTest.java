@@ -173,41 +173,41 @@ public class DashboardWidgetTest extends DashboardTestBase {
     @Test
     public void defaultHeaderIsNull() {
         DashboardWidget widget = new DashboardWidget();
-        Assert.assertNull(widget.getHeaderComponent());
+        Assert.assertNull(widget.getHeaderContent());
     }
 
     @Test
     public void setHeaderToEmptyWidget_correctHeaderIsSet() {
         Div header = new Div();
         DashboardWidget widget = new DashboardWidget();
-        widget.setHeaderComponent(header);
-        Assert.assertEquals(header, widget.getHeaderComponent());
+        widget.setHeaderContent(header);
+        Assert.assertEquals(header, widget.getHeaderContent());
     }
 
     @Test
     public void setAnotherHeaderToNonEmptyWidget_correctHeaderIsSet() {
         DashboardWidget widget = new DashboardWidget();
-        widget.setHeaderComponent(new Div());
+        widget.setHeaderContent(new Div());
         Span newHeader = new Span();
-        widget.setHeaderComponent(newHeader);
-        Assert.assertEquals(newHeader, widget.getHeaderComponent());
+        widget.setHeaderContent(newHeader);
+        Assert.assertEquals(newHeader, widget.getHeaderContent());
     }
 
     @Test
     public void setTheSameHeaderToNonEmptyWidget_correctHeaderIsSet() {
         Div header = new Div();
         DashboardWidget widget = new DashboardWidget();
-        widget.setHeaderComponent(header);
-        widget.setHeaderComponent(header);
-        Assert.assertEquals(header, widget.getHeaderComponent());
+        widget.setHeaderContent(header);
+        widget.setHeaderContent(header);
+        Assert.assertEquals(header, widget.getHeaderContent());
     }
 
     @Test
     public void setNullHeaderToNonEmptyWidget_headerIsRemoved() {
         DashboardWidget widget = new DashboardWidget();
-        widget.setHeaderComponent(new Div());
-        widget.setHeaderComponent(null);
-        Assert.assertNull(widget.getHeaderComponent());
+        widget.setHeaderContent(new Div());
+        widget.setHeaderContent(null);
+        Assert.assertNull(widget.getHeaderContent());
     }
 
     @Test
@@ -215,7 +215,7 @@ public class DashboardWidgetTest extends DashboardTestBase {
         Div content = new Div();
         DashboardWidget widget = new DashboardWidget();
         widget.setContent(content);
-        widget.setHeaderComponent(null);
+        widget.setHeaderContent(null);
         Assert.assertEquals(content, widget.getContent());
     }
 
@@ -223,9 +223,9 @@ public class DashboardWidgetTest extends DashboardTestBase {
     public void setNullContentToWidgetWithHeader_headerIsNotRemoved() {
         Div header = new Div();
         DashboardWidget widget = new DashboardWidget();
-        widget.setHeaderComponent(header);
+        widget.setHeaderContent(header);
         widget.setContent(null);
-        Assert.assertEquals(header, widget.getHeaderComponent());
+        Assert.assertEquals(header, widget.getHeaderContent());
     }
 
     @Test
@@ -234,9 +234,9 @@ public class DashboardWidgetTest extends DashboardTestBase {
         Span header = new Span();
         DashboardWidget widget = new DashboardWidget();
         widget.setContent(content);
-        widget.setHeaderComponent(header);
+        widget.setHeaderContent(header);
         Assert.assertEquals(content, widget.getContent());
-        Assert.assertEquals(header, widget.getHeaderComponent());
+        Assert.assertEquals(header, widget.getHeaderContent());
     }
 
     @Test
@@ -244,10 +244,10 @@ public class DashboardWidgetTest extends DashboardTestBase {
         Div content = new Div();
         Span header = new Span();
         DashboardWidget widget = new DashboardWidget();
-        widget.setHeaderComponent(header);
+        widget.setHeaderContent(header);
         widget.setContent(content);
         Assert.assertEquals(content, widget.getContent());
-        Assert.assertEquals(header, widget.getHeaderComponent());
+        Assert.assertEquals(header, widget.getHeaderContent());
     }
 
     @Test

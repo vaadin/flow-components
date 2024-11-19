@@ -29,7 +29,7 @@ public class DashboardWidgetPage extends Div {
         DashboardWidget widget1 = new DashboardWidget();
         widget1.setTitle("Widget 1");
         widget1.setContent(new Div("Some content"));
-        widget1.setHeaderComponent(new Span("Some header"));
+        widget1.setHeaderContent(new Span("Some header"));
         widget1.setId("widget-1");
 
         DashboardWidget widget2 = new DashboardWidget();
@@ -89,7 +89,7 @@ public class DashboardWidgetPage extends Div {
         updateHeaderOfTheFirstWidget.addClickListener(click -> {
             List<DashboardWidget> widgets = dashboard.getWidgets();
             if (!widgets.isEmpty()) {
-                widgets.get(0).setHeaderComponent(new Span("Updated header"));
+                widgets.get(0).setHeaderContent(new Span("Updated header"));
             }
         });
         updateHeaderOfTheFirstWidget.setId("update-header-of-the-first-widget");
@@ -99,7 +99,7 @@ public class DashboardWidgetPage extends Div {
         removeHeaderOfTheFirstWidget.addClickListener(click -> {
             List<DashboardWidget> widgets = dashboard.getWidgets();
             if (!widgets.isEmpty()) {
-                widgets.get(0).setHeaderComponent(null);
+                widgets.get(0).setHeaderContent(null);
             }
         });
         removeHeaderOfTheFirstWidget.setId("remove-header-of-the-first-widget");
