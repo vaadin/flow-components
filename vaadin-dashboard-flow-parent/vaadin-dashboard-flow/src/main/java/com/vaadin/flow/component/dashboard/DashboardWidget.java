@@ -17,7 +17,7 @@ import com.vaadin.flow.component.shared.SlotUtils;
 /**
  * DashboardWidget represents a customizable widget that can be placed within a
  * {@link Dashboard}. It supports layout options such as colspan and rowspan,
- * and allows setting content and a header component.
+ * and allows setting content and header content.
  *
  * @see Dashboard
  *
@@ -140,24 +140,24 @@ public class DashboardWidget extends Component {
     }
 
     /**
-     * Gets the component in the header content slot of this widget.
+     * Gets the content in the header content slot of this widget.
      *
-     * @return the header component of this widget, or {@code null} if no header
-     *         component has been set
+     * @return the header content of this widget, or {@code null} if no header
+     *         content has been set
      */
-    public Component getHeaderComponent() {
+    public Component getHeaderContent() {
         return SlotUtils.getChildInSlot(this, "header-content");
     }
 
     /**
-     * Sets the component in the header content slot of this widget, replacing
-     * any existing header component.
+     * Sets the content in the header content slot of this widget, replacing any
+     * existing header content.
      *
      * @param header
-     *            the component to set, can be {@code null} to remove existing
-     *            header component
+     *            the content to set, can be {@code null} to remove existing
+     *            header content
      */
-    public void setHeaderComponent(Component header) {
+    public void setHeaderContent(Component header) {
         SlotUtils.setSlot(this, "header-content", header);
     }
 
