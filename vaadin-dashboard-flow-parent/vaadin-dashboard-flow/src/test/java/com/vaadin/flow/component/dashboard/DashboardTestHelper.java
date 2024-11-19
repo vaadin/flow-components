@@ -17,7 +17,7 @@ import elemental.json.JsonObject;
 
 public class DashboardTestHelper {
 
-    static void fireItemResizeModeChangedEvent(Dashboard dashboard,
+    public static void fireItemResizeModeChangedEvent(Dashboard dashboard,
             int itemNodeId, boolean resizeMode) {
         JsonObject eventData = Json.createObject();
         eventData.put("event.detail.item.id", itemNodeId);
@@ -26,7 +26,7 @@ public class DashboardTestHelper {
                 eventData);
     }
 
-    static void fireItemResizedEvent(Dashboard dashboard,
+    public static void fireItemResizedEvent(Dashboard dashboard,
             DashboardWidget widget, int targetColspan, int targetRowspan) {
         JsonObject eventData = Json.createObject();
         eventData.put("event.detail.item.id",
@@ -36,7 +36,7 @@ public class DashboardTestHelper {
         fireDomEvent(dashboard, "dashboard-item-resized", eventData);
     }
 
-    static void fireItemMovedEvent(Dashboard dashboard, int itemNodeId,
+    public static void fireItemMovedEvent(Dashboard dashboard, int itemNodeId,
             JsonArray itemsArray, Integer sectionNodeId) {
         JsonObject eventData = Json.createObject();
         eventData.put("event.detail.item", itemNodeId);
@@ -47,7 +47,7 @@ public class DashboardTestHelper {
         fireDomEvent(dashboard, "dashboard-item-moved-flow", eventData);
     }
 
-    static void fireItemMoveModeChangedEvent(Dashboard dashboard,
+    public static void fireItemMoveModeChangedEvent(Dashboard dashboard,
             int itemNodeId, boolean moveMode) {
         JsonObject eventData = Json.createObject();
         eventData.put("event.detail.item.id", itemNodeId);
@@ -55,13 +55,13 @@ public class DashboardTestHelper {
         fireDomEvent(dashboard, "dashboard-item-move-mode-changed", eventData);
     }
 
-    static void fireItemRemovedEvent(Dashboard dashboard, int nodeId) {
+    public static void fireItemRemovedEvent(Dashboard dashboard, int nodeId) {
         JsonObject eventData = Json.createObject();
         eventData.put("event.detail.item.id", nodeId);
         fireDomEvent(dashboard, "dashboard-item-removed", eventData);
     }
 
-    static void fireItemSelectedChangedEvent(Dashboard dashboard,
+    public static void fireItemSelectedChangedEvent(Dashboard dashboard,
             int itemNodeId, boolean selected) {
         JsonObject eventData = Json.createObject();
         eventData.put("event.detail.item.id", itemNodeId);
