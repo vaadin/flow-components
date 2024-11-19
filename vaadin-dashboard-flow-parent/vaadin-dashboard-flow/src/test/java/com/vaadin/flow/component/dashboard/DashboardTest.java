@@ -6,7 +6,7 @@
  * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
-package com.vaadin.flow.component.dashboard.tests;
+package com.vaadin.flow.component.dashboard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +20,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.dashboard.Dashboard;
-import com.vaadin.flow.component.dashboard.DashboardSection;
-import com.vaadin.flow.component.dashboard.DashboardWidget;
 import com.vaadin.flow.component.html.Div;
 
 public class DashboardTest extends DashboardTestBase {
@@ -32,15 +29,15 @@ public class DashboardTest extends DashboardTestBase {
     @Override
     public void setup() {
         super.setup();
-        dashboard = new Dashboard();
+        dashboard = getNewDashboard();
         getUi().add(dashboard);
         fakeClientCommunication();
     }
 
     @Test
     public void addWidget_widgetIsAdded() {
-        DashboardWidget widget1 = new DashboardWidget();
-        DashboardWidget widget2 = new DashboardWidget();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
         dashboard.add(widget1, widget2);
         fakeClientCommunication();
         assertChildComponents(dashboard, widget1, widget2);
@@ -54,7 +51,7 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void addNullWidgetInArray_noWidgetIsAdded() {
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         try {
             dashboard.add(widget, null);
         } catch (NullPointerException e) {
@@ -66,9 +63,9 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void addWidgetAtIndex_widgetIsCorrectlyAdded() {
-        DashboardWidget widget1 = new DashboardWidget();
-        DashboardWidget widget2 = new DashboardWidget();
-        DashboardWidget widget3 = new DashboardWidget();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
+        DashboardWidget widget3 = getNewWidget();
         dashboard.add(widget1, widget2);
         fakeClientCommunication();
         dashboard.addWidgetAtIndex(1, widget3);
@@ -78,8 +75,8 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void addWidgetAtInvalidIndex_exceptionIsThrown() {
-        DashboardWidget widget1 = new DashboardWidget();
-        DashboardWidget widget2 = new DashboardWidget();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
         dashboard.add(widget1);
         fakeClientCommunication();
         Assert.assertThrows(IllegalArgumentException.class,
@@ -90,7 +87,7 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void addWidgetAtNegativeIndex_exceptionIsThrown() {
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> dashboard.addWidgetAtIndex(-1, widget));
         fakeClientCommunication();
@@ -105,8 +102,8 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void removeWidget_widgetIsRemoved() {
-        DashboardWidget widget1 = new DashboardWidget();
-        DashboardWidget widget2 = new DashboardWidget();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
         dashboard.add(widget1, widget2);
         fakeClientCommunication();
         dashboard.remove(widget1);
@@ -122,8 +119,8 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void removeAllWidgets_widgetsAreRemoved() {
-        DashboardWidget widget1 = new DashboardWidget();
-        DashboardWidget widget2 = new DashboardWidget();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
         dashboard.add(widget1, widget2);
         fakeClientCommunication();
         dashboard.removeAll();
@@ -133,7 +130,7 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void removeWidgetFromParent_widgetIsRemoved() {
-        DashboardWidget widget1 = new DashboardWidget();
+        DashboardWidget widget1 = getNewWidget();
         dashboard.add(widget1);
         fakeClientCommunication();
         widget1.removeFromParent();
@@ -143,8 +140,8 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void addMultipleWidgets_removeOneFromParent_widgetIsRemoved() {
-        DashboardWidget widget1 = new DashboardWidget();
-        DashboardWidget widget2 = new DashboardWidget();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
         dashboard.add(widget1, widget2);
         fakeClientCommunication();
         widget1.removeFromParent();
@@ -154,8 +151,8 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void addWidgetsSeparately_removeOneFromParent_widgetIsRemoved() {
-        DashboardWidget widget1 = new DashboardWidget();
-        DashboardWidget widget2 = new DashboardWidget();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
         dashboard.add(widget1);
         dashboard.add(widget2);
         fakeClientCommunication();
@@ -168,7 +165,7 @@ public class DashboardTest extends DashboardTestBase {
     public void addWidgetFromLayoutToDashboard_widgetIsMoved() {
         Div parent = new Div();
         getUi().add(parent);
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         parent.add(widget);
         fakeClientCommunication();
         dashboard.add(widget);
@@ -179,7 +176,7 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void addWidgetFromDashboardToLayout_widgetIsMoved() {
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         fakeClientCommunication();
         Div parent = new Div();
@@ -192,10 +189,10 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void addWidgetToAnotherDashboard_widgetIsMoved() {
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         fakeClientCommunication();
-        Dashboard newDashboard = new Dashboard();
+        Dashboard newDashboard = getNewDashboard();
         getUi().add(newDashboard);
         newDashboard.add(widget);
         fakeClientCommunication();
@@ -320,7 +317,7 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void addSectionWithWidget_removeWidgetFromDashboard_throwsException() {
         DashboardSection section = dashboard.addSection();
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         section.add(widget);
         fakeClientCommunication();
         Assert.assertThrows(IllegalArgumentException.class,
@@ -333,7 +330,7 @@ public class DashboardTest extends DashboardTestBase {
     public void addSection_addWidgetToSection_widgetIsAdded() {
         DashboardSection section = dashboard.addSection();
         fakeClientCommunication();
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         section.add(widget);
         fakeClientCommunication();
         assertChildComponents(dashboard, section);
@@ -342,8 +339,8 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void addSectionAndWidget_removeWidget_widgetRemoved() {
         DashboardSection section = dashboard.addSection();
-        section.add(new DashboardWidget());
-        DashboardWidget widget = new DashboardWidget();
+        section.add(getNewWidget());
+        DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         fakeClientCommunication();
         dashboard.remove(widget);
@@ -354,8 +351,8 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void addSectionAndWidget_removeSection_sectionRemoved() {
         DashboardSection section = dashboard.addSection();
-        section.add(new DashboardWidget());
-        DashboardWidget widget = new DashboardWidget();
+        section.add(getNewWidget());
+        DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         fakeClientCommunication();
         dashboard.remove(section);
@@ -366,8 +363,8 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void addSectionAndWidget_removeAll_widgetAndSectionRemoved() {
         DashboardSection section = dashboard.addSection();
-        section.add(new DashboardWidget());
-        DashboardWidget widget = new DashboardWidget();
+        section.add(getNewWidget());
+        DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         fakeClientCommunication();
         dashboard.removeAll();
@@ -378,8 +375,8 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void addWidgetToSection_widgetIsAdded() {
         DashboardSection section = dashboard.addSection();
-        DashboardWidget widget1 = new DashboardWidget();
-        DashboardWidget widget2 = new DashboardWidget();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
         section.add(widget1, widget2);
         fakeClientCommunication();
         assertSectionWidgets(section, widget1, widget2);
@@ -399,7 +396,7 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void addNullWidgetInArrayToSection_noWidgetIsAdded() {
         DashboardSection section = dashboard.addSection();
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         try {
             section.add(widget, null);
         } catch (NullPointerException e) {
@@ -413,9 +410,9 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void addWidgetAtIndexToSection_widgetIsCorrectlyAdded() {
         DashboardSection section = dashboard.addSection();
-        DashboardWidget widget1 = new DashboardWidget();
-        DashboardWidget widget2 = new DashboardWidget();
-        DashboardWidget widget3 = new DashboardWidget();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
+        DashboardWidget widget3 = getNewWidget();
         section.add(widget1, widget2);
         fakeClientCommunication();
         section.addWidgetAtIndex(1, widget3);
@@ -427,8 +424,8 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void addWidgetAtInvalidIndexToSection_exceptionIsThrown() {
         DashboardSection section = dashboard.addSection();
-        DashboardWidget widget1 = new DashboardWidget();
-        DashboardWidget widget2 = new DashboardWidget();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
         section.add(widget1);
         fakeClientCommunication();
         Assert.assertThrows(IllegalArgumentException.class,
@@ -441,7 +438,7 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void addWidgetAtNegativeIndexToSection_exceptionIsThrown() {
         DashboardSection section = dashboard.addSection();
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> section.addWidgetAtIndex(-1, widget));
         fakeClientCommunication();
@@ -461,8 +458,8 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void removeWidgetFromSection_widgetIsRemoved() {
         DashboardSection section = dashboard.addSection();
-        DashboardWidget widget1 = new DashboardWidget();
-        DashboardWidget widget2 = new DashboardWidget();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
         section.add(widget1, widget2);
         fakeClientCommunication();
         section.remove(widget1);
@@ -483,8 +480,8 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void removeAllWidgetsFromSection_widgetsAreRemoved() {
         DashboardSection section = dashboard.addSection();
-        DashboardWidget widget1 = new DashboardWidget();
-        DashboardWidget widget2 = new DashboardWidget();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
         section.add(widget1, widget2);
         fakeClientCommunication();
         section.removeAll();
@@ -496,7 +493,7 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void removeWidgetInSectionFromParent_widgetIsRemoved() {
         DashboardSection section = dashboard.addSection();
-        DashboardWidget widget1 = new DashboardWidget();
+        DashboardWidget widget1 = getNewWidget();
         section.add(widget1);
         fakeClientCommunication();
         widget1.removeFromParent();
@@ -508,8 +505,8 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void addMultipleWidgetsToSection_removeOneFromParent_widgetIsRemoved() {
         DashboardSection section = dashboard.addSection();
-        DashboardWidget widget1 = new DashboardWidget();
-        DashboardWidget widget2 = new DashboardWidget();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
         section.add(widget1, widget2);
         fakeClientCommunication();
         widget1.removeFromParent();
@@ -521,8 +518,8 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void addWidgetsSeparatelyToSection_removeOneFromParent_widgetIsRemoved() {
         DashboardSection section = dashboard.addSection();
-        DashboardWidget widget1 = new DashboardWidget();
-        DashboardWidget widget2 = new DashboardWidget();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
         section.add(widget1);
         section.add(widget2);
         fakeClientCommunication();
@@ -537,7 +534,7 @@ public class DashboardTest extends DashboardTestBase {
         DashboardSection section = dashboard.addSection();
         Div parent = new Div();
         getUi().add(parent);
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         parent.add(widget);
         fakeClientCommunication();
         section.add(widget);
@@ -550,7 +547,7 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void addWidgetFromSectionToLayout_widgetIsMoved() {
         DashboardSection section = dashboard.addSection();
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         section.add(widget);
         fakeClientCommunication();
         Div parent = new Div();
@@ -565,7 +562,7 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void addWidgetToAnotherSection_widgetIsMoved() {
         DashboardSection section = dashboard.addSection();
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         section.add(widget);
         fakeClientCommunication();
         DashboardSection newSection = dashboard.addSection();
@@ -617,8 +614,8 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void setWidgetsWithDifferentColspans_itemsAreGeneratedWithCorrectColspans() {
-        DashboardWidget widget1 = new DashboardWidget();
-        DashboardWidget widget2 = new DashboardWidget();
+        DashboardWidget widget1 = getNewWidget();
+        DashboardWidget widget2 = getNewWidget();
         widget2.setColspan(2);
         dashboard.add(widget1, widget2);
         fakeClientCommunication();
@@ -627,7 +624,7 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void setColspanOnExistingWidget_itemsAreUpdatedWithCorrectColspans() {
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         fakeClientCommunication();
         widget.setColspan(2);
@@ -825,7 +822,7 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void addWidget_detachDashboard_widgetIsRetained() {
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         fakeClientCommunication();
         getUi().remove(dashboard);
@@ -837,7 +834,7 @@ public class DashboardTest extends DashboardTestBase {
     public void detachDashboard_addWidget_reattachDashboard_widgetIsAdded() {
         getUi().remove(dashboard);
         fakeClientCommunication();
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         fakeClientCommunication();
         assertChildComponents(dashboard, widget);
@@ -845,7 +842,7 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void dashboardNotEditable_removeWidget_widgetIsNotRemoved() {
-        DashboardWidget widgetToRemove = new DashboardWidget();
+        DashboardWidget widgetToRemove = getNewWidget();
         dashboard.add(widgetToRemove);
         fakeClientCommunication();
         int expectedWidgetCount = dashboard.getWidgets().size();
@@ -860,7 +857,7 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void setDashboardEditable_removeWidget_widgetIsRemoved() {
-        DashboardWidget widgetToRemove = new DashboardWidget();
+        DashboardWidget widgetToRemove = getNewWidget();
         dashboard.add(widgetToRemove);
         dashboard.setEditable(true);
         fakeClientCommunication();
@@ -877,7 +874,7 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void setDashboardEditable_removeWidget_eventCorrectlyFired() {
         dashboard.setEditable(true);
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         fakeClientCommunication();
         int removedWidgetNodeId = widget.getElement().getNode().getId();
@@ -905,7 +902,7 @@ public class DashboardTest extends DashboardTestBase {
     public void setDashboardEditable_removeWidgetInSection_eventCorrectlyFired() {
         dashboard.setEditable(true);
         DashboardSection section = dashboard.addSection();
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         section.add(widget);
         fakeClientCommunication();
         int removedWidgetNodeId = widget.getElement().getNode().getId();
@@ -918,7 +915,7 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void dashboardNotEditable_removeWidget_eventNotFired() {
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         fakeClientCommunication();
         int removedWidgetNodeId = widget.getElement().getNode().getId();
@@ -955,7 +952,7 @@ public class DashboardTest extends DashboardTestBase {
 
     @Test
     public void changeWidgetSelectedState_eventCorrectlyFired() {
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         dashboard.add(widget);
         assertItemSelectedChangedEventCorrectlyFired(widget, true);
         assertItemSelectedChangedEventCorrectlyFired(widget, false);
@@ -971,7 +968,7 @@ public class DashboardTest extends DashboardTestBase {
     @Test
     public void changeWidgetInSectionSelectedState_eventCorrectlyFired() {
         DashboardSection section = dashboard.addSection();
-        DashboardWidget widget = new DashboardWidget();
+        DashboardWidget widget = getNewWidget();
         section.add(widget);
         assertItemSelectedChangedEventCorrectlyFired(widget, true);
         assertItemSelectedChangedEventCorrectlyFired(widget, false);

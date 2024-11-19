@@ -71,6 +71,8 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
 
     private boolean pendingUpdate = false;
 
+    private boolean featureFlagEnabled;
+
     /**
      * Creates an empty dashboard.
      */
@@ -785,7 +787,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
      *             not enabled
      */
     private void checkFeatureFlag() {
-        boolean enabled = getFeatureFlags()
+        boolean enabled = featureFlagEnabled || getFeatureFlags()
                 .isEnabled(FeatureFlags.DASHBOARD_COMPONENT);
         if (!enabled) {
             throw new ExperimentalFeatureException();
@@ -802,6 +804,13 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     FeatureFlags getFeatureFlags() {
         return FeatureFlags
                 .get(UI.getCurrent().getSession().getService().getContext());
+    }
+
+    /**
+     * Only for test use.
+     */
+    void setFeatureFlagEnabled(boolean featureFlagEnabled) {
+        this.featureFlagEnabled = featureFlagEnabled;
     }
 
     /**

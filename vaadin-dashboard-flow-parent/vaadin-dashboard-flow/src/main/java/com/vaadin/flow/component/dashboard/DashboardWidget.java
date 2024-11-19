@@ -37,6 +37,8 @@ public class DashboardWidget extends Component {
 
     private int rowspan = 1;
 
+    private boolean featureFlagEnabled;
+
     /**
      * Returns the title of the widget.
      *
@@ -204,7 +206,7 @@ public class DashboardWidget extends Component {
      *             not enabled
      */
     private void checkFeatureFlag() {
-        boolean enabled = getFeatureFlags()
+        boolean enabled = featureFlagEnabled || getFeatureFlags()
                 .isEnabled(FeatureFlags.DASHBOARD_COMPONENT);
         if (!enabled) {
             throw new ExperimentalFeatureException();
@@ -221,5 +223,12 @@ public class DashboardWidget extends Component {
     FeatureFlags getFeatureFlags() {
         return FeatureFlags
                 .get(UI.getCurrent().getSession().getService().getContext());
+    }
+
+    /**
+     * Only for test use.
+     */
+    void setFeatureFlagEnabled(boolean featureFlagEnabled) {
+        this.featureFlagEnabled = featureFlagEnabled;
     }
 }
