@@ -8,8 +8,11 @@
  */
 package com.vaadin.flow.component.dashboard;
 
+import com.vaadin.experimental.FeatureFlags;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
@@ -176,6 +179,12 @@ public class DashboardWidget extends Component {
         return true;
     }
 
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        checkFeatureFlag();
+    }
+
     private void notifyParentDashboardOrSection() {
         getParent().ifPresent(parent -> {
             if (parent instanceof Dashboard dashboard) {
@@ -184,5 +193,33 @@ public class DashboardWidget extends Component {
                 section.updateClient();
             }
         });
+    }
+
+    /**
+     * Checks whether the Dashboard component feature flag is active. Succeeds
+     * if the flag is enabled, and throws otherwise.
+     *
+     * @throws ExperimentalFeatureException
+     *             when the {@link FeatureFlags#DASHBOARD_COMPONENT} feature is
+     *             not enabled
+     */
+    private void checkFeatureFlag() {
+        boolean enabled = getFeatureFlags()
+                .isEnabled(FeatureFlags.DASHBOARD_COMPONENT);
+        if (!enabled) {
+            throw new ExperimentalFeatureException();
+        }
+    }
+
+    /**
+     * Gets the feature flags for the current UI.
+     * <p>
+     * Not private in order to support mocking
+     *
+     * @return the current set of feature flags
+     */
+    FeatureFlags getFeatureFlags() {
+        return FeatureFlags
+                .get(UI.getCurrent().getSession().getService().getContext());
     }
 }
