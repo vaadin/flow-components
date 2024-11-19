@@ -21,11 +21,13 @@ import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.DomEvent;
@@ -68,6 +70,8 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     private DashboardI18n i18n;
 
     private boolean pendingUpdate = false;
+
+    private boolean featureFlagEnabled;
 
     /**
      * Creates an empty dashboard.
@@ -496,6 +500,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
+        checkFeatureFlag();
         getElement().executeJs(
                 "Vaadin.FlowComponentHost.patchVirtualContainer(this);");
         customizeItemMovedEvent();
@@ -771,6 +776,41 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
             }
         }
         return null;
+    }
+
+    /**
+     * Checks whether the Dashboard component feature flag is active. Succeeds
+     * if the flag is enabled, and throws otherwise.
+     *
+     * @throws ExperimentalFeatureException
+     *             when the {@link FeatureFlags#DASHBOARD_COMPONENT} feature is
+     *             not enabled
+     */
+    private void checkFeatureFlag() {
+        boolean enabled = featureFlagEnabled || getFeatureFlags()
+                .isEnabled(FeatureFlags.DASHBOARD_COMPONENT);
+        if (!enabled) {
+            throw new ExperimentalFeatureException();
+        }
+    }
+
+    /**
+     * Gets the feature flags for the current UI.
+     * <p>
+     * Not private in order to support mocking
+     *
+     * @return the current set of feature flags
+     */
+    FeatureFlags getFeatureFlags() {
+        return FeatureFlags
+                .get(UI.getCurrent().getSession().getService().getContext());
+    }
+
+    /**
+     * Only for test use.
+     */
+    void setFeatureFlagEnabled(boolean featureFlagEnabled) {
+        this.featureFlagEnabled = featureFlagEnabled;
     }
 
     /**
