@@ -9,7 +9,10 @@
 package com.vaadin.flow.component.dashboard;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * HasWidgets is an interface for components that can contain and manage
@@ -35,7 +38,18 @@ public interface HasWidgets extends Serializable {
      * @param widgets
      *            the widgets to add, not {@code null}
      */
-    void add(DashboardWidget... widgets);
+    default void add(DashboardWidget... widgets) {
+        Objects.requireNonNull(widgets, "Widgets to add cannot be null.");
+        add(Arrays.asList(widgets));
+    }
+
+    /**
+     * Adds the given widgets to this component.
+     *
+     * @param widgets
+     *            the widgets to add, not {@code null}
+     */
+    void add(Collection<DashboardWidget> widgets);
 
     /**
      * Adds the given widget as child of this component at the specific index.
@@ -60,7 +74,21 @@ public interface HasWidgets extends Serializable {
      *             if there is a widget whose non {@code null} parent is not
      *             this component
      */
-    void remove(DashboardWidget... widgets);
+    default void remove(DashboardWidget... widgets) {
+        Objects.requireNonNull(widgets, "Widgets to remove cannot be null.");
+        remove(Arrays.asList(widgets));
+    }
+
+    /**
+     * Removes the given widgets from this component.
+     *
+     * @param widgets
+     *            the widgets to remove, not {@code null}
+     * @throws IllegalArgumentException
+     *             if there is a widget whose non {@code null} parent is not
+     *             this component
+     */
+    void remove(Collection<DashboardWidget> widgets);
 
     /**
      * Removes all widgets from this component.
