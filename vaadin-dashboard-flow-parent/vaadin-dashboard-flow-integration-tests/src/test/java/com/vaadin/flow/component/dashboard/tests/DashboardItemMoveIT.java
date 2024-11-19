@@ -123,7 +123,10 @@ public class DashboardItemMoveIT extends AbstractComponentIT {
         var xOffset = draggedElement.getLocation().getX() < targetElement
                 .getLocation().getX() ? 10 : -10;
 
+        var startOffset = 10;
+
         new Actions(getDriver()).clickAndHold(dragHandle)
+                .moveByOffset(startOffset, startOffset)
                 .moveToElement(targetElement, xOffset, yOffset)
                 .release(targetElement).build().perform();
     }
