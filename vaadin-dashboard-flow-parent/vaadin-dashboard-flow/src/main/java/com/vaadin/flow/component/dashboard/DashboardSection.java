@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.dashboard;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -20,7 +21,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.dom.Element;
 
 /**
  * DashboardSection is a container for organizing multiple
@@ -91,14 +91,11 @@ public class DashboardSection extends Component implements HasWidgets {
     }
 
     @Override
-    public void add(DashboardWidget... widgets) {
+    public void add(Collection<DashboardWidget> widgets) {
         Objects.requireNonNull(widgets, "Widgets to add cannot be null.");
-        List<DashboardWidget> toAdd = new ArrayList<>(widgets.length);
-        for (DashboardWidget widget : widgets) {
-            Objects.requireNonNull(widget, "Widget to add cannot be null.");
-            toAdd.add(widget);
-        }
-        toAdd.forEach(this::doAddWidget);
+        widgets.forEach(widget -> Objects.requireNonNull(widget,
+                "Widget to add cannot be null."));
+        widgets.forEach(this::doAddWidget);
         updateClient();
     }
 
@@ -119,12 +116,12 @@ public class DashboardSection extends Component implements HasWidgets {
     }
 
     @Override
-    public void remove(DashboardWidget... widgets) {
+    public void remove(Collection<DashboardWidget> widgets) {
         Objects.requireNonNull(widgets, "Widgets to remove cannot be null.");
-        List<DashboardWidget> toRemove = new ArrayList<>(widgets.length);
+        var toRemove = new ArrayList<DashboardWidget>(widgets.size());
         for (DashboardWidget widget : widgets) {
             Objects.requireNonNull(widget, "Widget to remove cannot be null.");
-            Element parent = widget.getElement().getParent();
+            var parent = widget.getElement().getParent();
             if (parent == null) {
                 LoggerFactory.getLogger(getClass()).debug(
                         "Removal of a widget with no parent does nothing.");
