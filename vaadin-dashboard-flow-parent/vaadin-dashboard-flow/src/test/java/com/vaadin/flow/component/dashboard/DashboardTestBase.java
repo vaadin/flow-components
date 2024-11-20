@@ -6,7 +6,7 @@
  * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
-package com.vaadin.flow.component.dashboard.tests;
+package com.vaadin.flow.component.dashboard;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,9 +19,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dashboard.Dashboard;
-import com.vaadin.flow.component.dashboard.DashboardSection;
-import com.vaadin.flow.component.dashboard.DashboardWidget;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
 import elemental.json.Json;
@@ -38,6 +36,8 @@ public class DashboardTestBase {
         VaadinSession session = Mockito.mock(VaadinSession.class);
         Mockito.when(session.hasLock()).thenReturn(true);
         ui.getInternals().setSession(session);
+        VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(session.getService()).thenReturn(service);
         fakeClientCommunication();
     }
 
@@ -107,5 +107,17 @@ public class DashboardTestBase {
             DashboardWidget... expectedWidgets) {
         Assert.assertEquals(Arrays.asList(expectedWidgets),
                 section.getWidgets());
+    }
+
+    protected DashboardWidget getNewWidget() {
+        var widget = new DashboardWidget();
+        widget.setFeatureFlagEnabled(true);
+        return widget;
+    }
+
+    protected Dashboard getNewDashboard() {
+        var dashboard = new Dashboard();
+        dashboard.setFeatureFlagEnabled(true);
+        return dashboard;
     }
 }

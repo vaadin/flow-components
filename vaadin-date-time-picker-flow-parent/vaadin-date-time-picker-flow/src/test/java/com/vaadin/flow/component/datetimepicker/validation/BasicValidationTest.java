@@ -33,7 +33,7 @@ public class BasicValidationTest
         extends AbstractBasicValidationTest<DateTimePicker, LocalDateTime> {
     @Test
     public void badInput_validate_emptyErrorMessageDisplayed() {
-        getDatePicker().getElement().setProperty("_hasInputValue", true);
+        getDatePicker().getElement().setProperty("_inputElementValue", "foo");
         fireValidatedDomEvent();
         Assert.assertEquals("", testField.getErrorMessage());
     }
@@ -42,7 +42,7 @@ public class BasicValidationTest
     public void badInput_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setI18n(new DateTimePicker.DateTimePickerI18n()
                 .setBadInputErrorMessage("Value has invalid format"));
-        getDatePicker().getElement().setProperty("_hasInputValue", true);
+        getDatePicker().getElement().setProperty("_inputElementValue", "foo");
         fireValidatedDomEvent();
         Assert.assertEquals("Value has invalid format",
                 testField.getErrorMessage());

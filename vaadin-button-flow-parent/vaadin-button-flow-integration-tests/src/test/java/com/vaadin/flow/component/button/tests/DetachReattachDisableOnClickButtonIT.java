@@ -50,10 +50,11 @@ public class DetachReattachDisableOnClickButtonIT extends AbstractComponentIT {
         disableOnClickButton.click();
 
         // Check 'Disable on click' button is disabled
-        assertDisableOnClickButtonDisabled(disableOnClickButton);
+        waitUntil(driver -> !$(ButtonElement.class).id("disable-on-click")
+                .isEnabled(), 2);
 
         waitUntil(ExpectedConditions.elementToBeClickable(
-                $(ButtonElement.class).id("disable-on-click")), 2000);
+                $(ButtonElement.class).id("disable-on-click")), 2);
 
         // Check 'Disable on click' button is enabled again
         assertDisableOnClickButtonEnabled(disableOnClickButton);
@@ -76,7 +77,7 @@ public class DetachReattachDisableOnClickButtonIT extends AbstractComponentIT {
         removeFromViewButton.click();
 
         waitUntil(ExpectedConditions
-                .numberOfElementsToBe(By.id("disable-on-click"), 0), 2000);
+                .numberOfElementsToBe(By.id("disable-on-click"), 0), 2);
 
         // Re-attach 'Disable on click" button
         ButtonElement addToViewButton = $(ButtonElement.class)
@@ -84,7 +85,7 @@ public class DetachReattachDisableOnClickButtonIT extends AbstractComponentIT {
         addToViewButton.click();
 
         waitUntil(ExpectedConditions
-                .numberOfElementsToBe(By.id("disable-on-click"), 1), 2000);
+                .numberOfElementsToBe(By.id("disable-on-click"), 1), 2);
 
         disableOnClickButton = getDisableOnClickButton();
 

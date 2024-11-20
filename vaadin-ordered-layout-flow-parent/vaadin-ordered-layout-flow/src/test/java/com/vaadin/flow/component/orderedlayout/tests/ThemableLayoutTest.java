@@ -64,6 +64,11 @@ public class ThemableLayoutTest {
         checkThemeToggling("spacing", layout::isSpacing, layout::setSpacing);
     }
 
+    @Test
+    public void checkWrap() {
+        checkThemeToggling("wrap", layout::isWrap, layout::setWrap);
+    }
+
     private void checkThemeToggling(String themeName,
             Supplier<Boolean> themeGetter, Consumer<Boolean> themeSetter) {
         assertFalse(String.format(

@@ -48,9 +48,9 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid-pro", version = "24.6.0-alpha8")
+@NpmPackage(value = "@vaadin/grid-pro", version = "24.6.0-alpha9")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -148,9 +148,12 @@ public class GridPro<E> extends Grid<E> {
             if (column.getEditorType().equals("custom")) {
                 column.getEditorField()
                         .setValue(column.getValueProvider().apply(e.getItem()));
+                var itemKey = getDataCommunicator().getKeyMapper()
+                        .key(e.getItem());
                 UI.getCurrent().getPage().executeJs(
-                        "window.Vaadin.Flow.gridProConnector.selectAll($0)",
-                        column.getEditorField().getElement());
+                        "window.Vaadin.Flow.gridProConnector.selectAll($0, $1, $2)",
+                        column.getEditorField().getElement(), itemKey,
+                        this.getElement());
             }
         });
     }
@@ -190,7 +193,7 @@ public class GridPro<E> extends Grid<E> {
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-pro-edit-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha8")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha9")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class EditColumn<T> extends Column<T> {
 

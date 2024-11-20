@@ -68,7 +68,7 @@ public class ButtonIT extends AbstractComponentIT {
 
         buttonElements = $(ButtonElement.class).withTextContaining("button")
                 .all();
-        Assert.assertEquals(4, buttonElements.size());
+        Assert.assertEquals(3, buttonElements.size());
 
         buttonElements = $(ButtonElement.class)
                 .withTextContaining("nonexistent").all();
@@ -83,11 +83,11 @@ public class ButtonIT extends AbstractComponentIT {
 
         buttonElements = $(ButtonElement.class)
                 .withText("button", String::endsWith).all();
-        Assert.assertEquals(3, buttonElements.size());
+        Assert.assertEquals(2, buttonElements.size());
 
         buttonElements = $(ButtonElement.class)
                 .withText("button", ButtonIT::containsIgnoreCase).all();
-        Assert.assertEquals(5, buttonElements.size());
+        Assert.assertEquals(4, buttonElements.size());
     }
 
     @Test
@@ -109,7 +109,7 @@ public class ButtonIT extends AbstractComponentIT {
 
         buttonElements = $(ButtonElement.class).withCaptionContaining("button")
                 .all();
-        Assert.assertEquals(4, buttonElements.size());
+        Assert.assertEquals(3, buttonElements.size());
 
         buttonElements = $(ButtonElement.class)
                 .withCaptionContaining("nonexistent").all();
@@ -290,29 +290,8 @@ public class ButtonIT extends AbstractComponentIT {
         }
     }
 
-    @Test // https://github.com/vaadin/vaadin-button-flow/issues/115
-    public void disableButtonOnClick_canBeEnabled() {
-        getCommandExecutor().disableWaitForVaadin();
-        ButtonElement button = $(ButtonElement.class)
-                .id("temporarily-disabled-button");
-
-        for (int i = 0; i < 3; i++) {
-            button.click();
-
-            Assert.assertFalse("button should be disabled", button.isEnabled());
-            waitUntil(ExpectedConditions.elementToBeClickable(
-                    $(ButtonElement.class).id("temporarily-disabled-button")),
-                    2000);
-
-            Assert.assertTrue("button should be enabled again",
-                    button.isEnabled());
-        }
-
-        getCommandExecutor().enableWaitForVaadin();
-    }
-
     @Test
-    public void removeDisabled_buttonWorksNormally() {
+    public void removeDisableOnClick_buttonWorksNormally() {
         WebElement button = layout
                 .findElement(By.id("disable-on-click-button"));
         Assert.assertTrue(
@@ -347,17 +326,18 @@ public class ButtonIT extends AbstractComponentIT {
     }
 
     @Test
-    public void disableOnClick_enableInSameRoundtrip_clientSideButtonIsEnabled() {
-        WebElement button = layout
-                .findElement(By.id("disable-on-click-re-enable-button"));
+    public void disableOnClick_enableInSameRoundTrip_clientSideButtonIsEnabled() {
+        var itemId = "disable-on-click-re-enable-button";
+        getCommandExecutor().disableWaitForVaadin();
+        var button = findElement(By.id(itemId));
         for (int i = 0; i < 3; i++) {
-            Boolean disabled = (Boolean) executeScript(
-                    "arguments[0].click(); return arguments[0].disabled",
-                    button);
-            Assert.assertTrue(disabled);
-
-            waitUntil(ExpectedConditions.elementToBeClickable(button));
+            button.click();
+            getCommandExecutor().getDriver()
+                    .executeAsyncScript("requestAnimationFrame(arguments[0])");
+            Assert.assertFalse(button.isEnabled());
+            waitUntil(driver -> button.isEnabled());
         }
+        getCommandExecutor().enableWaitForVaadin();
     }
 
     @Test

@@ -6,7 +6,7 @@
  * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
-package com.vaadin.flow.component.dashboard.tests;
+package com.vaadin.flow.component.dashboard;
 
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
