@@ -135,6 +135,61 @@ public class BasicIT extends AbstractComponentIT {
                 getPanelText("prop-panel"));
     }
 
+    private String LOADING_EDITOR_ATTRIBUTE = "loading-editor";
+
+    @Test
+    public void customComboBox_loadingEditorStateOnEdit() {
+        var cell = grid.getCell(0, 4);
+
+        var hasLoadingStateOnEditStart = (Boolean) executeScript(
+                """
+                            const [cell, grid, attribute] = arguments;
+
+                            // Enter edit mode with double click
+                            cell.dispatchEvent(new CustomEvent('dblclick', {composed: true, bubbles: true}));
+
+                            return grid.hasAttribute(attribute);
+                        """,
+                cell, grid, LOADING_EDITOR_ATTRIBUTE);
+        // Expect the editor to be hidden when the edit starts
+        Assert.assertTrue(hasLoadingStateOnEditStart);
+
+        // After the round trip to the server...
+        var editor = cell.$("vaadin-combo-box").first();
+        // The editor should be visible
+        Assert.assertFalse(grid.hasAttribute(LOADING_EDITOR_ATTRIBUTE));
+        // The editor should have focus
+        Assert.assertTrue("Editor should have focus",
+                (Boolean) executeScript(
+                        "return arguments[0].contains(document.activeElement)",
+                        editor));
+    }
+
+    @Test
+    public void customComboBox_loadingEditorStateClearedOnEditStop() {
+        var cell = grid.getCell(0, 4);
+        var nonCustomEditorCell = grid.getCell(0, 1);
+
+        var hasLoadingStateAttribute = (Boolean) executeScript(
+                """
+                            const [cell, nonCustomEditorCell, grid, attribute] = arguments;
+
+                            // Enter edit mode with double click
+                            cell.dispatchEvent(new CustomEvent('dblclick', {composed: true, bubbles: true}));
+                            await new Promise(resolve => requestAnimationFrame(resolve));
+
+                            // Focus another cell
+                            nonCustomEditorCell.focus();
+                            await new Promise(resolve => requestAnimationFrame(resolve));
+
+                            return grid.hasAttribute(attribute);
+
+                        """,
+                cell, nonCustomEditorCell, grid, LOADING_EDITOR_ATTRIBUTE);
+
+        Assert.assertFalse(hasLoadingStateAttribute);
+    }
+
     @Test
     public void textEditorIsUsedForTextColumn() {
         assertCellEnterEditModeOnDoubleClick(0, 1,
