@@ -40,6 +40,51 @@ public class DashboardWidget extends Component {
     private boolean featureFlagEnabled;
 
     /**
+     * Creates an empty widget.
+     */
+    public DashboardWidget() {
+        this(null, null);
+    }
+
+    /**
+     * Creates a widget with the specified title.
+     *
+     * @param title
+     *            the title to set
+     */
+    public DashboardWidget(String title) {
+        this(title, null);
+    }
+
+    /**
+     * Creates a widget with the specified content.
+     *
+     * @param content
+     *            the content to set
+     */
+    public DashboardWidget(Component content) {
+        this(null, content);
+    }
+
+    /**
+     * Creates a widget with the specified title and content.
+     *
+     * @param title
+     *            the title to set
+     * @param content
+     *            the content to set
+     */
+    public DashboardWidget(String title, Component content) {
+        super();
+        if (title != null) {
+            setTitle(title);
+        }
+        if (content != null) {
+            setContent(content);
+        }
+    }
+
+    /**
      * Returns the title of the widget.
      *
      * @return the {@code widgetTitle} property from the web component

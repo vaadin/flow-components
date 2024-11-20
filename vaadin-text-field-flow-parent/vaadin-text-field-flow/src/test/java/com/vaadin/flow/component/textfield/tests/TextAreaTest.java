@@ -215,4 +215,41 @@ public class TextAreaTest {
         Assert.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<TextArea, String>, String>);
     }
+
+    @Test
+    public void getMinRows_defaultValue() {
+        TextArea field = new TextArea();
+
+        Assert.assertEquals(2, field.getMinRows());
+    }
+
+    @Test
+    public void setMinRows() {
+        TextArea field = new TextArea();
+        field.setMinRows(5);
+
+        Assert.assertEquals(5, field.getMinRows());
+        Assert.assertEquals(5, field.getElement().getProperty("minRows", 0));
+    }
+
+    @Test
+    public void getMaxRows_defaultValue() {
+        TextArea field = new TextArea();
+
+        Assert.assertNull(field.getMaxRows());
+    }
+
+    @Test
+    public void setMaxRows() {
+        TextArea field = new TextArea();
+        field.setMaxRows(5);
+
+        Assert.assertEquals(5, (int) field.getMaxRows());
+        Assert.assertEquals(5, field.getElement().getProperty("maxRows", 0));
+
+        field.setMaxRows(null);
+
+        Assert.assertNull(field.getMaxRows());
+        Assert.assertNull(field.getElement().getProperty("maxRows"));
+    }
 }
