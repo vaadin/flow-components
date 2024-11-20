@@ -35,8 +35,10 @@ import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.data.binder.Result;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
@@ -371,6 +373,27 @@ public class DatePickerTest {
         var field = new DatePicker();
         Assert.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<DatePicker, LocalDate>, LocalDate>);
+    }
+
+    @Test
+    public void setFallbackParser_getFallbackParser() {
+        DatePicker datePicker = new DatePicker();
+        Assert.assertNull(datePicker.getFallbackParser());
+
+        SerializableFunction<String, Result<LocalDate>> fallbackParser = (
+                s) -> {
+            if (s.equals("tomorrow")) {
+                return Result.ok(LocalDate.now().plusDays(1));
+            } else {
+                return Result.error("Invalid date format");
+            }
+        };
+
+        datePicker.setFallbackParser(fallbackParser);
+        Assert.assertEquals(fallbackParser, datePicker.getFallbackParser());
+
+        datePicker.setFallbackParser(null);
+        Assert.assertNull(datePicker.getFallbackParser());
     }
 
     @Tag("div")
