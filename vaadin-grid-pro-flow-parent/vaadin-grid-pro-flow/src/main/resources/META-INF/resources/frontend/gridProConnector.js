@@ -55,8 +55,8 @@ window.Vaadin.Flow.gridProConnector = {
     column._setEditorValue = function (editor, value) {};
 
     const stopCellEdit = column._stopCellEdit;
-    column._stopCellEdit = function (editor, itemKey, grid) {
-      stopCellEdit.call(this, editor, itemKey, grid);
+    column._stopCellEdit = function () {
+      stopCellEdit.apply(this, arguments);
       this._grid.toggleAttribute(LOADING_EDITOR_CELL_ATTRIBUTE, false);
     };
   },
