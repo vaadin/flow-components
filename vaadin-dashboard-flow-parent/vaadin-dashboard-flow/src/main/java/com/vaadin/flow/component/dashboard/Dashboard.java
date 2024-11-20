@@ -10,6 +10,7 @@ package com.vaadin.flow.component.dashboard;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -133,14 +134,11 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     }
 
     @Override
-    public void add(DashboardWidget... widgets) {
+    public void add(Collection<DashboardWidget> widgets) {
         Objects.requireNonNull(widgets, "Widgets to add cannot be null.");
-        List<DashboardWidget> toAdd = new ArrayList<>(widgets.length);
-        for (DashboardWidget widget : widgets) {
-            Objects.requireNonNull(widget, "Widget to add cannot be null.");
-            toAdd.add(widget);
-        }
-        toAdd.forEach(this::doAddWidget);
+        widgets.forEach(widget -> Objects.requireNonNull(widget,
+                "Widget to add cannot be null."));
+        widgets.forEach(this::doAddWidget);
         updateClient();
     }
 
@@ -181,9 +179,9 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     }
 
     @Override
-    public void remove(DashboardWidget... widgets) {
+    public void remove(Collection<DashboardWidget> widgets) {
         Objects.requireNonNull(widgets, "Widgets to remove cannot be null.");
-        List<DashboardWidget> toRemove = new ArrayList<>(widgets.length);
+        List<DashboardWidget> toRemove = new ArrayList<>(widgets.size());
         for (DashboardWidget widget : widgets) {
             Objects.requireNonNull(widget, "Widget to remove cannot be null.");
             Element parent = widget.getElement().getParent();

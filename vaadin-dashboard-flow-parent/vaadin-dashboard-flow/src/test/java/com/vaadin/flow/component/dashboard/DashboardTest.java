@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.dashboard;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,10 +36,19 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void addWidget_widgetIsAdded() {
-        DashboardWidget widget1 = getNewWidget();
-        DashboardWidget widget2 = getNewWidget();
+    public void addWidgetInArray_widgetIsAdded() {
+        var widget1 = getNewWidget();
+        var widget2 = getNewWidget();
         dashboard.add(widget1, widget2);
+        fakeClientCommunication();
+        assertChildComponents(dashboard, widget1, widget2);
+    }
+
+    @Test
+    public void addWidgetInCollection_widgetIsAdded() {
+        var widget1 = getNewWidget();
+        var widget2 = getNewWidget();
+        dashboard.add(List.of(widget1, widget2));
         fakeClientCommunication();
         assertChildComponents(dashboard, widget1, widget2);
     }
@@ -50,10 +60,30 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
+    public void addNullCollection_exceptionIsThrown() {
+        Assert.assertThrows(NullPointerException.class,
+                () -> dashboard.add((Collection<DashboardWidget>) null));
+    }
+
+    @Test
     public void addNullWidgetInArray_noWidgetIsAdded() {
         DashboardWidget widget = getNewWidget();
         try {
             dashboard.add(widget, null);
+        } catch (NullPointerException e) {
+            // Do nothing
+        }
+        fakeClientCommunication();
+        assertChildComponents(dashboard);
+    }
+
+    @Test
+    public void addNullWidgetInCollection_noWidgetIsAdded() {
+        var widgets = new ArrayList<DashboardWidget>();
+        widgets.add(getNewWidget());
+        widgets.add(null);
+        try {
+            dashboard.add(widgets);
         } catch (NullPointerException e) {
             // Do nothing
         }
@@ -101,9 +131,9 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void removeWidget_widgetIsRemoved() {
-        DashboardWidget widget1 = getNewWidget();
-        DashboardWidget widget2 = getNewWidget();
+    public void removeWidgetInArray_widgetIsRemoved() {
+        var widget1 = getNewWidget();
+        var widget2 = getNewWidget();
         dashboard.add(widget1, widget2);
         fakeClientCommunication();
         dashboard.remove(widget1);
@@ -112,9 +142,26 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
+    public void removeWidgetInCollection_widgetIsRemoved() {
+        var widget1 = getNewWidget();
+        var widget2 = getNewWidget();
+        dashboard.add(widget1, widget2);
+        fakeClientCommunication();
+        dashboard.remove(List.of(widget1));
+        fakeClientCommunication();
+        assertChildComponents(dashboard, widget2);
+    }
+
+    @Test
     public void removeNullWidget_exceptionIsThrown() {
         Assert.assertThrows(NullPointerException.class,
                 () -> dashboard.remove((DashboardWidget) null));
+    }
+
+    @Test
+    public void removeNullWidgetCollection_exceptionIsThrown() {
+        Assert.assertThrows(NullPointerException.class,
+                () -> dashboard.remove((Collection<DashboardWidget>) null));
     }
 
     @Test
