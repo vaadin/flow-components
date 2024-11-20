@@ -448,7 +448,7 @@ public class TextArea extends TextFieldBase<TextArea, String>
         if (maxRows != null) {
             getElement().setProperty("maxRows", maxRows);
         } else {
-            getElement().setProperty("maxRows", null);
+            getElement().removeProperty("maxRows");
         }
     }
 
