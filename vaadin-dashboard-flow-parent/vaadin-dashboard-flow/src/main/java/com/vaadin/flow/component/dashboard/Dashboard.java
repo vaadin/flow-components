@@ -44,7 +44,7 @@ import elemental.json.JsonType;
  * Dashboard is a responsive layout component that allows users to organize
  * widgets either directly within the dashboard or optionally group them into
  * sections. The component supports customizable layout options like maximum
- * column count and spacing.
+ * column count.
  * <p>
  * Internationalization (i18n) is supported through {@link DashboardI18n},
  * allowing customization of accessible names for the dashboard controls. The
@@ -319,7 +319,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
      *
      * @return the spacing of the dashboard
      */
-    public String getSpacing() {
+    String getSpacing() {
         return getStyle().get("--vaadin-dashboard-spacing");
     }
 
@@ -331,7 +331,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
      *            the new spacing. Pass in {@code null} to set the spacing back
      *            to the default value.
      */
-    public void setSpacing(String spacing) {
+    void setSpacing(String spacing) {
         getStyle().set("--vaadin-dashboard-spacing", spacing);
     }
 
