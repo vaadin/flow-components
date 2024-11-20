@@ -55,7 +55,7 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/details", version = "24.6.0-alpha9")
-@JsModule("@vaadin/details/src/vaadin-details.js")
+@JsModule("@vaadin/details/src/vaadin-lit-details.js")
 public class Details extends Component implements HasComponents, HasSize,
         HasThemeVariant<DetailsVariant>, HasTooltip {
 

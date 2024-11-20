@@ -31,7 +31,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/horizontal-layout", version = "24.6.0-alpha9")
-@JsModule("@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js")
+@JsModule("@vaadin/horizontal-layout/src/vaadin-lit-horizontal-layout.js")
 public class HorizontalLayout extends Component implements ThemableLayout,
         FlexComponent, ClickNotifier<HorizontalLayout> {
 
