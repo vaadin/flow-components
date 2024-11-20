@@ -106,6 +106,38 @@ public interface ThemableLayout extends HasElement {
     }
 
     /**
+     * Sets whether items should wrap to new lines/columns when they exceed the
+     * layout's boundaries. When enabled, items maintain their size and create
+     * new rows or columns as needed, depending on the layout's orientation.
+     * <p>
+     * When disabled, items will be compressed to fit within a single
+     * row/column.
+     *
+     * @param wrap
+     *            true to enable wrapping, false to force items into a single
+     *            row/column
+     */
+    default void setWrap(boolean wrap) {
+        getThemeList().set("wrap", wrap);
+    }
+
+    /**
+     * Gets whether items will wrap to new lines/columns when they exceed the
+     * layout's boundaries.
+     * <p>
+     * When wrapping is enabled, items maintain their defined dimensions by
+     * creating new rows or columns as needed. When disabled, items may be
+     * compressed to fit within the available space.
+     *
+     * @return true if wrapping is enabled, false if items are forced into a
+     *         single row/column
+     * @see #setWrap(boolean)
+     */
+    default boolean isWrap() {
+        return getThemeList().contains("wrap");
+    }
+
+    /**
      * Gets the set of the theme names applied to the corresponding element in
      * {@code theme} attribute. The set returned can be modified to add or
      * remove the theme names, changes to the set will be reflected in the
