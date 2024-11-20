@@ -31,6 +31,15 @@ public class DashboardWidgetTest extends DashboardTestBase {
     }
 
     @Test
+    public void setTitleInConstructor_returnsCorrectTitle() {
+        var valueToSet = "New title";
+        var widget = new DashboardWidget(valueToSet);
+        widget.setFeatureFlagEnabled(true);
+        widget.setTitle(valueToSet);
+        Assert.assertEquals(valueToSet, widget.getTitle());
+    }
+
+    @Test
     public void setTitleNull_returnsEmptyTitle() {
         DashboardWidget widget = getNewWidget();
         widget.setTitle("New title");
@@ -140,6 +149,24 @@ public class DashboardWidgetTest extends DashboardTestBase {
         Div content = new Div();
         DashboardWidget widget = getNewWidget();
         widget.setContent(content);
+        Assert.assertEquals(content, widget.getContent());
+    }
+
+    @Test
+    public void setContentInConstructor_correctContentIsSet() {
+        var content = new Div();
+        var widget = new DashboardWidget(content);
+        widget.setFeatureFlagEnabled(true);
+        Assert.assertEquals(content, widget.getContent());
+    }
+
+    @Test
+    public void setTitleAndContentInConstructor_correctValuesAreSet() {
+        var title = "New title";
+        var content = new Div();
+        var widget = new DashboardWidget(title, content);
+        widget.setFeatureFlagEnabled(true);
+        Assert.assertEquals(title, widget.getTitle());
         Assert.assertEquals(content, widget.getContent());
     }
 
