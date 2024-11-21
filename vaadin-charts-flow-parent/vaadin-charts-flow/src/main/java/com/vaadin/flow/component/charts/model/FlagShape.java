@@ -13,8 +13,10 @@ package com.vaadin.flow.component.charts.model;
  */
 public enum FlagShape implements ChartEnum {
 
-    CALLOUT("callout"), FLAG("flag"), CIRCLEPIN("circlepin"), SQUAREPIN(
-            "squarepin");
+    CALLOUT("callout"),
+    FLAG("flag"),
+    CIRCLEPIN("circlepin"),
+    SQUAREPIN("squarepin");
 
     FlagShape(String type) {
         this.type = type;

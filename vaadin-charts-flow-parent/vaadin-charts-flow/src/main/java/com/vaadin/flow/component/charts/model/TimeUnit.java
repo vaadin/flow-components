@@ -9,8 +9,14 @@
 package com.vaadin.flow.component.charts.model;
 
 public enum TimeUnit implements ChartEnum {
-    MILLISECOND("millisecond"), SECOND("second"), MINUTE("minute"), HOUR(
-            "hour"), DAY("day"), WEEK("week"), MONTH("month"), YEAR("year");
+    MILLISECOND("millisecond"),
+    SECOND("second"),
+    MINUTE("minute"),
+    HOUR("hour"),
+    DAY("day"),
+    WEEK("week"),
+    MONTH("month"),
+    YEAR("year");
 
     private String name;
 
