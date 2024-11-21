@@ -17,6 +17,7 @@ package com.vaadin.flow.component.timepicker;
 
 import java.io.Serializable;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
@@ -368,25 +369,18 @@ public class TimePicker
         boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
         boolean isInputValuePresent = isInputValuePresent();
 
-        // When the value is cleared programmatically, reset hasInputValue
-        // so that the following validation doesn't treat this as bad input.
+        // When the value is cleared programmatically, there is no change event
+        // that would synchronize _inputElementValue, so we reset it ourselves
+        // to prevent the following validation from treating this as bad input.
         if (isNewValueEmpty) {
-            getElement().setProperty("_hasInputValue", false);
+            setInputElementValue("");
         }
 
         super.setValue(value);
 
-        // Clear the input element from possible bad input.
+        // Revalidate if setValue(null) didn't result in a value change but
+        // cleared bad input
         if (isValueRemainedEmpty && isInputValuePresent) {
-            // The check for value presence guarantees that a non-empty value
-            // won't get cleared when setValue(null) and setValue(...) are
-            // subsequently called within one round-trip.
-            // Flow only sends the final component value to the client
-            // when you update the value multiple times during a round-trip
-            // and the final value is sent in place of the first one, so
-            // `executeJs` can end up invoked after a non-empty value is set.
-            getElement()
-                    .executeJs("if (!this.value) this._inputElementValue = ''");
             validate();
             fireValidationStatusChangeEvent();
         }
@@ -453,9 +447,33 @@ public class TimePicker
      * @return <code>true</code> if the input element's value is populated,
      *         <code>false</code> otherwise
      */
-    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
     protected boolean isInputValuePresent() {
-        return getElement().getProperty("_hasInputValue", false);
+        return !getInputElementValue().isEmpty();
+    }
+
+    /**
+     * Gets the value of the input element. This value is updated on the server
+     * when the web component dispatches a `change` or `unparsable-change`
+     * event. Except when clearing the value, {@link #setValue(LocalDate)} does
+     * not update the input element value on the server because it requires date
+     * formatting, which is implemented on the web component's side.
+     *
+     * @return the value of the input element
+     */
+    @Synchronize(property = "_inputElementValue", value = { "change",
+            "unparsable-change" })
+    private String getInputElementValue() {
+        return getElement().getProperty("_inputElementValue", "");
+    }
+
+    /**
+     * Sets the value of the input element.
+     *
+     * @param value
+     *            the value to set
+     */
+    private void setInputElementValue(String value) {
+        getElement().setProperty("_inputElementValue", value);
     }
 
     /**

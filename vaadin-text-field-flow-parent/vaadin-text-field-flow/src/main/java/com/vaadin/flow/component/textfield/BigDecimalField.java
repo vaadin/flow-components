@@ -18,6 +18,7 @@ package com.vaadin.flow.component.textfield;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.DecimalFormatSymbols;
+import java.time.LocalDate;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -25,7 +26,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -123,7 +123,7 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         boolean fromComponent = context == null;
 
         boolean hasBadInput = valueEquals(value, getEmptyValue())
-                && isInputValuePresent();
+                && !getInputElementValue().isEmpty();
         if (hasBadInput) {
             return ValidationResult.error(getI18nErrorMessage(
                     BigDecimalFieldI18n::getBadInputErrorMessage));
@@ -164,6 +164,13 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
 
         addValueChangeListener(e -> validate());
+    }
+
+    @Override
+    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
+        super.setValueChangeMode(valueChangeMode);
+        getSynchronizationRegistration()
+                .synchronizeProperty("_inputElementValue");
     }
 
     /**
@@ -311,27 +318,22 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
         boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
         boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
-        boolean isInputValuePresent = isInputValuePresent();
+        boolean isInputElementValueEmpty = getInputElementValue().isEmpty();
 
-        // When the value is cleared programmatically, reset hasInputValue
-        // so that the following validation doesn't treat this as bad input.
+        // When the value is cleared programmatically, there is no change event
+        // that would synchronize _inputElementValue, so we reset it ourselves
+        // to prevent the following validation from treating this as bad input.
         if (isNewValueEmpty) {
-            getElement().setProperty("_hasInputValue", false);
+            setInputElementValue("");
         }
 
         super.setValue(value);
 
-        if (isValueRemainedEmpty && isInputValuePresent) {
-            // Clear the input element from possible bad input.
-            getElement().executeJs("this._inputElementValue = ''");
+        // Revalidate if setValue(null) didn't result in a value change but
+        // cleared bad input
+        if (isValueRemainedEmpty && !isInputElementValueEmpty) {
             validate();
             fireValidationStatusChangeEvent();
-        } else {
-            // Restore the input element's value in case it was cleared
-            // in the above branch. That can happen when setValue(null)
-            // and setValue(...) are subsequently called within one round-trip
-            // and there was bad input.
-            getElement().executeJs("this._inputElementValue = this.value");
         }
     }
 
@@ -403,14 +405,26 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     }
 
     /**
-     * Returns whether the input element has a value or not.
+     * Gets the value of the input element. This value is updated on the server
+     * when the web component dispatches a `change` event. Except when clearing
+     * the value, {@link #setValue(LocalDate)} does not update the input element
+     * value on the server because it requires date formatting, which is
+     * implemented on the web component's side.
      *
-     * @return <code>true</code> if the input element's value is populated,
-     *         <code>false</code> otherwise
+     * @return the value of the input element
      */
-    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
-    private boolean isInputValuePresent() {
-        return getElement().getProperty("_hasInputValue", false);
+    private String getInputElementValue() {
+        return getElement().getProperty("_inputElementValue", "");
+    }
+
+    /**
+     * Sets the value of the input element.
+     *
+     * @param value
+     *            the value to set
+     */
+    private void setInputElementValue(String value) {
+        getElement().setProperty("_inputElementValue", value);
     }
 
     /**

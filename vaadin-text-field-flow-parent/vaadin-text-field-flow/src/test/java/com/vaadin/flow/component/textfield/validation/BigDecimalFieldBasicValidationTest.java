@@ -15,13 +15,14 @@
  */
 package com.vaadin.flow.component.textfield.validation;
 
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.textfield.BigDecimalField;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
 public class BigDecimalFieldBasicValidationTest
@@ -34,14 +35,15 @@ public class BigDecimalFieldBasicValidationTest
         });
 
         // Trigger ValidationStatusChangeEvent
-        simulateBadInput();
+        fakeClientPropertyChange(testField, "_inputElementValue", "foo");
+        fakeClientPropertyChange(testField, "value", "foo");
         testField.clear();
     }
 
     @Test
     public void badInput_validate_emptyErrorMessageDisplayed() {
-        testField.getElement().setProperty("_hasInputValue", true);
-        simulateBadInput();
+        fakeClientPropertyChange(testField, "_inputElementValue", "foo");
+        fakeClientPropertyChange(testField, "value", "foo");
         Assert.assertEquals("", testField.getErrorMessage());
     }
 
@@ -49,8 +51,8 @@ public class BigDecimalFieldBasicValidationTest
     public void badInput_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setI18n(new BigDecimalField.BigDecimalFieldI18n()
                 .setBadInputErrorMessage("Value has invalid format"));
-        testField.getElement().setProperty("_hasInputValue", true);
-        simulateBadInput();
+        fakeClientPropertyChange(testField, "_inputElementValue", "foo");
+        fakeClientPropertyChange(testField, "value", "foo");
         Assert.assertEquals("Value has invalid format",
                 testField.getErrorMessage());
     }
@@ -104,16 +106,10 @@ public class BigDecimalFieldBasicValidationTest
         return new BigDecimalField();
     }
 
-    private void simulateBadInput() {
-        testField.getElement().setProperty("_hasInputValue", true);
-
-        try {
-            Method validateMethod = BigDecimalField.class
-                    .getDeclaredMethod("validate");
-            validateMethod.setAccessible(true);
-            validateMethod.invoke(testField);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    private void fakeClientPropertyChange(Component component, String property,
+            String value) {
+        Element element = component.getElement();
+        element.getStateProvider().setProperty(element.getNode(), property,
+                value, false);
     }
 }
