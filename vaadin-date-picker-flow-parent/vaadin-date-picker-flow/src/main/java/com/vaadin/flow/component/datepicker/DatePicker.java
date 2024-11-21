@@ -759,7 +759,7 @@ public class DatePicker
         boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
         boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
         boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
-        boolean isInputValuePresent = isInputValuePresent();
+        String oldInputElementValue = getInputElementValue();
 
         // When the value is cleared programmatically, there is no change event
         // that would synchronize _inputElementValue, so we reset it ourselves
@@ -772,7 +772,7 @@ public class DatePicker
 
         // Revalidate if setValue(null) didn't result in a value change but
         // cleared bad input
-        if (isValueRemainedEmpty && isInputValuePresent) {
+        if (isValueRemainedEmpty && !oldInputElementValue.isEmpty()) {
             validate();
             fireValidationStatusChangeEvent();
         }

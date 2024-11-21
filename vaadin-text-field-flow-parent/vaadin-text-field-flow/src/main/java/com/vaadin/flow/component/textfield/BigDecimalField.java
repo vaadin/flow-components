@@ -25,7 +25,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -123,7 +122,7 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         boolean fromComponent = context == null;
 
         boolean hasBadInput = valueEquals(value, getEmptyValue())
-                && isInputValuePresent();
+                && !getInputElementValue().isEmpty();
         if (hasBadInput) {
             return ValidationResult.error(getI18nErrorMessage(
                     BigDecimalFieldI18n::getBadInputErrorMessage));
@@ -311,27 +310,16 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
         boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
         boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
-        boolean isInputValuePresent = isInputValuePresent();
-
-        // When the value is cleared programmatically, reset hasInputValue
-        // so that the following validation doesn't treat this as bad input.
-        if (isNewValueEmpty) {
-            getElement().setProperty("_hasInputValue", false);
-        }
+        String oldInputElementValue = getInputElementValue();
 
         super.setValue(value);
 
-        if (isValueRemainedEmpty && isInputValuePresent) {
-            // Clear the input element from possible bad input.
-            getElement().executeJs("this._inputElementValue = ''");
+        // Revalidate and clear input element value if setValue(null) didn't
+        // result in a value change but there was bad input.
+        if (isValueRemainedEmpty && !oldInputElementValue.isEmpty()) {
+            setInputElementValue("");
             validate();
             fireValidationStatusChangeEvent();
-        } else {
-            // Restore the input element's value in case it was cleared
-            // in the above branch. That can happen when setValue(null)
-            // and setValue(...) are subsequently called within one round-trip
-            // and there was bad input.
-            getElement().executeJs("this._inputElementValue = this.value");
         }
     }
 
@@ -402,15 +390,12 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
                 .forEach(listener -> listener.validationStatusChanged(event));
     }
 
-    /**
-     * Returns whether the input element has a value or not.
-     *
-     * @return <code>true</code> if the input element's value is populated,
-     *         <code>false</code> otherwise
-     */
-    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
-    private boolean isInputValuePresent() {
-        return getElement().getProperty("_hasInputValue", false);
+    private String getInputElementValue() {
+        return getElement().getProperty("value", "");
+    }
+
+    private void setInputElementValue(String value) {
+        getElement().setProperty("value", value);
     }
 
     /**
