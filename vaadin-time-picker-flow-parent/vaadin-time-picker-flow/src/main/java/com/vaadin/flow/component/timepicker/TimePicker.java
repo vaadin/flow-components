@@ -17,7 +17,6 @@ package com.vaadin.flow.component.timepicker;
 
 import java.io.Serializable;
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
@@ -367,7 +366,7 @@ public class TimePicker
         boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
         boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
         boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
-        boolean isInputValuePresent = isInputValuePresent();
+        String oldInputElementValue = getInputElementValue();
 
         // When the value is cleared programmatically, there is no change event
         // that would synchronize _inputElementValue, so we reset it ourselves
@@ -380,7 +379,7 @@ public class TimePicker
 
         // Revalidate if setValue(null) didn't result in a value change but
         // cleared bad input
-        if (isValueRemainedEmpty && isInputValuePresent) {
+        if (isValueRemainedEmpty && !oldInputElementValue.isEmpty()) {
             validate();
             fireValidationStatusChangeEvent();
         }
@@ -454,7 +453,7 @@ public class TimePicker
     /**
      * Gets the value of the input element. This value is updated on the server
      * when the web component dispatches a `change` or `unparsable-change`
-     * event. Except when clearing the value, {@link #setValue(LocalDate)} does
+     * event. Except when clearing the value, {@link #setValue(LocalTime)} does
      * not update the input element value on the server because it requires date
      * formatting, which is implemented on the web component's side.
      *

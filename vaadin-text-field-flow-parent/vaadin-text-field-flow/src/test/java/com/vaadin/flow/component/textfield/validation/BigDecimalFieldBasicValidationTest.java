@@ -35,14 +35,12 @@ public class BigDecimalFieldBasicValidationTest
         });
 
         // Trigger ValidationStatusChangeEvent
-        fakeClientPropertyChange(testField, "_inputElementValue", "foo");
         fakeClientPropertyChange(testField, "value", "foo");
         testField.clear();
     }
 
     @Test
     public void badInput_validate_emptyErrorMessageDisplayed() {
-        fakeClientPropertyChange(testField, "_inputElementValue", "foo");
         fakeClientPropertyChange(testField, "value", "foo");
         Assert.assertEquals("", testField.getErrorMessage());
     }
@@ -51,7 +49,6 @@ public class BigDecimalFieldBasicValidationTest
     public void badInput_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setI18n(new BigDecimalField.BigDecimalFieldI18n()
                 .setBadInputErrorMessage("Value has invalid format"));
-        fakeClientPropertyChange(testField, "_inputElementValue", "foo");
         fakeClientPropertyChange(testField, "value", "foo");
         Assert.assertEquals("Value has invalid format",
                 testField.getErrorMessage());

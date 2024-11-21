@@ -18,7 +18,6 @@ package com.vaadin.flow.component.textfield;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.DecimalFormatSymbols;
-import java.time.LocalDate;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -166,13 +165,6 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         addValueChangeListener(e -> validate());
     }
 
-    @Override
-    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
-        super.setValueChangeMode(valueChangeMode);
-        getSynchronizationRegistration()
-                .synchronizeProperty("_inputElementValue");
-    }
-
     /**
      * Constructs an empty {@code BigDecimalField} with the given label.
      *
@@ -318,20 +310,14 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
         boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
         boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
-        boolean isInputElementValueEmpty = getInputElementValue().isEmpty();
-
-        // When the value is cleared programmatically, there is no change event
-        // that would synchronize _inputElementValue, so we reset it ourselves
-        // to prevent the following validation from treating this as bad input.
-        if (isNewValueEmpty) {
-            setInputElementValue("");
-        }
+        String oldInputElementValue = getInputElementValue();
 
         super.setValue(value);
 
-        // Revalidate if setValue(null) didn't result in a value change but
-        // cleared bad input
-        if (isValueRemainedEmpty && !isInputElementValueEmpty) {
+        // Revalidate and clear input element value if setValue(null) didn't
+        // result in a value change but there was bad input.
+        if (isValueRemainedEmpty && !oldInputElementValue.isEmpty()) {
+            setInputElementValue("");
             validate();
             fireValidationStatusChangeEvent();
         }
@@ -404,27 +390,12 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
                 .forEach(listener -> listener.validationStatusChanged(event));
     }
 
-    /**
-     * Gets the value of the input element. This value is updated on the server
-     * when the web component dispatches a `change` event. Except when clearing
-     * the value, {@link #setValue(LocalDate)} does not update the input element
-     * value on the server because it requires date formatting, which is
-     * implemented on the web component's side.
-     *
-     * @return the value of the input element
-     */
     private String getInputElementValue() {
-        return getElement().getProperty("_inputElementValue", "");
+        return getElement().getProperty("value", "");
     }
 
-    /**
-     * Sets the value of the input element.
-     *
-     * @param value
-     *            the value to set
-     */
     private void setInputElementValue(String value) {
-        getElement().setProperty("_inputElementValue", value);
+        getElement().setProperty("value", value);
     }
 
     /**
