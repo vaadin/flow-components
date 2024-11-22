@@ -46,4 +46,11 @@ public abstract class AbstractComponentIT
         return capabilities;
     }
 
+    @Override
+    protected void open() {
+        super.open();
+
+        // Force a specific window size for the tests
+        testBench().resizeViewPortTo(1024, 800);
+    }
 }
