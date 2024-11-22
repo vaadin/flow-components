@@ -26,8 +26,8 @@ public class DashboardItemResizePage extends Div {
         dashboard.setMinimumRowHeight("200px");
         dashboard.setMinimumColumnWidth("250px");
         dashboard.setMaximumColumnWidth("250px");
-        // Use setSpacing when it is made public
-        getStyle().set("--vaadin-dashboard-spacing", "0px");
+        dashboard.setGap("0px");
+        dashboard.setPadding("0px");
 
         DashboardWidget widget = new DashboardWidget();
         widget.setTitle("Widget");

@@ -794,41 +794,78 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
-    public void setSpacing_valueIsCorrectlySet() {
-        String propertyName = "--vaadin-dashboard-spacing";
+    public void setGap_valueIsCorrectlySet() {
+        String propertyName = "--vaadin-dashboard-gap";
         String valueToSet = "10px";
         Assert.assertNull(dashboard.getStyle().get(propertyName));
-        dashboard.setSpacing(valueToSet);
+        dashboard.setGap(valueToSet);
         Assert.assertEquals(valueToSet, dashboard.getStyle().get(propertyName));
-        dashboard.setSpacing(null);
+        dashboard.setGap(null);
         Assert.assertNull(dashboard.getStyle().get(propertyName));
     }
 
     @Test
-    public void setSpacingNull_propertyIsRemoved() {
-        dashboard.setSpacing("10px");
-        dashboard.setSpacing(null);
-        Assert.assertNull(
-                dashboard.getStyle().get("--vaadin-dashboard-spacing"));
+    public void setGapNull_propertyIsRemoved() {
+        dashboard.setGap("10px");
+        dashboard.setGap(null);
+        Assert.assertNull(dashboard.getStyle().get("--vaadin-dashboard-gap"));
     }
 
     @Test
-    public void defaultSpacingValueIsCorrectlyRetrieved() {
-        Assert.assertNull(dashboard.getSpacing());
+    public void defaultGapValueIsCorrectlyRetrieved() {
+        Assert.assertNull(dashboard.getGap());
     }
 
     @Test
-    public void setSpacing_valueIsCorrectlyRetrieved() {
+    public void setGap_valueIsCorrectlyRetrieved() {
         String valueToSet = "10px";
-        dashboard.setSpacing(valueToSet);
-        Assert.assertEquals(valueToSet, dashboard.getSpacing());
+        dashboard.setGap(valueToSet);
+        Assert.assertEquals(valueToSet, dashboard.getGap());
     }
 
     @Test
-    public void setSpacingNull_valueIsCorrectlyRetrieved() {
-        dashboard.setSpacing("10px");
-        dashboard.setSpacing(null);
-        Assert.assertNull(dashboard.getSpacing());
+    public void setGapNull_valueIsCorrectlyRetrieved() {
+        dashboard.setGap("10px");
+        dashboard.setGap(null);
+        Assert.assertNull(dashboard.getGap());
+    }
+
+    @Test
+    public void setPadding_valueIsCorrectlySet() {
+        String propertyName = "--vaadin-dashboard-padding";
+        String valueToSet = "10px";
+        Assert.assertNull(dashboard.getStyle().get(propertyName));
+        dashboard.setPadding(valueToSet);
+        Assert.assertEquals(valueToSet, dashboard.getStyle().get(propertyName));
+        dashboard.setPadding(null);
+        Assert.assertNull(dashboard.getStyle().get(propertyName));
+    }
+
+    @Test
+    public void setPaddingNull_propertyIsRemoved() {
+        dashboard.setPadding("10px");
+        dashboard.setPadding(null);
+        Assert.assertNull(
+                dashboard.getStyle().get("--vaadin-dashboard-padding"));
+    }
+
+    @Test
+    public void defaultPaddingValueIsCorrectlyRetrieved() {
+        Assert.assertNull(dashboard.getPadding());
+    }
+
+    @Test
+    public void setPadding_valueIsCorrectlyRetrieved() {
+        String valueToSet = "10px";
+        dashboard.setPadding(valueToSet);
+        Assert.assertEquals(valueToSet, dashboard.getPadding());
+    }
+
+    @Test
+    public void setPaddingNull_valueIsCorrectlyRetrieved() {
+        dashboard.setPadding("10px");
+        dashboard.setPadding(null);
+        Assert.assertNull(dashboard.getPadding());
     }
 
     @Test
