@@ -42,18 +42,18 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
         doScroll(280, 400, "Callback Item 270", RangeLog.of(4, 250, 300));
 
         // trigger another buffer increase but not capping item count
-        doScroll(399, 600, "Callback Item 395", RangeLog.of(7, 400, 450));
+        doScroll(399, 600, "Callback Item 395", RangeLog.of(6, 400, 450));
 
         // scroll to actual end, no more items returned and item count is
         // adjusted
-        doScroll(499, 500, "Callback Item 499", RangeLog.of(9, 500, 550));
+        doScroll(499, 500, "Callback Item 499", RangeLog.of(8, 500, 550));
 
         // scroll to 0 position and check the item count is correct
-        doScroll(0, 500, "Callback Item 0", RangeLog.of(10, 0, 50));
+        doScroll(0, 500, "Callback Item 0", RangeLog.of(9, 0, 50));
 
         // scroll again to the end of list and check the item count
-        doScroll(450, 500, "Callback Item 450", RangeLog.of(11, 400, 450),
-                RangeLog.of(12, 450, 500));
+        doScroll(450, 500, "Callback Item 450", RangeLog.of(10, 400, 450),
+                RangeLog.of(11, 450, 500));
     }
 
     @Test
