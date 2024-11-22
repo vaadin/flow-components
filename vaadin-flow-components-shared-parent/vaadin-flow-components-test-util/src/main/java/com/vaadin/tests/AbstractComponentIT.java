@@ -47,10 +47,10 @@ public abstract class AbstractComponentIT
     }
 
     @Override
-    protected void open() {
-        super.open();
+    public void setup() throws Exception {
+        super.setup();
 
-        // Force a specific window size for the tests
+        // Set a default window size
         testBench().resizeViewPortTo(1024, 800);
     }
 }
