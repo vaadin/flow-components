@@ -67,7 +67,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     private static Integer defaultHideDelay;
     private static Integer defaultFocusDelay;
     private static Integer defaultHoverDelay;
-    private static boolean uiInitListenerRegistered = false;
+    static boolean uiInitListenerRegistered = false;
 
     private Component target;
     private Registration targetAttachRegistration;
@@ -111,7 +111,8 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * @param defaultFocusDelay
      *            the default focus delay
      */
-    public static void setDefaultFocusDelay(int defaultFocusDelay) {
+    public synchronized static void setDefaultFocusDelay(
+            int defaultFocusDelay) {
         Popover.defaultFocusDelay = defaultFocusDelay;
         applyConfiguration();
     }
@@ -124,7 +125,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * @param defaultHideDelay
      *            the default hide delay
      */
-    public static void setDefaultHideDelay(int defaultHideDelay) {
+    public synchronized static void setDefaultHideDelay(int defaultHideDelay) {
         Popover.defaultHideDelay = defaultHideDelay;
         applyConfiguration();
     }
@@ -137,7 +138,8 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * @param defaultHoverDelay
      *            the default hover delay
      */
-    public static void setDefaultHoverDelay(int defaultHoverDelay) {
+    public synchronized static void setDefaultHoverDelay(
+            int defaultHoverDelay) {
         Popover.defaultHoverDelay = defaultHoverDelay;
         applyConfiguration();
     }

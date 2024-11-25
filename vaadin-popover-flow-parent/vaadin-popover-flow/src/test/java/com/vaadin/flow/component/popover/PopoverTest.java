@@ -15,12 +15,22 @@
  */
 package com.vaadin.flow.component.popover;
 
+import static org.mockito.Mockito.times;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.server.VaadinService;
 
 import elemental.json.JsonArray;
 
@@ -293,5 +303,49 @@ public class PopoverTest {
         Assert.assertEquals(1, popoverWithContent.getChildren().count());
         Assert.assertSame(content,
                 popoverWithContent.getChildren().findFirst().get());
+    }
+
+    @Test
+    public void testSetDefaultFocusDelay_threadSafety() {
+        testStaticSettersThreadsSafety(
+                () -> Popover.setDefaultFocusDelay(1000));
+    }
+
+    @Test
+    public void testSetDefaultHoverDelay_threadSafety() {
+        testStaticSettersThreadsSafety(
+                () -> Popover.setDefaultHoverDelay(1000));
+    }
+
+    @Test
+    public void testSetDefaultHideDelay_threadSafety() {
+        testStaticSettersThreadsSafety(() -> Popover.setDefaultHideDelay(1000));
+    }
+
+    private void testStaticSettersThreadsSafety(Runnable tester) {
+        // Reset the static state for each test
+        Popover.uiInitListenerRegistered = false;
+        final VaadinService current = Mockito.mock(VaadinService.class);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        final CountDownLatch latch = new CountDownLatch(10);
+        final Runnable runnable = () -> {
+            VaadinService.setCurrent(current);
+            latch.countDown();
+            for (int i = 0; i < 100000; i++) {
+                tester.run();
+            }
+        };
+        final var list = IntStream.range(0, 10)
+                .mapToObj(it -> executorService.submit(runnable)).toList();
+        for (var future : list) {
+            try {
+                future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        executorService.shutdown();
+        Mockito.verify(current, times(1)).addUIInitListener(Mockito.any());
     }
 }
