@@ -32,7 +32,7 @@ public abstract class AbstractItemCountComboBoxIT extends AbstractComboBoxIT {
 
     // changing the dimension might get combo box change what it fetches and
     // how many items it shows, so changing this is a bad idea ...
-    private static final Dimension TARGET_SIZE = new Dimension(1000, 900);
+    private static final Dimension TARGET_SIZE = new Dimension(1000, 1100);
     protected ComboBoxElement comboBoxElement;
     protected int countIncreasePageCount = 4;
     protected int pageSize = new ComboBox<String>().getPageSize();
