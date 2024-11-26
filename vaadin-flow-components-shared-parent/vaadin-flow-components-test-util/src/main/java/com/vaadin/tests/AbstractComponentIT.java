@@ -28,6 +28,9 @@ public abstract class AbstractComponentIT
     public void setup() throws Exception {
         browser.setup(super::setup, this::setDriver, this::getDriver,
                 screenshotOnFailure);
+
+        // Set a default window size
+        testBench().resizeViewPortTo(1024, 800);
     }
 
     protected int getDeploymentPort() {
