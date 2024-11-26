@@ -60,6 +60,15 @@ public class NotificationTest {
     }
 
     @Test
+    public void stringDurationPositionAndAssertiveCtor() {
+        notification = new Notification("fooo", 10000, Position.TOP_END, true);
+        Assert.assertEquals(10000, notification.getDuration(), 0);
+        Assert.assertEquals("top-end",
+                notification.getPosition().getClientName());
+        Assert.assertTrue(notification.isAssertive());
+    }
+
+    @Test
     public void componentCtor() {
         notification = new Notification(new Label(), new NativeButton());
 
@@ -70,10 +79,11 @@ public class NotificationTest {
 
     @Test
     public void staticCtor() {
-        notification = Notification.show("fooooo", 4000,
-                Position.BOTTOM_CENTER);
+        notification = Notification.show("fooooo", 4000, Position.BOTTOM_CENTER,
+                true);
         Assert.assertEquals("bottom-center",
                 notification.getPosition().getClientName());
+        Assert.assertTrue(notification.isAssertive());
     }
 
     @Test

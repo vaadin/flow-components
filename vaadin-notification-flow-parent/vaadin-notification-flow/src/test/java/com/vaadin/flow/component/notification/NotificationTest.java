@@ -367,4 +367,18 @@ public class NotificationTest {
         Assert.assertEquals("foo > bar",
                 notification.getElement().getProperty("text"));
     }
+
+    @Test
+    public void setAssertive_isAssertive() {
+        Notification notification = new Notification();
+        notification.setAssertive(true);
+        Assert.assertEquals(notification.isAssertive(), true);
+        Assert.assertTrue(
+                notification.getElement().getProperty("assertive", false));
+
+        notification.setAssertive(false);
+        Assert.assertEquals(notification.isAssertive(), false);
+        Assert.assertFalse(
+                notification.getElement().getProperty("assertive", false));
+    }
 }
