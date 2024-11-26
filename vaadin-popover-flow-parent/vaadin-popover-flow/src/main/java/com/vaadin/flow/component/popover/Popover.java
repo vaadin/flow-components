@@ -68,7 +68,8 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     private static Integer defaultHideDelay;
     private static Integer defaultFocusDelay;
     private static Integer defaultHoverDelay;
-    static AtomicBoolean uiInitListenerRegistered = new AtomicBoolean(false);
+    final static AtomicBoolean uiInitListenerRegistered = new AtomicBoolean(
+            false);
 
     private Component target;
     private Registration targetAttachRegistration;
