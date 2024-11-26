@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -67,7 +68,8 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     private static Integer defaultHideDelay;
     private static Integer defaultFocusDelay;
     private static Integer defaultHoverDelay;
-    private static boolean uiInitListenerRegistered = false;
+    final static AtomicBoolean uiInitListenerRegistered = new AtomicBoolean(
+            false);
 
     private Component target;
     private Registration targetAttachRegistration;
@@ -148,11 +150,10 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
             applyConfigurationForUI(UI.getCurrent());
         }
 
-        if (!uiInitListenerRegistered) {
+        if (uiInitListenerRegistered.compareAndSet(false, true)) {
             // Apply the popover configuration for all new UIs
             VaadinService.getCurrent()
                     .addUIInitListener(e -> applyConfigurationForUI(e.getUI()));
-            uiInitListenerRegistered = true;
         }
     }
 
