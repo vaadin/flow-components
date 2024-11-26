@@ -22,4 +22,11 @@ public abstract class AbstractComponentIT
         return 8080;
     }
 
+    @Override
+    public void setup() throws Exception {
+        super.setup();
+
+        // Set a default window size
+        testBench().resizeViewPortTo(1024, 800);
+    }
 }
