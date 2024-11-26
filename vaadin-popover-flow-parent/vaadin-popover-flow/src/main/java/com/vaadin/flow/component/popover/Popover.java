@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AttachEvent;
@@ -67,7 +68,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     private static Integer defaultHideDelay;
     private static Integer defaultFocusDelay;
     private static Integer defaultHoverDelay;
-    static boolean uiInitListenerRegistered = false;
+    static AtomicBoolean uiInitListenerRegistered = new AtomicBoolean(false);
 
     private Component target;
     private Registration targetAttachRegistration;
@@ -111,8 +112,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * @param defaultFocusDelay
      *            the default focus delay
      */
-    public synchronized static void setDefaultFocusDelay(
-            int defaultFocusDelay) {
+    public static void setDefaultFocusDelay(int defaultFocusDelay) {
         Popover.defaultFocusDelay = defaultFocusDelay;
         applyConfiguration();
     }
@@ -125,7 +125,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * @param defaultHideDelay
      *            the default hide delay
      */
-    public synchronized static void setDefaultHideDelay(int defaultHideDelay) {
+    public static void setDefaultHideDelay(int defaultHideDelay) {
         Popover.defaultHideDelay = defaultHideDelay;
         applyConfiguration();
     }
@@ -138,8 +138,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      * @param defaultHoverDelay
      *            the default hover delay
      */
-    public synchronized static void setDefaultHoverDelay(
-            int defaultHoverDelay) {
+    public static void setDefaultHoverDelay(int defaultHoverDelay) {
         Popover.defaultHoverDelay = defaultHoverDelay;
         applyConfiguration();
     }
@@ -150,11 +149,10 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
             applyConfigurationForUI(UI.getCurrent());
         }
 
-        if (!uiInitListenerRegistered) {
+        if (uiInitListenerRegistered.compareAndSet(false, true)) {
             // Apply the popover configuration for all new UIs
             VaadinService.getCurrent()
                     .addUIInitListener(e -> applyConfigurationForUI(e.getUI()));
-            uiInitListenerRegistered = true;
         }
     }
 

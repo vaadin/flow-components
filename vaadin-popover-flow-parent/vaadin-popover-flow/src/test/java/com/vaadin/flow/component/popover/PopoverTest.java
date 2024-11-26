@@ -324,7 +324,7 @@ public class PopoverTest {
 
     private void testStaticSettersThreadsSafety(Runnable tester) {
         // Reset the static state for each test
-        Popover.uiInitListenerRegistered = false;
+        Popover.uiInitListenerRegistered.set(false);
         final VaadinService current = Mockito.mock(VaadinService.class);
 
         ExecutorService executorService = Executors.newFixedThreadPool(10);
