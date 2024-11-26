@@ -9,8 +9,6 @@
 package com.vaadin.flow.component.charts.themes;
 
 import com.vaadin.flow.component.charts.model.AbstractDataLabels;
-import com.vaadin.flow.component.charts.model.Hover;
-import com.vaadin.flow.component.charts.model.States;
 import com.vaadin.flow.component.charts.model.style.AxisStyle;
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.model.style.FontWeight;
@@ -164,10 +162,6 @@ public class LumoDarkTheme extends Theme {
         setDataLabelsDefaults(getPlotOptions().getPyramid().getDataLabels());
         setDataLabelsDefaults(getPlotOptions().getSpline().getDataLabels());
         setDataLabelsDefaults(getPlotOptions().getWaterfall().getDataLabels());
-
-        States states = new States();
-        states.setHover(new Hover(false));
-        getPlotOptions().getPie().setStates(states);
     }
 
     protected void setDataLabelsDefaults(AbstractDataLabels labels) {
