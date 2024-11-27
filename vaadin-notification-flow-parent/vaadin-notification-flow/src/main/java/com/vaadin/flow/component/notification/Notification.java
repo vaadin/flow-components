@@ -54,9 +54,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/notification", version = "24.6.0-alpha8")
+@NpmPackage(value = "@vaadin/notification", version = "24.6.0-beta1")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -199,6 +199,31 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
+     * Creates a Notification with given text String, duration, position and
+     * assertive state.
+     * <P>
+     * Set to {@code 0} or a negative number to disable the notification
+     * auto-closing.
+     *
+     * @param text
+     *            the text of the notification
+     * @param duration
+     *            the duration in milliseconds to show the notification
+     * @param position
+     *            the position of the notification. Valid enumerate values are
+     *            TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE,
+     *            BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH
+     * @param assertive
+     *            whether the notification should have {@code aria-live}
+     *            attribute set to {@code assertive} or {@code polite}
+     */
+    public Notification(String text, int duration, Position position,
+            boolean assertive) {
+        this(text, duration, position);
+        setAssertive(assertive);
+    }
+
+    /**
      * Creates a notification with given components inside.
      * <p>
      * Note: To mix text and child components in a component that also supports
@@ -233,6 +258,31 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
+     * Shows a notification in the current page with given text, duration,
+     * position and assertive state.
+     *
+     * @param text
+     *            the text of the Notification
+     * @param duration
+     *            the duration in milliseconds to show the notification
+     * @param position
+     *            the position of the notification. Valid enumerate values are
+     *            TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE,
+     *            BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH
+     * @param assertive
+     *            whether the notification should have {@code aria-live}
+     *            attribute set to {@code assertive} or {@code polite}
+     * @return the notification
+     */
+    public static Notification show(String text, int duration,
+            Position position, boolean assertive) {
+        Notification notification = new Notification(text, duration, position,
+                assertive);
+        notification.open();
+        return notification;
+    }
+
+    /**
      * Shows a notification in the current page with given text, duration and
      * position.
      *
@@ -248,9 +298,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     public static Notification show(String text, int duration,
             Position position) {
-        Notification notification = new Notification(text, duration, position);
-        notification.open();
-        return notification;
+        return show(text, duration, position, false);
     }
 
     /**
@@ -499,6 +547,29 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     public int getDuration() {
         return getElement().getProperty("duration", 0);
+    }
+
+    /**
+     * When true, the notification card has {@code aria-live} attribute set to
+     * {@code assertive} instead of {@code polite}. This makes screen readers
+     * announce the notification content immediately when it appears.
+     *
+     * @param assertive
+     *            the value to set
+     */
+    public void setAssertive(boolean assertive) {
+        getElement().setProperty("assertive", assertive);
+    }
+
+    /**
+     * When true, the notification card has {@code aria-live} attribute set to
+     * {@code assertive} instead of {@code polite}. This makes screen readers
+     * announce the notification content immediately when it appears.
+     *
+     * @return the {@code assertive} property from the webcomponent
+     */
+    public boolean isAssertive() {
+        return getElement().getProperty("assertive", false);
     }
 
     /**

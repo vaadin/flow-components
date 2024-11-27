@@ -6,7 +6,7 @@
  * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
-package com.vaadin.flow.component.dashboard.tests;
+package com.vaadin.flow.component.dashboard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +20,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.dashboard.Dashboard;
-import com.vaadin.flow.component.dashboard.DashboardSection;
-import com.vaadin.flow.component.dashboard.DashboardWidget;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -37,11 +34,13 @@ public class DashboardItemMoveTest extends DashboardTestBase {
     @Override
     public void setup() {
         super.setup();
-        dashboard = new Dashboard();
-        dashboard.add(new DashboardWidget(), new DashboardWidget());
+        dashboard = getNewDashboard();
+        dashboard.setFeatureFlagEnabled(true);
+        dashboard.add(getNewWidget(), getNewWidget());
         dashboard.setEditable(true);
         DashboardSection section = dashboard.addSection();
-        section.add(new DashboardWidget(), new DashboardWidget());
+
+        section.add(getNewWidget(), getNewWidget());
         getUi().add(dashboard);
         fakeClientCommunication();
         itemsArray = getItemsArray(dashboard.getChildren().toList());

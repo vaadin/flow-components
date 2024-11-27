@@ -58,6 +58,7 @@ import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasValidator;
+import com.vaadin.flow.data.binder.Result;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
@@ -127,9 +128,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-beta1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-picker", version = "24.6.0-alpha8")
+@NpmPackage(value = "@vaadin/date-picker", version = "24.6.0-beta1")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.29.3")
@@ -158,6 +159,10 @@ public class DatePicker
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
 
+    private SerializableFunction<String, Result<LocalDate>> fallbackParser;
+    private String fallbackParserErrorMessage = null;
+    private boolean isFallbackParserRunning = false;
+
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDate>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
     private Validator<LocalDate> defaultValidator = (value, context) -> {
@@ -165,7 +170,9 @@ public class DatePicker
 
         boolean hasBadInput = valueEquals(value, getEmptyValue())
                 && isInputValuePresent();
-        if (hasBadInput) {
+        if (hasBadInput && fallbackParserErrorMessage != null) {
+            return ValidationResult.error(fallbackParserErrorMessage);
+        } else if (hasBadInput) {
             return ValidationResult.error(getI18nErrorMessage(
                     DatePickerI18n::getBadInputErrorMessage));
         }
@@ -257,6 +264,7 @@ public class DatePicker
         addValueChangeListener(e -> validate());
 
         getElement().addEventListener("unparsable-change", event -> {
+            setModelValue(getEmptyValue(), true);
             validate();
             fireValidationStatusChangeEvent();
         });
@@ -658,9 +666,91 @@ public class DatePicker
      * @return <code>true</code> if the input element's value is populated,
      *         <code>false</code> otherwise
      */
-    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
     protected boolean isInputValuePresent() {
-        return getElement().getProperty("_hasInputValue", false);
+        return !getInputElementValue().isEmpty();
+    }
+
+    /**
+     * Gets the value of the input element. This value is updated on the server
+     * when the web component dispatches a `change` or `unparsable-change`
+     * event. Except when clearing the value, {@link #setValue(LocalDate)} does
+     * not update the input element value on the server because it requires date
+     * formatting, which is implemented on the web component's side.
+     *
+     * @return the value of the input element
+     */
+    @Synchronize(property = "_inputElementValue", value = { "change",
+            "unparsable-change" })
+    private String getInputElementValue() {
+        return getElement().getProperty("_inputElementValue", "");
+    }
+
+    /**
+     * Sets the value of the input element.
+     *
+     * @param value
+     *            the value to set
+     */
+    private void setInputElementValue(String value) {
+        getElement().setProperty("_inputElementValue", value);
+    }
+
+    /**
+     * Sets a parser to handle user input that cannot be parsed using the i18n
+     * date formats.
+     * <p>
+     * The parser is a function that receives the user-entered string and
+     * returns a {@link Result} with the parsed date or an error message. If the
+     * parser returns an error message, the field will be marked as invalid,
+     * displaying that message as a validation error.
+     * <p>
+     * Example:
+     *
+     * <pre>
+     * datePicker.setFallbackParser(s -> {
+     *     if (s.equals("tomorrow")) {
+     *         return Result.ok(LocalDate.now().plusDays(1));
+     *     } else {
+     *         return Result.error("Invalid date format");
+     *     }
+     * });
+     * </pre>
+     * <p>
+     * NOTE: When a fallback parser is set, the i18n error message from
+     * {@link DatePickerI18n#getBadInputErrorMessage()} is not used.
+     *
+     * @param fallbackParser
+     *            the parser function
+     */
+    public void setFallbackParser(
+            SerializableFunction<String, Result<LocalDate>> fallbackParser) {
+        this.fallbackParser = fallbackParser;
+        this.fallbackParserErrorMessage = null;
+    }
+
+    /**
+     * Gets the parser that is used as a fallback when user input cannot be
+     * parsed using the i18n date formats.
+     *
+     * @return the parser function
+     */
+    public SerializableFunction<String, Result<LocalDate>> getFallbackParser() {
+        return fallbackParser;
+    }
+
+    private Result<LocalDate> runFallbackParser(String s) {
+        Result<LocalDate> result = null;
+
+        try {
+            result = fallbackParser.apply(s);
+        } catch (Exception e) {
+            LoggerFactory.getLogger(DatePicker.class)
+                    .error("Fallback parser threw an exception", e);
+            result = Result.error(getI18nErrorMessage(
+                    DatePickerI18n::getBadInputErrorMessage));
+        }
+
+        return Objects.requireNonNull(result, "Result cannot be null");
     }
 
     @Override
@@ -669,30 +759,59 @@ public class DatePicker
         boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
         boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
         boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
-        boolean isInputValuePresent = isInputValuePresent();
+        String oldInputElementValue = getInputElementValue();
 
-        // When the value is cleared programmatically, reset hasInputValue
-        // so that the following validation doesn't treat this as bad input.
+        // When the value is cleared programmatically, there is no change event
+        // that would synchronize _inputElementValue, so we reset it ourselves
+        // to prevent the following validation from treating this as bad input.
         if (isNewValueEmpty) {
-            getElement().setProperty("_hasInputValue", false);
+            setInputElementValue("");
         }
 
         super.setValue(value);
 
-        // Clear the input element from possible bad input.
-        if (isValueRemainedEmpty && isInputValuePresent) {
-            // The check for value presence guarantees that a non-empty value
-            // won't get cleared when setValue(null) and setValue(...) are
-            // subsequently called within one round-trip.
-            // Flow only sends the final component value to the client
-            // when you update the value multiple times during a round-trip
-            // and the final value is sent in place of the first one, so
-            // `executeJs` can end up invoked after a non-empty value is set.
-            getElement()
-                    .executeJs("if (!this.value) this._inputElementValue = ''");
+        // Revalidate if setValue(null) didn't result in a value change but
+        // cleared bad input
+        if (isValueRemainedEmpty && !oldInputElementValue.isEmpty()) {
             validate();
             fireValidationStatusChangeEvent();
         }
+    }
+
+    @Override
+    protected void setModelValue(LocalDate newModelValue, boolean fromClient) {
+        // Ignore setModelValue calls triggered by setPresentationValue
+        // when the fallback parser applies a parsed value (see below).
+        // This ensures that the ValueChangeEvent fires from the original
+        // setModelValue call with `fromClient` value: `true`.
+        if (isFallbackParserRunning) {
+            return;
+        }
+
+        try {
+            isFallbackParserRunning = true;
+
+            boolean isInputUnparsable = fromClient && newModelValue == null
+                    && isInputValuePresent();
+
+            if (fallbackParser != null && isInputUnparsable) {
+                Result<LocalDate> result = runFallbackParser(
+                        getInputElementValue());
+                if (result.isError()) {
+                    fallbackParserErrorMessage = result.getMessage()
+                            .orElse(null);
+                } else {
+                    fallbackParserErrorMessage = null;
+                    newModelValue = result
+                            .getOrThrow(IllegalStateException::new);
+                    setPresentationValue(newModelValue);
+                }
+            }
+        } finally {
+            isFallbackParserRunning = false;
+        }
+
+        super.setModelValue(newModelValue, fromClient);
     }
 
     /**
