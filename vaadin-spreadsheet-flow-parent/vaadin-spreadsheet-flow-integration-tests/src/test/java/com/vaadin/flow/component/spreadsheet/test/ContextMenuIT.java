@@ -34,8 +34,9 @@ public class ContextMenuIT extends AbstractSpreadsheetIT {
         // Make sure to use a small enough viewport so that the document needs
         // to be scrolled to see the cell
         getDriver().manage().window().setSize(WINDOW_SIZE_SMALL);
-        // Scroll the document horizontally
-        executeScript("document.documentElement.scrollLeft = 100");
+        // Scroll the document so the cell is visible
+        executeScript(
+                "document.documentElement.scrollLeft = 100;document.documentElement.scrollTop = 200;");
 
         var cell = getSpreadsheet().getCellAt("B2");
         // Open context menu for the cell
