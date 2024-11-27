@@ -63,4 +63,17 @@ public class UploadSerializableTest extends ClassesSerializableTest {
 
         serializeAndDeserialize(multiFileBuffer);
     }
+
+    @Test
+    public void serializeMultiFileBuffer_restoreFileMap() {
+        MultiFileBuffer multiFileBuffer = new MultiFileBuffer();
+        try {
+            multiFileBuffer = serializeAndDeserialize(multiFileBuffer);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+
+        // Verifies that internal file map is restored, would throw otherwise
+        multiFileBuffer.receiveUpload("bar.txt", "text/plain");
+    }
 }
