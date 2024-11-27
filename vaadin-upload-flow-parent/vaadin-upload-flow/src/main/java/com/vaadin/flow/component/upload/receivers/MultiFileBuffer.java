@@ -38,7 +38,6 @@ import com.vaadin.flow.component.upload.MultiFileReceiver;
  * For a custom file the constructor {@link AbstractFileBuffer(FileFactory)}
  * should be used.
  */
-@SuppressWarnings("serial")
 public class MultiFileBuffer extends AbstractFileBuffer
         implements MultiFileReceiver {
 
