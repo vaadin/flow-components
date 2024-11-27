@@ -19,9 +19,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -30,6 +35,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.virtuallist.paging.PagelessDataCommunicator;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
@@ -39,6 +45,15 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.data.selection.MultiSelect;
+import com.vaadin.flow.data.selection.MultiSelectionEvent;
+import com.vaadin.flow.data.selection.MultiSelectionListener;
+import com.vaadin.flow.data.selection.SelectionListener;
+import com.vaadin.flow.data.selection.SelectionModel;
+import com.vaadin.flow.data.selection.SelectionModel.Single;
+import com.vaadin.flow.data.selection.SingleSelect;
+import com.vaadin.flow.data.selection.SingleSelectionEvent;
+import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonUtils;
@@ -46,6 +61,7 @@ import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
+import elemental.json.JsonArray;
 import elemental.json.JsonValue;
 
 /**
@@ -119,6 +135,9 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
 
     private Renderer<T> renderer;
 
+    private SelectionMode selectionMode;
+    private SelectionModel<VirtualList<T>, T> selectionModel;
+
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private final List<Registration> renderingRegistrations = new ArrayList<>();
     private transient T placeholderItem;
@@ -134,6 +153,11 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     public VirtualList() {
         setRenderer((ValueProvider<T, String>) String::valueOf);
         addAttachListener((e) -> this.setPlaceholderItem(this.placeholderItem));
+
+        // Use NONE selection mode by default
+        setSelectionMode(SelectionMode.NONE);
+
+        initSelection();
     }
 
     private void initConnector() {
@@ -142,6 +166,38 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
                 .getPage().executeJs(
                         "window.Vaadin.Flow.virtualListConnector.initLazy($0)",
                         getElement());
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void initSelection() {
+        // Generate "selected" property for selected items
+        dataGenerator.addDataGenerator((item, jsonObject) -> {
+            if (this.getSelectionModel().isSelected(item)) {
+                jsonObject.put("selected", true);
+            }
+        });
+
+        // Set up SingleSelectionEvent and MultiSelectionEvent listeners to
+        // refresh the items in data communicator when selection changes. This
+        // is to ensure the data generator labels selected items with "selected"
+        // property on selection change.
+        ComponentUtil.addListener(this, SingleSelectionEvent.class,
+                (ComponentEventListener) ((ComponentEventListener<SingleSelectionEvent<VirtualList<T>, T>>) event -> {
+                    Stream.of(event.getValue(), event.getOldValue())
+                            .filter(Objects::nonNull)
+                            .forEach(item -> getDataCommunicator()
+                                    .refresh((T) item));
+                }));
+
+        ComponentUtil.addListener(this, MultiSelectionEvent.class,
+                (ComponentEventListener) ((ComponentEventListener<MultiSelectionEvent<VirtualList<T>, T>>) event -> {
+                    Stream.concat(event.getAddedSelection().stream(),
+                            event.getRemovedSelection().stream())
+                            .filter(Objects::nonNull)
+                            .forEach(item -> getDataCommunicator()
+                                    .refresh((T) item));
+                }));
+
     }
 
     @Override
@@ -323,5 +379,262 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      */
     public void scrollToEnd() {
         scrollToIndex(Integer.MAX_VALUE);
+    }
+
+    /**
+     * Returns the selection mode for this virtual list.
+     *
+     * @return the selection mode, not null
+     */
+    public SelectionMode getSelectionMode() {
+        assert selectionMode != null : "No selection mode set by "
+                + getClass().getName() + " constructor";
+        return selectionMode;
+    }
+
+    /**
+     * Sets the virtual list's selection mode.
+     *
+     * @param selectionMode
+     *            the selection mode to switch to, not {@code null}
+     * @return the used selection model
+     *
+     * @see SelectionMode
+     * @see VirtualListSingleSelectionModel
+     * @see VirtualListMultiSelectionModel
+     * @see VirtualListNoneSelectionModel
+     */
+    public SelectionModel<VirtualList<T>, T> setSelectionMode(
+            SelectionMode selectionMode) {
+        Objects.requireNonNull(selectionMode, "Selection mode cannot be null.");
+
+        if (selectionMode == SelectionMode.SINGLE) {
+            setSelectionModel(new VirtualListSingleSelectionModel<>(this),
+                    selectionMode);
+        } else if (selectionMode == SelectionMode.MULTI) {
+            setSelectionModel(new VirtualListMultiSelectionModel<>(this),
+                    selectionMode);
+        } else {
+            setSelectionModel(new VirtualListNoneSelectionModel<>(),
+                    selectionMode);
+        }
+        return selectionModel;
+    }
+
+    private Set<T> getItemsFromKeys(JsonArray keys) {
+        return JsonUtils.stream(keys).map(
+                key -> getDataCommunicator().getKeyMapper().get(key.asString()))
+                .filter(Objects::nonNull).collect(Collectors.toSet());
+    }
+
+    @SuppressWarnings("unchecked")
+    @ClientCallable
+    void updateSelection(JsonArray addedKeys, JsonArray removedKeys) {
+        var addedItems = getItemsFromKeys(addedKeys);
+        var removedItems = getItemsFromKeys(removedKeys);
+
+        if (selectionModel instanceof VirtualListSingleSelectionModel model) {
+            model.setSelectedItem(
+                    addedItems.isEmpty() ? null : addedItems.iterator().next());
+        } else if (selectionModel instanceof VirtualListMultiSelectionModel model) {
+            model.updateSelection(addedItems, removedItems);
+        }
+    }
+
+    /**
+     * Sets the selection model for the virtual list.
+     * <p>
+     * The default selection model is {@link VirtualListNoneSelectionModel}.
+     *
+     * @param model
+     *            the selection model to use, not {@code null}
+     * @param selectionMode
+     *            the selection mode this selection model corresponds to, not
+     *            {@code null}
+     *
+     * @see #setSelectionMode(SelectionMode)
+     */
+    private void setSelectionModel(SelectionModel<VirtualList<T>, T> model,
+            SelectionMode selectionMode) {
+        Objects.requireNonNull(model, "selection model cannot be null");
+        Objects.requireNonNull(selectionMode, "selection mode cannot be null");
+
+        selectionModel = model;
+        this.selectionMode = selectionMode;
+
+        getElement().setProperty("selectionMode",
+                SelectionMode.NONE.equals(selectionMode) ? null
+                        : selectionMode.name().toLowerCase());
+
+    }
+
+    /**
+     * Adds a selection listener to the current selection model.
+     * <p>
+     * This is a shorthand for
+     * {@code virtualList.getSelectionModel().addSelectionListener()}. To get
+     * more detailed selection events, use {@link #getSelectionModel()} and
+     * either
+     * {@link VirtualListSingleSelectionModel#addSingleSelectionListener(SingleSelectionListener)}
+     * or
+     * {@link VirtualListMultiSelectionModel#addMultiSelectionListener(MultiSelectionListener)}
+     * depending on the used selection mode.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a registration handle to remove the listener
+     * @throws UnsupportedOperationException
+     *             if {@link SelectionMode#NONE} is in use
+     */
+    public Registration addSelectionListener(
+            SelectionListener<VirtualList<T>, T> listener) {
+        return getSelectionModel().addSelectionListener(listener);
+    }
+
+    /**
+     * Use this virtual list as a single select in {@link Binder}.
+     * <p>
+     * Throws {@link IllegalStateException} if the virtual list is not using a
+     * {@link VirtualListSingleSelectionModel}.
+     *
+     * @return the single select wrapper that can be used in binder
+     * @throws IllegalStateException
+     *             if not using a single selection model
+     */
+    public SingleSelect<VirtualList<T>, T> asSingleSelect() {
+        var model = getSelectionModel();
+        if (!(model instanceof VirtualListSingleSelectionModel)) {
+            throw new IllegalStateException(
+                    "VirtualList is not in single select mode, "
+                            + "it needs to be explicitly set to such with "
+                            + "setSelectionMode(SelectionMode.SINGLE) before "
+                            + "being able to use single selection features.");
+        }
+        return ((VirtualListSingleSelectionModel<T>) model).asSingleSelect();
+    }
+
+    /**
+     * Use this virtual list as a multiselect in {@link Binder}.
+     * <p>
+     * Throws {@link IllegalStateException} if the virtual list is not using a
+     * {@link VirtualListMultiSelectionModel}.
+     *
+     * @return the multiselect wrapper that can be used in binder
+     * @throws IllegalStateException
+     *             if not using a multiselection model
+     */
+    public MultiSelect<VirtualList<T>, T> asMultiSelect() {
+        var model = getSelectionModel();
+        if (!(model instanceof VirtualListMultiSelectionModel)) {
+            throw new IllegalStateException(
+                    "VirtualList is not in multi select mode, "
+                            + "it needs to be explicitly set to such with "
+                            + "setSelectionMode(SelectionMode.MULTI) before "
+                            + "being able to use multi selection features.");
+        }
+        return ((VirtualListMultiSelectionModel<T>) model).asMultiSelect();
+    }
+
+    /**
+     * This method is a shorthand that delegates to the currently set selection
+     * model.
+     *
+     * @see #getSelectionModel()
+     * @see VirtualListSingleSelectionModel#getSelectedItems()
+     * @see VirtualListMultiSelectionModel#getSelectedItems()
+     *
+     * @return a set with the selected items, never <code>null</code>
+     */
+    public Set<T> getSelectedItems() {
+        return getSelectionModel().getSelectedItems();
+    }
+
+    /**
+     * This method is a shorthand that delegates to the currently set selection
+     * model.
+     *
+     * @param item
+     *            the item to select, not null
+     *
+     * @see #getSelectionModel()
+     * @see VirtualListSingleSelectionModel#select(Object)
+     * @see VirtualListMultiSelectionModel#select(Object)
+     */
+    public void select(T item) {
+        getSelectionModel().select(item);
+    }
+
+    /**
+     * This method is a shorthand that delegates to the currently set selection
+     * model.
+     *
+     * @param item
+     *            the item to deselect, not null
+     *
+     * @see #getSelectionModel()
+     * @see VirtualListSingleSelectionModel#deselect(Object)
+     * @see VirtualListMultiSelectionModel#deselect(Object)
+     */
+    public void deselect(T item) {
+        getSelectionModel().deselect(item);
+    }
+
+    /**
+     * This method is a shorthand that delegates to the currently set selection
+     * model.
+     *
+     * @see #getSelectionModel()
+     * @see VirtualListSingleSelectionModel#deselectAll()
+     * @see VirtualListMultiSelectionModel#deselectAll()
+     */
+    public void deselectAll() {
+        getSelectionModel().deselectAll();
+    }
+
+    /**
+     * Returns the selection model for this virtual list.
+     *
+     * @return the selection model, not null
+     */
+    public SelectionModel<VirtualList<T>, T> getSelectionModel() {
+        assert selectionModel != null : "No selection model set by "
+                + getClass().getName() + " constructor";
+        return selectionModel;
+    }
+
+    /**
+     * Selection mode representing the built-in selection models in virtual
+     * list.
+     * <p>
+     * These enums can be used in
+     * {@link VirtualList#setSelectionMode(SelectionMode)} to easily switch
+     * between the built-in selection models.
+     *
+     * @see VirtualList#setSelectionMode(SelectionMode)
+     * @see VirtualList#setSelectionModel(SelectionModel, SelectionMode)
+     */
+    public enum SelectionMode {
+
+        /**
+         * Single selection mode that maps to built-in {@link Single}.
+         *
+         * @see VirtualListSingleSelectionModel
+         */
+        SINGLE,
+
+        /**
+         * Multiselection mode that maps to built-in
+         * {@link SelectionModel.Multi}.
+         *
+         * @see VirtualListMultiSelectionModelπ
+         */
+        MULTI,
+
+        /**
+         * Selection model that doesn't allow selection.
+         *
+         * @see VirtualListNoneSelectionModel
+         */
+        NONE;
     }
 }
