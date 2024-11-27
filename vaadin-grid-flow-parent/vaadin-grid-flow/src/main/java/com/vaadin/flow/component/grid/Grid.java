@@ -3672,6 +3672,30 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Set the aria-label of the component to the given text.
+     *
+     * @param ariaLabel
+     *            the aria-label text to set or {@code null} to clear
+     */
+    public void setAriaLabel(String ariaLabel) {
+        if (ariaLabel == null) {
+            getElement().removeProperty("accessibleName");
+        } else {
+            getElement().setProperty("accessibleName", ariaLabel);
+        }
+    }
+
+    /**
+     * Gets the aria-label of the component.
+     *
+     * @return an optional aria-label of the component if no aria-label has been
+     *         set
+     */
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
+    }
+
+    /**
      * Adds a new context-menu for this grid.
      *
      * @return the added context-menu
