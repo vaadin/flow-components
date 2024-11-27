@@ -108,6 +108,8 @@ public class TimePickerIT extends AbstractComponentIT {
         Assert.assertEquals(
                 "The first item in the dropdown should be the min value",
                 "5:00 AM", picker.getItemText(0));
+        // Make sure the item is in the viewport / rendered
+        picker.scrollToItem(1000);
         Assert.assertEquals(
                 "The last item in the dropdown should be the max value",
                 "6:00 PM", picker.getLastItemText());
