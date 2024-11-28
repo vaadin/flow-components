@@ -15,25 +15,30 @@
  */
 package com.vaadin.flow.component.virtuallist.tests;
 
+import static com.vaadin.flow.component.virtuallist.tests.VirtualListTestHelpers.*;
+
+import java.util.Set;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.vaadin.flow.component.HasValue.ValueChangeEvent;
-import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.component.virtuallist.VirtualList.SelectionMode;
-import com.vaadin.flow.data.selection.SingleSelect;
+import com.vaadin.flow.data.provider.CompositeDataGenerator;
+import com.vaadin.flow.data.provider.DataGenerator;
+import com.vaadin.flow.data.selection.SelectionListener;
 
 /**
- * Tests using selection via VirtualList's SingleSelect API.
+ * Tests single-selectable VirtualList
  */
 public class VirtualListSingleSelectionTest {
 
     private VirtualList<String> list;
-    private SingleSelect<VirtualList<String>, String> singleSelect;
-    private ValueChangeListener<ValueChangeEvent<String>> selectionListenerSpy;
+    private SelectionListener<VirtualList<String>, String> selectionListenerSpy;
+    private CompositeDataGenerator<String> dataGenerator;
+    private DataGenerator<String> dataGeneratorSpy;
 
     @SuppressWarnings("unchecked")
     @Before
@@ -41,66 +46,154 @@ public class VirtualListSingleSelectionTest {
         list = new VirtualList<>();
         list.setItems("1", "2", "3", "4", "5");
         list.setSelectionMode(SelectionMode.SINGLE);
-        singleSelect = list.asSingleSelect();
-        selectionListenerSpy = Mockito.mock(ValueChangeListener.class);
-        singleSelect.addValueChangeListener(selectionListenerSpy);
+
+        selectionListenerSpy = Mockito.mock(SelectionListener.class);
+        list.addSelectionListener(selectionListenerSpy);
+
+        dataGenerator = getDataGenerator(list);
+        dataGeneratorSpy = Mockito.mock(DataGenerator.class);
+        dataGenerator.addDataGenerator(dataGeneratorSpy);
     }
 
     @Test
-    public void getValue() {
-        singleSelect.setValue("2");
-
-        Assert.assertEquals("2", singleSelect.getValue());
+    public void setsWebComponentSelectionMode() {
+        Assert.assertEquals("single",
+                list.getElement().getProperty("selectionMode"));
     }
 
     @Test
-    public void setValue_triggersSelectionListener() {
-        singleSelect.setValue("2");
+    public void getSelectionMode_returnsMode() {
+        Assert.assertEquals(SelectionMode.SINGLE, list.getSelectionMode());
+    }
+
+    @Test
+    public void setSelectionMode_returnsModel() {
+        var model = list.setSelectionMode(SelectionMode.SINGLE);
+        Assert.assertEquals(list.getSelectionModel(), model);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void asMultiSelect_throwsIfSelectionModeIsSingle() {
+        list.asMultiSelect();
+    }
+
+    @Test
+    public void getSelectedItems() {
+        list.select("2");
+        list.select("3");
+
+        Assert.assertEquals(Set.of("3"), list.getSelectedItems());
+    }
+
+    @Test
+    public void select_triggersSelectionListener() {
+        list.select("1");
 
         Mockito.verify(selectionListenerSpy, Mockito.times(1))
-                .valueChanged(Mockito.any());
+                .selectionChange(Mockito.any());
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void setValue_setExistingValue_noChanges() {
-        singleSelect.setValue("2");
+    public void select_selectExistingValue_noChanges() {
+        list.select("1");
         Mockito.reset(selectionListenerSpy);
-        singleSelect.setValue("2");
+        list.select("1");
 
-        Assert.assertEquals("2", singleSelect.getValue());
+        Assert.assertEquals(Set.of("1"), list.getSelectedItems());
         Mockito.verify(selectionListenerSpy, Mockito.times(0))
-                .valueChanged(Mockito.any());
+                .selectionChange(Mockito.any());
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void setValue_setDifferentValue_selectionChanged() {
-        singleSelect.setValue("2");
+    public void select_selectDifferentValue_selectionChanged() {
+        list.select("1");
         Mockito.reset(selectionListenerSpy);
-        singleSelect.setValue("3");
+        list.select("2");
 
-        Assert.assertEquals("3", singleSelect.getValue());
+        Assert.assertEquals(Set.of("2"), list.getSelectedItems());
         Mockito.verify(selectionListenerSpy, Mockito.times(1))
-                .valueChanged(Mockito.any());
+                .selectionChange(Mockito.any());
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void clear_updatesSelectionAndValueAndTriggersSelectionListener() {
-        singleSelect.setValue("2");
+    public void select_deselect_selectionChanged() {
+        list.select("1");
         Mockito.reset(selectionListenerSpy);
+        list.deselect("1");
 
-        singleSelect.clear();
-        Assert.assertEquals(null, singleSelect.getValue());
+        Assert.assertEquals(Set.of(), list.getSelectedItems());
         Mockito.verify(selectionListenerSpy, Mockito.times(1))
-                .valueChanged(Mockito.any());
+                .selectionChange(Mockito.any());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void selecti_deselectAll_selectionChanged() {
+        list.select("1");
+        Mockito.reset(selectionListenerSpy);
+        list.deselectAll();
+        Assert.assertEquals(Set.of(), list.getSelectedItems());
+        Mockito.verify(selectionListenerSpy, Mockito.times(1))
+                .selectionChange(Mockito.any());
     }
 
     @Test
-    public void emptySelection_clear_noChanges() {
-        singleSelect.clear();
+    public void emptySelection_deselectAll_noChanges() {
+        list.deselectAll();
         Mockito.verify(selectionListenerSpy, Mockito.times(0))
-                .valueChanged(Mockito.any());
+                .selectionChange(Mockito.any());
+    }
+
+    @Test
+    public void select_generateItemSelected() {
+        list.select("1");
+        Assert.assertTrue(generatesSelected(dataGenerator, "1"));
+        Assert.assertFalse(generatesSelected(dataGenerator, "2"));
+    }
+
+    @Test
+    public void deselect_generateItemSelected() {
+        list.select("1");
+        list.deselect("1");
+        Assert.assertFalse(generatesSelected(dataGenerator, "1"));
+    }
+
+    @Test
+    public void select_generateItemData() {
+        list.select("1");
+        Mockito.verify(dataGeneratorSpy, Mockito.times(1))
+                .refreshData(Mockito.eq("1"));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void deselect_generateItemData() {
+        list.select("1");
+        Mockito.reset(dataGeneratorSpy);
+        list.deselect("1");
+        Mockito.verify(dataGeneratorSpy, Mockito.times(1))
+                .refreshData(Mockito.eq("1"));
+    }
+
+    @Test
+    public void updateSelectionFromClient_itemsSelected() {
+        updateSelectionFromClient(list, Set.of("1"), Set.of());
+        Assert.assertEquals(Set.of("1"), list.getSelectedItems());
+        Mockito.verify(selectionListenerSpy, Mockito.times(1))
+                .selectionChange(Mockito.any());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void updateSelectionFromClient_itemsChanged() {
+        list.select("1");
+        Mockito.reset(selectionListenerSpy);
+        updateSelectionFromClient(list, Set.of("3"), Set.of("1"));
+        Assert.assertEquals(Set.of("3"), list.getSelectedItems());
+        Mockito.verify(selectionListenerSpy, Mockito.times(1))
+                .selectionChange(Mockito.any());
     }
 }
