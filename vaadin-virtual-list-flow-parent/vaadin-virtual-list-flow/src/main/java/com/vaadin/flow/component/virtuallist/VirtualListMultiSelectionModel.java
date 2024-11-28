@@ -98,9 +98,6 @@ public class VirtualListMultiSelectionModel<T>
 
     @Override
     public void select(T item) {
-        if (isSelected(item)) {
-            return;
-        }
         Set<T> selected = new HashSet<>();
         if (item != null) {
             selected.add(item);
@@ -111,9 +108,6 @@ public class VirtualListMultiSelectionModel<T>
 
     @Override
     public void deselect(T item) {
-        if (!isSelected(item)) {
-            return;
-        }
         Set<T> deselected = new HashSet<>();
         if (item != null) {
             deselected.add(item);
@@ -179,17 +173,6 @@ public class VirtualListMultiSelectionModel<T>
     @Override
     public boolean isSelected(T item) {
         return selected.containsKey(getItemId(item));
-    }
-
-    public void setSelectedItems(Set<T> items) {
-        var oldValue = getSelectedItems();
-        selected.clear();
-        items.forEach(item -> selected.put(getItemId(item), item));
-
-        // TODO: This should not be here
-        ComponentUtil.fireEvent(list, new MultiSelectionEvent<>(list,
-                asMultiSelect(), oldValue, true));
-
     }
 
     public MultiSelect<VirtualList<T>, T> asMultiSelect() {

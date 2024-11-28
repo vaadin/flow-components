@@ -25,6 +25,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.component.virtuallist.VirtualList.SelectionMode;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 
@@ -65,6 +66,11 @@ public class VirtualListAsMultiSelectTest {
         multiSelect.select("2", "3");
 
         Assert.assertEquals(Set.of("2", "3"), multiSelect.getSelectedItems());
+    }
+
+    @Test
+    public void getElement() {
+        Assert.assertEquals("vaadin-virtual-list", multiSelect.getElement().getTag());
     }
 
     @Test
@@ -185,5 +191,35 @@ public class VirtualListAsMultiSelectTest {
         multiSelect.deselectAll();
         Mockito.verify(selectionListenerSpy, Mockito.times(0))
                 .selectionChange(Mockito.any());
+    }
+
+    @Test
+    public void binderTest() {
+        var binder = new Binder<Person>(Person.class);
+        binder.bind(multiSelect, "values");
+
+        var person = new Person(Set.of("1"));
+        binder.setBean(person);
+
+        multiSelect.select("2");
+
+        Assert.assertEquals(Set.of("1", "2"), multiSelect.getSelectedItems());
+        Assert.assertEquals(Set.of("1", "2"), person.getValues());
+    }
+
+    public static class Person {
+        private Set<String> values;
+
+        public Person(Set<String> values) {
+            this.values = values;
+        }
+
+        public Set<String> getValues() {
+            return values;
+        }
+
+        public void setValues(Set<String> values) {
+            this.values = values;
+        }
     }
 }

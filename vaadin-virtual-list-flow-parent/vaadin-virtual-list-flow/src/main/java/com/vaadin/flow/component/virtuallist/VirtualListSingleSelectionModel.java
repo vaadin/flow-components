@@ -66,9 +66,7 @@ public class VirtualListSingleSelectionModel<T>
 
     @Override
     public void deselect(T item) {
-        if (isSelected(item)) {
-            select(null);
-        }
+        select(null);
     }
 
     @Override
@@ -135,22 +133,11 @@ public class VirtualListSingleSelectionModel<T>
                         .selectionChange((SelectionEvent) event)));
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public Registration addSingleSelectionListener(
-            SingleSelectionListener<VirtualList<T>, T> listener) {
-        Objects.requireNonNull(listener, "listener cannot be null");
-        return ComponentUtil.addListener(list, SingleSelectionEvent.class,
-                (ComponentEventListener) (event -> listener
-                        .selectionChange((SingleSelectionEvent) event)));
-    }
-
     private void doSelect(T item, boolean userOriginated) {
         T oldValue = selectedItem;
         selectedItem = item;
-        if (oldValue != selectedItem) {
-            ComponentUtil.fireEvent(list, new SingleSelectionEvent<>(list,
-                    asSingleSelect(), oldValue, true));
-        }
+        ComponentUtil.fireEvent(list, new SingleSelectionEvent<>(list,
+                asSingleSelect(), oldValue, true));
     }
 
     private Object getItemId(T item) {

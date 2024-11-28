@@ -29,6 +29,8 @@ import com.vaadin.flow.component.virtuallist.VirtualList.SelectionMode;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.selection.SelectionListener;
+import com.vaadin.flow.data.selection.SelectionModel;
+import com.vaadin.flow.data.selection.SelectionModel.Multi;
 
 /**
  * Tests multi-selectable VirtualList
@@ -39,13 +41,15 @@ public class VirtualListMultiSelectionTest {
     private SelectionListener<VirtualList<String>, String> selectionListenerSpy;
     private CompositeDataGenerator<String> dataGenerator;
     private DataGenerator<String> dataGeneratorSpy;
+    private SelectionModel.Multi<VirtualList<String>, String> selectionModel;
 
     @SuppressWarnings("unchecked")
     @Before
     public void setUp() {
         list = new VirtualList<>();
         list.setItems("1", "2", "3", "4", "5");
-        list.setSelectionMode(SelectionMode.MULTI);
+        selectionModel = (Multi<VirtualList<String>, String>) list
+                .setSelectionMode(SelectionMode.MULTI);
 
         selectionListenerSpy = Mockito.mock(SelectionListener.class);
         list.addSelectionListener(selectionListenerSpy);
@@ -131,6 +135,18 @@ public class VirtualListMultiSelectionTest {
 
     @SuppressWarnings("unchecked")
     @Test
+    public void deselectNonSelectedValue_noChanges() {
+        list.select("1");
+        Mockito.reset(selectionListenerSpy);
+        list.deselect("2");
+
+        Assert.assertEquals(Set.of("1"), list.getSelectedItems());
+        Mockito.verify(selectionListenerSpy, Mockito.times(0))
+                .selectionChange(Mockito.any());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
     public void selecti_deselectAll_selectionChanged() {
         list.select("1");
         Mockito.reset(selectionListenerSpy);
@@ -143,6 +159,27 @@ public class VirtualListMultiSelectionTest {
     @Test
     public void emptySelection_deselectAll_noChanges() {
         list.deselectAll();
+        Mockito.verify(selectionListenerSpy, Mockito.times(0))
+                .selectionChange(Mockito.any());
+    }
+
+    @Test
+    public void selectAll_selectionChanged() {
+        selectionModel.selectAll();
+        Assert.assertEquals(Set.of("1", "2", "3", "4", "5"),
+                list.getSelectedItems());
+        Mockito.verify(selectionListenerSpy, Mockito.times(1))
+                .selectionChange(Mockito.any());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void selectAll_selectAll_selectionChanged() {
+        selectionModel.selectAll();
+        Mockito.reset(selectionListenerSpy);
+        selectionModel.selectAll();
+        Assert.assertEquals(Set.of("1", "2", "3", "4", "5"),
+                list.getSelectedItems());
         Mockito.verify(selectionListenerSpy, Mockito.times(0))
                 .selectionChange(Mockito.any());
     }
@@ -196,6 +233,17 @@ public class VirtualListMultiSelectionTest {
         Assert.assertEquals(Set.of("2", "3"), list.getSelectedItems());
         Mockito.verify(selectionListenerSpy, Mockito.times(1))
                 .selectionChange(Mockito.any());
+    }
+
+    @Test
+    public void getFirstSelectedItem() {
+        Assert.assertFalse(selectionModel.getFirstSelectedItem().isPresent());
+    }
+
+    @Test
+    public void select_getFirstSelectedItem() {
+        list.select("1");
+        Assert.assertEquals("1", selectionModel.getFirstSelectedItem().get());
     }
 
 }
