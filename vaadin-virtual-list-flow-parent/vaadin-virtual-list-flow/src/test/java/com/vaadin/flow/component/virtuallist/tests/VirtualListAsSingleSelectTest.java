@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.virtuallist.tests;
 
+import java.util.Set;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +26,7 @@ import com.vaadin.flow.component.HasValue.ValueChangeEvent;
 import com.vaadin.flow.component.HasValue.ValueChangeListener;
 import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.component.virtuallist.VirtualList.SelectionMode;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.selection.SingleSelect;
 
 /**
@@ -50,6 +53,11 @@ public class VirtualListAsSingleSelectTest {
         singleSelect.setValue("2");
 
         Assert.assertEquals("2", singleSelect.getValue());
+    }
+
+    @Test
+    public void getElement() {
+        Assert.assertEquals("vaadin-virtual-list", singleSelect.getElement().getTag());
     }
 
     @Test
@@ -101,5 +109,35 @@ public class VirtualListAsSingleSelectTest {
         singleSelect.clear();
         Mockito.verify(selectionListenerSpy, Mockito.times(0))
                 .valueChanged(Mockito.any());
+    }
+
+    @Test
+    public void binderTest() {
+        var binder = new Binder<Person>(Person.class);
+        binder.bind(singleSelect, "value");
+
+        var person = new Person("1");
+        binder.setBean(person);
+
+        singleSelect.setValue("2");
+
+        Assert.assertEquals( "2", singleSelect.getValue());
+        Assert.assertEquals( "2", person.getValue());
+    }
+
+    public static class Person {
+        private String value;
+
+        public Person(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
     }
 }

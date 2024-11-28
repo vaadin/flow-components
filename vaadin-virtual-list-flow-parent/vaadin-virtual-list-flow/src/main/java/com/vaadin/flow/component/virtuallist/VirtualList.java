@@ -475,9 +475,9 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      * {@code virtualList.getSelectionModel().addSelectionListener()}. To get
      * more detailed selection events, use {@link #getSelectionModel()} and
      * either
-     * {@link VirtualListSingleSelectionModel#addSingleSelectionListener(SingleSelectionListener)}
+     * {@link VirtualListSingleSelectionModel#addSelectionListener(SelectionListener)
      * or
-     * {@link VirtualListMultiSelectionModel#addMultiSelectionListener(MultiSelectionListener)}
+     * {@link VirtualListMultiSelectionModel#addSelectionListener(SelectionListener)
      * depending on the used selection mode.
      *
      * @param listener
