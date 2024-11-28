@@ -429,7 +429,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
 
     @SuppressWarnings("unchecked")
     @ClientCallable
-    void updateSelection(JsonArray addedKeys, JsonArray removedKeys) {
+    private void updateSelection(JsonArray addedKeys, JsonArray removedKeys) {
         var addedItems = getItemsFromKeys(addedKeys);
         var removedItems = getItemsFromKeys(removedKeys);
 
