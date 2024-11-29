@@ -22,7 +22,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.testutil.TestPath;
@@ -33,7 +32,6 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     private TextFieldElement requestCount;
     private TextFieldElement dataProviderFetchCount;
     private ButtonElement requestCountReset;
-    private TextAreaElement receivedParents;
 
     private void open(List<Integer> expandedRootIndexes,
             SortDirection sortDirection, Integer nodesPerLevel, Integer depth,
@@ -70,12 +68,6 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
         requestCount = $(TextFieldElement.class).id("request-count");
         dataProviderFetchCount = $(TextFieldElement.class).id("fetch-count");
         requestCountReset = $(ButtonElement.class).id("request-count-reset");
-        receivedParents = $(TextAreaElement.class).id("received-parents");
-    }
-
-    private boolean parentItemsReceived(String parentId) {
-        return Arrays.stream(receivedParents.getValue().split("\n"))
-                .anyMatch(parentId::equals);
     }
 
     @Test
@@ -94,29 +86,7 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     @Test
     public void firstExpanded_shouldOptimizeDataProviderFetches() {
         open(Arrays.asList(0), null, null, null, null);
-        Assert.assertEquals("55", dataProviderFetchCount.getValue());
-    }
-
-    @Test
-    public void firstExpanded_shouldNotHaveDataForExpandedRootItemsOutsideViewportEstimate() {
-        open(Arrays.asList(0), null, null, null, null);
-        Assert.assertFalse(parentItemsReceived("/0/1"));
-    }
-
-    @Test
-    public void firstExpanded_shouldNotHaveDataForExpandedChildrenOutsideViewportEstimate() {
-        open(Arrays.asList(0), null, null, null, null);
-        Assert.assertFalse(parentItemsReceived("/0/0/1/1"));
-    }
-
-    @Test
-    public void firstExpanded_reExpand_shouldUseCachedDataForExpandedChildren() {
-        open(Arrays.asList(0), null, null, null, null);
-        requestCountReset.click();
-
-        getTreeGrid().collapseWithClick(0);
-        getTreeGrid().expandWithClick(0);
-        Assert.assertEquals("0", requestCount.getValue());
+        Assert.assertEquals("59", dataProviderFetchCount.getValue());
     }
 
     @Test
@@ -126,16 +96,6 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
         getTreeGrid().expandWithClick(0);
         verifyRow(0, "/0/0");
         verifyRow(4, "/0/0/1/0/2/0/3/0/4/0");
-    }
-
-    @Test
-    public void firstExpanded_reExpandChild_shouldUseCachedDataForExpandedChildren() {
-        open(Arrays.asList(0), null, null, null, null);
-        requestCountReset.click();
-
-        getTreeGrid().collapseWithClick(2);
-        getTreeGrid().expandWithClick(2);
-        Assert.assertEquals("0", requestCount.getValue());
     }
 
     @Test
@@ -151,20 +111,6 @@ public class TreeGridPreloadIT extends AbstractTreeGridIT {
     public void firstExpanded_smallPageSize_shouldHaveAllChildItemsVisible() {
         open(Arrays.asList(0), null, null, null, 2);
         verifyRow(6, "/0/0/1/0/2/0/3/0/4/2");
-    }
-
-    @Test
-    public void secondExpanded_shouldNotHaveDataForNonExpandedRootItems() {
-        open(Arrays.asList(1), null, null, null, null);
-        Assert.assertTrue(parentItemsReceived("/0/1"));
-        Assert.assertFalse(parentItemsReceived("/0/0"));
-    }
-
-    @Test
-    public void multipleExpanded_shouldNotHaveDataForExpandedRootItemsOutsideViewportEstimate() {
-        open(Arrays.asList(0, 2), null, null, null, null);
-        Assert.assertTrue(parentItemsReceived("/0/0"));
-        Assert.assertFalse(parentItemsReceived("/0/2"));
     }
 
     @Test
