@@ -570,9 +570,10 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       const updatedItems = updateGridCache(page, pkey);
       if (updatedItems) {
         itemsUpdated(updatedItems);
-        updateGridItemsInDomBasedOnCache(updatedItems);
       }
     }
+
+    grid.requestContentUpdate();
   };
 
   const itemToCacheLocation = function (item) {
@@ -713,11 +714,13 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     for (let i = 0; i < updatedPageCount; i++) {
       let page = firstPage + i;
       let items = cache[pkey][page];
-      grid.$connector.doDeselection(items.filter((item) => selectedKeys[item.key]));
-      items.forEach((item) => grid.closeItemDetails(item));
-      delete cache[pkey][page];
-      updateGridCache(page, parentKey);
-      updateGridItemsInDomBasedOnCache(items);
+      if (items) {
+        grid.$connector.doDeselection(items.filter((item) => selectedKeys[item.key]));
+        items.forEach((item) => grid.closeItemDetails(item));
+        delete cache[pkey][page];
+        updateGridCache(page, parentKey);
+        updateGridItemsInDomBasedOnCache(items);
+      }
     }
     let cacheToClear = dataProviderController.rootCache;
     if (parentKey) {
