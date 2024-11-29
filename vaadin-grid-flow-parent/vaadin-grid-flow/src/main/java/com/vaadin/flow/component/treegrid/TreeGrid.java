@@ -45,7 +45,6 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HasHierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalArrayUpdater.HierarchicalUpdate;
-import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
@@ -132,6 +131,11 @@ public class TreeGrid<T> extends Grid<T>
             enqueue("$connector.confirmParent", updateId, parentKey, levelSize);
             commit();
         }
+
+        @Override
+        public void commit() {
+            // Disable the default commit implementation to avoid sending
+        }
     }
 
     private class TreeGridArrayUpdaterImpl implements TreeGridArrayUpdater {
@@ -154,43 +158,43 @@ public class TreeGrid<T> extends Grid<T>
             TreeGridUpdateQueue queue = (TreeGridUpdateQueue) updateQueueFactory
                     .apply(data, sizeChange);
 
-            if (VaadinRequest.getCurrent() != null
-                    && !VaadinRequest.getCurrent().equals(previousRequest)) {
-                // Reset the viewportRemaining once for a server roundtrip.
-                viewportRemaining = EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE;
-                queuedParents.clear();
-                previousRequest = VaadinRequest.getCurrent();
-            }
+            // if (VaadinRequest.getCurrent() != null
+            // && !VaadinRequest.getCurrent().equals(previousRequest)) {
+            // // Reset the viewportRemaining once for a server roundtrip.
+            // viewportRemaining = EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE;
+            // queuedParents.clear();
+            // previousRequest = VaadinRequest.getCurrent();
+            // }
 
-            queue.setArrayUpdateListener((items) -> {
-                // Prepend the items to the queue of potential parents.
-                queuedParents.addAll(0, items);
+            // queue.setArrayUpdateListener((items) -> {
+            // // Prepend the items to the queue of potential parents.
+            // queuedParents.addAll(0, items);
 
-                while (viewportRemaining > 0 && !queuedParents.isEmpty()) {
-                    viewportRemaining--;
-                    JsonObject parent = (JsonObject) queuedParents.remove(0);
-                    T parentItem = getDataCommunicator().getKeyMapper()
-                            .get(parent.getString("key"));
+            // while (viewportRemaining > 0 && !queuedParents.isEmpty()) {
+            // viewportRemaining--;
+            // JsonObject parent = (JsonObject) queuedParents.remove(0);
+            // T parentItem = getDataCommunicator().getKeyMapper()
+            // .get(parent.getString("key"));
 
-                    if (isExpanded(parentItem)) {
-                        int childLength = Math.max(
-                                EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE,
-                                getPageSize());
+            // if (isExpanded(parentItem)) {
+            // int childLength = Math.max(
+            // EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE,
+            // getPageSize());
 
-                        // There's still room left in the viewport and the item
-                        // is expanded. Set parent requested range for it.
-                        getDataCommunicator().setParentRequestedRange(0,
-                                childLength, parentItem);
+            // // There's still room left in the viewport and the item
+            // // is expanded. Set parent requested range for it.
+            // getDataCommunicator().setParentRequestedRange(0,
+            // childLength, parentItem);
 
-                        // Stop iterating the items on this level. The request
-                        // for child items above will end up back in this while
-                        // loop, and to processing any parent siblings that
-                        // might be left in the queue.
-                        break;
-                    }
+            // // Stop iterating the items on this level. The request
+            // // for child items above will end up back in this while
+            // // loop, and to processing any parent siblings that
+            // // might be left in the queue.
+            // break;
+            // }
 
-                }
-            });
+            // }
+            // });
 
             return queue;
         }
@@ -221,6 +225,9 @@ public class TreeGrid<T> extends Grid<T>
      */
     public TreeGrid() {
         this(50, new TreeDataCommunicatorBuilder<T>());
+        // getDataCommunicator().addFlushListener(() -> {
+
+        // });
     }
 
     /**
@@ -358,8 +365,7 @@ public class TreeGrid<T> extends Grid<T>
                 TreeGridArrayUpdater arrayUpdater,
                 SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
 
-            return new HierarchicalDataCommunicator<>(dataGenerator,
-                    arrayUpdater,
+            return new TreeGridDataCommunicator<>(dataGenerator, arrayUpdater,
                     data -> element.callJsFunction(
                             "$connector.updateHierarchicalData", data),
                     element.getNode(), uniqueKeyProviderSupplier);
@@ -1099,8 +1105,8 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     @Override
-    public HierarchicalDataCommunicator<T> getDataCommunicator() {
-        return (HierarchicalDataCommunicator<T>) super.getDataCommunicator();
+    public TreeGridDataCommunicator<T> getDataCommunicator() {
+        return (TreeGridDataCommunicator<T>) super.getDataCommunicator();
     }
 
     @SuppressWarnings("unchecked")
