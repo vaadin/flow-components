@@ -60,8 +60,7 @@ public class TreeGridRefreshAllIT extends AbstractTreeGridIT {
 
         refreshAllButton.click();
 
-        Assert.assertFalse("TreeGrid was left with pending requests.",
-                getTreeGrid().hasAttribute("loading"));
+        waitUntilNot((driver) -> getTreeGrid().hasAttribute("loading"));
     }
 
     @Test // https://github.com/vaadin/vaadin-grid-flow/issues/740
