@@ -21,10 +21,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.IntStream;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasEnabled;
@@ -37,9 +35,9 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.I18nController;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.server.NoInputStreamException;
 import com.vaadin.flow.server.NoOutputStreamException;
 import com.vaadin.flow.server.StreamReceiver;
@@ -48,9 +46,7 @@ import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
-import elemental.json.JsonNull;
 import elemental.json.JsonObject;
-import elemental.json.JsonType;
 
 /**
  * Upload is a component for uploading one or more files. It shows the upload
@@ -82,7 +78,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     private int activeUploads = 0;
     private boolean uploading;
 
-    private UploadI18N i18n;
+    private I18nController<Upload, UploadI18N> i18nController;
 
     private Component uploadButton;
     private Component defaultUploadButton;
@@ -106,6 +102,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     public Upload() {
         final String eventDetailError = "event.detail.error";
         final String eventDetailFileName = "event.detail.file.name";
+
+        i18nController = new I18nController<>(this);
 
         getElement().addEventListener("file-reject", event -> {
             String detailError = event.getEventData()
@@ -660,75 +658,6 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     }
 
     /**
-     * Set the internationalization properties for this component.
-     *
-     * @param i18n
-     *            the i18n object, not {@code null}
-     */
-    public void setI18n(UploadI18N i18n) {
-        this.i18n = Objects.requireNonNull(i18n,
-                "The i18n properties object should not be null");
-
-        runBeforeClientResponse(ui -> {
-            if (i18n == this.i18n) {
-                setI18nWithJS();
-            }
-        });
-    }
-
-    private void setI18nWithJS() {
-        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
-
-        // Remove null values so that we don't overwrite existing WC
-        // translations with empty ones
-        deeplyRemoveNullValuesFromJsonObject(i18nJson);
-
-        // Assign new I18N object to WC, by deeply merging the existing
-        // WC I18N, and the values from the new UploadI18N instance,
-        // into an empty object
-        getElement().executeJs(
-                "const dropFiles = Object.assign({}, this.i18n.dropFiles, $0.dropFiles);"
-                        + "const addFiles = Object.assign({}, this.i18n.addFiles, $0.addFiles);"
-                        + "const error = Object.assign({}, this.i18n.error, $0.error);"
-                        + "const uploadingStatus = Object.assign({}, this.i18n.uploading.status, $0.uploading && $0.uploading.status);"
-                        + "const uploadingRemainingTime = Object.assign({}, this.i18n.uploading.remainingTime, $0.uploading && $0.uploading.remainingTime);"
-                        + "const uploadingError = Object.assign({}, this.i18n.uploading.error, $0.uploading && $0.uploading.error);"
-                        + "const uploading = {status: uploadingStatus,"
-                        + "  remainingTime: uploadingRemainingTime,"
-                        + "  error: uploadingError};"
-                        + "const units = $0.units || this.i18n.units;"
-                        + "this.i18n = Object.assign({}, this.i18n, $0, {"
-                        + "  addFiles: addFiles,  dropFiles: dropFiles,"
-                        + "  uploading: uploading, units: units});",
-                i18nJson);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-
-        // Element state is not persisted across attach/detach
-        if (this.i18n != null) {
-            setI18nWithJS();
-        }
-    }
-
-    private void deeplyRemoveNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.OBJECT) {
-                deeplyRemoveNullValuesFromJsonObject(jsonObject.get(key));
-            } else if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
-            }
-        }
-    }
-
-    void runBeforeClientResponse(SerializableConsumer<UI> command) {
-        getElement().getNode().runWhenAttached(ui -> ui
-                .beforeClientResponse(this, context -> command.accept(ui)));
-    }
-
-    /**
      * Get the internationalization object previously set for this component.
      * <p>
      * NOTE: Updating the instance that is returned from this method will not
@@ -737,34 +666,22 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * @return the i18n object or {@code null} if no i18n object has been set
      */
     public UploadI18N getI18n() {
-        return i18n;
+        return i18nController.getI18n();
     }
 
-    private String getStringObject(String propertyName, String subName) {
-        String result = null;
-        JsonObject json = (JsonObject) getElement()
-                .getPropertyRaw(propertyName);
-        if (json != null && json.hasKey(subName)
-                && !(json.get(subName) instanceof JsonNull)) {
-            result = json.getString(subName);
-        }
-        return result;
+    /**
+     * Set the internationalization properties for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    public void setI18n(UploadI18N i18n) {
+        i18nController.setI18n(i18n);
     }
 
-    private String getStringObject(String propertyName, String object,
-            String subName) {
-        String result = null;
-        JsonObject json = (JsonObject) getElement()
-                .getPropertyRaw(propertyName);
-        if (json != null && json.hasKey(object)
-                && !(json.get(object) instanceof JsonNull)) {
-            json = json.getObject(object);
-            if (json != null && json.hasKey(subName)
-                    && !(json.get(subName) instanceof JsonNull)) {
-                result = json.getString(subName);
-            }
-        }
-        return result;
+    void runBeforeClientResponse(SerializableConsumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
     /**
