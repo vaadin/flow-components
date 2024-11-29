@@ -75,6 +75,9 @@ public class EditColumnConfigurator<T> implements Serializable {
         column.setItemUpdater(itemUpdater);
         column.setEditorField(editorField);
         column.setValueProvider(valueProvider);
+        editorField.addValueChangeListener(v -> {
+            editorField.getElement().executeJs("this.__dirty = true");
+        });
 
         return getColumn();
     }

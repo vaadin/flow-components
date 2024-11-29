@@ -24,6 +24,8 @@ window.Vaadin.Flow.gridProConnector = {
 
     grid.toggleAttribute(LOADING_EDITOR_CELL_ATTRIBUTE, false);
 
+    editor.__dirty = false;
+
     if (editor instanceof HTMLInputElement) {
       editor.select();
     } else if (editor.focusElement && editor.focusElement instanceof HTMLInputElement) {
@@ -54,6 +56,27 @@ window.Vaadin.Flow.gridProConnector = {
     // Overridden in order to avoid blinking of the cell content.
     column._setEditorValue = function (editor, value) {};
 
+    // TODO: This doesn't work sinde the grid-level method is overriden specific to this column. Needs to be done differently.
+    const grid = column._grid;
+    grid.__originalStopEdit ||= grid._stopEdit;
+    grid._stopEdit = function (_shouldCancel, shouldRestoreFocus) {
+      if (component.__dirty && !grid.hasAttribute(LOADING_EDITOR_CELL_ATTRIBUTE)) {
+        // If the editor is dirty, manually dispatch the item-property-changed event
+        grid.dispatchEvent(
+          new CustomEvent('item-property-changed', {
+            detail: {
+              item: grid.__edited.model.item,
+              path: column.path
+            },
+            bubbles: true
+          })
+        );
+      }
+
+      // Make the default stopEdit method always cancel the edit
+      grid.__originalStopEdit.apply(grid, [true, shouldRestoreFocus]);
+    };
+
     const stopCellEdit = column._stopCellEdit;
     column._stopCellEdit = function () {
       stopCellEdit.apply(this, arguments);
@@ -79,10 +102,10 @@ window.Vaadin.Flow.gridProConnector = {
   },
 
   initCellEditableProvider(column) {
-    column.isCellEditable = function(model) {
+    column.isCellEditable = function (model) {
       // If there is no cell editable data, assume the cell is editable
       const isEditable = model.item.cellEditable && model.item.cellEditable[column._flowId];
       return isEditable === undefined || isEditable;
     };
-  },
+  }
 };
