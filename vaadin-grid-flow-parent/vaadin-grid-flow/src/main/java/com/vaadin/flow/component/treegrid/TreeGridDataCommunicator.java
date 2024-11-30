@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.treegrid;
 
 import java.util.List;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -37,7 +38,7 @@ public class TreeGridDataCommunicator<T>
         extends HierarchicalDataCommunicator<T> {
     private SerializableRunnable flushListener;
 
-    private Cache<T> rootCache = new Cache<>();
+    private Cache<T> rootCache;
 
     public TreeGridDataCommunicator(CompositeDataGenerator<T> dataGenerator,
             HierarchicalArrayUpdater arrayUpdater,
@@ -64,6 +65,10 @@ public class TreeGridDataCommunicator<T>
     }
 
     public void setRequestedFlatRange(int start, int length) {
+        if (rootCache == null) {
+            rootCache = new Cache<>(null, -1, countChildItems(null));
+        }
+
         for (int i = start; i < start + length; i++) {
             FlatIndexContext<T> context = getFlatIndexContext(i);
             int index = context.index;
@@ -71,13 +76,13 @@ public class TreeGridDataCommunicator<T>
 
             if (!cache.hasItem(index)) {
                 // TODO: Optimize length calculation
-                cache.setItems(index, fetchChildItems(cache,
+                cache.setItems(index, fetchChildItems(cache.getParentItem(),
                         Range.withLength(index, length)));
             }
 
             T item = cache.getItem(index);
             if (isExpanded(item) && !cache.hasCache(index)) {
-                cache.createCache(index, countChildItems(cache));
+                cache.createCache(index, countChildItems(item));
             }
         }
     }
@@ -90,8 +95,8 @@ public class TreeGridDataCommunicator<T>
             Cache<T> cache) {
         int index = flatIndex;
 
-        for (Cache<T> childCache : cache.getCaches()) {
-            int cacheIndex = childCache.getParentIndex();
+        for (int cacheIndex : cache.getCacheIndexes()) {
+            Cache<T> childCache = cache.getCache(cacheIndex);
 
             if (index <= cacheIndex) {
                 break;
@@ -107,13 +112,12 @@ public class TreeGridDataCommunicator<T>
         return new FlatIndexContext<>(cache, index);
     }
 
-    private List<T> fetchChildItems(Cache<T> cache, Range range) {
-        return getHierarchyMapper()
-                .fetchChildItems(cache.getParentItem(), range).toList();
+    private List<T> fetchChildItems(T parentItem, Range range) {
+        return getHierarchyMapper().fetchChildItems(parentItem, range).toList();
     }
 
-    private int countChildItems(Cache<T> cache) {
-        return getHierarchyMapper().countChildItems(cache.getParentItem());
+    private int countChildItems(T parentItem) {
+        return getHierarchyMapper().countChildItems(parentItem);
     }
 
     private static record FlatIndexContext<T>(Cache<T> cache,
@@ -123,38 +127,22 @@ public class TreeGridDataCommunicator<T>
 
     private static class Cache<T> {
         private Cache<T> parentCache;
-        private Integer parentIndex;
-        private Integer size;
+        private int parentIndex;
+        private int size;
         private SortedMap<Integer, T> items = new TreeMap<>();
         private SortedMap<Integer, Cache<T>> caches = new TreeMap<>();
 
-        public Cache() {
-            this(null, 0, 0);
-        }
-
-        public Cache(Cache<T> parentCache, Integer parentIndex, Integer size) {
+        public Cache(Cache<T> parentCache, int parentIndex, int size) {
             this.parentCache = parentCache;
             this.parentIndex = parentIndex;
             this.size = size;
-        }
-
-        public Integer getParentIndex() {
-            return parentIndex;
         }
 
         public T getParentItem() {
             return parentCache.getItem(parentIndex);
         }
 
-        public Integer getSize() {
-            return size;
-        }
-
         public int getFlatSize() {
-            if (size == null) {
-                return 0;
-            }
-
             return size + caches.values().stream().mapToInt(Cache::getFlatSize)
                     .sum();
         }
@@ -167,18 +155,22 @@ public class TreeGridDataCommunicator<T>
             return items.get(index);
         }
 
-        public void setItems(int startIndex, List<T> items) {
-            for (int i = 0; i < items.size(); i++) {
-                this.items.put(startIndex + i, items.get(i));
+        public void setItems(int startIndex, List<T> itemsToSet) {
+            for (int i = 0; i < itemsToSet.size(); i++) {
+                items.put(startIndex + i, itemsToSet.get(i));
             }
         }
 
-        public List<Cache<T>> getCaches() {
-            return caches.values().stream().toList();
+        public Set<Integer> getCacheIndexes() {
+            return caches.keySet();
         }
 
         public boolean hasCache(int index) {
             return caches.containsKey(index);
+        }
+
+        public Cache<T> getCache(int index) {
+            return caches.get(index);
         }
 
         public Cache<T> createCache(int index, int size) {
