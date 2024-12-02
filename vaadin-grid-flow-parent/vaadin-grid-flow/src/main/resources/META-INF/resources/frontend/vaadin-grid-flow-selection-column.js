@@ -24,8 +24,14 @@ export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridCo
       width: {
         type: String,
         value: '56px'
-      }
+      },
     };
+  }
+
+  static get observers() {
+    return [
+      '__shiftKeyDownChanged(_shiftKeyDown)'
+    ];
   }
 
   /**
@@ -42,6 +48,10 @@ export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridCo
     }
   }
 
+  /** @private */
+  __shiftKeyDownChanged(shiftKeyDown) {
+    this.$server.setShiftKeyDown(shiftKeyDown);
+  }
 
   /**
    * Override a method from `GridSelectionColumnBaseMixin` to handle the user

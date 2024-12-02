@@ -32,6 +32,7 @@ import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.grid.Grid.AbstractGridExtension;
+import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
@@ -60,6 +61,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
     private final Map<Object, T> selected;
     private final GridSelectionColumn selectionColumn;
     private SelectAllCheckboxVisibility selectAllCheckBoxVisibility;
+    private boolean rangeSelect;
+    private T startItem;
 
     /**
      * Constructor for passing a reference of the grid to this implementation.
@@ -120,6 +123,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, true));
 
+        startItem = startItem != null ? startItem : item;
+        if (isShiftKeyDown()) {
+            selectRangeFromClient(startItem, item);
+        }
+        startItem = item;
+
         if (!isSelectAllCheckboxVisible()) {
             // Skip changing the state of Select All checkbox if it was
             // meant to be hidden
@@ -134,6 +143,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
                         : selected.size() > 0 && selected.size() < size);
     }
 
+    protected void selectRangeFromClient(T startItem, T endItem) {
+        Set<T> range = fetchSelectionRange(startItem, endItem);
+        range.forEach(item -> selected.put(getItemId(item), item));
+        sendSelectionUpdate(range, getGrid()::doClientSideSelection);
+    }
+
     @Override
     public void deselectFromClient(T item) {
         boolean selectable = getGrid().isItemSelectable(item);
@@ -144,6 +159,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
         Set<T> oldSelection = getSelectedItems();
         selected.remove(getItemId(item));
 
+        startItem = startItem != null ? startItem : item;
+        if (isRangeSelect() && isShiftKeyDown()) {
+            deselectRangeFromClient(startItem, item);
+        }
+        startItem = item;
+
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, true));
 
@@ -152,6 +173,12 @@ public abstract class AbstractGridMultiSelectionModel<T>
         selectionColumn.setSelectAllCheckboxIndeterminateState(
                 isHierarchicalDataProvider() ? selected.size() > 0
                         : selected.size() > 0 && selected.size() < size);
+    }
+
+    protected void deselectRangeFromClient(T startItem, T endItem) {
+        Set<T> range = fetchSelectionRange(startItem, endItem);
+        range.forEach(item -> selected.remove(getItemId(item)));
+        sendSelectionUpdate(range, getGrid()::doClientSideDeselection);
     }
 
     @Override
@@ -376,6 +403,40 @@ public abstract class AbstractGridMultiSelectionModel<T>
         return selectionColumn.isDragSelect();
     }
 
+    @Override
+    public void setRangeSelect(boolean rangeSelect) {
+        if (getGrid() instanceof TreeGrid) {
+            throw new UnsupportedOperationException(
+                    "Range selection is not supported for TreeGrid");
+        }
+
+        this.rangeSelect = rangeSelect;
+    }
+
+    @Override
+    public boolean isRangeSelect() {
+        return rangeSelect;
+    }
+
+    private Set<T> fetchSelectionRange(T startItem, T endItem) {
+        Stream<T> allItems = getGrid()
+                .getDataCommunicator().getDataProvider().fetch(getGrid()
+                        .getDataCommunicator().buildQuery(0, Integer.MAX_VALUE));
+        Set<T> range = new HashSet<>();
+        allItems.forEach(item -> {
+            if (!getGrid().isItemSelectable(item)) {
+                return;
+            } else if (item.equals(startItem) || item.equals(endItem)) {
+                range.add(item);
+            } else if (range.contains(startItem) && !range.contains(endItem)) {
+                range.add(item);
+            } else if (!range.contains(startItem) && range.contains(endItem)) {
+                range.add(item);
+            }
+        });
+        return range;
+    }
+
     /**
      * Method for handling the firing of selection events.
      *
@@ -408,6 +469,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     protected GridSelectionColumn getSelectionColumn() {
         return selectionColumn;
+    }
+
+    protected boolean isShiftKeyDown() {
+        return selectionColumn.isShiftKeyDown();
     }
 
     /**

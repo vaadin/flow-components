@@ -169,4 +169,8 @@ public interface GridMultiSelectionModel<T>
      *         <code>false</code> otherwise
      */
     boolean isDragSelect();
+
+    void setRangeSelect(boolean rangeSelect);
+
+    boolean isRangeSelect();
 }
