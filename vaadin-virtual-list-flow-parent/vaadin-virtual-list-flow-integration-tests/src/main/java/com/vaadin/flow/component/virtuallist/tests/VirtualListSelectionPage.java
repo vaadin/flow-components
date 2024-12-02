@@ -22,6 +22,7 @@ import java.util.stream.IntStream;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.virtuallist.VirtualList;
+import com.vaadin.flow.component.virtuallist.VirtualListSingleSelectionModel;
 import com.vaadin.flow.component.virtuallist.VirtualList.SelectionMode;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
@@ -45,7 +46,10 @@ public class VirtualListSelectionPage extends Div {
         list.setRenderer(LitRenderer.<Item> of("<div>${item.name}</div>")
                 .withProperty("name", item -> item.name));
 
-        list.setSelectionMode(SelectionMode.MULTI);
+        var model = (VirtualListSingleSelectionModel)list.setSelectionMode(SelectionMode.SINGLE);
+        model.setDeselectAllowed(false);
+
+        list.select(items.get(0));
 
         list.addSelectionListener(e -> {
             System.out.println("Selected items: " + e.getAllSelectedItems());
@@ -57,6 +61,11 @@ public class VirtualListSelectionPage extends Div {
             list.select(items.get(1));
         });
         add(button);
+
+        var deselectAll = new NativeButton("Deselect all", e -> {
+            list.deselectAll();
+        });
+        add(deselectAll);
 
         var printSelectionButton = new NativeButton("Print selection", e -> {
             System.out.println("Selected item: "

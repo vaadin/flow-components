@@ -41,7 +41,6 @@ public class VirtualListSingleSelectionModel<T>
         implements SelectionModel.Single<VirtualList<T>, T> {
 
     private T selectedItem;
-    private boolean deselectAllowed = true;
     private VirtualList<T> list;
 
     /**
@@ -81,12 +80,12 @@ public class VirtualListSingleSelectionModel<T>
 
     @Override
     public void setDeselectAllowed(boolean deselectAllowed) {
-        this.deselectAllowed = deselectAllowed;
+        list.getElement().setProperty("__deselectionDisallowed", !deselectAllowed);
     }
 
     @Override
     public boolean isDeselectAllowed() {
-        return deselectAllowed;
+        return !list.getElement().getProperty("__deselectionDisallowed", false);
     }
 
     public SingleSelect<VirtualList<T>, T> asSingleSelect() {

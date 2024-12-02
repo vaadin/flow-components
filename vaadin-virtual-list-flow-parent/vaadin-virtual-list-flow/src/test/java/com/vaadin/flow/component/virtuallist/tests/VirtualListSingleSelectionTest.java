@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.virtuallist.VirtualList;
+import com.vaadin.flow.component.virtuallist.VirtualListSingleSelectionModel;
 import com.vaadin.flow.component.virtuallist.VirtualList.SelectionMode;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
@@ -195,5 +196,46 @@ public class VirtualListSingleSelectionTest {
         Assert.assertEquals(Set.of("3"), list.getSelectedItems());
         Mockito.verify(selectionListenerSpy, Mockito.times(1))
                 .selectionChange(Mockito.any());
+    }
+
+    @Test
+    public void deselectAllowed_defaultValue() {
+        var model = (VirtualListSingleSelectionModel<String>) list.getSelectionModel();
+        Assert.assertTrue(model.isDeselectAllowed());
+    }
+
+    @Test
+    public void deselectAllowed_setDisallowed() {
+        var model = (VirtualListSingleSelectionModel<String>) list.getSelectionModel();
+        model.setDeselectAllowed(false);
+        Assert.assertFalse(model.isDeselectAllowed());
+    }
+
+    @Test
+    public void deselectAllowed_changeMode() {
+        var model = (VirtualListSingleSelectionModel<String>) list.getSelectionModel();
+        model.setDeselectAllowed(false);
+        list.setSelectionMode(SelectionMode.MULTI);
+
+        model = (VirtualListSingleSelectionModel<String>) list.setSelectionMode(SelectionMode.SINGLE);
+        Assert.assertTrue(model.isDeselectAllowed());
+    }
+
+    @Test
+    public void deselectAllowed_setSameMode() {
+        var model = (VirtualListSingleSelectionModel<String>) list.getSelectionModel();
+        model.setDeselectAllowed(false);
+        list.setSelectionMode(SelectionMode.SINGLE);        
+        model = (VirtualListSingleSelectionModel<String>) list.setSelectionMode(SelectionMode.SINGLE);
+        Assert.assertTrue(model.isDeselectAllowed());
+    }
+
+    @Test
+    public void deselectDisallowed_allowProgrammaticDeselection() {
+        var model = (VirtualListSingleSelectionModel<String>) list.getSelectionModel();
+        model.setDeselectAllowed(false);
+        list.select("1");
+        list.deselect("1");
+        Assert.assertEquals(Set.of(), list.getSelectedItems());
     }
 }
