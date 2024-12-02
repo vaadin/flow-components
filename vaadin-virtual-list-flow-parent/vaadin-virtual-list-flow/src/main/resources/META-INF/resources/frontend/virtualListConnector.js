@@ -161,6 +161,26 @@ window.Vaadin.Flow.virtualListConnector = {
 
     let previousSelectedKeys = [];
 
+    // This listener is used to prevent user from de-selecting the selected item when deselection is disallowed
+    list.addEventListener('selected-items-changed', function (event) {
+      if (list.$connector.__revertingSelection) {
+        event.stopImmediatePropagation();
+        return;
+      }
+      if (
+        list.selectionMode === 'single' &&
+        list.__deselectionDisallowed &&
+        previousSelectedKeys.length &&
+        list.selectedItems.length === 0 &&
+        !list.$connector.__updatingSelectedItemsFromServer
+      ) {
+        event.stopImmediatePropagation();
+        list.$connector.__revertingSelection = true;
+        list.selectedItems = list.items.filter((item) => item && item.selected);
+        list.$connector.__revertingSelection = false;
+      }
+    });
+
     list.addEventListener('selected-items-changed', function (event) {
       const selectedKeys = event.detail.value.map((item) => item.key);
       const addedKeys = selectedKeys.filter((key) => !previousSelectedKeys.includes(key));

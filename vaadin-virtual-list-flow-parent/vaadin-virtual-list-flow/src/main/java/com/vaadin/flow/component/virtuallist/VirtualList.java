@@ -461,7 +461,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
 
         selectionModel = model;
         this.selectionMode = selectionMode;
-
+        
+        getElement().removeProperty("__deselectionDisallowed");
         getElement().setProperty("selectionMode",
                 SelectionMode.NONE.equals(selectionMode) ? null
                         : selectionMode.name().toLowerCase());
