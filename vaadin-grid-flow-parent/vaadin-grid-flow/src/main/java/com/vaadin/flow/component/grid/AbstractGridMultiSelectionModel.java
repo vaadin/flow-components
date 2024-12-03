@@ -125,7 +125,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
         startItem = startItem != null ? startItem : item;
         if (isShiftKeyDown()) {
-            selectRangeFromClient(startItem, item);
+            Set<T> range = fetchSelectionRange(item);
+            range.forEach(
+                    rangeItem -> selected.put(getItemId(rangeItem), rangeItem));
+            sendSelectionUpdate(range, getGrid()::doClientSideSelection);
         }
         startItem = item;
 
@@ -143,12 +146,6 @@ public abstract class AbstractGridMultiSelectionModel<T>
                         : selected.size() > 0 && selected.size() < size);
     }
 
-    protected void selectRangeFromClient(T startItem, T endItem) {
-        Set<T> range = fetchSelectionRange(startItem, endItem);
-        range.forEach(item -> selected.put(getItemId(item), item));
-        sendSelectionUpdate(range, getGrid()::doClientSideSelection);
-    }
-
     @Override
     public void deselectFromClient(T item) {
         boolean selectable = getGrid().isItemSelectable(item);
@@ -161,7 +158,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
         startItem = startItem != null ? startItem : item;
         if (isRangeSelect() && isShiftKeyDown()) {
-            deselectRangeFromClient(startItem, item);
+            Set<T> range = fetchSelectionRange(item);
+            range.forEach(rangeItem -> selected.remove(getItemId(rangeItem)));
+            sendSelectionUpdate(range, getGrid()::doClientSideDeselection);
         }
         startItem = item;
 
@@ -173,12 +172,6 @@ public abstract class AbstractGridMultiSelectionModel<T>
         selectionColumn.setSelectAllCheckboxIndeterminateState(
                 isHierarchicalDataProvider() ? selected.size() > 0
                         : selected.size() > 0 && selected.size() < size);
-    }
-
-    protected void deselectRangeFromClient(T startItem, T endItem) {
-        Set<T> range = fetchSelectionRange(startItem, endItem);
-        range.forEach(item -> selected.remove(getItemId(item)));
-        sendSelectionUpdate(range, getGrid()::doClientSideDeselection);
     }
 
     @Override
@@ -418,25 +411,6 @@ public abstract class AbstractGridMultiSelectionModel<T>
         return rangeSelect;
     }
 
-    private Set<T> fetchSelectionRange(T startItem, T endItem) {
-        Stream<T> allItems = getGrid()
-                .getDataCommunicator().getDataProvider().fetch(getGrid()
-                        .getDataCommunicator().buildQuery(0, Integer.MAX_VALUE));
-        Set<T> range = new HashSet<>();
-        allItems.forEach(item -> {
-            if (!getGrid().isItemSelectable(item)) {
-                return;
-            } else if (item.equals(startItem) || item.equals(endItem)) {
-                range.add(item);
-            } else if (range.contains(startItem) && !range.contains(endItem)) {
-                range.add(item);
-            } else if (!range.contains(startItem) && range.contains(endItem)) {
-                range.add(item);
-            }
-        });
-        return range;
-    }
-
     /**
      * Method for handling the firing of selection events.
      *
@@ -473,6 +447,28 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     protected boolean isShiftKeyDown() {
         return selectionColumn.isShiftKeyDown();
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    protected Set<T> fetchSelectionRange(T endItem) {
+        DataCommunicator<T> dataCommunicator = getGrid().getDataCommunicator();
+        DataProvider<T, ?> dataProvider = dataCommunicator.getDataProvider();
+        Stream<T> allItems = dataProvider
+                .fetch(dataCommunicator.buildQuery(0, Integer.MAX_VALUE));
+
+        Set<T> range = new HashSet<>();
+        allItems.forEach(item -> {
+            if (!getGrid().isItemSelectable(item)) {
+                return;
+            } else if (item.equals(startItem) || item.equals(endItem)) {
+                range.add(item);
+            } else if (range.contains(startItem) && !range.contains(endItem)) {
+                range.add(item);
+            } else if (!range.contains(startItem) && range.contains(endItem)) {
+                range.add(item);
+            }
+        });
+        return range;
     }
 
     /**

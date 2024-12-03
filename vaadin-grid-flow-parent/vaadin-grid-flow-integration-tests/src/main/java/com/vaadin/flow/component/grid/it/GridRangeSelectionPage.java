@@ -26,14 +26,18 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-grid/grid-range-selection")
 public class GridRangeSelectionPage extends Div {
 
-
     public GridRangeSelectionPage() {
         Grid<String> grid = new Grid<>(10);
 
-        grid.setItems(DataProvider.fromCallbacks(
-            query -> IntStream.range(query.getOffset(), query.getOffset() + query.getLimit())
-                .mapToObj(Integer::toString),
-            query -> 10000));
+        grid.setItems(
+                DataProvider
+                        .fromCallbacks(
+                                query -> IntStream
+                                        .range(query.getOffset(),
+                                                query.getOffset()
+                                                        + query.getLimit())
+                                        .mapToObj(Integer::toString),
+                                query -> 10000));
         grid.setSelectionMode(SelectionMode.MULTI);
         add(grid);
     }
