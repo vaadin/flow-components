@@ -65,6 +65,9 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
             return;
         }
         doSelect(item, true);
+
+        fireClientItemSelectionEvent(
+                new ClientItemSelectionEvent<>(getGrid(), item, true, false));
     }
 
     @Override
@@ -82,6 +85,9 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
         boolean selectable = getGrid().isItemSelectable(item);
         if (isSelected(item) && selectable && isDeselectAllowed()) {
             doSelect(null, true);
+
+            fireClientItemSelectionEvent(new ClientItemSelectionEvent<>(
+                    getGrid(), item, false, false));
         }
     }
 
@@ -187,6 +193,11 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
      */
     protected abstract void fireSelectionEvent(
             SelectionEvent<Grid<T>, T> event);
+
+    protected void fireClientItemSelectionEvent(
+            ClientItemSelectionEvent<T> event) {
+        ComponentUtil.fireEvent(getGrid(), event);
+    }
 
     private void doSelect(T item, boolean userOriginated) {
         T oldValue = selectedItem;
