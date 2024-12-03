@@ -55,6 +55,7 @@ import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.data.selection.SingleSelectionEvent;
 import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.server.Command;
@@ -137,6 +138,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
 
     private SelectionMode selectionMode;
     private SelectionModel<VirtualList<T>, T> selectionModel;
+    private SerializableFunction<T, String> itemAccessibleNameGenerator = item -> null;
 
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private final List<Registration> renderingRegistrations = new ArrayList<>();
@@ -174,6 +176,10 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         dataGenerator.addDataGenerator((item, jsonObject) -> {
             if (this.getSelectionModel().isSelected(item)) {
                 jsonObject.put("selected", true);
+            }
+            var accessibleName = this.itemAccessibleNameGenerator.apply(item);
+            if (accessibleName != null) {
+                jsonObject.put("accessibleName", accessibleName);
             }
         });
 
@@ -601,6 +607,31 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         assert selectionModel != null : "No selection model set by "
                 + getClass().getName() + " constructor";
         return selectionModel;
+    }
+
+    /**
+     * A function that generates accessible names for virtual list items.
+     *
+     * @param itemAccessibleNameGenerator
+     *            the item accessible name generator to set, not {@code null}
+     * @throws NullPointerException
+     *             if {@code itemAccessibleNameGenerator} is {@code null}
+     */
+    public void setItemAccessibleNameGenerator(
+            SerializableFunction<T, String> itemAccessibleNameGenerator) {
+        Objects.requireNonNull(itemAccessibleNameGenerator,
+                "Part name generator can not be null");
+        this.itemAccessibleNameGenerator = itemAccessibleNameGenerator;
+        getDataCommunicator().reset();
+    }
+
+    /**
+     * Gets the function that generates accessible names for virtual list items.
+     *
+     * @return the item accessible name generator
+     */
+    public SerializableFunction<T, String> getItemAccessibleNameGenerator() {
+        return itemAccessibleNameGenerator;
     }
 
     /**
