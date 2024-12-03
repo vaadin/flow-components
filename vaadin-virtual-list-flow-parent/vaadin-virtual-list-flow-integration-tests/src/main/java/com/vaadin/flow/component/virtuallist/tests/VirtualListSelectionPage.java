@@ -55,6 +55,8 @@ public class VirtualListSelectionPage extends Div {
             System.out.println("Selected items: " + e.getAllSelectedItems());
         });
 
+        list.setItemAccessibleNameGenerator(item -> "Accessible " + item.name);
+
         add(list);
 
         var button = new NativeButton("Select second item", e -> {
