@@ -29,6 +29,7 @@ import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 
 /**
  * Base class for item component used inside {@link ContextMenu}s.
@@ -58,6 +59,9 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
     private boolean checkable = false;
 
     private Set<String> themeNames = new LinkedHashSet<>();
+
+    private final DisableOnClickController<MenuItemBase<C, I, S>> disableOnClickController = new DisableOnClickController<>(
+            this);
 
     /**
      * Default constructor
@@ -215,6 +219,35 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      */
     public boolean isKeepOpen() {
         return getElement().getProperty("_keepOpen", false);
+    }
+
+    /**
+     * Sets whether the item should be disabled when clicked.
+     * <p>
+     * When set to {@code true}, the item will be immediately disabled on the
+     * client-side when clicked, preventing further clicks until re-enabled from
+     * the server-side.
+     *
+     * @param disableOnClick
+     *            whether the item should be disabled when clicked
+     */
+    public void setDisableOnClick(boolean disableOnClick) {
+        disableOnClickController.setDisableOnClick(disableOnClick);
+    }
+
+    /**
+     * Gets whether the item is set to be disabled when clicked.
+     *
+     * @return whether the item is set to be disabled on click
+     */
+    public boolean isDisableOnClick() {
+        return disableOnClickController.isDisableOnClick();
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        HasComponents.super.setEnabled(enabled);
+        disableOnClickController.onSetEnabled(enabled);
     }
 
     /**
