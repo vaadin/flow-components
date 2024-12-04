@@ -16,8 +16,6 @@
 package com.vaadin.flow.component.virtuallist.testbench;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 import org.openqa.selenium.By;
@@ -98,7 +96,8 @@ public class VirtualListElement extends TestBenchElement {
             return;
         }
 
-        var element = this.findElement(By.xpath("child::div[@aria-posinset='" + (rowIndex + 1) + "']"));
+        var element = this.findElement(By
+                .xpath("child::div[@aria-posinset='" + (rowIndex + 1) + "']"));
         element.click();
     }
 
@@ -116,7 +115,8 @@ public class VirtualListElement extends TestBenchElement {
             return;
         }
 
-        var element = this.findElement(By.xpath("child::div[@aria-posinset='" + (rowIndex + 1) + "']"));
+        var element = this.findElement(By
+                .xpath("child::div[@aria-posinset='" + (rowIndex + 1) + "']"));
         element.click();
     }
 
@@ -126,8 +126,11 @@ public class VirtualListElement extends TestBenchElement {
      * @return the indexes of the selected rows
      */
     public Set<Integer> getSelectedIndexes() {
-        var selectedIndexes = (ArrayList<Long>) executeScript("return arguments[0].selectedItems.map(i => arguments[0].items.indexOf(i))", this);
-        return Set.copyOf(selectedIndexes.stream().map(Long::intValue).toList());
+        var selectedIndexes = (ArrayList<Long>) executeScript(
+                "return arguments[0].selectedItems.map(i => arguments[0].items.indexOf(i))",
+                this);
+        return Set
+                .copyOf(selectedIndexes.stream().map(Long::intValue).toList());
     }
 
 }
