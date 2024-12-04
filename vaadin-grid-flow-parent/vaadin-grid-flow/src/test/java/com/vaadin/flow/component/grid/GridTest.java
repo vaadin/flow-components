@@ -131,6 +131,20 @@ public class GridTest {
         callSetRequestedRange(grid, 0, 600);
     }
 
+    @Test
+    public void setAriaLabel() {
+        final Grid<String> grid = new Grid<>();
+        grid.setAriaLabel("test");
+        Assert.assertTrue(grid.getAriaLabel().isPresent());
+        Assert.assertEquals("test", grid.getAriaLabel().get());
+        Assert.assertEquals("test",
+                grid.getElement().getProperty("accessibleName"));
+
+        grid.setAriaLabel(null);
+        Assert.assertFalse(grid.getAriaLabel().isPresent());
+        Assert.assertFalse(grid.getElement().hasProperty("accessibleName"));
+    }
+
     private void callSetRequestedRange(Grid<String> grid, int start,
             int length) {
         try {
