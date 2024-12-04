@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.datepicker.testbench;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -132,7 +133,7 @@ public class DatePickerElement extends TestBenchElement
     }
 
     /**
-     * Sets the selected date as a string.
+     * Sets the selected date as a string and dispatches a change event.
      * <p>
      * The value is always in format <code>YYYY-MM-DD</code>.
      *
@@ -141,6 +142,7 @@ public class DatePickerElement extends TestBenchElement
      */
     protected void setValue(String value) {
         setProperty("value", value);
+        dispatchEvent("change", Collections.singletonMap("bubbles", true));
     }
 
     /**
