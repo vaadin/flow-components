@@ -26,7 +26,6 @@ import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.data.selection.SelectionModel;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.data.selection.SingleSelectionEvent;
-import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
 
@@ -80,7 +79,8 @@ public class VirtualListSingleSelectionModel<T>
 
     @Override
     public void setDeselectAllowed(boolean deselectAllowed) {
-        list.getElement().setProperty("__deselectionDisallowed", !deselectAllowed);
+        list.getElement().setProperty("__deselectionDisallowed",
+                !deselectAllowed);
     }
 
     @Override

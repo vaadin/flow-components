@@ -42,7 +42,8 @@ public class VirtualListSelectionIT extends AbstractComponentIT {
         open();
         virtualList = $(VirtualListElement.class).waitForFirst();
         singleSelectionModeButton = $("button").id("single-selection-mode");
-        singleSelectionModeDeselectionDisallowedButton = $("button").id("single-selection-mode-deselection-disallowed");
+        singleSelectionModeDeselectionDisallowedButton = $("button")
+                .id("single-selection-mode-deselection-disallowed");
         multiSelectionModeButton = $("button").id("multi-selection-mode");
         selectFirstButton = $("button").id("select-first");
         deselectAllButton = $("button").id("deselect-all");
@@ -52,9 +53,9 @@ public class VirtualListSelectionIT extends AbstractComponentIT {
     @Test
     public void select_shouldNotSelect() {
         virtualList.select(0);
-        
+
         var selectedRows = virtualList.getSelectedIndexes();
-        Assert.assertTrue(selectedRows.isEmpty());    
+        Assert.assertTrue(selectedRows.isEmpty());
     }
 
     @Test
@@ -114,7 +115,7 @@ public class VirtualListSelectionIT extends AbstractComponentIT {
         virtualList.select(3);
         virtualList.select(1);
         virtualList.deselect(0);
-        
+
         var selectedIndexesSet = Set.of(selectedIndexes.getText().split(", "));
         Assert.assertEquals(Set.of("1", "3"), selectedIndexesSet);
     }
@@ -131,9 +132,10 @@ public class VirtualListSelectionIT extends AbstractComponentIT {
 
     @Test
     public void accessibleName() {
-        var firstChildElement = virtualList.findElement(By.xpath("child::div[@aria-posinset='1']"));
-        Assert.assertEquals("Accessible Item 0", firstChildElement.getAttribute("aria-label"));
+        var firstChildElement = virtualList
+                .findElement(By.xpath("child::div[@aria-posinset='1']"));
+        Assert.assertEquals("Accessible Item 0",
+                firstChildElement.getAttribute("aria-label"));
     }
-
 
 }

@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.virtuallist.tests;
 
-import java.util.Set;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,7 +55,8 @@ public class VirtualListAsSingleSelectTest {
 
     @Test
     public void getElement() {
-        Assert.assertEquals("vaadin-virtual-list", singleSelect.getElement().getTag());
+        Assert.assertEquals("vaadin-virtual-list",
+                singleSelect.getElement().getTag());
     }
 
     @Test
@@ -121,8 +120,8 @@ public class VirtualListAsSingleSelectTest {
 
         singleSelect.setValue("2");
 
-        Assert.assertEquals( "2", singleSelect.getValue());
-        Assert.assertEquals( "2", person.getValue());
+        Assert.assertEquals("2", singleSelect.getValue());
+        Assert.assertEquals("2", person.getValue());
     }
 
     public static class Person {

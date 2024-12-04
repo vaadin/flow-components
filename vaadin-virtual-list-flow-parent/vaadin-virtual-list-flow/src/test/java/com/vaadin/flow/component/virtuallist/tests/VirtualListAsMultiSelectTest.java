@@ -70,7 +70,8 @@ public class VirtualListAsMultiSelectTest {
 
     @Test
     public void getElement() {
-        Assert.assertEquals("vaadin-virtual-list", multiSelect.getElement().getTag());
+        Assert.assertEquals("vaadin-virtual-list",
+                multiSelect.getElement().getTag());
     }
 
     @Test

@@ -48,7 +48,6 @@ public class VirtualListSelectionPage extends Div {
         list.setRenderer(LitRenderer.<Item> of("<div>${item.name}</div>")
                 .withProperty("name", item -> item.name));
 
-
         list.setItemAccessibleNameGenerator(item -> "Accessible " + item.name);
 
         add(list);
@@ -57,7 +56,9 @@ public class VirtualListSelectionPage extends Div {
         selectedIndexes.setHeight("30px");
         selectedIndexes.setId("selected-indexes");
         SelectionListener<VirtualList<Item>, Item> selectionListener = event -> {
-            selectedIndexes.setText(event.getAllSelectedItems().stream().map(item -> String.valueOf(items.indexOf(item))).collect(Collectors.joining(", ")));
+            selectedIndexes.setText(event.getAllSelectedItems().stream()
+                    .map(item -> String.valueOf(items.indexOf(item)))
+                    .collect(Collectors.joining(", ")));
         };
 
         add(new Div(new H2("Selected item indexes"), selectedIndexes));
@@ -85,12 +86,15 @@ public class VirtualListSelectionPage extends Div {
         });
         singleSelectionModeButton.setId("single-selection-mode");
 
-        var singleSelectionModeDeselectionDisallowedButton = new NativeButton("Single (deselection disallowed)", e -> {
-            var model = list.setSelectionMode(SelectionMode.SINGLE);
-            ((SelectionModel.Single<VirtualList<Item>, Item>)model).setDeselectAllowed(false);
-            list.addSelectionListener(selectionListener);
-        });
-        singleSelectionModeDeselectionDisallowedButton.setId("single-selection-mode-deselection-disallowed");
+        var singleSelectionModeDeselectionDisallowedButton = new NativeButton(
+                "Single (deselection disallowed)", e -> {
+                    var model = list.setSelectionMode(SelectionMode.SINGLE);
+                    ((SelectionModel.Single<VirtualList<Item>, Item>) model)
+                            .setDeselectAllowed(false);
+                    list.addSelectionListener(selectionListener);
+                });
+        singleSelectionModeDeselectionDisallowedButton
+                .setId("single-selection-mode-deselection-disallowed");
 
         var multiSelectionModeButton = new NativeButton("Multi", e -> {
             list.setSelectionMode(SelectionMode.MULTI);
@@ -98,9 +102,11 @@ public class VirtualListSelectionPage extends Div {
         });
         multiSelectionModeButton.setId("multi-selection-mode");
 
-        add(new Div(new H2("Selection mode"), noneSelectionModeButton, singleSelectionModeButton, singleSelectionModeDeselectionDisallowedButton, multiSelectionModeButton));
+        add(new Div(new H2("Selection mode"), noneSelectionModeButton,
+                singleSelectionModeButton,
+                singleSelectionModeDeselectionDisallowedButton,
+                multiSelectionModeButton));
 
-        
     }
 
     private List<Item> createItems() {

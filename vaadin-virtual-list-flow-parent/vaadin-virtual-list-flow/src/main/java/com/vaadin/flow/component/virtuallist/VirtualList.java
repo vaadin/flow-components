@@ -47,13 +47,11 @@ import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
-import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.data.selection.SelectionModel;
 import com.vaadin.flow.data.selection.SelectionModel.Single;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.data.selection.SingleSelectionEvent;
-import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
@@ -467,7 +465,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
 
         selectionModel = model;
         this.selectionMode = selectionMode;
-        
+
         getElement().removeProperty("__deselectionDisallowed");
         getElement().setProperty("selectionMode",
                 SelectionMode.NONE.equals(selectionMode) ? null
