@@ -18,8 +18,10 @@ package com.vaadin.flow.component.shared.internal;
 import java.io.Serializable;
 import java.util.Objects;
 
-import com.vaadin.flow.component.ClickNotifier;
+import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.dependency.JsModule;
 
@@ -32,14 +34,13 @@ import com.vaadin.flow.component.dependency.JsModule;
  * to prevent multiple clicks or submissions while the server processes the
  * event.
  * <p>
- * This controller requires that the component implements both
- * {@link HasEnabled} and {@link ClickNotifier}.
+ * This controller requires that the component implements {@link HasEnabled}.
  *
  * @param <C>
  *            Type of the component that uses this controller.
  */
 @JsModule("./disableOnClickFunctions.js")
-public class DisableOnClickController<C extends Component & HasEnabled & ClickNotifier<C>>
+public class DisableOnClickController<C extends Component & HasEnabled>
         implements Serializable {
 
     private final C component;
@@ -52,13 +53,16 @@ public class DisableOnClickController<C extends Component & HasEnabled & ClickNo
      * @param component
      *            the component to control, not {@code null}
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public DisableOnClickController(C component) {
         this.component = Objects.requireNonNull(component);
-        component.addClickListener(event -> {
-            if (isDisableOnClick()) {
-                component.setEnabled(false);
-            }
-        });
+
+        ComponentUtil.addListener(component, ClickEvent.class,
+                (ComponentEventListener) (event -> {
+                    if (isDisableOnClick()) {
+                        component.setEnabled(false);
+                    }
+                }));
     }
 
     /**
