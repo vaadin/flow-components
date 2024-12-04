@@ -15,6 +15,13 @@
  */
 package com.vaadin.flow.component.virtuallist.testbench;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+
+import org.openqa.selenium.By;
+
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -75,6 +82,52 @@ public class VirtualListElement extends TestBenchElement {
      */
     public int getRowCount() {
         return getPropertyInteger("items", "length");
+    }
+
+    /**
+     * Selects the row with the given index.
+     *
+     * @param rowIndex
+     *            the row to select
+     */
+    public void select(int rowIndex) {
+        if (!isRowInView(rowIndex)) {
+            scrollToRow(rowIndex);
+        }
+        if (getSelectedIndexes().contains(rowIndex)) {
+            return;
+        }
+
+        var element = this.findElement(By.xpath("child::div[@aria-posinset='" + (rowIndex + 1) + "']"));
+        element.click();
+    }
+
+    /**
+     * Deselects the row with the given index.
+     *
+     * @param rowIndex
+     *            the row to deselect
+     */
+    public void deselect(int rowIndex) {
+        if (!isRowInView(rowIndex)) {
+            scrollToRow(rowIndex);
+        }
+        if (!getSelectedIndexes().contains(rowIndex)) {
+            return;
+        }
+
+        var element = this.findElement(By.xpath("child::div[@aria-posinset='" + (rowIndex + 1) + "']"));
+        element.click();
+    }
+
+    /**
+     * Gets the indexes of the selected rows.
+     *
+     * @return the indexes of the selected rows
+     */
+    public Set<Integer> getSelectedIndexes() {
+        var selectedIndexes = (ArrayList<Long>) executeScript("return arguments[0].selectedItems.map(i => arguments[0].items.indexOf(i))", this);
+        return Set.copyOf(selectedIndexes.stream().map(Long::intValue).toList());
     }
 
 }

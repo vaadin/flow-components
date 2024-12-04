@@ -20,12 +20,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.virtuallist.VirtualList;
-import com.vaadin.flow.component.virtuallist.VirtualListSingleSelectionModel;
 import com.vaadin.flow.component.virtuallist.VirtualList.SelectionMode;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.selection.SelectionListener;
+import com.vaadin.flow.data.selection.SelectionModel;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -33,7 +35,7 @@ import com.vaadin.flow.router.Route;
  *
  * @author Vaadin Ltd.
  */
-@Route("vaadin-virtual-list/virtual-list-selection")
+@Route("vaadin-virtual-list/selection")
 public class VirtualListSelectionPage extends Div {
 
     public VirtualListSelectionPage() {
@@ -46,35 +48,59 @@ public class VirtualListSelectionPage extends Div {
         list.setRenderer(LitRenderer.<Item> of("<div>${item.name}</div>")
                 .withProperty("name", item -> item.name));
 
-        var model = (VirtualListSingleSelectionModel)list.setSelectionMode(SelectionMode.SINGLE);
-        model.setDeselectAllowed(false);
-
-        list.select(items.get(0));
-
-        list.addSelectionListener(e -> {
-            System.out.println("Selected items: " + e.getAllSelectedItems());
-        });
 
         list.setItemAccessibleNameGenerator(item -> "Accessible " + item.name);
 
         add(list);
 
-        var button = new NativeButton("Select second item", e -> {
-            list.select(items.get(1));
-        });
-        add(button);
+        var selectedIndexes = new Div();
+        selectedIndexes.setHeight("30px");
+        selectedIndexes.setId("selected-indexes");
+        SelectionListener<VirtualList<Item>, Item> selectionListener = event -> {
+            selectedIndexes.setText(event.getAllSelectedItems().stream().map(item -> String.valueOf(items.indexOf(item))).collect(Collectors.joining(", ")));
+        };
 
-        var deselectAll = new NativeButton("Deselect all", e -> {
+        add(new Div(new H2("Selected item indexes"), selectedIndexes));
+
+        var selectFirstButton = new NativeButton("Select first item", e -> {
+            list.select(items.get(0));
+        });
+        selectFirstButton.setId("select-first");
+
+        var deselectAllButton = new NativeButton("Deselect all", e -> {
             list.deselectAll();
         });
-        add(deselectAll);
+        deselectAllButton.setId("deselect-all");
 
-        var printSelectionButton = new NativeButton("Print selection", e -> {
-            System.out.println("Selected item: "
-                    + list.getSelectionModel().getSelectedItems());
+        add(new Div(new H2("Actions"), selectFirstButton, deselectAllButton));
+
+        var noneSelectionModeButton = new NativeButton("None", e -> {
+            list.setSelectionMode(SelectionMode.NONE);
         });
-        add(printSelectionButton);
+        noneSelectionModeButton.setId("none-selection-mode");
 
+        var singleSelectionModeButton = new NativeButton("Single", e -> {
+            list.setSelectionMode(SelectionMode.SINGLE);
+            list.addSelectionListener(selectionListener);
+        });
+        singleSelectionModeButton.setId("single-selection-mode");
+
+        var singleSelectionModeDeselectionDisallowedButton = new NativeButton("Single (deselection disallowed)", e -> {
+            var model = list.setSelectionMode(SelectionMode.SINGLE);
+            ((SelectionModel.Single<VirtualList<Item>, Item>)model).setDeselectAllowed(false);
+            list.addSelectionListener(selectionListener);
+        });
+        singleSelectionModeDeselectionDisallowedButton.setId("single-selection-mode-deselection-disallowed");
+
+        var multiSelectionModeButton = new NativeButton("Multi", e -> {
+            list.setSelectionMode(SelectionMode.MULTI);
+            list.addSelectionListener(selectionListener);
+        });
+        multiSelectionModeButton.setId("multi-selection-mode");
+
+        add(new Div(new H2("Selection mode"), noneSelectionModeButton, singleSelectionModeButton, singleSelectionModeDeselectionDisallowedButton, multiSelectionModeButton));
+
+        
     }
 
     private List<Item> createItems() {

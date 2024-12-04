@@ -8,7 +8,6 @@ window.Vaadin.Flow.virtualListConnector = {
       return;
     }
 
-    list.itemIdPath = 'key';
     const extraItemsBuffer = 20;
 
     let lastRequestedRange = [0, 0];
@@ -166,9 +165,11 @@ window.Vaadin.Flow.virtualListConnector = {
     // This listener is used to prevent user from de-selecting the selected item when deselection is disallowed
     list.addEventListener('selected-items-changed', function (event) {
       if (list.$connector.__revertingSelection) {
+        // Reverting the (de)selection, stop the event and don't do anything
         event.stopImmediatePropagation();
         return;
       }
+
       if (
         list.selectionMode === 'single' &&
         list.__deselectionDisallowed &&
