@@ -322,8 +322,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     public Registration addClientItemToggleListener(
             ComponentEventListener<ClientItemToggleEvent<T>> listener) {
         Objects.requireNonNull(listener, "listener cannot be null");
-        return ComponentUtil.addListener(getGrid(),
-                ClientItemToggleEvent.class,
+        return ComponentUtil.addListener(getGrid(), ClientItemToggleEvent.class,
                 (ComponentEventListener) listener);
     }
 
