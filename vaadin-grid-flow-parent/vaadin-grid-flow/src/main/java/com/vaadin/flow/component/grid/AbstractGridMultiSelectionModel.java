@@ -120,8 +120,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, true));
 
-        fireClientItemSelectionEvent(new ClientItemSelectionEvent<>(getGrid(),
-                item, true, selectionColumn.isShiftKeyDown()));
+        ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
+                getGrid(), item, true, selectionColumn.isShiftKeyDown()));
 
         if (!isSelectAllCheckboxVisible()) {
             // Skip changing the state of Select All checkbox if it was
@@ -150,8 +150,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, true));
 
-        fireClientItemSelectionEvent(new ClientItemSelectionEvent<>(getGrid(),
-                item, false, selectionColumn.isShiftKeyDown()));
+        ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
+                getGrid(), item, false, selectionColumn.isShiftKeyDown()));
 
         long size = getDataProviderSize();
         selectionColumn.setSelectAllCheckboxState(false);
@@ -317,6 +317,16 @@ public abstract class AbstractGridMultiSelectionModel<T>
                         .selectionChange((MultiSelectionEvent) event)));
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Registration addClientItemToggleListener(
+            ComponentEventListener<ClientItemToggleEvent<T>> listener) {
+        Objects.requireNonNull(listener, "listener cannot be null");
+        return ComponentUtil.addListener(getGrid(),
+                ClientItemToggleEvent.class,
+                (ComponentEventListener) listener);
+    }
+
     @Override
     public void setSelectAllCheckboxVisibility(
             SelectAllCheckboxVisibility selectAllCheckBoxVisibility) {
@@ -390,11 +400,6 @@ public abstract class AbstractGridMultiSelectionModel<T>
      */
     protected abstract void fireSelectionEvent(
             SelectionEvent<Grid<T>, T> event);
-
-    protected void fireClientItemSelectionEvent(
-            ClientItemSelectionEvent<T> event) {
-        ComponentUtil.fireEvent(getGrid(), event);
-    }
 
     protected void clientSelectAll() {
         // ignore call if the checkbox is hidden

@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid;
 
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
@@ -169,4 +170,7 @@ public interface GridMultiSelectionModel<T>
      *         <code>false</code> otherwise
      */
     boolean isDragSelect();
+
+    Registration addClientItemToggleListener(
+            ComponentEventListener<ClientItemToggleEvent<T>> listener);
 }

@@ -3298,13 +3298,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return getSelectionModel().addSelectionListener(listener);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public Registration addClientItemSelectionListener(
-            ComponentEventListener<ClientItemSelectionEvent<T>> listener) {
-        return addListener(ClientItemSelectionEvent.class,
-                (ComponentEventListener) listener);
-    }
-
     /**
      * Set the renderer to use for displaying the item details rows in this
      * grid.

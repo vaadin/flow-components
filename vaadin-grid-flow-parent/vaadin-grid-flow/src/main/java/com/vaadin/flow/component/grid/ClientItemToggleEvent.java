@@ -17,12 +17,12 @@ package com.vaadin.flow.component.grid;
 
 import com.vaadin.flow.component.ComponentEvent;
 
-public class ClientItemSelectionEvent<T> extends ComponentEvent<Grid<T>> {
+public class ClientItemToggleEvent<T> extends ComponentEvent<Grid<T>> {
     private final T item;
     private final boolean isSelected;
     private final boolean isShiftKey;
 
-    public ClientItemSelectionEvent(Grid<T> source, T item, boolean isSelected,
+    public ClientItemToggleEvent(Grid<T> source, T item, boolean isSelected,
             boolean isShiftKey) {
         super(source, true);
         this.item = item;

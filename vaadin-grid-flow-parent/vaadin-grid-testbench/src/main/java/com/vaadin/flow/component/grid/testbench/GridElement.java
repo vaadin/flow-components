@@ -387,8 +387,9 @@ public class GridElement extends TestBenchElement {
             GridTHTDElement cell = row.getCell(multiSelectColumn);
             CheckboxElement checkbox = wrapElement(cell.getFirstChildElement(),
                     getCommandExecutor()).wrap(CheckboxElement.class);
+
             if (!checkbox.isChecked()) {
-                checkbox.click();
+                checkbox.getWrappedElement().click();
             }
         } else {
             setActiveItem(row);
@@ -418,7 +419,7 @@ public class GridElement extends TestBenchElement {
             CheckboxElement checkbox = wrapElement(cell.getFirstChildElement(),
                     getCommandExecutor()).wrap(CheckboxElement.class);
             if (checkbox.isChecked()) {
-                checkbox.click();
+                checkbox.getWrappedElement().click();
             }
         } else {
             removeActiveItem(row);
