@@ -387,7 +387,6 @@ public class GridElement extends TestBenchElement {
             GridTHTDElement cell = row.getCell(multiSelectColumn);
             CheckboxElement checkbox = wrapElement(cell.getFirstChildElement(),
                     getCommandExecutor()).wrap(CheckboxElement.class);
-
             if (!checkbox.isChecked()) {
                 checkbox.getWrappedElement().click();
             }
