@@ -463,6 +463,11 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         Objects.requireNonNull(model, "selection model cannot be null");
         Objects.requireNonNull(selectionMode, "selection mode cannot be null");
 
+        if (this.selectionModel != null) {
+            // Reset existing selections
+            this.selectionModel.deselectAll();
+        }
+
         selectionModel = model;
         this.selectionMode = selectionMode;
 
@@ -470,7 +475,6 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         getElement().setProperty("selectionMode",
                 SelectionMode.NONE.equals(selectionMode) ? null
                         : selectionMode.name().toLowerCase());
-
     }
 
     /**

@@ -146,4 +146,12 @@ public class VirtualListSelectionIT extends AbstractComponentIT {
                 firstChildElement.getAttribute("aria-label"));
     }
 
+    @Test
+    public void changeSelectionMode_resetSelection() {
+        singleSelectionModeButton.click();
+        virtualList.select(0);
+        multiSelectionModeButton.click();
+        Assert.assertFalse(virtualList.isRowSelected(0));
+    }
+
 }
