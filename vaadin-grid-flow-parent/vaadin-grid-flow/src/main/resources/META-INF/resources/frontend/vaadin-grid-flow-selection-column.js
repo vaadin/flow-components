@@ -24,14 +24,12 @@ export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridCo
       width: {
         type: String,
         value: '56px'
-      },
+      }
     };
   }
 
   static get observers() {
-    return [
-      '__shiftKeyDownChanged(_shiftKeyDown)'
-    ];
+    return ['__shiftKeyDownChanged(_shiftKeyDown)'];
   }
 
   /**
