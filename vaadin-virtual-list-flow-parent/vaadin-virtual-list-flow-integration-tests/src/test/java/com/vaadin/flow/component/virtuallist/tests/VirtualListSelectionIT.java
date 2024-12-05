@@ -54,15 +54,14 @@ public class VirtualListSelectionIT extends AbstractComponentIT {
     public void select_shouldNotSelect() {
         virtualList.select(0);
 
-        var selectedRows = virtualList.getSelectedIndexes();
-        Assert.assertTrue(selectedRows.isEmpty());
+        Assert.assertFalse(virtualList.isRowSelected(0));
     }
 
     @Test
     public void singleSelectionMode_select() {
         singleSelectionModeButton.click();
         virtualList.select(0);
-        Assert.assertEquals(Set.of(0), virtualList.getSelectedIndexes());
+        Assert.assertTrue(virtualList.isRowSelected(0));
     }
 
     @Test
@@ -70,7 +69,8 @@ public class VirtualListSelectionIT extends AbstractComponentIT {
         singleSelectionModeButton.click();
         virtualList.select(0);
         virtualList.select(1);
-        Assert.assertEquals(Set.of(1), virtualList.getSelectedIndexes());
+        Assert.assertFalse(virtualList.isRowSelected(0));
+        Assert.assertTrue(virtualList.isRowSelected(1));
     }
 
     @Test
@@ -78,34 +78,38 @@ public class VirtualListSelectionIT extends AbstractComponentIT {
         singleSelectionModeButton.click();
         virtualList.select(0);
         virtualList.deselect(0);
-        Assert.assertEquals(Set.of(), virtualList.getSelectedIndexes());
+        Assert.assertFalse(virtualList.isRowSelected(0));
     }
 
     @Test
     public void singleSelectionModeDeselectionDisallowed_deselectionNotAllowed() {
         singleSelectionModeDeselectionDisallowedButton.click();
-        Assert.assertEquals(Set.of(), virtualList.getSelectedIndexes());
+        Assert.assertFalse(virtualList.isRowSelected(0));
         virtualList.select(0);
         virtualList.deselect(0);
-        Assert.assertEquals(Set.of(0), virtualList.getSelectedIndexes());
+        Assert.assertTrue(virtualList.isRowSelected(0));
     }
 
     @Test
     public void multiSelectionMode_selectMultiple() {
         multiSelectionModeButton.click();
         virtualList.select(0);
-        virtualList.select(3);
-        Assert.assertEquals(Set.of(0, 3), virtualList.getSelectedIndexes());
+        virtualList.select(2);
+        Assert.assertTrue(virtualList.isRowSelected(0));
+        Assert.assertFalse(virtualList.isRowSelected(1));
+        Assert.assertTrue(virtualList.isRowSelected(2));
     }
 
     @Test
     public void multiSelectionMode_deselect() {
         multiSelectionModeButton.click();
         virtualList.select(0);
-        virtualList.select(3);
+        virtualList.select(2);
         virtualList.select(1);
         virtualList.deselect(0);
-        Assert.assertEquals(Set.of(1, 3), virtualList.getSelectedIndexes());
+        Assert.assertFalse(virtualList.isRowSelected(0));
+        Assert.assertTrue(virtualList.isRowSelected(1));
+        Assert.assertTrue(virtualList.isRowSelected(2));
     }
 
     @Test
@@ -113,21 +117,25 @@ public class VirtualListSelectionIT extends AbstractComponentIT {
         multiSelectionModeButton.click();
         selectFirstButton.click();
         virtualList.select(3);
-        virtualList.select(1);
+        virtualList.select(80);
         virtualList.deselect(0);
 
         var selectedIndexesSet = Set.of(selectedIndexes.getText().split(", "));
-        Assert.assertEquals(Set.of("1", "3"), selectedIndexesSet);
+        Assert.assertEquals(Set.of("3", "80"), selectedIndexesSet);
     }
 
     @Test
     public void programmaticSelection() {
         singleSelectionModeButton.click();
         selectFirstButton.click();
-        Assert.assertEquals(Set.of(0), virtualList.getSelectedIndexes());
+        Assert.assertTrue(virtualList.isRowSelected(0));
+
+        var selectedIndexesSet = Set.of(selectedIndexes.getText().split(", "));
+        Assert.assertEquals(Set.of("0"), selectedIndexesSet);
 
         deselectAllButton.click();
-        Assert.assertEquals(Set.of(), virtualList.getSelectedIndexes());
+        Assert.assertFalse(virtualList.isRowSelected(0));
+        Assert.assertTrue(selectedIndexes.getText().isEmpty());
     }
 
     @Test
