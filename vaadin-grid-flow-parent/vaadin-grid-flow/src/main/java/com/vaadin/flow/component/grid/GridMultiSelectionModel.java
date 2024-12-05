@@ -92,6 +92,17 @@ public interface GridMultiSelectionModel<T>
             MultiSelectionListener<Grid<T>, T> listener);
 
     /**
+     * Adds a client item toggle listener that will be called when the user
+     * toggles an item on the client-side.
+     *
+     * @param listener
+     *            the client item toggle listener, not {@code null}
+     * @return a registration for the listener
+     */
+    Registration addClientItemToggleListener(
+            ComponentEventListener<ClientItemToggleEvent<T>> listener);
+
+    /**
      * Sets the select all checkbox visibility mode.
      * <p>
      * The default value is {@link SelectAllCheckboxVisibility#DEFAULT}, which
@@ -170,7 +181,4 @@ public interface GridMultiSelectionModel<T>
      *         <code>false</code> otherwise
      */
     boolean isDragSelect();
-
-    Registration addClientItemToggleListener(
-            ComponentEventListener<ClientItemToggleEvent<T>> listener);
 }

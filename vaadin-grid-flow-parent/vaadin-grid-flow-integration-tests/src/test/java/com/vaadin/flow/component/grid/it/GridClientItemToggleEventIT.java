@@ -33,11 +33,6 @@ import com.vaadin.tests.AbstractComponentIT;
 import elemental.json.Json;
 import elemental.json.JsonObject;
 
-/**
- * IT for grid's Flow based cell focus event.
- *
- * @author Vaadin Ltd
- */
 @TestPath("vaadin-grid/grid-client-item-toggle-event")
 public class GridClientItemToggleEventIT extends AbstractComponentIT {
     private GridElement grid;
