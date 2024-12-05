@@ -83,7 +83,7 @@ public class GridClientItemToggleEventIT extends AbstractComponentIT {
         JsonObject record = Json.parse(records.get(0).getText());
         Assert.assertTrue("isFromClient should be true",
                 record.getBoolean("isFromClient"));
-        Assert.assertEquals("Item should match the selected item", item,
+        Assert.assertEquals("Item should match the toggled item", item,
                 record.getString("item"));
         Assert.assertEquals("isSelected should match the selected state",
                 isSelected, record.getBoolean("isSelected"));
