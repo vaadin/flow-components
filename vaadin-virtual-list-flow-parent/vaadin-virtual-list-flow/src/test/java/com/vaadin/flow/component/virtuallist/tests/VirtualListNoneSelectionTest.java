@@ -55,6 +55,7 @@ public class VirtualListNoneSelectionTest {
 
     @Test
     public void clientSelectionMode() {
-        Assert.assertNull(list.getElement().getProperty("selectionMode"));
+        Assert.assertEquals("none",
+                list.getElement().getProperty("selectionMode"));
     }
 }
