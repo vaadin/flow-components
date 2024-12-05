@@ -15,9 +15,6 @@
  */
 package com.vaadin.flow.component.virtuallist.testbench;
 
-import java.util.ArrayList;
-import java.util.Set;
-
 import org.openqa.selenium.By;
 
 import com.vaadin.testbench.TestBenchElement;
@@ -89,16 +86,10 @@ public class VirtualListElement extends TestBenchElement {
      *            the row to select
      */
     public void select(int rowIndex) {
-        if (!isRowInView(rowIndex)) {
-            scrollToRow(rowIndex);
+        var element = getRowElement(rowIndex);
+        if (!isSelected(element)) {
+            element.click();
         }
-        if (getSelectedIndexes().contains(rowIndex)) {
-            return;
-        }
-
-        var element = this.findElement(By
-                .xpath("child::div[@aria-posinset='" + (rowIndex + 1) + "']"));
-        element.click();
     }
 
     /**
@@ -108,29 +99,50 @@ public class VirtualListElement extends TestBenchElement {
      *            the row to deselect
      */
     public void deselect(int rowIndex) {
-        if (!isRowInView(rowIndex)) {
-            scrollToRow(rowIndex);
+        var element = getRowElement(rowIndex);
+        if (isSelected(element)) {
+            element.click();
         }
-        if (!getSelectedIndexes().contains(rowIndex)) {
-            return;
-        }
-
-        var element = this.findElement(By
-                .xpath("child::div[@aria-posinset='" + (rowIndex + 1) + "']"));
-        element.click();
     }
 
     /**
-     * Gets the indexes of the selected rows.
+     * Checks if the row at the specified index is selected.
      *
-     * @return the indexes of the selected rows
+     * @param rowIndex
+     *            the index of the row to check
+     * @return true if the row is selected, false otherwise
      */
-    public Set<Integer> getSelectedIndexes() {
-        var selectedIndexes = (ArrayList<Long>) executeScript(
-                "return arguments[0].selectedItems.map(i => arguments[0].items.indexOf(i))",
-                this);
-        return Set
-                .copyOf(selectedIndexes.stream().map(Long::intValue).toList());
+    public boolean isRowSelected(int rowIndex) {
+        return isSelected(getRowElement(rowIndex));
+    }
+
+    /**
+     * Checks if the given TestBenchElement is selected.
+     *
+     * @param element
+     *            the TestBenchElement to check
+     * @return true if the element has the "selected" attribute, false otherwise
+     */
+    private boolean isSelected(TestBenchElement element) {
+        return element.hasAttribute("selected");
+
+    }
+
+    /**
+     * Retrieves the row element at the specified index. If the row is not
+     * currently in view, it will scroll to the row first.
+     *
+     * @param rowIndex
+     *            the index of the row to retrieve
+     * @return the TestBenchElement representing the row at the specified index
+     */
+    private TestBenchElement getRowElement(int rowIndex) {
+        if (!isRowInView(rowIndex)) {
+            scrollToRow(rowIndex);
+            waitUntil(e -> isRowInView(rowIndex));
+        }
+        return this.findElement(By
+                .xpath("child::div[@aria-posinset='" + (rowIndex + 1) + "']"));
     }
 
 }
