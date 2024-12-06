@@ -4,7 +4,7 @@
     <parent>
         <artifactId>vaadin-side-nav-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>24.6-SNAPSHOT</version>
+        <version>24.7-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-side-nav-testbench</artifactId>
     <packaging>jar</packaging>
