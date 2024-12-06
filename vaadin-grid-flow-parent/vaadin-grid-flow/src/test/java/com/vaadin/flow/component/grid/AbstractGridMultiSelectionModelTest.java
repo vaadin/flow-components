@@ -23,11 +23,14 @@ import java.util.stream.Stream;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.provider.*;
+import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
 
 public class AbstractGridMultiSelectionModelTest {
@@ -507,6 +510,62 @@ public class AbstractGridMultiSelectionModelTest {
         selectionModel.select("bar");
         selectionModel.deselectFromClient("bar");
         Assert.assertEquals(Set.of("foo"), grid.getSelectedItems());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void selectFromClient_clientItemToggleEventIsFired() {
+        grid.setItems("Item 0", "Item 1");
+        grid.setSelectionMode(SelectionMode.MULTI);
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        SelectionListener<Grid<String>, String> selectionListenerSpy = Mockito
+                .spy(SelectionListener.class);
+        selectionModel.addSelectionListener(selectionListenerSpy);
+
+        ComponentEventListener<ClientItemToggleEvent<String>> clientItemToggleListenerSpy = Mockito
+                .spy(ComponentEventListener.class);
+        selectionModel.addClientItemToggleListener(clientItemToggleListenerSpy);
+
+        selectionModel.selectFromClient("Item 0");
+
+        InOrder inOrder = Mockito.inOrder(selectionListenerSpy,
+                clientItemToggleListenerSpy);
+        inOrder.verify(selectionListenerSpy, Mockito.times(1))
+                .selectionChange(Mockito.any());
+        inOrder.verify(clientItemToggleListenerSpy, Mockito.times(1))
+                .onComponentEvent(Mockito.any());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void deselectFromClient_clientItemToggleEventIsFired() {
+        grid.setItems("Item 0", "Item 1");
+        grid.setSelectionMode(SelectionMode.MULTI);
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        selectionModel.selectFromClient("Item 0");
+
+        SelectionListener<Grid<String>, String> selectionListenerSpy = Mockito
+                .spy(SelectionListener.class);
+        selectionModel.addSelectionListener(selectionListenerSpy);
+
+        ComponentEventListener<ClientItemToggleEvent<String>> clientItemToggleListenerSpy = Mockito
+                .spy(ComponentEventListener.class);
+        selectionModel.addClientItemToggleListener(clientItemToggleListenerSpy);
+
+        selectionModel.deselectFromClient("Item 0");
+
+        InOrder inOrder = Mockito.inOrder(selectionListenerSpy,
+                clientItemToggleListenerSpy);
+        inOrder.verify(selectionListenerSpy, Mockito.times(1))
+                .selectionChange(Mockito.any());
+        inOrder.verify(clientItemToggleListenerSpy, Mockito.times(1))
+                .onComponentEvent(Mockito.any());
     }
 
     @Test

@@ -28,6 +28,10 @@ export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridCo
     };
   }
 
+  static get observers() {
+    return ['__shiftKeyDownChanged(_shiftKeyDown)'];
+  }
+
   /**
    * Override method from `GridSelectionColumnBaseMixin` to add ID to select all
    * checkbox
@@ -42,6 +46,10 @@ export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridCo
     }
   }
 
+  /** @private */
+  __shiftKeyDownChanged(shiftKeyDown) {
+    this.$server.setShiftKeyDown(shiftKeyDown);
+  }
 
   /**
    * Override a method from `GridSelectionColumnBaseMixin` to handle the user
