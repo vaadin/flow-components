@@ -517,7 +517,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
     /**
      * The delay in milliseconds before the popover is opened on target focus.
-     * Defaults to {@code 0}.
+     * When not specified, the default {@code 500} milliseconds delay is used.
      *
      * @param focusDelay
      *            the delay in milliseconds
@@ -528,7 +528,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
     /**
      * The delay in milliseconds before the popover is opened on target focus.
-     * Defaults to {@code 0}.
+     * When not specified, the default {@code 500} milliseconds delay is used.
      *
      * @return the delay in milliseconds
      */
@@ -538,7 +538,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
     /**
      * The delay in milliseconds before the popover is opened on target hover.
-     * Defaults to {@code 0}.
+     * When not specified, the default {@code 500} milliseconds delay is used.
      *
      * @param hoverDelay
      *            the delay in milliseconds
@@ -549,7 +549,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
     /**
      * The delay in milliseconds before the popover is opened on target hover.
-     * Defaults to {@code 0}.
+     * When not specified, the default {@code 500} milliseconds delay is used.
      *
      * @return the delay in milliseconds
      */
@@ -559,7 +559,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
     /**
      * The delay in milliseconds before the popover is closed on losing hover.
-     * Defaults to {@code 0}.
+     * When not specified, the default {@code 500} milliseconds delay is used.
      * <p>
      * NOTE: on target blur, the popover is closed immediately.
      *
@@ -572,7 +572,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
     /**
      * The delay in milliseconds before the popover is closed on losing hover.
-     * Defaults to {@code 0}.
+     * When not specified, the default {@code 500} milliseconds delay is used.
      * <p>
      * NOTE: on target blur, the popover is closed immediately.
      *
