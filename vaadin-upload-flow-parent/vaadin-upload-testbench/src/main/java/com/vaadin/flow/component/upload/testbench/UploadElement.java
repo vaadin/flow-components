@@ -151,10 +151,13 @@ public class UploadElement extends TestBenchElement {
         timeouts.setScriptTimeout(maxSeconds, TimeUnit.SECONDS);
 
         String script = "var callback = arguments[arguments.length - 1];"
-                + "var upload = arguments[0];"
-                + "window.setTimeout(function() {"
+                + "var upload = arguments[0];" + "let intervalId;"
+                + "intervalId = window.setInterval(function() {"
                 + "  var inProgress = upload.files.filter(function(file) { return file.uploading;}).length >0;"
-                + "  if (!inProgress) callback();" //
+                + "  if (!inProgress) { " //
+                + "    window.clearInterval(intervalId);" //
+                + "    callback();" //
+                + "  }" //
                 + "}, 500);";
         getCommandExecutor().getDriver().executeAsyncScript(script, this);
 
