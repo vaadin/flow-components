@@ -154,9 +154,11 @@ public class UploadElement extends TestBenchElement {
                 + "var upload = arguments[0];" + "let intervalId;"
                 + "intervalId = window.setInterval(function() {"
                 + "  var inProgress = upload.files.filter(function(file) { return file.uploading;}).length >0;"
-                + "  if (!inProgress) { "
-                + "    window.clearInterval(intervalId);" + "    callback();"
-                + "  }" + "}, 500);";
+                + "  if (!inProgress) { " //
+                + "    window.clearInterval(intervalId);" //
+                + "    callback();" //
+                + "  }" //
+                + "}, 500);";
         getCommandExecutor().getDriver().executeAsyncScript(script, this);
 
     }
