@@ -1,4 +1,5 @@
 import { expect, fixtureSync, nextFrame } from '@open-wc/testing';
+import { sendKeys } from '@web/test-runner-commands';
 import { init, getBodyCellContent, setRootItems, getHeaderCellContent, FlowGridSelectionColumn, initSelectionColumn } from './shared.js';
 import type { FlowGrid } from './shared.js';
 
@@ -68,6 +69,40 @@ describe('grid connector - selection – multi mode', () => {
       clickSelectCheckbox(0);
       clickSelectCheckbox(0);
       expect(grid.$server.deselect).to.be.calledWith('0');
+    });
+
+    it('should set shift key flag on server when selecting with Shift', async () => {
+      await sendKeys({ down: 'Shift' });
+      expect(grid.$server.setShiftKeyDown).to.be.not.called;
+
+      clickSelectCheckbox(0);
+      expect(grid.$server.setShiftKeyDown).to.be.calledOnce;
+      expect(grid.$server.setShiftKeyDown).to.be.calledWith(true);
+      expect(grid.$server.setShiftKeyDown).to.be.calledBefore(grid.$server.select);
+
+      grid.$server.setShiftKeyDown.resetHistory();
+
+      await sendKeys({ up: 'Shift' });
+      expect(grid.$server.setShiftKeyDown).to.be.calledOnce;
+      expect(grid.$server.setShiftKeyDown).to.be.calledWith(false);
+    });
+
+    it('should set shift key flag on server when deselecting with Shift', async () => {
+      clickSelectCheckbox(0);
+
+      await sendKeys({ down: 'Shift' });
+      expect(grid.$server.setShiftKeyDown).to.be.not.called;
+
+      clickSelectCheckbox(1);
+      expect(grid.$server.setShiftKeyDown).to.be.calledOnce;
+      expect(grid.$server.setShiftKeyDown).to.be.calledWith(true);
+      expect(grid.$server.setShiftKeyDown).to.be.calledBefore(grid.$server.deselect);
+
+      grid.$server.setShiftKeyDown.resetHistory();
+
+      await sendKeys({ up: 'Shift' });
+      expect(grid.$server.setShiftKeyDown).to.be.calledOnce;
+      expect(grid.$server.setShiftKeyDown).to.be.calledWith(false);
     });
 
     it('should select all items on server', () => {
