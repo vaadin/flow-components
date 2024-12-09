@@ -801,7 +801,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * <p>
      * {@code comboBox.setItemsWithFilterConverter(
      * query -> orderService.getOrdersByCount(query.getFilter(),
-     * query.getOffset,
+     * query.getOffset(),
      * query.getLimit()),
      * orderCountStr -> Integer.parseInt(orderCountStr));} Note: Validations for
      * <code>orderCountStr</code> are omitted for briefness.
@@ -840,7 +840,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * <p>
      * {@code comboBox.setItemsWithFilterConverter(
      * query -> orderService.getOrdersByCount(query.getFilter(),
-     * query.getOffset,
+     * query.getOffset(),
      * query.getLimit()),
      * query -> orderService.getSize(query.getFilter()),
      * orderCountStr -> Integer.parseInt(orderCountStr));} Note: Validations for
@@ -921,14 +921,14 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * exact size. Usage example without component provided filter:
      * <p>
      * {@code comboBox.setItems(
-     * query -> orderService.getOrders(query.getOffset, query.getLimit()),
+     * query -> orderService.getOrders(query.getOffset(), query.getLimit()),
      * query -> orderService.getSize());}
      * <p>
      * Since ComboBox supports filtering, it can be fetched via
      * query.getFilter():
      * <p>
      * {@code comboBox.setItems(
-     * query -> orderService.getOrders(query.getFilter(), query.getOffset,
+     * query -> orderService.getOrders(query.getFilter(), query.getOffset(),
      * query.getLimit()),
      * query -> orderService.getSize(query.getFilter()));}
      * <p>
