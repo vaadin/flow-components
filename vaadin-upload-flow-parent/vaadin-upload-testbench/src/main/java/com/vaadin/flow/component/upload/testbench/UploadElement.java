@@ -145,11 +145,7 @@ public class UploadElement extends TestBenchElement {
      *            the number of seconds to wait for the upload to finish
      */
     private void waitForUploads(int maxSeconds) {
-        String script = """
-                var upload = arguments[0];
-                var inProgress = upload.files.filter(function(file) { return file.uploading;}).length >0;
-                return !inProgress;
-                """;
+        String script = "return arguments[0].files.every((file) => !file.uploading);";
 
         waitUntil(driver -> (Boolean) getCommandExecutor().getDriver()
                 .executeScript(script, UploadElement.this), maxSeconds);
