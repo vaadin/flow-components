@@ -147,8 +147,8 @@ public class UploadElement extends TestBenchElement {
     private void waitForUploads(int maxSeconds) {
         String script = "return arguments[0].files.every((file) => !file.uploading);";
 
-        waitUntil(driver -> (Boolean) getCommandExecutor().getDriver()
-                .executeScript(script, UploadElement.this), maxSeconds);
+        waitUntil(driver -> (Boolean) executeScript(script, UploadElement.this),
+                maxSeconds);
     }
 
     private void startUpload() {
