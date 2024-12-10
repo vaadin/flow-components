@@ -146,7 +146,6 @@ public class UploadElement extends TestBenchElement {
      */
     private void waitForUploads(int maxSeconds) {
         String script = """
-                var callback = arguments[arguments.length - 1];
                 var upload = arguments[0];
                 var inProgress = upload.files.filter(function(file) { return file.uploading;}).length >0;
                 return !inProgress;
