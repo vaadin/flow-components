@@ -151,10 +151,8 @@ public class UploadElement extends TestBenchElement {
                 return !inProgress;
                 """;
 
-        waitUntil(
-                driver -> (Boolean) getCommandExecutor().getDriver()
-                        .executeScript(script, UploadElement.this),
-                maxSeconds);
+        waitUntil(driver -> (Boolean) getCommandExecutor().getDriver()
+                .executeScript(script, UploadElement.this), maxSeconds);
     }
 
     private void startUpload() {
