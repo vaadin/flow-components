@@ -72,7 +72,7 @@ public class MultiSelectComboBoxBasicValidationIT
     public void required_enterCustomValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
-        testField.sendKeys("custom", Keys.TAB);
+        testField.sendKeys("custom", Keys.ENTER);
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
@@ -83,7 +83,7 @@ public class MultiSelectComboBoxBasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
         $("button").id(ENABLE_CUSTOM_VALUE_BUTTON).click();
 
-        testField.sendKeys("custom", Keys.TAB);
+        testField.sendKeys("custom", Keys.ENTER);
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
