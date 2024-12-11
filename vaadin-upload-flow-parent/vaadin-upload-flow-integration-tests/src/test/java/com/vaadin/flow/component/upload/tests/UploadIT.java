@@ -32,7 +32,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.devtools.DevTools;
 import org.openqa.selenium.devtools.HasDevTools;
-import org.openqa.selenium.devtools.v130.network.Network;
+import org.openqa.selenium.devtools.v127.network.Network;
 import org.openqa.selenium.logging.LogEntry;
 
 import com.vaadin.flow.component.upload.testbench.UploadElement;
