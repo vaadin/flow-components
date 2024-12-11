@@ -57,6 +57,6 @@ public class SideNavI18NIT extends AbstractComponentIT {
 
     private String getI18nText(SideNavItemElement element) {
         return element.getWrappedElement().getShadowRoot()
-                .findElement(By.id("i18n")).getText();
+                .findElement(By.id("i18n")).getDomProperty("textContent");
     }
 }
