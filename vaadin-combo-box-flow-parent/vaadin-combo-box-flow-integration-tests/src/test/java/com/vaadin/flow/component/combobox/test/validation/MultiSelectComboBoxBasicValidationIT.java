@@ -51,7 +51,7 @@ public class MultiSelectComboBoxBasicValidationIT
         assertClientInvalid();
 
         // Try enter custom value
-        testField.sendKeys("custom", Keys.TAB);
+        testField.sendKeys("custom", Keys.ENTER);
         assertServerInvalid();
         assertClientInvalid();
     }
@@ -61,7 +61,7 @@ public class MultiSelectComboBoxBasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
         $("button").id(ENABLE_CUSTOM_VALUE_BUTTON).click();
 
-        testField.sendKeys("custom", Keys.TAB);
+        testField.sendKeys("custom", Keys.ENTER);
         assertServerValid();
         assertClientValid();
 
