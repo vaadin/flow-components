@@ -40,6 +40,7 @@ export type GridServer = {
   setParentRequestedRanges: ((ranges: { firstIndex: number; size: number; parentKey: string }[]) => void) &
     sinon.SinonSpy;
   sortersChanged: ((sorters: { path: string, direction: string }[]) => void) & sinon.SinonSpy;
+  setShiftKeyDown: ((shiftKeyDown: boolean) => void) & sinon.SinonSpy;
 };
 
 export type Item = {
@@ -98,7 +99,8 @@ export function init(grid: FlowGrid): void {
     setDetailsVisible: sinon.spy(),
     setRequestedRange: sinon.spy(),
     setParentRequestedRanges: sinon.spy(),
-    sortersChanged: sinon.spy()
+    sortersChanged: sinon.spy(),
+    setShiftKeyDown: sinon.spy()
   };
 
   gridConnector.initLazy(grid);

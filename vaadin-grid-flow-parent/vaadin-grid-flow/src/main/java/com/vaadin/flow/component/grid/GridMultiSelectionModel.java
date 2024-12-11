@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid;
 
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
@@ -89,6 +90,17 @@ public interface GridMultiSelectionModel<T>
      */
     Registration addMultiSelectionListener(
             MultiSelectionListener<Grid<T>, T> listener);
+
+    /**
+     * Adds a client item toggle listener that will be called when the user
+     * toggles an item on the client-side.
+     *
+     * @param listener
+     *            the client item toggle listener, not {@code null}
+     * @return a registration for the listener
+     */
+    Registration addClientItemToggleListener(
+            ComponentEventListener<ClientItemToggleEvent<T>> listener);
 
     /**
      * Sets the select all checkbox visibility mode.
