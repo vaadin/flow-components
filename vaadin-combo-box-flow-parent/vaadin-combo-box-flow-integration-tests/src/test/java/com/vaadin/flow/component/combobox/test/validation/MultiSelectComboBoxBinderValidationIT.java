@@ -77,7 +77,7 @@ public class MultiSelectComboBoxBinderValidationIT
     public void required_enterCustomValue_assertValidity() {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("foo", Keys.ENTER);
 
-        testField.sendKeys("custom", Keys.TAB);
+        testField.sendKeys("custom", Keys.ENTER);
         assertValidationCount(0);
         assertServerValid();
         assertClientValid();
@@ -89,7 +89,7 @@ public class MultiSelectComboBoxBinderValidationIT
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("custom", Keys.ENTER);
 
         // Binder validation fails
-        testField.sendKeys("invalid", Keys.TAB);
+        testField.sendKeys("invalid", Keys.ENTER);
         assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
@@ -98,7 +98,7 @@ public class MultiSelectComboBoxBinderValidationIT
         // Binder validation passes
         testField.deselectAll();
         assertValidationCount(1);
-        testField.sendKeys("custom", Keys.TAB);
+        testField.sendKeys("custom", Keys.ENTER);
         assertValidationCount(1);
         assertServerValid();
         assertClientValid();
