@@ -15,6 +15,8 @@ window.Vaadin.Flow.virtualListConnector = {
     list.$connector = {};
     list.$connector.placeholderItem = { __placeholder: true };
 
+    list.itemAccessibleNameGenerator = (item) => item && item.accessibleName;
+
     const updateRequestedItem = function () {
       /*
        * TODO virtual list seems to do a small index adjustment after scrolling
@@ -105,7 +107,7 @@ window.Vaadin.Flow.virtualListConnector = {
 
     list.$connector.set = function (index, items) {
       list.items.splice(index, items.length, ...items);
-      list.items = [...list.items];
+      list.$connector.updateItems([...list.items]);
     };
 
     list.$connector.clear = function (index, length) {
@@ -120,7 +122,7 @@ window.Vaadin.Flow.virtualListConnector = {
         return map;
       }, {});
 
-      list.items = list.items.map((item) => {
+      const newItems = list.items.map((item) => {
         // Items can be undefined if they are outside the viewport
         if (!item) {
           return item;
@@ -129,14 +131,15 @@ window.Vaadin.Flow.virtualListConnector = {
         // return existing item as fallback if it was not updated
         return updatedItemsMap[item.key] || item;
       });
+      list.$connector.updateItems(newItems);
     };
 
     list.$connector.updateSize = function (newSize) {
       const delta = newSize - list.items.length;
       if (delta > 0) {
-        list.items = [...list.items, ...Array(delta)];
+        list.$connector.updateItems([...list.items, ...Array(delta)]);
       } else if (delta < 0) {
-        list.items = list.items.slice(0, newSize);
+        list.$connector.updateItems(list.items.slice(0, newSize));
       }
     };
 
@@ -146,5 +149,58 @@ window.Vaadin.Flow.virtualListConnector = {
       const nodeId = Object.entries(placeholderItem).find(([key]) => key.endsWith('_nodeid'));
       list.$connector.placeholderElement = nodeId ? Vaadin.Flow.clients[appId].getByNodeId(nodeId[1]) : null;
     };
+
+    list.$connector.updateItems = function (items) {
+      // Update the virtual list's items
+      list.items = items;
+
+      // Update the virtual list's selectedItems
+      list.$connector.__updatingSelectedItemsFromServer = true;
+      list.selectedItems = items.filter((item) => item && item.selected);
+      list.$connector.__updatingSelectedItemsFromServer = false;
+    };
+
+    let previousSelectedKeys = [];
+
+    // This listener is used to prevent user from de-selecting the selected item when deselection is disallowed
+    list.addEventListener('selected-items-changed', function (event) {
+      if (list.$connector.__revertingSelection) {
+        // Reverting the (de)selection, stop the event and don't do anything
+        event.stopImmediatePropagation();
+        return;
+      }
+
+      if (
+        list.selectionMode === 'single' &&
+        list.__deselectionDisallowed &&
+        previousSelectedKeys.length &&
+        list.selectedItems.length === 0 &&
+        !list.$connector.__updatingSelectedItemsFromServer
+      ) {
+        event.stopImmediatePropagation();
+        list.$connector.__revertingSelection = true;
+        list.selectedItems = list.items.filter((item) => item && item.selected);
+        list.$connector.__revertingSelection = false;
+      }
+    });
+
+    list.addEventListener('selected-items-changed', function (event) {
+      const selectedKeys = event.detail.value.map((item) => item.key);
+      const addedKeys = selectedKeys.filter((key) => !previousSelectedKeys.includes(key));
+      const removedKeys = previousSelectedKeys.filter((key) => !selectedKeys.includes(key));
+      previousSelectedKeys = selectedKeys;
+
+      if (list.$connector.__updatingSelectedItemsFromServer) {
+        // Items are being updated from the server, don't send the selection changes back
+        return;
+      }
+
+      // If server sends partial updates while still making selections, other items might get temporarily
+      // de-selected / selected if their state is now yet synced from the server.
+      // Workaround the issue by updating the item selection state immediately on the client.
+      list.items.filter((item) => item).forEach((item) => (item.selected = selectedKeys.includes(item.key)));
+
+      list.$server.updateSelection(addedKeys, removedKeys);
+    });
   }
 };
