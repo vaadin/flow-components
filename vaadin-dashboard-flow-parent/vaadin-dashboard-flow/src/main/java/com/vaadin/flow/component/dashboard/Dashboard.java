@@ -57,11 +57,11 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dashboard")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "24.6.0-beta1")
+@NpmPackage(value = "@vaadin/dashboard", version = "24.7.0-alpha1")
 public class Dashboard extends Component implements HasWidgets, HasSize {
 
     private final List<Component> childrenComponents = new ArrayList<>();
@@ -313,26 +313,47 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     }
 
     /**
-     * Returns the spacing of the dashboard. This value adjusts the spacing
-     * between elements within the component and the space around its outer
-     * edges.
+     * Returns the gap of the dashboard. This value adjusts the gap between
+     * elements within the dashboard.
      *
-     * @return the spacing of the dashboard
+     * @return the gap of the dashboard
      */
-    String getSpacing() {
-        return getStyle().get("--vaadin-dashboard-spacing");
+    public String getGap() {
+        return getStyle().get("--vaadin-dashboard-gap");
     }
 
     /**
-     * Sets the spacing of the dashboard. This value adjusts the spacing between
-     * elements within the component and the space around its outer edges.
+     * Sets the gap of the dashboard. This value adjusts the gap between
+     * elements within the dashboard.
      *
-     * @param spacing
-     *            the new spacing. Pass in {@code null} to set the spacing back
+     * @param gap
+     *            the new gap. Pass in {@code null} to set the gap back to the
+     *            default value.
+     */
+    public void setGap(String gap) {
+        getStyle().set("--vaadin-dashboard-gap", gap);
+    }
+
+    /**
+     * Returns the padding of the dashboard. This value adjusts the space around
+     * the outer edges of the dashboard.
+     *
+     * @return the padding of the dashboard
+     */
+    public String getPadding() {
+        return getStyle().get("--vaadin-dashboard-padding");
+    }
+
+    /**
+     * Sets the padding of the dashboard. This value adjusts the space around
+     * the outer edges of the dashboard.
+     *
+     * @param padding
+     *            the new padding. Pass in {@code null} to set the padding back
      *            to the default value.
      */
-    void setSpacing(String spacing) {
-        getStyle().set("--vaadin-dashboard-spacing", spacing);
+    public void setPadding(String padding) {
+        getStyle().set("--vaadin-dashboard-padding", padding);
     }
 
     /**
