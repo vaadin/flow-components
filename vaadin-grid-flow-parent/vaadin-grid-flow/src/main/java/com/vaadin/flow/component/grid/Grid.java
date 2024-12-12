@@ -212,10 +212,10 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.6.0-beta1")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.6.0-beta1")
+@NpmPackage(value = "@vaadin/grid", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.7.0-alpha1")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -440,7 +440,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.6.0-beta1")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha1")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -3669,6 +3669,30 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private void updateContextMenuTargetItem(String key, String colId) {
         getElement().setProperty("_contextMenuTargetItemKey", key);
         getElement().setProperty("_contextMenuTargetColumnId", colId);
+    }
+
+    /**
+     * Set the aria-label of the component to the given text.
+     *
+     * @param ariaLabel
+     *            the aria-label text to set or {@code null} to clear
+     */
+    public void setAriaLabel(String ariaLabel) {
+        if (ariaLabel == null) {
+            getElement().removeProperty("accessibleName");
+        } else {
+            getElement().setProperty("accessibleName", ariaLabel);
+        }
+    }
+
+    /**
+     * Gets the aria-label of the component.
+     *
+     * @return an optional aria-label of the component if no aria-label has been
+     *         set
+     */
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
     }
 
     /**
