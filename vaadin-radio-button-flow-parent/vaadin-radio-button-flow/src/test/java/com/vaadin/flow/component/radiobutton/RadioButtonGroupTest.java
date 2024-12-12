@@ -601,4 +601,27 @@ public class RadioButtonGroupTest {
         Assert.assertEquals(selectedItem, group.getValue());
         Assert.assertTrue(events.isEmpty());
     }
+
+    @Test
+    public void refreshItem_selectFromClient_valueContainsUpdatedItem() {
+        RadioButtonGroup<CustomItem> group = new RadioButtonGroup<>();
+        RadioButtonGroupListDataView<CustomItem> dataView = group.setItems(
+                new CustomItem(1L, "foo"), new CustomItem(2L, "bar"),
+                new CustomItem(3L, "baz"));
+        dataView.setIdentifierProvider(CustomItem::getId);
+
+        CustomItem updatedItem = new CustomItem(2L, "updated");
+        dataView.refreshItem(updatedItem);
+
+        AtomicReference<CustomItem> selectedItem = new AtomicReference<>();
+        group.addValueChangeListener(e -> selectedItem.set(e.getValue()));
+
+        // Simulate selecting an item from the client side via key
+        var itemKey = group.getChildren().skip(1).findFirst().get().getElement()
+                .getProperty("value");
+        group.getElement().setProperty("value", itemKey);
+
+        Assert.assertEquals("updated", selectedItem.get().getName());
+        Assert.assertEquals("updated", group.getValue().getName());
+    }
 }
