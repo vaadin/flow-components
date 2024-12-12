@@ -941,6 +941,29 @@ public class SelectTest {
         Assert.assertEquals(-1, select.getItemPosition("does not exist"));
     }
 
+    @Test
+    public void refreshItem_selectFromClient_valueContainsUpdatedItem() {
+        Select<CustomItem> select = new Select<>();
+        SelectListDataView<CustomItem> dataView = select.setItems(
+                new CustomItem(1L, "foo"), new CustomItem(2L, "bar"),
+                new CustomItem(3L, "baz"));
+        dataView.setIdentifierProvider(CustomItem::getId);
+        selectSupplier = () -> select;
+
+        CustomItem updatedItem = new CustomItem(2L, "updated");
+        dataView.refreshItem(updatedItem);
+
+        AtomicReference<CustomItem> selectedItem = new AtomicReference<>();
+        select.addValueChangeListener(e -> selectedItem.set(e.getValue()));
+
+        // Simulate selecting an item from the client side via key
+        var itemKey = getListBoxChild(1).getProperty("value");
+        select.getElement().setProperty("value", itemKey);
+
+        Assert.assertEquals("updated", selectedItem.get().name);
+        Assert.assertEquals("updated", select.getValue().name);
+    }
+
     private void validateItem(int index, String textContent, String label,
             boolean enabled) {
         Element item = getListBoxChild(index);
