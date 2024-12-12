@@ -1,5 +1,6 @@
 import { expect, fixtureSync, nextFrame } from '@open-wc/testing';
 import { sendKeys, sendMouse } from '@web/test-runner-commands';
+import { middleOfNode } from '@vaadin/testing-helpers';
 import { init, setRootItems, FlowGridSelectionColumn, initSelectionColumn } from './shared.js';
 import type { FlowGrid } from './shared.js';
 
@@ -33,11 +34,8 @@ describe('grid connector - selection – multi mode', () => {
   });
 
   async function mouseClick(element: HTMLElement) {
-    const { x, y, width, height } = element.getBoundingClientRect();
-    await sendMouse({
-      type: 'click',
-      position: [Math.floor(x + width / 2), Math.floor(y + height / 2)],
-    });
+    const { x, y } = middleOfNode(element);
+    await sendMouse({ type: 'click', position: [Math.floor(x), Math.floor(y)] });
   }
 
   describe('client to server', () => {
