@@ -24,12 +24,15 @@ export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridCo
       width: {
         type: String,
         value: '56px'
+      },
+
+      /** @override */
+      _shiftKeyDown: {
+        type: Boolean,
+        value: false,
+        observer: '__shiftKeyDownChanged'
       }
     };
-  }
-
-  static get observers() {
-    return ['__shiftKeyDownChanged(_shiftKeyDown)'];
   }
 
   /**
@@ -47,8 +50,10 @@ export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridCo
   }
 
   /** @private */
-  __shiftKeyDownChanged(shiftKeyDown) {
-    this.$server.setShiftKeyDown(shiftKeyDown);
+  __shiftKeyDownChanged(newState, oldState) {
+    if (oldState !== undefined) {
+      this.$server.setShiftKeyDown(newState);
+    }
   }
 
   /**

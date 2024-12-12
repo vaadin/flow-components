@@ -1,11 +1,13 @@
 import { expect, fixtureSync, nextFrame } from '@open-wc/testing';
-import { sendKeys } from '@web/test-runner-commands';
-import { init, getBodyCellContent, setRootItems, getHeaderCellContent, FlowGridSelectionColumn, initSelectionColumn } from './shared.js';
+import { sendKeys, sendMouse } from '@web/test-runner-commands';
+import { init, setRootItems, FlowGridSelectionColumn, initSelectionColumn } from './shared.js';
 import type { FlowGrid } from './shared.js';
 
 describe('grid connector - selection – multi mode', () => {
   let grid: FlowGrid;
   let selectionColumn: FlowGridSelectionColumn;
+  let selectAllCheckbox: HTMLElement;
+  let selectRowCheckboxes: HTMLElement[];
 
   beforeEach(async () => {
     grid = fixtureSync(`
@@ -26,48 +28,50 @@ describe('grid connector - selection – multi mode', () => {
     await nextFrame();
 
     grid.$connector.setSelectionMode('MULTI');
+
+    [selectAllCheckbox, ...selectRowCheckboxes] = [...grid.querySelectorAll('vaadin-checkbox')];
   });
 
-  function clickSelectCheckbox(row: number) {
-    getBodyCellContent(grid, row, 0)!.querySelector('vaadin-checkbox')!.click();
-  }
-
-  function clickSelectAllCheckbox() {
-    getHeaderCellContent(selectionColumn).querySelector('vaadin-checkbox')!.click();
+  async function mouseClick(element: HTMLElement) {
+    const { x, y, width, height } = element.getBoundingClientRect();
+    await sendMouse({
+      type: 'click',
+      position: [Math.floor(x + width / 2), Math.floor(y + height / 2)],
+    });
   }
 
   describe('client to server', () => {
-    it('should select items', () => {
-      clickSelectCheckbox(0);
+    it('should select items', async () => {
+      await mouseClick(selectRowCheckboxes[0]);
       expect(grid.selectedItems).to.have.lengthOf(1);
       expect(grid.selectedItems[0].key).to.equal('0');
 
-      clickSelectCheckbox(1);
+      await mouseClick(selectRowCheckboxes[1]);
       expect(grid.selectedItems).to.have.lengthOf(2);
       expect(grid.selectedItems[0].key).to.equal('0');
       expect(grid.selectedItems[1].key).to.equal('1');
     });
 
-    it('should deselect items', () => {
-      clickSelectCheckbox(0);
-      clickSelectCheckbox(1);
+    it('should deselect items', async () => {
+      await mouseClick(selectRowCheckboxes[0]);
+      await mouseClick(selectRowCheckboxes[1]);
 
-      clickSelectCheckbox(1);
+      await mouseClick(selectRowCheckboxes[1]);
       expect(grid.selectedItems).to.have.lengthOf(1);
       expect(grid.selectedItems[0].key).to.equal('0');
 
-      clickSelectCheckbox(0);
+      await mouseClick(selectRowCheckboxes[0]);
       expect(grid.selectedItems).to.be.empty;
     });
 
-    it('should select items on server', () => {
-      clickSelectCheckbox(0);
+    it('should select items on server', async () => {
+      await mouseClick(selectRowCheckboxes[0]);
       expect(grid.$server.select).to.be.calledWith('0');
     });
 
-    it('should deselect items on server', () => {
-      clickSelectCheckbox(0);
-      clickSelectCheckbox(0);
+    it('should deselect items on server', async () => {
+      await mouseClick(selectRowCheckboxes[0]);
+      await mouseClick(selectRowCheckboxes[0]);
       expect(grid.$server.deselect).to.be.calledWith('0');
     });
 
@@ -75,7 +79,7 @@ describe('grid connector - selection – multi mode', () => {
       await sendKeys({ down: 'Shift' });
       expect(grid.$server.setShiftKeyDown).to.be.not.called;
 
-      clickSelectCheckbox(0);
+      await mouseClick(selectRowCheckboxes[0]);
       expect(grid.$server.setShiftKeyDown).to.be.calledOnce;
       expect(grid.$server.setShiftKeyDown).to.be.calledWith(true);
       expect(grid.$server.setShiftKeyDown).to.be.calledBefore(grid.$server.select);
@@ -88,12 +92,12 @@ describe('grid connector - selection – multi mode', () => {
     });
 
     it('should set shift key flag on server when deselecting with Shift', async () => {
-      clickSelectCheckbox(0);
+      await mouseClick(selectRowCheckboxes[0]);
 
       await sendKeys({ down: 'Shift' });
       expect(grid.$server.setShiftKeyDown).to.be.not.called;
 
-      clickSelectCheckbox(1);
+      await mouseClick(selectRowCheckboxes[1]);
       expect(grid.$server.setShiftKeyDown).to.be.calledOnce;
       expect(grid.$server.setShiftKeyDown).to.be.calledWith(true);
       expect(grid.$server.setShiftKeyDown).to.be.calledBefore(grid.$server.deselect);
@@ -105,14 +109,14 @@ describe('grid connector - selection – multi mode', () => {
       expect(grid.$server.setShiftKeyDown).to.be.calledWith(false);
     });
 
-    it('should select all items on server', () => {
-      clickSelectAllCheckbox();
+    it('should select all items on server', async () => {
+      await mouseClick(selectAllCheckbox);
       expect(grid.$server.selectAll).to.be.calledOnce;
     });
 
-    it('should deselect all items on server', () => {
+    it('should deselect all items on server', async () => {
       selectionColumn.selectAll = true;
-      clickSelectAllCheckbox();
+      await mouseClick(selectAllCheckbox);
       expect(grid.$server.deselectAll).to.be.calledOnce;
     });
   });
