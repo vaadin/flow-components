@@ -18,9 +18,7 @@ package com.vaadin.flow.component.upload.tests;
 import static org.junit.Assert.assertThat;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Level;
 
 import org.hamcrest.CoreMatchers;
@@ -30,9 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.devtools.DevTools;
 import org.openqa.selenium.devtools.HasDevTools;
-import org.openqa.selenium.devtools.v127.network.Network;
 import org.openqa.selenium.logging.LogEntry;
 
 import com.vaadin.flow.component.upload.testbench.UploadElement;
@@ -173,23 +169,25 @@ public class UploadIT extends AbstractUploadIT {
         Assume.assumeTrue("Current driver does not support Dev Tools",
                 driver instanceof HasDevTools);
 
-        // Slow down upload to 100 kb/sec
-        DevTools devTools = ((HasDevTools) driver).getDevTools();
-        devTools.createSessionIfThereIsNotOne();
-        devTools.send(Network.enable(Optional.empty(), Optional.empty(),
-                Optional.empty()));
-        devTools.send(Network.emulateNetworkConditions(false, 40, 900000,
-                100000, Optional.empty(), Optional.empty(), Optional.empty(),
-                Optional.empty()));
+        // Fake slow upload to test whether UploadElement.waitForUploads
+        // actually waits for the specified time. UploadElement.waitForUploads
+        // checks whether all files are uploaded. To simulate slow upload, first
+        // add a file without waiting and then mark it as uploading. Then
+        // schedule a script to clear the uploading state after some time to
+        // make waitForUploads resolve. Finally upload another file that waits
+        // for upload to finish.
+        getUpload().setProperty("noAuto", true);
+        getUpload().upload(createTempFile("txt"));
+        executeScript("arguments[0].files[0].uploading = true", getUpload());
+        executeScript(
+                "setTimeout(() => arguments[0].files.forEach(file => { file.uploading = false }), 8000)",
+                getUpload());
 
-        File tempFile = createTempFile("txt");
-        Files.write(tempFile.toPath(), new byte[1024 * 300]);
-
-        getUpload().upload(tempFile, 10);
+        getUpload().upload(createTempFile("txt"), 10);
 
         $("button").id("print-file-count").click();
 
-        Assert.assertEquals("File list should contain one file", 1,
+        Assert.assertEquals("File list should contain two files", 2,
                 getFileCount());
     }
 
