@@ -35,14 +35,13 @@ public final class ClientValidationUtil {
         StringBuilder expression = new StringBuilder(
                 "this._shouldSetInvalid = function (invalid) { return false };");
 
-        if (component.isInvalid()) {
-            /*
-             * By default the invalid flag is set to false. Workaround the case
-             * where the client side validation overrides the invalid state
-             * before the `_shouldSetInvalid` method is overridden above.
-             */
-            expression.append("this.invalid = true;");
-        }
+        /*
+         * Workaround the case where the client side validation overrides the
+         * invalid state before the `_shouldSetInvalid` method is overridden
+         * above.
+         */
+        expression.append("this.invalid = ").append(component.isInvalid())
+                .append(";");
 
         component.getElement().executeJs(expression.toString());
     }
