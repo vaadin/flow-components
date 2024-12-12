@@ -617,8 +617,8 @@ public class RadioButtonGroupTest {
         group.addValueChangeListener(e -> selectedItem.set(e.getValue()));
 
         // Simulate selecting an item from the client side via key
-        var itemKey = group.getChildren().skip(1).findFirst().get().getElement()
-                .getProperty("value");
+        String itemKey = group.getChildren().skip(1).findFirst().orElseThrow()
+                .getElement().getProperty("value");
         group.getElement().setProperty("value", itemKey);
 
         Assert.assertEquals("updated", selectedItem.get().getName());
