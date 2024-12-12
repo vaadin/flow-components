@@ -957,7 +957,7 @@ public class SelectTest {
         select.addValueChangeListener(e -> selectedItem.set(e.getValue()));
 
         // Simulate selecting an item from the client side via key
-        var itemKey = getListBoxChild(1).getProperty("value");
+        String itemKey = getListBoxChild(1).getProperty("value");
         select.getElement().setProperty("value", itemKey);
 
         Assert.assertEquals("updated", selectedItem.get().name);
