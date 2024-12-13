@@ -62,7 +62,7 @@ public class MultiSelectComboBoxBinderValidationIT
 
         // Try enter custom value, required fails
         testField.deselectAll();
-        testField.sendKeys("custom", Keys.TAB);
+        testField.sendKeys("custom", Keys.ENTER);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
@@ -74,14 +74,14 @@ public class MultiSelectComboBoxBinderValidationIT
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("custom", Keys.ENTER);
 
         // Binder validation fails
-        testField.sendKeys("invalid", Keys.TAB);
+        testField.sendKeys("invalid", Keys.ENTER);
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
 
         // Binder validation passes
         testField.deselectAll();
-        testField.sendKeys("custom", Keys.TAB);
+        testField.sendKeys("custom", Keys.ENTER);
         assertServerValid();
         assertClientValid();
 
