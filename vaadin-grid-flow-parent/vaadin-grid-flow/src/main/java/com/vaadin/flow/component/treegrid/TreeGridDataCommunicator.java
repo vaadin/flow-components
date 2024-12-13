@@ -18,6 +18,7 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
@@ -262,13 +263,13 @@ public class TreeGridDataCommunicator<T>
         }
 
         public void removeDescendantCacheIf(SerializablePredicate<Cache<T>> predicate) {
-            for (Cache<T> cache : caches.values()) {
+            caches.values().removeIf(cache -> {
                 if (predicate.test(cache)) {
-                    caches.remove(cache.parentIndex);
-                } else {
-                    cache.removeDescendantCacheIf(predicate);
+                    return true;
                 }
-            }
+                cache.removeDescendantCacheIf(predicate);
+                return false;
+            });
         }
     }
 }
