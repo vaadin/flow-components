@@ -845,12 +845,6 @@ public class TreeGrid<T> extends Grid<T>
 
     @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
-    private void setRequestedRange(int start, int length) {
-        getDataCommunicator().setRequestedRange(start, length);
-    }
-
-    @AllowInert
-    @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setParentRequestedRange(int start, int length,
             String parentKey) {
         T item = getDataCommunicator().getKeyMapper().get(parentKey);
