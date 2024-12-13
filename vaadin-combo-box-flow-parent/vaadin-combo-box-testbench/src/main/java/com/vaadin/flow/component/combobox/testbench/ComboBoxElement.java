@@ -39,6 +39,8 @@ public class ComboBoxElement extends TestBenchElement
     @Override
     public void clear() {
         setValue(null);
+        // Setting value to null is not enough to empty the text input
+        executeScript("arguments[0].clear();", this);
     }
 
     /**
