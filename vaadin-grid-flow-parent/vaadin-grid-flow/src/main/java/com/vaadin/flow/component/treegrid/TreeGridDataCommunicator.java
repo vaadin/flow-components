@@ -125,8 +125,10 @@ public class TreeGridDataCommunicator<T>
         for (int i = start; i < end; i++) {
             FlatIndexContext<T> context = getFlatIndexContext(i);
             if (context == null) {
+                end = i;
                 break;
             }
+
             var cache = context.cache;
             var index = context.index;
 
@@ -145,11 +147,16 @@ public class TreeGridDataCommunicator<T>
 
         int flatSize = rootCache.getFlatSize();
 
+        // Send the data to the client side
         Update update = getArrayUpdater().startUpdate(flatSize);
         update.clear(0, start);
         update.clear(end, flatSize - end);
         update.set(start, result.stream().map(this::generateItemJson).toList());
         update.commit(nextUpdateId++);
+
+        // Restrict the requested range to the actual range of items
+        // that were fetched in case it's requested again in the future.
+        requestedRange = requestedRange.restrictTo(Range.between(start, end));
     }
 
     private FlatIndexContext<T> getFlatIndexContext(int flatIndex) {
