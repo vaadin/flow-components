@@ -856,10 +856,9 @@ public class RadioButtonGroup<T>
     }
 
     private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
-        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent) {
-            resetRadioButton(
-                    ((DataChangeEvent.DataRefreshEvent<T>) dataChangeEvent)
-                            .getItem());
+        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent<T> refreshEvent) {
+            keyMapper.refresh(refreshEvent.getItem());
+            resetRadioButton(refreshEvent.getItem());
         } else {
             keyMapper.removeAll();
             selectionPreservationHandler.handleDataChange(dataChangeEvent);
