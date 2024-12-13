@@ -15,11 +15,14 @@
  */
 package com.vaadin.flow.component.treegrid;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import com.vaadin.flow.data.provider.ArrayUpdater.Update;
+import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalArrayUpdater;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalArrayUpdater.HierarchicalUpdate;
@@ -32,13 +35,18 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.Range;
 import com.vaadin.flow.internal.StateNode;
 
+import elemental.json.Json;
 import elemental.json.JsonArray;
+import elemental.json.JsonObject;
+import elemental.json.JsonValue;
 
 public class TreeGridDataCommunicator<T>
         extends HierarchicalDataCommunicator<T> {
-    private SerializableRunnable flushListener;
-
     private Cache<T> rootCache;
+
+    private ArrayUpdater arrayUpdater;
+    private CompositeDataGenerator<T> dataGenerator;
+    private int nextUpdateId = 0;
 
     public TreeGridDataCommunicator(CompositeDataGenerator<T> dataGenerator,
             HierarchicalArrayUpdater arrayUpdater,
@@ -46,25 +54,22 @@ public class TreeGridDataCommunicator<T>
             SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
         super(dataGenerator, arrayUpdater, dataUpdater, stateNode,
                 uniqueKeyProviderSupplier);
+        this.arrayUpdater = arrayUpdater;
+        this.dataGenerator = dataGenerator;
     }
 
     protected void requestFlush(boolean forced) {
-        // flush();
     }
 
     protected void requestFlush(HierarchicalUpdate update) {
-        // update.commit();
     }
 
     protected void requestFlush(HierarchicalCommunicationController<T> update) {
-        // update.flush();
     }
 
-    public void addFlushListener(SerializableRunnable listener) {
-        this.flushListener = listener;
-    }
+    public void setRequestedRange(int start, int length) {
+        List<T> result = new ArrayList<>();
 
-    public void setRequestedFlatRange(int start, int length) {
         if (rootCache == null) {
             rootCache = new Cache<>(null, -1, countChildItems(null));
         }
@@ -84,7 +89,13 @@ public class TreeGridDataCommunicator<T>
             if (isExpanded(item) && !cache.hasCache(index)) {
                 cache.createCache(index, countChildItems(item));
             }
+
+            result.add(item);
         }
+
+        Update update = arrayUpdater.startUpdate(rootCache.getFlatSize());
+        update.set(start, result.stream().map(this::generateJson).toList());
+        update.commit(nextUpdateId++);
     }
 
     private FlatIndexContext<T> getFlatIndexContext(int flatIndex) {
@@ -110,6 +121,13 @@ public class TreeGridDataCommunicator<T>
         }
 
         return new FlatIndexContext<>(cache, index);
+    }
+
+    private JsonValue generateJson(T item) {
+        JsonObject json = Json.createObject();
+        json.put("key", getKeyMapper().key(item));
+        dataGenerator.generateData(item, json);
+        return json;
     }
 
     private List<T> fetchChildItems(T parentItem, Range range) {
@@ -139,6 +157,9 @@ public class TreeGridDataCommunicator<T>
         }
 
         public T getParentItem() {
+            if (parentCache == null) {
+                return null;
+            }
             return parentCache.getItem(parentIndex);
         }
 
