@@ -225,9 +225,6 @@ public class TreeGrid<T> extends Grid<T>
      */
     public TreeGrid() {
         this(50, new TreeDataCommunicatorBuilder<T>());
-        // getDataCommunicator().addFlushListener(() -> {
-
-        // });
     }
 
     /**
@@ -849,6 +846,12 @@ public class TreeGrid<T> extends Grid<T>
                     "Multiple columns for the same property: "
                             + property.getName());
         }
+    }
+
+    @AllowInert
+    @ClientCallable(DisabledUpdateMode.ALWAYS)
+    private void setRequestedRange(int start, int length) {
+        getDataCommunicator().setRequestedRange(start, length);
     }
 
     @AllowInert
