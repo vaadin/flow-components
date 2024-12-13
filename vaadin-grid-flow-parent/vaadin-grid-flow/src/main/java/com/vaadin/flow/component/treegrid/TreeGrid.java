@@ -131,11 +131,6 @@ public class TreeGrid<T> extends Grid<T>
             enqueue("$connector.confirmParent", updateId, parentKey, levelSize);
             commit();
         }
-
-        @Override
-        public void commit() {
-            // Disable the default commit implementation to avoid sending
-        }
     }
 
     private class TreeGridArrayUpdaterImpl implements TreeGridArrayUpdater {
