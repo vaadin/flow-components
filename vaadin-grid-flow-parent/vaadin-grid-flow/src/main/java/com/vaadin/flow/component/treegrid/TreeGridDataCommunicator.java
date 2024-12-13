@@ -18,12 +18,10 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.stream.Stream;
 
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
@@ -45,9 +43,8 @@ import elemental.json.JsonValue;
 
 public class TreeGridDataCommunicator<T>
         extends HierarchicalDataCommunicator<T> {
-    private Cache<T> rootCache;
-
     private int nextUpdateId = 0;
+    private Cache<T> rootCache;
     private Range requestedRange;
 
     public TreeGridDataCommunicator(CompositeDataGenerator<T> dataGenerator,
@@ -107,39 +104,44 @@ public class TreeGridDataCommunicator<T>
                 collapsedItems.add(item);
             }
         });
-        rootCache.removeDescendantCacheIf(cache -> collapsedItems.contains(cache.getParentItem()));
+        rootCache.removeDescendantCacheIf(
+                cache -> collapsedItems.contains(cache.getParentItem()));
         requestFlush();
         return collapsedItems;
     }
 
     @Override
     protected void flush() {
+        int start = requestedRange.getStart();
+        int end = requestedRange.getEnd();
+
         if (rootCache == null) {
-            rootCache = new Cache<>(null, -1, countChildItems(null));
+            rootCache = new Cache<>(null, -1,
+                    getHierarchyMapper().getRootSize());
         }
 
         List<T> result = new ArrayList<>();
-
-        int start = requestedRange.getStart();
-        int end = requestedRange.getEnd();
         for (int i = start; i < end; i++) {
             FlatIndexContext<T> context = getFlatIndexContext(i);
             if (context == null) {
                 end = i;
                 break;
             }
-
             var cache = context.cache;
             var index = context.index;
 
             if (!cache.hasItem(index)) {
-                cache.setItems(index, fetchChildItems(cache.getParentItem(),
-                        Range.between(index, end)));
+                List<T> childItems = getHierarchyMapper()
+                        .fetchChildItems(cache.getParentItem(),
+                                Range.between(index, end))
+                        .toList();
+                cache.setItems(index, childItems);
             }
 
             T item = cache.getItem(index);
             if (isExpanded(item) && !cache.hasCache(index)) {
-                cache.createCache(index, countChildItems(item));
+                int childCount = getHierarchyMapper().countChildItems(item);
+                cache.createCache(index, childCount);
             }
 
             result.add(item);
@@ -193,14 +195,6 @@ public class TreeGridDataCommunicator<T>
         json.put("key", getKeyMapper().key(item));
         getDataGenerator().generateData(item, json);
         return json;
-    }
-
-    private List<T> fetchChildItems(T parentItem, Range range) {
-        return getHierarchyMapper().fetchChildItems(parentItem, range).toList();
-    }
-
-    private int countChildItems(T parentItem) {
-        return getHierarchyMapper().countChildItems(parentItem);
     }
 
     private static record FlatIndexContext<T>(Cache<T> cache,
@@ -269,7 +263,8 @@ public class TreeGridDataCommunicator<T>
             return cache;
         }
 
-        public void removeDescendantCacheIf(SerializablePredicate<Cache<T>> predicate) {
+        public void removeDescendantCacheIf(
+                SerializablePredicate<Cache<T>> predicate) {
             caches.values().removeIf(cache -> {
                 if (predicate.test(cache)) {
                     return true;
