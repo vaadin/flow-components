@@ -724,6 +724,33 @@ public class CheckboxGroupTest {
         Assert.assertTrue(events.isEmpty());
     }
 
+    @Test
+    public void refreshItem_selectFromClient_valueContainsUpdatedItem() {
+        CheckboxGroup<CustomItem> group = new CheckboxGroup<>();
+        CheckboxGroupListDataView<CustomItem> dataView = group.setItems(
+                new CustomItem(1L, "foo"), new CustomItem(2L, "bar"),
+                new CustomItem(3L, "baz"));
+        dataView.setIdentifierProvider(CustomItem::getId);
+
+        CustomItem updatedItem = new CustomItem(2L, "updated");
+        dataView.refreshItem(updatedItem);
+
+        AtomicReference<Set<CustomItem>> selectedItems = new AtomicReference<>();
+        group.addValueChangeListener(e -> selectedItems.set(e.getValue()));
+
+        // Simulate selecting an item from the client side via key
+        String itemKey = group.getChildren().skip(1).findFirst().orElseThrow()
+                .getElement().getProperty("value");
+        JsonArray selection = Json.createArray();
+        selection.set(0, itemKey);
+        group.getElement().setPropertyJson("value", selection);
+
+        Assert.assertEquals("updated",
+                selectedItems.get().stream().findFirst().orElseThrow().name);
+        Assert.assertEquals("updated",
+                group.getValue().stream().findFirst().orElseThrow().name);
+    }
+
     /**
      * Used in the tests {@link #singleDataRefreshEvent()} and
      * {@link #allDataRefreshEvent()}
