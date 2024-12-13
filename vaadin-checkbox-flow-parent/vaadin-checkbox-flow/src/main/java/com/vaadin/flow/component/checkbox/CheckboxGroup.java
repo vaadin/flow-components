@@ -389,10 +389,10 @@ public class CheckboxGroup<T>
     }
 
     private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
-        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent) {
-            T otherItem = ((DataChangeEvent.DataRefreshEvent<T>) dataChangeEvent)
-                    .getItem();
+        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent<T> dataRefreshEvent) {
+            T otherItem = dataRefreshEvent.getItem();
             Object otherItemId = getItemId(otherItem);
+            keyMapper.refresh(otherItem);
             getCheckboxItems().filter(
                     item -> Objects.equals(getItemId(item.item), otherItemId))
                     .findFirst().ifPresent(this::updateCheckbox);
