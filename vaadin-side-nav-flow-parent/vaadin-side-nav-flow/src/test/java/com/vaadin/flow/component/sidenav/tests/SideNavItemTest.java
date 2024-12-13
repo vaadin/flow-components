@@ -33,6 +33,8 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.NotFoundException;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
@@ -606,6 +608,25 @@ public class SideNavItemTest {
     }
 
     @Test
+    public void createFromComponentWithHasUrlParameter_pathContainsParameters() {
+        runWithMockRouter(() -> {
+            sideNavItem = new SideNavItem("test",
+                    TestRouteWithHasUrlParameter.class, "bar/baz");
+
+            assertPath("foo/bar/baz");
+        }, TestRouteWithHasUrlParameter.class);
+    }
+
+    @Test
+    public void setPathAsComponentWithHasUrlParameter_pathContainsParameters() {
+        runWithMockRouter(() -> {
+            sideNavItem.setPath(TestRouteWithHasUrlParameter.class, "bar/baz");
+
+            assertPath("foo/bar/baz");
+        }, TestRouteWithHasUrlParameter.class);
+    }
+
+    @Test
     public void setTarget_hasTarget() {
         sideNavItem.setTarget("_blank");
         Assert.assertEquals("_blank",
@@ -777,6 +798,15 @@ public class SideNavItemTest {
     @Route("foo/:k1/:k2/bar")
     private static class TestRouteWithRouteParams extends Component {
 
+    }
+
+    @Route("foo")
+    private static class TestRouteWithHasUrlParameter extends Component
+            implements HasUrlParameter<String> {
+        @Override
+        public void setParameter(BeforeEvent event, String parameter) {
+
+        }
     }
 
     @Route("foo/bar")
