@@ -55,7 +55,7 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav-item")
-@NpmPackage(value = "@vaadin/side-nav", version = "24.5.5")
+@NpmPackage(value = "@vaadin/side-nav", version = "24.5.6")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 public class SideNavItem extends SideNavItemContainer
         implements HasEnabled, HasPrefix, HasSuffix {
