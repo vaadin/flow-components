@@ -1050,6 +1050,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
                     .getItem();
             IdentifierProvider<T> identifierProvider = getIdentifierProvider();
             Object updatedItemId = identifierProvider.apply(updatedItem);
+            keyMapper.refresh(updatedItem);
             getItems()
                     .filter(vaadinItem -> updatedItemId.equals(
                             identifierProvider.apply(vaadinItem.getItem())))
