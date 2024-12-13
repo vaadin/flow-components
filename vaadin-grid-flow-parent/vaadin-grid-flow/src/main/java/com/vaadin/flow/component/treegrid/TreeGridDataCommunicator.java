@@ -47,6 +47,7 @@ public class TreeGridDataCommunicator<T>
     private ArrayUpdater arrayUpdater;
     private CompositeDataGenerator<T> dataGenerator;
     private int nextUpdateId = 0;
+    private Range requestedRange;
 
     public TreeGridDataCommunicator(CompositeDataGenerator<T> dataGenerator,
             HierarchicalArrayUpdater arrayUpdater,
@@ -58,23 +59,24 @@ public class TreeGridDataCommunicator<T>
         this.dataGenerator = dataGenerator;
     }
 
-    protected void requestFlush(boolean forced) {
-    }
-
     protected void requestFlush(HierarchicalUpdate update) {
     }
 
     protected void requestFlush(HierarchicalCommunicationController<T> update) {
     }
 
-    public void setRequestedRange(int start, int length) {
+    protected void flush() {
+        int start = requestedRange.getStart();
+        int end = requestedRange.getEnd();
+        int length = requestedRange.length();
+
         List<T> result = new ArrayList<>();
 
         if (rootCache == null) {
             rootCache = new Cache<>(null, -1, countChildItems(null));
         }
 
-        for (int i = start; i < start + length; i++) {
+        for (int i = start; i < end; i++) {
             FlatIndexContext<T> context = getFlatIndexContext(i);
             int index = context.index;
             Cache<T> cache = context.cache;
@@ -96,6 +98,10 @@ public class TreeGridDataCommunicator<T>
         Update update = arrayUpdater.startUpdate(rootCache.getFlatSize());
         update.set(start, result.stream().map(this::generateJson).toList());
         update.commit(nextUpdateId++);
+    }
+
+    public void setRequestedRange(int start, int length) {
+        requestedRange = Range.withLength(start, length);
     }
 
     private FlatIndexContext<T> getFlatIndexContext(int flatIndex) {
