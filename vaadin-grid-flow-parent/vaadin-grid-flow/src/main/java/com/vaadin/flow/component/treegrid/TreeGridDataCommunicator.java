@@ -70,19 +70,21 @@ public class TreeGridDataCommunicator<T>
         int end = requestedRange.getEnd();
         int length = requestedRange.length();
 
-        List<T> result = new ArrayList<>();
-
         if (rootCache == null) {
             rootCache = new Cache<>(null, -1, countChildItems(null));
         }
 
+        List<T> result = new ArrayList<>();
         for (int i = start; i < end; i++) {
             FlatIndexContext<T> context = getFlatIndexContext(i);
-            int index = context.index;
-            Cache<T> cache = context.cache;
+            if (context == null) {
+                break;
+            }
+            var cache = context.cache;
+            var index = context.index;
 
             if (!cache.hasItem(index)) {
-                // TODO: Optimize length calculation
+                // TODO: Optimize length to fetch
                 cache.setItems(index, fetchChildItems(cache.getParentItem(),
                         Range.withLength(index, length)));
             }
@@ -96,12 +98,13 @@ public class TreeGridDataCommunicator<T>
         }
 
         Update update = arrayUpdater.startUpdate(rootCache.getFlatSize());
-        update.set(start, result.stream().map(this::generateJson).toList());
+        update.set(start, result.stream().map(this::generateItemJson).toList());
         update.commit(nextUpdateId++);
     }
 
     public void setRequestedRange(int start, int length) {
         requestedRange = Range.withLength(start, length);
+        requestFlush();
     }
 
     private FlatIndexContext<T> getFlatIndexContext(int flatIndex) {
@@ -126,10 +129,14 @@ public class TreeGridDataCommunicator<T>
             index -= childCache.getFlatSize();
         }
 
+        if (index >= cache.getSize()) {
+            return null;
+        }
+
         return new FlatIndexContext<>(cache, index);
     }
 
-    private JsonValue generateJson(T item) {
+    private JsonValue generateItemJson(T item) {
         JsonObject json = Json.createObject();
         json.put("key", getKeyMapper().key(item));
         dataGenerator.generateData(item, json);
@@ -167,6 +174,10 @@ public class TreeGridDataCommunicator<T>
                 return null;
             }
             return parentCache.getItem(parentIndex);
+        }
+
+        public int getSize() {
+            return size;
         }
 
         public int getFlatSize() {

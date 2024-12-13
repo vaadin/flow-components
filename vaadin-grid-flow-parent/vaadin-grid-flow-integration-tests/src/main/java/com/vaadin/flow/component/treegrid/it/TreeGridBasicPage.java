@@ -30,7 +30,7 @@ public class TreeGridBasicPage extends Div {
         grid.addHierarchyColumn(item -> item).setHeader("Item");
 
         TreeData<String> data = new TreeGridStringDataBuilder()
-                .addLevel("Item", 50).addLevel("Item ", 50)
+                .addLevel("Item", 200).addLevel("Item ", 50)
                 .addLevel("Item  ", 50).build();
 
         grid.setDataProvider(new TreeDataProvider<>(data));
