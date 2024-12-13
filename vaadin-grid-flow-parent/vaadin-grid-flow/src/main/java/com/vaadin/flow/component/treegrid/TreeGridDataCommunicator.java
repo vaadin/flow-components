@@ -16,20 +16,22 @@
 package com.vaadin.flow.component.treegrid;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
-import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalArrayUpdater;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalArrayUpdater.HierarchicalUpdate;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalCommunicationController;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.function.SerializableRunnable;
+import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.Range;
@@ -44,8 +46,6 @@ public class TreeGridDataCommunicator<T>
         extends HierarchicalDataCommunicator<T> {
     private Cache<T> rootCache;
 
-    private ArrayUpdater arrayUpdater;
-    private CompositeDataGenerator<T> dataGenerator;
     private int nextUpdateId = 0;
     private Range requestedRange;
 
@@ -55,8 +55,6 @@ public class TreeGridDataCommunicator<T>
             SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
         super(dataGenerator, arrayUpdater, dataUpdater, stateNode,
                 uniqueKeyProviderSupplier);
-        this.arrayUpdater = arrayUpdater;
-        this.dataGenerator = dataGenerator;
     }
 
     protected void requestFlush(HierarchicalUpdate update) {
@@ -65,16 +63,64 @@ public class TreeGridDataCommunicator<T>
     protected void requestFlush(HierarchicalCommunicationController<T> update) {
     }
 
-    protected void flush() {
-        int start = requestedRange.getStart();
-        int end = requestedRange.getEnd();
-        int length = requestedRange.length();
+    @Override
+    public void reset() {
+        rootCache = null;
+        getDataGenerator().destroyAllData();
+        requestFlush();
+    }
 
+    @Override
+    public void setRequestedRange(int start, int length) {
+        requestedRange = Range.withLength(start, length);
+        requestFlush();
+    }
+
+    @Override
+    public void expand(T item) {
+        expand(Arrays.asList(item));
+    }
+
+    @Override
+    public Collection<T> expand(Collection<T> items) {
+        List<T> expandedItems = new ArrayList<>();
+        items.forEach(item -> {
+            if (getHierarchyMapper().expand(item)) {
+                expandedItems.add(item);
+            }
+        });
+        requestFlush();
+        return expandedItems;
+    }
+
+    @Override
+    public void collapse(T item) {
+        collapse(Arrays.asList(item));
+    }
+
+    @Override
+    public Collection<T> collapse(Collection<T> items) {
+        List<T> collapsedItems = new ArrayList<>();
+        items.forEach(item -> {
+            if (getHierarchyMapper().collapse(item)) {
+                collapsedItems.add(item);
+            }
+        });
+        rootCache.removeDescendantCacheIf(cache -> collapsedItems.contains(cache.getParentItem()));
+        requestFlush();
+        return collapsedItems;
+    }
+
+    @Override
+    protected void flush() {
         if (rootCache == null) {
             rootCache = new Cache<>(null, -1, countChildItems(null));
         }
 
         List<T> result = new ArrayList<>();
+
+        int start = requestedRange.getStart();
+        int end = requestedRange.getEnd();
         for (int i = start; i < end; i++) {
             FlatIndexContext<T> context = getFlatIndexContext(i);
             if (context == null) {
@@ -84,9 +130,8 @@ public class TreeGridDataCommunicator<T>
             var index = context.index;
 
             if (!cache.hasItem(index)) {
-                // TODO: Optimize length to fetch
                 cache.setItems(index, fetchChildItems(cache.getParentItem(),
-                        Range.withLength(index, length)));
+                        Range.between(index, end)));
             }
 
             T item = cache.getItem(index);
@@ -97,14 +142,13 @@ public class TreeGridDataCommunicator<T>
             result.add(item);
         }
 
-        Update update = arrayUpdater.startUpdate(rootCache.getFlatSize());
+        int flatSize = rootCache.getFlatSize();
+
+        Update update = getArrayUpdater().startUpdate(flatSize);
+        update.clear(0, start);
+        update.clear(end, flatSize - end);
         update.set(start, result.stream().map(this::generateItemJson).toList());
         update.commit(nextUpdateId++);
-    }
-
-    public void setRequestedRange(int start, int length) {
-        requestedRange = Range.withLength(start, length);
-        requestFlush();
     }
 
     private FlatIndexContext<T> getFlatIndexContext(int flatIndex) {
@@ -139,7 +183,7 @@ public class TreeGridDataCommunicator<T>
     private JsonValue generateItemJson(T item) {
         JsonObject json = Json.createObject();
         json.put("key", getKeyMapper().key(item));
-        dataGenerator.generateData(item, json);
+        getDataGenerator().generateData(item, json);
         return json;
     }
 
@@ -215,6 +259,16 @@ public class TreeGridDataCommunicator<T>
             Cache<T> cache = new Cache<>(this, index, size);
             caches.put(index, cache);
             return cache;
+        }
+
+        public void removeDescendantCacheIf(SerializablePredicate<Cache<T>> predicate) {
+            for (Cache<T> cache : caches.values()) {
+                if (predicate.test(cache)) {
+                    caches.remove(cache.parentIndex);
+                } else {
+                    cache.removeDescendantCacheIf(predicate);
+                }
+            }
         }
     }
 }
