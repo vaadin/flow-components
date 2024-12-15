@@ -29,6 +29,8 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalArrayUpdater;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalArrayUpdater.HierarchicalUpdate;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalCommunicationController;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataCommunicator;
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
+import com.vaadin.flow.data.provider.hierarchy.HierarchyMapper;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
@@ -149,16 +151,11 @@ public class TreeGridDataCommunicator<T>
 
         int flatSize = rootCache.getFlatSize();
 
-        // Send the data to the client side
         Update update = getArrayUpdater().startUpdate(flatSize);
         update.clear(0, start);
         update.clear(end, flatSize - end);
         update.set(start, result.stream().map(this::generateItemJson).toList());
         update.commit(nextUpdateId++);
-
-        // Restrict the requested range to the actual range of items
-        // that were fetched in case it's requested again in the future.
-        requestedRange = requestedRange.restrictTo(Range.between(start, end));
     }
 
     private FlatIndexContext<T> getFlatIndexContext(int flatIndex) {
@@ -195,6 +192,31 @@ public class TreeGridDataCommunicator<T>
         json.put("key", getKeyMapper().key(item));
         getDataGenerator().generateData(item, json);
         return json;
+    }
+
+    protected <F> HierarchyMapper<T, F> createHierarchyMapper(
+            HierarchicalDataProvider<T, F> dataProvider) {
+        return new HierarchyMapper<>(dataProvider) {
+            @Override
+            public int getDepth(T item) {
+                // TODO: Implement this method via Cache
+                return 0;
+            }
+
+            @Override
+            protected T getParentOfItem(T item) {
+                // TODO: Implement this method via Cache
+                return null;
+            }
+
+            @Override
+            protected void registerChildren(T parent, List<T> childList) {
+            }
+
+            @Override
+            protected void removeChildren(Object id) {
+            }
+        };
     }
 
     private static record FlatIndexContext<T>(Cache<T> cache,
