@@ -16,9 +16,16 @@
 package com.vaadin.flow.component.grid;
 
 import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.data.selection.MultiSelectionEvent;
 
 /**
- * Event fired when the user toggles an item on the client-side.
+ * Event fired when the user toggles the selection state of an item on the
+ * client-side.
+ * <p>
+ * This event follows {@link MultiSelectionEvent} and provides details about the
+ * item that was toggled, its new selection state, and whether the shift key was
+ * pressed during the selection. This can be helpful for implementing features
+ * like range selection.
  *
  * @param <T>
  *            the grid bean type
@@ -63,7 +70,8 @@ public class ClientItemToggleEvent<T> extends ComponentEvent<Grid<T>> {
     /**
      * Gets whether the item was selected.
      *
-     * @return {@code true} if the item was selected, {@code false} if the item was deselected
+     * @return {@code true} if the item was selected, {@code false} if the item
+     *         was deselected
      */
     public boolean isSelected() {
         return isSelected;
