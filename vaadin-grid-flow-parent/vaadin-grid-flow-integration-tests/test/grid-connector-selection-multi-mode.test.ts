@@ -90,6 +90,7 @@ describe('grid connector - selection – multi mode', () => {
 
     it('should set shift key flag on server when deselecting with Shift', async () => {
       await mouseClick(selectRowCheckboxes[0]);
+      grid.$server.setShiftKeyDown.resetHistory();
 
       await sendKeys({ down: 'Shift' });
       expect(grid.$server.setShiftKeyDown).to.be.not.called;
