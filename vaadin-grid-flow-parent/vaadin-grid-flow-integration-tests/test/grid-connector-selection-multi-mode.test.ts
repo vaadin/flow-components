@@ -85,8 +85,7 @@ describe('grid connector - selection – multi mode', () => {
       grid.$server.setShiftKeyDown.resetHistory();
 
       await sendKeys({ up: 'Shift' });
-      expect(grid.$server.setShiftKeyDown).to.be.calledOnce;
-      expect(grid.$server.setShiftKeyDown).to.be.calledWith(false);
+      expect(grid.$server.setShiftKeyDown).to.be.not.called;
     });
 
     it('should set shift key flag on server when deselecting with Shift', async () => {
@@ -103,8 +102,7 @@ describe('grid connector - selection – multi mode', () => {
       grid.$server.setShiftKeyDown.resetHistory();
 
       await sendKeys({ up: 'Shift' });
-      expect(grid.$server.setShiftKeyDown).to.be.calledOnce;
-      expect(grid.$server.setShiftKeyDown).to.be.calledWith(false);
+      expect(grid.$server.setShiftKeyDown).to.be.not.called;
     });
 
     it('should select all items on server', async () => {
