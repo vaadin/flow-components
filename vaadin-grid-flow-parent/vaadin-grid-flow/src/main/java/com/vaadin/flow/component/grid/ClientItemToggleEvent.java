@@ -63,7 +63,7 @@ public class ClientItemToggleEvent<T> extends ComponentEvent<Grid<T>> {
     /**
      * Gets whether the item was selected.
      *
-     * @return {@code true} if the item was selected, {@code false} otherwise
+     * @return {@code true} if the item was selected, {@code false} if the item was deselected
      */
     public boolean isSelected() {
         return isSelected;
