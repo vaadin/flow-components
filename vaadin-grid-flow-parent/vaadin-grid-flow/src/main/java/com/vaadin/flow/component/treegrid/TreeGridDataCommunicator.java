@@ -18,14 +18,12 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
-import java.util.Map.Entry;
 
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
@@ -221,6 +219,13 @@ public class TreeGridDataCommunicator<T>
             return parentCache.getItem(parentIndex);
         }
 
+        public int getDepth() {
+            if (parentCache == null) {
+                return 0;
+            }
+            return parentCache.getDepth() + 1;
+        }
+
         public int getSize() {
             return size;
         }
@@ -228,10 +233,6 @@ public class TreeGridDataCommunicator<T>
         public int getFlatSize() {
             return size + caches.values().stream().mapToInt(Cache::getFlatSize)
                     .sum();
-        }
-
-        public int getDepth() {
-            return parentCache == null ? 0 : parentCache.getDepth() + 1;
         }
 
         public boolean hasItem(int index) {
@@ -284,8 +285,14 @@ public class TreeGridDataCommunicator<T>
     private static class RootCache<T> extends Cache<T> {
         private Map<T, Cache<T>> itemToCache = new WeakHashMap<>();
 
-        public static record ItemContext<T>(Cache<T> cache, int index) {}
-        public static record FlatIndexContext<T>(Cache<T> cache, int index) {}
+        public static record ItemContext<T>(Cache<T> cache,
+        int index)
+        {
+        }
+        public static record FlatIndexContext<T>(Cache<T> cache,
+        int index)
+        {
+        }
 
         public RootCache(int size) {
             super(null, -1, size);
@@ -296,16 +303,18 @@ public class TreeGridDataCommunicator<T>
             if (cache == null) {
                 return null;
             }
-            return new ItemContext<>(cache, cache.items.entrySet().stream()
-                    .filter(entry -> entry.getValue().equals(item))
-                    .map(Entry::getKey).findFirst().orElse(-1));
+            return new ItemContext<>(cache,
+                    cache.items.entrySet().stream()
+                            .filter(entry -> entry.getValue().equals(item))
+                            .map(Entry::getKey).findFirst().orElse(-1));
         }
 
         public FlatIndexContext<T> getFlatIndexContext(int flatIndex) {
             return getFlatIndexContext(this, flatIndex);
         }
 
-        private FlatIndexContext<T> getFlatIndexContext(Cache<T> cache, int flatIndex) {
+        private FlatIndexContext<T> getFlatIndexContext(Cache<T> cache,
+                int flatIndex) {
             int index = flatIndex;
 
             var subCaches = cache.caches.entrySet();
@@ -318,7 +327,8 @@ public class TreeGridDataCommunicator<T>
                 }
 
                 if (index <= subCacheIndex + subCache.getFlatSize()) {
-                    return getFlatIndexContext(subCache, index - subCacheIndex - 1);
+                    return getFlatIndexContext(subCache,
+                            index - subCacheIndex - 1);
                 }
 
                 index -= subCache.getFlatSize();
