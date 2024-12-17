@@ -31,6 +31,8 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.BeforeEvent;
@@ -43,6 +45,7 @@ import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.Router;
 import com.vaadin.flow.server.VaadinContext;
+import com.vaadin.flow.server.menu.MenuEntry;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
 
 import elemental.json.JsonArray;
@@ -216,6 +219,75 @@ public class SideNavItemTest {
 
         assertPath("test-path");
         Assert.assertEquals(prefixComponent, sideNavItem.getPrefixComponent());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void createFromMenuEntry_entryIsNull_throws() {
+        new SideNavItem((MenuEntry) null);
+    }
+
+    @Test
+    public void createFromMenuEntry_setsLabelAndPath() {
+        MenuEntry entry = new MenuEntry("path", "Test label", 0.0, null, null);
+        SideNavItem sideNavItem = new SideNavItem(entry);
+
+        Assert.assertEquals("Test label", sideNavItem.getLabel());
+        Assert.assertEquals("path", sideNavItem.getPath());
+    }
+
+    @Test
+    public void createFromMenuEntry_withMenuClass_setsRouteAndAliases() {
+        runWithMockRouter(() -> {
+            MenuEntry entry = new MenuEntry("path", "Test label", 0.0, null,
+                    TestRouteWithAliases.class);
+            SideNavItem sideNavItem = new SideNavItem(entry);
+
+            Assert.assertEquals("Test label", sideNavItem.getLabel());
+            Assert.assertEquals("foo/bar", sideNavItem.getPath());
+            Assert.assertEquals(Set.of("foo/baz", "foo/qux"),
+                    sideNavItem.getPathAliases());
+        }, TestRouteWithAliases.class);
+    }
+
+    @Test
+    public void createFromMenuEntry_withIconSetIcon_setsIcon() {
+        MenuEntry entry = new MenuEntry("path", "Test label", 0.0,
+                "vaadin:icon", null);
+        SideNavItem sideNavItem = new SideNavItem(entry);
+
+        Assert.assertNotNull(sideNavItem.getPrefixComponent());
+        Assert.assertTrue(sideNavItem.getPrefixComponent() instanceof Icon);
+        Assert.assertEquals("vaadin:icon",
+                ((Icon) sideNavItem.getPrefixComponent()).getIcon());
+    }
+
+    @Test
+    public void createFromMenuEntry_withSvgIcon_setsIcon() {
+        MenuEntry entry = new MenuEntry("path", "Test label", 0.0,
+                "assets/globe.svg", null);
+        SideNavItem sideNavItem = new SideNavItem(entry);
+
+        Assert.assertNotNull(sideNavItem.getPrefixComponent());
+        Assert.assertTrue(sideNavItem.getPrefixComponent() instanceof SvgIcon);
+        Assert.assertEquals("assets/globe.svg",
+                ((SvgIcon) sideNavItem.getPrefixComponent()).getSrc());
+    }
+
+    @Test
+    public void createFromMenuEntry_withoutIcon_noIconSet() {
+        MenuEntry entry = new MenuEntry("path", "Test label", 0.0, null, null);
+        SideNavItem sideNavItem = new SideNavItem(entry);
+
+        Assert.assertNull(sideNavItem.getPrefixComponent());
+    }
+
+    @Test
+    public void createFromMenuEntry_unsupportedIcon_noIconSet() {
+        MenuEntry entry = new MenuEntry("path", "Test label", 0.0,
+                "assets/globe.png", null);
+        SideNavItem sideNavItem = new SideNavItem(entry);
+
+        Assert.assertNull(sideNavItem.getPrefixComponent());
     }
 
     // EXPAND AND COLLAPSE TESTS

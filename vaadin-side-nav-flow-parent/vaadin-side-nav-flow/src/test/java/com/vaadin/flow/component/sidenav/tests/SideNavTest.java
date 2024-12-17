@@ -21,6 +21,7 @@ import static com.vaadin.flow.component.sidenav.tests.SideNavTest.SetLabelOption
 import static com.vaadin.flow.component.sidenav.tests.SideNavTest.SetLabelOption.SET_NO_LABEL;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,6 +32,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.server.menu.MenuEntry;
 
 public class SideNavTest {
 
@@ -397,6 +399,29 @@ public class SideNavTest {
         sideNav.remove(new SideNavItem("Foreign item"));
 
         Assert.assertEquals(sideNav.getItems(), sideNavItems);
+    }
+
+    @Test
+    public void createFromMenuEntries_menuEntriesAdded() {
+        MenuEntry entry1 = new MenuEntry("path1", "Item 1", 0.0, null, null);
+        MenuEntry entry2 = new MenuEntry("path2", "Item 2", 1.0, null, null);
+        MenuEntry entry3 = new MenuEntry("path3", "Item 3", 2.0, null, null);
+        List<MenuEntry> menuEntries = List.of(entry1, entry2, entry3);
+
+        SideNav nav = new SideNav(menuEntries);
+
+        Assert.assertEquals(3, nav.getItems().size());
+        Assert.assertEquals("Item 1", nav.getItems().get(0).getLabel());
+        Assert.assertEquals("path1", nav.getItems().get(0).getPath());
+        Assert.assertEquals("Item 2", nav.getItems().get(1).getLabel());
+        Assert.assertEquals("path2", nav.getItems().get(1).getPath());
+        Assert.assertEquals("Item 3", nav.getItems().get(2).getLabel());
+        Assert.assertEquals("path3", nav.getItems().get(2).getPath());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void createFromNullMenuEntries_throws() {
+        new SideNav((Collection<MenuEntry>) null);
     }
 
     enum SetLabelOption {

@@ -24,6 +24,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasEnabled;
@@ -31,6 +33,9 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.icon.AbstractIcon;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.dom.Element;
@@ -43,6 +48,8 @@ import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.internal.ConfigureRoutes;
 import com.vaadin.flow.router.internal.HasUrlParameterFormat;
+import com.vaadin.flow.server.menu.MenuConfiguration;
+import com.vaadin.flow.server.menu.MenuEntry;
 
 import elemental.json.JsonArray;
 
@@ -195,6 +202,66 @@ public class SideNavItem extends SideNavItemContainer
         setPath(view, routeParameters);
         setLabel(label);
         setPrefixComponent(prefixComponent);
+    }
+
+    /**
+     * Creates a new menu item from the given {@link MenuEntry}.
+     * <p>
+     * If the entry has an icon string, creates an instance of {@link Icon} or
+     * {@link SvgIcon} based on the icon string and sets it as prefix component.
+     * Note that only the following icon types are supported:
+     * <ul>
+     * <li>Icon set: the icon string contains ":" and is in the format
+     * "icon-set:icon-name", for example "vaadin:file"</li>
+     * <li>SVG icon: the icon string ends with ".svg"</li>
+     * </ul>
+     *
+     * @param entry
+     *            the menu entry to create the item from
+     * @see MenuEntry
+     * @see MenuConfiguration
+     */
+    public SideNavItem(MenuEntry entry) {
+        Objects.requireNonNull(entry, "Menu entry cannot be null");
+
+        setLabel(entry.title());
+
+        // If there is a menu class, use it as the path to also add path aliases
+        // Client routes have no menu class, so use the path as fallback
+        if (entry.menuClass() != null) {
+            setPath(entry.menuClass());
+        } else {
+            setPath(entry.path());
+        }
+
+        AbstractIcon<?> icon = createIconFromMenuEntry(entry);
+        if (icon != null) {
+            setPrefixComponent(icon);
+        }
+    }
+
+    private AbstractIcon<? extends AbstractIcon<?>> createIconFromMenuEntry(
+            MenuEntry entry) {
+        // No icon
+        if (entry.icon() == null) {
+            return null;
+        }
+
+        // Icon set
+        if (entry.icon().contains(":") && entry.icon().split(":").length == 2) {
+            return new Icon(entry.icon());
+        }
+
+        // SVG icon
+        if (entry.icon().endsWith(".svg")) {
+            return new SvgIcon(entry.icon());
+        }
+
+        // Icon component doesn't support other types of icons, log a warning
+        LoggerFactory.getLogger(SideNavItem.class)
+                .warn("Icon type not supported: {}", entry.icon());
+
+        return null;
     }
 
     @Override
