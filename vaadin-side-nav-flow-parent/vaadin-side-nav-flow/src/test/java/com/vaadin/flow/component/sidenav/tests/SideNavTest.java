@@ -405,8 +405,7 @@ public class SideNavTest {
     public void createFromMenuEntries_menuEntriesAdded() {
         MenuEntry entry1 = new MenuEntry("path1", "Item 1", 0.0, null, null);
         MenuEntry entry2 = new MenuEntry("path2", "Item 2", 1.0, null, null);
-        MenuEntry entry3 = new MenuEntry("path3", "Item 3", 2.0, "vaadin:file",
-                null);
+        MenuEntry entry3 = new MenuEntry("path3", "Item 3", 2.0, null, null);
         List<MenuEntry> menuEntries = List.of(entry1, entry2, entry3);
 
         SideNav nav = new SideNav(menuEntries);

@@ -221,6 +221,11 @@ public class SideNavItemTest {
         Assert.assertEquals(prefixComponent, sideNavItem.getPrefixComponent());
     }
 
+    @Test(expected = NullPointerException.class)
+    public void createFromMenuEntry_entryIsNull_throws() {
+        new SideNavItem((MenuEntry) null);
+    }
+
     @Test
     public void createFromMenuEntry_setsLabelAndPath() {
         MenuEntry entry = new MenuEntry("path", "Test label", 0.0, null, null);

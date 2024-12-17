@@ -222,6 +222,8 @@ public class SideNavItem extends SideNavItemContainer
      * @see MenuConfiguration
      */
     public SideNavItem(MenuEntry entry) {
+        Objects.requireNonNull(entry, "Menu entry cannot be null");
+
         setLabel(entry.title());
 
         // If there is a menu class, use it as the path to also add path aliases
