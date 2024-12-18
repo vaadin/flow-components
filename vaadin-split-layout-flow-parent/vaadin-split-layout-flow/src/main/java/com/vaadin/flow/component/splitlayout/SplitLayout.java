@@ -51,8 +51,8 @@ public class SplitLayout extends Component
         implements ClickNotifier<SplitLayout>, HasSize, HasStyle,
         HasThemeVariant<SplitLayoutVariant> {
 
-    private Component primaryComponent;
-    private Component secondaryComponent;
+    private SplitLayoutComponent primaryComponent;
+    private SplitLayoutComponent secondaryComponent;
     private StateTree.ExecutionRegistration updateStylesRegistration;
     private Double splitterPosition;
 
@@ -61,6 +61,34 @@ public class SplitLayout extends Component
      */
     public enum Orientation {
         VERTICAL, HORIZONTAL;
+    }
+
+    public class SplitLayoutComponent extends Div implements HasSize {
+        @Override
+        public void setWidth(String minWidth) {
+            super.setWidth(minWidth);
+
+            final Component parent = getParent().get();
+            if (parent instanceof SplitLayout && ((SplitLayout) parent).getOrientation() == Orientation.HORIZONTAL) {
+                // If only one of the elements has fixed size, and setSplitPosition is not used
+                // Set the fixed-size element to have flex-grow:0 so that it doesn't grow beyond that
+                // Set the unsized element to flex-basis:0 (so that it doesn't force the fixed-sized element to shrink)
+                SplitLayoutComponent other = this == primaryComponent ? secondaryComponent : primaryComponent;
+
+                if (other.getWidth() == null) {
+                    // Only one of the elements has fixed size.
+                    // Set the element to have flex-grow: 0 so it doesn't grow beyond that
+                    // Set the unsized element to flex-basis: 0 so that it doesn't force the fixed-sized element to shrink
+                    getElement().getStyle().set("flex-grow", "0");
+                    other.getElement().getStyle().set("flex-basis", "0");
+                } else {
+                    // If both elements have fixed size, use default behavior for both
+                    // by clearing the properties set above
+                    other.getElement().getStyle().remove("flex-grow");
+                    getElement().getStyle().remove("flex-basis");
+                }
+            }
+        }
     }
 
     /**
@@ -84,10 +112,19 @@ public class SplitLayout extends Component
             splitterPosition = calcNewSplitterPosition(
                     e.primaryComponentFlexBasis, e.secondaryComponentFlexBasis);
 
+            String primaryFlexGrow = getPrimaryComponent().getElement().getStyle().get("flex-grow");
+            if (primaryFlexGrow == null) {
+                primaryFlexGrow = "0";
+            }
+            String secondaryFlexGrow = getSecondaryComponent().getElement().getStyle().get("flex-grow");
+            if (secondaryFlexGrow == null) {
+                secondaryFlexGrow = "0";
+            }
+
             setPrimaryStyle("flex",
-                    String.format("1 1 %s", e.primaryComponentFlexBasis));
+                    String.format("%s 1 %s", primaryFlexGrow, e.primaryComponentFlexBasis));
             setSecondaryStyle("flex",
-                    String.format("1 1 %s", e.secondaryComponentFlexBasis));
+                    String.format("%s 1 %s", secondaryFlexGrow, e.secondaryComponentFlexBasis));
         });
     }
 
@@ -179,7 +216,7 @@ public class SplitLayout extends Component
      *
      * @return the primary component, may be null
      */
-    public Component getPrimaryComponent() {
+    public SplitLayoutComponent getPrimaryComponent() {
         return primaryComponent;
     }
 
@@ -203,7 +240,7 @@ public class SplitLayout extends Component
      *
      * @return the primary component, may be null
      */
-    public Component getSecondaryComponent() {
+    public SplitLayoutComponent getSecondaryComponent() {
         return secondaryComponent;
     }
 
@@ -288,19 +325,20 @@ public class SplitLayout extends Component
     }
 
     /**
-     * Returns the component if the given components array contains only one or
-     * a wrapper div with the given components if the array contains more.
+     * Returns a wrapper div with the given components.
      *
      * @param components
      *            the components to wrap
-     * @return the component or a wrapper div
+     * @return a wrapper div
      */
-    private Component getComponentOrWrap(Component... components) {
-        return components.length == 1 ? components[0] : new Div(components);
+    private SplitLayoutComponent getComponentOrWrap(Component... components) {
+        SplitLayoutComponent component = new SplitLayoutComponent();
+        component.add(components);
+        return component;
     }
 
-    private void setComponent(Component component, String slot) {
-        Component child = component == null ? new Div() : component;
+    private void setComponent(SplitLayoutComponent component, String slot) {
+        SplitLayoutComponent child = component == null ? new SplitLayoutComponent() : component;
         SlotUtils.setSlot(this, slot, child);
     }
 
