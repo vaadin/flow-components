@@ -852,6 +852,7 @@ public class SheetWidget extends Panel {
             // vaadin does bunch of layout phases so this needs to be done in
             // case the comment overlay position should be updated
             refreshAlwaysVisibleCellCommentOverlays();
+            updateSheetPanePositions();
         }
     }
 
