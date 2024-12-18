@@ -29,13 +29,14 @@ import com.vaadin.flow.function.SerializableRunnable;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-grid-flow-selection-column")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-grid-flow-selection-column.js")
 public class GridSelectionColumn extends Component {
 
     private final SerializableRunnable selectAllCallback;
     private final SerializableRunnable deselectAllCallback;
+    private boolean shiftKeyDown = false;
 
     /**
      * Constructs a new grid selection column configured to use the given
@@ -125,6 +126,15 @@ public class GridSelectionColumn extends Component {
     @Synchronize("drag-select-changed")
     public boolean isDragSelect() {
         return getElement().getProperty("dragSelect", false);
+    }
+
+    @ClientCallable
+    private void setShiftKeyDown(boolean shiftKeyDown) {
+        this.shiftKeyDown = shiftKeyDown;
+    }
+
+    boolean isShiftKeyDown() {
+        return shiftKeyDown;
     }
 
     @ClientCallable

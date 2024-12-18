@@ -39,6 +39,7 @@ import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
+import elemental.json.JsonType;
 
 /**
  * Rich Text Editor is an input field for entering rich text. It allows you to
@@ -58,9 +59,9 @@ import elemental.json.JsonObject;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.7.0-alpha2")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
@@ -96,16 +97,34 @@ public class RichTextEditor
     public void setI18n(RichTextEditorI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
+
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {
-                JsonObject i18nObject = (JsonObject) JsonSerializer
-                        .toJson(this.i18n);
-                for (String key : i18nObject.keys()) {
-                    getElement().executeJs("this.set('i18n." + key + "', $0)",
-                            i18nObject.get(key));
-                }
+                setI18nWithJS();
             }
         });
+    }
+
+    private void setI18nWithJS() {
+        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
+
+        // Remove properties with null values to prevent errors in web
+        // component
+        removeNullValuesFromJsonObject(i18nJson);
+
+        // Assign new I18N object to WC, by merging the existing
+        // WC I18N, and the values from the new RichTextEditorI18n instance,
+        // into an empty object
+        getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
+                i18nJson);
+    }
+
+    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
+        for (String key : jsonObject.keys()) {
+            if (jsonObject.get(key).getType() == JsonType.NULL) {
+                jsonObject.remove(key);
+            }
+        }
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
@@ -147,6 +166,11 @@ public class RichTextEditor
         // presentation value to run the necessary JS for initializing the
         // client-side element
         setPresentationValue(getValue());
+
+        // Element state is not persisted across attach/detach
+        if (this.i18n != null) {
+            setI18nWithJS();
+        }
     }
 
     /**

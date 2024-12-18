@@ -102,9 +102,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/radio-group", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/radio-group", version = "24.7.0-alpha2")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
@@ -856,10 +856,9 @@ public class RadioButtonGroup<T>
     }
 
     private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
-        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent) {
-            resetRadioButton(
-                    ((DataChangeEvent.DataRefreshEvent<T>) dataChangeEvent)
-                            .getItem());
+        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent<T> refreshEvent) {
+            keyMapper.refresh(refreshEvent.getItem());
+            resetRadioButton(refreshEvent.getItem());
         } else {
             keyMapper.removeAll();
             selectionPreservationHandler.handleDataChange(dataChangeEvent);

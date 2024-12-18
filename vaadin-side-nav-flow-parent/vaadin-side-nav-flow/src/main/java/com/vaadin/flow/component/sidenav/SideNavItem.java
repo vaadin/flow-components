@@ -24,6 +24,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasEnabled;
@@ -31,16 +33,23 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.icon.AbstractIcon;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.UrlUtil;
+import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.internal.ConfigureRoutes;
+import com.vaadin.flow.router.internal.HasUrlParameterFormat;
+import com.vaadin.flow.server.menu.MenuConfiguration;
+import com.vaadin.flow.server.menu.MenuEntry;
 
 import elemental.json.JsonArray;
 
@@ -55,7 +64,7 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav-item")
-@NpmPackage(value = "@vaadin/side-nav", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/side-nav", version = "24.7.0-alpha2")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
 public class SideNavItem extends SideNavItemContainer
         implements HasEnabled, HasPrefix, HasSuffix {
@@ -101,6 +110,26 @@ public class SideNavItem extends SideNavItemContainer
     public SideNavItem(String label, Class<? extends Component> view) {
         setPath(view);
         setLabel(label);
+    }
+
+    /**
+     * Creates a new menu item using the given label that links to the given
+     * view, which must implement {@link HasUrlParameter}.
+     *
+     * @param label
+     *            the label for the item
+     * @param view
+     *            the view to link to, must implement {@link HasUrlParameter}
+     * @param parameter
+     *            the URL parameter for the view
+     * @param <T>
+     *            the type of the URL parameter
+     * @param <C>
+     *            the type of the view
+     */
+    public <T, C extends Component & HasUrlParameter<T>> SideNavItem(
+            String label, Class<? extends C> view, T parameter) {
+        this(label, view, HasUrlParameterFormat.getParameters(parameter));
     }
 
     /**
@@ -173,6 +202,66 @@ public class SideNavItem extends SideNavItemContainer
         setPath(view, routeParameters);
         setLabel(label);
         setPrefixComponent(prefixComponent);
+    }
+
+    /**
+     * Creates a new menu item from the given {@link MenuEntry}.
+     * <p>
+     * If the entry has an icon string, creates an instance of {@link Icon} or
+     * {@link SvgIcon} based on the icon string and sets it as prefix component.
+     * Note that only the following icon types are supported:
+     * <ul>
+     * <li>Icon set: the icon string contains ":" and is in the format
+     * "icon-set:icon-name", for example "vaadin:file"</li>
+     * <li>SVG icon: the icon string ends with ".svg"</li>
+     * </ul>
+     *
+     * @param entry
+     *            the menu entry to create the item from
+     * @see MenuEntry
+     * @see MenuConfiguration
+     */
+    public SideNavItem(MenuEntry entry) {
+        Objects.requireNonNull(entry, "Menu entry cannot be null");
+
+        setLabel(entry.title());
+
+        // If there is a menu class, use it as the path to also add path aliases
+        // Client routes have no menu class, so use the path as fallback
+        if (entry.menuClass() != null) {
+            setPath(entry.menuClass());
+        } else {
+            setPath(entry.path());
+        }
+
+        AbstractIcon<?> icon = createIconFromMenuEntry(entry);
+        if (icon != null) {
+            setPrefixComponent(icon);
+        }
+    }
+
+    private AbstractIcon<? extends AbstractIcon<?>> createIconFromMenuEntry(
+            MenuEntry entry) {
+        // No icon
+        if (entry.icon() == null) {
+            return null;
+        }
+
+        // Icon set
+        if (entry.icon().contains(":") && entry.icon().split(":").length == 2) {
+            return new Icon(entry.icon());
+        }
+
+        // SVG icon
+        if (entry.icon().endsWith(".svg")) {
+            return new SvgIcon(entry.icon());
+        }
+
+        // Icon component doesn't support other types of icons, log a warning
+        LoggerFactory.getLogger(SideNavItem.class)
+                .warn("Icon type not supported: {}", entry.icon());
+
+        return null;
     }
 
     @Override
@@ -260,6 +349,33 @@ public class SideNavItem extends SideNavItemContainer
      */
     public void setPath(Class<? extends Component> view) {
         setPath(view, RouteParameters.empty());
+    }
+
+    /**
+     * Retrieves {@link com.vaadin.flow.router.Route} and
+     * {@link com.vaadin.flow.router.RouteAlias} annotations from the specified
+     * view, and then sets the corresponding path and path aliases for this
+     * item.
+     * <p>
+     * Note: Vaadin Router will be used to determine the URL path of the view
+     * and this URL will be then set to this navigation item using
+     * {@link SideNavItem#setPath(String)}.
+     *
+     * @param view
+     *            The view to link to. The view should be annotated with the
+     *            {@link com.vaadin.flow.router.Route} annotation and must
+     *            implement {@link HasUrlParameter}. Set to null to disable
+     *            navigation for this item.
+     * @param parameter
+     *            the URL parameter for the view
+     * @param <T>
+     *            the type of the URL parameter
+     * @param <C>
+     *            the type of the view
+     */
+    public <T, C extends Component & HasUrlParameter<T>> void setPath(
+            Class<? extends C> view, T parameter) {
+        setPath(view, HasUrlParameterFormat.getParameters(parameter));
     }
 
     /**

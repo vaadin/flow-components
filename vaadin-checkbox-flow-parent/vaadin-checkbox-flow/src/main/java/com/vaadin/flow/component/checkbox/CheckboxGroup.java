@@ -114,9 +114,9 @@ import elemental.json.JsonArray;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox-group", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/checkbox-group", version = "24.7.0-alpha2")
 @JsModule("@vaadin/checkbox-group/src/vaadin-checkbox-group.js")
 public class CheckboxGroup<T>
         extends AbstractSinglePropertyField<CheckboxGroup<T>, Set<T>>
@@ -389,10 +389,10 @@ public class CheckboxGroup<T>
     }
 
     private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
-        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent) {
-            T otherItem = ((DataChangeEvent.DataRefreshEvent<T>) dataChangeEvent)
-                    .getItem();
+        if (dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent<T> dataRefreshEvent) {
+            T otherItem = dataRefreshEvent.getItem();
             Object otherItemId = getItemId(otherItem);
+            keyMapper.refresh(otherItem);
             getCheckboxItems().filter(
                     item -> Objects.equals(getItemId(item.item), otherItemId))
                     .findFirst().ifPresent(this::updateCheckbox);

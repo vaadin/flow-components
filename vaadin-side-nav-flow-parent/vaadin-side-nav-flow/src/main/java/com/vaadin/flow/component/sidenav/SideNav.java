@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.sidenav;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Objects;
 
 import com.vaadin.flow.component.HasSize;
@@ -26,6 +27,8 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.server.menu.MenuConfiguration;
+import com.vaadin.flow.server.menu.MenuEntry;
 
 /**
  * A side navigation menu with support for hierarchical and flat menus.
@@ -37,7 +40,7 @@ import com.vaadin.flow.internal.JsonSerializer;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav")
-@NpmPackage(value = "@vaadin/side-nav", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/side-nav", version = "24.7.0-alpha2")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
 public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
 
@@ -59,6 +62,24 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
      */
     public SideNav(String label) {
         setLabel(label);
+    }
+
+    /**
+     * Creates a new menu from the given menu entries, which can be retrieved
+     * from {@link MenuConfiguration}.
+     *
+     * @param menuEntries
+     *            the menu entries to add
+     * @see MenuConfiguration
+     * @see MenuEntry
+     * @see SideNavItem#SideNavItem(MenuEntry)
+     */
+    public SideNav(Collection<MenuEntry> menuEntries) {
+        Objects.requireNonNull(menuEntries, "menuEntries cannot be null");
+
+        for (MenuEntry menuEntry : menuEntries) {
+            addItem(new SideNavItem(menuEntry));
+        }
     }
 
     /**

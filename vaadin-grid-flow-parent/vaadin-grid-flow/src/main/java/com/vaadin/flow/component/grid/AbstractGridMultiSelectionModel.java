@@ -120,6 +120,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, true));
 
+        ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
+                getGrid(), item, true, selectionColumn.isShiftKeyDown()));
+
         if (!isSelectAllCheckboxVisible()) {
             // Skip changing the state of Select All checkbox if it was
             // meant to be hidden
@@ -146,6 +149,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, true));
+
+        ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
+                getGrid(), item, false, selectionColumn.isShiftKeyDown()));
 
         long size = getDataProviderSize();
         selectionColumn.setSelectAllCheckboxState(false);
@@ -309,6 +315,15 @@ public abstract class AbstractGridMultiSelectionModel<T>
         return ComponentUtil.addListener(getGrid(), MultiSelectionEvent.class,
                 (ComponentEventListener) (event -> listener
                         .selectionChange((MultiSelectionEvent) event)));
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Registration addClientItemToggleListener(
+            ComponentEventListener<ClientItemToggleEvent<T>> listener) {
+        Objects.requireNonNull(listener, "listener cannot be null");
+        return ComponentUtil.addListener(getGrid(), ClientItemToggleEvent.class,
+                (ComponentEventListener) listener);
     }
 
     @Override
