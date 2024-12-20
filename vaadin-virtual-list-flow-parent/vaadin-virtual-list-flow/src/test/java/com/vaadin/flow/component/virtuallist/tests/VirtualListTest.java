@@ -21,6 +21,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.virtuallist.VirtualList;
+import com.vaadin.flow.function.SerializableFunction;
 
 public class VirtualListTest {
 
@@ -48,5 +49,21 @@ public class VirtualListTest {
         exceptionRule.expect(UnsupportedOperationException.class);
         exceptionRule.expectMessage("VirtualList does not support paging");
         virtualList.getDataCommunicator().setPagingEnabled(true);
+    }
+
+    @Test
+    public void setItemAccessibleNameGenerator_get() {
+        VirtualList<String> virtualList = new VirtualList<>();
+        SerializableFunction<String, String> itemAccessibleNameGenerator = item -> "Accessible "
+                + item;
+        virtualList.setItemAccessibleNameGenerator(itemAccessibleNameGenerator);
+        Assert.assertEquals(itemAccessibleNameGenerator,
+                virtualList.getItemAccessibleNameGenerator());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setItemAccessibleNameGenerator_nullThrows() {
+        VirtualList<String> virtualList = new VirtualList<>();
+        virtualList.setItemAccessibleNameGenerator(null);
     }
 }
