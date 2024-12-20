@@ -956,6 +956,22 @@ public class DashboardTest extends DashboardTestBase {
     }
 
     @Test
+    public void setDashboardEditable_removeWidget_noClientUpdate() {
+        DashboardWidget widgetToRemove = getNewWidget();
+        dashboard.add(widgetToRemove);
+        dashboard.setEditable(true);
+        fakeClientCommunication();
+        getUi().getInternals().dumpPendingJavaScriptInvocations();
+
+        int nodeIdToBeRemoved = widgetToRemove.getElement().getNode().getId();
+        DashboardTestHelper.fireItemRemovedEvent(dashboard, nodeIdToBeRemoved);
+        fakeClientCommunication();
+
+        Assert.assertTrue(getUi().getInternals()
+                .dumpPendingJavaScriptInvocations().isEmpty());
+    }
+
+    @Test
     public void setDashboardEditable_removeWidget_eventCorrectlyFired() {
         dashboard.setEditable(true);
         DashboardWidget widget = getNewWidget();

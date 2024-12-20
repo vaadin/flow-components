@@ -75,6 +75,18 @@ public class DashboardItemResizeTest extends DashboardTestBase {
     }
 
     @Test
+    public void resizeWidget_noClientUpdate() {
+        getUi().getInternals().dumpPendingJavaScriptInvocations();
+
+        assertWidgetResized(0, 2, 1);
+
+        fakeClientCommunication();
+
+        Assert.assertTrue(getUi().getInternals()
+                .dumpPendingJavaScriptInvocations().isEmpty());
+    }
+
+    @Test
     public void resizeWidget_eventCorrectlyFired() {
         DashboardWidget resizedWidget = (DashboardWidget) dashboard
                 .getChildren().toList().get(0);

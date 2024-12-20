@@ -84,6 +84,18 @@ public class DashboardItemMoveTest extends DashboardTestBase {
     }
 
     @Test
+    public void moveWidget_noClientUpdate() {
+        getUi().getInternals().dumpPendingJavaScriptInvocations();
+
+        assertRootLevelItemMoved(0, 1);
+
+        fakeClientCommunication();
+
+        Assert.assertTrue(getUi().getInternals()
+                .dumpPendingJavaScriptInvocations().isEmpty());
+    }
+
+    @Test
     public void moveWidget_eventCorrectlyFired() {
         int initialIndex = 0;
         int finalIndex = 1;
