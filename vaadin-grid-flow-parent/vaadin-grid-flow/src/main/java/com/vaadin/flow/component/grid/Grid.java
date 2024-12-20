@@ -72,6 +72,7 @@ import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertyDefinition;
@@ -4804,9 +4805,22 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         this.dataCommunicator.reset();
     }
 
+    /**
+     * Sets the tooltip position relative to the cell that is being hovered or
+     * focused. The default position is {@link TooltipPosition#BOTTOM}.
+     *
+     * @param position
+     *            the position to set
+     */
+    public void setTooltipPosition(TooltipPosition position) {
+        addTooltipElementToTooltipSlot();
+
+        getTooltipElement().ifPresent(tooltipElement -> tooltipElement
+                .setAttribute("position", position.getPosition()));
+    }
+
     private void addTooltipElementToTooltipSlot() {
-        if (this.getElement().getChildren().anyMatch(child -> Objects
-                .equals(child.getAttribute("slot"), "tooltip"))) {
+        if (getTooltipElement().isPresent()) {
             // the grid's tooltip slot has already been filled
             return;
         }
@@ -4819,6 +4833,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         tooltipElement.executeJs(
                 "this.generator = ({item, column}) => { return (item && item.gridtooltips && column) ? item.gridtooltips[column._flowId] ?? item.gridtooltips['row'] : ''; }"));
         SlotUtils.addToSlot(this, "tooltip", tooltipElement);
+    }
+
+    private Optional<Element> getTooltipElement() {
+        return this.getElement().getChildren().filter(
+                child -> Objects.equals(child.getAttribute("slot"), "tooltip"))
+                .findFirst();
     }
 
     /**

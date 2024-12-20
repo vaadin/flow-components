@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -35,7 +36,7 @@ public class GridTooltipTest {
 
     @Before
     public void setup() {
-        grid = new Grid<String>();
+        grid = new Grid<>();
         grid.addColumn(item -> item);
     }
 
@@ -67,14 +68,14 @@ public class GridTooltipTest {
     public void setColumnTooltip_tooltipHasSlot() {
         grid.addColumn(item -> item).setTooltipGenerator(item -> item);
         Assert.assertEquals("tooltip",
-                getTooltipElement(grid).get().getAttribute("slot"));
+                getTooltipElement(grid).orElseThrow().getAttribute("slot"));
     }
 
     @Test
     public void setGridTooltip_tooltipHasSlot() {
         grid.setTooltipGenerator(item -> item);
         Assert.assertEquals("tooltip",
-                getTooltipElement(grid).get().getAttribute("slot"));
+                getTooltipElement(grid).orElseThrow().getAttribute("slot"));
     }
 
     @Test
@@ -92,6 +93,19 @@ public class GridTooltipTest {
     @Test(expected = NullPointerException.class)
     public void setNullGridTooltipGenerator_throws() {
         grid.setTooltipGenerator(null);
+    }
+
+    @Test
+    public void setTooltipPosition_hasTooltipElement() {
+        grid.setTooltipPosition(Tooltip.TooltipPosition.START);
+        Assert.assertTrue(getTooltipElement(grid).isPresent());
+    }
+
+    @Test
+    public void setTooltipPosition_hasTooltipWithPosition() {
+        grid.setTooltipPosition(Tooltip.TooltipPosition.START);
+        Assert.assertEquals("start",
+                getTooltipElement(grid).orElseThrow().getAttribute("position"));
     }
 
     private Optional<Element> getTooltipElement(Grid<?> grid) {
