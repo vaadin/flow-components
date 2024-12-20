@@ -549,7 +549,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         try {
             action.run();
         } finally {
-            suppressClientUpdates.set(false);
+            suppressClientUpdates.remove();
         }
     }
 
