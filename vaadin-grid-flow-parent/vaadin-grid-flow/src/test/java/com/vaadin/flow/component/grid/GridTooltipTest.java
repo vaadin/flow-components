@@ -106,6 +106,10 @@ public class GridTooltipTest {
         grid.setTooltipPosition(Tooltip.TooltipPosition.START);
         Assert.assertEquals("start",
                 getTooltipElement(grid).orElseThrow().getAttribute("position"));
+
+        grid.setTooltipPosition(Tooltip.TooltipPosition.END);
+        Assert.assertEquals("end",
+                getTooltipElement(grid).orElseThrow().getAttribute("position"));
     }
 
     private Optional<Element> getTooltipElement(Grid<?> grid) {
