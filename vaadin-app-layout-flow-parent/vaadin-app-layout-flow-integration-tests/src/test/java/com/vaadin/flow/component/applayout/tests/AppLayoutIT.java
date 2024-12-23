@@ -24,16 +24,16 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.applayout.testbench.AppLayoutElement;
 import com.vaadin.flow.component.applayout.testbench.DrawerToggleElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractParallelTest;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class AppLayoutIT extends AbstractParallelTest {
+@TestPath("vaadin-app-layout")
+public class AppLayoutIT extends AbstractComponentIT {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-app-layout");
-        getDriver().get(url);
+        open();
     }
 
     @Test
@@ -66,8 +66,7 @@ public class AppLayoutIT extends AbstractParallelTest {
 
     @Test
     public void navigateToNotFound() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-app-layout") + "/nonexistingpage";
+        String url = getRootURL() + getTestPath() + "/nonexistingpage";
         getDriver().get(url);
         Assert.assertTrue($(AppLayoutElement.class).waitForFirst().getContent()
                 .getText().contains("Could not navigate to"));
