@@ -105,7 +105,7 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/radio-group", version = "24.7.0-alpha2")
-@JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
+@JsModule("@vaadin/radio-group/src/vaadin-lit-radio-group.js")
 public class RadioButtonGroup<T>
         extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
         implements HasAriaLabel, HasClientValidation,

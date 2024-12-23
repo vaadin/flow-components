@@ -50,7 +50,7 @@ import com.vaadin.flow.dom.Element;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/custom-field", version = "24.7.0-alpha2")
-@JsModule("@vaadin/custom-field/src/vaadin-custom-field.js")
+@JsModule("@vaadin/custom-field/src/vaadin-lit-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         implements Focusable<CustomField<T>>,
         InputField<AbstractField.ComponentValueChangeEvent<CustomField<T>, T>, T>,

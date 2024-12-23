@@ -37,7 +37,7 @@ import com.vaadin.flow.data.binder.HasItemComponents;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/radio-group", version = "24.7.0-alpha2")
-@JsModule("@vaadin/radio-group/src/vaadin-radio-button.js")
+@JsModule("@vaadin/radio-group/src/vaadin-lit-radio-button.js")
 class RadioButton<T> extends Component
         implements ClickNotifier<RadioButton<T>>, Focusable<RadioButton<T>>,
         HasComponents, HasItemComponents.ItemComponent<T>, HasStyle {

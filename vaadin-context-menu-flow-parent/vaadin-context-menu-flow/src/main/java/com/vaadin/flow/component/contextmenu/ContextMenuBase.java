@@ -55,7 +55,7 @@ import elemental.json.JsonObject;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/context-menu", version = "24.7.0-alpha2")
-@JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
+@JsModule("@vaadin/context-menu/src/vaadin-lit-context-menu.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")
 @JsModule("./contextMenuTargetConnector.js")

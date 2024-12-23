@@ -57,7 +57,7 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/notification", version = "24.7.0-alpha2")
-@JsModule("@vaadin/notification/src/vaadin-notification.js")
+@JsModule("@vaadin/notification/src/vaadin-lit-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,
         HasThemeVariant<NotificationVariant> {

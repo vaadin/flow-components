@@ -55,7 +55,7 @@ import com.vaadin.flow.shared.Registration;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/accordion", version = "24.7.0-alpha2")
-@JsModule("@vaadin/accordion/src/vaadin-accordion.js")
+@JsModule("@vaadin/accordion/src/vaadin-lit-accordion.js")
 public class Accordion extends Component implements HasSize, HasStyle {
 
     private static final String OPENED_PROPERTY = "opened";
