@@ -18,15 +18,17 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.WeakHashMap;
 
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
+import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalArrayUpdater;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalArrayUpdater.HierarchicalUpdate;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalCommunicationController;
@@ -34,6 +36,7 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchyMapper;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
@@ -47,9 +50,10 @@ import elemental.json.JsonValue;
 
 public class TreeGridDataCommunicator<T>
         extends HierarchicalDataCommunicator<T> {
-    private int nextUpdateId = 0;
     private RootCache<T> rootCache;
     private Range requestedRange;
+    private int nextUpdateId = 0;
+    private int lastGeneratedKey = 0;
 
     public TreeGridDataCommunicator(CompositeDataGenerator<T> dataGenerator,
             HierarchicalArrayUpdater arrayUpdater,
@@ -60,15 +64,37 @@ public class TreeGridDataCommunicator<T>
     }
 
     protected void requestFlush(HierarchicalUpdate update) {
+        // NO-OP
     }
 
     protected void requestFlush(HierarchicalCommunicationController<T> update) {
+        // NO-OP
     }
 
     @Override
     public void reset() {
         rootCache = null;
         getDataGenerator().destroyAllData();
+        requestFlush();
+    }
+
+    @Override
+    protected void handleDataRefreshEvent(
+            DataChangeEvent.DataRefreshEvent<T> event) {
+        refresh(event.getItem());
+    }
+
+    @Override
+    public void refresh(T item) {
+        Objects.requireNonNull(item,
+                "DataCommunicator can not refresh null object");
+        getDataGenerator().refreshData(item);
+
+        var itemContext = rootCache.getItemContext(item);
+        if (itemContext != null) {
+            itemContext.cache.refreshItem(item);
+        }
+
         requestFlush();
     }
 
@@ -85,12 +111,8 @@ public class TreeGridDataCommunicator<T>
 
     @Override
     public Collection<T> expand(Collection<T> items) {
-        List<T> expandedItems = new ArrayList<>();
-        items.forEach(item -> {
-            if (getHierarchyMapper().expand(item)) {
-                expandedItems.add(item);
-            }
-        });
+        List<T> expandedItems = items.stream()
+                .filter(getHierarchyMapper()::expand).toList();
         requestFlush();
         return expandedItems;
     }
@@ -102,14 +124,17 @@ public class TreeGridDataCommunicator<T>
 
     @Override
     public Collection<T> collapse(Collection<T> items) {
-        List<T> collapsedItems = new ArrayList<>();
-        items.forEach(item -> {
-            if (getHierarchyMapper().collapse(item)) {
-                collapsedItems.add(item);
-            }
+        List<T> collapsedItems = items.stream()
+                .filter(getHierarchyMapper()::collapse).toList();
+
+        List<Object> collapsedItemIds = collapsedItems.stream()
+                .map(getDataProvider()::getId).toList();
+        rootCache.removeDescendantCacheIf((cache) -> {
+            Object parentItemId = getDataProvider()
+                    .getId(cache.getParentItem());
+            return collapsedItemIds.contains(parentItemId);
         });
-        rootCache.removeDescendantCacheIf(
-                cache -> collapsedItems.contains(cache.getParentItem()));
+
         requestFlush();
         return collapsedItems;
     }
@@ -120,7 +145,8 @@ public class TreeGridDataCommunicator<T>
         int end = requestedRange.getEnd();
 
         if (rootCache == null) {
-            rootCache = new RootCache<>(getHierarchyMapper().getRootSize());
+            rootCache = new RootCache<>(getHierarchyMapper().getRootSize(),
+                    getDataProvider()::getId, this::generateItemKey);
         }
 
         List<T> result = new ArrayList<>();
@@ -157,6 +183,15 @@ public class TreeGridDataCommunicator<T>
         update.clear(end, flatSize - end);
         update.set(start, result.stream().map(this::generateItemJson).toList());
         update.commit(nextUpdateId++);
+    }
+
+    private String generateItemKey(T item) {
+        var uniqueKeyProvider = getUniqueKeyProvider();
+        if (uniqueKeyProvider != null) {
+            return uniqueKeyProvider.apply(item);
+        }
+
+        return String.valueOf(lastGeneratedKey++);
     }
 
     private JsonValue generateItemJson(T item) {
@@ -200,13 +235,14 @@ public class TreeGridDataCommunicator<T>
     }
 
     private static class Cache<T> {
-        private Cache<T> parentCache;
-        private int parentIndex;
-        private int size;
-        private SortedMap<Integer, T> items = new TreeMap<>();
-        private SortedMap<Integer, Cache<T>> caches = new TreeMap<>();
+        private final Cache<T> parentCache;
+        private final int parentIndex;
+        private final int size;
+        private Map<Object, T> itemIdToItem = new HashMap<>();
+        private SortedMap<Integer, Object> indexToItemId = new TreeMap<>();
+        private SortedMap<Integer, Cache<T>> indexToCache = new TreeMap<>();
 
-        public Cache(Cache<T> parentCache, int parentIndex, int size) {
+        protected Cache(Cache<T> parentCache, int parentIndex, int size) {
             this.parentCache = parentCache;
             this.parentIndex = parentIndex;
             this.size = size;
@@ -231,42 +267,71 @@ public class TreeGridDataCommunicator<T>
         }
 
         public int getFlatSize() {
-            return size + caches.values().stream().mapToInt(Cache::getFlatSize)
-                    .sum();
+            return size + indexToCache.values().stream()
+                    .mapToInt(Cache::getFlatSize).sum();
         }
 
         public boolean hasItem(int index) {
-            return items.containsKey(index);
+            return indexToItemId.containsKey(index);
         }
 
         public T getItem(int index) {
-            return items.get(index);
+            Object itemId = indexToItemId.get(index);
+            return itemIdToItem.get(itemId);
         }
 
-        public void setItems(int startIndex, List<T> itemsToSet) {
+        public void refreshItem(T item) {
+            Object itemId = getRootCache().getItemId(item);
+            itemIdToItem.replace(itemId, item);
+        }
+
+        public void clear() {
             RootCache<T> rootCache = getRootCache();
 
-            for (int i = 0; i < itemsToSet.size(); i++) {
-                T item = itemsToSet.get(i);
-                items.put(startIndex + i, item);
-                rootCache.itemToCache.put(item, this);
+            indexToCache.values().forEach((cache) -> {
+                cache.clear();
+            });
+
+            indexToItemId.values().forEach((itemId) -> {
+                T item = itemIdToItem.get(itemId);
+                rootCache.removeItemContext(item);
+            });
+
+            indexToCache.clear();
+            indexToItemId.clear();
+            itemIdToItem.clear();
+        }
+
+        public void setItems(int startIndex, List<T> items) {
+            RootCache<T> rootCache = getRootCache();
+
+            for (int i = 0; i < items.size(); i++) {
+                var item = items.get(i);
+                var itemId = rootCache.getItemId(item);
+                var index = startIndex + i;
+
+                indexToItemId.put(index, itemId);
+                itemIdToItem.put(itemId, item);
+
+                rootCache.createItemContext(item, this, index);
             }
         }
 
         public boolean hasCache(int index) {
-            return caches.containsKey(index);
+            return indexToCache.containsKey(index);
         }
 
         public Cache<T> createCache(int index, int size) {
             Cache<T> cache = new Cache<>(this, index, size);
-            caches.put(index, cache);
+            indexToCache.put(index, cache);
             return cache;
         }
 
         public void removeDescendantCacheIf(
                 SerializablePredicate<Cache<T>> predicate) {
-            caches.values().removeIf(cache -> {
+            indexToCache.values().removeIf(cache -> {
                 if (predicate.test(cache)) {
+                    cache.clear();
                     return true;
                 }
                 cache.removeDescendantCacheIf(predicate);
@@ -283,54 +348,48 @@ public class TreeGridDataCommunicator<T>
     }
 
     private static class RootCache<T> extends Cache<T> {
-        private Map<T, Cache<T>> itemToCache = new WeakHashMap<>();
+        private final ValueProvider<T, Object> itemIdProvider;
+        private final SerializableFunction<T, String> itemKeyGenerator;
+        private Map<Object, ItemContext<T>> itemIdToContext = new HashMap<>();
+        private Map<String, ItemContext<T>> itemKeyToContext = new HashMap<>();
 
-        public static record ItemContext<T>(Cache<T> cache,
-        int index)
-        {
-        }
-        public static record FlatIndexContext<T>(Cache<T> cache,
-        int index)
-        {
-        }
+        // @formatter:off
+        public static record ItemContext<T>(
+                Object id, String key, Cache<T> cache, int index) {}
 
-        public RootCache(int size) {
+        public static record FlatIndexContext<T>(
+                Cache<T> cache, int index) {}
+        // @formatter:off
+
+        public RootCache(int size, ValueProvider<T, Object> itemIdProvider, SerializableFunction<T, String> itemKeyGenerator) {
             super(null, -1, size);
+            this.itemIdProvider = itemIdProvider;
+            this.itemKeyGenerator = itemKeyGenerator;
         }
 
         public ItemContext<T> getItemContext(T item) {
-            Cache<T> cache = itemToCache.get(item);
-            if (cache == null) {
-                return null;
-            }
-            return new ItemContext<>(cache,
-                    cache.items.entrySet().stream()
-                            .filter(entry -> entry.getValue().equals(item))
-                            .map(Entry::getKey).findFirst().orElse(-1));
+            Object itemId = getItemId(item);
+            return itemIdToContext.get(itemId);
         }
 
         public FlatIndexContext<T> getFlatIndexContext(int flatIndex) {
             return getFlatIndexContext(this, flatIndex);
         }
-
         private FlatIndexContext<T> getFlatIndexContext(Cache<T> cache,
                 int flatIndex) {
             int index = flatIndex;
 
-            var subCaches = cache.caches.entrySet();
-            for (Entry<Integer, Cache<T>> entry : subCaches) {
+            for (Entry<Integer, Cache<T>> entry : cache.indexToCache.entrySet()) {
                 var subCacheIndex = entry.getKey();
                 var subCache = entry.getValue();
 
                 if (index <= subCacheIndex) {
                     break;
                 }
-
                 if (index <= subCacheIndex + subCache.getFlatSize()) {
                     return getFlatIndexContext(subCache,
                             index - subCacheIndex - 1);
                 }
-
                 index -= subCache.getFlatSize();
             }
 
@@ -339,6 +398,29 @@ public class TreeGridDataCommunicator<T>
             }
 
             return new FlatIndexContext<>(cache, index);
+        }
+
+        private void createItemContext(T item, Cache<T> cache, int index) {
+            Object itemId = getItemId(item);
+            String itemKey = generateItemKey(item);
+
+            ItemContext<T> itemContext = new ItemContext<>(itemId, itemKey, cache, index);
+            itemIdToContext.put(itemId, itemContext);
+            itemKeyToContext.put(itemKey, itemContext);
+        }
+
+        private void removeItemContext(T item) {
+            Object itemId = getItemId(item);
+            ItemContext<T> itemContext = itemIdToContext.remove(itemId);
+            itemKeyToContext.remove(itemContext.key);
+        }
+
+        private Object getItemId(T item) {
+            return itemIdProvider.apply(item);
+        }
+
+        private String generateItemKey(T item) {
+            return itemKeyGenerator.apply(item);
         }
     }
 }
