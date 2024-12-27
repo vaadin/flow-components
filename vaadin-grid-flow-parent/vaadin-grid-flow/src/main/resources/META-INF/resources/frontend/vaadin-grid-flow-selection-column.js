@@ -3,7 +3,6 @@ import { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
 import { GridSelectionColumnBaseMixin } from '@vaadin/grid/src/vaadin-grid-selection-column-base-mixin.js';
 
 export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridColumn) {
-
   static get is() {
     return 'vaadin-grid-flow-selection-column';
   }
