@@ -15,9 +15,14 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.bean.PeopleGenerator;
+import com.vaadin.flow.data.bean.PersonWithLevel;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.router.Route;
@@ -26,20 +31,34 @@ import com.vaadin.flow.router.Route;
 public class TreeGridBasicPage extends Div {
 
     public TreeGridBasicPage() {
-        TreeGrid<String> grid = new TreeGrid<>();
-        grid.addHierarchyColumn(item -> item).setHeader("Item");
+        PeopleGenerator peopleGenerator = new PeopleGenerator();
+        List<PersonWithLevel> people = peopleGenerator.generatePeopleWithLevels(10, 0);
 
-        TreeData<String> data = new TreeGridStringDataBuilder()
-                .addLevel("Item", 500).addLevel("Item ", 10)
-                .addLevel("Item  ", 10).build();
+        TreeGrid<PersonWithLevel> grid = new TreeGrid<>();
+        grid.addHierarchyColumn(person -> person.getFirstName())
+                .setHeader("First name");
 
+        TreeData<PersonWithLevel> data = new TreeData<>();
+        data.addItems(people, person -> {
+            if (person.getLevel() == 0) {
+                return peopleGenerator.generatePeopleWithLevels(5, 1);
+            }
+
+            return Collections.emptyList();
+        });
         grid.setDataProvider(new TreeDataProvider<>(data));
 
         NativeButton expandAll = new NativeButton("Expand all",
                 e -> grid.expandRecursively(data.getRootItems(), 3));
         expandAll.setId("expand-all");
 
-        add(grid, expandAll);
+        NativeButton refreshItem = new NativeButton("Refresh item", e -> {
+            PersonWithLevel person = data.getChildren(people.get(0)).get(1);
+            person.setFirstName("Updated");
+            grid.getDataProvider().refreshItem(person);
+        });
+
+        add(grid, expandAll, refreshItem);
     }
 
 }
