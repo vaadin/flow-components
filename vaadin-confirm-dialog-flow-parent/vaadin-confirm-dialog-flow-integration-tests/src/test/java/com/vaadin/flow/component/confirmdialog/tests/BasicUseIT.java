@@ -21,15 +21,15 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
-import com.vaadin.tests.AbstractParallelTest;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class BasicUseIT extends AbstractParallelTest {
+@TestPath("vaadin-confirm-dialog/basicuse")
+public class BasicUseIT extends AbstractComponentIT {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-confirm-dialog") + "/basicuse";
-        getDriver().get(url);
+        open();
     }
 
     @Test

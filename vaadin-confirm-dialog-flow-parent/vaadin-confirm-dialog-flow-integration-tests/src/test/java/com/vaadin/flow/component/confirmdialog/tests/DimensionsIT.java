@@ -19,24 +19,25 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractParallelTest;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * DimensionsIT
  */
-public class DimensionsIT extends AbstractParallelTest {
+@TestPath("vaadin-confirm-dialog/Dimensions")
+public class DimensionsIT extends AbstractComponentIT {
 
     @Before
     public void init() {
-        getDriver().manage().window().setSize(WINDOW_SIZE_LARGE);
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-confirm-dialog") + "/Dimensions";
-        getDriver().get(url);
+        open();
+        getDriver().manage().window().setSize(new Dimension(1920, 1080));
 
         waitUntil(ExpectedConditions
                 .presenceOfElementLocated(By.id(Dimensions.VIEW_ID)));
