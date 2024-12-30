@@ -66,6 +66,27 @@ public class VirtualListIT extends AbstractComponentIT {
     }
 
     @Test
+    public void accessibleName() {
+        String listId = "list-with-strings";
+
+        var virtualList = $(VirtualListElement.class).id(listId);
+
+        var firstChildElement = virtualList
+                .findElement(By.xpath("//*[text()='Item 1']"));
+
+        Assert.assertFalse(firstChildElement.hasAttribute("aria-label"));
+
+        clickElementWithJs("list-with-strings-accessible-name");
+
+        Assert.assertEquals("Accessible Item 1",
+                firstChildElement.getAttribute("aria-label"));
+
+        var secondChildElement = virtualList
+                .findElement(By.xpath("//*[text()='Item 2']"));
+        Assert.assertFalse(secondChildElement.hasAttribute("aria-label"));
+    }
+
+    @Test
     public void dataProviderWithStrings() {
         String listId = "dataprovider-with-strings";
 
