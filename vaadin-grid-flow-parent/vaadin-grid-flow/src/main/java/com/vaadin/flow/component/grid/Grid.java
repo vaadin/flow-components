@@ -4806,6 +4806,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
+     * Gets the tooltip position relative to the cell that is being hovered or
+     * focused. The default position is {@link TooltipPosition#BOTTOM}.
+     *
+     * @return the position of the tooltip
+     */
+    public TooltipPosition getTooltipPosition() {
+        String position = getTooltipElement()
+                .map(tooltipElement -> tooltipElement.getAttribute("position"))
+                .orElse(null);
+        return TooltipPosition.fromPosition(position);
+    }
+
+    /**
      * Sets the tooltip position relative to the cell that is being hovered or
      * focused. The default position is {@link TooltipPosition#BOTTOM}.
      *

@@ -112,6 +112,35 @@ public class GridTooltipTest {
                 getTooltipElement(grid).orElseThrow().getAttribute("position"));
     }
 
+    @Test
+    public void setTooltipPosition_getTooltipPosition() {
+        grid.setTooltipPosition(Tooltip.TooltipPosition.START);
+        Assert.assertEquals(Tooltip.TooltipPosition.START,
+                grid.getTooltipPosition());
+
+        grid.setTooltipPosition(Tooltip.TooltipPosition.END);
+        Assert.assertEquals(Tooltip.TooltipPosition.END,
+                grid.getTooltipPosition());
+    }
+
+    @Test
+    public void getTooltipPosition_defaultTooltipPosition() {
+        // without tooltip element
+        Assert.assertEquals(Tooltip.TooltipPosition.BOTTOM,
+                grid.getTooltipPosition());
+
+        // with tooltip element, unspecified position
+        grid.setTooltipGenerator(item -> item);
+        Assert.assertEquals(Tooltip.TooltipPosition.BOTTOM,
+                grid.getTooltipPosition());
+
+        // with tooltip element, invalid position
+        getTooltipElement(grid).orElseThrow().setAttribute("position",
+                "invalid");
+        Assert.assertEquals(Tooltip.TooltipPosition.BOTTOM,
+                grid.getTooltipPosition());
+    }
+
     private Optional<Element> getTooltipElement(Grid<?> grid) {
         return getTooltipElements(grid).findFirst();
     }

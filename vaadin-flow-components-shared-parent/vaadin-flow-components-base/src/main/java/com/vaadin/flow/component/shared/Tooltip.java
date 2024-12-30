@@ -74,6 +74,18 @@ public class Tooltip implements Serializable {
         public String getPosition() {
             return position;
         }
+
+        /**
+         * Gets the {@link TooltipPosition} for the given position string.
+         * Returns {@link TooltipPosition#BOTTOM} if no match is found.
+         *
+         * @param position the position string
+         * @return the {@link TooltipPosition}
+         */
+        public static TooltipPosition fromPosition(String position) {
+            return Arrays.stream(TooltipPosition.values())
+                .filter(p -> p.getPosition().equals(position)).findFirst().orElse(BOTTOM);
+        }
     }
 
     /**
