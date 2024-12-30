@@ -113,6 +113,12 @@ public class GridTooltipTest {
     }
 
     @Test
+    public void setTooltipPosition_throwsForNull() {
+        Assert.assertThrows(NullPointerException.class,
+                () -> grid.setTooltipPosition(null));
+    }
+
+    @Test
     public void setTooltipPosition_getTooltipPosition() {
         grid.setTooltipPosition(Tooltip.TooltipPosition.START);
         Assert.assertEquals(Tooltip.TooltipPosition.START,

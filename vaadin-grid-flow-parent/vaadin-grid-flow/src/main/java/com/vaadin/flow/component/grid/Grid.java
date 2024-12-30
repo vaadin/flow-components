@@ -4826,6 +4826,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the position to set
      */
     public void setTooltipPosition(TooltipPosition position) {
+        Objects.requireNonNull(position, "Position cannot be null");
+
         addTooltipElementToTooltipSlot();
 
         getTooltipElement().ifPresent(tooltipElement -> tooltipElement
