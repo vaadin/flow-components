@@ -22,7 +22,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
 import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
@@ -66,7 +65,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         boolean fromComponent = context == null;
 
         boolean hasBadInput = valueEquals(value, getEmptyValue())
-                && isInputValuePresent();
+                && !getInputElementValue().isEmpty();
         if (hasBadInput) {
             return ValidationResult.error(getI18nErrorMessage(
                     AbstractNumberFieldI18n::getBadInputErrorMessage));
@@ -175,6 +174,9 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         }
 
         super.setValueChangeMode(valueChangeMode);
+
+        getSynchronizationRegistration()
+                .synchronizeProperty("_inputElementValue");
     }
 
     @Override
@@ -230,27 +232,20 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
         boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
         boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
-        boolean isInputValuePresent = isInputValuePresent();
+        String oldInputElementValue = getInputElementValue();
 
-        // When the value is cleared programmatically, reset hasInputValue
-        // so that the following validation doesn't treat this as bad input.
+        // When the value is cleared programmatically, there is no change event
+        // that would synchronize _inputElementValue, so we reset it ourselves
+        // to prevent the following validation from treating this as bad input.
         if (isNewValueEmpty) {
-            getElement().setProperty("_hasInputValue", false);
+            setInputElementValue("");
         }
 
         super.setValue(value);
 
-        // Clear the input element from possible bad input.
-        if (isValueRemainedEmpty && isInputValuePresent) {
-            // The check for value presence guarantees that a non-empty value
-            // won't get cleared when setValue(null) and setValue(...) are
-            // subsequently called within one round-trip.
-            // Flow only sends the final component value to the client
-            // when you update the value multiple times during a round-trip
-            // and the final value is sent in place of the first one, so
-            // `executeJs` can end up invoked after a non-empty value is set.
-            getElement()
-                    .executeJs("if (!this.value) this._inputElementValue = ''");
+        // Revalidate if setValue(null) didn't result in a value change but
+        // cleared bad input
+        if (isValueRemainedEmpty && !oldInputElementValue.isEmpty()) {
             validate();
             fireValidationStatusChangeEvent();
         }
@@ -341,15 +336,12 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         return step;
     }
 
-    /**
-     * Returns whether the input element has a value or not.
-     *
-     * @return <code>true</code> if the input element's value is populated,
-     *         <code>false</code> otherwise
-     */
-    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
-    private boolean isInputValuePresent() {
-        return getElement().getProperty("_hasInputValue", false);
+    private String getInputElementValue() {
+        return getElement().getProperty("_inputElementValue", "");
+    }
+
+    private void setInputElementValue(String value) {
+        getElement().setProperty("_inputElementValue", value);
     }
 
     @Override
