@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -35,7 +36,7 @@ public class GridTooltipTest {
 
     @Before
     public void setup() {
-        grid = new Grid<String>();
+        grid = new Grid<>();
         grid.addColumn(item -> item);
     }
 
@@ -67,14 +68,14 @@ public class GridTooltipTest {
     public void setColumnTooltip_tooltipHasSlot() {
         grid.addColumn(item -> item).setTooltipGenerator(item -> item);
         Assert.assertEquals("tooltip",
-                getTooltipElement(grid).get().getAttribute("slot"));
+                getTooltipElement(grid).orElseThrow().getAttribute("slot"));
     }
 
     @Test
     public void setGridTooltip_tooltipHasSlot() {
         grid.setTooltipGenerator(item -> item);
         Assert.assertEquals("tooltip",
-                getTooltipElement(grid).get().getAttribute("slot"));
+                getTooltipElement(grid).orElseThrow().getAttribute("slot"));
     }
 
     @Test
@@ -92,6 +93,58 @@ public class GridTooltipTest {
     @Test(expected = NullPointerException.class)
     public void setNullGridTooltipGenerator_throws() {
         grid.setTooltipGenerator(null);
+    }
+
+    @Test
+    public void setTooltipPosition_hasTooltipElement() {
+        grid.setTooltipPosition(Tooltip.TooltipPosition.START);
+        Assert.assertTrue(getTooltipElement(grid).isPresent());
+    }
+
+    @Test
+    public void setTooltipPosition_hasTooltipWithPosition() {
+        grid.setTooltipPosition(Tooltip.TooltipPosition.START);
+        Assert.assertEquals("start",
+                getTooltipElement(grid).orElseThrow().getAttribute("position"));
+
+        grid.setTooltipPosition(Tooltip.TooltipPosition.END);
+        Assert.assertEquals("end",
+                getTooltipElement(grid).orElseThrow().getAttribute("position"));
+    }
+
+    @Test
+    public void setTooltipPosition_throwsForNull() {
+        Assert.assertThrows(NullPointerException.class,
+                () -> grid.setTooltipPosition(null));
+    }
+
+    @Test
+    public void setTooltipPosition_getTooltipPosition() {
+        grid.setTooltipPosition(Tooltip.TooltipPosition.START);
+        Assert.assertEquals(Tooltip.TooltipPosition.START,
+                grid.getTooltipPosition());
+
+        grid.setTooltipPosition(Tooltip.TooltipPosition.END);
+        Assert.assertEquals(Tooltip.TooltipPosition.END,
+                grid.getTooltipPosition());
+    }
+
+    @Test
+    public void getTooltipPosition_defaultTooltipPosition() {
+        // without tooltip element
+        Assert.assertEquals(Tooltip.TooltipPosition.BOTTOM,
+                grid.getTooltipPosition());
+
+        // with tooltip element, unspecified position
+        grid.setTooltipGenerator(item -> item);
+        Assert.assertEquals(Tooltip.TooltipPosition.BOTTOM,
+                grid.getTooltipPosition());
+
+        // with tooltip element, invalid position
+        getTooltipElement(grid).orElseThrow().setAttribute("position",
+                "invalid");
+        Assert.assertEquals(Tooltip.TooltipPosition.BOTTOM,
+                grid.getTooltipPosition());
     }
 
     private Optional<Element> getTooltipElement(Grid<?> grid) {
