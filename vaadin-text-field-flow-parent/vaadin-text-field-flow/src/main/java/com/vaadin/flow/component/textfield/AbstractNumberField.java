@@ -151,7 +151,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         getElement().addEventListener("unparsable-change", e -> {
             validate();
             fireValidationStatusChangeEvent();
-        });
+        }).synchronizeProperty("_inputElementValue");
     }
 
     @Override
