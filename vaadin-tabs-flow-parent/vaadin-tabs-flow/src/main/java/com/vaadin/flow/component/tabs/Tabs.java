@@ -68,7 +68,7 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-tabs")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@JsModule("@vaadin/tabs/src/vaadin-tabs.js")
+@JsModule("@vaadin/tabs/src/vaadin-lit-tabs.js")
 @NpmPackage(value = "@vaadin/tabs", version = "24.7.0-alpha2")
 public class Tabs extends Component
         implements HasEnabled, HasSize, HasStyle, HasThemeVariant<TabsVariant> {

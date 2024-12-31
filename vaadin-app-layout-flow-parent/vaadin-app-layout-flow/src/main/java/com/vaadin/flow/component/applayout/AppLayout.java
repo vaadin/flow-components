@@ -55,7 +55,7 @@ import elemental.json.JsonType;
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha2")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/app-layout", version = "24.7.0-alpha2")
-@JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
+@JsModule("@vaadin/app-layout/src/vaadin-lit-app-layout.js")
 public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
             .propertyWithDefault("primarySection",
