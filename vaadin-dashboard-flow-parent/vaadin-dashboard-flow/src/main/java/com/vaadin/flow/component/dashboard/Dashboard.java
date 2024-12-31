@@ -64,6 +64,9 @@ import elemental.json.JsonType;
 @NpmPackage(value = "@vaadin/dashboard", version = "24.6.0")
 public class Dashboard extends Component implements HasWidgets, HasSize {
 
+    private static final ThreadLocal<Boolean> suppressClientUpdates = ThreadLocal
+            .withInitial(() -> false);
+
     private final List<Component> childrenComponents = new ArrayList<>();
 
     private final DashboardChildDetachHandler childDetachHandler;
@@ -541,8 +544,17 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         }).filter(Objects::nonNull).findAny().orElseThrow();
     }
 
+    private void withoutClientUpdate(Runnable action) {
+        suppressClientUpdates.set(true);
+        try {
+            action.run();
+        } finally {
+            suppressClientUpdates.remove();
+        }
+    }
+
     void updateClient() {
-        if (pendingUpdate) {
+        if (suppressClientUpdates.get() || pendingUpdate) {
             return;
         }
         pendingUpdate = true;
@@ -661,7 +673,6 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
                 return;
             }
             handleItemMovedClientEvent(e, itemKey, itemsKey, sectionKey);
-            updateClient();
         }).addEventData(itemKey).addEventData(itemsKey)
                 .addEventData(sectionKey);
     }
@@ -705,7 +716,6 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
                 return;
             }
             handleItemResizedClientEvent(e, idKey, colspanKey, rowspanKey);
-            updateClient();
         }).addEventData(idKey).addEventData(colspanKey)
                 .addEventData(rowspanKey);
     }
@@ -718,8 +728,10 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         DashboardWidget resizedWidget = getWidgets().stream()
                 .filter(child -> nodeId == child.getElement().getNode().getId())
                 .findAny().orElseThrow();
-        resizedWidget.setRowspan(rowspan);
-        resizedWidget.setColspan(colspan);
+        withoutClientUpdate(() -> {
+            resizedWidget.setColspan(colspan);
+            resizedWidget.setRowspan(rowspan);
+        });
         fireEvent(new DashboardItemResizedEvent(this, true, resizedWidget,
                 getChildren().toList()));
     }
@@ -731,14 +743,13 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
                 return;
             }
             handleItemRemovedClientEvent(e, idKey);
-            updateClient();
         }).addEventData(idKey);
     }
 
     private void handleItemRemovedClientEvent(DomEvent e, String idKey) {
         int nodeId = (int) e.getEventData().getNumber(idKey);
         Component removedItem = getItem(nodeId);
-        removedItem.removeFromParent();
+        withoutClientUpdate(removedItem::removeFromParent);
         fireEvent(new DashboardItemRemovedEvent(this, true, removedItem,
                 getChildren().toList()));
     }
