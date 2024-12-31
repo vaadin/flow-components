@@ -38,8 +38,8 @@ public class DashboardElement extends TestBenchElement {
     }
 
     private <T extends TestBenchElement> List<T> getSorted(Class<T> type) {
-        return $(type).all().stream()
-                .sorted((e1, e2) -> getSortIndex(e1).compareTo(getSortIndex(e2)))
+        return $(type).all().stream().sorted(
+                (e1, e2) -> getSortIndex(e1).compareTo(getSortIndex(e2)))
                 .toList();
     }
 

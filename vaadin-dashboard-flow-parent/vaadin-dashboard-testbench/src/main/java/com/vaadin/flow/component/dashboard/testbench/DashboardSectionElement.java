@@ -34,8 +34,8 @@ public class DashboardSectionElement extends TestBenchElement {
      * @return The widgets in the section
      */
     public List<DashboardWidgetElement> getWidgets() {
-        return $(DashboardWidgetElement.class).all().stream()
-                .sorted((w1, w2) -> getSortIndex(w1).compareTo(getSortIndex(w2)))
+        return $(DashboardWidgetElement.class).all().stream().sorted(
+                (w1, w2) -> getSortIndex(w1).compareTo(getSortIndex(w2)))
                 .toList();
     }
 
