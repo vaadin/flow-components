@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.charts.examples.timeline;
 
 import com.vaadin.flow.component.charts.Chart;
+import com.vaadin.flow.component.charts.ChartMode;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.examples.timeline.util.StockPrices;
 import com.vaadin.flow.component.charts.model.ChartType;
@@ -52,7 +53,7 @@ public class Candlestick extends AbstractChartExample {
         rangeSelector.setSelected(4);
         configuration.setRangeSelector(rangeSelector);
 
-        chart.setTimeline(true);
+        chart.setMode(ChartMode.TIMELINE);
         add(chart);
     }
 }
