@@ -24,6 +24,7 @@ import com.vaadin.flow.component.charts.model.PlotOptionsColumnrange;
 import com.vaadin.flow.component.charts.model.PlotOptionsErrorbar;
 import com.vaadin.flow.component.charts.model.PlotOptionsFlags;
 import com.vaadin.flow.component.charts.model.PlotOptionsFunnel;
+import com.vaadin.flow.component.charts.model.PlotOptionsGantt;
 import com.vaadin.flow.component.charts.model.PlotOptionsGauge;
 import com.vaadin.flow.component.charts.model.PlotOptionsHeatmap;
 import com.vaadin.flow.component.charts.model.PlotOptionsLine;
@@ -76,6 +77,7 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
     private PlotOptionsTreemap treemap = new PlotOptionsTreemap();
     private PlotOptionsWaterfall waterfall = new PlotOptionsWaterfall();
     private PlotOptionsXrange xrange = new PlotOptionsXrange();
+    private PlotOptionsGantt gantt = new PlotOptionsGantt();
 
     /**
      * @see #setBar(PlotOptionsBar)
@@ -541,6 +543,22 @@ public class PlotOptionsStyle extends AbstractConfigurationObject {
      */
     public void setXrange(PlotOptionsXrange xrange) {
         this.xrange = xrange;
+    }
+
+    /**
+     * @see #setGantt(PlotOptionsGantt)
+     */
+    public PlotOptionsGantt getGantt() {
+        return gantt;
+    }
+
+    /**
+     * Sets the style options for {@link ChartType#GANTT} charts
+     *
+     * @param gantt
+     */
+    public void setGantt(PlotOptionsGantt gantt) {
+        this.gantt = gantt;
     }
 
 }
