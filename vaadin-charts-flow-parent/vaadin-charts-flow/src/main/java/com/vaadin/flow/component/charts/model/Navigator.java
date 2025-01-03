@@ -27,7 +27,7 @@ public class Navigator extends AbstractConfigurationObject {
     private Boolean opposite;
     private Color outlineColor;
     private Number outlineWidth;
-    private PlotOptionsSeries series;
+    private AbstractPlotOptions series;
     private XAxis xAxis;
     private YAxis yAxis;
 
@@ -220,9 +220,9 @@ public class Navigator extends AbstractConfigurationObject {
     }
 
     /**
-     * @see #setSeries(PlotOptionsSeries)
+     * @see #setSeries(AbstractPlotOptions)
      */
-    public PlotOptionsSeries getSeries() {
+    public AbstractPlotOptions getSeries() {
         return series;
     }
 
@@ -258,7 +258,7 @@ public class Navigator extends AbstractConfigurationObject {
      * 	}
      * </pre>
      */
-    public void setSeries(PlotOptionsSeries series) {
+    public void setSeries(AbstractPlotOptions series) {
         this.series = series;
     }
 
