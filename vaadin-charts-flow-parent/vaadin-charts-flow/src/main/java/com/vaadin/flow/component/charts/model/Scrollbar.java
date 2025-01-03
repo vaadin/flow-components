@@ -48,6 +48,7 @@ public class Scrollbar extends AbstractConfigurationObject {
     private Color trackBackgroundColor;
     private Color trackBorderColor;
     private Number trackBorderRadius;
+    private Number trackBorderWidth;
     private Number zIndex;
     private Number height;
 
@@ -395,5 +396,19 @@ public class Scrollbar extends AbstractConfigurationObject {
      */
     public void setHeight(Number height) {
         this.height = height;
+    }
+
+    /**
+     * @see #setTrackBorderWidth(Number)
+     */
+    public Number getTrackBorderWidth() {
+        return trackBorderWidth;
+    }
+
+    /**
+     * The width of the border of the scrollbar track. Defaults to 1.
+     */
+    public void setTrackBorderWidth(Number trackBorderWidth) {
+        this.trackBorderWidth = trackBorderWidth;
     }
 }
