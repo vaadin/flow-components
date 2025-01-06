@@ -62,7 +62,7 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void selectAllCheckbox_click_state() {
+    public void selectAllCheckbox_state() {
         open();
         WebElement grid = findElement(
                 By.id(GridMultiSelectionColumnPage.IN_MEMORY_GRID_ID));
