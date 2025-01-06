@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
@@ -129,6 +130,26 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
         Assert.assertNull(
                 "Select all checkbox is in indeterminate state even though no items are selected",
                 selectAllCheckbox.getAttribute("indeterminate"));
+    }
+
+    @Test
+    public void selectAllCheckbox_setChecked_selectsAndDeselectsItems() {
+        open();
+
+        GridElement grid = $(GridElement.class)
+                .id(GridMultiSelectionColumnPage.IN_MEMORY_GRID_ID);
+        CheckboxElement selectAllCheckbox = grid.$(CheckboxElement.class)
+                .id(SELECT_ALL_CHECKBOX_ID);
+        WebElement message = findElement(By.id("selected-item-count"));
+
+        selectAllCheckbox.setChecked(true);
+        Assert.assertEquals(
+                "Selected item count: "
+                        + GridMultiSelectionColumnPage.ITEM_COUNT,
+                message.getText());
+
+        selectAllCheckbox.setChecked(false);
+        Assert.assertEquals("Selected item count: 0", message.getText());
     }
 
     @Test
