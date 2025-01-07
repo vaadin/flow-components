@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.card.testbench;
 
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-card&gt;</code>
