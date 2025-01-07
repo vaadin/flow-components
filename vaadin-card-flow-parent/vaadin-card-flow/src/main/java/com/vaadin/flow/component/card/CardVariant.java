@@ -25,10 +25,7 @@ public enum CardVariant implements ThemeVariant {
     LUMO_ELEVATED("elevated"),
     LUMO_OUTLINED("outlined"),
     MATERIAL_ELEVATED("elevated"),
-    MATERIAL_OUTLINED("outlined"),
-    HORIZONTAL("horizontal"),
-    STRETCH_MEDIA("stretch-media"),
-    COVER_MEDIA("cover-media");
+    MATERIAL_OUTLINED("outlined");
     //@formatter:on
 
     private final String variant;
