@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.card.tests;
+package com.vaadin.flow.component.card;
 
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
