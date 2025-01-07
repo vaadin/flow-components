@@ -17,7 +17,6 @@ package com.vaadin.flow.component.card;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -34,11 +33,5 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 @NpmPackage(value = "@vaadin/card", version = "24.7.0-alpha2")
 @JsModule("@vaadin/card/src/vaadin-card.js")
 public class Card extends Component
-        implements HasSize, HasStyle, HasThemeVariant<CardVariant> {
-
-    /**
-     * Creates an empty card.
-     */
-    public Card() {
-    }
+        implements HasSize, HasThemeVariant<CardVariant> {
 }
