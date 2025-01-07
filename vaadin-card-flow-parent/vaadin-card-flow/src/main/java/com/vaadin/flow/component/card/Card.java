@@ -34,8 +34,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 @NpmPackage(value = "@vaadin/card", version = "24.7.0-alpha2")
 @JsModule("@vaadin/card/src/vaadin-card.js")
 public class Card extends Component
-        implements HasSize, HasStyle,
-        HasThemeVariant<CardVariant> {
+        implements HasSize, HasStyle, HasThemeVariant<CardVariant> {
 
     /**
      * Creates an empty card.
