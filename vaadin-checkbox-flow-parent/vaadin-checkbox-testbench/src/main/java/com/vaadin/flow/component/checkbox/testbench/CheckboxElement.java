@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.checkbox.testbench;
 
+import java.util.Collections;
+
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.TestBenchElement;
@@ -46,6 +48,7 @@ public class CheckboxElement extends TestBenchElement
      */
     public void setChecked(boolean checked) {
         setProperty("checked", checked);
+        dispatchEvent("change", Collections.singletonMap("bubbles", true));
     }
 
     @Override

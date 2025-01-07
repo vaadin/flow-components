@@ -40,12 +40,14 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
+import elemental.json.JsonObject;
 import elemental.json.JsonValue;
 
 /**
@@ -66,9 +68,9 @@ import elemental.json.JsonValue;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/virtual-list", version = "24.7.0-alpha2")
+@NpmPackage(value = "@vaadin/virtual-list", version = "24.7.0-alpha3")
 @JsModule("@vaadin/virtual-list/src/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
@@ -119,6 +121,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
 
     private Renderer<T> renderer;
 
+    private SerializableFunction<T, String> itemAccessibleNameGenerator = item -> null;
+
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private final List<Registration> renderingRegistrations = new ArrayList<>();
     private transient T placeholderItem;
@@ -134,6 +138,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     public VirtualList() {
         setRenderer((ValueProvider<T, String>) String::valueOf);
         addAttachListener((e) -> this.setPlaceholderItem(this.placeholderItem));
+        dataGenerator.addDataGenerator(this::generateItemAccessibleName);
     }
 
     private void initConnector() {
@@ -142,6 +147,13 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
                 .getPage().executeJs(
                         "window.Vaadin.Flow.virtualListConnector.initLazy($0)",
                         getElement());
+    }
+
+    private void generateItemAccessibleName(T item, JsonObject jsonObject) {
+        var accessibleName = this.itemAccessibleNameGenerator.apply(item);
+        if (accessibleName != null) {
+            jsonObject.put("accessibleName", accessibleName);
+        }
     }
 
     @Override
@@ -323,5 +335,33 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      */
     public void scrollToEnd() {
         scrollToIndex(Integer.MAX_VALUE);
+    }
+
+    /**
+     * A function that generates accessible names for virtual list items. The
+     * function gets the item as an argument and the return value should be a
+     * string representing that item. The result gets applied to the
+     * corresponding virtual list child element as an `aria-label` attribute.
+     *
+     * @param itemAccessibleNameGenerator
+     *            the item accessible name generator to set, not {@code null}
+     * @throws NullPointerException
+     *             if {@code itemAccessibleNameGenerator} is {@code null}
+     */
+    public void setItemAccessibleNameGenerator(
+            SerializableFunction<T, String> itemAccessibleNameGenerator) {
+        Objects.requireNonNull(itemAccessibleNameGenerator,
+                "Item accessible name generator can not be null");
+        this.itemAccessibleNameGenerator = itemAccessibleNameGenerator;
+        getDataCommunicator().reset();
+    }
+
+    /**
+     * Gets the function that generates accessible names for virtual list items.
+     *
+     * @return the item accessible name generator
+     */
+    public SerializableFunction<T, String> getItemAccessibleNameGenerator() {
+        return itemAccessibleNameGenerator;
     }
 }

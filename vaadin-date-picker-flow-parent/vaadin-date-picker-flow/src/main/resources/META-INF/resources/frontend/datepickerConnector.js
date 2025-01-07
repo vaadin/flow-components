@@ -176,4 +176,4 @@ window.Vaadin.Flow.datepickerConnector.initLazy = (datepicker) => {
   };
 
   datepicker.addEventListener('opened-changed', () => (datepicker.$connector._lastParseStatus = undefined));
-}
+};

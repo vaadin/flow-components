@@ -72,6 +72,7 @@ import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertyDefinition;
@@ -212,10 +213,10 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.7.0-alpha2")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.7.0-alpha2")
+@NpmPackage(value = "@vaadin/grid", version = "24.7.0-alpha3")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.7.0-alpha3")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -440,7 +441,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha2")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha3")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -4804,9 +4805,37 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         this.dataCommunicator.reset();
     }
 
+    /**
+     * Gets the tooltip position relative to the cell that is being hovered or
+     * focused. The default position is {@link TooltipPosition#BOTTOM}.
+     *
+     * @return the position of the tooltip
+     */
+    public TooltipPosition getTooltipPosition() {
+        String position = getTooltipElement()
+                .map(tooltipElement -> tooltipElement.getAttribute("position"))
+                .orElse(null);
+        return TooltipPosition.fromPosition(position);
+    }
+
+    /**
+     * Sets the tooltip position relative to the cell that is being hovered or
+     * focused. The default position is {@link TooltipPosition#BOTTOM}.
+     *
+     * @param position
+     *            the position to set
+     */
+    public void setTooltipPosition(TooltipPosition position) {
+        Objects.requireNonNull(position, "Position cannot be null");
+
+        addTooltipElementToTooltipSlot();
+
+        getTooltipElement().ifPresent(tooltipElement -> tooltipElement
+                .setAttribute("position", position.getPosition()));
+    }
+
     private void addTooltipElementToTooltipSlot() {
-        if (this.getElement().getChildren().anyMatch(child -> Objects
-                .equals(child.getAttribute("slot"), "tooltip"))) {
+        if (getTooltipElement().isPresent()) {
             // the grid's tooltip slot has already been filled
             return;
         }
@@ -4819,6 +4848,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         tooltipElement.executeJs(
                 "this.generator = ({item, column}) => { return (item && item.gridtooltips && column) ? item.gridtooltips[column._flowId] ?? item.gridtooltips['row'] : ''; }"));
         SlotUtils.addToSlot(this, "tooltip", tooltipElement);
+    }
+
+    private Optional<Element> getTooltipElement() {
+        return this.getElement().getChildren().filter(
+                child -> Objects.equals(child.getAttribute("slot"), "tooltip"))
+                .findFirst();
     }
 
     /**

@@ -18,8 +18,10 @@ package com.vaadin.flow.component.textfield.validation;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
@@ -35,14 +37,14 @@ public class IntegerFieldBasicValidationTest
         });
 
         // Trigger ValidationStatusChangeEvent
-        testField.getElement().setProperty("_hasInputValue", true);
+        fakeClientPropertyChange(testField, "_inputElementValue", "NaN");
         testField.clear();
     }
 
     @Test
     public void badInput_validate_emptyErrorMessageDisplayed() {
-        testField.getElement().setProperty("_hasInputValue", true);
-        fireUnparsableChangeDomEvent();
+        fakeClientPropertyChange(testField, "_inputElementValue", "NaN");
+        fakeClientDomEvent(testField, "unparsable-change");
         Assert.assertEquals("", testField.getErrorMessage());
     }
 
@@ -50,8 +52,8 @@ public class IntegerFieldBasicValidationTest
     public void badInput_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
         testField.setI18n(new IntegerField.IntegerFieldI18n()
                 .setBadInputErrorMessage("Value has invalid format"));
-        testField.getElement().setProperty("_hasInputValue", true);
-        fireUnparsableChangeDomEvent();
+        fakeClientPropertyChange(testField, "_inputElementValue", "NaN");
+        fakeClientDomEvent(testField, "unparsable-change");
         Assert.assertEquals("Value has invalid format",
                 testField.getErrorMessage());
     }
@@ -137,10 +139,16 @@ public class IntegerFieldBasicValidationTest
         return new IntegerField();
     }
 
-    private void fireUnparsableChangeDomEvent() {
-        DomEvent unparsableChangeDomEvent = new DomEvent(testField.getElement(),
-                "unparsable-change", Json.createObject());
-        testField.getElement().getNode().getFeature(ElementListenerMap.class)
-                .fireEvent(unparsableChangeDomEvent);
+    private void fakeClientDomEvent(Component component, String eventName) {
+        Element element = component.getElement();
+        DomEvent event = new DomEvent(element, eventName, Json.createObject());
+        element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
+    }
+
+    private void fakeClientPropertyChange(Component component, String property,
+            String value) {
+        Element element = component.getElement();
+        element.getStateProvider().setProperty(element.getNode(), property,
+                value, false);
     }
 }

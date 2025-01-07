@@ -34,6 +34,13 @@ public class DashboardSectionElement extends TestBenchElement {
      * @return The widgets in the section
      */
     public List<DashboardWidgetElement> getWidgets() {
-        return $(DashboardWidgetElement.class).all();
+        return $(DashboardWidgetElement.class).all().stream().sorted(
+                (w1, w2) -> getSortIndex(w1).compareTo(getSortIndex(w2)))
+                .toList();
+    }
+
+    private Float getSortIndex(DashboardWidgetElement widget) {
+        var slotName = widget.getPropertyString("parentElement", "slot");
+        return Float.parseFloat(slotName.split("-")[1]);
     }
 }

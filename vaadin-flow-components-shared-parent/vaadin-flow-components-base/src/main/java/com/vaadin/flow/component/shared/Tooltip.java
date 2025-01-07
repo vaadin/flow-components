@@ -31,7 +31,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/tooltip", version = "24.7.0-alpha2")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.7.0-alpha3")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Tooltip implements Serializable {
 
@@ -73,6 +73,18 @@ public class Tooltip implements Serializable {
 
         public String getPosition() {
             return position;
+        }
+
+        /**
+         * Gets the {@link TooltipPosition} for the given position string.
+         * Returns {@link TooltipPosition#BOTTOM} if no match is found.
+         *
+         * @param position the position string
+         * @return the {@link TooltipPosition}
+         */
+        public static TooltipPosition fromPosition(String position) {
+            return Arrays.stream(TooltipPosition.values())
+                .filter(p -> p.getPosition().equals(position)).findFirst().orElse(BOTTOM);
         }
     }
 

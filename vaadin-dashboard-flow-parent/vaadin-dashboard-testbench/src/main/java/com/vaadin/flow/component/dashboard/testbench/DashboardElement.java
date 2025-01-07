@@ -25,7 +25,7 @@ public class DashboardElement extends TestBenchElement {
      * @return The widgets in the dashboard
      */
     public List<DashboardWidgetElement> getWidgets() {
-        return $(DashboardWidgetElement.class).all();
+        return getSorted(DashboardWidgetElement.class);
     }
 
     /**
@@ -34,6 +34,23 @@ public class DashboardElement extends TestBenchElement {
      * @return The sections in the dashboard
      */
     public List<DashboardSectionElement> getSections() {
-        return $(DashboardSectionElement.class).all();
+        return getSorted(DashboardSectionElement.class);
+    }
+
+    private <T extends TestBenchElement> List<T> getSorted(Class<T> type) {
+        return $(type).all().stream().sorted(
+                (e1, e2) -> getSortIndex(e1).compareTo(getSortIndex(e2)))
+                .toList();
+    }
+
+    private Float getSortIndex(TestBenchElement element) {
+        var wrapper = element.getPropertyElement("parentElement");
+        var slotName = wrapper.getAttribute("slot");
+        var slotNumber = Float.parseFloat(slotName.split("-")[1]);
+        var wrapperParent = wrapper.getPropertyElement("parentElement");
+        if ($(DashboardSectionElement.class).all().contains(wrapperParent)) {
+            return slotNumber / 1000f + getSortIndex(wrapperParent);
+        }
+        return slotNumber;
     }
 }
