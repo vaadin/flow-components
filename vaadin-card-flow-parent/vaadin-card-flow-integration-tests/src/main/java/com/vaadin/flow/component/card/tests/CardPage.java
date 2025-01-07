@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.card.tests;
 
+import com.vaadin.flow.component.card.Card;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 
@@ -22,5 +23,8 @@ import com.vaadin.flow.router.Route;
 public class CardPage extends Div {
 
     public CardPage() {
+        Card card = new Card();
+
+        add(card);
     }
 }
