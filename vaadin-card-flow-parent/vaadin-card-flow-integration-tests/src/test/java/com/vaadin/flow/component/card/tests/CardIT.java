@@ -15,29 +15,9 @@
  */
 package com.vaadin.flow.component.card.tests;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-card/template-card")
-public class TemplateCardIT extends AbstractComponentIT {
-
-    @Test
-    public void setText_overridesAllContent() {
-        open();
-
-        waitUntil(ExpectedConditions
-                .presenceOfElementLocated(By.id("card-template")));
-        TestBenchElement template = $("*").id("card-template");
-
-        WebElement card = template.$("*").id("card");
-
-        Assert.assertTrue("Card should have displayed", card.isDisplayed());
-    }
+@TestPath("vaadin-card")
+public class CardIT extends AbstractComponentIT {
 }

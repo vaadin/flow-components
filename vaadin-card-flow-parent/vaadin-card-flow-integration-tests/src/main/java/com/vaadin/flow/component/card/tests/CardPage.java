@@ -15,22 +15,12 @@
  */
 package com.vaadin.flow.component.card.tests;
 
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.card.Card;
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.littemplate.LitTemplate;
-import com.vaadin.flow.component.template.Id;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 
-@Tag("template-card")
-@Route("vaadin-card/template-card")
-@JsModule("./template-card.js")
-public class TemplateCardPage extends LitTemplate {
+@Route("vaadin-card")
+public class CardPage extends Div {
 
-    @Id("card")
-    private Card templateCard;
-
-    public TemplateCardPage() {
-        setId("card-template");
+    public CardPage() {
     }
 }
