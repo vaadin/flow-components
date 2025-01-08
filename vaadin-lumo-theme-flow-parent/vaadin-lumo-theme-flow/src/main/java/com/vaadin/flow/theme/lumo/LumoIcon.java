@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,7 +35,48 @@ import com.vaadin.flow.component.icon.IconFactory;
  */
 public enum LumoIcon implements IconFactory {
 
-    ALIGN_CENTER, ALIGN_LEFT, ALIGN_RIGHT, ANGLE_DOWN, ANGLE_LEFT, ANGLE_RIGHT, ANGLE_UP, ARROW_DOWN, ARROW_LEFT, ARROW_RIGHT, ARROW_UP, BAR_CHART, BELL, CALENDAR, CHECKMARK, CHEVRON_DOWN, CHEVRON_LEFT, CHEVRON_RIGHT, CHEVRON_UP, CLOCK, COG, CROSS, DOWNLOAD, DROPDOWN, EDIT, ERROR, EYE, EYE_DISABLED, MENU, MINUS, ORDERED_LIST, PHONE, PHOTO, PLAY, PLUS, REDO, RELOAD, SEARCH, UNDO, UNORDERED_LIST, UPLOAD, USER;
+    ALIGN_CENTER,
+    ALIGN_LEFT,
+    ALIGN_RIGHT,
+    ANGLE_DOWN,
+    ANGLE_LEFT,
+    ANGLE_RIGHT,
+    ANGLE_UP,
+    ARROW_DOWN,
+    ARROW_LEFT,
+    ARROW_RIGHT,
+    ARROW_UP,
+    BAR_CHART,
+    BELL,
+    CALENDAR,
+    CHECKMARK,
+    CHEVRON_DOWN,
+    CHEVRON_LEFT,
+    CHEVRON_RIGHT,
+    CHEVRON_UP,
+    CLOCK,
+    COG,
+    CROSS,
+    DOWNLOAD,
+    DROPDOWN,
+    EDIT,
+    ERROR,
+    EYE,
+    EYE_DISABLED,
+    MENU,
+    MINUS,
+    ORDERED_LIST,
+    PHONE,
+    PHOTO,
+    PLAY,
+    PLUS,
+    REDO,
+    RELOAD,
+    SEARCH,
+    UNDO,
+    UNORDERED_LIST,
+    UPLOAD,
+    USER;
 
     /**
      * Creates a new {@link Icon} instance with the icon determined by the name
