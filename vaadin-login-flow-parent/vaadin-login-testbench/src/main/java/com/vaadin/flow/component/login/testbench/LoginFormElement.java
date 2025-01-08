@@ -48,7 +48,7 @@ public class LoginFormElement extends TestBenchElement implements Login {
 
     @Override
     public ButtonElement getForgotPasswordButton() {
-        return $(ButtonElement.class).attribute("slot", "forgot-password")
+        return $(ButtonElement.class).withAttribute("slot", "forgot-password")
                 .first();
     }
 
@@ -65,18 +65,19 @@ public class LoginFormElement extends TestBenchElement implements Login {
     @Override
     public String getFormTitle() {
         return getFormWrapper().$(TestBenchElement.class)
-                .attribute("part", "form").first().$("h2").first().getText();
+                .withAttribute("part", "form-title").first().getText();
     }
 
     @Override
     public TestBenchElement getErrorComponent() {
         return getFormWrapper().$(TestBenchElement.class)
-                .attribute("part", "error-message").first();
+                .withAttribute("part", "error-message").first();
     }
 
     @Override
     public String getErrorMessageTitle() {
-        return getErrorComponent().$("h5").first().getText();
+        return getErrorComponent().$(TestBenchElement.class)
+                .withAttribute("part", "error-message-title").first().getText();
     }
 
     @Override
@@ -87,7 +88,8 @@ public class LoginFormElement extends TestBenchElement implements Login {
     @Override
     public String getAdditionalInformation() {
         return getFormWrapper().$(TestBenchElement.class)
-                .attribute("part", "footer").first().$("p").first().getText();
+                .withAttribute("part", "footer").first().$("p").first()
+                .getText();
     }
 
     @Override
