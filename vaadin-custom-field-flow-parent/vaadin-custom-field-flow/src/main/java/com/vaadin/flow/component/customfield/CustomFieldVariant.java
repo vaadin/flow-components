@@ -21,8 +21,9 @@ package com.vaadin.flow.component.customfield;
  */
 public enum CustomFieldVariant {
 
-    LUMO_SMALL("small"), LUMO_HELPER_ABOVE_FIELD(
-            "helper-above-field"), LUMO_WHITESPACE("whitespace");
+    LUMO_SMALL("small"),
+    LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
+    LUMO_WHITESPACE("whitespace");
 
     private final String variant;
 

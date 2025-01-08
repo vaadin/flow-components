@@ -400,7 +400,10 @@ public class SideNavTest {
     }
 
     enum SetLabelOption {
-        SET_NO_LABEL, SET_LABEL_BEFORE_ITEMS_CREATION, SET_LABEL_DURING_ITEMS_CREATION, SET_LABEL_AFTER_ITEMS_CREATION
+        SET_NO_LABEL,
+        SET_LABEL_BEFORE_ITEMS_CREATION,
+        SET_LABEL_DURING_ITEMS_CREATION,
+        SET_LABEL_AFTER_ITEMS_CREATION
     }
 
     private List<SideNavItem> setupItemsAndLabel(

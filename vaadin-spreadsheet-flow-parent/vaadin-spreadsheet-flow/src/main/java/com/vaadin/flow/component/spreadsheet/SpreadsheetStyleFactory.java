@@ -58,10 +58,14 @@ public class SpreadsheetStyleFactory implements Serializable {
      * @author Vaadin Ltd.
      */
     public enum BorderStyle {
-        SOLID_THIN("solid", 1, 1), DOTTED_THIN("dotted", 1, 1), DASHED_THIN(
-                "dashed", 1, 1), SOLID_MEDIUM("solid", 2, 2), DASHED_MEDIUM(
-                        "dashed", 2, 2), SOLID_THICK("solid", 3,
-                                4), DOUBLE("double", 3, 4), NONE("none", 0, 0);
+        SOLID_THIN("solid", 1, 1),
+        DOTTED_THIN("dotted", 1, 1),
+        DASHED_THIN("dashed", 1, 1),
+        SOLID_MEDIUM("solid", 2, 2),
+        DASHED_MEDIUM("dashed", 2, 2),
+        SOLID_THICK("solid", 3, 4),
+        DOUBLE("double", 3, 4),
+        NONE("none", 0, 0);
 
         private final int size;
         private final String borderStyle;
