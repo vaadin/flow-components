@@ -20,11 +20,12 @@ package com.vaadin.flow.component.datetimepicker;
  * component.
  */
 public enum DateTimePickerVariant {
-    LUMO_SMALL("small"), LUMO_ALIGN_LEFT("align-left"), LUMO_ALIGN_CENTER(
-            "align-center"), LUMO_ALIGN_RIGHT(
-                    "align-right"), LUMO_HELPER_ABOVE_FIELD(
-                            "helper-above-field"), MATERIAL_ALWAYS_FLOAT_LABEL(
-                                    "always-float-label");
+    LUMO_SMALL("small"),
+    LUMO_ALIGN_LEFT("align-left"),
+    LUMO_ALIGN_CENTER("align-center"),
+    LUMO_ALIGN_RIGHT("align-right"),
+    LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
+    MATERIAL_ALWAYS_FLOAT_LABEL("always-float-label");
 
     private final String variant;
 
