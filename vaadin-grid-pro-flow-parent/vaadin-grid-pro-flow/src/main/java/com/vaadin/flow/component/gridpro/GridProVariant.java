@@ -12,7 +12,6 @@ package com.vaadin.flow.component.gridpro;
  * Set of theme variants applicable for {@code vaadin-grid-pro} component.
  */
 public enum GridProVariant {
-    //@formatter:off
     LUMO_NO_BORDER("no-border"),
     LUMO_NO_ROW_BORDERS("no-row-borders"),
     LUMO_COLUMN_BORDERS("column-borders"),
@@ -22,8 +21,6 @@ public enum GridProVariant {
     MATERIAL_COLUMN_DIVIDERS("column-dividers"),
     LUMO_HIGHLIGHT_EDITABLE_CELLS("highlight-editable-cells"),
     LUMO_HIGHLIGHT_READ_ONLY_CELLS("highlight-read-only-cells");
-
-    //@formatter:on
 
     private final String variant;
 
