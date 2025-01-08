@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.grid;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -255,31 +254,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     // package-private because it's used in tests
     static final String DRAG_SOURCE_DATA_KEY = "drag-source-data";
 
-    private static final java.lang.reflect.Method springFetchMethod,
-            springCountMethod;
-    static {
-        try {
-            springFetchMethod = Arrays
-                    .stream(Spring.FetchCallback.class.getMethods())
-                    .filter(method -> method.getName().equals("fetch"))
-                    .findFirst().orElseThrow(() -> new NoSuchMethodException(
-                            "Method fetch not found"));
-        } catch (NoSuchMethodException | SecurityException e) {
-            throw new IllegalStateException(
-                    "Unable to find the Spring data fetch method", e);
-        }
-        try {
-            springCountMethod = Arrays
-                    .stream(Spring.CountCallback.class.getMethods())
-                    .filter(method -> method.getName().equals("count"))
-                    .findFirst().orElseThrow(() -> new NoSuchMethodException(
-                            "Method count not found"));
-        } catch (NoSuchMethodException | SecurityException e) {
-            throw new IllegalStateException(
-                    "Unable to find the Spring data count method", e);
-        }
-    }
-
     protected static class UpdateQueue implements Update {
         private final ArrayList<SerializableRunnable> queue = new ArrayList<>();
         private final UpdateQueueData data;
@@ -375,37 +349,37 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * Creates the selection model to use with this enum.
          *
          * @param <T>
-         *            the type of items in the grid
+         *             the type of items in the grid
          * @param grid
-         *            the grid to create the selection model for
+         *             the grid to create the selection model for
          * @return the selection model
          */
         protected <T> GridSelectionModel<T> createModel(Grid<T> grid) {
             return switch (this) {
-            case SINGLE -> new AbstractGridSingleSelectionModel<T>(grid) {
-                @SuppressWarnings("unchecked")
-                @Override
-                protected void fireSelectionEvent(
-                        SelectionEvent<Grid<T>, T> event) {
-                    grid.fireEvent((ComponentEvent<Grid<T>>) event);
-                }
+                case SINGLE -> new AbstractGridSingleSelectionModel<T>(grid) {
+                    @SuppressWarnings("unchecked")
+                    @Override
+                    protected void fireSelectionEvent(
+                            SelectionEvent<Grid<T>, T> event) {
+                        grid.fireEvent((ComponentEvent<Grid<T>>) event);
+                    }
 
-                @Override
-                public void setDeselectAllowed(boolean deselectAllowed) {
-                    super.setDeselectAllowed(deselectAllowed);
-                    grid.getElement().setProperty("__deselectDisallowed",
-                            !deselectAllowed);
-                }
-            };
-            case MULTI -> new AbstractGridMultiSelectionModel<T>(grid) {
-                @SuppressWarnings("unchecked")
-                @Override
-                protected void fireSelectionEvent(
-                        SelectionEvent<Grid<T>, T> event) {
-                    grid.fireEvent((ComponentEvent<Grid<?>>) event);
-                }
-            };
-            case NONE -> new GridNoneSelectionModel<>();
+                    @Override
+                    public void setDeselectAllowed(boolean deselectAllowed) {
+                        super.setDeselectAllowed(deselectAllowed);
+                        grid.getElement().setProperty("__deselectDisallowed",
+                                !deselectAllowed);
+                    }
+                };
+                case MULTI -> new AbstractGridMultiSelectionModel<T>(grid) {
+                    @SuppressWarnings("unchecked")
+                    @Override
+                    protected void fireSelectionEvent(
+                            SelectionEvent<Grid<T>, T> event) {
+                        grid.fireEvent((ComponentEvent<Grid<?>>) event);
+                    }
+                };
+                case NONE -> new GridNoneSelectionModel<>();
             };
         }
     }
@@ -3045,48 +3019,25 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private static <PAGEABLE, T> Stream<T> handleSpringFetchCallback(
             Query<T, Void> query,
             Spring.FetchCallback<PAGEABLE, T> fetchCallback) {
-        try {
-            Object pageable = VaadinSpringDataHelpers
-                    .toSpringPageRequest(query);
-            List<T> itemList = (List<T>) springFetchMethod.invoke(fetchCallback,
-                    pageable);
-            return itemList.stream();
-        } catch (SecurityException | IllegalAccessException e) {
-            throw new IllegalStateException(
-                    "The Vaadin Spring Data Helper could not be found or invoked",
-                    e);
-        } catch (InvocationTargetException e) {
-            throw new IllegalStateException(
-                    "Error fetching data from the spring service",
-                    e.getTargetException());
-
-        }
+        PAGEABLE pageable = (PAGEABLE) VaadinSpringDataHelpers
+                .toSpringPageRequest(query);
+        List<T> itemList = fetchCallback.fetch(pageable);
+        return itemList.stream();
     }
 
     private static <PAGEABLE> int handleSpringCountCallback(
             Query<?, Void> query,
             Spring.CountCallback<PAGEABLE> countCallback) {
-        try {
-            long count = (long) springCountMethod.invoke(countCallback,
-                    VaadinSpringDataHelpers.toSpringPageRequest(query));
-            if (count > Integer.MAX_VALUE) {
-                LoggerFactory.getLogger(Grid.class).warn(
-                        "The count of items in the backend ({}) exceeds the maximum supported by the Grid.",
-                        count);
-                return Integer.MAX_VALUE;
-            }
-            return (int) count;
-        } catch (SecurityException | IllegalAccessException e) {
-            throw new IllegalStateException(
-                    "The Vaadin Spring Data Helper could not be found or invoked",
-                    e);
-        } catch (InvocationTargetException e) {
-            throw new IllegalStateException(
-                    "Error fetching data from the spring service",
-                    e.getTargetException());
-
+        PAGEABLE pageable = (PAGEABLE) VaadinSpringDataHelpers
+                .toSpringPageRequest(query);
+        long count = (long) countCallback.count(pageable);
+        if (count > Integer.MAX_VALUE) {
+            LoggerFactory.getLogger(Grid.class).warn(
+                    "The count of items in the backend ({}) exceeds the maximum supported by the Grid.",
+                    count);
+            return Integer.MAX_VALUE;
         }
-
+        return (int) count;
     }
 
     /**
