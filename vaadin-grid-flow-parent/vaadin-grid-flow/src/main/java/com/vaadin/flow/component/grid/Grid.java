@@ -349,37 +349,37 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * Creates the selection model to use with this enum.
          *
          * @param <T>
-         *             the type of items in the grid
+         *            the type of items in the grid
          * @param grid
-         *             the grid to create the selection model for
+         *            the grid to create the selection model for
          * @return the selection model
          */
         protected <T> GridSelectionModel<T> createModel(Grid<T> grid) {
             return switch (this) {
-                case SINGLE -> new AbstractGridSingleSelectionModel<T>(grid) {
-                    @SuppressWarnings("unchecked")
-                    @Override
-                    protected void fireSelectionEvent(
-                            SelectionEvent<Grid<T>, T> event) {
-                        grid.fireEvent((ComponentEvent<Grid<T>>) event);
-                    }
+            case SINGLE -> new AbstractGridSingleSelectionModel<T>(grid) {
+                @SuppressWarnings("unchecked")
+                @Override
+                protected void fireSelectionEvent(
+                        SelectionEvent<Grid<T>, T> event) {
+                    grid.fireEvent((ComponentEvent<Grid<T>>) event);
+                }
 
-                    @Override
-                    public void setDeselectAllowed(boolean deselectAllowed) {
-                        super.setDeselectAllowed(deselectAllowed);
-                        grid.getElement().setProperty("__deselectDisallowed",
-                                !deselectAllowed);
-                    }
-                };
-                case MULTI -> new AbstractGridMultiSelectionModel<T>(grid) {
-                    @SuppressWarnings("unchecked")
-                    @Override
-                    protected void fireSelectionEvent(
-                            SelectionEvent<Grid<T>, T> event) {
-                        grid.fireEvent((ComponentEvent<Grid<?>>) event);
-                    }
-                };
-                case NONE -> new GridNoneSelectionModel<>();
+                @Override
+                public void setDeselectAllowed(boolean deselectAllowed) {
+                    super.setDeselectAllowed(deselectAllowed);
+                    grid.getElement().setProperty("__deselectDisallowed",
+                            !deselectAllowed);
+                }
+            };
+            case MULTI -> new AbstractGridMultiSelectionModel<T>(grid) {
+                @SuppressWarnings("unchecked")
+                @Override
+                protected void fireSelectionEvent(
+                        SelectionEvent<Grid<T>, T> event) {
+                    grid.fireEvent((ComponentEvent<Grid<?>>) event);
+                }
+            };
+            case NONE -> new GridNoneSelectionModel<>();
             };
         }
     }
