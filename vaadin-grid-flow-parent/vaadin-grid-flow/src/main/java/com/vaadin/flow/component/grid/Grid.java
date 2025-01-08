@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.grid;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -132,6 +133,7 @@ import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -252,6 +254,31 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     // package-private because it's used in tests
     static final String DRAG_SOURCE_DATA_KEY = "drag-source-data";
+
+    private static final java.lang.reflect.Method springFetchMethod,
+            springCountMethod;
+    static {
+        try {
+            springFetchMethod = Arrays
+                    .stream(Spring.FetchCallback.class.getMethods())
+                    .filter(method -> method.getName().equals("fetch"))
+                    .findFirst().orElseThrow(() -> new NoSuchMethodException(
+                            "Method fetch not found"));
+        } catch (NoSuchMethodException | SecurityException e) {
+            throw new IllegalStateException(
+                    "Unable to find the Spring data fetch method", e);
+        }
+        try {
+            springCountMethod = Arrays
+                    .stream(Spring.CountCallback.class.getMethods())
+                    .filter(method -> method.getName().equals("count"))
+                    .findFirst().orElseThrow(() -> new NoSuchMethodException(
+                            "Method count not found"));
+        } catch (NoSuchMethodException | SecurityException e) {
+            throw new IllegalStateException(
+                    "Unable to find the Spring data count method", e);
+        }
+    }
 
     protected static class UpdateQueue implements Update {
         private final ArrayList<SerializableRunnable> queue = new ArrayList<>();
@@ -2926,7 +2953,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *            the type of the items to fetch
          */
         @FunctionalInterface
-        public interface FetchCallback<T> extends Serializable {
+        public interface FetchCallback<PAGEABLE, T> extends Serializable {
+
             /**
              * Fetches a list of items based on a pageable. The pageable defines
              * the paging of the items to fetch and the sorting.
@@ -2936,7 +2964,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
              *            sort order
              * @return a list of items
              */
-            List<T> fetch(Pageable pageable);
+            List<T> fetch(PAGEABLE pageable);
         }
 
         /**
@@ -2944,7 +2972,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * based on a Spring Data Pageable.
          */
         @FunctionalInterface
-        public interface CountCallback extends Serializable {
+        public interface CountCallback<PAGEABLE> extends Serializable {
             /**
              * Counts the number of available items based on a pageable. The
              * pageable defines the paging of the items to fetch and the sorting
@@ -2956,7 +2984,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
              *            sort order
              * @return the number of available items
              */
-            long count(Pageable pageable);
+            long count(PAGEABLE pageable);
         }
     }
 
@@ -2965,7 +2993,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * component will automatically fetch more items and adjust its size until
      * the backend runs out of items. Usage example:
      * <p>
-     * {@code component.setItemsSpring(pageable -> orderService.getOrders(pageable);}
+     * {@code component.setItemsSpring(pageable -> orderService.getOrders(pageable));}
      * <p>
      * The returned data view object can be used for further configuration, or
      * later on fetched with {@link #getLazyDataView()}. For using in-memory
@@ -2978,12 +3006,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return a data view for further configuration
      */
     public GridLazyDataView<T> setItemsSpring(
-            Spring.FetchCallback<T> fetchCallback) {
-        return setItems(query -> {
-            Pageable pageable = com.vaadin.flow.spring.data.VaadinSpringDataHelpers
-                    .toSpringPageRequest(query);
-            return fetchCallback.fetch(pageable).stream();
-        });
+            Spring.FetchCallback<Pageable, T> fetchCallback) {
+        return setItems(
+                query -> handleSpringFetchCallback(query, fetchCallback));
     }
 
     /**
@@ -3010,16 +3035,40 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return LazyDataView instance for further configuration
      */
     public GridLazyDataView<T> setItemsSpring(
-            Spring.FetchCallback<T> fetchCallback,
-            Spring.CountCallback countCallback) {
-        return setItems(query -> {
-            Pageable pageable = com.vaadin.flow.spring.data.VaadinSpringDataHelpers
+            Spring.FetchCallback<Pageable, T> fetchCallback,
+            Spring.CountCallback<Pageable> countCallback) {
+        return setItems(
+                query -> handleSpringFetchCallback(query, fetchCallback),
+                query -> handleSpringCountCallback(query, countCallback));
+    }
+
+    private static <PAGEABLE, T> Stream<T> handleSpringFetchCallback(
+            Query<T, Void> query,
+            Spring.FetchCallback<PAGEABLE, T> fetchCallback) {
+        try {
+            Object pageable = VaadinSpringDataHelpers
                     .toSpringPageRequest(query);
-            return fetchCallback.fetch(pageable).stream();
-        }, query -> {
-            Pageable pageable = com.vaadin.flow.spring.data.VaadinSpringDataHelpers
-                    .toSpringPageRequest(query);
-            long count = countCallback.count(pageable);
+            List<T> itemList = (List<T>) springFetchMethod.invoke(fetchCallback,
+                    pageable);
+            return itemList.stream();
+        } catch (SecurityException | IllegalAccessException e) {
+            throw new IllegalStateException(
+                    "The Vaadin Spring Data Helper could not be found or invoked",
+                    e);
+        } catch (InvocationTargetException e) {
+            throw new IllegalStateException(
+                    "Error fetching data from the spring service",
+                    e.getTargetException());
+
+        }
+    }
+
+    private static <PAGEABLE> int handleSpringCountCallback(
+            Query<?, Void> query,
+            Spring.CountCallback<PAGEABLE> countCallback) {
+        try {
+            long count = (long) springCountMethod.invoke(countCallback,
+                    VaadinSpringDataHelpers.toSpringPageRequest(query));
             if (count > Integer.MAX_VALUE) {
                 LoggerFactory.getLogger(Grid.class).warn(
                         "The count of items in the backend ({}) exceeds the maximum supported by the Grid.",
@@ -3027,7 +3076,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 return Integer.MAX_VALUE;
             }
             return (int) count;
-        });
+        } catch (SecurityException | IllegalAccessException e) {
+            throw new IllegalStateException(
+                    "The Vaadin Spring Data Helper could not be found or invoked",
+                    e);
+        } catch (InvocationTargetException e) {
+            throw new IllegalStateException(
+                    "Error fetching data from the spring service",
+                    e.getTargetException());
+
+        }
+
     }
 
     /**
