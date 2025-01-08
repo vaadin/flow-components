@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.charts.examples.timeline;
 
 import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.ChartMode;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.examples.timeline.util.StockPrices;
 import com.vaadin.flow.component.charts.model.ChartType;
@@ -53,7 +52,7 @@ public class OHLC extends AbstractChartExample {
         rangeSelector.setSelected(1);
         configuration.setRangeSelector(rangeSelector);
 
-        chart.setMode(ChartMode.TIMELINE);
+        chart.setTimeline(true);
         add(chart);
     }
 }

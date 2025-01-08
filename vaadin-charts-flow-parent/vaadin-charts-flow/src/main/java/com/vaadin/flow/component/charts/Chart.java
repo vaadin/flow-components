@@ -60,6 +60,7 @@ import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.DrilldownCallback;
 import com.vaadin.flow.component.charts.model.DrilldownCallback.DrilldownDetails;
+import com.vaadin.flow.component.charts.model.PlotOptionsTimeline;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -103,9 +104,6 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     private final static List<ChartType> TIMELINE_NOT_SUPPORTED = Arrays.asList(
             ChartType.PIE, ChartType.GAUGE, ChartType.SOLIDGAUGE,
             ChartType.PYRAMID, ChartType.FUNNEL, ChartType.ORGANIZATION);
-
-    private final static List<ChartType> GANTT_SUPPORTED = Arrays
-            .asList(ChartType.GANTT, ChartType.XRANGE);
 
     private DrillCallbackHandler drillCallbackHandler;
 
@@ -194,7 +192,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * @see #getConfiguration()
      */
     public void drawChart(boolean resetConfiguration) {
-        validateChartMode();
+        validateTimelineAndConfiguration();
 
         final JsonObject configurationNode = getJsonFactory()
                 .parse(ChartSerialization.toJSON(configuration));
@@ -203,64 +201,37 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
                 resetConfiguration);
     }
 
-    private void validateChartMode() {
-        validateTimelineAndConfiguration();
-        validateGanttAndConfiguration();
-    }
-
     /**
-     * Determines if the chart is in timeline mode or in normal mode. For more
-     * information see {@link ChartMode#TIMELINE}.
+     * Determines if the chart is in timeline mode or in normal mode. The
+     * following chart types do not support timeline mode:
+     * <ul>
+     * <li>ChartType.PIE</li>
+     * <li>ChartType.GAUGE</li>
+     * <li>ChartType.SOLIDGAUGE</li>
+     * <li>ChartType.PYRAMID</li>
+     * <li>ChartType.FUNNEL</li>
+     * <li>ChartType.ORGANIZATION</li>
+     * </ul>
+     * Enabling timeline mode in these unsupported chart types results in an
+     * <code>IllegalArgumentException</code>
+     * <p>
+     * Note: for Timeline chart type see {@link ChartType.TIMELINE} and
+     * {@link PlotOptionsTimeline}.
      *
      * @param timeline
      *            true for timeline chart
-     * @deprecated Use {@link #setMode(ChartMode)} instead
      */
     public void setTimeline(Boolean timeline) {
-        setMode(timeline ? ChartMode.TIMELINE : ChartMode.NORMAL);
-    }
-
-    /**
-     * The chart mode configures how data is presented in the chart. You can
-     * specify whether the chart will be rendered as a normal chart, a timeline
-     * chart or a gantt chart.
-     * <p>
-     * For more information on modes and their limitations see
-     * {@link ChartMode}.
-     * 
-     * @param mode
-     *            the mode to set
-     */
-    public void setMode(ChartMode mode) {
-        getElement().setProperty("mode",
-                mode == null ? null : mode.getModeName());
-    }
-
-    /**
-     * @see #setMode(ChartMode)
-     */
-    public ChartMode getMode() {
-        final String mode = getElement().getProperty("mode");
-        return mode == null ? ChartMode.NORMAL : ChartMode.getForName(mode);
+        getElement().setProperty("timeline", timeline);
     }
 
     private void validateTimelineAndConfiguration() {
-        if (getMode().equals(ChartMode.TIMELINE)) {
+        if (getElement().getProperty("timeline", false)) {
             final ChartType type = getConfiguration().getChart().getType();
             if (TIMELINE_NOT_SUPPORTED.contains(type)) {
                 throw new IllegalArgumentException(
                         "Timeline is not supported for chart type '" + type
                                 + "'");
-            }
-        }
-    }
-
-    private void validateGanttAndConfiguration() {
-        if (getMode().equals(ChartMode.GANTT)) {
-            final ChartType type = getConfiguration().getChart().getType();
-            if (!GANTT_SUPPORTED.contains(type)) {
-                throw new IllegalArgumentException(
-                        "Gantt is not supported for chart type '" + type + "'");
             }
         }
     }
