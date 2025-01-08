@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,6 +14,8 @@
  * the License.
  */
 package com.vaadin.flow.component.checkbox.testbench;
+
+import java.util.Collections;
 
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
@@ -46,6 +48,7 @@ public class CheckboxElement extends TestBenchElement
      */
     public void setChecked(boolean checked) {
         setProperty("checked", checked);
+        dispatchEvent("change", Collections.singletonMap("bubbles", true));
     }
 
     @Override

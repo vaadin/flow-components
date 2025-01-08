@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -151,6 +151,8 @@ public class ChartType implements ChartEnum {
      * @see PlotOptionsXrange
      */
     public static final ChartType XRANGE = new ChartType("xrange");
+
+    public static final ChartType GANTT = new ChartType("gantt");
 
     public static ChartType getDefault() {
         return ChartType.LINE;
