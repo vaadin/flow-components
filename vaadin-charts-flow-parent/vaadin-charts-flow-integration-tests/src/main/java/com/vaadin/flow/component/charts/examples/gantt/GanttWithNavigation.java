@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -11,7 +11,6 @@ package com.vaadin.flow.component.charts.examples.gantt;
 import java.time.Instant;
 
 import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.ChartMode;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Completed;
@@ -28,7 +27,6 @@ public class GanttWithNavigation extends AbstractChartExample {
     @Override
     public void initDemo() {
         Chart chart = new Chart(ChartType.GANTT);
-        chart.setMode(ChartMode.GANTT);
 
         final Configuration configuration = chart.getConfiguration();
 
@@ -81,9 +79,6 @@ public class GanttWithNavigation extends AbstractChartExample {
     private void configureNavigator(Configuration configuration) {
         final Navigator navigator = configuration.getNavigator();
         navigator.setEnabled(true);
-        final PlotOptionsGantt navigatorPlotOptions = new PlotOptionsGantt();
-        navigatorPlotOptions.setPointPadding(0.2);
-        navigator.setSeries(navigatorPlotOptions);
         final YAxis navigatorYAxis = navigator.getYAxis();
         navigatorYAxis.setMin(0);
         navigatorYAxis.setMax(3);

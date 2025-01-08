@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -13,7 +13,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
 import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.ChartMode;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.ChartType;
@@ -36,7 +35,6 @@ public class GanttCustomDataLabels extends AbstractChartExample {
     @Override
     public void initDemo() {
         Chart chart = new Chart(ChartType.GANTT);
-        chart.setMode(ChartMode.GANTT);
 
         final Configuration configuration = chart.getConfiguration();
 

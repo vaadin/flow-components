@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -11,7 +11,6 @@ package com.vaadin.flow.component.charts.examples.gantt;
 import java.time.Instant;
 
 import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.ChartMode;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.examples.SkipFromDemo;
 import com.vaadin.flow.component.charts.model.ChartType;
@@ -29,7 +28,6 @@ public class GanttProgressIndicator extends AbstractChartExample {
     @Override
     public void initDemo() {
         Chart chart = new Chart(ChartType.GANTT);
-        chart.setMode(ChartMode.GANTT);
 
         final Configuration configuration = chart.getConfiguration();
 

@@ -19,7 +19,6 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.ChartMode;
 import com.vaadin.flow.component.charts.events.internal.AxisRescaledEvent;
 import com.vaadin.flow.component.charts.events.internal.ConfigurationChangeListener;
 import com.vaadin.flow.component.charts.events.internal.DataAddedEvent;
@@ -690,7 +689,6 @@ public class Configuration extends AbstractConfigurationObject
      * Set settings for range selector.
      * <p>
      * This is only valid if the chart is configured to use timeline mode. See
-     * {@link com.vaadin.flow.component.charts.Chart#setMode(ChartMode)}}
      *
      * @param rangeSelector
      * @see RangeSelector
