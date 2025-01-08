@@ -36,6 +36,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
@@ -2914,6 +2915,112 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             BackEndDataProvider<T, Void> dataProvider) {
         setDataProvider(dataProvider);
         return getLazyDataView();
+    }
+
+    public interface Spring extends Serializable {
+        /**
+         * Callback interface for fetching a list of items from a backend based
+         * on a Spring Data Pageable.
+         *
+         * @param <T>
+         *            the type of the items to fetch
+         */
+        @FunctionalInterface
+        public interface FetchCallback<T> extends Serializable {
+            /**
+             * Fetches a list of items based on a pageable. The pageable defines
+             * the paging of the items to fetch and the sorting.
+             *
+             * @param pageable
+             *            the pageable that defines which items to fetch and the
+             *            sort order
+             * @return a list of items
+             */
+            List<T> fetch(Pageable pageable);
+        }
+
+        /**
+         * Callback interface for counting the number of items in a backend
+         * based on a Spring Data Pageable.
+         */
+        @FunctionalInterface
+        public interface CountCallback extends Serializable {
+            /**
+             * Counts the number of available items based on a pageable. The
+             * pageable defines the paging of the items to fetch and the sorting
+             * and is provided although it is generally not needed for
+             * determining the number of items.
+             *
+             * @param pageable
+             *            the pageable that defines which items to fetch and the
+             *            sort order
+             * @return the number of available items
+             */
+            int count(Pageable pageable);
+        }
+    }
+
+    /**
+     * Supply items lazily with a callback from a Spring service method. The
+     * component will automatically fetch more items and adjust its size until
+     * the backend runs out of items. Usage example:
+     * <p>
+     * {@code component.setItemsSpring(pageable -> orderService.getOrders(pageable);}
+     * <p>
+     * The returned data view object can be used for further configuration, or
+     * later on fetched with {@link #getLazyDataView()}. For using in-memory
+     * data, like {@link java.util.Collection}, use
+     * {@link HasListDataView#setItems(Collection)} instead.
+     *
+     * @param fetchCallback
+     *            a function that returns a sorted list of items from the
+     *            backend based on the given pageable
+     * @return a data view for further configuration
+     */
+    public GridLazyDataView<T> setItemsSpring(
+            Spring.FetchCallback<T> fetchCallback) {
+        return setItems(query -> {
+            Pageable pageable = com.vaadin.flow.spring.data.VaadinSpringDataHelpers
+                    .toSpringPageRequest(query);
+            return fetchCallback.fetch(pageable).stream();
+        });
+    }
+
+    /**
+     * Supply items lazily with callbacks: the first one fetches a list of items
+     * from a Spring service method, the second provides the exact count of
+     * items in the backend. Use this in case getting the count is cheap and the
+     * user benefits from the component showing immediately the exact size.
+     * Usage example:
+     * <p>
+     * {@code component.setItemsSpring(
+     *                    pageable -> orderService.getOrders(pageable),
+     *                    pageable -> orderService.countOrders());}
+     * <p>
+     * The returned data view object can be used for further configuration, or
+     * later on fetched with {@link #getLazyDataView()}. For using in-memory
+     * data, like {@link java.util.Collection}, use
+     * {@link HasListDataView#setItems(Collection)} instead.
+     *
+     * @param fetchCallback
+     *            a function that returns a sorted list of items from the
+     *            backend based on the given pageable
+     * @param countCallback
+     *            a function that returns the number of items in the back end
+     * @return LazyDataView instance for further configuration
+     */
+    public GridLazyDataView<T> setItemsSpring(
+            Spring.FetchCallback<T> fetchCallback,
+            Spring.CountCallback<T> countCallback) {
+        return setItems(query -> {
+            Pageable pageable = com.vaadin.flow.spring.data.VaadinSpringDataHelpers
+                    .toSpringPageRequest(query);
+            return fetchCallback.fetch(pageable).stream();
+        }, query -> {
+            Pageable pageable = com.vaadin.flow.spring.data.VaadinSpringDataHelpers
+                    .toSpringPageRequest(query);
+            return countCallback.fetch(pageable).stream();
+        });
     }
 
     /**
