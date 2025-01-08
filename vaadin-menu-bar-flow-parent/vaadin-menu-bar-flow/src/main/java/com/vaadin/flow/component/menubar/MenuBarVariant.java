@@ -12,11 +12,15 @@ package com.vaadin.flow.component.menubar;
  * Set of theme variants applicable for {@code vaadin-menu-bar} component.
  */
 public enum MenuBarVariant {
-    LUMO_SMALL("small"), LUMO_LARGE("large"), LUMO_TERTIARY(
-            "tertiary"), LUMO_TERTIARY_INLINE(
-                    "tertiary-inline"), LUMO_PRIMARY("primary"), LUMO_CONTRAST(
-                            "contrast"), LUMO_ICON("icon"), MATERIAL_CONTAINED(
-                                    "contained"), MATERIAL_OUTLINED("outlined");
+    LUMO_SMALL("small"),
+    LUMO_LARGE("large"),
+    LUMO_TERTIARY("tertiary"),
+    LUMO_TERTIARY_INLINE("tertiary-inline"),
+    LUMO_PRIMARY("primary"),
+    LUMO_CONTRAST("contrast"),
+    LUMO_ICON("icon"),
+    MATERIAL_CONTAINED("contained"),
+    MATERIAL_OUTLINED("outlined");
 
     private final String variant;
 

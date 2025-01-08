@@ -71,8 +71,7 @@ public interface HasItem extends HasSeries {
      * String id = this.getItemId();
      * TreeSeries series = (TreeSeries) this.getSeries();
      * Optional&lt;TreeSeriesItem&gt; treeItem = series.getData().stream()
-     *   .filter(item -> item.getId().equals(id))
-     *   .findFirst();
+     *         .filter(item -> item.getId().equals(id)).findFirst();
      * </pre>
      * <p>
      * Only {@link AbstractSeriesItem} supports setting an ID. For other types

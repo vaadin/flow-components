@@ -12,8 +12,10 @@ package com.vaadin.flow.component.avatar;
  * Set of theme variants applicable for {@code vaadin-avatar} component.
  */
 public enum AvatarVariant {
-    LUMO_XLARGE("xlarge"), LUMO_LARGE("large"), LUMO_SMALL(
-            "small"), LUMO_XSMALL("xsmall");
+    LUMO_XLARGE("xlarge"),
+    LUMO_LARGE("large"),
+    LUMO_SMALL("small"),
+    LUMO_XSMALL("xsmall");
 
     private final String variant;
 

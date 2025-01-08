@@ -33,8 +33,11 @@ package com.vaadin.flow.component.charts.model;
  *
  */
 public enum MarkerSymbolEnum implements MarkerSymbol, ChartEnum {
-    CIRCLE("circle"), SQUARE("square"), DIAMOND("diamond"), TRIANGLE(
-            "triangle"), TRIANGLE_DOWN("triangle-down");
+    CIRCLE("circle"),
+    SQUARE("square"),
+    DIAMOND("diamond"),
+    TRIANGLE("triangle"),
+    TRIANGLE_DOWN("triangle-down");
 
     private String symbol;
 

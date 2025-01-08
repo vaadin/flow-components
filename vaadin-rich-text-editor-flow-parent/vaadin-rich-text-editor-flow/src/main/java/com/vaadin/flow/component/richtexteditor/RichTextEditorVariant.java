@@ -30,8 +30,9 @@ package com.vaadin.flow.component.richtexteditor;
  * component.
  */
 public enum RichTextEditorVariant {
-    LUMO_NO_BORDER("no-border"), LUMO_COMPACT("compact"), MATERIAL_NO_BORDER(
-            "no-border");
+    LUMO_NO_BORDER("no-border"),
+    LUMO_COMPACT("compact"),
+    MATERIAL_NO_BORDER("no-border");
 
     private final String variant;
 

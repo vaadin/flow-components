@@ -61,12 +61,12 @@ import elemental.json.JsonObject;
  * <u>Basic usage</u>
  *
  * {@code
- *   Crud<Person> crud = new Crud<>(Person.class, personEditor);
- *   crud.setDataProvider(personDataProvider);
+ * Crud<Person> crud = new Crud<>(Person.class, personEditor);
+ * crud.setDataProvider(personDataProvider);
  *
- *   // Handle save and delete events.
- *   crud.addSaveListener(e -> save(e.getItem()));
- *   crud.addDeleteListener(e -> delete(e.getItem()));
+ * // Handle save and delete events.
+ * crud.addSaveListener(e -> save(e.getItem()));
+ * crud.addDeleteListener(e -> delete(e.getItem()));
  * }
  * </pre>
  *

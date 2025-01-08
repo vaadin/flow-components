@@ -10,8 +10,12 @@ package com.vaadin.flow.data.bean;
 
 public enum Country {
 
-    FINLAND("Finland"), SWEDEN("Sweden"), USA("USA"), RUSSIA(
-            "Russia"), NETHERLANDS("Netherlands"), SOUTH_AFRICA("South Africa");
+    FINLAND("Finland"),
+    SWEDEN("Sweden"),
+    USA("USA"),
+    RUSSIA("Russia"),
+    NETHERLANDS("Netherlands"),
+    SOUTH_AFRICA("South Africa");
 
     private String name;
 
