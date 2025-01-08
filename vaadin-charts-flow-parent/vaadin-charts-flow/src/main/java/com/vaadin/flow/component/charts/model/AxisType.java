@@ -20,7 +20,8 @@ import java.util.Date;
  * {@link Axis#setCategories(String...)}.
  */
 public enum AxisType implements ChartEnum {
-    LINEAR("linear"), LOGARITHMIC("logarithmic"),
+    LINEAR("linear"),
+    LOGARITHMIC("logarithmic"),
     /**
      * In axis mode, the numbers are given in milliseconds (or as {@link Date}
      * s), and tick marks are placed on appropriate values like full hours or

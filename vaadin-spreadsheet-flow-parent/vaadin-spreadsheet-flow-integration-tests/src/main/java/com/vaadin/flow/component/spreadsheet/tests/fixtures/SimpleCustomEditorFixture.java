@@ -171,9 +171,11 @@ public class SimpleCustomEditorFixture implements SpreadsheetFixture {
     }
 
     private enum EditorType {
-        TEXT_FIELD(1, "TextField"), CHECKBOX(2, "Checkbox"), DATE_PICKER(3,
-                "DatePicker"), TEXT_AREA(4,
-                        "TextArea"), COMBO_BOX(5, "ComboBox");
+        TEXT_FIELD(1, "TextField"),
+        CHECKBOX(2, "Checkbox"),
+        DATE_PICKER(3, "DatePicker"),
+        TEXT_AREA(4, "TextArea"),
+        COMBO_BOX(5, "ComboBox");
 
         private final int columnIndex;
 
