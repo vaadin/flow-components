@@ -2956,7 +2956,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
              *            sort order
              * @return the number of available items
              */
-            int count(Pageable pageable);
+            long count(Pageable pageable);
         }
     }
 
@@ -3011,7 +3011,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public GridLazyDataView<T> setItemsSpring(
             Spring.FetchCallback<T> fetchCallback,
-            Spring.CountCallback<T> countCallback) {
+            Spring.CountCallback countCallback) {
         return setItems(query -> {
             Pageable pageable = com.vaadin.flow.spring.data.VaadinSpringDataHelpers
                     .toSpringPageRequest(query);
@@ -3019,7 +3019,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }, query -> {
             Pageable pageable = com.vaadin.flow.spring.data.VaadinSpringDataHelpers
                     .toSpringPageRequest(query);
-            return countCallback.fetch(pageable).stream();
+            long count = countCallback.count(pageable);
+            if (count > Integer.MAX_VALUE) {
+                LoggerFactory.getLogger(Grid.class).warn(
+                        "The count of items in the backend ({}) exceeds the maximum supported by the Grid.",
+                        count);
+                return Integer.MAX_VALUE;
+            }
+            return (int) count;
         });
     }
 
