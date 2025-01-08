@@ -2967,7 +2967,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * component will automatically fetch more items and adjust its size until
      * the backend runs out of items. Usage example:
      * <p>
-     * {@code component.setItemsSpring(pageable -> orderService.getOrders(pageable));}
+     * {@code component.setItemsPageable(pageable -> orderService.getOrders(pageable));}
      * <p>
      * The returned data view object can be used for further configuration, or
      * later on fetched with {@link #getLazyDataView()}. For using in-memory
@@ -2979,7 +2979,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            backend based on the given pageable
      * @return a data view for further configuration
      */
-    public GridLazyDataView<T> setItemsSpring(
+    public GridLazyDataView<T> setItemsPageable(
             Spring.FetchCallback<Pageable, T> fetchCallback) {
         return setItems(
                 query -> handleSpringFetchCallback(query, fetchCallback));
@@ -2992,7 +2992,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * user benefits from the component showing immediately the exact size.
      * Usage example:
      * <p>
-     * {@code component.setItemsSpring(
+     * {@code component.setItemsPageable(
      *                    pageable -> orderService.getOrders(pageable),
      *                    pageable -> orderService.countOrders());}
      * <p>
@@ -3008,7 +3008,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            a function that returns the number of items in the back end
      * @return LazyDataView instance for further configuration
      */
-    public GridLazyDataView<T> setItemsSpring(
+    public GridLazyDataView<T> setItemsPageable(
             Spring.FetchCallback<Pageable, T> fetchCallback,
             Spring.CountCallback<Pageable> countCallback) {
         return setItems(
