@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.charts.model;
 
+import java.time.Instant;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -60,8 +61,20 @@ public abstract class Axis extends AbstractConfigurationObject {
      *
      * @param min
      * @see #setMin(Number)
+     * @deprecated use setMin(Instant) instead
      */
+    @Deprecated
     public void setMin(Date min) {
+        this.min = Util.toHighchartsTS(min);
+    }
+
+    /**
+     * The minimum value of the axis as Instant.
+     *
+     * @param min
+     * @see #setMin(Number)
+     */
+    public void setMin(Instant min) {
         this.min = Util.toHighchartsTS(min);
     }
 
@@ -90,8 +103,20 @@ public abstract class Axis extends AbstractConfigurationObject {
      *
      * @param max
      * @see #setMax(Number)
+     * @deprecated use setMax(Instant) instead
      */
+    @Deprecated
     public void setMax(Date max) {
+        this.max = Util.toHighchartsTS(max);
+    }
+
+    /**
+     * The maximum value of the axis as Instant.
+     *
+     * @param max
+     * @see #setMax(Number)
+     */
+    public void setMax(Instant max) {
         this.max = Util.toHighchartsTS(max);
     }
 
