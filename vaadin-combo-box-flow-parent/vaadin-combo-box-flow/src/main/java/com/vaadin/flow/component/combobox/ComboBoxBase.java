@@ -15,11 +15,17 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
+
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
@@ -65,6 +71,7 @@ import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.ListDataView;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -72,6 +79,7 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 /**
  * Provides base functionality for combo box related components, such as
@@ -956,6 +964,136 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
             CallbackDataProvider.FetchCallback<TItem, String> fetchCallback,
             CallbackDataProvider.CountCallback<TItem, String> countCallback) {
         return HasLazyDataView.super.setItems(fetchCallback, countCallback);
+    }
+
+    public interface SpringData extends Serializable {
+        /**
+         * Callback interface for fetching a list of items from a backend based
+         * on a Spring Data Pageable and a filter string.
+         *
+         * @param <T>
+         *            the type of the items to fetch
+         */
+        @FunctionalInterface
+        public interface FetchCallback<PAGEABLE, T> extends Serializable {
+
+            /**
+             * Fetches a list of items based on a pageable and a filter string.
+             * The pageable defines the paging of the items to fetch and the
+             * sorting.
+             *
+             * @param pageable
+             *            the pageable that defines which items to fetch and the
+             *            sort order
+             * @param filterString
+             *            the filter string provided by the ComboBox
+             * @return a list of items
+             */
+            List<T> fetch(PAGEABLE pageable, String filterString);
+        }
+
+        /**
+         * Callback interface for counting the number of items in a backend
+         * based on a Spring Data Pageable and a filter string.
+         */
+        @FunctionalInterface
+        public interface CountCallback<PAGEABLE> extends Serializable {
+            /**
+             * Counts the number of available items based on a pageable and a
+             * filter string. The pageable defines the paging of the items to
+             * fetch and the sorting and is provided although it is generally
+             * not needed for determining the number of items.
+             *
+             * @param pageable
+             *            the pageable that defines which items to fetch and the
+             *            sort order
+             * @param filterString
+             *            the filter string provided by the ComboBox
+             * @return the number of available items
+             */
+            long count(PAGEABLE pageable, String filterString);
+        }
+    }
+
+    /**
+     * Supply items lazily with a callback from a backend based on a Spring Data
+     * Pageable. The component will automatically fetch more items and adjust
+     * its size until the backend runs out of items. Usage example:
+     * <p>
+     * {@code comboBox.setItemsPageable((pageable, filterString) -> orderService.getOrders(pageable, filterString));}
+     * <p>
+     * The returned data view object can be used for further configuration, or
+     * later on fetched with {@link #getLazyDataView()}. For using in-memory
+     * data, like {@link java.util.Collection}, use
+     * {@link HasListDataView#setItems(Collection)} instead.
+     *
+     * @param fetchCallback
+     *            a function that returns a sorted list of items from the
+     *            backend based on the given pageable
+     * @return a data view for further configuration
+     */
+    public ComboBoxLazyDataView<TItem> setItemsPageable(
+            SpringData.FetchCallback<Pageable, TItem> fetchCallback) {
+        return setItems(
+                query -> handleSpringFetchCallback(query, fetchCallback));
+    }
+
+    /**
+     * Supply items lazily with callbacks: the first one fetches a list of items
+     * from a backend based on a Spring Data Pageable, the second provides the
+     * exact count of items in the backend. Use this in case getting the count
+     * is cheap and the user benefits from the component showing immediately the
+     * exact size. Usage example:
+     * <p>
+     * {@code component.setItemsPageable(
+     *                    (pageable, filterString) -> orderService.getOrders(pageable, filterString),
+     *                    (pageable, filterString) -> orderService.countOrders(filterString));}
+     * <p>
+     * The returned data view object can be used for further configuration, or
+     * later on fetched with {@link #getLazyDataView()}. For using in-memory
+     * data, like {@link java.util.Collection}, use
+     * {@link HasListDataView#setItems(Collection)} instead.
+     *
+     * @param fetchCallback
+     *            a function that returns a sorted list of items from the
+     *            backend based on the given pageable and filter string
+     * @param countCallback
+     *            a function that returns the number of items in the back end
+     *            based on the filter string
+     * @return LazyDataView instance for further configuration
+     */
+    public ComboBoxLazyDataView<TItem> setItemsPageable(
+            SpringData.FetchCallback<Pageable, TItem> fetchCallback,
+            SpringData.CountCallback<Pageable> countCallback) {
+        return setItems(
+                query -> handleSpringFetchCallback(query, fetchCallback),
+                query -> handleSpringCountCallback(query, countCallback));
+    }
+
+    private static <PAGEABLE, T> Stream<T> handleSpringFetchCallback(
+            Query<T, String> query,
+            SpringData.FetchCallback<PAGEABLE, T> fetchCallback) {
+        PAGEABLE pageable = (PAGEABLE) VaadinSpringDataHelpers
+                .toSpringPageRequest(query);
+        List<T> itemList = fetchCallback.fetch(pageable,
+                query.getFilter().orElse(""));
+        return itemList.stream();
+    }
+
+    private static <PAGEABLE> int handleSpringCountCallback(
+            Query<?, String> query,
+            SpringData.CountCallback<PAGEABLE> countCallback) {
+        PAGEABLE pageable = (PAGEABLE) VaadinSpringDataHelpers
+                .toSpringPageRequest(query);
+        long count = (long) countCallback.count(pageable,
+                query.getFilter().orElse(""));
+        if (count > Integer.MAX_VALUE) {
+            LoggerFactory.getLogger(ComboBoxBase.class).warn(
+                    "The count of items in the backend ({}) exceeds the maximum supported by the Grid.",
+                    count);
+            return Integer.MAX_VALUE;
+        }
+        return (int) count;
     }
 
     @Override
