@@ -31,8 +31,12 @@ package com.vaadin.flow.component.charts.model;
  */
 public enum Shape implements ChartEnum {
 
-    CALLOUT("callout"), CIRCLE("circle"), DIAMOND("diamond"), SQUARE(
-            "square"), TRIANGLE("triangle"), TRIANGLE_DOWN("triangle-down");
+    CALLOUT("callout"),
+    CIRCLE("circle"),
+    DIAMOND("diamond"),
+    SQUARE("square"),
+    TRIANGLE("triangle"),
+    TRIANGLE_DOWN("triangle-down");
 
     Shape(String type) {
         this.type = type;

@@ -141,7 +141,8 @@ public class TimePickerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testSetStep_lessThan0Ms_throwsException() {
-        TimePicker timePicker=new TimePicker();timePicker.setStep(Duration.ofNanos(500_000));
+        TimePicker timePicker = new TimePicker();
+        timePicker.setStep(Duration.ofNanos(500_000));
     }
 
     @Test

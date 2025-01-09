@@ -12,10 +12,11 @@ package com.vaadin.flow.component.textfield;
  * Set of theme variants applicable for {@code vaadin-text-field} component.
  */
 public enum TextFieldVariant {
-    LUMO_SMALL("small"), LUMO_ALIGN_CENTER("align-center"), LUMO_ALIGN_RIGHT(
-            "align-right"), LUMO_HELPER_ABOVE_FIELD(
-                    "helper-above-field"), MATERIAL_ALWAYS_FLOAT_LABEL(
-                            "always-float-label");
+    LUMO_SMALL("small"),
+    LUMO_ALIGN_CENTER("align-center"),
+    LUMO_ALIGN_RIGHT("align-right"),
+    LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
+    MATERIAL_ALWAYS_FLOAT_LABEL("always-float-label");
 
     private final String variant;
 

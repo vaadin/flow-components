@@ -33,8 +33,10 @@ package com.vaadin.flow.component.charts.model;
  */
 public enum ExportFileType implements ChartEnum {
 
-    IMAGE_PNG("image/png"), IMAGE_JPEG("image/jpeg"), APPLICATION_PDF(
-            "application/pdf"), IMAGE_SVG_XML("image/svg+xml");
+    IMAGE_PNG("image/png"),
+    IMAGE_JPEG("image/jpeg"),
+    APPLICATION_PDF("application/pdf"),
+    IMAGE_SVG_XML("image/svg+xml");
 
     private final String type;
 

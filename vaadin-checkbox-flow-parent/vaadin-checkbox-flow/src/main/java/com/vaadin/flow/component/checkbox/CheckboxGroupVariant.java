@@ -12,8 +12,9 @@ package com.vaadin.flow.component.checkbox;
  * Set of theme variants applicable for {@code vaadin-checkbox-group} component.
  */
 public enum CheckboxGroupVariant {
-    LUMO_VERTICAL("vertical"), LUMO_HELPER_ABOVE_FIELD(
-            "helper-above-field"), MATERIAL_VERTICAL("vertical");
+    LUMO_VERTICAL("vertical"),
+    LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
+    MATERIAL_VERTICAL("vertical");
 
     private final String variant;
 
