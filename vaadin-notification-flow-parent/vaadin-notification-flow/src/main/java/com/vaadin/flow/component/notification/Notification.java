@@ -88,7 +88,15 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      * Enumeration of all available positions for notification component
      */
     public enum Position {
-        TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE, BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH;
+        TOP_STRETCH,
+        TOP_START,
+        TOP_CENTER,
+        TOP_END,
+        MIDDLE,
+        BOTTOM_START,
+        BOTTOM_CENTER,
+        BOTTOM_END,
+        BOTTOM_STRETCH;
 
         private final String clientName;
 
