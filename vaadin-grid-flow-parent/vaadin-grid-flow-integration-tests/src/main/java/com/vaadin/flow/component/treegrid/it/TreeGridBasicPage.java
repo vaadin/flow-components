@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -32,7 +32,8 @@ public class TreeGridBasicPage extends Div {
 
     public TreeGridBasicPage() {
         PeopleGenerator peopleGenerator = new PeopleGenerator();
-        List<PersonWithLevel> people = peopleGenerator.generatePeopleWithLevels(10, 0);
+        List<PersonWithLevel> people = peopleGenerator
+                .generatePeopleWithLevels(1000, 0);
 
         TreeGrid<PersonWithLevel> grid = new TreeGrid<>();
         grid.addHierarchyColumn(person -> person.getFirstName())
