@@ -9,21 +9,26 @@
 package com.vaadin.flow.component.crud.tests;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class CompositeIT extends AbstractParallelTest {
+@TestPath("vaadin-crud/composite")
+public class CompositeIT extends AbstractComponentIT {
+
+    @Before
+    public void init() {
+        open();
+    }
 
     @Test
     public void compositeTouchesDirtyState() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-crud") + "/composite";
-        getDriver().get(url);
-
         final CrudElement crud = $(CrudElement.class).waitForFirst();
         crud.getNewItemButton().get().click();
 
