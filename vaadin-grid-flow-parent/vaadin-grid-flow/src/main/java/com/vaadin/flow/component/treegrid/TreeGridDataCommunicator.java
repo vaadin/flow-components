@@ -63,9 +63,12 @@ public class TreeGridDataCommunicator<T>
 
     @Override
     public void reset() {
+        if (rootCache != null) {
+            getKeyMapper().removeAll();
+            getDataGenerator().destroyAllData();
+        }
+
         rootCache = null;
-        getKeyMapper().removeAll();
-        getDataGenerator().destroyAllData();
         requestFlush();
     }
 
