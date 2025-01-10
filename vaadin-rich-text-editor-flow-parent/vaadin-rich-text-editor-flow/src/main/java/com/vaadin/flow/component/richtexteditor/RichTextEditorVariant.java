@@ -15,11 +15,9 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * component.
  */
 public enum RichTextEditorVariant implements ThemeVariant {
-    //@formatter:off
     LUMO_NO_BORDER("no-border"),
     LUMO_COMPACT("compact"),
     MATERIAL_NO_BORDER("no-border");
-    //@formatter:on
 
     private final String variant;
 

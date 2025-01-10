@@ -21,7 +21,6 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-menu-bar} component.
  */
 public enum MenuBarVariant implements ThemeVariant {
-    //@formatter:off
     LUMO_SMALL("small"),
     LUMO_LARGE("large"),
     LUMO_TERTIARY("tertiary"),
@@ -34,7 +33,6 @@ public enum MenuBarVariant implements ThemeVariant {
     MATERIAL_CONTAINED("contained"),
     MATERIAL_OUTLINED("outlined"),
     MATERIAL_END_ALIGNED("end-aligned");
-    //@formatter:on
 
     private final String variant;
 
