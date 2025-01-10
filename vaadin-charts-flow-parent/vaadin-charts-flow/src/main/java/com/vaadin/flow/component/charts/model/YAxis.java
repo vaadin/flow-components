@@ -1794,11 +1794,11 @@ public class YAxis extends Axis {
     }
 
     /**
-     * For vertical axes only. Setting the static scale ensures that each tick
-     * unit is translated into a fixed pixel height. For example, setting the
-     * static scale to 24 results in each Y axis category taking up 24 pixels,
-     * and the height of the chart adjusts. Adding or removing items will make
-     * the chart resize. Defaults to 50.
+     * Supported only in Gantt charts: For vertical axes only. Setting the
+     * static scale ensures that each tick unit is translated into a fixed pixel
+     * height. For example, setting the static scale to 24 results in each Y
+     * axis category taking up 24 pixels, and the height of the chart adjusts.
+     * Adding or removing items will make the chart resize. Defaults to 50.
      * 
      * @param staticScale
      */

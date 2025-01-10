@@ -185,8 +185,8 @@ public class Marker extends AbstractConfigurationObject {
     }
 
     /**
-     * Horizontal alignment of the markers relative to the points. Defaults to
-     * "center"
+     * Supported only in Gantt charts: Horizontal alignment of the markers
+     * relative to the points. Defaults to "center"
      */
     public void setAlign(HorizontalAlign align) {
         this.align = align;
@@ -200,8 +200,8 @@ public class Marker extends AbstractConfigurationObject {
     }
 
     /**
-     * Vertical alignment of the markers relative to the points. Defaults to
-     * "middle"
+     * Supported only in Gantt charts: Vertical alignment of the markers
+     * relative to the points. Defaults to "middle"
      */
     public void setVerticalAlign(VerticalAlign verticalAlign) {
         this.verticalAlign = verticalAlign;
@@ -215,7 +215,8 @@ public class Marker extends AbstractConfigurationObject {
     }
 
     /**
-     * Whether to draw the markers inside the points. Defaults to false.
+     * Supported only in Gantt charts: Whether to draw the markers inside the
+     * points. Defaults to false.
      */
     public void setInside(Boolean inside) {
         this.inside = inside;

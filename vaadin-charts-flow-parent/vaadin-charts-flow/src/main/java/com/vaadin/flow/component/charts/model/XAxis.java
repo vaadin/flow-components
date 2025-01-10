@@ -1533,7 +1533,8 @@ public class XAxis extends Axis {
     }
 
     /**
-     * Show an indicator on the axis for the current date and time.
+     * Supported only in Gantt charts: Show an indicator on the axis for the
+     * current date and time.
      *
      * @param currentDateIndicator
      */
@@ -1546,7 +1547,8 @@ public class XAxis extends Axis {
     }
 
     /**
-     * Show an indicator on the axis for the current date and time.
+     * Supported only in Gantt charts: Show an indicator on the axis for the
+     * current date and time.
      *
      * @param currentDateIndicator
      */
