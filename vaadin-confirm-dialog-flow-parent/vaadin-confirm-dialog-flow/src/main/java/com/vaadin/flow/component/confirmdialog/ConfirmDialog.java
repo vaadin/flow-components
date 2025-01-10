@@ -28,18 +28,15 @@ import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Shortcuts;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
-import com.vaadin.flow.internal.StateTree;
-import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -104,8 +101,6 @@ public class ConfirmDialog extends Component
 
     private String height;
     private String width;
-
-    private Registration afterProgrammaticNavigationListenerRegistration;
 
     /**
      * Sets the width of the component content area.
@@ -217,21 +212,16 @@ public class ConfirmDialog extends Component
                 getElement().getProperty("accessibleDescriptionRef"));
     }
 
-    private boolean autoAddedToTheUi;
-
     /**
      * Creates an empty dialog with a Confirm button
      */
     public ConfirmDialog() {
-        getElement().addEventListener("opened-changed", event -> {
-            if (!isOpened()) {
-                setModality(false);
-            }
-            if (autoAddedToTheUi && !isOpened()) {
-                getElement().removeFromParent();
-                autoAddedToTheUi = false;
-            }
-        });
+        // Initialize auto-add behavior
+        new OverlayAutoAddController<>(this, () -> true);
+
+        addConfirmListener(event -> close());
+        addRejectListener(event -> close());
+        addCancelListener(event -> close());
     }
 
     /**
@@ -648,7 +638,6 @@ public class ConfirmDialog extends Component
         setOpened(false);
     }
 
-    @Synchronize(property = "opened", value = "opened-changed")
     public boolean isOpened() {
         return getElement().getProperty("opened", false);
     }
@@ -664,9 +653,6 @@ public class ConfirmDialog extends Component
      *            close it
      */
     public void setOpened(boolean opened) {
-        if (opened) {
-            ensureAttached();
-        }
         setModality(opened);
         getElement().setProperty("opened", opened);
     }
@@ -873,6 +859,9 @@ public class ConfirmDialog extends Component
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
+        updateWidth();
+        updateHeight();
+
         // Same as https://github.com/vaadin/flow-components/pull/725
         Shortcuts.setShortcutListenOnElement("this._overlayElement", this);
     }
@@ -880,47 +869,6 @@ public class ConfirmDialog extends Component
     private void setModality(boolean modal) {
         if (isAttached()) {
             getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
-        }
-    }
-
-    private UI getCurrentUI() {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        return ui;
-    }
-
-    private void ensureAttached() {
-        UI ui = getCurrentUI();
-        StateTree.ExecutionRegistration addToUiRegistration = ui
-                .beforeClientResponse(ui, context -> {
-                    if (getElement().getNode().getParent() == null) {
-                        ui.addToModalComponent(this);
-                        autoAddedToTheUi = true;
-                        updateWidth();
-                        updateHeight();
-                        ui.setChildComponentModal(this, true);
-                    }
-                    if (afterProgrammaticNavigationListenerRegistration != null) {
-                        afterProgrammaticNavigationListenerRegistration
-                                .remove();
-                    }
-                });
-        if (ui.getSession() != null) {
-            afterProgrammaticNavigationListenerRegistration = ui
-                    .addAfterNavigationListener(event -> {
-                        if (event.getLocationChangeEvent()
-                                .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
-                            addToUiRegistration.remove();
-                            afterProgrammaticNavigationListenerRegistration
-                                    .remove();
-                        }
-                    });
         }
     }
 }
