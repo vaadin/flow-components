@@ -11,6 +11,8 @@ package com.vaadin.flow.component.charts.model;
 import java.time.Instant;
 import java.util.Date;
 
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.style.Color;
 
 public abstract class AreaOptions extends AbstractPlotOptions {
@@ -764,4 +766,22 @@ public abstract class AreaOptions extends AbstractPlotOptions {
      * @see #setPointStart(Number)
      */
     public abstract void setPointStart(Instant instant);
+
+    /**
+     * @see #setDragDrop(DragDrop)
+     */
+    public abstract DragDrop getDragDrop();
+
+    /**
+     * The DragDrop options allows points to be moved around or modified in the
+     * chart. In addition to the options mentioned under the dragDrop API
+     * structure, the chart fires three events: dragStart, drag and drop.
+     *
+     * @see Chart#addPointDragStartListener(ComponentEventListener)
+     * @see Chart#addPointDragListener(ComponentEventListener)
+     * @see Chart#addPointDropListener(ComponentEventListener)
+     * @param dragDrop
+     */
+    public abstract void setDragDrop(DragDrop dragDrop);
+
 }

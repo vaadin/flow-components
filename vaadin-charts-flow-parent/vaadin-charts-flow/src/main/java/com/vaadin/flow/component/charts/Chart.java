@@ -35,6 +35,9 @@ import com.vaadin.flow.component.charts.events.ChartRedrawEvent;
 import com.vaadin.flow.component.charts.events.ChartSelectionEvent;
 import com.vaadin.flow.component.charts.events.DrilldownEvent;
 import com.vaadin.flow.component.charts.events.PointClickEvent;
+import com.vaadin.flow.component.charts.events.PointDragEvent;
+import com.vaadin.flow.component.charts.events.PointDragStartEvent;
+import com.vaadin.flow.component.charts.events.PointDropEvent;
 import com.vaadin.flow.component.charts.events.PointLegendItemClickEvent;
 import com.vaadin.flow.component.charts.events.PointMouseOutEvent;
 import com.vaadin.flow.component.charts.events.PointMouseOverEvent;
@@ -594,6 +597,33 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     public Registration addPointUpdateListener(
             ComponentEventListener<PointUpdateEvent> listener) {
         return addListener(PointUpdateEvent.class, listener);
+    }
+
+    /**
+     * Adds a point drag start listener, which will be notified when starting to drag a point.
+     * @param listener
+     */
+    public Registration addPointDragStartListener(
+            ComponentEventListener<PointDragStartEvent> listener) {
+        return addListener(PointDragStartEvent.class, listener);
+    }
+
+    /**
+     * Adds a point drop listener, which will be notified point is dropped.
+     * @param listener
+     */
+    public Registration addPointDropListener(
+            ComponentEventListener<PointDropEvent> listener) {
+        return addListener(PointDropEvent.class, listener);
+    }
+
+    /**
+     * Adds a point drag listener, which will be notified while point is dragged.
+     * @param listener
+     */
+    public Registration addPointDragListener(
+            ComponentEventListener<PointDragEvent> listener) {
+        return addListener(PointDragEvent.class, listener);
     }
 
     /**

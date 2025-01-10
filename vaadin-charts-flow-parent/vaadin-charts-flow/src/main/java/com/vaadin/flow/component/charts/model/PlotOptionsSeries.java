@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.util.Util;
 
@@ -39,6 +41,7 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
     private DashStyle dashStyle;
     private DataLabels dataLabels;
     private String description;
+    private DragDrop dragDrop;
     private Boolean enableMouseTracking;
     private Boolean exposeElementToA11y;
     private Dimension findNearestPointBy;
@@ -1309,5 +1312,30 @@ public class PlotOptionsSeries extends AbstractPlotOptions {
      */
     public void setPointStart(Instant instant) {
         this.pointStart = Util.toHighchartsTS(instant);
+    }
+
+    /**
+     * @see #setDragDrop(DragDrop)
+     */
+    public DragDrop getDragDrop() {
+        if (this.dragDrop == null) {
+            this.dragDrop = new DragDrop();
+        }
+
+        return dragDrop;
+    }
+
+    /**
+     * The DragDrop options allows points to be moved around or modified in the
+     * chart. In addition to the options mentioned under the dragDrop API
+     * structure, the chart fires three events: dragStart, drag and drop.
+     *
+     * @see Chart#addPointDragStartListener(ComponentEventListener)
+     * @see Chart#addPointDragListener(ComponentEventListener)
+     * @see Chart#addPointDropListener(ComponentEventListener)
+     * @param dragDrop
+     */
+    public void setDragDrop(DragDrop dragDrop) {
+        this.dragDrop = dragDrop;
     }
 }
