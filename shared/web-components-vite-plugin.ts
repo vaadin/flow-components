@@ -44,7 +44,10 @@ export function useLitWebComponents(): PluginOption {
         resolve: {
           alias: [
             'accordion',
+            'accordion-panel',
             'app-layout',
+            'drawer-toggle',
+            'avatar',
             'avatar-group',
             'context-menu',
             'custom-field',
@@ -52,23 +55,26 @@ export function useLitWebComponents(): PluginOption {
             'dialog',
             'horizontal-layout',
             'list-box',
+            'item',
             'notification',
+            'radio-button',
             'radio-button-group',
             'scroller',
             'split-layout',
             'tabs',
+            'tab',
+            'tabsheet',
             'vertical-layout'
           ].flatMap((component) => {
             return [
               {
-                find: new RegExp(`^@vaadin/${component}\/(src\/)?vaadin-(?!lit)`),
-                replacement: `@vaadin/${component}/$1vaadin-lit-`
+                find: new RegExp(`^@vaadin/[^\/]+\/(src\/)?vaadin-${component}.js`),
+                replacement: `@vaadin/[^\/]+/$1vaadin-lit-${component}.js`
               }
-            ]
+            ];
           })
-        },
-      }
+        }
+      };
     }
-  }
+  };
 }
-
