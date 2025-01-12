@@ -32,3 +32,43 @@ export function useLocalWebComponents(webComponentsRepoPath: string): PluginOpti
     }
   };
 }
+
+/**
+ * Vite plugin that resolves Vaadin web components to Lit versions
+ */
+export function useLitWebComponents(): PluginOption {
+  return {
+    name: 'use-lit-web-components',
+    config() {
+      return {
+        resolve: {
+          alias: [
+            'accordion',
+            'app-layout',
+            'avatar-group',
+            'context-menu',
+            'custom-field',
+            'details',
+            'dialog',
+            'horizontal-layout',
+            'list-box',
+            'notification',
+            'radio-button-group',
+            'scroller',
+            'split-layout',
+            'tabs',
+            'vertical-layout'
+          ].flatMap((component) => {
+            return [
+              {
+                find: new RegExp(`^@vaadin/${component}\/(src\/)?vaadin-(?!lit)`),
+                replacement: `@vaadin/${component}/$1vaadin-lit-`
+              }
+            ]
+          })
+        },
+      }
+    }
+  }
+}
+
