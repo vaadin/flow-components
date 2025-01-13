@@ -52,7 +52,7 @@ pomBase=`getBaseVersion $pomVersion`
 
 ### Get the main branch version for components
 mainPom=`curl -s "https://raw.githubusercontent.com/vaadin/flow-components/main/pom.xml"`
-mainMajorMinor=`echo "$mainPom" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | head -1 | cut -d '-' -f1`
+mainMajorMinor=`echo "$mainPom" | grep -m2 '<version>' | tail -n1 | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | head -1 | cut -d '-' -f1`
 
 ### Load versions file for this platform release
 branch=$versionBase
