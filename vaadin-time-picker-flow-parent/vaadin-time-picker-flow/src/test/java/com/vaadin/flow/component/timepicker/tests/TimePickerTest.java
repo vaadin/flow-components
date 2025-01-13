@@ -80,6 +80,18 @@ public class TimePickerTest {
     }
 
     @Test
+    public void emptyValueIsNull() {
+        TimePicker picker = new TimePicker();
+        Assert.assertNull(picker.getEmptyValue());
+    }
+
+    @Test
+    public void setInitialValue_emptyValueIsNull() {
+        TimePicker picker = new TimePicker(LocalTime.of(5, 30));
+        Assert.assertNull(picker.getEmptyValue());
+    }
+
+    @Test
     public void timePicker_nullValue() {
         TimePicker timePicker = new TimePicker();
         timePicker.setValue(null);
