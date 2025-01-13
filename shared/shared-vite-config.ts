@@ -7,10 +7,10 @@ export const mergeConfigs = (...configs: UserConfigFn[]) => {
 
 export const sharedConfig: UserConfigFn = (env) => ({
   plugins: [
-    // Use local version of web-components, disabled by default
-    // To use this un-comment the lines below and change the path to
-    // the absolute path of your web-components repo's node_modules
-    // folder
+    // Use local version of web-components, disabled by default.
+    // To use this, uncomment the lines below and change the path
+    // to your local web-components folder if needed (absolute or
+    // relative to this shared config).
     // DO NOT COMMIT THESE CHANGES!
     // useLocalWebComponents('../../web-components')
   ]
