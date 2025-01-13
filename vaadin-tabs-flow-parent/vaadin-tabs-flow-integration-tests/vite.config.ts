@@ -9,4 +9,8 @@ const customConfig: UserConfigFn = (env) => ({
   // https://vitejs.dev/config/
 });
 
-export default defineConfig((env) => mergeConfigs(vaadinConfig(env), sharedConfig(env), customConfig(env)));
+export default defineConfig((env) => mergeConfigs(
+  vaadinConfig(env),
+  sharedConfig(env),
+  customConfig(env)
+));
