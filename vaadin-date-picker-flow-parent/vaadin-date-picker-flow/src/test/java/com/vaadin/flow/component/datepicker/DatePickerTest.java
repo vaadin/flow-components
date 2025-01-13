@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.datepicker;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -86,6 +87,18 @@ public class DatePickerTest {
         Assert.assertEquals(LocalDate.of(2018, 4, 25), picker.getValue());
         Assert.assertEquals("2018-04-25",
                 picker.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void emptyValueIsNull() {
+        DatePicker picker = new DatePicker();
+        Assert.assertNull(picker.getEmptyValue());
+    }
+
+    @Test
+    public void setInitialValue_emptyValueIsNull() {
+        DatePicker picker = new DatePicker(LocalDate.of(2018, 4, 25));
+        Assert.assertNull(picker.getEmptyValue());
     }
 
     @Test
