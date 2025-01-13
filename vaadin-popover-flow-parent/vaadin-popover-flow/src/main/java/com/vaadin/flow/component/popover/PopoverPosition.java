@@ -19,7 +19,6 @@ package com.vaadin.flow.component.popover;
  * Popover position in relation to the target element.
  */
 public enum PopoverPosition {
-    //@formatter:off
     TOP_START("top-start"),
     TOP("top"),
     TOP_END("top-end"),
@@ -32,7 +31,6 @@ public enum PopoverPosition {
     END_TOP("end-top"),
     END("end"),
     END_BOTTOM("end-bottom");
-    //@formatter:off
 
     private final String position;
 

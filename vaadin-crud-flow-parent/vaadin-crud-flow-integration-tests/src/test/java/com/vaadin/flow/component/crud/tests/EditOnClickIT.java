@@ -15,14 +15,15 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class EditOnClickIT extends AbstractParallelTest {
+@TestPath("vaadin-crud/editonclick")
+public class EditOnClickIT extends AbstractComponentIT {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-crud") + "/editonclick";
-        getDriver().get(url);
+        open();
     }
 
     @After

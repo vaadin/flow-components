@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>vaadin-login-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
+        <artifactId>vaadin-login-flow-parent</artifactId>
         <version>24.7-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-login-testbench</artifactId>
@@ -11,6 +11,11 @@
     <name>Vaadin Login Testbench API</name>
     <description>Vaadin Login Testbench API</description>
     <dependencies>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-button-testbench</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-shared</artifactId>
@@ -21,15 +26,9 @@
             <artifactId>vaadin-text-field-testbench</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-button-testbench</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
     <build>
-        <plugins>
-        </plugins>
+        <plugins/>
     </build>
     <profiles>
         <profile>

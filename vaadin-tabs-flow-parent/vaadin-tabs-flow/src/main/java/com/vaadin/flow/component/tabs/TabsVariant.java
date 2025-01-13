@@ -21,9 +21,9 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-tabs} component.
  */
 public enum TabsVariant implements ThemeVariant {
-    //@formatter:off
     /**
-     * @deprecated Use {@code TabVariant.LUMO_ICON_ON_TOP} on individual {@code Tab} instances instead.
+     * @deprecated Use {@code TabVariant.LUMO_ICON_ON_TOP} on individual
+     *             {@code Tab} instances instead.
      */
     @Deprecated
     LUMO_ICON_ON_TOP("icon-on-top"),
@@ -33,7 +33,6 @@ public enum TabsVariant implements ThemeVariant {
     LUMO_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
     LUMO_EQUAL_WIDTH_TABS("equal-width-tabs"),
     MATERIAL_FIXED("fixed");
-    //@formatter:on
 
     private final String variant;
 
