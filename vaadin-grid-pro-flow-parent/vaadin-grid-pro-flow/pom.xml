@@ -29,13 +29,6 @@
             <artifactId>vaadin-grid-flow</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- Optional Spring dependencies to be able to provide Spring Data API-->
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-commons</artifactId>
-            <version>3.4.1</version>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-lumo-theme</artifactId>
@@ -69,6 +62,13 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
+        </dependency>
+        <!-- Optional Spring dependencies to be able to provide Spring Data API-->
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
+            <version>3.4.1</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>

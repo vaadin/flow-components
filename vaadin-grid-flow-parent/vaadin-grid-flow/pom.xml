@@ -34,24 +34,6 @@
             <artifactId>flow-html-components</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-renderer-flow</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!-- Optional Spring dependencies to be able to provide Spring Data API-->
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-commons</artifactId>
-            <version>3.4.1</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-spring</artifactId>
-            <version>${flow.version}</version>
-            <optional>true</optional>
-        </dependency>
 
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -73,6 +55,17 @@
             <artifactId>vaadin-flow-components-test-util</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-renderer-flow</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring</artifactId>
+            <version>${flow.version}</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -102,6 +95,13 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
+        </dependency>
+        <!-- Optional Spring dependencies to be able to provide Spring Data API-->
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
+            <version>3.4.1</version>
+            <optional>true</optional>
         </dependency>
     </dependencies>
     <build>
