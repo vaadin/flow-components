@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.datepicker;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
