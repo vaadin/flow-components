@@ -249,7 +249,7 @@ public class DatePicker
      * @see #setValue(Object)
      */
     private DatePicker(LocalDate initialDate, boolean isInitialValueOptional) {
-        super("value", initialDate, String.class, PARSER, FORMATTER);
+        super("value", null, String.class, PARSER, FORMATTER);
 
         // Initialize property value unless it has already been set from a
         // template
