@@ -89,7 +89,7 @@ public final class LumoUtility {
                 public static final String BASELINE = "sm:items-baseline";
                 public static final String CENTER = "sm:items-center";
                 public static final String END = "sm:items-end";
-                public static final String START = "sm:tems-start";
+                public static final String START = "sm:items-start";
                 public static final String STRETCH = "sm:items-stretch";
 
                 private Small() {
@@ -105,7 +105,7 @@ public final class LumoUtility {
                 public static final String BASELINE = "md:items-baseline";
                 public static final String CENTER = "md:items-center";
                 public static final String END = "md:items-end";
-                public static final String START = "md:tems-start";
+                public static final String START = "md:items-start";
                 public static final String STRETCH = "md:items-stretch";
 
                 private Medium() {
@@ -121,7 +121,7 @@ public final class LumoUtility {
                 public static final String BASELINE = "lg:items-baseline";
                 public static final String CENTER = "lg:items-center";
                 public static final String END = "lg:items-end";
-                public static final String START = "lg:tems-start";
+                public static final String START = "lg:items-start";
                 public static final String STRETCH = "lg:items-stretch";
 
                 private Large() {
@@ -137,7 +137,7 @@ public final class LumoUtility {
                 public static final String BASELINE = "xl:items-baseline";
                 public static final String CENTER = "xl:items-center";
                 public static final String END = "xl:items-end";
-                public static final String START = "xl:tems-start";
+                public static final String START = "xl:items-start";
                 public static final String STRETCH = "xl:items-stretch";
 
                 private XLarge() {
@@ -153,7 +153,7 @@ public final class LumoUtility {
                 public static final String BASELINE = "2xl:items-baseline";
                 public static final String CENTER = "2xl:items-center";
                 public static final String END = "2xl:items-end";
-                public static final String START = "2xl:tems-start";
+                public static final String START = "2xl:items-start";
                 public static final String STRETCH = "2xl:items-stretch";
 
                 private XXLarge() {
