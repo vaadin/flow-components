@@ -87,6 +87,18 @@ public class DatePickerTest {
     }
 
     @Test
+    public void emptyValueIsNull() {
+        DatePicker picker = new DatePicker();
+        Assert.assertNull(picker.getEmptyValue());
+    }
+
+    @Test
+    public void setInitialValue_emptyValueIsNull() {
+        DatePicker picker = new DatePicker(LocalDate.of(2018, 4, 25));
+        Assert.assertNull(picker.getEmptyValue());
+    }
+
+    @Test
     public void updatingToNullValue_displaysEmptyString() {
         DatePicker picker = new DatePicker();
 

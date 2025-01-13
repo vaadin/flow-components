@@ -218,7 +218,7 @@ public class TimePicker
      *            ignored and the initial value is set
      */
     private TimePicker(LocalTime time, boolean isInitialValueOptional) {
-        super("value", time, String.class, PARSER, FORMATTER);
+        super("value", null, String.class, PARSER, FORMATTER);
 
         // Initialize property value unless it has already been set from a
         // template
