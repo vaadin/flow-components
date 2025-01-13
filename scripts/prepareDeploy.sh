@@ -44,7 +44,7 @@ setPomVersion() {
 version=$1
 ! [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+([\.-](alpha|beta|rc)[0-9]+)?$ ]] && echo Invalid version format: $version && exit 1
 [[ $version =~ (alpha|beta|rc) ]] && profile=prerelease || profile=maven-central
-pomVersion=`cat pom.xml | grep '<version>' | head -1 | cut -d '>' -f2 | cut -d '<' -f1`
+pomVersion=`cat pom.xml | grep -m2 "<version>" | tail -n1 | cut -d '>' -f2 | cut -d '<' -f1`
 
 ### Extrat major.minor part from version
 versionBase=`getBaseVersion $version`
