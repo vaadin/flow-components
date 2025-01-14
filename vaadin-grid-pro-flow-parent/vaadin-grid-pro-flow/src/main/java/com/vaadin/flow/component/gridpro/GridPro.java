@@ -139,6 +139,10 @@ public class GridPro<E> extends Grid<E> {
                 }
                 getDataProvider().refreshItem(e.getItem());
             }
+
+            getElement().executeJs(
+                    "window.Vaadin.Flow.gridProConnector.clearUpdatingCell($0);",
+                    getElement());
         });
 
         addCellEditStartedListener(e -> {
@@ -156,6 +160,9 @@ public class GridPro<E> extends Grid<E> {
                         this.getElement());
             }
         });
+        addAttachListener(e -> getElement().executeJs(
+                "window.Vaadin.Flow.gridProConnector.initUpdatingCellAnimation($0);",
+                getElement()));
     }
 
     /**
