@@ -2963,9 +2963,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * Supply items lazily with a callback from a Spring service method. The
-     * component will automatically fetch more items and adjust its size until
-     * the backend runs out of items. Usage example:
+     * Supply items lazily with a callback from a backend based on a Spring Data
+     * Pageable. The component will automatically fetch more items and adjust
+     * its size until the backend runs out of items. Usage example:
      * <p>
      * {@code component.setItemsPageable(pageable -> orderService.getOrders(pageable));}
      * <p>
@@ -2987,10 +2987,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Supply items lazily with callbacks: the first one fetches a list of items
-     * from a Spring service method, the second provides the exact count of
-     * items in the backend. Use this in case getting the count is cheap and the
-     * user benefits from the component showing immediately the exact size.
-     * Usage example:
+     * from a backend based on a Spring Data Pageable, the second provides the
+     * exact count of items in the backend. Use this in case getting the count
+     * is cheap and the user benefits from the component showing immediately the
+     * exact size. Usage example:
      * <p>
      * {@code component.setItemsPageable(
      *                    pageable -> orderService.getOrders(pageable),
