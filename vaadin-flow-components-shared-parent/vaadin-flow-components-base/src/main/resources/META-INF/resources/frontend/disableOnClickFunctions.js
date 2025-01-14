@@ -1,14 +1,6 @@
-function disableOnClickListener({currentTarget: element}) {
-  if (element.disableOnClick) {
-    requestAnimationFrame(() => element.disabled = true);
+document.addEventListener('click', (event) => {
+  const target = event.composedPath().find((node) => node.disableOnClick);
+  if (target) {
+    target.disabled = true;
   }
-}
-
-window.Vaadin.Flow.disableOnClick = {
-  initDisableOnClick: (element) => {
-    if (!element.__hasDisableOnClickListener) {
-      element.addEventListener('click', disableOnClickListener);
-      element.__hasDisableOnClickListener = true;
-    }
-  }
-}
+});
