@@ -332,8 +332,6 @@ public class ButtonIT extends AbstractComponentIT {
         var button = findElement(By.id(itemId));
         for (int i = 0; i < 3; i++) {
             button.click();
-            getCommandExecutor().getDriver()
-                    .executeAsyncScript("requestAnimationFrame(arguments[0])");
             Assert.assertFalse(button.isEnabled());
             waitUntil(driver -> button.isEnabled());
         }
