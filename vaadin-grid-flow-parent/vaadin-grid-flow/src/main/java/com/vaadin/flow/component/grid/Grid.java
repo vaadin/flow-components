@@ -2918,7 +2918,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return getLazyDataView();
     }
 
-    public interface Spring extends Serializable {
+    public interface SpringData extends Serializable {
         /**
          * Callback interface for fetching a list of items from a backend based
          * on a Spring Data Pageable.
@@ -2980,7 +2980,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return a data view for further configuration
      */
     public GridLazyDataView<T> setItemsPageable(
-            Spring.FetchCallback<Pageable, T> fetchCallback) {
+            SpringData.FetchCallback<Pageable, T> fetchCallback) {
         return setItems(
                 query -> handleSpringFetchCallback(query, fetchCallback));
     }
@@ -3009,8 +3009,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @return LazyDataView instance for further configuration
      */
     public GridLazyDataView<T> setItemsPageable(
-            Spring.FetchCallback<Pageable, T> fetchCallback,
-            Spring.CountCallback<Pageable> countCallback) {
+            SpringData.FetchCallback<Pageable, T> fetchCallback,
+            SpringData.CountCallback<Pageable> countCallback) {
         return setItems(
                 query -> handleSpringFetchCallback(query, fetchCallback),
                 query -> handleSpringCountCallback(query, countCallback));
@@ -3018,7 +3018,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private static <PAGEABLE, T> Stream<T> handleSpringFetchCallback(
             Query<T, Void> query,
-            Spring.FetchCallback<PAGEABLE, T> fetchCallback) {
+            SpringData.FetchCallback<PAGEABLE, T> fetchCallback) {
         PAGEABLE pageable = (PAGEABLE) VaadinSpringDataHelpers
                 .toSpringPageRequest(query);
         List<T> itemList = fetchCallback.fetch(pageable);
@@ -3027,7 +3027,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private static <PAGEABLE> int handleSpringCountCallback(
             Query<?, Void> query,
-            Spring.CountCallback<PAGEABLE> countCallback) {
+            SpringData.CountCallback<PAGEABLE> countCallback) {
         PAGEABLE pageable = (PAGEABLE) VaadinSpringDataHelpers
                 .toSpringPageRequest(query);
         long count = (long) countCallback.count(pageable);
