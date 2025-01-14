@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -63,6 +63,27 @@ public class VirtualListIT extends AbstractComponentIT {
         clickToSet3Items_listIsUpdated(listId, "list-with-strings-3-items",
                 "Item ");
         clickToSet0Items_listIsUpdated(listId, "list-with-strings-0-items");
+    }
+
+    @Test
+    public void accessibleName() {
+        String listId = "list-with-strings";
+
+        var virtualList = $(VirtualListElement.class).id(listId);
+
+        var firstChildElement = virtualList
+                .findElement(By.xpath("//*[text()='Item 1']"));
+
+        Assert.assertFalse(firstChildElement.hasAttribute("aria-label"));
+
+        clickElementWithJs("list-with-strings-accessible-name");
+
+        Assert.assertEquals("Accessible Item 1",
+                firstChildElement.getAttribute("aria-label"));
+
+        var secondChildElement = virtualList
+                .findElement(By.xpath("//*[text()='Item 2']"));
+        Assert.assertFalse(secondChildElement.hasAttribute("aria-label"));
     }
 
     @Test

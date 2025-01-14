@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -72,6 +72,18 @@ public class DashboardItemResizeTest extends DashboardTestBase {
                 2);
         Assert.assertEquals(1, widgetToResize.getColspan());
         Assert.assertEquals(1, widgetToResize.getRowspan());
+    }
+
+    @Test
+    public void resizeWidget_noClientUpdate() {
+        getUi().getInternals().dumpPendingJavaScriptInvocations();
+
+        assertWidgetResized(0, 2, 1);
+
+        fakeClientCommunication();
+
+        Assert.assertTrue(getUi().getInternals()
+                .dumpPendingJavaScriptInvocations().isEmpty());
     }
 
     @Test

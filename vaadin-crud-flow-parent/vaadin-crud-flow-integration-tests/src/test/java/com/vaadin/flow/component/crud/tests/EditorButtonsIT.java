@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.crud.tests;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -22,14 +21,15 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class EditorButtonsIT extends AbstractParallelTest {
+@TestPath("vaadin-crud/editorbuttons")
+public class EditorButtonsIT extends AbstractComponentIT {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-crud") + "/editorbuttons";
-        getDriver().get(url);
+        open();
     }
 
     @Test
@@ -179,7 +179,8 @@ public class EditorButtonsIT extends AbstractParallelTest {
         String lastNameActual = crud.getGrid().getCell(0, 2).getText();
 
         assertFalse("Editor is closed", crud.isEditorOpen());
-        assertEquals("Last name is updated", lastNameExpected, lastNameActual);
+        Assert.assertEquals("Last name is updated", lastNameExpected,
+                lastNameActual);
     }
 
     private CrudElement getCrud() {

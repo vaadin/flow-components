@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -953,6 +953,22 @@ public class DashboardTest extends DashboardTestBase {
                 .map(widget -> widget.getElement().getNode().getId())
                 .collect(Collectors.toSet());
         Assert.assertFalse(actualNodeIds.contains(nodeIdToBeRemoved));
+    }
+
+    @Test
+    public void setDashboardEditable_removeWidget_noClientUpdate() {
+        DashboardWidget widgetToRemove = getNewWidget();
+        dashboard.add(widgetToRemove);
+        dashboard.setEditable(true);
+        fakeClientCommunication();
+        getUi().getInternals().dumpPendingJavaScriptInvocations();
+
+        int nodeIdToBeRemoved = widgetToRemove.getElement().getNode().getId();
+        DashboardTestHelper.fireItemRemovedEvent(dashboard, nodeIdToBeRemoved);
+        fakeClientCommunication();
+
+        Assert.assertTrue(getUi().getInternals()
+                .dumpPendingJavaScriptInvocations().isEmpty());
     }
 
     @Test

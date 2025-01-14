@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -81,6 +81,18 @@ public class DashboardItemMoveTest extends DashboardTestBase {
         DashboardTestHelper.fireItemMovedEvent(dashboard, movedWidgetNodeId,
                 itemsArray, null);
         Assert.assertEquals(expectedRootLevelNodeIds, getRootLevelNodeIds());
+    }
+
+    @Test
+    public void moveWidget_noClientUpdate() {
+        getUi().getInternals().dumpPendingJavaScriptInvocations();
+
+        assertRootLevelItemMoved(0, 1);
+
+        fakeClientCommunication();
+
+        Assert.assertTrue(getUi().getInternals()
+                .dumpPendingJavaScriptInvocations().isEmpty());
     }
 
     @Test

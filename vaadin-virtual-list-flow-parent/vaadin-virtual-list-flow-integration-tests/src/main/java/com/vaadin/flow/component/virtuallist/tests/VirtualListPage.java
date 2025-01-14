@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -107,13 +107,21 @@ public class VirtualListPage extends Div {
                 evt -> list.setItems("Another item 1", "Another item 2"));
         NativeButton setEmptyList = new NativeButton("Change list 3",
                 evt -> list.setItems());
+        NativeButton setItemAccessibleNameGenerator = new NativeButton(
+                "Set item accessible name generator",
+                evt -> list.setItemAccessibleNameGenerator(
+                        item -> item.contains("2") ? null
+                                : "Accessible " + item));
 
         list.setId("list-with-strings");
         setListWith3Items.setId("list-with-strings-3-items");
         setListWith2Items.setId("list-with-strings-2-items");
         setEmptyList.setId("list-with-strings-0-items");
+        setItemAccessibleNameGenerator
+                .setId("list-with-strings-accessible-name");
 
-        add(list, setListWith3Items, setListWith2Items, setEmptyList);
+        add(list, setListWith3Items, setListWith2Items, setEmptyList,
+                setItemAccessibleNameGenerator);
     }
 
     private void createDataProviderWithStrings() {

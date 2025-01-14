@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -17,15 +17,16 @@ import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.orderedlayout.testbench.VerticalLayoutElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.ElementQuery;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class TemplateSupportIT extends AbstractParallelTest {
+@TestPath("vaadin-crud/crudintemplate")
+public class TemplateSupportIT extends AbstractComponentIT {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-crud") + "/crudintemplate";
-        getDriver().get(url);
+        open();
     }
 
     @After
@@ -97,8 +98,7 @@ public class TemplateSupportIT extends AbstractParallelTest {
         return $("crud-app").waitForFirst().$(CrudElement.class);
     }
 
-    @Override
-    protected String getLastEvent() {
+    private String getLastEvent() {
         return $("crud-app").first().$(VerticalLayoutElement.class).last()
                 .$("span").last().getText();
     }

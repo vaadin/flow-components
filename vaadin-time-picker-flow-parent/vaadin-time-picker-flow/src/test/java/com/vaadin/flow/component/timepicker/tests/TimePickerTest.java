@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -77,6 +77,18 @@ public class TimePickerTest {
 
         picker.getElement().setProperty("value", "07:40");
         assertEquals(LocalTime.of(7, 40), picker.getValue());
+    }
+
+    @Test
+    public void emptyValueIsNull() {
+        TimePicker picker = new TimePicker();
+        Assert.assertNull(picker.getEmptyValue());
+    }
+
+    @Test
+    public void setInitialValue_emptyValueIsNull() {
+        TimePicker picker = new TimePicker(LocalTime.of(5, 30));
+        Assert.assertNull(picker.getEmptyValue());
     }
 
     @Test
@@ -177,7 +189,8 @@ public class TimePickerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testSetStep_lessThan0Ms_throwsException() {
-        TimePicker timePicker=new TimePicker();timePicker.setStep(Duration.ofNanos(500_000));
+        TimePicker timePicker = new TimePicker();
+        timePicker.setStep(Duration.ofNanos(500_000));
     }
 
     @Test

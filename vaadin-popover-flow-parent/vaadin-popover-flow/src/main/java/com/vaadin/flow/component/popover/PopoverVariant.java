@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,11 +21,9 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for the {@link Popover} component.
  */
 public enum PopoverVariant implements ThemeVariant {
-    //@formatter:off
     ARROW("arrow"),
     LUMO_NO_PADDING("no-padding"),
     MATERIAL_NO_PADDING("no-padding");
-    //@formatter:on
 
     private final String variant;
 

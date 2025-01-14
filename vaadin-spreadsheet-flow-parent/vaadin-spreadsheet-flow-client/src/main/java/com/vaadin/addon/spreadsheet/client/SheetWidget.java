@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -852,6 +852,7 @@ public class SheetWidget extends Panel {
             // vaadin does bunch of layout phases so this needs to be done in
             // case the comment overlay position should be updated
             refreshAlwaysVisibleCellCommentOverlays();
+            updateSheetPanePositions();
         }
     }
 

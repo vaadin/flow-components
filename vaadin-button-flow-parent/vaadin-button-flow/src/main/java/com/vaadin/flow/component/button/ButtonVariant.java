@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,7 +21,6 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-button} component.
  */
 public enum ButtonVariant implements ThemeVariant {
-    //@formatter:off
     LUMO_SMALL("small"),
     LUMO_LARGE("large"),
     LUMO_TERTIARY("tertiary"),
@@ -34,7 +33,6 @@ public enum ButtonVariant implements ThemeVariant {
     LUMO_ICON("icon"),
     MATERIAL_CONTAINED("contained"),
     MATERIAL_OUTLINED("outlined");
-    //@formatter:on
 
     private final String variant;
 

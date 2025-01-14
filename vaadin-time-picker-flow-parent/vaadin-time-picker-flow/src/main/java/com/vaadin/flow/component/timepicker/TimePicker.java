@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -112,9 +112,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/time-picker", version = "24.7.0-alpha5")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
@@ -218,7 +218,7 @@ public class TimePicker
      *            ignored and the initial value is set
      */
     private TimePicker(LocalTime time, boolean isInitialValueOptional) {
-        super("value", time, String.class, PARSER, FORMATTER);
+        super("value", null, String.class, PARSER, FORMATTER);
 
         // Initialize property value unless it has already been set from a
         // template

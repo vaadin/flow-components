@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -31,7 +31,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/tooltip", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.7.0-alpha5")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Tooltip implements Serializable {
 
@@ -50,7 +50,6 @@ public class Tooltip implements Serializable {
      * Tooltip position in relation to the target element.
      */
     public enum TooltipPosition {
-        //@formatter:off
         TOP_START("top-start"),
         TOP("top"),
         TOP_END("top-end"),
@@ -63,7 +62,6 @@ public class Tooltip implements Serializable {
         END_TOP("end-top"),
         END("end"),
         END_BOTTOM("end-bottom");
-        //@formatter:off
 
         private final String position;
 
@@ -73,6 +71,20 @@ public class Tooltip implements Serializable {
 
         public String getPosition() {
             return position;
+        }
+
+        /**
+         * Gets the {@link TooltipPosition} for the given position string.
+         * Returns {@link TooltipPosition#BOTTOM} if no match is found.
+         *
+         * @param position
+         *            the position string
+         * @return the {@link TooltipPosition}
+         */
+        public static TooltipPosition fromPosition(String position) {
+            return Arrays.stream(TooltipPosition.values())
+                    .filter(p -> p.getPosition().equals(position)).findFirst()
+                    .orElse(BOTTOM);
         }
     }
 
@@ -92,7 +104,8 @@ public class Tooltip implements Serializable {
             // Remove the tooltip from its current state tree
             tooltip.tooltipElement.removeFromTree(false);
 
-            // The host under which the <vaadin-tooltip> element is auto-attached
+            // The host under which the <vaadin-tooltip> element is
+            // auto-attached
             var tooltipHost = UI.getCurrent().getElement();
             tooltipHost.appendChild(tooltip.tooltipElement);
             tooltip.tooltipElement.executeJs("this.target = $0;", element);
@@ -110,7 +123,8 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * Creates a tooltip to the given {@code Component} if one hasn't already been created.
+     * Creates a tooltip to the given {@code Component} if one hasn't already
+     * been created.
      *
      * @param component
      *            the component to attach the tooltip to
@@ -138,17 +152,18 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * Creates a tooltip to the given {@link HasTooltip} component
-     * and adds the tooltip element to the component's tooltip slot.
+     * Creates a tooltip to the given {@link HasTooltip} component and adds the
+     * tooltip element to the component's tooltip slot.
      *
      * @param hasTooltip
-     *              the component to attach the tooltip to
+     *            the component to attach the tooltip to
      * @return the tooltip handle
      */
     static Tooltip forHasTooltip(HasTooltip hasTooltip) {
         var tooltip = new Tooltip();
         SlotUtils.setSlot(hasTooltip, "tooltip", tooltip.tooltipElement);
-        var component = ComponentUtil.getInnermostComponent(hasTooltip.getElement());
+        var component = ComponentUtil
+                .getInnermostComponent(hasTooltip.getElement());
         ComponentUtil.setData(component, TOOLTIP_DATA_KEY, tooltip);
         return tooltip;
     }
@@ -184,8 +199,8 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * The delay in milliseconds before the tooltip is opened on keyboard focus, when not
-     * in manual mode.
+     * The delay in milliseconds before the tooltip is opened on keyboard focus,
+     * when not in manual mode.
      *
      * @param focusDelay
      *            the delay in milliseconds
@@ -195,8 +210,8 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * The delay in milliseconds before the tooltip is opened on keyboard focus, when not
-     * in manual mode.
+     * The delay in milliseconds before the tooltip is opened on keyboard focus,
+     * when not in manual mode.
      *
      * @return the delay in milliseconds
      */
@@ -205,8 +220,8 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * The delay in milliseconds before the tooltip is opened on keyboard focus, when not
-     * in manual mode.
+     * The delay in milliseconds before the tooltip is opened on keyboard focus,
+     * when not in manual mode.
      *
      * @param focusDelay
      *            the delay in milliseconds
@@ -300,7 +315,8 @@ public class Tooltip implements Serializable {
     public TooltipPosition getPosition() {
         var positionString = tooltipElement.getProperty("position");
         return Arrays.stream(TooltipPosition.values())
-            .filter(p -> p.getPosition().equals(positionString)).findFirst().orElse(null);
+                .filter(p -> p.getPosition().equals(positionString)).findFirst()
+                .orElse(null);
     }
 
     /**

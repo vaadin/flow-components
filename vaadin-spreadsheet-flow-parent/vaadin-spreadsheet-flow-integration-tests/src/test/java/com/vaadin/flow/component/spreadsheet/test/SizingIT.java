@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -124,6 +124,26 @@ public class SizingIT extends AbstractComponentIT {
 
         // New rows should have been added on resize
         waitUntil(e -> spreadsheet.getCellAt("A20") != null);
+    }
+
+    @Test
+    public void containerInitiallyHidden_containerIsShown_panelsPositionsAreCorrect() {
+        // Detach spreadsheet
+        findElement(By.id("spreadsheetAttachedToggle")).click();
+        // Hide layout
+        findElement(By.id("layoutDisplayNone")).click();
+        // Attach spreadsheet
+        findElement(By.id("spreadsheetAttachedToggle")).click();
+        // Get reference to the new spreadsheet
+        var spreadsheet = $(SpreadsheetElement.class).first();
+        // Show layout
+        findElement(By.id("layoutDisplayDefault")).click();
+
+        // Print panel position
+        findElement(By.id("logPanelPosition")).click();
+
+        var messageLog = findElement(By.id("messageLog")).getText();
+        Assert.assertNotEquals("0px", messageLog);
     }
 
     private void assertSpreadsheetHeight(int height) {

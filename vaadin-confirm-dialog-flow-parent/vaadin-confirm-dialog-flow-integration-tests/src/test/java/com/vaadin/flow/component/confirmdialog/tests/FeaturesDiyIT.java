@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,85 +15,136 @@
  */
 package com.vaadin.flow.component.confirmdialog.tests;
 
+import java.util.Optional;
+
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
-import com.vaadin.flow.component.confirmdialog.tests.helpers.Actionwords;
-import com.vaadin.tests.AbstractParallelTest;
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.ElementQuery;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class FeaturesDiyIT extends AbstractParallelTest {
+@TestPath("vaadin-confirm-dialog/FeaturesDiy")
+public class FeaturesDiyIT extends AbstractComponentIT {
 
-    public Actionwords actionwords = new Actionwords(this, FeaturesDiy.class);
+    @Before
+    public void init() {
+        open();
+    }
 
     @Test
     public void testReminderDialog() throws Exception {
-        String sampleName = "SampleConfirmDialog";
-        actionwords.iHaveSampleDialog(sampleName);
-        actionwords.iOpenDialogDialog(sampleName);
-        actionwords.iCompareTheDialogToReferenceImage(sampleName);
-        actionwords.iClickConfirm();
-        actionwords.dialogDialogIsClosed(sampleName);
-        actionwords.confirmEventIsFired();
+        openDialog("SampleConfirmDialog");
+        clickConfirm();
+        assertDialogClosed();
+        assertConfirmEventIsFired();
     }
 
     @Test
     public void testConfirmDeleteDialog() throws Exception {
         String sampleName = "SampleConfirmDeleteDialog";
-        actionwords.iHaveSampleDialog(sampleName);
-        actionwords.iOpenDialogDialog(sampleName);
-        actionwords.iCompareTheDialogToReferenceImage(sampleName);
-        actionwords.iClickConfirm();
-        actionwords.dialogDialogIsClosed(sampleName);
-        actionwords.confirmEventIsFired();
-        actionwords.iOpenDialogDialog(sampleName);
-        actionwords.iClickCancel();
-        actionwords.dialogDialogIsClosed(sampleName);
-        actionwords.cancelEventIsFired();
+        openDialog(sampleName);
+        clickConfirm();
+        assertDialogClosed();
+        assertConfirmEventIsFired();
+
+        openDialog(sampleName);
+        clickCancel();
+        assertDialogClosed();
+        assertCancelEventIsFired();
     }
 
     @Test
     public void testAreYouSureYouWantToPublishDialog() throws Exception {
         String sampleName = "SampleConfirmPublishDialog";
-        actionwords.iHaveSampleDialog(sampleName);
-        actionwords.iOpenDialogDialog(sampleName);
-        actionwords.iCompareTheDialogToReferenceImage(sampleName);
-        actionwords.iClickConfirm();
-        actionwords.dialogDialogIsClosed(sampleName);
-        actionwords.confirmEventIsFired();
-        actionwords.iOpenDialogDialog(sampleName);
-        actionwords.iClickCancel();
-        actionwords.dialogDialogIsClosed(sampleName);
-        actionwords.cancelEventIsFired();
+        openDialog(sampleName);
+        clickConfirm();
+        assertDialogClosed();
+        assertConfirmEventIsFired();
+
+        openDialog(sampleName);
+        clickCancel();
+        assertDialogClosed();
+        assertCancelEventIsFired();
     }
 
     @Test
     public void testUnsavedChangesDialog() throws Exception {
         String sampleName = "SampleUnsavedChangesDialog";
-        actionwords.iHaveSampleDialog(sampleName);
-        actionwords.iOpenDialogDialog(sampleName);
-        actionwords.iCompareTheDialogToReferenceImage(sampleName);
-        actionwords.iClickConfirm();
-        actionwords.dialogDialogIsClosed(sampleName);
-        actionwords.confirmEventIsFired();
-        actionwords.iOpenDialogDialog(sampleName);
-        actionwords.iClickReject();
-        actionwords.dialogDialogIsClosed(sampleName);
-        actionwords.rejectEventIsFired();
-        actionwords.iOpenDialogDialog(sampleName);
-        actionwords.iClickCancel();
-        actionwords.dialogDialogIsClosed(sampleName);
-        actionwords.cancelEventIsFired();
+        openDialog(sampleName);
+        clickConfirm();
+        assertDialogClosed();
+        assertConfirmEventIsFired();
+
+        openDialog(sampleName);
+        clickReject();
+        assertDialogClosed();
+        assertRejectEventIsFired();
+
+        openDialog(sampleName);
+        clickCancel();
+        assertDialogClosed();
+        assertCancelEventIsFired();
     }
 
     @Test
     public void testConfirmDialogButtonsCount() throws Exception {
-        String sampleName = "SampleConfirmDialog";
-        actionwords.iHaveSampleDialog(sampleName);
-        actionwords.iOpenDialogDialog(sampleName);
+        openDialog("SampleConfirmDialog");
         int confirmButtonCount = findElements(By.cssSelector(
                 "vaadin-confirm-dialog-overlay [slot='confirm-button']"))
                 .size();
         Assert.assertEquals(1, confirmButtonCount);
+    }
+
+    private void openDialog(String dialog) {
+        $(ButtonElement.class).id(dialog).click();
+    }
+
+    private Optional<ConfirmDialogElement> getConfirmDialog() {
+        ElementQuery<ConfirmDialogElement> query = $(ConfirmDialogElement.class)
+                .onPage();
+        return query.exists() ? Optional.of(query.first()) : Optional.empty();
+    }
+
+    public void assertDialogClosed() {
+        Assert.assertFalse(getConfirmDialog().isPresent());
+    }
+
+    private void clickConfirm() {
+        getConfirmDialog().get().getConfirmButton().click();
+    }
+
+    private void clickCancel() {
+        getConfirmDialog().get().getCancelButton().click();
+    }
+
+    private void clickReject() {
+        getConfirmDialog().get().getRejectButton().click();
+    }
+
+    private String getEventName() {
+        return $(TestBenchElement.class).id("eventName").getText();
+    }
+
+    private void assertConfirmEventIsFired() {
+        checkFiredEventName(ConfirmDialog.ConfirmEvent.class);
+    }
+
+    private void assertCancelEventIsFired() {
+        checkFiredEventName(ConfirmDialog.CancelEvent.class);
+    }
+
+    private void assertRejectEventIsFired() {
+        checkFiredEventName(ConfirmDialog.RejectEvent.class);
+    }
+
+    private void checkFiredEventName(Class<?> eventClass) {
+        Assert.assertEquals(eventClass.getSimpleName(), getEventName());
     }
 }

@@ -1,48 +1,16 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>vaadin-flow-components</artifactId>
-    <version>24.7-SNAPSHOT</version>
-    <packaging>pom</packaging>
-    <name>Vaadin Flow Components Root Project</name>
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-parent</artifactId>
         <version>2.2.1</version>
     </parent>
+    <artifactId>vaadin-flow-components</artifactId>
+    <version>24.7-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Vaadin Flow Components Root Project</name>
     <url>https://vaadin.com/components</url>
-    <properties>
-        <flow.version>24.7-SNAPSHOT</flow.version>
-        <testbench.version>9.3.7</testbench.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8
-                </project.reporting.outputEncoding>
-        <jetty.version>12.0.16</jetty.version>
-        <jetty.http.port>8080</jetty.http.port>
-        <jetty.stop.port>9999</jetty.stop.port>
-        <karaf-maven-plugin.version>4.4.6</karaf-maven-plugin.version>
-        <maven.surefire.plugin.version>3.5.2</maven.surefire.plugin.version>
-        <maven.failsafe.plugin.version>3.5.2</maven.failsafe.plugin.version>
-        <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
-        <spotless.plugin.version>2.43.0</spotless.plugin.version>
-        <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
-        <failsafe.forkCount>4</failsafe.forkCount>
-        <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
-        <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
-        <failIfNoTests>false</failIfNoTests>
-        <vaadin.pnpm.enable>false</vaadin.pnpm.enable>
-        <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
-        <osgi.export.package>default</osgi.export.package>
-        <cvdlName></cvdlName>
-        <jakarta.servlet.api.version>5.0.0</jakarta.servlet.api.version>
-        <jakarta.web.api.version>10.0.0</jakarta.web.api.version>
-
-        <!-- spreadsheet -->
-        <poi.version>5.2.5</poi.version>
-        <javaparser.version>3.25.3</javaparser.version>
-    </properties>
     <modules>
         <module>vaadin-renderer-flow-parent</module>
         <module>vaadin-lumo-theme-flow-parent</module>
@@ -52,6 +20,7 @@
         <module>vaadin-avatar-flow-parent</module>
         <module>vaadin-app-layout-flow-parent</module>
         <module>vaadin-button-flow-parent</module>
+        <module>vaadin-card-flow-parent</module>
         <module>vaadin-checkbox-flow-parent</module>
         <module>vaadin-combo-box-flow-parent</module>
         <module>vaadin-context-menu-flow-parent</module>
@@ -92,105 +61,226 @@
         <module>vaadin-field-highlighter-flow-parent</module>
         <module>vaadin-side-nav-flow-parent</module>
     </modules>
-    <profiles>
-        <profile>
-            <id>merged-it</id>
-            <activation>
-                <property>
-                    <name>run-it</name>
-                </property>
-            </activation>
-            <modules>
-                <module>integration-tests</module>
-            </modules>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <!-- Enable production mode when running merged ITs -->
-                        <plugin>
-                            <groupId>org.eclipse.jetty.ee10</groupId>
-                            <artifactId>jetty-ee10-maven-plugin</artifactId>
-                            <configuration>
-                                <systemProperties>
-                                    <vaadin.productionMode>true</vaadin.productionMode>
-                                </systemProperties>
-                            </configuration>
-                        </plugin>
-                        <!-- Build frontend bundle for running merged ITs -->
-                        <plugin>
-                            <groupId>com.vaadin</groupId>
-                            <artifactId>flow-maven-plugin</artifactId>
-                            <executions>
-                                <execution>
-                                    <goals>
-                                        <goal>build-frontend</goal>
-                                    </goals>
-                                </execution>
-                            </executions>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
-        <profile>
-            <id>sonar-cloud</id>
-            <properties>
-                <!-- SonarQube rule exclusions for: Integration tests -->
-                <sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5</sonar.issue.ignore.multicriteria>
-                <!-- Disable: Public types, methods and fields (API) should be documented with Javadoc -->
-                <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S1176</sonar.issue.ignore.multicriteria.e1.ruleKey>
-                <sonar.issue.ignore.multicriteria.e1.resourceKey>**/*-integration-tests/**/*.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
-                <!-- Disable: Constructors should only call non-overridable methods -->
-                <sonar.issue.ignore.multicriteria.e2.ruleKey>java:S1699</sonar.issue.ignore.multicriteria.e2.ruleKey>
-                <sonar.issue.ignore.multicriteria.e2.resourceKey>**/*-integration-tests/**/*.java</sonar.issue.ignore.multicriteria.e2.resourceKey>
-                <!-- Disable: String literals should not be duplicated -->
-                <sonar.issue.ignore.multicriteria.e3.ruleKey>java:S1192</sonar.issue.ignore.multicriteria.e3.ruleKey>
-                <sonar.issue.ignore.multicriteria.e3.resourceKey>**/*-integration-tests/**/*.java</sonar.issue.ignore.multicriteria.e3.resourceKey>
-                <!-- Disable: Inheritance tree of classes should not be too deep -->
-                <sonar.issue.ignore.multicriteria.e4.ruleKey>java:S110</sonar.issue.ignore.multicriteria.e4.ruleKey>
-                <sonar.issue.ignore.multicriteria.e4.resourceKey>**/*-integration-tests/**/*.java</sonar.issue.ignore.multicriteria.e4.resourceKey>
-                <!-- Disable: Standard outputs should not be used directly to log anything -->
-                <sonar.issue.ignore.multicriteria.e5.ruleKey>java:S106</sonar.issue.ignore.multicriteria.e5.ruleKey>
-                <sonar.issue.ignore.multicriteria.e5.resourceKey>**/*-integration-tests/**/*.java</sonar.issue.ignore.multicriteria.e5.resourceKey>
-            </properties>
-        </profile>
-    </profiles>
+    <properties>
+        <flow.version>24.7-SNAPSHOT</flow.version>
+        <testbench.version>9.3.7</testbench.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <jetty.version>12.0.16</jetty.version>
+        <jetty.http.port>8080</jetty.http.port>
+        <jetty.stop.port>9999</jetty.stop.port>
+        <karaf-maven-plugin.version>4.4.6</karaf-maven-plugin.version>
+        <maven.surefire.plugin.version>3.5.2</maven.surefire.plugin.version>
+        <maven.failsafe.plugin.version>3.5.2</maven.failsafe.plugin.version>
+        <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
+        <spotless.plugin.version>2.44.1</spotless.plugin.version>
+        <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
+        <failsafe.forkCount>4</failsafe.forkCount>
+        <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
+        <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
+        <failIfNoTests>false</failIfNoTests>
+        <vaadin.pnpm.enable>false</vaadin.pnpm.enable>
+        <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
+        <osgi.export.package>default</osgi.export.package>
+        <cvdlName/>
+        <jakarta.servlet.api.version>5.0.0</jakarta.servlet.api.version>
+        <jakarta.web.api.version>10.0.0</jakarta.web.api.version>
+
+        <!-- spreadsheet -->
+        <poi.version>5.2.5</poi.version>
+        <javaparser.version>3.25.3</javaparser.version>
+    </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.github.javaparser</groupId>
+                <artifactId>javaparser-core</artifactId>
+                <version>${javaparser.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow</artifactId>
+                <version>${flow.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-client</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-data</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-html-components</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-lit-template</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-osgi</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-polymer-template</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-server</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-server-production-mode</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-test-generic</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>flow-test-util</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-dev-server</artifactId>
+                <version>${flow.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-lumo-theme</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-testbench-core</artifactId>
+                <version>${testbench.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-testbench-shared</artifactId>
+                <version>${testbench.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.platform</groupId>
+                <artifactId>jakarta.jakartaee-web-api</artifactId>
+                <version>${jakarta.web.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>${jakarta.servlet.api.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.13.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.17.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml-full</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-scratchpad</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-all</artifactId>
+                <version>1.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>5.6.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>org.osgi.core</artifactId>
+                <version>6.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.osgi</groupId>
+                <artifactId>osgi.cmpn</artifactId>
+                <version>7.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>2.0.16</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <repositories>
         <repository>
-            <id>central</id>
-            <url>https://repo.maven.apache.org/maven2</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
+            <id>central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
         </repository>
         <repository>
-            <id>vaadin-prereleases</id>
-            <url>https://maven.vaadin.com/vaadin-prereleases</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
+            <id>vaadin-prereleases</id>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
         </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
-            <id>central</id>
-            <url>https://repo.maven.apache.org/maven2</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
+            <id>central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
         </pluginRepository>
         <pluginRepository>
-            <id>vaadin-prereleases</id>
-            <url>https://maven.vaadin.com/vaadin-prereleases</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
+            <id>vaadin-prereleases</id>
+            <url>https://maven.vaadin.com/vaadin-prereleases</url>
         </pluginRepository>
     </pluginRepositories>
     <build>
@@ -203,10 +293,10 @@
                     <executions>
                         <execution>
                             <id>attach-sources</id>
-                            <phase>package</phase>
                             <goals>
                                 <goal>jar-no-fork</goal>
                             </goals>
+                            <phase>package</phase>
                         </execution>
                     </executions>
                 </plugin>
@@ -214,19 +304,19 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>3.11.2</version>
-                    <executions>
-                        <execution>
-                            <id>attach-javadocs</id>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                     <configuration>
                         <quiet>true</quiet>
                         <doclint>none</doclint>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                            <phase>package</phase>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>biz.aQute.bnd</groupId>
@@ -302,17 +392,17 @@
                     <executions>
                         <execution>
                             <id>start-jetty</id>
-                            <phase>pre-integration-test</phase>
                             <goals>
                                 <goal>start-war</goal>
                             </goals>
+                            <phase>pre-integration-test</phase>
                         </execution>
                         <execution>
                             <id>stop-jetty</id>
-                            <phase>post-integration-test</phase>
                             <goals>
                                 <goal>stop</goal>
                             </goals>
+                            <phase>post-integration-test</phase>
                         </execution>
                     </executions>
                 </plugin>
@@ -330,14 +420,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>${maven.failsafe.plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>integration-test</goal>
-                                <goal>verify</goal>
-                            </goals>
-                        </execution>
-                    </executions>
                     <configuration>
                         <forkCount>${failsafe.forkCount}</forkCount>
                         <argLine>-Xmx2048m</argLine>
@@ -351,6 +433,14 @@
                             <exclude>${exclude.tests}</exclude>
                         </excludes>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>integration-test</goal>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
@@ -358,10 +448,10 @@
                     <executions>
                         <execution>
                             <id>copy-resources-for-demo-website</id>
-                            <phase>process-resources</phase>
                             <goals>
                                 <goal>copy-resources</goal>
                             </goals>
+                            <phase>process-resources</phase>
                             <configuration>
                                 <outputDirectory>${project.build.directory}/test-classes</outputDirectory>
                                 <overwrite>true</overwrite>
@@ -458,7 +548,7 @@
                             <exclude>**/com/google/gwt/**/*.*</exclude>
                         </excludes>
                         <endWithNewline/>
-                        <removeUnusedImports />
+                        <removeUnusedImports/>
                         <importOrder>
                             <wildcardsLast>true</wildcardsLast>
                             <order>java|javax,org,com</order>
@@ -467,161 +557,78 @@
                             <file>${spotless.licence-header}</file>
                         </licenseHeader>
                     </java>
+                    <pom>
+                        <sortPom>
+                            <expandEmptyElements>false</expandEmptyElements>
+                            <nrOfIndentSpace>4</nrOfIndentSpace>
+                            <sortDependencies>groupId,artifactId</sortDependencies>
+                        </sortPom>
+                    </pom>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow</artifactId>
-                <version>${flow.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-server</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-client</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-data</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-html-components</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-lumo-theme</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-server-production-mode</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-osgi</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-lit-template</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-polymer-template</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-              <groupId>com.vaadin</groupId>
-              <artifactId>vaadin-dev-server</artifactId>
-              <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-                <version>2.0.16</version>
-            </dependency>
-            <dependency>
-                <groupId>jakarta.servlet</groupId>
-                <artifactId>jakarta.servlet-api</artifactId>
-                <version>${jakarta.servlet.api.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>osgi.cmpn</artifactId>
-                <version>7.0.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.core</artifactId>
-                <version>6.0.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>3.17.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-test-generic</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>flow-test-util</artifactId>
-                <version>${flow.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.13.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>5.6.0</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest-all</artifactId>
-                <version>1.3</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-testbench-core</artifactId>
-                <version>${testbench.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-testbench-shared</artifactId>
-                <version>${testbench.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.poi</groupId>
-                <artifactId>poi</artifactId>
-                <version>${poi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.poi</groupId>
-                <artifactId>poi-scratchpad</artifactId>
-                <version>${poi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.poi</groupId>
-                <artifactId>poi-ooxml</artifactId>
-                <version>${poi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.poi</groupId>
-                <artifactId>poi-ooxml-full</artifactId>
-                <version>${poi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.github.javaparser</groupId>
-                <artifactId>javaparser-core</artifactId>
-                <version>${javaparser.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>jakarta.platform</groupId>
-                <artifactId>jakarta.jakartaee-web-api</artifactId>
-                <version>${jakarta.web.api.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+    <profiles>
+        <profile>
+            <id>merged-it</id>
+            <activation>
+                <property>
+                    <name>run-it</name>
+                </property>
+            </activation>
+            <modules>
+                <module>integration-tests</module>
+            </modules>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <!-- Enable production mode when running merged ITs -->
+                        <plugin>
+                            <groupId>org.eclipse.jetty.ee10</groupId>
+                            <artifactId>jetty-ee10-maven-plugin</artifactId>
+                            <configuration>
+                                <systemProperties>
+                                    <vaadin.productionMode>true</vaadin.productionMode>
+                                </systemProperties>
+                            </configuration>
+                        </plugin>
+                        <!-- Build frontend bundle for running merged ITs -->
+                        <plugin>
+                            <groupId>com.vaadin</groupId>
+                            <artifactId>flow-maven-plugin</artifactId>
+                            <executions>
+                                <execution>
+                                    <goals>
+                                        <goal>build-frontend</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+        <profile>
+            <id>sonar-cloud</id>
+            <properties>
+                <!-- SonarQube rule exclusions for: Integration tests -->
+                <sonar.issue.ignore.multicriteria>e1,e2,e3,e4,e5</sonar.issue.ignore.multicriteria>
+                <!-- Disable: Public types, methods and fields (API) should be documented with Javadoc -->
+                <sonar.issue.ignore.multicriteria.e1.ruleKey>java:S1176</sonar.issue.ignore.multicriteria.e1.ruleKey>
+                <sonar.issue.ignore.multicriteria.e1.resourceKey>**/*-integration-tests/**/*.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
+                <!-- Disable: Constructors should only call non-overridable methods -->
+                <sonar.issue.ignore.multicriteria.e2.ruleKey>java:S1699</sonar.issue.ignore.multicriteria.e2.ruleKey>
+                <sonar.issue.ignore.multicriteria.e2.resourceKey>**/*-integration-tests/**/*.java</sonar.issue.ignore.multicriteria.e2.resourceKey>
+                <!-- Disable: String literals should not be duplicated -->
+                <sonar.issue.ignore.multicriteria.e3.ruleKey>java:S1192</sonar.issue.ignore.multicriteria.e3.ruleKey>
+                <sonar.issue.ignore.multicriteria.e3.resourceKey>**/*-integration-tests/**/*.java</sonar.issue.ignore.multicriteria.e3.resourceKey>
+                <!-- Disable: Inheritance tree of classes should not be too deep -->
+                <sonar.issue.ignore.multicriteria.e4.ruleKey>java:S110</sonar.issue.ignore.multicriteria.e4.ruleKey>
+                <sonar.issue.ignore.multicriteria.e4.resourceKey>**/*-integration-tests/**/*.java</sonar.issue.ignore.multicriteria.e4.resourceKey>
+                <!-- Disable: Standard outputs should not be used directly to log anything -->
+                <sonar.issue.ignore.multicriteria.e5.ruleKey>java:S106</sonar.issue.ignore.multicriteria.e5.ruleKey>
+                <sonar.issue.ignore.multicriteria.e5.resourceKey>**/*-integration-tests/**/*.java</sonar.issue.ignore.multicriteria.e5.resourceKey>
+            </properties>
+        </profile>
+    </profiles>
 </project>

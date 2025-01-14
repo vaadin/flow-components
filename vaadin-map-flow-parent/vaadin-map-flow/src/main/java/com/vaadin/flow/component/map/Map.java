@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -65,7 +65,7 @@ import com.vaadin.flow.component.map.configuration.source.XYZSource;
  * using {@link #defineProjection(String, String)}.
  */
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/map", version = "24.7.0-alpha5")
 @NpmPackage(value = "proj4", version = "2.12.1")
 @JsModule("@vaadin/map/src/vaadin-map.js")
 @JsModule("./vaadin-map/mapConnector.js")

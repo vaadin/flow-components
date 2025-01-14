@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -400,7 +400,10 @@ public class SideNavTest {
     }
 
     enum SetLabelOption {
-        SET_NO_LABEL, SET_LABEL_BEFORE_ITEMS_CREATION, SET_LABEL_DURING_ITEMS_CREATION, SET_LABEL_AFTER_ITEMS_CREATION
+        SET_NO_LABEL,
+        SET_LABEL_BEFORE_ITEMS_CREATION,
+        SET_LABEL_DURING_ITEMS_CREATION,
+        SET_LABEL_AFTER_ITEMS_CREATION
     }
 
     private List<SideNavItem> setupItemsAndLabel(

@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -9,8 +9,14 @@
 package com.vaadin.flow.component.charts.model;
 
 public enum TimeUnit implements ChartEnum {
-    MILLISECOND("millisecond"), SECOND("second"), MINUTE("minute"), HOUR(
-            "hour"), DAY("day"), WEEK("week"), MONTH("month"), YEAR("year");
+    MILLISECOND("millisecond"),
+    SECOND("second"),
+    MINUTE("minute"),
+    HOUR("hour"),
+    DAY("day"),
+    WEEK("week"),
+    MONTH("month"),
+    YEAR("year");
 
     private String name;
 

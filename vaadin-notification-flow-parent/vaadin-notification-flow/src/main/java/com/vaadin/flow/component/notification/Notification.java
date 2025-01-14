@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -54,9 +54,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/notification", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/notification", version = "24.7.0-alpha5")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -75,7 +75,15 @@ public class Notification extends Component implements HasComponents, HasStyle,
      * Enumeration of all available positions for notification component
      */
     public enum Position {
-        TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE, BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH;
+        TOP_STRETCH,
+        TOP_START,
+        TOP_CENTER,
+        TOP_END,
+        MIDDLE,
+        BOTTOM_START,
+        BOTTOM_CENTER,
+        BOTTOM_END,
+        BOTTOM_STRETCH;
 
         private final String clientName;
 

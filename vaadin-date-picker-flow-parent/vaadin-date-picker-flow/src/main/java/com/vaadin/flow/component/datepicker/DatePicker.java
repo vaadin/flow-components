@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -128,9 +128,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-picker", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/date-picker", version = "24.7.0-alpha5")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.29.3")
@@ -249,7 +249,7 @@ public class DatePicker
      * @see #setValue(Object)
      */
     private DatePicker(LocalDate initialDate, boolean isInitialValueOptional) {
-        super("value", initialDate, String.class, PARSER, FORMATTER);
+        super("value", null, String.class, PARSER, FORMATTER);
 
         // Initialize property value unless it has already been set from a
         // template

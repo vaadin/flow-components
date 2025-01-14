@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -86,6 +86,18 @@ public class DatePickerTest {
         Assert.assertEquals(LocalDate.of(2018, 4, 25), picker.getValue());
         Assert.assertEquals("2018-04-25",
                 picker.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void emptyValueIsNull() {
+        DatePicker picker = new DatePicker();
+        Assert.assertNull(picker.getEmptyValue());
+    }
+
+    @Test
+    public void setInitialValue_emptyValueIsNull() {
+        DatePicker picker = new DatePicker(LocalDate.of(2018, 4, 25));
+        Assert.assertNull(picker.getEmptyValue());
     }
 
     @Test

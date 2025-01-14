@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -86,9 +86,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-text-area")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/text-area", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/text-area", version = "24.7.0-alpha5")
 @JsModule("@vaadin/text-area/src/vaadin-text-area.js")
 public class TextArea extends TextFieldBase<TextArea, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextAreaVariant> {

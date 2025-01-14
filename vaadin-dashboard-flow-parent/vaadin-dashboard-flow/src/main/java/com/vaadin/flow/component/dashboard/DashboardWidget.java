@@ -1,5 +1,5 @@
 /**
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -27,10 +27,10 @@ import com.vaadin.flow.component.shared.SlotUtils;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dashboard-widget")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha5")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard-widget.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "24.7.0-alpha1")
+@NpmPackage(value = "@vaadin/dashboard", version = "24.7.0-alpha5")
 public class DashboardWidget extends Component {
 
     private int colspan = 1;

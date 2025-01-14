@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2024 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.datepicker;
 
-import static org.junit.Assert.assertTrue;
-
 import java.time.LocalDate;
 import java.time.Month;
 
@@ -29,8 +27,6 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.TestBenchTestCase;
 import com.vaadin.tests.AbstractComponentIT;
 
 /**
@@ -40,13 +36,11 @@ import com.vaadin.tests.AbstractComponentIT;
 public class DatePickerIT extends AbstractComponentIT {
 
     private static final String DATEPICKER_OVERLAY = "vaadin-date-picker-overlay";
-    private TestBenchTestCase layout;
 
     @Before
     public void init() {
         open();
         waitForElementPresent(By.tagName("vaadin-date-picker"));
-        layout = this;
     }
 
     @Test
@@ -57,93 +51,92 @@ public class DatePickerIT extends AbstractComponentIT {
 
     @Test
     public void selectDateOnSimpleDatePicker() {
-        WebElement picker = layout.findElement(By.id("simple-picker"));
-        WebElement message = layout.findElement(By.id("simple-picker-message"));
+        DatePickerElement picker = $(DatePickerElement.class)
+                .id("simple-picker");
+        WebElement message = findElement(By.id("simple-picker-message"));
 
-        executeScript("arguments[0].value = '1985-01-10'", picker);
+        picker.setDate(LocalDate.of(1985, 1, 10));
 
         waitUntil(driver -> message.getText()
                 .contains("Day: 10\nMonth: 1\nYear: 1985"));
 
-        executeScript("arguments[0].value = ''", picker);
+        picker.clear();
 
         waitUntil(driver -> "No date is selected".equals(message.getText()));
     }
 
     @Test
     public void selectDateOnMinMaxDatePicker() {
-        WebElement picker = layout.findElement(By.id("min-and-max-picker"));
-        WebElement message = layout
-                .findElement(By.id("min-and-max-picker-message"));
+        DatePickerElement picker = $(DatePickerElement.class)
+                .id("min-and-max-picker");
+        WebElement message = findElement(By.id("min-and-max-picker-message"));
 
         LocalDate now = LocalDate.now();
-        executeScript("arguments[0].value = arguments[1]", picker,
-                now.toString());
+        picker.setDate(now);
 
-        Assert.assertEquals("The selected date should be considered valid",
-                false, executeScript("return arguments[0].invalid", picker));
+        Assert.assertFalse("The selected date should be considered valid",
+                picker.getPropertyBoolean("invalid"));
 
         waitUntil(driver -> message.getText()
                 .contains(("Day: " + now.getDayOfMonth() + "\nMonth: "
                         + now.getMonthValue() + "\nYear: " + now.getYear())));
 
-        executeScript("arguments[0].value = ''", picker);
+        picker.clear();
 
         waitUntil(driver -> "No date is selected".equals(message.getText()));
 
-        Assert.assertEquals("The empty date should be considered valid", false,
-                executeScript("return arguments[0].invalid", picker));
+        Assert.assertFalse("The empty date should be considered valid",
+                picker.getPropertyBoolean("invalid"));
 
         LocalDate invalid = now.minusYears(1);
 
-        executeScript("arguments[0].value = arguments[1]", picker,
-                invalid.toString());
+        picker.setDate(invalid);
 
-        Assert.assertEquals("The selected date should be considered invalid",
-                true, executeScript("return arguments[0].invalid", picker));
+        Assert.assertTrue("The selected date should be considered invalid",
+                picker.getPropertyBoolean("invalid"));
     }
 
     @Test
     public void selectDateOnFinnishDatePicker() {
-        WebElement picker = layout.findElement(By.id("finnish-picker"));
-        WebElement message = layout
-                .findElement(By.id("finnish-picker-message"));
+        DatePickerElement picker = $(DatePickerElement.class)
+                .id("finnish-picker");
+        WebElement message = findElement(By.id("finnish-picker-message"));
 
-        executeScript("arguments[0].value = '1985-01-10'", picker);
+        picker.setDate(LocalDate.of(1985, 1, 10));
 
         waitUntil(driver -> "Day of week: torstai\nMonth: tammiku"
                 .equals(message.getText()));
 
-        executeScript("arguments[0].value = ''", picker);
+        picker.clear();
 
         waitUntil(driver -> "No date is selected".equals(message.getText()));
 
-        executeScript("arguments[0].setAttribute(\"opened\", true)", picker);
-        waitForElementPresent(By.tagName(DATEPICKER_OVERLAY));
+        picker.open();
 
-        TestBenchElement overlay = $(DATEPICKER_OVERLAY).first();
-        WebElement todayButton = overlay.$("*")
-                .attribute("slot", "today-button").first();
+        WebElement overlay = $(DATEPICKER_OVERLAY).waitForFirst();
+        WebElement todayButton = overlay
+                .findElement(By.cssSelector("[slot=today-button]"));
 
         waitUntil(driver -> "tänään".equals(todayButton.getText()));
     }
 
     @Test
     public void selectDatesOnLinkedDatePickers() {
-        WebElement startPicker = layout.findElement(By.id("start-picker"));
-        WebElement endPicker = layout.findElement(By.id("end-picker"));
-        WebElement message = layout.findElement(By.id("start-and-end-message"));
+        DatePickerElement startPicker = $(DatePickerElement.class)
+                .id("start-picker");
+        DatePickerElement endPicker = $(DatePickerElement.class)
+                .id("end-picker");
+        WebElement message = findElement(By.id("start-and-end-message"));
 
-        executeScript("arguments[0].value = '1985-01-10'", startPicker);
+        startPicker.setDate(LocalDate.of(1985, 1, 10));
 
         waitUntil(driver -> "Select the ending date".equals(message.getText()));
 
         Assert.assertEquals(
                 "The min date at the end date picker should be 1985-01-11",
-                true, executeScript("return arguments[0].min === '1985-01-11'",
-                        endPicker));
+                "1985-01-11", endPicker.getProperty("min"));
 
-        executeScript("arguments[0].value = '1985-01-20'", endPicker);
+        endPicker.setDate(LocalDate.of(1985, 1, 20));
 
         waitUntil(driver -> "Selected period:\nFrom 1985-01-10 to 1985-01-20"
                 .equals(message.getText()));
@@ -153,50 +146,47 @@ public class DatePickerIT extends AbstractComponentIT {
                 true, executeScript("return arguments[0].max === '1985-01-19'",
                         startPicker));
 
-        executeScript("arguments[0].value = ''", startPicker);
+        startPicker.clear();
         waitUntil(
                 driver -> "Select the starting date".equals(message.getText()));
     }
 
     @Test
     public void selectDatesOnCustomLocaleDatePickers() {
-        WebElement localePicker = layout
-                .findElement(By.id("locale-change-picker"));
-        WebElement message = layout
-                .findElement(By.id("Customize-locale-picker-message"));
-        WebElement displayText = localePicker.findElement(By.tagName("input"));
-        executeScript("arguments[0].value = '2018-03-27'", localePicker);
+        DatePickerElement localePicker = $(DatePickerElement.class)
+                .id("locale-change-picker");
+        WebElement message = findElement(
+                By.id("Customize-locale-picker-message"));
+        localePicker.setDate(LocalDate.of(2018, 3, 27));
 
         waitUntil(driver -> message.getText()
                 .contains("Day: 27\nMonth: 3\nYear: 2018\nLocale:"));
 
         Assert.assertEquals(
-                "The format of the displayed date should be MM/DD/YYYY.", true,
-                executeScript("return arguments[0].value === '3/27/2018'",
-                        displayText));
+                "The format of the displayed date should be MM/DD/YYYY",
+                "3/27/2018", localePicker.getInputValue());
 
-        layout.findElement(By.id("Locale-UK")).click();
-        executeScript("arguments[0].value = '2018-03-26'", localePicker);
+        findElement(By.id("Locale-UK")).click();
+        localePicker.setDate(LocalDate.of(2018, 3, 26));
         waitUntil(driver -> "Day: 26\nMonth: 3\nYear: 2018\nLocale: en_GB"
                 .equals(message.getText()));
 
         Assert.assertEquals(
-                "The format of the displayed date should be DD/MM/YYYY.", true,
-                executeScript("return arguments[0].value === '26/03/2018'",
-                        displayText));
+                "The format of the displayed date should be DD/MM/YYYY",
+                "26/03/2018", localePicker.getInputValue());
 
-        layout.findElement(By.id("Locale-US")).click();
-        executeScript("arguments[0].value = '2018-03-25'", localePicker);
+        findElement(By.id("Locale-US")).click();
+        localePicker.setDate(LocalDate.of(2018, 3, 25));
         waitUntil(driver -> "Day: 25\nMonth: 3\nYear: 2018\nLocale: en_US"
                 .equals(message.getText()));
         Assert.assertEquals(
-                "The format of the displayed date should be MM/DD/YYYY.", true,
-                executeScript("return arguments[0].value === '3/25/2018'",
-                        displayText));
+                "The format of the displayed date should be MM/DD/YYYY",
+                "3/25/2018", localePicker.getInputValue());
 
-        layout.findElement(By.id("Locale-UK")).click();
-        assertTrue((Boolean) executeScript(
-                "return arguments[0].value === '25/03/2018'", displayText));
+        findElement(By.id("Locale-UK")).click();
+        Assert.assertEquals(
+                "The format of the displayed date should be DD/MM/YYYY",
+                "25/03/2018", localePicker.getInputValue());
     }
 
     private void setDateAndAssert(DatePickerElement datePicker, LocalDate date,
@@ -209,8 +199,6 @@ public class DatePickerIT extends AbstractComponentIT {
     public void selectDatesBeforeYear1000() {
         DatePickerElement localePicker = $(DatePickerElement.class)
                 .id("locale-change-picker");
-        TestBenchElement message = $("div")
-                .id("Customize-locale-picker-message");
 
         setDateAndAssert(localePicker, LocalDate.of(900, Month.MARCH, 7),
                 "3/7/0900");
@@ -269,8 +257,6 @@ public class DatePickerIT extends AbstractComponentIT {
     public void selectDatesBeforeYear1000SimulateUserInput() {
         DatePickerElement localePicker = $(DatePickerElement.class)
                 .id("locale-change-picker");
-        TestBenchElement message = $("div")
-                .id("Customize-locale-picker-message");
 
         setInputValueAndAssert(localePicker, "3/7/0900",
                 LocalDate.of(900, Month.MARCH, 7));
@@ -345,7 +331,8 @@ public class DatePickerIT extends AbstractComponentIT {
         WebElement message = findElement(
                 By.id("picker-with-opened-change-message"));
 
-        WebElement picker = findElement(By.id("picker-with-opened-change"));
+        DatePickerElement picker = $(DatePickerElement.class)
+                .id("picker-with-opened-change");
 
         picker.click();
         waitUntil(drive -> "date picker was opened".equals(message.getText()));
