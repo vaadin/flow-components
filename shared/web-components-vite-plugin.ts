@@ -8,7 +8,7 @@ import { PluginOption } from 'vite';
  * @param webComponentsRepoPath
  */
 export function useLocalWebComponents(webComponentsRepoPath: string): PluginOption {
-  const nodeModulesPath = path.resolve(__dirname, `${webComponentsRepoPath}/node_modules`);
+  const nodeModulesPath = path.resolve(__dirname, '../', `${webComponentsRepoPath}/node_modules`);
 
   return {
     name: 'use-local-web-components',
