@@ -68,8 +68,20 @@ export function useLitWebComponents(): PluginOption {
           ].flatMap((component) => {
             return [
               {
-                find: new RegExp(`^@vaadin/[^\/]+\/(src\/)?vaadin-${component}.js`),
-                replacement: `@vaadin/[^\/]+/$1vaadin-lit-${component}.js`
+                find: new RegExp(`^@vaadin/([^\/]+)\/vaadin-${component}.js`),
+                replacement: `@vaadin/$1/vaadin-lit-${component}.js`
+              },
+              {
+                find: new RegExp(`^@vaadin/([^\/]+)\/src/vaadin-${component}.js`),
+                replacement: `@vaadin/$1/src/vaadin-lit-${component}.js`
+              },
+              {
+                find: new RegExp(`^@vaadin/([^\/]+)\/theme/lumo/vaadin-${component}.js`),
+                replacement: `@vaadin/$1/theme/lumo/vaadin-lit-${component}.js`
+              },
+              {
+                find: new RegExp(`^@vaadin/([^\/]+)\/theme/material/vaadin-${component}.js`),
+                replacement: `@vaadin/$1/theme/material/vaadin-lit-${component}.js`
               }
             ];
           })
