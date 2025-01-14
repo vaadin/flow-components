@@ -98,8 +98,6 @@ public class MenuItemDisableOnClickIT extends AbstractContextMenuIT {
         var menuItem = findElement(By.id(itemId));
         for (int i = 0; i < 3; i++) {
             menuItem.click();
-            getCommandExecutor().getDriver()
-                    .executeAsyncScript("requestAnimationFrame(arguments[0])");
             Assert.assertFalse(menuItem.isEnabled());
             waitUntil(driver -> menuItem.isEnabled());
         }
@@ -197,8 +195,6 @@ public class MenuItemDisableOnClickIT extends AbstractContextMenuIT {
         // Test whether the item is still disable on click
         getCommandExecutor().disableWaitForVaadin();
         menuItem.click();
-        getCommandExecutor().getDriver()
-                .executeAsyncScript("requestAnimationFrame(arguments[0])");
         Assert.assertFalse(menuItem.isEnabled());
         waitUntil(ExpectedConditions.elementToBeClickable(menuItem), 2);
         Assert.assertTrue(menuItem.isEnabled());
