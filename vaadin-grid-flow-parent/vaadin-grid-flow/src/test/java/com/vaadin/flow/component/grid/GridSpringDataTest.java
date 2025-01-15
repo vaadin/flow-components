@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class GridSpringTest {
+public class GridSpringDataTest {
 
     @Test
     public void setItemsPageableNoCount() {
@@ -61,9 +61,7 @@ public class GridSpringTest {
 
             return List.of(new Person("John", 1293), new Person("Jane", 1923),
                     new Person("Homer", 1956));
-        }, pageable -> {
-            return 3L;
-        });
+        }, pageable -> 3L);
 
         Person item = grid.getLazyDataView().getItems().toList().get(1);
 

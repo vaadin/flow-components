@@ -3016,6 +3016,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 query -> handleSpringCountCallback(query, countCallback));
     }
 
+    @SuppressWarnings("unchecked")
     private static <PAGEABLE, T> Stream<T> handleSpringFetchCallback(
             Query<T, Void> query,
             SpringData.FetchCallback<PAGEABLE, T> fetchCallback) {
@@ -3025,12 +3026,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return itemList.stream();
     }
 
+    @SuppressWarnings("unchecked")
     private static <PAGEABLE> int handleSpringCountCallback(
             Query<?, Void> query,
             SpringData.CountCallback<PAGEABLE> countCallback) {
         PAGEABLE pageable = (PAGEABLE) VaadinSpringDataHelpers
                 .toSpringPageRequest(query);
-        long count = (long) countCallback.count(pageable);
+        long count = countCallback.count(pageable);
         if (count > Integer.MAX_VALUE) {
             LoggerFactory.getLogger(Grid.class).warn(
                     "The count of items in the backend ({}) exceeds the maximum supported by the Grid.",
