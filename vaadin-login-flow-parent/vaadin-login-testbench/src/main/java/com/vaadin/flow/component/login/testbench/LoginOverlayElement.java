@@ -94,7 +94,7 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
             return getTitleComponent().getText();
         }
         return getLoginOverlayWrapper().$(TestBenchElement.class)
-                .attribute("part", "brand").first().$("h1").first()
+                .attribute("part", "title").first()
                 // Using textContent, since getText() works unpredictable in
                 // Edge
                 .getPropertyString("textContent");
