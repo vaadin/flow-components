@@ -401,6 +401,52 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         sheetWidget.showCustomWidgets(customWidgetMap);
     }
 
+    public void showCellCustomEditors(
+            HashMap<String, String> cellKeysToEditorIdMap) {
+
+        if (cellKeysToEditorIdMap == null || customEditorFactory == null) {
+            return;
+        }
+
+        for (var entry : cellKeysToEditorIdMap.entrySet()) {
+            Widget customEditor = customEditorFactory
+                    .getCustomEditor(entry.getKey());
+            if (customEditor != null) {
+                var col = getColumnIndexFromKey(entry.getKey());
+                var row = getRowFromKey(entry.getKey());
+                var cell = sheetWidget.getCell(col, row);
+                sheetWidget.displayCustomCellEditor(customEditor, cell);
+            }
+        }
+    }
+
+    /**
+     * Returns the column index for the given Cell key.
+     *
+     * @param key
+     *            Cell key
+     * @return Column index of cell, 1-based
+     */
+    public static int getColumnIndexFromKey(String key) {
+        var split = key.split(" ");
+        var col = split[0].replace("col", "");
+        return Integer.valueOf(col);
+    }
+
+    /**
+     * Returns the row index for the given Cell key.
+     *
+     * @param key
+     *            Cell key
+     * @return Row index of cell, 1-based
+     */
+    public static int getRowFromKey(String key) {
+        var split = key.split(" ");
+        var row = split[1].replace("row", "");
+        return Integer.valueOf(row);
+
+    }
+
     public void addPopupButton(PopupButtonWidget widget) {
         sheetWidget.addPopupButton(widget);
     }
@@ -894,7 +940,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             cellEditingDone(editedValue, true);
         } else if (customCellEditorDisplayed) {
             customCellEditorDisplayed = false;
-            sheetWidget.removeCustomCellEditor();
+            // sheetWidget.removeCustomCellEditor();
             formulaBarWidget.setFormulaFieldEnabled(true);
         }
     }
@@ -1190,6 +1236,15 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                             formulaBarWidget.getFormulaFieldValue());
                     formulaBarWidget.setInFullFocus(true);
                     formulaBarWidget.startInlineEdit(true);
+                } else if (customEditorFactory
+                        .hasCustomEditor(sheetWidget.getSelectedCellKey())) {
+                    Widget customEditor = customEditorFactory
+                            .getCustomEditor(sheetWidget.getSelectedCellKey());
+                    if (customEditor instanceof Slot) {
+                        Arrays.stream(
+                                ((Slot) customEditor).getAssignedElements())
+                                .findFirst().ifPresent(Element::focus);
+                    }
                 }
                 break;
             }

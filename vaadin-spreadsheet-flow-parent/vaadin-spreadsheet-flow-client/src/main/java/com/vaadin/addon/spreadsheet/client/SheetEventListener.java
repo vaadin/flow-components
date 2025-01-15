@@ -8,11 +8,17 @@
  */
 package com.vaadin.addon.spreadsheet.client;
 
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.logging.Logger;
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
+import org.apache.juli.logging.Log;
 
 public class SheetEventListener implements EventListener {
 
@@ -46,17 +52,22 @@ public class SheetEventListener implements EventListener {
 
     @Override
     public void onBrowserEvent(Event event) {
+        var insideCustomEditor = isInsideCustomEditor(event);
+
         if ((SheetWidget.getEventTarget(event)).getAttribute("class")
-                .contains(PopupButtonWidget.BUTTON_CLASSNAME)) {
+                .contains(PopupButtonWidget.BUTTON_CLASSNAME) ) {
             widget.setFocused(true);
             return;
         }
         final int typeInt = event.getTypeInt();
 
+//        Logger.getLogger(SheetEventListener.class.getName()).info("Event type: " + typeInt);
         if (typeInt == Event.ONFOCUS) {
             widget.setFocused(true);
             sheetFocused = true;
-        } else if (typeInt == Event.ONBLUR) {
+        } else if (typeInt == Event.ONBLUR && !insideCustomEditor) {
+            var relatedTarget = Element.as(event.getRelatedEventTarget());
+            Logger.getLogger(SheetEventListener.class.getName()).info("BLUR: Target element: " + SheetWidget.getEventTarget(event).getTagName() + " Related target element: " + relatedTarget);
             widget.setFocused(false);
             sheetFocused = false;
         } else if (typeInt == Event.ONTOUCHMOVE) {
@@ -142,9 +153,47 @@ public class SheetEventListener implements EventListener {
         }
     }
 
+    private boolean isInsideCustomEditor(Event event) {
+        var composedPath = getComposedPath(event);
+
+        var result = Arrays
+                .stream(composedPath).filter(
+                        element -> element.getNodeType() == Node.ELEMENT_NODE
+                                && Objects.equals(element.getTagName(), "SLOT")
+                                && element.getAttribute("name")
+                                        .startsWith("custom-editor-"))
+                .findFirst();
+
+        if (result.isPresent()) {
+            Logger.getLogger(SheetEventListener.class.getName())
+                    .info("Custom editor found: "
+                            + result.get().getAttribute("name"));
+            return true;
+        }
+
+        return Arrays
+                .stream(composedPath).filter(
+                        element -> element.getNodeType() == Node.ELEMENT_NODE
+                                && Objects.equals(element.getTagName(), "SLOT")
+                                && element.getAttribute("name")
+                                        .startsWith("custom-editor-"))
+                .count() > 0;
+    }
+
+    private static native Element[] getComposedPath(Event event)
+    /*-{
+        return event.composedPath();
+    }-*/;
+
     private void onKeyDown(Event event) {
+        Logger.getLogger(SheetEventListener.class.getName())
+                .info("is inside custom editor: " + isInsideCustomEditor(event)
+                        + " isEditingCell: " + widget.isEditingCell()
+                    + " sheetFocused: " + sheetFocused
+                        + " char code: " + event.getCharCode());
         if (!widget.isEditingCell()) {
-            if (!sheetFocused) {
+            if (!sheetFocused || isInsideCustomEditor(event)) {
+//            if (!sheetFocused) {
                 return; // focus in input or custom editor
             }
             final int keyCode = event.getKeyCode();
@@ -159,6 +208,7 @@ public class SheetEventListener implements EventListener {
             case KeyCodes.KEY_DELETE:
             case KeyCodes.KEY_SPACE:
                 if (event.getCharCode() == 0) {
+                    Logger.getLogger(SheetEventListener.class.getName()).info("GOT HERE!!!");
                     widget.getSheetHandler().onSheetKeyPress(event, "");
                     // prevent the default browser action (scroll to key
                     // direction) or switch focus (tab)
@@ -194,6 +244,7 @@ public class SheetEventListener implements EventListener {
     }
 
     private void onKeyPress(Event event) {
+        Logger.getLogger(SheetEventListener.class.getName()).info("onKeyPress");
         if (!widget.isEditingCell()) {
             if (!sheetFocused) {
                 return; // focus in input or custom editor

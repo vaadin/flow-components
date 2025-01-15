@@ -373,9 +373,11 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                 });
             }
             widget.showCellCustomComponents(customWidgetMap);
+            widget.showCellCustomEditors(getState().cellKeysToEditorIdMap);
         }
         if (stateChangeEvent.hasPropertyChanged("cellKeysToEditorIdMap")) {
             setupCustomEditors();
+            widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
         }
         if (stateChangeEvent.hasPropertyChanged("cellComments")
                 || stateChangeEvent.hasPropertyChanged("cellCommentAuthors")) {
@@ -459,14 +461,21 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                                 .containsKey(key);
                     }
 
+                    private final Map<String, Widget> customEditors = new HashMap<>();
+
                     @Override
                     public Widget getCustomEditor(String key) {
                         String editorId = getState().cellKeysToEditorIdMap
                                 .get(key);
+                        if (customEditors.containsKey(editorId)) {
+                            return customEditors.get(editorId);
+                        }
                         var editor = SheetJsniUtil.getVirtualChild(editorId,
                                 host.getPropertyString("appId"));
-                        return new Slot("custom-editor-" + editorId, editor,
-                                host);
+                        var widget = new Slot("custom-editor-" + editorId,
+                                editor, host);
+                        customEditors.put(editorId, widget);
+                        return widget;
                     }
 
                 };

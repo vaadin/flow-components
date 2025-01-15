@@ -46,7 +46,7 @@ import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 @SuppressWarnings("serial")
 public class SpreadsheetUtil implements Serializable {
 
-    private static final Pattern keyParser = Pattern.compile("-?\\d+");
+    private static final Pattern keyparser = Pattern.compile("-?\\d+");
 
     private static final short EXCEL_COLUMN_WIDTH_FACTOR = 256;
 
@@ -183,6 +183,8 @@ public class SpreadsheetUtil implements Serializable {
         }
         return result;
     }
+
+    private static final Pattern keyParser = Pattern.compile("-?\\d+");
 
     /**
      * Returns the column index for the given Cell key.

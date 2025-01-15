@@ -1,0 +1,2 @@
+1576
+/Users/cardoso/.sdkman/candidates/java/current/bin/java -Duser.language=en -Duser.country=US -classpath /opt/homebrew/Cellar/maven/3.9.9/libexec/boot/plexus-classworlds-2.8.0.jar -Dclassworlds.conf=/opt/homebrew/Cellar/maven/3.9.9/libexec/bin/m2.conf -Dmaven.home=/opt/homebrew/Cellar/maven/3.9.9/libexec -Dlibrary.jansi.path=/opt/homebrew/Cellar/maven/3.9.9/libexec/lib/jansi-native -Dmaven.multiModuleProjectDirectory=/Users/cardoso/Developer/Vaadin/flow-components org.codehaus.plexus.classworlds.launcher.Launcher jetty:run -pl vaadin-login-flow-integration-tests

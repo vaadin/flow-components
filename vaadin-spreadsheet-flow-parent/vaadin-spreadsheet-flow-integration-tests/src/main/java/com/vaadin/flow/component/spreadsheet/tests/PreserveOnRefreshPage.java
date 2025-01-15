@@ -12,24 +12,22 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.vaadin.flow.component.HasHelper;
-import com.vaadin.flow.component.combobox.ComboBox;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Sheet;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.SpreadsheetComponentFactory;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-spreadsheet/preserve-on-refresh")
-@PreserveOnRefresh
+// @PreserveOnRefresh
 public class PreserveOnRefreshPage extends Div {
 
     private Spreadsheet spreadsheet;
@@ -147,8 +145,9 @@ public class PreserveOnRefreshPage extends Div {
             } else {
                 ComboBox<String> comboBox = new ComboBox<>();
                 comboBox.setItems("Option 1", "Option 2", "Option 3");
-                comboBox.addValueChangeListener(e -> spreadsheet.refreshCells(
-                        spreadsheet.createCell(rowIndex, columnIndex, e.getValue())));
+                comboBox.addValueChangeListener(
+                        e -> spreadsheet.refreshCells(spreadsheet.createCell(
+                                rowIndex, columnIndex, e.getValue())));
                 cellToComponent.put(key, comboBox);
             }
             return textField;

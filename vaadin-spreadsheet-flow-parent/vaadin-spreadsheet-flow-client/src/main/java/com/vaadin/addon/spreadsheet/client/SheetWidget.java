@@ -10,6 +10,7 @@ package com.vaadin.addon.spreadsheet.client;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1118,6 +1120,32 @@ public class SheetWidget extends Panel {
         }
     }
 
+    private Element getCustomEditorCell(Event event) {
+        var composedPath = getComposedPath(event);
+        var result = Arrays.stream(composedPath)
+                .filter(element -> Objects.equals(element.getTagName(), "SLOT")
+                        && element.getAttribute("name")
+                                .startsWith("custom-editor-"));
+
+        if (result.count() == 0) {
+            return null;
+        }
+
+        return Arrays.stream(composedPath)
+                .filter(element -> element.hasClassName("cell")).findFirst()
+                .orElse(null);
+    }
+
+    private static native Element[] getComposedPath(Event event)
+    /*-{
+        return event.composedPath();
+    }-*/;
+
+    private static native Element[] getAssignedElements(Element slot)
+    /*-{
+        return slot.assignedElements();
+    }-*/;
+
     /**
      *
      * @param event
@@ -1127,6 +1155,11 @@ public class SheetWidget extends Panel {
         Element target = getEventTarget(event);
 
         String className = target.getAttribute("class");
+
+        var customEditorCell = getCustomEditorCell(event);
+        if (customEditorCell != null) {
+            className = customEditorCell.getClassName();
+        }
 
         if (cellCommentEditMode && !className.contains("comment-overlay")) {
             cellCommentEditMode = false;
@@ -1199,7 +1232,15 @@ public class SheetWidget extends Panel {
                 Event.releaseCapture(sheet);
                 actionHandler.onCellRightClick(event, targetCol, targetRow);
             } else {
-                sheet.focus();
+                if (customEditorCell != null) {
+                    var slot = customEditorCell.getFirstChildElement();
+                    if (slot.getTagName().equals("SLOT")) {
+                        Arrays.stream(getAssignedElements(slot)).findFirst()
+                                .ifPresent(Element::focus);
+                    }
+                } else {
+                    sheet.focus();
+                }
                 // quit input if active
                 if (editingCell && !input.getElement().isOrHasChild(target)) {
                     actionHandler.onCellInputBlur(input.getValue());
@@ -3258,7 +3299,7 @@ public class SheetWidget extends Panel {
 
         // orphan custom editor if visible (it is outside of visible range, and
         // cell may be re-purposed)
-        removeCustomCellEditor();
+        // removeCustomCellEditor();
 
         if (firstR > lastRowIndex || lastR < firstRowIndex
                 || firstC > lastColumnIndex || lastC < firstColumnIndex) {
@@ -3469,6 +3510,28 @@ public class SheetWidget extends Panel {
         showRegionWidgets(newWidgetMap, firstColumnIndex, lastColumnIndex,
                 firstRowIndex, lastRowIndex);
         customWidgetMap = newWidgetMap;
+    }
+
+    public void showCustomEditors(
+            HashMap<String, String> cellKeysToEditorIdMap) {
+        System.out.println("showCustomEditors");
+        debugConsole.info("showCustomEditors");
+        if (cellKeysToEditorIdMap == null) {
+            return;
+        }
+
+        for (var entry : cellKeysToEditorIdMap.entrySet()) {
+            debugConsole.info("Cell key: " + entry.getKey() + ", editor id: "
+                    + entry.getValue());
+
+            // Widget customEditor = spreadsheet.customEditorFactory
+            // .getCustomEditor(sheetWidget.getSelectedCellKey());
+            // if (customEditor != null) {
+            // spreadsheet.customCellEditorDisplayed = true;
+            // spreadsheet.formulaBarWidget.setFormulaFieldEnabled(false);
+            // sheetWidget.displayCustomCellEditor(customEditor);
+            // }
+        }
     }
 
     private void showRegionWidgets(HashMap<String, Widget> newWidgets, int col1,
@@ -4264,8 +4327,11 @@ public class SheetWidget extends Panel {
                         c1 = row.get(0).getCol();
                     }
                 }
-                row.get(cd.col - c1).setValue(cd.value, cd.cellStyle,
-                        cd.needsMeasure);
+                if (!actionHandler.getCustomEditorFactory()
+                        .hasCustomEditor(toKey(cd.col, cd.row))) {
+                    row.get(cd.col - c1).setValue(cd.value, cd.cellStyle,
+                            cd.needsMeasure);
+                }
             }
             String key = toKey(cd.col, cd.row);
             setMergedCellValue(key, cd.value, cd.cellStyle, cd.needsMeasure);
@@ -4300,7 +4366,10 @@ public class SheetWidget extends Panel {
                     cell = getFrozenCell(cd.col, cd.row);
                 }
 
-                if (cell != null) {
+                if (cell != null && !actionHandler.getCustomEditorFactory()
+                        .hasCustomEditor(toKey(cell.getCol(), cell.getRow()))
+                        && !customWidgetMap.containsKey(
+                                toKey(cell.getCol(), cell.getRow()))) {
                     cell.setValue(cd.value, cd.cellStyle, cd.needsMeasure);
                     cell.markAsOverflowDirty();
                 }
@@ -5006,22 +5075,19 @@ public class SheetWidget extends Panel {
         return lastRowIndex;
     }
 
-    public void displayCustomCellEditor(Widget customEditorWidget) {
+    public void displayCustomCellEditor(Widget customEditorWidget, Cell cell) {
+
         customCellEditorDisplayed = true;
         jsniUtil.replaceSelector(editedCellFreezeColumnStyle,
                 ".notusedselector", 0);
         this.customEditorWidget = customEditorWidget;
-        Cell selectedCell = getSelectedCell();
-        if (selectedCell == null) {
-            return;
-        }
-        selectedCell.setValue(null);
+        cell.setValue(null);
 
         Widget parent = customEditorWidget.getParent();
         if (parent != null && !equals(parent)) {
             customEditorWidget.removeFromParent();
         }
-        DivElement element = selectedCell.getElement();
+        DivElement element = cell.getElement();
         element.addClassName(CUSTOM_EDITOR_CELL_CLASSNAME);
         element.appendChild(customEditorWidget.getElement());
         if (parent == null || (parent != null && !equals(parent))) {
@@ -5031,10 +5097,18 @@ public class SheetWidget extends Panel {
             Slot slot = (Slot) customEditorWidget;
             var elems = slot.getAssignedElements();
             if (elems.length > 0) {
-//                elems[0].focus();
+                // elems[0].focus();
             }
         }
-//                focusSheet();
+        // focusSheet();
+    }
+
+    public void displayCustomCellEditor(Widget customEditorWidget) {
+        Cell selectedCell = getSelectedCell();
+        if (selectedCell == null) {
+            return;
+        }
+        displayCustomCellEditor(customEditorWidget, selectedCell);
     }
 
     public void removeCustomCellEditor() {
