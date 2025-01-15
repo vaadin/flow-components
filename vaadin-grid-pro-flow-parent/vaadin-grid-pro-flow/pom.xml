@@ -67,7 +67,7 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
-            <version>${spring.boot.version}</version>
+            <version>${spring-data-commons.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
