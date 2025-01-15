@@ -41,6 +41,7 @@ public class PlotOptionsGantt extends AbstractPlotOptions {
     private Boolean enableMouseTracking;
     private Boolean grouping;
     private Number groupPadding;
+    private Boolean includeInDataExport;
     private ArrayList<String> keys;
     private String linkedTo;
     private Number maxPointWidth;
@@ -887,5 +888,22 @@ public class PlotOptionsGantt extends AbstractPlotOptions {
      */
     public void setCustom(AbstractConfigurationObject custom) {
         this.custom = custom;
+    }
+
+    /**
+     * @see #setIncludeInDataExport(Boolean)
+     */
+    public Boolean getIncludeInDataExport() {
+        return includeInDataExport;
+    }
+
+    /**
+     * When set to false will prevent the series data from being included in any
+     * form of data export.
+     * 
+     * @param includeInDataExport
+     */
+    public void setIncludeInDataExport(Boolean includeInDataExport) {
+        this.includeInDataExport = includeInDataExport;
     }
 }
