@@ -152,6 +152,8 @@ public class ChartType implements ChartEnum {
      */
     public static final ChartType XRANGE = new ChartType("xrange");
 
+    public static final ChartType GANTT = new ChartType("gantt");
+
     public static ChartType getDefault() {
         return ChartType.LINE;
     }
