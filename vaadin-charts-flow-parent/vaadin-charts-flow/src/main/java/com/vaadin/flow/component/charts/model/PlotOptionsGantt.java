@@ -44,6 +44,7 @@ public class PlotOptionsGantt extends AbstractPlotOptions {
     private Boolean enableMouseTracking;
     private Boolean grouping;
     private Number groupPadding;
+    private Boolean includeInDataExport;
     private ArrayList<String> keys;
     private String linkedTo;
     private Number maxPointWidth;
@@ -893,6 +894,23 @@ public class PlotOptionsGantt extends AbstractPlotOptions {
     }
 
     /**
+     * @see #setIncludeInDataExport(Boolean)
+     */
+    public Boolean getIncludeInDataExport() {
+        return includeInDataExport;
+    }
+
+    /**
+     * When set to false will prevent the series data from being included in any
+     * form of data export.
+     *
+     * @param includeInDataExport
+     */
+    public void setIncludeInDataExport(Boolean includeInDataExport) {
+        this.includeInDataExport = includeInDataExport;
+    }
+
+    /**
      * @see #setDragDrop(DragDrop)
      */
     public DragDrop getDragDrop() {
@@ -907,7 +925,7 @@ public class PlotOptionsGantt extends AbstractPlotOptions {
      * The DragDrop options allows points to be moved around or modified in the
      * chart. In addition to the options mentioned under the dragDrop API
      * structure, the chart fires three events: dragStart, drag and drop.
-     * 
+     *
      * @see Chart#addPointDragStartListener(ComponentEventListener)
      * @see Chart#addPointDragListener(ComponentEventListener)
      * @see Chart#addPointDropListener(ComponentEventListener)

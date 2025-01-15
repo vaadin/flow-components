@@ -44,7 +44,7 @@ setPomVersion() {
 version=$1
 ! [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+([\.-](alpha|beta|rc)[0-9]+)?$ ]] && echo Invalid version format: $version && exit 1
 [[ $version =~ (alpha|beta|rc) ]] && profile=prerelease || profile=maven-central
-pomVersion=`cat pom.xml | grep '<version>' | head -1 | cut -d '>' -f2 | cut -d '<' -f1`
+pomVersion=`cat pom.xml | grep -m2 "<version>" | tail -n1 | cut -d '>' -f2 | cut -d '<' -f1`
 
 ### Extrat major.minor part from version
 versionBase=`getBaseVersion $version`
@@ -52,7 +52,7 @@ pomBase=`getBaseVersion $pomVersion`
 
 ### Get the main branch version for components
 mainPom=`curl -s "https://raw.githubusercontent.com/vaadin/flow-components/main/pom.xml"`
-mainMajorMinor=`echo "$mainPom" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | head -1 | cut -d '-' -f1`
+mainMajorMinor=`echo "$mainPom" | grep -m2 '<version>' | tail -n1 | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | head -1 | cut -d '-' -f1`
 
 ### Load versions file for this platform release
 branch=$versionBase
