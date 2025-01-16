@@ -14,6 +14,8 @@ public class DragDrop extends AbstractConfigurationObject {
     private Boolean draggableEnd;
     private Boolean draggableStart;
     private Boolean draggableX;
+    private Boolean draggableX1;
+    private Boolean draggableX2;
     private Boolean draggableY;
     private DragHandle dragHandle;
     private Number dragMaxX;
@@ -75,6 +77,38 @@ public class DragDrop extends AbstractConfigurationObject {
      */
     public void setDraggableX(Boolean draggableX) {
         this.draggableX = draggableX;
+    }
+
+    /**
+     * @see #setDraggableX1(Boolean)
+     */
+    public Boolean getDraggableX1() {
+        return draggableX1;
+    }
+
+    /**
+     * Allow X1 value to be dragged individually. Defaults to true.
+     *
+     * @param draggableX1
+     */
+    public void setDraggableX1(Boolean draggableX1) {
+        this.draggableX1 = draggableX1;
+    }
+
+    /**
+     * @see #setDraggableX2(Boolean)
+     */
+    public Boolean getDraggableX2() {
+        return draggableX2;
+    }
+
+    /**
+     * Allow X2 value to be dragged individually. Defaults to true.
+     *
+     * @param draggableX2
+     */
+    public void setDraggableX2(Boolean draggableX2) {
+        this.draggableX2 = draggableX2;
     }
 
     /**
