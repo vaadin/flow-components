@@ -15,10 +15,16 @@
  */
 package com.vaadin.flow.component.orderedlayout;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
@@ -260,5 +266,140 @@ public class HorizontalLayout extends Component implements ThemableLayout,
         add(components);
         setWidthFull();
         expand(components);
+    }
+
+    /**
+     * Adds the components to the <em>start</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the start slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToStart(Component... components) {
+        Objects.requireNonNull(components, "Components should not be null");
+
+        addToStart(Arrays.asList(components));
+    }
+
+    /**
+     * Adds the components to the <em>start</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the start slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToStart(Collection<Component> components) {
+        var idx = getChildren().filter((child) -> {
+            var slotName = child.getElement().getAttribute("slot");
+            return slotName == null;
+        }).count();
+
+        final AtomicInteger itemCounter = new AtomicInteger(0);
+
+        components.stream()
+                .map(component -> Objects.requireNonNull(component,
+                        "Component to add cannot be null"))
+                .forEach((component) -> {
+                    getElement().insertChild(
+                            (int) idx + itemCounter.getAndIncrement(),
+                            component.getElement());
+                });
+    }
+
+    /**
+     * Adds the components to the <em>middle</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the middle slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToMiddle(Component... components) {
+        Objects.requireNonNull(components, "Components should not be null");
+
+        addToMiddle(Arrays.asList(components));
+    }
+
+    /**
+     * Adds the components to the <em>middle</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the middle slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToMiddle(Collection<Component> components) {
+        Objects.requireNonNull(components, "Components should not be null");
+
+        var idx = getChildren().filter((child) -> {
+            var slotName = child.getElement().getAttribute("slot");
+            return slotName == null || slotName.equals("middle");
+        }).count();
+
+        final AtomicInteger itemCounter = new AtomicInteger(0);
+
+        components.stream()
+                .map(component -> Objects.requireNonNull(component,
+                        "Component to add cannot be null"))
+                .forEach((component) -> {
+                    if (component instanceof Text) {
+                        throw new IllegalArgumentException("Text as a middle"
+                                + " slot content is not supported. "
+                                + "Consider wrapping the Text inside a Div.");
+                    }
+
+                    component.getElement().setAttribute("slot", "middle");
+                    getElement().insertChild(
+                            (int) idx + itemCounter.getAndIncrement(),
+                            component.getElement());
+                });
+    }
+
+    /**
+     * Adds the components to the <em>middle</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the middle slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToEnd(Component... components) {
+        Objects.requireNonNull(components, "Components should not be null");
+
+        addToEnd(Arrays.asList(components));
+    }
+
+    /**
+     * Adds the components to the <em>end</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the middle slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToEnd(Collection<Component> components) {
+        Objects.requireNonNull(components, "Components should not be null");
+
+        components.stream()
+                .map(component -> Objects.requireNonNull(component,
+                        "Component to add cannot be null"))
+                .forEach((component) -> {
+                    if (component instanceof Text) {
+                        throw new IllegalArgumentException("Text as an end"
+                                + " slot content is not supported. "
+                                + "Consider wrapping the Text inside a Div.");
+                    }
+
+                    component.getElement().setAttribute("slot", "end");
+                    getElement().appendChild(component.getElement());
+                });
     }
 }
