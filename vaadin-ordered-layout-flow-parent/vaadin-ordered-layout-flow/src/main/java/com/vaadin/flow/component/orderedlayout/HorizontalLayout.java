@@ -15,12 +15,18 @@
  */
 package com.vaadin.flow.component.orderedlayout;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.SlotUtils;
 
 /**
  * Horizontal Layout places components side-by-side in a row. By default, it has
@@ -260,5 +266,126 @@ public class HorizontalLayout extends Component implements ThemableLayout,
         add(components);
         setWidthFull();
         expand(components);
+    }
+
+    /**
+     * Adds the components to the <em>start</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the start slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToStart(Component... components) {
+        add(components);
+    }
+
+    /**
+     * Adds the components to the <em>start</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the start slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToStart(Collection<Component> components) {
+        add(components);
+    }
+
+    /**
+     * Adds the components to the <em>middle</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the middle slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToMiddle(Component... components) {
+        Objects.requireNonNull(components, "Components should not be null");
+
+        addToMiddle(Arrays.asList(components));
+    }
+
+    /**
+     * Adds the components to the <em>middle</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the middle slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToMiddle(Collection<Component> components) {
+        Objects.requireNonNull(components, "Components should not be null");
+
+        components.stream()
+                .map(component -> Objects.requireNonNull(component,
+                        "Component to add cannot be null"))
+                .forEach((component) -> {
+                    SlotUtils.addToSlot(this, "middle", component);
+                });
+    }
+
+    /**
+     * Adds the components to the <em>middle</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the middle slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToEnd(Component... components) {
+        Objects.requireNonNull(components, "Components should not be null");
+
+        addToEnd(Arrays.asList(components));
+    }
+
+    /**
+     * Adds the components to the <em>end</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the middle slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToEnd(Collection<Component> components) {
+        Objects.requireNonNull(components, "Components should not be null");
+
+        components.stream()
+                .map(component -> Objects.requireNonNull(component,
+                        "Component to add cannot be null"))
+                .forEach((component) -> {
+                    SlotUtils.addToSlot(this, "end", component);
+                });
+    }
+
+    /**
+     * Gets the child components of this component.
+     * <p>
+     * Child components indexes are maintained based on their corresponding
+     * alignment slots, so that components added to the <code>start</code> slot
+     * come first, then those in the <code>middle</code> slot, and then in the
+     * <code>end</code> slot.
+     *
+     * @return the child components of this component
+     */
+    @Override
+    public Stream<Component> getChildren() {
+        return super.getChildren().sorted(
+                (c1, c2) -> getSortIndex(c1).compareTo(getSortIndex(c2)));
+    }
+
+    private Integer getSortIndex(Component component) {
+        var slotName = component.getElement().getAttribute("slot");
+        if (slotName == null) {
+            return 0;
+        }
+
+        return slotName.equals("middle") ? 1 : 2;
     }
 }
