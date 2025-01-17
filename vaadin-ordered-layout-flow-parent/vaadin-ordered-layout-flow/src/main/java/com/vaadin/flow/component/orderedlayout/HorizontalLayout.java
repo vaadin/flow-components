@@ -18,15 +18,15 @@ package com.vaadin.flow.component.orderedlayout;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.SlotUtils;
 
 /**
  * Horizontal Layout places components side-by-side in a row. By default, it has
@@ -278,7 +278,9 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      *             is null.
      */
     public void addToStart(Component... components) {
-        add(components);
+        Objects.requireNonNull(components, "Components should not be null");
+
+        addToStart(Arrays.asList(components));
     }
 
     /**
@@ -291,7 +293,21 @@ public class HorizontalLayout extends Component implements ThemableLayout,
      *             is null.
      */
     public void addToStart(Collection<Component> components) {
-        add(components);
+        var idx = getChildren().filter((child) -> {
+            var slotName = child.getElement().getAttribute("slot");
+            return slotName == null;
+        }).count();
+
+        final AtomicInteger itemCounter = new AtomicInteger(0);
+
+        components.stream()
+                .map(component -> Objects.requireNonNull(component,
+                        "Component to add cannot be null"))
+                .forEach((component) -> {
+                    getElement().insertChild(
+                            (int) idx + itemCounter.getAndIncrement(),
+                            component.getElement());
+                });
     }
 
     /**
@@ -321,11 +337,27 @@ public class HorizontalLayout extends Component implements ThemableLayout,
     public void addToMiddle(Collection<Component> components) {
         Objects.requireNonNull(components, "Components should not be null");
 
+        var idx = getChildren().filter((child) -> {
+            var slotName = child.getElement().getAttribute("slot");
+            return slotName == null || slotName.equals("middle");
+        }).count();
+
+        final AtomicInteger itemCounter = new AtomicInteger(0);
+
         components.stream()
                 .map(component -> Objects.requireNonNull(component,
                         "Component to add cannot be null"))
                 .forEach((component) -> {
-                    SlotUtils.addToSlot(this, "middle", component);
+                    if (component instanceof Text) {
+                        throw new IllegalArgumentException("Text as a middle"
+                                + " slot content is not supported. "
+                                + "Consider wrapping the Text inside a Div.");
+                    }
+
+                    component.getElement().setAttribute("slot", "middle");
+                    getElement().insertChild(
+                            (int) idx + itemCounter.getAndIncrement(),
+                            component.getElement());
                 });
     }
 
@@ -360,32 +392,14 @@ public class HorizontalLayout extends Component implements ThemableLayout,
                 .map(component -> Objects.requireNonNull(component,
                         "Component to add cannot be null"))
                 .forEach((component) -> {
-                    SlotUtils.addToSlot(this, "end", component);
+                    if (component instanceof Text) {
+                        throw new IllegalArgumentException("Text as an end"
+                                + " slot content is not supported. "
+                                + "Consider wrapping the Text inside a Div.");
+                    }
+
+                    component.getElement().setAttribute("slot", "end");
+                    getElement().appendChild(component.getElement());
                 });
-    }
-
-    /**
-     * Gets the child components of this component.
-     * <p>
-     * Child components indexes are maintained based on their corresponding
-     * alignment slots, so that components added to the <code>start</code> slot
-     * come first, then those in the <code>middle</code> slot, and then in the
-     * <code>end</code> slot.
-     *
-     * @return the child components of this component
-     */
-    @Override
-    public Stream<Component> getChildren() {
-        return super.getChildren().sorted(
-                (c1, c2) -> getSortIndex(c1).compareTo(getSortIndex(c2)));
-    }
-
-    private Integer getSortIndex(Component component) {
-        var slotName = component.getElement().getAttribute("slot");
-        if (slotName == null) {
-            return 0;
-        }
-
-        return slotName.equals("middle") ? 1 : 2;
     }
 }
