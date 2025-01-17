@@ -32,3 +32,61 @@ export function useLocalWebComponents(webComponentsRepoPath: string): PluginOpti
     }
   };
 }
+
+/**
+ * Vite plugin that resolves Vaadin web components to Lit versions
+ */
+export function useLitWebComponents(): PluginOption {
+  return {
+    name: 'use-lit-web-components',
+    config() {
+      return {
+        resolve: {
+          alias: [
+            'accordion',
+            'accordion-panel',
+            'app-layout',
+            'drawer-toggle',
+            'avatar',
+            'avatar-group',
+            'context-menu',
+            'custom-field',
+            'details',
+            'dialog',
+            'horizontal-layout',
+            'list-box',
+            'item',
+            'notification',
+            'radio-button',
+            'radio-button-group',
+            'scroller',
+            'split-layout',
+            'tabs',
+            'tab',
+            'tabsheet',
+            'vertical-layout'
+          ].flatMap((component) => {
+            return [
+              {
+                find: new RegExp(`^@vaadin/([^\/]+)\/vaadin-${component}.js`),
+                replacement: `@vaadin/$1/vaadin-lit-${component}.js`
+              },
+              {
+                find: new RegExp(`^@vaadin/([^\/]+)\/src/vaadin-${component}.js`),
+                replacement: `@vaadin/$1/src/vaadin-lit-${component}.js`
+              },
+              {
+                find: new RegExp(`^@vaadin/([^\/]+)\/theme/lumo/vaadin-${component}.js`),
+                replacement: `@vaadin/$1/theme/lumo/vaadin-lit-${component}.js`
+              },
+              {
+                find: new RegExp(`^@vaadin/([^\/]+)\/theme/material/vaadin-${component}.js`),
+                replacement: `@vaadin/$1/theme/material/vaadin-lit-${component}.js`
+              }
+            ];
+          })
+        }
+      };
+    }
+  };
+}
