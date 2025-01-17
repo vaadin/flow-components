@@ -20,6 +20,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.experimental.Feature;
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
@@ -30,7 +32,11 @@ import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
+import com.vaadin.flow.component.ShortcutRegistration;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Image;
@@ -39,7 +45,9 @@ import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * The Button component allows users to perform actions. It comes in several
@@ -158,6 +166,43 @@ public class Button extends Component
         setIcon(icon);
         setText(text);
         addClickListener(clickListener);
+    }
+
+    @Override
+    public ShortcutRegistration addFocusShortcut(Key key,
+            KeyModifier... keyModifiers) {
+        ShortcutRegistration registration = Focusable.super.addFocusShortcut(
+                key, keyModifiers);
+        if (isFeatureFlagEnabled(FeatureFlags.EXAMPLE)) {
+            registration.setDisabledUpdateMode(DisabledUpdateMode.ALWAYS);
+        }
+        return registration;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Registration addFocusListener(
+            ComponentEventListener<FocusEvent<Button>> listener) {
+        return getEventBus().addListener(FocusEvent.class,
+                (ComponentEventListener) listener, registration -> {
+                    if (isFeatureFlagEnabled(FeatureFlags.EXAMPLE)) {
+                        registration.setDisabledUpdateMode(
+                                DisabledUpdateMode.ALWAYS);
+                    }
+                });
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Registration addBlurListener(
+            ComponentEventListener<BlurEvent<Button>> listener) {
+        return getEventBus().addListener(BlurEvent.class,
+                (ComponentEventListener) listener, registration -> {
+                    if (isFeatureFlagEnabled(FeatureFlags.EXAMPLE)) {
+                        registration.setDisabledUpdateMode(
+                                DisabledUpdateMode.ALWAYS);
+                    }
+                });
     }
 
     /**
@@ -426,5 +471,23 @@ public class Button extends Component
         } else {
             getThemeNames().remove("icon");
         }
+    }
+
+    /**
+     * Checks whether the give feature flag is active.
+     *
+     * @param feature
+     *            the feature flag to check
+     * @return {@code true} if the feature flag is active, {@code false}
+     *         otherwise
+     */
+    private boolean isFeatureFlagEnabled(Feature feature) {
+        UI ui = UI.getCurrent();
+        if (ui == null) {
+            return false;
+        }
+
+        return FeatureFlags.get(ui.getSession().getService().getContext())
+                .isEnabled(feature);
     }
 }
