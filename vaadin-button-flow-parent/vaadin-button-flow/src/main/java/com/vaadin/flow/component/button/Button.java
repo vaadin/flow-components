@@ -341,6 +341,22 @@ public class Button extends Component
         return disableOnClickController.isDisableOnClick();
     }
 
+    /**
+     *
+     * When set to false, prevents any user interaction with the button such as
+     * clicking, focusing, etc.
+     * <p>
+     * For better accessibility, disabled buttons can be made focusable so that
+     * screen readers can reach and properly announce them to users, including
+     * their attached tooltips and popovers. Other interactions such as clicks,
+     * remain disabled. This behavior is currently experimental and can be
+     * enabled by setting the following feature flag in your
+     * {@code vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.focusableDisabledComponents=true
+     * </pre>
+     */
     @Override
     public void setEnabled(boolean enabled) {
         Focusable.super.setEnabled(enabled);
