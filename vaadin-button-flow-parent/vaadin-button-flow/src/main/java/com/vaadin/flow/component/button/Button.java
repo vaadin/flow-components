@@ -359,9 +359,9 @@ public class Button extends Component
      * screen readers. To improve this, disabled buttons can be made focusable
      * so that screen readers can still reach and properly announce them,
      * including any attached tooltips and popovers, while still preventing
-     * other interactions like clicks. This is currently available as an
-     * experimental enhancement that can be enabled by setting the following
-     * feature flag in {@code vaadin-featureflags.properties}:
+     * clicks. This is currently available as an experimental enhancement that
+     * can be enabled by setting the following feature flag in
+     * {@code vaadin-featureflags.properties}:
      *
      * <pre>
      * com.vaadin.experimental.accessibleDisabledButtons = true
@@ -380,8 +380,8 @@ public class Button extends Component
      * {@inheritDoc}
      * <p>
      * By default, focus shortcuts are only active when the button is enabled.
-     * To make disabled buttons also focusable, set the following feature flag in
-     * {@code vaadin-featureflags.properties}:
+     * To make disabled buttons also focusable, set the following feature flag
+     * in {@code vaadin-featureflags.properties}:
      *
      * <pre>
      * com.vaadin.experimental.accessibleDisabledButtons = true
