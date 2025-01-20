@@ -168,43 +168,6 @@ public class Button extends Component
         addClickListener(clickListener);
     }
 
-    @Override
-    public ShortcutRegistration addFocusShortcut(Key key,
-            KeyModifier... keyModifiers) {
-        ShortcutRegistration registration = Focusable.super.addFocusShortcut(
-                key, keyModifiers);
-        if (isFeatureFlagEnabled(FeatureFlags.EXAMPLE)) {
-            registration.setDisabledUpdateMode(DisabledUpdateMode.ALWAYS);
-        }
-        return registration;
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Override
-    public Registration addFocusListener(
-            ComponentEventListener<FocusEvent<Button>> listener) {
-        return getEventBus().addListener(FocusEvent.class,
-                (ComponentEventListener) listener, registration -> {
-                    if (isFeatureFlagEnabled(FeatureFlags.EXAMPLE)) {
-                        registration.setDisabledUpdateMode(
-                                DisabledUpdateMode.ALWAYS);
-                    }
-                });
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Override
-    public Registration addBlurListener(
-            ComponentEventListener<BlurEvent<Button>> listener) {
-        return getEventBus().addListener(BlurEvent.class,
-                (ComponentEventListener) listener, registration -> {
-                    if (isFeatureFlagEnabled(FeatureFlags.EXAMPLE)) {
-                        registration.setDisabledUpdateMode(
-                                DisabledUpdateMode.ALWAYS);
-                    }
-                });
-    }
-
     /**
      * Sets the given string as the text content of this component.
      * <p>
@@ -387,26 +350,106 @@ public class Button extends Component
     }
 
     /**
-     *
-     * When set to false, prevents any user interaction with the button such as
-     * clicking, hovering, etc. It also removes the button from the tab order.
+     * Sets the button explicitly disabled or enabled. When disabled, prevents
+     * any user interaction with the button such as clicking or hovering, and
+     * removes the button from the tab order.
      * <p>
-     * This behavior, however, negatively impacts accessibility, as disabled
-     * buttons become completely invisible to screen readers. To improve this,
-     * disabled buttons can be made focusable so that screen readers can reach
-     * and properly announce them, including their attached tooltips and
-     * popovers, while clicks remain disabled. This is currently available as an
-     * experimental feature that can be enabled by explicitly setting the
-     * following feature flag in your {@code vaadin-featureflags.properties}:
+     * Please note that removing the button from the tab order may negatively
+     * impact accessibility, as disabled buttons become completely hidden from
+     * screen readers. To improve this, disabled buttons can be made focusable
+     * so that screen readers can still reach and properly announce them,
+     * including any attached tooltips and popovers, while still preventing
+     * other interactions like clicks. This is currently available as an
+     * experimental enhancement that can be enabled by setting the following
+     * feature flag in {@code vaadin-featureflags.properties}:
      *
      * <pre>
      * com.vaadin.experimental.accessibleDisabledButtons = true
      * </pre>
+     *
+     * This feature flag will also enable focus events and focus shortcuts for
+     * disabled buttons.
      */
     @Override
     public void setEnabled(boolean enabled) {
         Focusable.super.setEnabled(enabled);
         disableOnClickController.onSetEnabled(enabled);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * By default, focus shortcuts are only active when the button is enabled.
+     * To make disabled buttons also focusable, set the following feature flag in
+     * {@code vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.accessibleDisabledButtons = true
+     * </pre>
+     *
+     * This feature flag will enable focus events and focus shortcuts for
+     * disabled buttons.
+     */
+    @Override
+    public ShortcutRegistration addFocusShortcut(Key key,
+            KeyModifier... keyModifiers) {
+        ShortcutRegistration registration = Focusable.super.addFocusShortcut(
+                key, keyModifiers);
+        if (isFeatureFlagEnabled(FeatureFlags.EXAMPLE)) {
+            registration.setDisabledUpdateMode(DisabledUpdateMode.ALWAYS);
+        }
+        return registration;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * By default, buttons are only focusable in the enabled state. To make
+     * disabled buttons also focusable, set the following feature flag in
+     * {@code vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.accessibleDisabledButtons = true
+     * </pre>
+     *
+     * This feature flag will enable focus events and focus shortcuts for
+     * disabled buttons.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Registration addFocusListener(
+            ComponentEventListener<FocusEvent<Button>> listener) {
+        return getEventBus().addListener(FocusEvent.class,
+                (ComponentEventListener) listener, registration -> {
+                    if (isFeatureFlagEnabled(FeatureFlags.EXAMPLE)) {
+                        registration.setDisabledUpdateMode(
+                                DisabledUpdateMode.ALWAYS);
+                    }
+                });
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * By default, buttons are only focusable in the enabled state. To make
+     * disabled buttons also focusable, set the following feature flag in
+     * {@code vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.accessibleDisabledButtons = true
+     * </pre>
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Registration addBlurListener(
+            ComponentEventListener<BlurEvent<Button>> listener) {
+        return getEventBus().addListener(BlurEvent.class,
+                (ComponentEventListener) listener, registration -> {
+                    if (isFeatureFlagEnabled(FeatureFlags.EXAMPLE)) {
+                        registration.setDisabledUpdateMode(
+                                DisabledUpdateMode.ALWAYS);
+                    }
+                });
     }
 
     private void updateIconSlot() {
