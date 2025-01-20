@@ -37,6 +37,28 @@ class MenuBarItem extends MenuItem {
     }
 
     /**
+     * Sets the menu item explicitly disabled or enabled. When a menu item is
+     * disabled, it prevents any user interaction with it, such as focusing,
+     * clicking, opening a sub-menu, etc. The item is also removed from the tab
+     * order, which makes it inaccessible for screen readers.
+     * <p>
+     * To improve accessibility, disabled root-level items (menu bar buttons)
+     * can be made focusable so that screen readers can reach and properly
+     * announce them, including any tooltips, while still preventing clicks.
+     * This is currently available as an experimental enhancement that can be
+     * enabled by setting the following feature flag in
+     * {@code vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.accessibleDisabledButtons = true
+     * </pre>
+     */
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+    }
+
+    /**
      * @inheritDoc
      */
     @Override

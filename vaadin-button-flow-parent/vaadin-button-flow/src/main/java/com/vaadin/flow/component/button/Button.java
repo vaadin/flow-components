@@ -352,15 +352,14 @@ public class Button extends Component
     /**
      * Sets the button explicitly disabled or enabled. When disabled, prevents
      * any user interaction with the button such as clicking or hovering, and
-     * removes the button from the tab order.
+     * removes the button from the tab order, which makes it inaccessible to
+     * screen readers.
      * <p>
-     * Please note that removing the button from the tab order may negatively
-     * impact accessibility, as disabled buttons become completely hidden from
-     * screen readers. To improve this, disabled buttons can be made focusable
-     * so that screen readers can still reach and properly announce them,
-     * including any attached tooltips and popovers, while still preventing
-     * clicks. This is currently available as an experimental enhancement that
-     * can be enabled by setting the following feature flag in
+     * To improve accessibility, disabled buttons can be made focusable so that
+     * screen readers can still reach and properly announce them, including any
+     * attached tooltips and popovers, while still preventing clicks. This is
+     * currently available as an experimental enhancement that can be enabled by
+     * setting the following feature flag in
      * {@code vaadin-featureflags.properties}:
      *
      * <pre>
