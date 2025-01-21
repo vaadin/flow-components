@@ -40,7 +40,7 @@ class MenuBarItem extends MenuItem {
      * Sets the menu item explicitly disabled or enabled. When a menu item is
      * disabled, it prevents any user interaction with it, such as focusing,
      * clicking, opening a sub-menu, etc. The item is also removed from the tab
-     * order, which makes it inaccessible for screen readers.
+     * order, which makes it inaccessible to screen readers.
      * <p>
      * To improve accessibility, disabled root-level items (menu bar buttons)
      * can be made focusable so that screen readers can reach and properly
