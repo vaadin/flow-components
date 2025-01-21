@@ -1070,6 +1070,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
                 query -> handleSpringCountCallback(query, countCallback));
     }
 
+    @SuppressWarnings("unchecked")
     private static <PAGEABLE, T> Stream<T> handleSpringFetchCallback(
             Query<T, String> query,
             SpringData.FetchCallback<PAGEABLE, T> fetchCallback) {
@@ -1080,16 +1081,17 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         return itemList.stream();
     }
 
+    @SuppressWarnings("unchecked")
     private static <PAGEABLE> int handleSpringCountCallback(
             Query<?, String> query,
             SpringData.CountCallback<PAGEABLE> countCallback) {
         PAGEABLE pageable = (PAGEABLE) VaadinSpringDataHelpers
                 .toSpringPageRequest(query);
-        long count = (long) countCallback.count(pageable,
+        long count = countCallback.count(pageable,
                 query.getFilter().orElse(""));
         if (count > Integer.MAX_VALUE) {
             LoggerFactory.getLogger(ComboBoxBase.class).warn(
-                    "The count of items in the backend ({}) exceeds the maximum supported by the Grid.",
+                    "The count of items in the backend ({}) exceeds the maximum supported by the ComboBox.",
                     count);
             return Integer.MAX_VALUE;
         }

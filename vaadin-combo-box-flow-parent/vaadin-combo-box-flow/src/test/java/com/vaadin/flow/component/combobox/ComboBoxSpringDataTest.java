@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ComboBoxSpringTest {
+public class ComboBoxSpringDataTest {
     public static class Person implements Serializable {
         private String name;
         private final int born;
@@ -109,9 +109,7 @@ public class ComboBoxSpringTest {
             pageNumber.set(pageable.getPageNumber());
 
             return filteredData(filterString);
-        }, (pageable, filterString) -> {
-            return 3L;
-        });
+        }, (pageable, filterString) -> 3L);
 
         List<Person> items = comboBox.getLazyDataView().getItems().toList();
 
