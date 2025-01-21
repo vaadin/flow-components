@@ -17,6 +17,8 @@ package com.vaadin.flow.component.orderedlayout;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -27,6 +29,10 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.ElementDetachEvent;
+import com.vaadin.flow.dom.ElementDetachListener;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Horizontal Layout places components side-by-side in a row. By default, it has
@@ -359,6 +365,8 @@ public class HorizontalLayout extends Component implements ThemableLayout,
                             (int) idx + itemCounter.getAndIncrement(),
                             component.getElement());
                 });
+
+        updateChildDetachListeners();
     }
 
     /**
@@ -401,5 +409,39 @@ public class HorizontalLayout extends Component implements ThemableLayout,
                     component.getElement().setAttribute("slot", "end");
                     getElement().appendChild(component.getElement());
                 });
+
+        updateChildDetachListeners();
+    }
+
+    private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
+    // Must not use lambda here as that would break serialization. See
+    // https://github.com/vaadin/flow-components/issues/5597
+    private ElementDetachListener childDetachListener = new ElementDetachListener() {
+        @Override
+        public void onDetach(ElementDetachEvent e) {
+            var child = e.getSource();
+            var childDetachedFromLayout = !getElement().getChildren().anyMatch(
+                    layoutChild -> Objects.equals(child, layoutChild));
+
+            if (childDetachedFromLayout) {
+                // The child was removed from the layout
+                // Clear slot to avoid problems when moving to other layout
+                child.removeAttribute("slot");
+
+                // Remove the registration for the child detach listener
+                childDetachListenerMap.get(child).remove();
+                childDetachListenerMap.remove(child);
+            }
+        }
+    };
+
+    private void updateChildDetachListeners() {
+        // Add detach listeners (child may be removed with removeFromParent())
+        getElement().getChildren().forEach(child -> {
+            if (!childDetachListenerMap.containsKey(child)) {
+                childDetachListenerMap.put(child,
+                        child.addDetachListener(childDetachListener));
+            }
+        });
     }
 }

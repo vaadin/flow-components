@@ -21,15 +21,20 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 public class HorizontalLayoutSlotsTest {
     private HorizontalLayout layout;
+    private UI ui;
 
     @Before
     public void setup() {
         layout = new HorizontalLayout();
+        ui = new UI();
+        UI.setCurrent(ui);
+        ui.add(layout);
     }
 
     @Test
@@ -54,6 +59,60 @@ public class HorizontalLayoutSlotsTest {
         layout.addToEnd(div);
         Assert.assertEquals(div, layout.getComponentAt(0));
         Assert.assertEquals(div.getElement().getAttribute("slot"), "end");
+    }
+
+    @Test
+    public void addToMiddle_remove_componentHasNoSlot() {
+        Div div = new Div();
+        layout.addToMiddle(div);
+
+        layout.remove(div);
+        Assert.assertNull(div.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void addToMiddle_removeAll_componentHasNoSlot() {
+        Div div = new Div();
+        layout.addToMiddle(div);
+
+        layout.removeAll();
+        Assert.assertNull(div.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void addToMiddle_removeFromParent_componentHasNoSlot() {
+        Div div = new Div();
+        layout.addToMiddle(div);
+
+        div.getElement().removeFromParent();
+        Assert.assertNull(div.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void addToEnd_remove_componentHasNoSlot() {
+        Div div = new Div();
+        layout.addToEnd(div);
+
+        layout.remove(div);
+        Assert.assertNull(div.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void addToEnd_removeFromParent_componentHasNoSlot() {
+        Div div = new Div();
+        layout.addToEnd(div);
+
+        div.getElement().removeFromParent();
+        Assert.assertNull(div.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void addToEnd_removeAll_componentHasNoSlot() {
+        Div div = new Div();
+        layout.addToEnd(div);
+
+        layout.removeAll();
+        Assert.assertNull(div.getElement().getAttribute("slot"));
     }
 
     @Test
