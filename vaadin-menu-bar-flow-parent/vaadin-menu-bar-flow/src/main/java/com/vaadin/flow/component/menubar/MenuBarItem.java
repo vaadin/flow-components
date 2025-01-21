@@ -37,16 +37,18 @@ class MenuBarItem extends MenuItem {
     }
 
     /**
-     * Sets the menu item explicitly disabled or enabled. When a menu item is
-     * disabled, it prevents any user interaction with it, such as focusing,
-     * clicking, opening a sub-menu, etc. The item is also removed from the tab
-     * order, which makes it inaccessible to screen readers.
+     * Sets the menu item explicitly disabled or enabled. When disabled,
+     * prevents all user interactions with it, such as focusing, clicking,
+     * opening a sub-menu, etc. The item is also removed from the tab order,
+     * which makes it unreachable via the keyboard navigation.
      * <p>
-     * To improve accessibility, disabled root-level items (menu bar buttons)
-     * can be made focusable so that screen readers can reach and properly
-     * announce them, including any tooltips, while still preventing clicks.
-     * This is currently available as an experimental enhancement that can be
-     * enabled by setting the following feature flag in
+     * While the default behavior effectively prevents accidental interactions,
+     * it has an accessibility drawback: screen readers skip disabled root-level
+     * items (menu bar buttons) entirely, and users can't see tooltips that
+     * might explain why the button is disabled. To improve this, an
+     * experimental enhancement allows disabled menu bar buttons to receive
+     * focus and show tooltips, while still preventing other interactions. This
+     * feature can be enabled by setting the following feature flag in
      * {@code vaadin-featureflags.properties}:
      *
      * <pre>
