@@ -17,19 +17,18 @@ package com.vaadin.flow.component.button.tests;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.VaadinService;
 
 import elemental.json.Json;
 import elemental.json.JsonObject;
 
-@Route("vaadin-button/accessible-disabled-button")
-public class AccessibleDisabledButtonPage extends Div {
+@Route("vaadin-button/disabled-button")
+public class DisabledButtonPage extends Div {
     private AtomicInteger blurListenerCounter = new AtomicInteger(0);
     private AtomicInteger focusListenerCounter = new AtomicInteger(0);
     private AtomicInteger clickListenerCounter = new AtomicInteger(0);
@@ -37,10 +36,7 @@ public class AccessibleDisabledButtonPage extends Div {
 
     private Div listenerCounters;
 
-    public AccessibleDisabledButtonPage() {
-        FeatureFlags.get(VaadinService.getCurrent().getContext())
-                .setEnabled("exampleFeatureFlag", true);
-
+    public DisabledButtonPage() {
         Button button = new Button("Disabled button");
         button.setEnabled(false);
 
@@ -57,7 +53,12 @@ public class AccessibleDisabledButtonPage extends Div {
         listenerCounters = new Div();
         listenerCounters.setId("listener-counters");
 
-        add(button, listenerCounters);
+        NativeButton enableButton = new NativeButton("Enable button", event -> {
+            button.setEnabled(true);
+        });
+        enableButton.setId("enable-button");
+
+        add(button, listenerCounters, enableButton);
     }
 
     private void incrementListenerCounter(AtomicInteger listenerCounter) {

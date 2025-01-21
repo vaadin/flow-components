@@ -29,8 +29,8 @@ import com.vaadin.tests.AbstractComponentIT;
 import elemental.json.Json;
 import elemental.json.JsonObject;
 
-@TestPath("vaadin-button/accessible-disabled-button")
-public class AccessibleDisabledButtonIT extends AbstractComponentIT {
+@TestPath("vaadin-button/disabled-button")
+public class DisabledButtonIT extends AbstractComponentIT {
     private ButtonElement button;
     private TestBenchElement listenerCounters;
 
@@ -42,32 +42,42 @@ public class AccessibleDisabledButtonIT extends AbstractComponentIT {
     }
 
     @Test
-    public void click_noClickEvent() {
+    public void click_noClickEventWhenDisabled() {
         button.click();
         assertListenerCounter("click", 0);
+
+        $("button").id("enable-button").click();
+
+        button.click();
+        assertListenerCounter("click", 1);
     }
 
     @Test
-    public void doubleClick_noDoubleClickEvent() {
+    public void doubleClick_noDoubleClickEventWhenDisabled() {
         button.doubleClick();
         assertListenerCounter("doubleClick", 0);
+
+        $("button").id("enable-button").click();
+
+        button.doubleClick();
+        assertListenerCounter("doubleClick", 1);
     }
 
     @Test
-    public void focus_focusEventIsFired() {
+    public void focus_firesFocusEventWhenDisabled() {
         button.focus();
         assertListenerCounter("focus", 1);
     }
 
     @Test
-    public void focusWithShortcut_focusEventIsFired() {
+    public void focusWithShortcut_firesFocusEventWhenDisabled() {
         new Actions(getDriver()).keyDown(Keys.ALT).sendKeys("A").keyUp(Keys.ALT)
                 .build().perform();
         assertListenerCounter("focus", 1);
     }
 
     @Test
-    public void blur_blurEventIsFired() {
+    public void blur_firesBlurEventWhenDisabled() {
         button.sendKeys(Keys.TAB);
         assertListenerCounter("blur", 1);
     }

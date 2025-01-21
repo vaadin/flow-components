@@ -352,8 +352,8 @@ public class Button extends Component
     /**
      * Sets the button explicitly disabled or enabled. When disabled, prevents
      * all user interactions with the button such as clicking or hovering, and
-     * removes the button from the tab order, which makes it unreachable via
-     * the keyboard navigation.
+     * removes the button from the tab order, which makes it unreachable via the
+     * keyboard navigation.
      * <p>
      * While the default behavior effectively prevents accidental interactions,
      * it has an accessibility drawback: screen readers skip disabled buttons
@@ -395,7 +395,7 @@ public class Button extends Component
             KeyModifier... keyModifiers) {
         ShortcutRegistration registration = Focusable.super.addFocusShortcut(
                 key, keyModifiers);
-        if (isFeatureFlagEnabled(FeatureFlags.EXAMPLE)) {
+        if (isFeatureFlagEnabled(FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS)) {
             registration.setDisabledUpdateMode(DisabledUpdateMode.ALWAYS);
         }
         return registration;
@@ -421,7 +421,7 @@ public class Button extends Component
             ComponentEventListener<FocusEvent<Button>> listener) {
         return getEventBus().addListener(FocusEvent.class,
                 (ComponentEventListener) listener, registration -> {
-                    if (isFeatureFlagEnabled(FeatureFlags.EXAMPLE)) {
+                    if (isFeatureFlagEnabled(FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS)) {
                         registration.setDisabledUpdateMode(
                                 DisabledUpdateMode.ALWAYS);
                     }
@@ -445,7 +445,7 @@ public class Button extends Component
             ComponentEventListener<BlurEvent<Button>> listener) {
         return getEventBus().addListener(BlurEvent.class,
                 (ComponentEventListener) listener, registration -> {
-                    if (isFeatureFlagEnabled(FeatureFlags.EXAMPLE)) {
+                    if (isFeatureFlagEnabled(FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS)) {
                         registration.setDisabledUpdateMode(
                                 DisabledUpdateMode.ALWAYS);
                     }
@@ -517,7 +517,7 @@ public class Button extends Component
     }
 
     /**
-     * Checks whether the give feature flag is active.
+     * Checks whether the given feature flag is active.
      *
      * @param feature
      *            the feature flag to check

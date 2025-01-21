@@ -47,7 +47,6 @@ public class ButtonView extends Div {
         createImageButtonWithAutofocus();
         createImageButtonWithAccessibleLabel();
         createButtonsWithTabIndex();
-        createDisabledButton();
         createButtonWithDisableOnClick();
         createButtonWithDisableOnClickThatEnablesInSameRoundTrip();
         createButtonWithDisableOnClickThatIsHidden();
@@ -126,17 +125,6 @@ public class ButtonView extends Div {
         button1.setId("button-tabindex-1");
         button2.setId("button-tabindex-2");
         button3.setId("button-tabindex-3");
-    }
-
-    private void createDisabledButton() {
-        Button button = new Button("Disabled");
-        button.setEnabled(false);
-
-        addCard("Disabled button", button);
-        button.addClickListener(evt -> message.setText("Button "
-                + evt.getSource().getText()
-                + " was clicked, but the button is disabled and this shouldn't happen!"));
-        button.setId("disabled-button");
     }
 
     private void addVariantsFeature() {
