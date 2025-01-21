@@ -45,15 +45,15 @@ public class ComboBoxSpringDataTest {
         }
     }
 
-    private static List<Person> data = List.of(new Person("John", 1293),
+    private static final List<Person> data = List.of(new Person("John", 1293),
             new Person("Jane", 1923), new Person("Homer", 1956));
 
     @Test
     public void setItemsPageableNoCountNoFilter() {
         AtomicInteger pageSize = new AtomicInteger(-1);
         AtomicInteger pageNumber = new AtomicInteger(-1);
-        ComboBox<Person> combobox = new ComboBox<>();
-        combobox.setItemsPageable((pageable, filterString) -> {
+        ComboBox<Person> comboBox = new ComboBox<>();
+        comboBox.setItemsPageable((pageable, filterString) -> {
             if (pageSize.get() != -1) {
                 throw new IllegalStateException(
                         "There should be only one call to the data provider");
@@ -64,11 +64,11 @@ public class ComboBoxSpringDataTest {
             return filteredData(filterString);
         });
 
-        Person item = combobox.getLazyDataView().getItems().toList().get(2);
-
+        List<Person> items = comboBox.getLazyDataView().getItems().toList();
+        Assert.assertEquals(3, items.size());
         Assert.assertEquals(0, pageNumber.get());
         Assert.assertTrue(pageSize.get() > 0);
-        Assert.assertEquals("Homer", item.getName());
+        Assert.assertEquals("Homer", items.get(2).getName());
     }
 
     @Test
