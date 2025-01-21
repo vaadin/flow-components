@@ -303,6 +303,24 @@ public class HorizontalLayout extends Component implements ThemableLayout,
         updateChildDetachListeners();
     }
 
+    @Override
+    public void addComponentAtIndex(int index, Component component) {
+        Component oldComponent = getComponentAt(index);
+        String slotName = oldComponent != null
+                ? oldComponent.getElement().getAttribute("slot")
+                : null;
+
+        FlexComponent.super.addComponentAtIndex(index, component);
+
+        if (slotName == null) {
+            component.getElement().removeAttribute("slot");
+        } else {
+            component.getElement().setAttribute("slot", slotName);
+        }
+
+        updateChildDetachListeners();
+    }
+
     /**
      * Adds the components to the <em>start</em> slot of this layout.
      *

@@ -215,6 +215,53 @@ public class HorizontalLayoutSlotsTest {
         Assert.assertEquals(div1, layout.getComponentAt(2));
     }
 
+    @Test
+    public void addComponentAtIndex_added_componentSlotIsSet() {
+        Div div1 = new Div();
+        layout.addToMiddle(div1);
+
+        Div div2 = new Div();
+        layout.addToMiddle(div2);
+
+        Div div3 = new Div();
+        layout.addComponentAtIndex(1, div3);
+
+        Assert.assertEquals(div3, layout.getComponentAt(1));
+        Assert.assertEquals(div1.getElement().getAttribute("slot"), "middle");
+    }
+
+    @Test
+    public void addComponentAtIndex_movedToStart_componentSlotRemoved() {
+        Div div1 = new Div();
+        layout.addToStart(div1);
+
+        Div div2 = new Div();
+        layout.addToMiddle(div2);
+
+        layout.addComponentAtIndex(0, div2);
+
+        Assert.assertEquals(div2, layout.getComponentAt(0));
+        Assert.assertNull(div2.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void addComponentAtIndex_movedFromStart_componentSlotUpdated() {
+        Div div1 = new Div();
+        layout.addToStart(div1);
+
+        Div div2 = new Div();
+        layout.addToMiddle(div2);
+
+        Div div3 = new Div();
+        layout.addToEnd(div3);
+
+        layout.addComponentAtIndex(1, div1);
+        Assert.assertEquals(div1.getElement().getAttribute("slot"), "middle");
+
+        layout.addComponentAtIndex(2, div1);
+        Assert.assertEquals(div1.getElement().getAttribute("slot"), "end");
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void addToMiddle_textNodeAsComponent_throws() {
         Text textNode = new Text("Text");
