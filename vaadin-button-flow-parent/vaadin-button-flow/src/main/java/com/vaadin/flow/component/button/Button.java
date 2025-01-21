@@ -421,7 +421,8 @@ public class Button extends Component
             ComponentEventListener<FocusEvent<Button>> listener) {
         return getEventBus().addListener(FocusEvent.class,
                 (ComponentEventListener) listener, registration -> {
-                    if (isFeatureFlagEnabled(FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS)) {
+                    if (isFeatureFlagEnabled(
+                            FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS)) {
                         registration.setDisabledUpdateMode(
                                 DisabledUpdateMode.ALWAYS);
                     }
@@ -445,7 +446,8 @@ public class Button extends Component
             ComponentEventListener<BlurEvent<Button>> listener) {
         return getEventBus().addListener(BlurEvent.class,
                 (ComponentEventListener) listener, registration -> {
-                    if (isFeatureFlagEnabled(FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS)) {
+                    if (isFeatureFlagEnabled(
+                            FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS)) {
                         registration.setDisabledUpdateMode(
                                 DisabledUpdateMode.ALWAYS);
                     }
