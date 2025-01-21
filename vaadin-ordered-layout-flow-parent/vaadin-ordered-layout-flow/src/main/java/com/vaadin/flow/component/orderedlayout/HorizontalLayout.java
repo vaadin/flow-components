@@ -274,6 +274,35 @@ public class HorizontalLayout extends Component implements ThemableLayout,
         expand(components);
     }
 
+    @Override
+    public void replace(Component oldComponent, Component newComponent) {
+        String oldSlotName = oldComponent != null
+                ? oldComponent.getElement().getAttribute("slot")
+                : null;
+
+        String newSlotName = newComponent != null
+                ? newComponent.getElement().getAttribute("slot")
+                : null;
+
+        FlexComponent.super.replace(oldComponent, newComponent);
+
+        if (newComponent != null && oldComponent != null) {
+            if (oldSlotName == null) {
+                newComponent.getElement().removeAttribute("slot");
+            } else {
+                newComponent.getElement().setAttribute("slot", oldSlotName);
+            }
+
+            if (newSlotName == null) {
+                oldComponent.getElement().removeAttribute("slot");
+            } else {
+                oldComponent.getElement().setAttribute("slot", newSlotName);
+            }
+        }
+
+        updateChildDetachListeners();
+    }
+
     /**
      * Adds the components to the <em>start</em> slot of this layout.
      *

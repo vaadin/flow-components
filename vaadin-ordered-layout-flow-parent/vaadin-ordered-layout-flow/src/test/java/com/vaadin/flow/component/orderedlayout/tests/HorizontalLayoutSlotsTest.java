@@ -116,6 +116,90 @@ public class HorizontalLayoutSlotsTest {
     }
 
     @Test
+    public void addToStart_addToMiddle_replace_componentSlotUpdated() {
+        Div div1 = new Div();
+        layout.addToStart(div1);
+
+        Div div2 = new Div();
+        layout.addToMiddle(div2);
+
+        layout.replace(div1, div2);
+
+        Assert.assertEquals(div1.getElement().getAttribute("slot"), "middle");
+        Assert.assertNull(div2.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void addToMiddle_addToStart_replace_componentSlotUpdated() {
+        Div div1 = new Div();
+        layout.addToMiddle(div1);
+
+        Div div2 = new Div();
+        layout.addToStart(div2);
+
+        layout.replace(div1, div2);
+
+        Assert.assertNull(div1.getElement().getAttribute("slot"));
+        Assert.assertEquals(div2.getElement().getAttribute("slot"), "middle");
+    }
+
+    @Test
+    public void addToStart_addToEnd_replace_componentSlotUpdated() {
+        Div div1 = new Div();
+        layout.addToStart(div1);
+
+        Div div2 = new Div();
+        layout.addToEnd(div2);
+
+        layout.replace(div1, div2);
+
+        Assert.assertEquals(div1.getElement().getAttribute("slot"), "end");
+        Assert.assertNull(div2.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void addToEnd_addToStart_replace_componentSlotUpdated() {
+        Div div1 = new Div();
+        layout.addToEnd(div1);
+
+        Div div2 = new Div();
+        layout.addToStart(div2);
+
+        layout.replace(div1, div2);
+
+        Assert.assertNull(div1.getElement().getAttribute("slot"));
+        Assert.assertEquals(div2.getElement().getAttribute("slot"), "end");
+    }
+
+    @Test
+    public void addToMiddle_addToEnd_replace_componentSlotUpdated() {
+        Div div1 = new Div();
+        layout.addToMiddle(div1);
+
+        Div div2 = new Div();
+        layout.addToEnd(div2);
+
+        layout.replace(div1, div2);
+
+        Assert.assertEquals(div1.getElement().getAttribute("slot"), "end");
+        Assert.assertEquals(div2.getElement().getAttribute("slot"), "middle");
+    }
+
+    @Test
+    public void addToEnd_addToMiddle_replace_componentSlotUpdated() {
+        Div div1 = new Div();
+        layout.addToEnd(div1);
+
+        Div div2 = new Div();
+        layout.addToMiddle(div2);
+
+        layout.replace(div1, div2);
+
+        Assert.assertEquals(div1.getElement().getAttribute("slot"), "middle");
+        Assert.assertEquals(div2.getElement().getAttribute("slot"), "end");
+    }
+
+    @Test
     public void addToSlots_indexesAreSlotsOrder() {
         Div div1 = new Div();
         layout.addToEnd(div1);
