@@ -51,6 +51,7 @@ export function useLitWebComponents(): PluginOption {
             'avatar-group',
             'context-menu',
             'custom-field',
+            'date-picker',
             'details',
             'dialog',
             'horizontal-layout',
