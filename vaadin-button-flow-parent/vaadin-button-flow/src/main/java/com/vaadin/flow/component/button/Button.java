@@ -350,18 +350,18 @@ public class Button extends Component
     }
 
     /**
-     * Sets the button explicitly disabled or enabled. When disabled, prevents
-     * all user interactions with the button such as clicking or hovering, and
-     * removes the button from the tab order, which makes it unreachable via the
-     * keyboard navigation.
+     * Sets the button explicitly disabled or enabled. When disabled, the button
+     * is rendered as "dimmed" and prevents all user interactions (mouse and
+     * keyboard).
      * <p>
-     * While the default behavior effectively prevents accidental interactions,
-     * it has an accessibility drawback: screen readers skip disabled buttons
-     * entirely, and users can't see tooltips that might explain why the button
-     * is disabled. To address this, an experimental enhancement allows disabled
-     * buttons to receive focus and show tooltips, while still preventing other
-     * interactions. This feature can be enabled by setting the following
-     * feature flag in {@code vaadin-featureflags.properties}:
+     * Since disabled buttons are not focusable and cannot react to hover events
+     * by default, it can cause accessibility issues by making them entirely
+     * invisible to assistive technologies, and prevents the use of Tooltips to
+     * explain why the action is not available. This can be addressed with the
+     * feature flag {@code accessibleDisabledButtons}, which makes disabled
+     * buttons focusable and hoverable, while preventing them from being
+     * triggered. To enable this feature flag, add the following line to
+     * {@code src/main/resources/vaadin-featureflags.properties}:
      *
      * <pre>
      * com.vaadin.experimental.accessibleDisabledButtons = true
@@ -380,8 +380,8 @@ public class Button extends Component
      * {@inheritDoc}
      * <p>
      * By default, focus shortcuts are only active when the button is enabled.
-     * To make disabled buttons also focusable, set the following feature flag
-     * in {@code vaadin-featureflags.properties}:
+     * To make disabled buttons also focusable, enable the following feature
+     * flag in {@code src/main/resources/vaadin-featureflags.properties}:
      *
      * <pre>
      * com.vaadin.experimental.accessibleDisabledButtons = true
@@ -405,8 +405,8 @@ public class Button extends Component
      * {@inheritDoc}
      * <p>
      * By default, buttons are only focusable in the enabled state. To make
-     * disabled buttons also focusable, set the following feature flag in
-     * {@code vaadin-featureflags.properties}:
+     * disabled buttons also focusable, enable the following feature flag in
+     * {@code src/main/resources/vaadin-featureflags.properties}:
      *
      * <pre>
      * com.vaadin.experimental.accessibleDisabledButtons = true
@@ -433,8 +433,8 @@ public class Button extends Component
      * {@inheritDoc}
      * <p>
      * By default, buttons are only focusable in the enabled state. To make
-     * disabled buttons also focusable, set the following feature flag in
-     * {@code vaadin-featureflags.properties}:
+     * disabled buttons also focusable, enable the following feature flag in
+     * {@code src/main/resources/vaadin-featureflags.properties}:
      *
      * <pre>
      * com.vaadin.experimental.accessibleDisabledButtons = true
