@@ -83,8 +83,14 @@ public class DisabledButtonIT extends AbstractComponentIT {
     }
 
     private void assertListenerCounter(String name, int expectedCount) {
-        JsonObject json = Json.parse(listenerCounters.getText());
+        int actualCount = 0;
+
+        if (!listenerCounters.getText().isEmpty()) {
+            JsonObject json = Json.parse(listenerCounters.getText());
+            actualCount = (int) json.getNumber(name);
+        }
+
         Assert.assertEquals("Unexpected " + name + " value", expectedCount,
-                (int) json.getNumber(name));
+                actualCount);
     }
 }
