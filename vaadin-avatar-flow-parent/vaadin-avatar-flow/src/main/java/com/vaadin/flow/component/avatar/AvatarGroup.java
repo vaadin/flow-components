@@ -65,10 +65,10 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "24.7.0-alpha6")
+@NpmPackage(value = "@vaadin/avatar-group", version = "24.7.0-alpha7")
 public class AvatarGroup extends Component implements HasOverlayClassName,
         HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
