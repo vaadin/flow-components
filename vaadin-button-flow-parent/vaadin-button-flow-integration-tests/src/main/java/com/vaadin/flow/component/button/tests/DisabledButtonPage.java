@@ -58,6 +58,8 @@ public class DisabledButtonPage extends Div {
         });
         enableButton.setId("enable-button");
 
+        updateListenerCounters();
+
         add(button, listenerCounters, enableButton);
     }
 

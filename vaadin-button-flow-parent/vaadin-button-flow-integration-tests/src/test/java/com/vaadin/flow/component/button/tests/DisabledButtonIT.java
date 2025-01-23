@@ -71,7 +71,7 @@ public class DisabledButtonIT extends AbstractComponentIT {
 
     @Test
     public void focusWithShortcut_firesFocusEventWhenDisabled() {
-        new Actions(getDriver()).keyDown(Keys.ALT).sendKeys("A").keyUp(Keys.ALT)
+        new Actions(getDriver()).keyDown(Keys.ALT).sendKeys("a").keyUp(Keys.ALT)
                 .build().perform();
         assertListenerCounter("focus", 1);
     }
@@ -83,14 +83,8 @@ public class DisabledButtonIT extends AbstractComponentIT {
     }
 
     private void assertListenerCounter(String name, int expectedCount) {
-        int actualCount = 0;
-
-        if (!listenerCounters.getText().isEmpty()) {
-            JsonObject json = Json.parse(listenerCounters.getText());
-            actualCount = (int) json.getNumber(name);
-        }
-
+        JsonObject json = Json.parse(listenerCounters.getText());
         Assert.assertEquals("Unexpected " + name + " value", expectedCount,
-                actualCount);
+                (int) json.getNumber(name));
     }
 }
