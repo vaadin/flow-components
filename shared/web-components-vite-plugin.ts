@@ -49,23 +49,31 @@ export function useLitWebComponents(): PluginOption {
             'drawer-toggle',
             'avatar',
             'avatar-group',
+            'checkbox',
+            'combo-box',
             'context-menu',
             'custom-field',
             'date-picker',
+            'date-time-picker',
             'details',
             'dialog',
             'horizontal-layout',
             'list-box',
             'item',
+            'map',
+            'multi-select-combo-box',
             'notification',
             'radio-button',
             'radio-button-group',
             'scroller',
+            'select',
             'split-layout',
             'tabs',
             'tab',
             'tabsheet',
-            'vertical-layout'
+            'time-picker',
+            'vertical-layout',
+            'virtual-list'
           ].flatMap((component) => {
             return [
               {
