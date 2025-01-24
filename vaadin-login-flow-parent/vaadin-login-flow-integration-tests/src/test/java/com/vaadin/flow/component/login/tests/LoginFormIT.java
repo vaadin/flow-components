@@ -152,7 +152,7 @@ public class LoginFormIT extends AbstractLoginIT {
         getDriver().get(url);
 
         LoginFormElement login = getLoginForm();
-        Assert.assertTrue(login.getForgotPasswordButton()
-                .hasAttribute("hidden"));
+        Assert.assertTrue(
+                login.getForgotPasswordButton().hasAttribute("hidden"));
     }
 }

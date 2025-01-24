@@ -33,8 +33,8 @@ public abstract class AbstractLoginIT extends AbstractComponentIT {
         Assert.assertEquals("", login.getErrorMessage());
         Assert.assertEquals("Forgot password",
                 login.getForgotPasswordButton().getText().trim());
-        Assert.assertFalse(login.getForgotPasswordButton()
-                .hasAttribute("hidden"));
+        Assert.assertFalse(
+                login.getForgotPasswordButton().hasAttribute("hidden"));
         Assert.assertEquals("", login.getAdditionalInformation());
     }
 

@@ -19,7 +19,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
@@ -132,7 +131,8 @@ public class OverlayIT extends AbstractLoginIT {
     }
 
     public void testTitleAndDescriptionStrings() {
-        String url = getRootURL() + getTestPath() + "/property-title-description";
+        String url = getRootURL() + getTestPath()
+                + "/property-title-description";
         getDriver().get(url);
         openOverlay();
 
