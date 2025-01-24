@@ -16,23 +16,20 @@
 package com.vaadin.flow.component.login.tests;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
-public class OverlayIT extends BasicIT {
+@TestPath("vaadin-login/overlay")
+public class OverlayIT extends AbstractLoginIT {
 
-    @Override
-    protected String getBaseURL() {
-        return super.getBaseURL() + "/overlay";
-    }
-
-    @Override
-    public LoginFormElement getLoginForm() {
-        openOverlay();
-        return $(LoginOverlayElement.class).waitForFirst().getLoginForm();
+    @Before
+    public void init() {
+        open();
     }
 
     private void openOverlay() {
@@ -48,14 +45,17 @@ public class OverlayIT extends BasicIT {
                 overlay.getPasswordField(), () -> overlay.submit());
     }
 
-    @Override
+    @Test
     public void testDefaults() {
-        super.testDefaults();
+        openOverlay();
         LoginOverlayElement loginOverlay = $(LoginOverlayElement.class)
                 .waitForFirst();
         Assert.assertEquals("App name", loginOverlay.getTitle());
         Assert.assertEquals("Application description",
                 loginOverlay.getDescription());
+
+        checkLoginFormDefaults(loginOverlay.getLoginForm());
+
         checkLoginForm(loginOverlay.getUsernameField(),
                 loginOverlay.getPasswordField(),
                 loginOverlay.getSubmitButton());
@@ -63,8 +63,8 @@ public class OverlayIT extends BasicIT {
 
     @Test
     public void testOverlaySelfAttached() {
-        getDriver()
-                .get(super.getBaseURL() + "/vaadin-login/overlayselfattached");
+        String url = getRootURL() + "/vaadin-login/overlayselfattached";
+        getDriver().get(url);
 
         Assert.assertFalse($(LoginOverlayElement.class).exists());
         openOverlay();
@@ -82,8 +82,7 @@ public class OverlayIT extends BasicIT {
 
     @Test
     public void testTitleComponent() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-login") + "/component-title";
+        String url = getRootURL() + getTestPath() + "/component-title";
         getDriver().get(url);
         openOverlay();
 
@@ -115,8 +114,7 @@ public class OverlayIT extends BasicIT {
 
     @Test
     public void testResetTitleComponent() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-login") + "/component-title";
+        String url = getRootURL() + getTestPath() + "/component-title";
         getDriver().get(url);
         checkTitleComponentWasReset();
     }
@@ -134,9 +132,7 @@ public class OverlayIT extends BasicIT {
     }
 
     public void testTitleAndDescriptionStrings() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-login")
-                + "/property-title-description";
+        String url = getRootURL() + getTestPath() + "/property-title-description";
         getDriver().get(url);
         openOverlay();
 
