@@ -18,16 +18,11 @@ package com.vaadin.flow.component.treegrid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.data.provider.ArrayUpdater;
@@ -42,7 +37,6 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.Range;
@@ -112,7 +106,7 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
 
         var itemContext = rootCache.getItemContext(item);
         if (itemContext != null) {
-            itemContext.cache.refreshItem(item);
+            itemContext.cache().refreshItem(item);
         }
 
         requestFlush();
@@ -148,8 +142,8 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
                 end = i;
                 break;
             }
-            var cache = context.cache;
-            var index = context.index;
+            var cache = context.cache();
+            var index = context.index();
 
             if (!cache.hasItem(index)) {
                 List<T> childItems = fetchDataProviderChildren(
@@ -233,7 +227,7 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
         if (itemContext == null) {
             return null;
         }
-        return itemContext.cache.getParentItem();
+        return itemContext.cache().getParentItem();
     }
 
     /** @see HierarchicalDataCommunicator#getDepth(T) */
@@ -242,7 +236,7 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
         if (itemContext == null) {
             return -1;
         }
-        return itemContext.cache.getDepth();
+        return itemContext.cache().getDepth();
     }
 
     private JsonValue generateItemJson(T item) {
@@ -278,7 +272,7 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
     private RootCache<T> createRootCache(int size) {
         return new RootCache<>(size, getDataProvider()::getId) {
             @Override
-            protected void removeItemContext(T item) {
+            void removeItemContext(T item) {
                 super.removeItemContext(item);
 
                 getKeyMapper().remove(item);
@@ -304,173 +298,5 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
 
         return ((HierarchicalDataProvider<T, Object>) getDataProvider())
                 .getChildCount(query);
-    }
-
-    private static class Cache<T> {
-        private final RootCache<T> rootCache;
-        private final Cache<T> parentCache;
-        private final int parentIndex;
-        private final int size;
-        private final Map<Object, T> itemIdToItem = new HashMap<>();
-        private final SortedMap<Integer, Object> indexToItemId = new TreeMap<>();
-        private final SortedMap<Integer, Cache<T>> indexToCache = new TreeMap<>();
-
-        protected Cache(RootCache<T> rootCache, Cache<T> parentCache,
-                int parentIndex, int size) {
-            this.rootCache = rootCache != null ? rootCache
-                    : (RootCache<T>) this;
-            this.parentCache = parentCache;
-            this.parentIndex = parentIndex;
-            this.size = size;
-        }
-
-        public T getParentItem() {
-            return parentCache != null ? parentCache.getItem(parentIndex)
-                    : null;
-        }
-
-        public int getDepth() {
-            return parentCache != null ? parentCache.getDepth() + 1 : 0;
-        }
-
-        public int getSize() {
-            return size;
-        }
-
-        public int getFlatSize() {
-            return size + indexToCache.values().stream()
-                    .mapToInt(Cache::getFlatSize).sum();
-        }
-
-        public boolean hasItem(int index) {
-            return indexToItemId.containsKey(index);
-        }
-
-        public T getItem(int index) {
-            Object itemId = indexToItemId.get(index);
-            return itemIdToItem.get(itemId);
-        }
-
-        public void refreshItem(T item) {
-            Object itemId = rootCache.getItemId(item);
-            itemIdToItem.replace(itemId, item);
-        }
-
-        public void setItems(int startIndex, List<T> items) {
-            for (int i = 0; i < items.size(); i++) {
-                var item = items.get(i);
-                var itemId = rootCache.getItemId(item);
-                var index = startIndex + i;
-
-                indexToItemId.put(index, itemId);
-                itemIdToItem.put(itemId, item);
-
-                rootCache.addItemContext(item, this, index);
-            }
-        }
-
-        public void clear() {
-            indexToCache.values().forEach((cache) -> {
-                cache.clear();
-            });
-
-            indexToItemId.values().forEach((itemId) -> {
-                T item = itemIdToItem.get(itemId);
-                rootCache.removeItemContext(item);
-            });
-
-            indexToCache.clear();
-            indexToItemId.clear();
-            itemIdToItem.clear();
-        }
-
-        public boolean hasCache(int index) {
-            return indexToCache.containsKey(index);
-        }
-
-        public Cache<T> createCache(int index, int size) {
-            Cache<T> cache = new Cache<>(rootCache, this, index, size);
-            indexToCache.put(index, cache);
-            return cache;
-        }
-
-        public void removeDescendantCacheIf(
-                SerializablePredicate<Cache<T>> predicate) {
-            indexToCache.values().removeIf(cache -> {
-                if (predicate.test(cache)) {
-                    cache.clear();
-                    return true;
-                }
-                cache.removeDescendantCacheIf(predicate);
-                return false;
-            });
-        }
-    }
-
-    private static class RootCache<T> extends Cache<T> {
-        private final ValueProvider<T, Object> itemIdProvider;
-        private final Map<Object, ItemContext<T>> itemIdToContext = new HashMap<>();
-
-        public static record ItemContext<T>(Object id, Cache<T> cache,
-                int index) {
-        }
-
-        public static record FlatIndexContext<T>(Cache<T> cache, int index) {
-        }
-
-        public RootCache(int size, ValueProvider<T, Object> itemIdProvider) {
-            super(null, null, -1, size);
-            this.itemIdProvider = itemIdProvider;
-        }
-
-        public FlatIndexContext<T> getFlatIndexContext(int flatIndex) {
-            return getFlatIndexContext(this, flatIndex);
-        }
-
-        private FlatIndexContext<T> getFlatIndexContext(Cache<T> cache,
-                int flatIndex) {
-            int index = flatIndex;
-
-            for (Entry<Integer, Cache<T>> entry : cache.indexToCache
-                    .entrySet()) {
-                var subCacheIndex = entry.getKey();
-                var subCache = entry.getValue();
-
-                if (index <= subCacheIndex) {
-                    break;
-                }
-                if (index <= subCacheIndex + subCache.getFlatSize()) {
-                    return getFlatIndexContext(subCache,
-                            index - subCacheIndex - 1);
-                }
-                index -= subCache.getFlatSize();
-            }
-
-            if (index >= cache.getSize()) {
-                return null;
-            }
-
-            return new FlatIndexContext<>(cache, index);
-        }
-
-        public ItemContext<T> getItemContext(T item) {
-            Object itemId = getItemId(item);
-            return itemIdToContext.get(itemId);
-        }
-
-        protected void addItemContext(T item, Cache<T> cache, int index) {
-            Object itemId = getItemId(item);
-            itemIdToContext.put(itemId,
-                    new ItemContext<>(itemId, cache, index));
-        }
-
-        protected void removeItemContext(T item) {
-            Object itemId = getItemId(item);
-            itemIdToContext.remove(itemId);
-        }
-
-        private Object getItemId(T item) {
-            return itemIdProvider.apply(item);
-        }
     }
 }
