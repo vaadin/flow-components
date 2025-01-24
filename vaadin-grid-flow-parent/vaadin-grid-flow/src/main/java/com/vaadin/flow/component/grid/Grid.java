@@ -74,6 +74,7 @@ import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
+import com.vaadin.flow.component.treegrid.TreeGridDataCommunicator;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertyDefinition;
@@ -4771,14 +4772,20 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         getElement().setProperty("dropMode",
                 dropMode == null ? null : dropMode.getClientName());
 
-        // Do not reset the data communicator if no filters are applied in order
-        // to avoid unnecessary scroll position reset. This can be removed when
-        // Flow will provide a way to request refresh for only items that
-        // are in the viewport.
-        if (dragFilter != defaultDragFilter
-                || dropFilter != defaultDropFilter) {
-            getDataCommunicator().reset();
+        if (getDataCommunicator() instanceof TreeGridDataCommunicator) {
+            ((TreeGridDataCommunicator<T>) getDataCommunicator())
+                    .refreshAllVisible();
+        } else {
+            // Do not reset the data communicator if no filters are applied in order
+            // to avoid unnecessary scroll position reset. This can be removed when
+            // Flow will provide a way to request refresh for only items that
+            // are in the viewport.
+            if (dragFilter != defaultDragFilter
+                    || dropFilter != defaultDropFilter) {
+                getDataCommunicator().reset();
+            }
         }
+
     }
 
     /**
