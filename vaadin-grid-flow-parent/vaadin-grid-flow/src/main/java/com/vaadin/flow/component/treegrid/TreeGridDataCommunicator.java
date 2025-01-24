@@ -72,17 +72,25 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
         this.dataGenerator = dataGenerator;
         this.uniqueKeyProviderSupplier = uniqueKeyProviderSupplier;
 
-        KeyMapperWrapper<T> keyMapperWrapper = new KeyMapperWrapper<>();
-        setKeyMapper(keyMapperWrapper);
+        KeyMapper<T> keyMapper = createKeyMapper();
+        setKeyMapper(keyMapper);
 
-        // dataGenerator.addDataGenerator(this::generateTreeData);
         setDataProvider(new TreeDataProvider<>(new TreeData<>()), null);
     }
 
+    /** @see DataCommunicator#getDataProvider() */
+    @Override
     public HierarchicalDataProvider<T, ?> getDataProvider() {
         return (HierarchicalDataProvider<T, ?>) super.getDataProvider();
     }
 
+    /** @see DataCommunicator#getDataProviderSize() */
+    @Override
+    public int getDataProviderSize() {
+        return getDataProviderChildCount(null);
+    }
+
+    /** @see DataCommunicator#reset() */
     @Override
     public void reset() {
         if (rootCache != null) {
@@ -94,6 +102,7 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
         requestFlush();
     }
 
+    /** @see DataCommunicator#refresh(T) */
     @Override
     public void refresh(T item) {
         Objects.requireNonNull(item,
@@ -109,15 +118,62 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
         requestFlush();
     }
 
+    /** @see DataCommunicator#setRequestedRange(int, int) */
     @Override
     public void setRequestedRange(int start, int length) {
         requestedRange = Range.withLength(start, length);
         requestFlush();
     }
 
+    /** @see DataCommunicator#confirmUpdate() */
     @Override
     public void confirmUpdate(int updateId) {
         // NO-OP
+    }
+
+    /** @see DataCommunicator#flush() */
+    @Override
+    protected void flush() {
+        int start = requestedRange.getStart();
+        int end = requestedRange.getEnd();
+
+        if (rootCache == null) {
+            rootCache = createRootCache(getDataProviderChildCount(null));
+        }
+
+        List<T> result = new ArrayList<>();
+        for (int i = start; i < end; i++) {
+            var context = rootCache.getFlatIndexContext(i);
+            if (context == null) {
+                end = i;
+                break;
+            }
+            var cache = context.cache;
+            var index = context.index;
+
+            if (!cache.hasItem(index)) {
+                List<T> childItems = fetchDataProviderChildren(
+                        cache.getParentItem(), Range.between(index, end))
+                        .toList();
+                cache.setItems(index, childItems);
+            }
+
+            T item = cache.getItem(index);
+            if (isExpanded(item) && !cache.hasCache(index)) {
+                int childCount = getDataProviderChildCount(item);
+                cache.createCache(index, childCount);
+            }
+
+            result.add(item);
+        }
+
+        int flatSize = rootCache.getFlatSize();
+
+        Update update = arrayUpdater.startUpdate(flatSize);
+        update.clear(0, start);
+        update.clear(end, flatSize - end);
+        update.set(start, result.stream().map(this::generateItemJson).toList());
+        update.commit(nextUpdateId++);
     }
 
     /** @see HierarchicalDataCommunicator#hasChildren(T) */
@@ -189,60 +245,34 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
         return itemContext.cache.getDepth();
     }
 
-    @Override
-    public int getDataProviderSize() {
-        return getDataProviderChildCount(null);
-    }
-
-    @Override
-    protected void flush() {
-        int start = requestedRange.getStart();
-        int end = requestedRange.getEnd();
-
-        if (rootCache == null) {
-            rootCache = createRootCache(getDataProviderChildCount(null));
-        }
-
-        List<T> result = new ArrayList<>();
-        for (int i = start; i < end; i++) {
-            var context = rootCache.getFlatIndexContext(i);
-            if (context == null) {
-                end = i;
-                break;
-            }
-            var cache = context.cache;
-            var index = context.index;
-
-            if (!cache.hasItem(index)) {
-                List<T> childItems = fetchDataProviderChildren(
-                        cache.getParentItem(), Range.between(index, end))
-                        .toList();
-                cache.setItems(index, childItems);
-            }
-
-            T item = cache.getItem(index);
-            if (isExpanded(item) && !cache.hasCache(index)) {
-                int childCount = getDataProviderChildCount(item);
-                cache.createCache(index, childCount);
-            }
-
-            result.add(item);
-        }
-
-        int flatSize = rootCache.getFlatSize();
-
-        Update update = arrayUpdater.startUpdate(flatSize);
-        update.clear(0, start);
-        update.clear(end, flatSize - end);
-        update.set(start, result.stream().map(this::generateItemJson).toList());
-        update.commit(nextUpdateId++);
-    }
-
     private JsonValue generateItemJson(T item) {
         JsonObject json = Json.createObject();
         json.put("key", getKeyMapper().key(item));
         dataGenerator.generateData(item, json);
         return json;
+    }
+
+    private KeyMapper<T> createKeyMapper() {
+        return new KeyMapper<T>() {
+            private T object;
+
+            @Override
+            public String key(T o) {
+                this.object = o;
+                try {
+                    return super.key(o);
+                } finally {
+                    this.object = null;
+                }
+            }
+
+            @Override
+            protected String createKey() {
+                return Optional.ofNullable(uniqueKeyProviderSupplier.get())
+                        .map(provider -> provider.apply(object))
+                        .orElse(super.createKey());
+            }
+        };
     }
 
     private RootCache<T> createRootCache(int size) {
@@ -441,28 +471,6 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
 
         private Object getItemId(T item) {
             return itemIdProvider.apply(item);
-        }
-    }
-
-    private class KeyMapperWrapper<V> extends KeyMapper<T> {
-
-        private T object;
-
-        @Override
-        public String key(T o) {
-            this.object = o;
-            try {
-                return super.key(o);
-            } finally {
-                this.object = null;
-            }
-        }
-
-        @Override
-        protected String createKey() {
-            return Optional.ofNullable(uniqueKeyProviderSupplier.get())
-                    .map(provider -> provider.apply(object))
-                    .orElse(super.createKey());
         }
     }
 }
