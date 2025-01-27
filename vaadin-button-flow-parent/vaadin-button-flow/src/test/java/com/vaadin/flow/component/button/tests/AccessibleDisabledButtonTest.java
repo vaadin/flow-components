@@ -77,6 +77,7 @@ public class AccessibleDisabledButtonTest {
     @After
     public void tearDown() {
         mockFeatureFlagsStatic.close();
+        UI.setCurrent(null);
     }
 
     @SuppressWarnings("unchecked")
