@@ -198,6 +198,28 @@ public class ButtonIT extends AbstractComponentIT {
     }
 
     @Test
+    public void clickOnDisabledButton_nothingIsDisplayed() {
+        WebElement button = layout.findElement(By.id("disabled-button"));
+        Assert.assertTrue("The button should contain the 'disabled' attribute",
+                button.getAttribute("disabled").equals("")
+                        || button.getAttribute("disabled").equals("true"));
+
+        // valo theme adds the pointer-events: none CSS property, which makes
+        // the button unclickable by selenium.
+        Assert.assertEquals("none", button.getCssValue("pointer-events"));
+
+        WebElement message = layout.findElement(By.id("buttonMessage"));
+        Assert.assertEquals("", message.getText());
+
+        // Remove disabled Attribute and click again from client side, click
+        // message should not been shown in the dom
+        executeScript("arguments[0].removeAttribute(\"disabled\");"
+                + "arguments[0].click();", button);
+        message = layout.findElement(By.id("buttonMessage"));
+        Assert.assertEquals("", message.getText());
+    }
+
+    @Test
     public void clickDisableOnClickButton_newClickNotRegistered() {
         WebElement button = layout
                 .findElement(By.id("disable-on-click-button"));
