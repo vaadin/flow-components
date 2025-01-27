@@ -11,6 +11,7 @@ package com.vaadin.flow.component.spreadsheet.tests;
 import java.util.Locale;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +36,11 @@ public class CustomDataFormatterTest {
         this.threePartDataFormatCell = createThreePartDataFormatCell(
                 spreadsheet);
         this.generalFormatCell = createGeneralFormatCell(spreadsheet);
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     private Cell createFourPartDataFormatCell(Spreadsheet spreadsheet) {

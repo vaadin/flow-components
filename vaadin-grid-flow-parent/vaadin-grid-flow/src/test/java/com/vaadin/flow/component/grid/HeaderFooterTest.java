@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.hamcrest.CoreMatchers;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -61,6 +62,11 @@ public class HeaderFooterTest {
         addColumns();
 
         UI.setCurrent(new UI());
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     private void addColumns() {

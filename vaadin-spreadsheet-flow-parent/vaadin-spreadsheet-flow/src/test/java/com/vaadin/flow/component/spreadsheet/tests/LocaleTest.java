@@ -11,6 +11,7 @@ package com.vaadin.flow.component.spreadsheet.tests;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +36,11 @@ public class LocaleTest {
         UI.setCurrent(ui);
 
         spreadsheet = new Spreadsheet();
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test
