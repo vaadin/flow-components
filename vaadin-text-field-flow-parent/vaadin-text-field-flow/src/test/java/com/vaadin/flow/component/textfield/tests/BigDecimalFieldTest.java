@@ -20,6 +20,7 @@ import static org.junit.Assert.assertNull;
 import java.math.BigDecimal;
 import java.util.Locale;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,6 +48,11 @@ public class BigDecimalFieldTest extends TextFieldTest {
     public void setup() {
         field = new BigDecimalField();
         field.setLocale(Locale.US);
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Override

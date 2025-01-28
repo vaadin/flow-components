@@ -11,7 +11,6 @@ package com.vaadin.flow.component.spreadsheet.tests.charts;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
@@ -53,7 +52,6 @@ public class ChartFeatureTest extends ChartTestBase {
         String fileName = "Tagetik 6.xlsx";
         Configuration conf = getChartFromSampleFile(fileName, "J13")
                 .getConfiguration();
-        UI.setCurrent(new UI());
         Spreadsheet spreadsheet = TestHelper.createSpreadsheet(fileName);
 
         Assert.assertEquals(spreadsheet.getCell("B14").getStringCellValue(),

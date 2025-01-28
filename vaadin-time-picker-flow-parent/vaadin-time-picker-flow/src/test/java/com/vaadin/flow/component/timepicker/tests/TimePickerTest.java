@@ -24,6 +24,7 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -46,6 +47,11 @@ import com.vaadin.flow.server.VaadinSession;
 
 public class TimePickerTest {
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
 
     @Test
     public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
