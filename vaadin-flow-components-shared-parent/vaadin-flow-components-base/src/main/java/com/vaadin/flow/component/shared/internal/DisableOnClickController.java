@@ -77,9 +77,9 @@ public class DisableOnClickController<C extends Component & HasEnabled>
     public void setDisableOnClick(boolean disableOnClick) {
         this.disableOnClick = disableOnClick;
         if (disableOnClick) {
-            component.getElement().setAttribute("disableOnClick", "true");
+            component.getElement().setAttribute("disableonclick", "true");
         } else {
-            component.getElement().removeAttribute("disableOnClick");
+            component.getElement().removeAttribute("disableonclick");
         }
     }
 

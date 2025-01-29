@@ -54,11 +54,11 @@ public class DisableOnClickControllerTest {
     public void setDisableOnClick_updatesAttribute() {
         component.setDisableOnClick(true);
         Assert.assertTrue(
-                component.getElement().hasAttribute("disableOnClick"));
+                component.getElement().hasAttribute("disableonclick"));
 
         component.setDisableOnClick(false);
         Assert.assertFalse(
-                component.getElement().hasAttribute("disableOnClick"));
+                component.getElement().hasAttribute("disableonclick"));
     }
 
     @Test
