@@ -23,6 +23,7 @@ import org.junit.Test;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
@@ -124,6 +125,13 @@ public class BasicValidationTest
         Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
+    @Test
+    public void setInvalid_nestedPickersAreInvalid() {
+        testField.setInvalid(true);
+        Assert.assertTrue(getDatePicker().isInvalid());
+        Assert.assertTrue(getTimePicker().isInvalid());
+    }
+
     @Override
     protected DateTimePicker createTestField() {
         return new DateTimePicker();
@@ -131,6 +139,10 @@ public class BasicValidationTest
 
     private DatePicker getDatePicker() {
         return (DatePicker) SlotUtils.getChildInSlot(testField, "date-picker");
+    }
+
+    private TimePicker getTimePicker() {
+        return (TimePicker) SlotUtils.getChildInSlot(testField, "time-picker");
     }
 
     private void fireValidatedDomEvent() {

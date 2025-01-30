@@ -425,6 +425,13 @@ public class DateTimePicker
         timePicker.setReadOnly(readOnly);
     }
 
+    @Override
+    public void setInvalid(boolean invalid) {
+        HasValidationProperties.super.setInvalid(invalid);
+        datePicker.setInvalid(invalid);
+        timePicker.setInvalid(invalid);
+    }
+
     /**
      * Sets the label for this field.
      *
