@@ -12,6 +12,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +51,11 @@ public class MapSerializerTest {
                 .thenReturn(streamRegistrationMock);
         Mockito.when(streamRegistrationMock.getResourceUri())
                 .thenReturn(new URI("https://example.com"));
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test

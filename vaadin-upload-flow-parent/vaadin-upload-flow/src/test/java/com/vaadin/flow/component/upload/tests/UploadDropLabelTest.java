@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
+import org.junit.After;
 import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
@@ -25,6 +26,11 @@ import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class UploadDropLabelTest {
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
+
     // Regression test for:
     // https://github.com/vaadin/flow-components/issues/3053
     @Test

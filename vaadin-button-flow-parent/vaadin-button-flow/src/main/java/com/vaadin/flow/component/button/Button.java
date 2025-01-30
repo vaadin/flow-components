@@ -20,6 +20,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.experimental.Feature;
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
@@ -30,7 +32,11 @@ import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
+import com.vaadin.flow.component.ShortcutRegistration;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Image;
@@ -39,7 +45,9 @@ import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.internal.DisableOnClickController;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * The Button component allows users to perform actions. It comes in several
@@ -48,9 +56,9 @@ import com.vaadin.flow.dom.Element;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha7")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/button", version = "24.7.0-alpha6")
+@NpmPackage(value = "@vaadin/button", version = "24.7.0-alpha7")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component
         implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,
@@ -341,10 +349,109 @@ public class Button extends Component
         return disableOnClickController.isDisableOnClick();
     }
 
+    /**
+     * Sets the button explicitly disabled or enabled. When disabled, the button
+     * is rendered as "dimmed" and prevents all user interactions (mouse and
+     * keyboard).
+     * <p>
+     * Since disabled buttons are not focusable and cannot react to hover events
+     * by default, it can cause accessibility issues by making them entirely
+     * invisible to assistive technologies, and prevents the use of Tooltips to
+     * explain why the action is not available. This can be addressed with the
+     * feature flag {@code accessibleDisabledButtons}, which makes disabled
+     * buttons focusable and hoverable, while preventing them from being
+     * triggered. To enable this feature flag, add the following line to
+     * {@code src/main/resources/vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.accessibleDisabledButtons = true
+     * </pre>
+     *
+     * This feature flag will also enable focus events and focus shortcuts for
+     * disabled buttons.
+     */
     @Override
     public void setEnabled(boolean enabled) {
         Focusable.super.setEnabled(enabled);
         disableOnClickController.onSetEnabled(enabled);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * By default, focus shortcuts are only active when the button is enabled.
+     * To make disabled buttons also focusable, enable the following feature
+     * flag in {@code src/main/resources/vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.accessibleDisabledButtons = true
+     * </pre>
+     *
+     * This feature flag will enable focus events and focus shortcuts for
+     * disabled buttons.
+     */
+    @Override
+    public ShortcutRegistration addFocusShortcut(Key key,
+            KeyModifier... keyModifiers) {
+        ShortcutRegistration registration = Focusable.super.addFocusShortcut(
+                key, keyModifiers);
+        if (isFeatureFlagEnabled(FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS)) {
+            registration.setDisabledUpdateMode(DisabledUpdateMode.ALWAYS);
+        }
+        return registration;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * By default, buttons are only focusable in the enabled state. To make
+     * disabled buttons also focusable, enable the following feature flag in
+     * {@code src/main/resources/vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.accessibleDisabledButtons = true
+     * </pre>
+     *
+     * This feature flag will enable focus events and focus shortcuts for
+     * disabled buttons.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Registration addFocusListener(
+            ComponentEventListener<FocusEvent<Button>> listener) {
+        return getEventBus().addListener(FocusEvent.class,
+                (ComponentEventListener) listener, registration -> {
+                    if (isFeatureFlagEnabled(
+                            FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS)) {
+                        registration.setDisabledUpdateMode(
+                                DisabledUpdateMode.ALWAYS);
+                    }
+                });
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * By default, buttons are only focusable in the enabled state. To make
+     * disabled buttons also focusable, enable the following feature flag in
+     * {@code src/main/resources/vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.accessibleDisabledButtons = true
+     * </pre>
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Registration addBlurListener(
+            ComponentEventListener<BlurEvent<Button>> listener) {
+        return getEventBus().addListener(BlurEvent.class,
+                (ComponentEventListener) listener, registration -> {
+                    if (isFeatureFlagEnabled(
+                            FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS)) {
+                        registration.setDisabledUpdateMode(
+                                DisabledUpdateMode.ALWAYS);
+                    }
+                });
     }
 
     private void updateIconSlot() {
@@ -409,5 +516,23 @@ public class Button extends Component
         } else {
             getThemeNames().remove("icon");
         }
+    }
+
+    /**
+     * Checks whether the given feature flag is active.
+     *
+     * @param feature
+     *            the feature flag to check
+     * @return {@code true} if the feature flag is active, {@code false}
+     *         otherwise
+     */
+    private boolean isFeatureFlagEnabled(Feature feature) {
+        UI ui = UI.getCurrent();
+        if (ui == null) {
+            return false;
+        }
+
+        return FeatureFlags.get(ui.getSession().getService().getContext())
+                .isEnabled(feature);
     }
 }

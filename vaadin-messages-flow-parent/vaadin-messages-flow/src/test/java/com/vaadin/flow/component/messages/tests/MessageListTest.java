@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.hamcrest.MatcherAssert;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +46,11 @@ public class MessageListTest {
         messageList = new MessageList();
         item1 = new MessageListItem();
         item2 = new MessageListItem();
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test(expected = UnsupportedOperationException.class)

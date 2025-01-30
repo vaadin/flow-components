@@ -17,6 +17,7 @@ package com.vaadin.flow.component.timepicker.tests;
 
 import java.util.Locale;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +36,11 @@ public class TimePickerLocaleTest {
     public void setup() {
         ui = new UI();
         UI.setCurrent(ui);
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test

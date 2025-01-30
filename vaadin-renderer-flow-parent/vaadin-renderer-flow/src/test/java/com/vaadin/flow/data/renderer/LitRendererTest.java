@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.data.renderer;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +28,11 @@ public class LitRendererTest {
     public void setup() {
         UI ui = new UI();
         UI.setCurrent(ui);
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test(expected = IllegalArgumentException.class)

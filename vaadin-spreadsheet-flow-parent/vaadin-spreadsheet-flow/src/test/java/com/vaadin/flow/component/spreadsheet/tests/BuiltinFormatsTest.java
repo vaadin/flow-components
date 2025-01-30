@@ -14,6 +14,7 @@ import java.util.Locale;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +46,11 @@ public class BuiltinFormatsTest {
 
         cell = spreadsheet.createCell(0, 0, null);
         cell.setCellStyle(cellStyle);
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test
