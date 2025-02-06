@@ -3710,7 +3710,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            client-side, {@code false} to disable
      */
     public void setMultiSort(boolean multiSort) {
-        doSetMultiSort(boolean);
+        doSetMultiSort(multiSort);
     }
 
     /**
@@ -3725,7 +3725,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see MultiSortPriority
      */
     public void setMultiSort(boolean multiSort, MultiSortPriority priority) {
-        doSetMultiSort(boolean);
+        doSetMultiSort(multiSort);
         updateMultiSortPriority(priority);
     }
 
@@ -3741,7 +3741,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            behavior
      */
     public void setMultiSort(boolean multiSort, boolean onShiftClickOnly) {
-        doSetMultiSort(boolean);
+        doSetMultiSort(multiSort);
         if (multiSort) {
             updateMultiSortOnShiftClick(onShiftClickOnly);
         }
