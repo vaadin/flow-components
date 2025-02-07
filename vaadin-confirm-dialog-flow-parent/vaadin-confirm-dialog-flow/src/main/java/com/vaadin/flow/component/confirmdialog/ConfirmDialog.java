@@ -99,8 +99,10 @@ public class ConfirmDialog extends Component
         }
     }
 
-    private String height;
-    private String width;
+    @Override
+    public String getWidth() {
+        return getElement().getProperty("_contentWidth");
+    }
 
     /**
      * Sets the width of the component content area.
@@ -117,12 +119,12 @@ public class ConfirmDialog extends Component
      */
     @Override
     public void setWidth(String width) {
-        this.width = width;
-        updateWidth();
+        getElement().setProperty("_contentWidth", width);
     }
 
-    private void updateWidth() {
-        this.getElement().executeJs("this._contentWidth = $0", this.width);
+    @Override
+    public String getHeight() {
+        return getElement().getProperty("_contentHeight");
     }
 
     /**
@@ -140,12 +142,7 @@ public class ConfirmDialog extends Component
      */
     @Override
     public void setHeight(String height) {
-        this.height = height;
-        updateHeight();
-    }
-
-    public void updateHeight() {
-        this.getElement().executeJs("this._contentHeight = $0", this.height);
+        getElement().setProperty("_contentHeight", height);
     }
 
     /**
@@ -862,9 +859,6 @@ public class ConfirmDialog extends Component
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-
-        updateWidth();
-        updateHeight();
 
         // Same as https://github.com/vaadin/flow-components/pull/725
         Shortcuts.setShortcutListenOnElement("this._overlayElement", this);
