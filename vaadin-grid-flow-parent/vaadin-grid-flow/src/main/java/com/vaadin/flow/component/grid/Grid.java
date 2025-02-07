@@ -3695,13 +3695,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return addListener(SortEvent.class, (ComponentEventListener) listener);
     }
 
-    private void doSetMultiSort(boolean multiSort) {
-        getElement().setAttribute("multi-sort", multiSort);
-        if (!multiSort) {
-            updateMultiSortOnShiftClick(false);
-        }
-    }
-
     /**
      * Sets whether multiple column sorting is enabled on the client-side.
      *
@@ -3764,8 +3757,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setMultiSort(boolean multiSort, MultiSortPriority priority,
             boolean onShiftClickOnly) {
-        setMultiSort(multiSort, onShiftClickOnly);
+        doSetMultiSort(multiSort);
         updateMultiSortPriority(priority);
+        if (multiSort) {
+            updateMultiSortOnShiftClick(onShiftClickOnly);
+        }
+    }
+
+    private void doSetMultiSort(boolean multiSort) {
+        getElement().setAttribute("multi-sort", multiSort);
+        if (!multiSort) {
+            updateMultiSortOnShiftClick(false);
+        }
     }
 
     private void updateMultiSortOnShiftClick(boolean multiSortOnShiftClick) {
