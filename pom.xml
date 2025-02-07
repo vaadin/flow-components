@@ -90,8 +90,8 @@
         <spring-data-commons.version>3.4.2</spring-data-commons.version>
 
         <!-- spreadsheet -->
-        <poi.version>5.2.5</poi.version>
-        <javaparser.version>3.25.3</javaparser.version>
+        <poi.version>5.4.0</poi.version>
+        <javaparser.version>3.26.3</javaparser.version>
     </properties>
     <dependencyManagement>
         <dependencies>
