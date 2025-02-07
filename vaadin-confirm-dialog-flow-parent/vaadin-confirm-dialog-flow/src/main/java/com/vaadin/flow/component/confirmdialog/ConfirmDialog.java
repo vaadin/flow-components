@@ -53,7 +53,7 @@ import com.vaadin.flow.shared.Registration;
  * <li>“Confirm” button</li>
  * </ul>
  * </ul>
- *
+ * <p>
  * Each Confirm Dialog should have a title and/or message. The “Confirm” button
  * is shown by default, while the two other buttons are not (they must be
  * explicitly enabled to be displayed).
@@ -219,9 +219,13 @@ public class ConfirmDialog extends Component
         // Initialize auto-add behavior
         new OverlayAutoAddController<>(this, () -> true);
 
-        addConfirmListener(event -> close());
-        addRejectListener(event -> close());
-        addCancelListener(event -> close());
+        // Listen specifically for the client dialog closing to close it on the
+        // server as well. Not using synchronization for the `opened` property
+        // as that would cause the auto add controller to remove the dialog from
+        // the UI before other event listeners (confirm, reject, cancel) are
+        // fired.
+        getElement().addEventListener("opened-changed", event -> close())
+                .setFilter("event.detail.value === false");
     }
 
     /**
