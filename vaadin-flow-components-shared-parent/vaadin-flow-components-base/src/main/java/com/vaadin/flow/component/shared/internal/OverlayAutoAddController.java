@@ -86,7 +86,7 @@ public class OverlayAutoAddController<C extends Component>
     }
 
     private void handleClose() {
-        if (!isOpened() && autoAdded) {
+        if (autoAdded) {
             autoAdded = false;
             component.getElement().removeFromParent();
         }
