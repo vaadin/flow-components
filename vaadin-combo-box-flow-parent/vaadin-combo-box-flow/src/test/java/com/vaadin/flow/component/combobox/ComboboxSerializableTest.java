@@ -18,12 +18,20 @@ package com.vaadin.flow.component.combobox;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.Test;
 
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
 public class ComboboxSerializableTest extends ClassesSerializableTest {
+
+    @Override
+    protected Stream<String> getExcludedPatterns() {
+        return Stream.concat(super.getExcludedPatterns(),
+                Stream.of("com\\.vaadin\\.flow\\.spring\\..*"));
+    }
+
     @Test
     public void setItems_callSetRequestedRange_comboBoxSerializable()
             throws Throwable {

@@ -18,6 +18,7 @@ package com.vaadin.flow.component.combobox;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -60,6 +61,11 @@ public class ComboBoxTest extends ComboBoxBaseTest {
     protected <TItem> ComboBoxBase<?, TItem, ?> createComboBox(
             Class<TItem> itemClass) {
         return new ComboBox<>();
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test

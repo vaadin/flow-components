@@ -35,6 +35,9 @@ import com.vaadin.flow.component.charts.events.ChartRedrawEvent;
 import com.vaadin.flow.component.charts.events.ChartSelectionEvent;
 import com.vaadin.flow.component.charts.events.DrilldownEvent;
 import com.vaadin.flow.component.charts.events.PointClickEvent;
+import com.vaadin.flow.component.charts.events.PointDragEvent;
+import com.vaadin.flow.component.charts.events.PointDragStartEvent;
+import com.vaadin.flow.component.charts.events.PointDropEvent;
 import com.vaadin.flow.component.charts.events.PointLegendItemClickEvent;
 import com.vaadin.flow.component.charts.events.PointMouseOutEvent;
 import com.vaadin.flow.component.charts.events.PointMouseOverEvent;
@@ -86,9 +89,9 @@ import elemental.json.impl.JreJsonFactory;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-chart")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha4")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/charts", version = "24.7.0-alpha4")
+@NpmPackage(value = "@vaadin/charts", version = "24.7.0-alpha8")
 @JsModule("@vaadin/charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
@@ -103,7 +106,8 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
     private final static List<ChartType> TIMELINE_NOT_SUPPORTED = Arrays.asList(
             ChartType.PIE, ChartType.GAUGE, ChartType.SOLIDGAUGE,
-            ChartType.PYRAMID, ChartType.FUNNEL, ChartType.ORGANIZATION);
+            ChartType.PYRAMID, ChartType.FUNNEL, ChartType.ORGANIZATION,
+            ChartType.GANTT);
 
     private DrillCallbackHandler drillCallbackHandler;
 
@@ -211,6 +215,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * <li>ChartType.PYRAMID</li>
      * <li>ChartType.FUNNEL</li>
      * <li>ChartType.ORGANIZATION</li>
+     * <li>ChartType.GANTT</li>
      * </ul>
      * Enabling timeline mode in these unsupported chart types results in an
      * <code>IllegalArgumentException</code>
@@ -592,6 +597,38 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     public Registration addPointUpdateListener(
             ComponentEventListener<PointUpdateEvent> listener) {
         return addListener(PointUpdateEvent.class, listener);
+    }
+
+    /**
+     * Adds a point drag start listener, which will be notified when starting to
+     * drag a point.
+     * 
+     * @param listener
+     */
+    public Registration addPointDragStartListener(
+            ComponentEventListener<PointDragStartEvent> listener) {
+        return addListener(PointDragStartEvent.class, listener);
+    }
+
+    /**
+     * Adds a point drop listener, which will be notified point is dropped.
+     * 
+     * @param listener
+     */
+    public Registration addPointDropListener(
+            ComponentEventListener<PointDropEvent> listener) {
+        return addListener(PointDropEvent.class, listener);
+    }
+
+    /**
+     * Adds a point drag listener, which will be notified while point is
+     * dragged.
+     * 
+     * @param listener
+     */
+    public Registration addPointDragListener(
+            ComponentEventListener<PointDragEvent> listener) {
+        return addListener(PointDragEvent.class, listener);
     }
 
     /**

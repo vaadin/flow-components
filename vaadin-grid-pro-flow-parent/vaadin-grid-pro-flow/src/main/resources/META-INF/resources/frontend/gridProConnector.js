@@ -7,6 +7,8 @@
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
+import { iterateRowCells, updatePart } from '@vaadin/grid/src/vaadin-grid-helpers.js';
+
 function isEditedRow(grid, rowData) {
   return grid.__edited && grid.__edited.model.item.key === rowData.item.key;
 }
@@ -79,10 +81,45 @@ window.Vaadin.Flow.gridProConnector = {
   },
 
   initCellEditableProvider(column) {
-    column.isCellEditable = function(model) {
+    column.isCellEditable = function (model) {
       // If there is no cell editable data, assume the cell is editable
       const isEditable = model.item.cellEditable && model.item.cellEditable[column._flowId];
       return isEditable === undefined || isEditable;
     };
   },
+
+  initUpdatingCellAnimation(grid) {
+    // When stopping editing, getting the updated cell value for columns with
+    // custom editors requires a server round-trip. During this time, we hide
+    // the cell content and show an update animation.
+    grid.addEventListener('item-property-changed', () => {
+      const { column, model } = grid.__edited;
+
+      if (column.editorType !== 'custom') {
+        return;
+      }
+
+      grid.__pendingCellUpdate = `${model.item.key}:${column.path}`;
+      grid.requestContentUpdate();
+    });
+
+    // Override the method to add the updating-cell part to the cell when it's being updated.
+    const generateCellPartNames = grid._generateCellPartNames;
+    grid._generateCellPartNames = function (row, model) {
+      generateCellPartNames.apply(this, arguments);
+
+      iterateRowCells(row, (cell) => {
+        const isUpdating =
+          model && cell._column && grid.__pendingCellUpdate === `${model.item.key}:${cell._column.path}`;
+        const target = cell._focusButton || cell;
+        updatePart(target, isUpdating, 'updating-cell');
+      });
+    };
+  },
+
+  clearUpdatingCell(grid) {
+    // Clear the updating-cell part from the cell when the update is done.
+    grid.__pendingCellUpdate = null;
+    grid.requestContentUpdate();
+  }
 };

@@ -20,15 +20,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
-import com.vaadin.tests.AbstractParallelTest;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class I18nIT extends AbstractParallelTest {
+@TestPath("vaadin-login/overlay/ptbr")
+public class I18nIT extends AbstractComponentIT {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-login") + "/overlay/ptbr";
-        getDriver().get(url);
+        open();
     }
 
     @Test

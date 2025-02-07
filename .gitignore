@@ -2,6 +2,7 @@ bin
 target
 integration-tests
 pom.xml.bak
+.env
 
 # Eclipse
 .project

@@ -18,6 +18,7 @@ package com.vaadin.flow.component.icon.tests;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -26,6 +27,11 @@ import com.vaadin.flow.component.icon.SvgIcon;
 import com.vaadin.flow.server.StreamResource;
 
 public class SvgIconTest {
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
+
     @Test
     public void emptyConstructor_hasNoSrc() {
         var icon = new SvgIcon();

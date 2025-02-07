@@ -58,5 +58,7 @@ class ComponentFromTest {
 
         Component field = Component.from(element, componentClass);
         Assert.assertEquals(value, field.getElement().getPropertyRaw("value"));
+
+        UI.setCurrent(null);
     }
 }

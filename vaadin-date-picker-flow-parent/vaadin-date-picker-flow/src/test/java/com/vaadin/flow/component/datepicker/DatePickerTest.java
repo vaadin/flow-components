@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -48,6 +49,11 @@ import net.jcip.annotations.NotThreadSafe;
 public class DatePickerTest {
 
     private static final String OPENED_PROPERTY_NOT_UPDATED = "The server-side \"opened\"-property was not updated synchronously";
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
 
     @Test
     public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
@@ -86,6 +92,18 @@ public class DatePickerTest {
         Assert.assertEquals(LocalDate.of(2018, 4, 25), picker.getValue());
         Assert.assertEquals("2018-04-25",
                 picker.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void emptyValueIsNull() {
+        DatePicker picker = new DatePicker();
+        Assert.assertNull(picker.getEmptyValue());
+    }
+
+    @Test
+    public void setInitialValue_emptyValueIsNull() {
+        DatePicker picker = new DatePicker(LocalDate.of(2018, 4, 25));
+        Assert.assertNull(picker.getEmptyValue());
     }
 
     @Test

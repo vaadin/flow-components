@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -54,6 +55,11 @@ public class RadioButtonGroupTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
 
     @Test
     public void setReadOnlyRadioGroup_groupIsReadOnly() {
