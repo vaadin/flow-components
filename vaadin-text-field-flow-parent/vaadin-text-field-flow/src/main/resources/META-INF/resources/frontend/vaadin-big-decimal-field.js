@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-import { TextField } from '@vaadin/text-field';
+import { TextField } from '@vaadin/text-field/src/vaadin-text-field.js';
 import { defineCustomElement } from '@vaadin/component-base/src/define.js';
 
 let memoizedTemplate;
