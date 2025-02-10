@@ -32,4 +32,34 @@ public class ConfirmDialogTest {
         confirmDialog.setAriaDescribedBy(null);
         Assert.assertTrue(confirmDialog.getAriaDescribedBy().isEmpty());
     }
+
+    @Test
+    public void setWidth_getWidth() {
+        var confirmDialog = new ConfirmDialog();
+        confirmDialog.setWidth("100px");
+
+        Assert.assertEquals("100px", confirmDialog.getWidth());
+        Assert.assertEquals("100px",
+                confirmDialog.getElement().getProperty("_contentWidth"));
+
+        confirmDialog.setWidth(null);
+        Assert.assertNull(confirmDialog.getWidth());
+        Assert.assertNull(
+                confirmDialog.getElement().getProperty("_contentWidth"));
+    }
+
+    @Test
+    public void setHeight_getHeight() {
+        var confirmDialog = new ConfirmDialog();
+        confirmDialog.setHeight("100px");
+
+        Assert.assertEquals("100px", confirmDialog.getHeight());
+        Assert.assertEquals("100px",
+                confirmDialog.getElement().getProperty("_contentHeight"));
+
+        confirmDialog.setHeight(null);
+        Assert.assertNull(confirmDialog.getHeight());
+        Assert.assertNull(
+                confirmDialog.getElement().getProperty("_contentHeight"));
+    }
 }
