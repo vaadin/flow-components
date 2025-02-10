@@ -18,6 +18,7 @@ package com.vaadin.flow.component.shared;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +38,11 @@ public class HasTooltipTest {
         component = new TestComponent();
         ui = new UI();
         UI.setCurrent(ui);
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test

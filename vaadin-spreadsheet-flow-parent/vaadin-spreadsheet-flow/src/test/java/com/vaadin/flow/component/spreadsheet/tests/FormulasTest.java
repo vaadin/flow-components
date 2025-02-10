@@ -10,6 +10,7 @@ package com.vaadin.flow.component.spreadsheet.tests;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -33,6 +34,11 @@ public class FormulasTest {
         // loaded
         TestHelper.fireClientEvent(spreadsheet, "onSheetScroll",
                 "[1, 1, 1, 1]");
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test

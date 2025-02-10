@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,6 +37,11 @@ public class RichTextEditorTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
 
     @Test
     public void setValueNull() {

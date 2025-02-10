@@ -20,6 +20,7 @@ import static org.junit.Assert.assertNull;
 
 import java.util.Arrays;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +49,11 @@ public class NumberFieldTest extends TextFieldTest {
     @Before
     public void setup() {
         field = new NumberField();
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Override
