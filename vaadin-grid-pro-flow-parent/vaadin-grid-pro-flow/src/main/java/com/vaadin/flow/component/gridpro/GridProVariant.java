@@ -18,6 +18,11 @@ public enum GridProVariant {
     LUMO_ROW_STRIPES("row-stripes"),
     LUMO_COMPACT("compact"),
     LUMO_WRAP_CELL_CONTENT("wrap-cell-content"),
+    /**
+     * @deprecated Since 24.7, the Material theme is deprecated and will be
+     *             removed in Vaadin 25.
+     */
+    @Deprecated
     MATERIAL_COLUMN_DIVIDERS("column-dividers"),
     LUMO_HIGHLIGHT_EDITABLE_CELLS("highlight-editable-cells"),
     LUMO_HIGHLIGHT_READ_ONLY_CELLS("highlight-read-only-cells");

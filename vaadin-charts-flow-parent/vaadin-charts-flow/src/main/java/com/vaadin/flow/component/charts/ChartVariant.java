@@ -15,8 +15,23 @@ public enum ChartVariant {
     LUMO_GRADIENT("gradient"),
     LUMO_MONOTONE("monotone"),
     LUMO_CLASSIC("classic"),
+    /**
+     * @deprecated Since 24.7, the Material theme is deprecated and will be
+     *             removed in Vaadin 25.
+     */
+    @Deprecated
     MATERIAL_GRADIENT("gradient"),
+    /**
+     * @deprecated Since 24.7, the Material theme is deprecated and will be
+     *             removed in Vaadin 25.
+     */
+    @Deprecated
     MATERIAL_MONOTONE("monotone"),
+    /**
+     * @deprecated Since 24.7, the Material theme is deprecated and will be
+     *             removed in Vaadin 25.
+     */
+    @Deprecated
     MATERIAL_CLASSIC("classic");
 
     private final String variant;
