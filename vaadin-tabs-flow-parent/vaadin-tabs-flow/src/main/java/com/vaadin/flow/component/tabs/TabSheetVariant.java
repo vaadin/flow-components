@@ -34,7 +34,17 @@ public enum TabSheetVariant implements ThemeVariant {
     LUMO_TABS_EQUAL_WIDTH_TABS("equal-width-tabs"),
     LUMO_BORDERED("bordered"),
     LUMO_NO_PADDING("no-padding"),
+    /**
+     * @deprecated Since 24.7, the Material theme is deprecated and will be
+     *             removed in Vaadin 25.
+     */
+    @Deprecated
     MATERIAL_TABS_FIXED("fixed"),
+    /**
+     * @deprecated Since 24.7, the Material theme is deprecated and will be
+     *             removed in Vaadin 25.
+     */
+    @Deprecated
     MATERIAL_BORDERED("bordered");
 
     private final String variant;
