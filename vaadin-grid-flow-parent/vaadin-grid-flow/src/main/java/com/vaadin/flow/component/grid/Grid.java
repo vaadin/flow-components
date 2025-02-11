@@ -3738,8 +3738,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         Optional<T> item = Optional
                 .ofNullable(getDataCommunicator().getKeyMapper().get(key));
         if (!item.isPresent()) {
-            LoggerFactory.getLogger(Grid.class).debug("Key not found: %s. "
-                    + "This can happen due to user action while changing"
+            LoggerFactory.getLogger(Grid.class).debug("Key not found: {}."
+                    + " This can happen due to user action while changing"
                     + " the data provider.", key);
         }
         return item;
