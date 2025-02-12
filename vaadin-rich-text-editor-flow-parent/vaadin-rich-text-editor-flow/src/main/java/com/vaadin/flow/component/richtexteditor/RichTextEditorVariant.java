@@ -17,6 +17,11 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 public enum RichTextEditorVariant implements ThemeVariant {
     LUMO_NO_BORDER("no-border"),
     LUMO_COMPACT("compact"),
+    /**
+     * @deprecated Since 24.7, the Material theme is deprecated and will be
+     *             removed in Vaadin 25.
+     */
+    @Deprecated
     MATERIAL_NO_BORDER("no-border");
 
     private final String variant;

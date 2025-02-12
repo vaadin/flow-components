@@ -26,6 +26,9 @@ import com.vaadin.flow.theme.AbstractTheme;
 
 /**
  * Material component theme class implementation.
+ *
+ * @deprecated Since 24.7, the Material theme is deprecated and will be removed
+ *             in Vaadin 25.
  */
 @NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "24.7.0-alpha8")
 @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha8")
@@ -33,6 +36,7 @@ import com.vaadin.flow.theme.AbstractTheme;
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/vaadin-material-styles/color-global.js")
 @JsModule("@vaadin/vaadin-material-styles/typography-global.js")
+@Deprecated
 public class Material implements AbstractTheme {
     public static final String LIGHT = "light";
     public static final String DARK = "dark";
