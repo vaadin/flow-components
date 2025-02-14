@@ -196,8 +196,8 @@
         items.forEach(item => {
           if (item) {
             selectedKeys[item.key] = item;
+            item.selected = true;
             if (userOriginated) {
-              item.selected = true;
               grid.$server.select(item.key);
             }
           }
@@ -226,8 +226,8 @@
           }
           if (itemToDeselect) {
             delete selectedKeys[itemToDeselect.key];
+            delete itemToDeselect.selected;
             if (userOriginated) {
-              delete itemToDeselect.selected;
               grid.$server.deselect(itemToDeselect.key);
             }
           }
