@@ -1,13 +1,13 @@
 package com.vaadin.flow.component.grid.it;
 
+import java.util.stream.Stream;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.Route;
-
-import java.util.stream.Stream;
 
 @Route("vaadin-grid/grid-single-selection-update-and-deselect")
 public class GridSingleSelectionUpdateAndDeselectPage extends Div {
