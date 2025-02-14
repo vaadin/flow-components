@@ -37,24 +37,3 @@ public class GridSingleSelectionUpdateAndDeselectIT
     }
 
 }
-@TestPath("vaadin-grid/grid-single-selection-update-and-deselect")
-public class GridSingleSelectionUpdateAndDeselectIT
-        extends AbstractComponentIT {
-
-    @Before
-    public void init() {
-        open();
-    }
-
-    @Test
-    public void shouldHaveCorrectValueAfterUpdateAndDeselect() {
-        // Click the update button
-        clickElementWithJs("update-name");
-        GridElement grid = $(GridElement.class).first();
-        String name = grid.getCell(0, 1).getText();
-
-        // Expect the name to be updated
-        Assert.assertEquals("Bar", name);
-    }
-
-}
