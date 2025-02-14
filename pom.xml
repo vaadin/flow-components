@@ -63,7 +63,7 @@
     </modules>
     <properties>
         <flow.version>24.7-SNAPSHOT</flow.version>
-        <testbench.version>9.3.8</testbench.version>
+        <testbench.version>9.3.9</testbench.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
