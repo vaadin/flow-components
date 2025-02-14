@@ -8,14 +8,15 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 @TestPath("vaadin-grid/select-item-with-identical-id")
 public class SelectItemWithIdenticalIdIT extends AbstractComponentIT {
