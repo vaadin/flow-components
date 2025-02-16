@@ -215,10 +215,10 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.7.0-alpha8")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.7.0-alpha8")
+@NpmPackage(value = "@vaadin/grid", version = "24.7.0-alpha9")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.7.0-alpha9")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -443,7 +443,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha8")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -3872,8 +3872,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         Optional<T> item = Optional
                 .ofNullable(getDataCommunicator().getKeyMapper().get(key));
         if (!item.isPresent()) {
-            LoggerFactory.getLogger(Grid.class).debug("Key not found: %s. "
-                    + "This can happen due to user action while changing"
+            LoggerFactory.getLogger(Grid.class).debug("Key not found: {}."
+                    + " This can happen due to user action while changing"
                     + " the data provider.", key);
         }
         return item;
