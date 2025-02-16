@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -434,9 +435,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Server-side component for the {@code <vaadin-grid-column>} element.
      *
      * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * By default, every added column sends data to the client side regardless
+     * of its visibility state. To avoid sending extra data, either remove the
+     * column using {@link Grid#removeColumn(Column)} or use
+     * {@link #setGenerateDataWhenHidden(boolean)}.
      * </p>
      *
      * @param <T>
@@ -452,6 +454,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         private String columnKey; // defined and used by the user
 
         private boolean sortingEnabled;
+        private boolean generateDataWhenHidden = true;
 
         private Component editorComponent;
         private EditorRenderer<T> editorRenderer;
@@ -503,8 +506,48 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     .getDataGenerator();
 
             if (dataGenerator.isPresent()) {
+                var generator = dataGenerator.get();
+
+                // Use an anonymous class instead of Lambda to prevent potential
+                // deserialization issues when used with Grid
+                // see https://github.com/vaadin/flow-components/issues/6256
+                var conditionalDataGenerator = new DataGenerator<T>() {
+                    @Override
+                    public void generateData(T item, JsonObject jsonObject) {
+                        if (isGenerateDataWhenHidden()
+                                || Column.this.isVisible()) {
+                            generator.generateData(item, jsonObject);
+                        }
+                    }
+
+                    @Override
+                    public void destroyData(T item) {
+                        generator.destroyData(item);
+                    }
+
+                    @Override
+                    public void destroyAllData() {
+                        generator.destroyAllData();
+                    }
+
+                    @Override
+                    public void refreshData(T item) {
+                        generator.refreshData(item);
+                    }
+                };
                 columnDataGeneratorRegistration = grid
-                        .addDataGenerator(dataGenerator.get());
+                        .addDataGenerator(conditionalDataGenerator);
+            }
+        }
+
+        @Override
+        public void setVisible(boolean visible) {
+            // Data has to be generated for previously hidden columns
+            boolean resetDataCommunicator = !isGenerateDataWhenHidden()
+                    && visible && !isVisible();
+            super.setVisible(visible);
+            if (resetDataCommunicator) {
+                getGrid().getDataCommunicator().reset();
             }
         }
 
@@ -773,7 +816,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *            the value provider used to extract the {@link Comparable}
          *            sort key
          * @return this column
-         * @see Comparator#comparing(java.util.function.Function)
+         * @see Comparator#comparing(Function)
          */
         public <V extends Comparable<? super V>> Column<T> setComparator(
                 ValueProvider<T, V> keyExtractor) {
@@ -896,6 +939,49 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         public boolean isSortable() {
             return sortingEnabled;
+        }
+
+        /**
+         * Sets whether the data for this column should be generated and sent to
+         * the client even when the column is hidden. By default, data for
+         * hidden columns is generated and sent to the client.
+         * <p>
+         * Setting this property to {@code false} will prevent the data for this
+         * column from being generated and sent to the client when the column is
+         * hidden. Alternatively, you can remove the column using
+         * {@link Grid#removeColumn(Column)} or avoid adding the column
+         * altogether.
+         * </p>
+         *
+         * @param generateDataWhenHidden
+         *            {@code true} to generate data even when the column is
+         *            hidden, {@code false} otherwise
+         * @return this column
+         */
+        public Column<T> setGenerateDataWhenHidden(
+                boolean generateDataWhenHidden) {
+            if (this.generateDataWhenHidden == generateDataWhenHidden) {
+                return this;
+            }
+            // Data has to be generated for hidden columns.
+            if (!isVisible() && generateDataWhenHidden
+                    && !isGenerateDataWhenHidden()) {
+                getGrid().getDataCommunicator().reset();
+            }
+            this.generateDataWhenHidden = generateDataWhenHidden;
+            return this;
+        }
+
+        /**
+         * Returns whether the data for this column is generated and sent to the
+         * client when the column is hidden. The default is {@code true}.
+         *
+         * @return {@code true} if data is generated even when the column is
+         *         hidden, {@code false} otherwise
+         * @see #setGenerateDataWhenHidden(boolean)
+         */
+        public boolean isGenerateDataWhenHidden() {
+            return generateDataWhenHidden;
         }
 
         /**
@@ -1854,9 +1940,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * see {@link #addColumn(Renderer)}.
      * </p>
      * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * By default, every added column sends data to the client side regardless
+     * of its visibility state. To avoid sending extra data, either remove the
+     * column using {@link #removeColumn(Column)} or use
+     * {@link Column#setGenerateDataWhenHidden(boolean)}.
      * </p>
      * <p>
      * <em>NOTE:</em> This method is a shorthand for
@@ -1887,9 +1974,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * see {@link #addColumn(Renderer)}.
      * </p>
      * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * By default, every added column sends data to the client side regardless
+     * of its visibility state. To avoid sending extra data, either remove the
+     * column using {@link #removeColumn(Column)} or use
+     * {@link Column#setGenerateDataWhenHidden(boolean)}.
      * </p>
      *
      * @param valueProvider
@@ -1949,10 +2037,12 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <em>NOTE:</em> Using {@link ComponentRenderer} is not as efficient as the
      * built in renderers or using {@link LitRenderer}.
      * </p>
+     *
      * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * By default, every added column sends data to the client side regardless
+     * of its visibility state. To avoid sending extra data, either remove the
+     * column using {@link #removeColumn(Column)} or use
+     * {@link Column#setGenerateDataWhenHidden(boolean)}.
      * </p>
      *
      * @param componentProvider
@@ -1978,9 +2068,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * {@link ValueProvider}.
      *
      * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * By default, every added column sends data to the client side regardless
+     * of its visibility state. To avoid sending extra data, either remove the
+     * column using {@link #removeColumn(Column)} or use
+     * {@link Column#setGenerateDataWhenHidden(boolean)}.
      * </p>
      *
      * @see Column#setComparator(ValueProvider)
@@ -2017,9 +2108,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * or using {@link LitRenderer}.
      * </p>
      * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * By default, every added column sends data to the client side regardless
+     * of its visibility state. To avoid sending extra data, either remove the
+     * column using {@link #removeColumn(Column)} or use
+     * {@link Column#setGenerateDataWhenHidden(boolean)}.
      * </p>
      * <p>
      * <em>NOTE:</em> This method is a shorthand for
@@ -2055,9 +2147,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * or using {@link LitRenderer}.
      * </p>
      * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * By default, every added column sends data to the client side regardless
+     * of its visibility state. To avoid sending extra data, either remove the
+     * column using {@link #removeColumn(Column)} or use
+     * {@link Column#setGenerateDataWhenHidden(boolean)}.
      * </p>
      *
      * @param renderer
@@ -2162,9 +2255,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * from a bean type with {@link #Grid(Class)}.
      *
      * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * By default, every added column sends data to the client side regardless
+     * of its visibility state. To avoid sending extra data, either remove the
+     * column using {@link #removeColumn(Column)} or use
+     * {@link Column#setGenerateDataWhenHidden(boolean)}.
      * </p>
      *
      * <p>
@@ -2203,9 +2297,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * from a bean type with {@link #Grid(Class)}.
      *
      * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * By default, every added column sends data to the client side regardless
+     * of its visibility state. To avoid sending extra data, either remove the
+     * column using {@link #removeColumn(Column)} or use
+     * {@link Column#setGenerateDataWhenHidden(boolean)}.
      * </p>
      *
      * @see #addColumn(String)
@@ -2278,11 +2373,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * <p>
      * <strong>Note:</strong> This method can only be used for a Grid created
      * from a bean type with {@link #Grid(Class)}.
-     *
      * <p>
-     * Every added column sends data to the client side regardless of its
-     * visibility state. Don't add a new column at all or use
-     * {@link Grid#removeColumn(Column)} to avoid sending extra data.
+     * By default, every added column sends data to the client side regardless
+     * of its visibility state. To avoid sending extra data, either remove the
+     * column using {@link #removeColumn(Column)} or use
+     * {@link Column#setGenerateDataWhenHidden(boolean)}.
      * </p>
      *
      * @param propertyNames
