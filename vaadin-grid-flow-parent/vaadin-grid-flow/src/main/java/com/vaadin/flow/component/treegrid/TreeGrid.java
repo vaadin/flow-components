@@ -663,7 +663,6 @@ public class TreeGrid<T> extends Grid<T>
         return column;
     }
     
-
     /**
      * Adds a new Hierarchy column that shows components.
      * <p>
