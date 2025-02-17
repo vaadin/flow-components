@@ -71,7 +71,7 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
         }
 
         private void clear(TestBenchElement input) {
-            String value = input.getAttribute("value");
+            String value = input.getDomProperty("value");
             if (value.length() > 0) {
                 CharSequence[] clearSequence = new CharSequence[value.length()];
                 for (int i = 0; i < clearSequence.length; i++) {
@@ -181,7 +181,7 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
 
             Assert.assertEquals(
                     "EmptySelectionItem not selected based on value attribute",
-                    "", selectedItem.getAttribute("value"));
+                    "", selectedItem.getDomProperty("value"));
         }
 
         void valueChangeEvent(String value, String oldValue, boolean fromClient,
