@@ -96,11 +96,11 @@ public class OverlayClassNameIT extends AbstractComponentIT {
 
     private void assertClassAttribute(LoginOverlayElement overlay,
             String expected) {
-        String className = overlay.getAttribute("class");
+        String className = overlay.getDomAttribute("class");
         Assert.assertEquals(expected, className);
 
         WebElement wrappedElement = overlay.getLoginOverlayWrapper();
-        String cardClassName = wrappedElement.getAttribute("class");
+        String cardClassName = wrappedElement.getDomAttribute("class");
         Assert.assertEquals(expected, cardClassName);
     }
 }
