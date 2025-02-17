@@ -64,9 +64,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.7.0-alpha6")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "24.7.0-alpha9")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
@@ -102,10 +102,12 @@ public class ConfirmDialog extends Component
         }
     }
 
-    private String height;
-    private String width;
-
     private Registration afterProgrammaticNavigationListenerRegistration;
+
+    @Override
+    public String getWidth() {
+        return getElement().getProperty("_contentWidth");
+    }
 
     /**
      * Sets the width of the component content area.
@@ -122,12 +124,12 @@ public class ConfirmDialog extends Component
      */
     @Override
     public void setWidth(String width) {
-        this.width = width;
-        updateWidth();
+        getElement().setProperty("_contentWidth", width);
     }
 
-    private void updateWidth() {
-        this.getElement().executeJs("this._contentWidth = $0", this.width);
+    @Override
+    public String getHeight() {
+        return getElement().getProperty("_contentHeight");
     }
 
     /**
@@ -145,12 +147,7 @@ public class ConfirmDialog extends Component
      */
     @Override
     public void setHeight(String height) {
-        this.height = height;
-        updateHeight();
-    }
-
-    public void updateHeight() {
-        this.getElement().executeJs("this._contentHeight = $0", this.height);
+        getElement().setProperty("_contentHeight", height);
     }
 
     /**
@@ -902,8 +899,6 @@ public class ConfirmDialog extends Component
                     if (getElement().getNode().getParent() == null) {
                         ui.addToModalComponent(this);
                         autoAddedToTheUi = true;
-                        updateWidth();
-                        updateHeight();
                         ui.setChildComponentModal(this, true);
                     }
                     if (afterProgrammaticNavigationListenerRegistration != null) {

@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.radiobutton.tests;
 
+import org.junit.After;
 import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
@@ -22,6 +23,11 @@ import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
 public class RadioButtonSerializableTest extends ClassesSerializableTest {
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
+
     @Test
     public void setItems_addToUI_radioButtonGroupIsSerializable()
             throws Throwable {

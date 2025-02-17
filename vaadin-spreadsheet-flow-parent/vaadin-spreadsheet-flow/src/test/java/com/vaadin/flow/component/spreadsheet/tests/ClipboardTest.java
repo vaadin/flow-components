@@ -11,6 +11,7 @@ package com.vaadin.flow.component.spreadsheet.tests;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +31,11 @@ public class ClipboardTest {
         spreadsheet.setLocale(Locale.US);
         var ui = new UI();
         UI.setCurrent(ui);
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test

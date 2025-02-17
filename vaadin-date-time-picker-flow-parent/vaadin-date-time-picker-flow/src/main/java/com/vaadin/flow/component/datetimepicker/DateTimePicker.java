@@ -93,9 +93,9 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "24.7.0-alpha6")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "24.7.0-alpha9")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -399,6 +399,13 @@ public class DateTimePicker
         // https://github.com/vaadin/vaadin-date-time-picker/pull/30
         datePicker.setReadOnly(readOnly);
         timePicker.setReadOnly(readOnly);
+    }
+
+    @Override
+    public void setInvalid(boolean invalid) {
+        HasValidationProperties.super.setInvalid(invalid);
+        datePicker.setInvalid(invalid);
+        timePicker.setInvalid(invalid);
     }
 
     /**

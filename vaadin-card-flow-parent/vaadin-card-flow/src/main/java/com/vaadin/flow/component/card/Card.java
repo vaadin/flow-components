@@ -28,9 +28,9 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-card")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/card", version = "24.7.0-alpha6")
+@NpmPackage(value = "@vaadin/card", version = "24.7.0-alpha9")
 @JsModule("@vaadin/card/src/vaadin-card.js")
 public class Card extends Component
         implements HasSize, HasThemeVariant<CardVariant> {

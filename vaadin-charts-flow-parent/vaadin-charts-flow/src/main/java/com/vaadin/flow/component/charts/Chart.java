@@ -68,6 +68,7 @@ import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
@@ -89,9 +90,9 @@ import elemental.json.impl.JreJsonFactory;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-chart")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha6")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/charts", version = "24.7.0-alpha6")
+@NpmPackage(value = "@vaadin/charts", version = "24.7.0-alpha9")
 @JsModule("@vaadin/charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
@@ -145,15 +146,22 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
         configurationUpdateRegistration = ui.beforeClientResponse(this,
                 context -> {
                     drawChart(resetConfiguration);
+                    reportUsage();
 
                     if (configuration != null) {
                         // Start listening to data series events once the chart
-                        // has been
-                        // drawn.
+                        // has been drawn.
                         configuration.addChangeListener(changeListener);
                     }
                     configurationUpdateRegistration = null;
                 });
+    }
+
+    private void reportUsage() {
+        final ChartType type = getConfiguration().getChart().getType();
+        if (type == ChartType.GANTT) {
+            UsageStatistics.markAsUsed("flow-components/chart/gantt", null);
+        }
     }
 
     JreJsonFactory getJsonFactory() {
