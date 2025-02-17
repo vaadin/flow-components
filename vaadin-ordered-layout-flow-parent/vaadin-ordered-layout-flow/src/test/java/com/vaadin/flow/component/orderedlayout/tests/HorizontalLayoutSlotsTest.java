@@ -226,7 +226,7 @@ public class HorizontalLayoutSlotsTest {
     }
 
     @Test
-    public void addToSlots_indexesAreSlotsOrder() {
+    public void addToEnd_addToMiddle_addToStart_indexesAreInSlotsOrder() {
         Div div1 = new Div();
         layout.addToEnd(div1);
 
@@ -235,6 +235,22 @@ public class HorizontalLayoutSlotsTest {
 
         Div div3 = new Div();
         layout.addToStart(div3);
+
+        Assert.assertEquals(div3, layout.getComponentAt(0));
+        Assert.assertEquals(div2, layout.getComponentAt(1));
+        Assert.assertEquals(div1, layout.getComponentAt(2));
+    }
+
+    @Test
+    public void addToEnd_addToMiddle_add_indexesAreInSlotsOrder() {
+        Div div1 = new Div();
+        layout.addToEnd(div1);
+
+        Div div2 = new Div();
+        layout.addToMiddle(div2);
+
+        Div div3 = new Div();
+        layout.add(div3);
 
         Assert.assertEquals(div3, layout.getComponentAt(0));
         Assert.assertEquals(div2, layout.getComponentAt(1));

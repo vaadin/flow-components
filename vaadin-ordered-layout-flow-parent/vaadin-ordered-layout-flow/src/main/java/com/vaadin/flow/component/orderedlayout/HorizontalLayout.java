@@ -303,6 +303,26 @@ public class HorizontalLayout extends Component implements ThemableLayout,
         updateChildDetachListeners();
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method only adds components to the start slot.
+     */
+    @Override
+    public void add(Collection<Component> components) {
+        addToStart(components);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method only adds components to the start slot.
+     */
+    @Override
+    public void add(Component... components) {
+        addToStart(components);
+    }
+
     @Override
     public void addComponentAtIndex(int index, Component component) {
         Component oldComponent = getComponentAt(index);
