@@ -188,11 +188,11 @@
           return;
         }
         if (selectionMode === 'SINGLE') {
-          grid.selectedItems = [];
           selectedKeys = {};
         }
 
-        grid.selectedItems = grid.selectedItems.concat(items);
+        // FYI: In single selection mode, the server can send items = [null]
+        // which means a "Deselect All" command.
         items.forEach(item => {
           if (item) {
             selectedKeys[item.key] = item;
@@ -206,6 +206,8 @@
             grid.activeItem = item;
           }
         });
+        
+        grid.selectedItems = Object.values(selectedKeys);
       });
 
       grid.$connector.doDeselection = tryCatchWrapper(function(items, userOriginated) {
