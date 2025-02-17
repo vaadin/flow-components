@@ -57,9 +57,8 @@ public class WrongHashesOnScrollIT extends AbstractSpreadsheetIT {
                 By.cssSelector(".cell"));
 
         for (WebElement cell : elements) {
-            assertNotEquals(
-                    "Cell with class " + cell.getAttribute("class") + " fails",
-                    "###", cell.getText());
+            assertNotEquals("Cell with class " + cell.getDomAttribute("class")
+                    + " fails", "###", cell.getText());
         }
     }
 

@@ -98,6 +98,6 @@ public class SheetTabSheetIT extends AbstractSpreadsheetIT {
 
     private void verifySheetFocused() {
         Assert.assertTrue("Sheet lost focus", getFocusedElement()
-                .getAttribute("class").contains("bottom-right-pane"));
+                .getDomAttribute("class").contains("bottom-right-pane"));
     }
 }
