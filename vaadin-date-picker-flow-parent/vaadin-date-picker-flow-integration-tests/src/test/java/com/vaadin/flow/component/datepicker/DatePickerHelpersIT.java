@@ -47,7 +47,7 @@ public class DatePickerHelpersIT extends AbstractComponentIT {
         DatePickerElement dataPickerHelperComponent = $(DatePickerElement.class)
                 .id("data-picker-helper-component");
         Assert.assertEquals("helper-component", dataPickerHelperComponent
-                .getHelperComponent().getAttribute("id"));
+                .getHelperComponent().getDomAttribute("id"));
 
         $("button").id("button-clear-component").click();
         Assert.assertNull(dataPickerHelperComponent.getHelperComponent());
