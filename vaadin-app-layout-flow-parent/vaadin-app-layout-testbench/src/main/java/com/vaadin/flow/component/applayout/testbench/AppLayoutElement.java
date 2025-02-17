@@ -21,14 +21,12 @@ import com.vaadin.testbench.elementsbase.Element;
 @Element("vaadin-app-layout")
 public class AppLayoutElement extends TestBenchElement {
 
-    @SuppressWarnings("unchecked")
     public TestBenchElement getContent() {
-        TestBenchElement contentPlaceholder = $(TestBenchElement.class)
-                .attribute("content", "").first();
+        TestBenchElement contentSlot = $("slot").withoutAttribute("name")
+                .first();
 
         return (TestBenchElement) executeScript(
-                "return arguments[0].firstElementChild.assignedNodes()[0];",
-                contentPlaceholder);
+                "return arguments[0].assignedNodes()[0];", contentSlot);
     }
 
     public boolean isDrawerFirst() {

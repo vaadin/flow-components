@@ -248,11 +248,13 @@ public class DateTimePickerElement extends TestBenchElement
     }
 
     private TestBenchElement getDatePicker() {
-        return $("vaadin-date-picker").attribute("slot", "date-picker").first();
+        return $("vaadin-date-picker").withAttribute("slot", "date-picker")
+                .first();
     }
 
     private TestBenchElement getTimePicker() {
-        return $("vaadin-time-picker").attribute("slot", "time-picker").first();
+        return $("vaadin-time-picker").withAttribute("slot", "time-picker")
+                .first();
     }
 
     /**
@@ -263,7 +265,7 @@ public class DateTimePickerElement extends TestBenchElement
     @Override
     public TestBenchElement getHelperComponent() {
         final ElementQuery<TestBenchElement> query = $(TestBenchElement.class)
-                .attribute("slot", "helper");
+                .withAttribute("slot", "helper");
         if (query.exists()) {
             TestBenchElement last = query.last();
             // To avoid getting the "slot" element, for components with slotted

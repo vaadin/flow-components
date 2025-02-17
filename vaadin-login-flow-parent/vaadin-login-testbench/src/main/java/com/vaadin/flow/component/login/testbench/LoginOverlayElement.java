@@ -94,7 +94,7 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
             return getTitleComponent().getText();
         }
         return getLoginOverlayWrapper().$(TestBenchElement.class)
-                .attribute("part", "title").first()
+                .withAttribute("part", "title").first()
                 // Using textContent, since getText() works unpredictable in
                 // Edge
                 .getPropertyString("textContent");
@@ -105,7 +105,8 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
      */
     public String getDescription() {
         return getLoginOverlayWrapper().$(TestBenchElement.class)
-                .attribute("part", "brand").first().$("p").first().getText();
+                .withAttribute("part", "brand").first().$("p").first()
+                .getText();
     }
 
     /**
@@ -113,7 +114,7 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
      */
     public boolean hasTitleComponent() {
         return getLoginOverlayWrapper().$(TestBenchElement.class)
-                .attribute("slot", "title").exists();
+                .withAttribute("slot", "title").exists();
     }
 
     /**
@@ -125,7 +126,7 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
             return null;
         }
         return getLoginOverlayWrapper().$(TestBenchElement.class)
-                .attribute("slot", "title").first();
+                .withAttribute("slot", "title").first();
     }
 
     @Override

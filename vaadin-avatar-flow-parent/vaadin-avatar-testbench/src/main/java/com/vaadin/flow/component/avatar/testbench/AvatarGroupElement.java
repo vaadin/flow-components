@@ -47,7 +47,7 @@ public class AvatarGroupElement extends TestBenchElement {
      * @return the aria label
      */
     public String getAriaLabel() {
-        return getAttribute("aria-label");
+        return getDomAttribute("aria-label");
     }
 
 }

@@ -53,9 +53,9 @@ public class AccordionElement extends TestBenchElement {
      * @return the index of the opened panel or null if closed.
      */
     public OptionalInt getOpenedIndex() {
-        final String openedAttribute = getAttribute(OPENED_PROPERTY);
-        return openedAttribute == null ? OptionalInt.empty()
-                : OptionalInt.of(Integer.valueOf(openedAttribute));
+        Integer openedIndex = getPropertyInteger(OPENED_PROPERTY);
+        return openedIndex == null ? OptionalInt.empty()
+                : OptionalInt.of(openedIndex);
     }
 
     /**
@@ -65,7 +65,7 @@ public class AccordionElement extends TestBenchElement {
      */
     public Optional<AccordionPanelElement> getOpenedPanel() {
         final ElementQuery<AccordionPanelElement> openedPanels = $(
-                AccordionPanelElement.class).attribute(OPENED_PROPERTY, "");
+                AccordionPanelElement.class).withAttribute(OPENED_PROPERTY);
 
         return !openedPanels.exists() ? Optional.empty()
                 : Optional.of(openedPanels.first());

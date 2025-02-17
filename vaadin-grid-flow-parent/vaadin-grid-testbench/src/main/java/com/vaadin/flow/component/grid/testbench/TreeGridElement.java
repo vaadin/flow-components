@@ -177,7 +177,7 @@ public class TreeGridElement extends GridElement {
         WebElement expandElement = getExpandToggleElement(rowIndex,
                 hierarchyColumnIndex);
         return expandElement != null
-                && !"false".equals(expandElement.getAttribute("expanded"));
+                && !"false".equals(expandElement.getDomProperty("expanded"));
     }
 
     /**
@@ -208,7 +208,7 @@ public class TreeGridElement extends GridElement {
             WebElement expandElement = getExpandToggleElement(rowIndex,
                     hierarchyColumnIndex);
             return expandElement != null && expandElement.isDisplayed()
-                    && "false".equals(expandElement.getAttribute("leaf"));
+                    && "false".equals(expandElement.getDomProperty("leaf"));
         } catch (NoSuchElementException e) {
             return false;
         }
