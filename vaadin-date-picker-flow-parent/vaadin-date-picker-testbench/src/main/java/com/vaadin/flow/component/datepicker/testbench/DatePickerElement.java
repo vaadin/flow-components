@@ -56,8 +56,8 @@ public class DatePickerElement extends TestBenchElement
          * @return
          */
         public ButtonElement getTodayButton() {
-            return this.$(ButtonElement.class).attribute("slot", "today-button")
-                    .first();
+            return this.$(ButtonElement.class)
+                    .withAttribute("slot", "today-button").first();
         }
 
         /**
@@ -67,7 +67,7 @@ public class DatePickerElement extends TestBenchElement
          */
         public ButtonElement getCancelButton() {
             return this.$(ButtonElement.class)
-                    .attribute("slot", "cancel-button").first();
+                    .withAttribute("slot", "cancel-button").first();
         }
     }
 
@@ -79,7 +79,7 @@ public class DatePickerElement extends TestBenchElement
          */
         public String getHeaderText() {
             return this.$(TestBenchElement.class)
-                    .attribute("part", "month-header").first().getText();
+                    .withAttribute("part", "month-header").first().getText();
         }
 
         /**
@@ -88,7 +88,7 @@ public class DatePickerElement extends TestBenchElement
          * @return
          */
         public List<WeekdayElement> getWeekdays() {
-            return this.$(WeekdayElement.class).attribute("part", "weekday")
+            return this.$(WeekdayElement.class).withAttribute("part", "weekday")
                     .all();
         }
     }

@@ -39,7 +39,7 @@ public class CustomFieldElement extends TestBenchElement implements HasHelper {
     @Override
     public TestBenchElement getHelperComponent() {
         final ElementQuery<TestBenchElement> query = $(TestBenchElement.class)
-                .attribute("slot", "helper");
+                .withAttribute("slot", "helper");
         if (query.exists()) {
             TestBenchElement last = query.last();
             // To avoid getting the "slot" element, for components with slotted

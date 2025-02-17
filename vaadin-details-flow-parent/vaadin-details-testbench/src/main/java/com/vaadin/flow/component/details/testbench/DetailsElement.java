@@ -39,12 +39,11 @@ public class DetailsElement extends TestBenchElement {
      * Returns content element
      */
     public TestBenchElement getContent() {
-        TestBenchElement contentPlaceholder = $(TestBenchElement.class)
-                .attribute("part", "content").first();
+        TestBenchElement contentSlot = $("slot").withoutAttribute("name")
+                .first();
 
         return (TestBenchElement) executeScript(
-                "return arguments[0].firstElementChild.assignedNodes()[0];",
-                contentPlaceholder);
+                "return arguments[0].assignedNodes()[0];", contentSlot);
     }
 
     /**
@@ -65,7 +64,8 @@ public class DetailsElement extends TestBenchElement {
      * Returns a wrapper of the summary component
      */
     public TestBenchElement getSummaryWrapper() {
-        return $(TestBenchElement.class).attribute("slot", "summary").first();
+        return $(TestBenchElement.class).withAttribute("slot", "summary")
+                .first();
     }
 
     /**

@@ -65,7 +65,7 @@ public class AccordionElement extends TestBenchElement {
      */
     public Optional<AccordionPanelElement> getOpenedPanel() {
         final ElementQuery<AccordionPanelElement> openedPanels = $(
-                AccordionPanelElement.class).attribute(OPENED_PROPERTY, "");
+                AccordionPanelElement.class).withAttribute(OPENED_PROPERTY);
 
         return !openedPanels.exists() ? Optional.empty()
                 : Optional.of(openedPanels.first());
