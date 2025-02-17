@@ -129,8 +129,8 @@ public class ListBoxIT extends AbstractComponentIT {
     }
 
     private void assertItem(WebElement item, String itemName) {
-        Assert.assertEquals("Items should be enabled in the beginning", null,
-                item.getAttribute("disabled"));
+        Assert.assertNull("Items should be enabled in the beginning",
+                item.getDomAttribute("disabled"));
 
         List<WebElement> labels = item.findElements(By.tagName("label"));
         String nameText = labels.get(0).getText();
@@ -156,7 +156,7 @@ public class ListBoxIT extends AbstractComponentIT {
 
         Assert.assertEquals(
                 "Item should be disabled after clicking the button enough times",
-                "true", item.getAttribute("disabled"));
+                "true", item.getDomAttribute("disabled"));
     }
 
     @Test
