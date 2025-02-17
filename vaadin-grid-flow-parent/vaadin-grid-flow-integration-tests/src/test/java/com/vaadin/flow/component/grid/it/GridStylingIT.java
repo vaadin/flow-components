@@ -166,9 +166,9 @@ public class GridStylingIT extends AbstractComponentIT {
         click("column-generator");
 
         Assert.assertEquals("grid0",
-                grid.getRow(0).getDetailsRow().getAttribute("class"));
+                grid.getRow(0).getDetailsRow().getDomAttribute("class"));
         Assert.assertEquals("grid5",
-                grid.getRow(5).getDetailsRow().getAttribute("class"));
+                grid.getRow(5).getDetailsRow().getDomAttribute("class"));
 
         checkLogsForErrors();
     }
@@ -304,7 +304,7 @@ public class GridStylingIT extends AbstractComponentIT {
     static void assertCellClassNames(GridElement grid, int rowIndex,
             int colIndex, String expectedClassNames) {
         String classNames = grid.getCell(rowIndex, colIndex)
-                .getAttribute("class");
+                .getDomAttribute("class");
         Assert.assertEquals(String.format(
                 "Unexpected class names in cell at row %s, col %s.", rowIndex,
                 colIndex), expectedClassNames, classNames);
@@ -322,7 +322,7 @@ public class GridStylingIT extends AbstractComponentIT {
     static void assertCellPartNames(GridElement grid, int rowIndex,
             int colIndex, String expectedPartNames) {
         String partNames = grid.getCell(rowIndex, colIndex)
-                .getAttribute("part");
+                .getDomAttribute("part");
         String customParts = Stream.of(partNames.split(" "))
                 .filter(part -> !part.contains("cell"))
                 .collect(Collectors.joining(" "));

@@ -60,7 +60,7 @@ public class GridViewEditorIT extends AbstractComponentIT {
         TestBenchElement subscriberCheckbox = subscriberCell
                 .$("vaadin-checkbox").first();
         boolean isSubscriber = subscriberCheckbox
-                .getAttribute("checked") != null;
+                .getDomAttribute("checked") != null;
 
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
@@ -232,14 +232,14 @@ public class GridViewEditorIT extends AbstractComponentIT {
                 .getCell(grid.getAllColumns().get(2)).$("vaadin-button")
                 .first();
         Assert.assertEquals(Boolean.TRUE.toString(),
-                nextEditButton.getAttribute("disabled"));
+                nextEditButton.getDomAttribute("disabled"));
 
         GridTHTDElement subscriberCell = row.getCell(subscriberColumn);
 
         TestBenchElement subscriberCheckbox = subscriberCell
                 .$("vaadin-checkbox").first();
         boolean isSubscriber = subscriberCheckbox
-                .getAttribute("checked") != null;
+                .getDomAttribute("checked") != null;
 
         // Write valid name.
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
@@ -296,7 +296,7 @@ public class GridViewEditorIT extends AbstractComponentIT {
         WebElement nextEditButton = grid.getRow(1).getCell(editColumn)
                 .$("vaadin-button").first();
         Assert.assertEquals(Boolean.TRUE.toString(),
-                nextEditButton.getAttribute("disabled"));
+                nextEditButton.getDomAttribute("disabled"));
 
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
@@ -337,10 +337,10 @@ public class GridViewEditorIT extends AbstractComponentIT {
         emailInput = emailField.$("input").first();
 
         Assert.assertEquals(Boolean.TRUE.toString(),
-                emailInput.getAttribute("readonly"));
+                emailInput.getDomAttribute("readonly"));
 
         Assert.assertEquals("Not a subscriber",
-                emailInput.getAttribute("value"));
+                emailInput.getDomProperty("value"));
 
         // Switch subscriber value on
         checkbox = subscriberCell.$("vaadin-checkbox").first();
@@ -391,9 +391,9 @@ public class GridViewEditorIT extends AbstractComponentIT {
 
         TestBenchElement emailField = row.getCell(grid.getAllColumns().get(2))
                 .$("vaadin-text-field").first();
-        Assert.assertNotNull(emailField.getAttribute("focused"));
+        Assert.assertNotNull(emailField.getDomAttribute("focused"));
         Assert.assertEquals("Not a subscriber",
-                emailField.getAttribute("value"));
+                emailField.getDomProperty("value"));
 
         subscriberCell.$("vaadin-checkbox").first().click();
 

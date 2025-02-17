@@ -92,11 +92,11 @@ public class GridTestPageIT extends AbstractComponentIT {
     public void grid_does_not_loose_data_on_new_property_sync() {
         int size = Integer
                 .valueOf(findElement(By.id("grid-with-component-renderers"))
-                        .getAttribute("size"));
+                        .getDomProperty("size"));
         findElement(By.id("toggle-column-ordering")).click();
         int updatedSize = Integer
                 .valueOf(findElement(By.id("grid-with-component-renderers"))
-                        .getAttribute("size"));
+                        .getDomProperty("size"));
         Assert.assertEquals(
                 "When some property is synced, grid size property should stay the same",
                 size, updatedSize);
@@ -344,9 +344,9 @@ public class GridTestPageIT extends AbstractComponentIT {
                 grid);
 
         invisible.click();
-        waitUntil(driver -> "true".equals(grid.getAttribute("hidden")));
+        waitUntil(driver -> "true".equals(grid.getDomAttribute("hidden")));
         visible.click();
-        waitUntil(driver -> grid.getAttribute("hidden") == null);
+        waitUntil(driver -> grid.getDomAttribute("hidden") == null);
         items = getItems(driver, grid);
         Assert.assertEquals(50, items.size());
         items.forEach((row, map) -> {
@@ -373,9 +373,9 @@ public class GridTestPageIT extends AbstractComponentIT {
         assertSelection(grid, "Item 0");
 
         invisible.click();
-        waitUntil(driver -> "true".equals(grid.getAttribute("hidden")));
+        waitUntil(driver -> "true".equals(grid.getDomAttribute("hidden")));
         visible.click();
-        waitUntil(driver -> grid.getAttribute("hidden") == null);
+        waitUntil(driver -> grid.getDomAttribute("hidden") == null);
         assertSelection(grid, "Item 0");
     }
 
