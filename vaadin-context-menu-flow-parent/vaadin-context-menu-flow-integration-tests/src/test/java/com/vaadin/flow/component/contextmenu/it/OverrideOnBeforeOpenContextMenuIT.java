@@ -48,7 +48,7 @@ public class OverrideOnBeforeOpenContextMenuIT extends AbstractContextMenuIT {
         verifyOpened();
 
         Assert.assertEquals("Dynamic Item",
-                getOverlay().getAttribute("innerText"));
+                getOverlay().getDomProperty("innerText"));
 
         clickBody();
         verifyClosed();

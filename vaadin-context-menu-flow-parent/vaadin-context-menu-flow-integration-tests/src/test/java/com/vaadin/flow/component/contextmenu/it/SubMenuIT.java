@@ -170,7 +170,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
                 checkableItem.getTagName().toLowerCase(Locale.ENGLISH));
         Assert.assertEquals("checkable", checkableItem.getText());
         Assert.assertEquals("",
-                checkableItem.getAttribute("menu-item-checked"));
+                checkableItem.getDomAttribute("menu-item-checked"));
 
         // uncheck the item
         checkableItem.click();
@@ -192,12 +192,11 @@ public class SubMenuIT extends AbstractContextMenuIT {
         checkableItem = subMenuOverlay.$("vaadin-context-menu-list-box").first()
                 .findElements(By.xpath("./*")).get(1);
 
-        Assert.assertNull(checkableItem.getAttribute("menu-item-checked"));
+        Assert.assertNull(checkableItem.getDomAttribute("menu-item-checked"));
     }
 
     private void assertHasPopup(TestBenchElement item, boolean isParent) {
-        boolean hasPopup = Boolean
-                .parseBoolean(item.getAttribute("aria-haspopup"));
+        boolean hasPopup = item.hasAttribute("aria-haspopup");
         if (isParent) {
             Assert.assertTrue("Item should have aria-haspopup set to true",
                     hasPopup);
