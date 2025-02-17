@@ -88,7 +88,7 @@ public class MessageElement extends TestBenchElement {
      * @return the {@code theme} attribute
      */
     public String getTheme() {
-        return getAttribute("theme");
+        return getDomAttribute("theme");
     }
 
 }

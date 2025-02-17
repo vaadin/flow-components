@@ -9,6 +9,7 @@
 package com.vaadin.flow.component.spreadsheet.testbench;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -90,7 +91,8 @@ public class SheetCellElement extends TestBenchElement {
 
     private boolean noneOfTheElementsIsWidget(List<WebElement> children) {
         for (WebElement e : children) {
-            if (e.getAttribute("class").contains("v-widget")) {
+            if (Optional.ofNullable(e.getDomAttribute("class")).orElse("")
+                    .contains("v-widget")) {
                 return false;
             }
         }

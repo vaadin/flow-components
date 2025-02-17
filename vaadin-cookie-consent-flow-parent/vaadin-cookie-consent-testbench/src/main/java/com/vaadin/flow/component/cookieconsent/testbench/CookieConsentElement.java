@@ -30,27 +30,27 @@ public class CookieConsentElement extends TestBenchElement {
     }
 
     public String getMessage() {
-        return getAttribute("message");
+        return getDomProperty("message");
     }
 
     public String getDismissLabel() {
-        return getAttribute("dismiss");
+        return getDomProperty("dismiss");
     }
 
     public String getLearnMoreLabel() {
-        return getAttribute("learnMore");
+        return getDomProperty("learnMore");
     }
 
     public String getLearnMoreLink() {
-        return getAttribute("learnMoreLink");
+        return getDomProperty("learnMoreLink");
     }
 
     public String getCookieName() {
-        return getAttribute("cookieName");
+        return getDomProperty("cookieName");
     }
 
     public Position getPosition() {
-        return Optional.ofNullable(getAttribute("position"))
+        return Optional.ofNullable(getDomProperty("position"))
                 .map(value -> value.replace('-', '_')).map(String::toUpperCase)
                 .map(Position::valueOf).orElse(null);
     }

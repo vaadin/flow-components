@@ -44,7 +44,7 @@ public class CrudElement extends TestBenchElement {
      */
     public Optional<TestBenchElement> getNewItemButton() {
         ElementQuery<TestBenchElement> newButtonQuery = this
-                .$(TestBenchElement.class).attribute("slot", "new-button");
+                .$(TestBenchElement.class).withAttribute("slot", "new-button");
         return newButtonQuery.exists() ? Optional.of(newButtonQuery.last())
                 : Optional.empty();
     }
@@ -56,8 +56,8 @@ public class CrudElement extends TestBenchElement {
      * @return the filter field for each column
      */
     public List<TextFieldElement> getFilterFields() {
-        return this.$(TextFieldElement.class).attribute("crud-role", "Search")
-                .all();
+        return this.$(TextFieldElement.class)
+                .withAttribute("crud-role", "Search").all();
     }
 
     /**
@@ -66,7 +66,7 @@ public class CrudElement extends TestBenchElement {
      * @return the toolbar content
      */
     public List<TestBenchElement> getToolbar() {
-        return this.$(TestBenchElement.class).attribute("slot", "toolbar")
+        return this.$(TestBenchElement.class).withAttribute("slot", "toolbar")
                 .all();
     }
 
@@ -129,7 +129,7 @@ public class CrudElement extends TestBenchElement {
     public boolean isEditorOpen() {
         if (getEditorPosition().isEmpty()) {
             return $("vaadin-crud-dialog-overlay").onPage()
-                    .attribute("opened", "").exists();
+                    .withAttribute("opened").exists();
         }
         return getPropertyBoolean("editorOpened");
     }
@@ -161,7 +161,7 @@ public class CrudElement extends TestBenchElement {
     public TestBenchElement getEditor() {
         if (getEditorPosition().isEmpty()) {
             return $("vaadin-crud-dialog-overlay").onPage()
-                    .attribute("opened", "").first();
+                    .withAttribute("opened").first();
         }
         return this;
     }
