@@ -200,6 +200,32 @@ public class HorizontalLayoutSlotsTest {
     }
 
     @Test
+    public void addToMiddle_replace_componentSlotUpdated() {
+        Div div1 = new Div();
+        layout.addToMiddle(div1);
+
+        Div div2 = new Div();
+
+        layout.replace(div1, div2);
+
+        Assert.assertNull(div1.getElement().getAttribute("slot"));
+        Assert.assertEquals(div2.getElement().getAttribute("slot"), "middle");
+    }
+
+    @Test
+    public void addToEnd_replace_componentSlotUpdated() {
+        Div div1 = new Div();
+        layout.addToEnd(div1);
+
+        Div div2 = new Div();
+
+        layout.replace(div1, div2);
+
+        Assert.assertNull(div1.getElement().getAttribute("slot"));
+        Assert.assertEquals(div2.getElement().getAttribute("slot"), "end");
+    }
+
+    @Test
     public void addToSlots_indexesAreSlotsOrder() {
         Div div1 = new Div();
         layout.addToEnd(div1);

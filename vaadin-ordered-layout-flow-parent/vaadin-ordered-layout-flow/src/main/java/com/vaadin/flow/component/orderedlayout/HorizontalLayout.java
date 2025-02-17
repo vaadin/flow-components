@@ -351,14 +351,13 @@ public class HorizontalLayout extends Component implements ThemableLayout,
             return slotName == null;
         }).count();
 
-        final AtomicInteger itemCounter = new AtomicInteger(0);
+        final AtomicInteger itemCounter = new AtomicInteger((int) idx);
 
         components.stream()
                 .map(component -> Objects.requireNonNull(component,
                         "Component to add cannot be null"))
                 .forEach((component) -> {
-                    getElement().insertChild(
-                            (int) idx + itemCounter.getAndIncrement(),
+                    getElement().insertChild(itemCounter.getAndIncrement(),
                             component.getElement());
                 });
     }
@@ -395,7 +394,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
             return slotName == null || slotName.equals("middle");
         }).count();
 
-        final AtomicInteger itemCounter = new AtomicInteger(0);
+        final AtomicInteger itemCounter = new AtomicInteger((int) idx);
 
         components.stream()
                 .map(component -> Objects.requireNonNull(component,
@@ -408,8 +407,7 @@ public class HorizontalLayout extends Component implements ThemableLayout,
                     }
 
                     component.getElement().setAttribute("slot", "middle");
-                    getElement().insertChild(
-                            (int) idx + itemCounter.getAndIncrement(),
+                    getElement().insertChild(itemCounter.getAndIncrement(),
                             component.getElement());
                 });
 
