@@ -64,15 +64,14 @@ public class TextAreaPageIT extends AbstractComponentIT {
     public void assertFocusShortcut() {
         TextAreaElement shortcutField = $(TextAreaElement.class)
                 .id("shortcut-field");
-        Assert.assertNull(
+        Assert.assertFalse(
                 "TextArea should not be focused before the shortcut event is triggered.",
-                shortcutField.getAttribute("focused"));
+                shortcutField.hasAttribute("focused"));
 
         SendKeysHelper.sendKeys(driver, Keys.ALT, "1");
         Assert.assertTrue(
                 "TextArea should be focused after the shortcut event is triggered.",
-                shortcutField.getAttribute("focused").equals("true")
-                        || shortcutField.getAttribute("focused").equals(""));
+                shortcutField.hasAttribute("focused"));
     }
 
     @Test
@@ -125,7 +124,7 @@ public class TextAreaPageIT extends AbstractComponentIT {
     public void textAreaHasPlaceholder() {
         WebElement textField = findElement(
                 By.id("text-area-with-value-change-listener"));
-        Assert.assertEquals(textField.getAttribute("placeholder"),
+        Assert.assertEquals(textField.getDomAttribute("placeholder"),
                 "placeholder text");
     }
 
@@ -174,7 +173,7 @@ public class TextAreaPageIT extends AbstractComponentIT {
         TextAreaElement textAreaElement = $(TextAreaElement.class)
                 .id("helper-component-field");
         Assert.assertEquals("helper-component",
-                textAreaElement.getHelperComponent().getAttribute("id"));
+                textAreaElement.getHelperComponent().getDomAttribute("id"));
     }
 
     @Test
@@ -182,7 +181,7 @@ public class TextAreaPageIT extends AbstractComponentIT {
         TextAreaElement textAreaElement = $(TextAreaElement.class)
                 .id("helper-component-field");
         Assert.assertEquals("helper-component",
-                textAreaElement.getHelperComponent().getAttribute("id"));
+                textAreaElement.getHelperComponent().getDomAttribute("id"));
 
         $(TestBenchElement.class).id("clear-helper-component-button").click();
         Assert.assertNull(textAreaElement.getHelperComponent());

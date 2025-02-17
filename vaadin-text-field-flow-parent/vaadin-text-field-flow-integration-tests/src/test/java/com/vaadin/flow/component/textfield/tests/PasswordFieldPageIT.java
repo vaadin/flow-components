@@ -45,7 +45,7 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
     public void assertReadOnly() {
         WebElement webComponent = findElement(
                 By.tagName("vaadin-password-field"));
-        Assert.assertNull(webComponent.getAttribute("readonly"));
+        Assert.assertNull(webComponent.getDomAttribute("readonly"));
         WebElement button = findElement(By.id("read-only"));
         button.click();
         waitUntil(
@@ -61,7 +61,7 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
         WebElement webComponent = findElement(
                 By.tagName("vaadin-password-field"));
 
-        Assert.assertNull(webComponent.getAttribute("required"));
+        Assert.assertNull(webComponent.getDomAttribute("required"));
 
         WebElement button = findElement(By.id("required"));
         button.click();
@@ -108,22 +108,21 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
     public void assertFocusShortcut() {
         PasswordFieldElement shortcutField = $(PasswordFieldElement.class)
                 .id("shortcut-field");
-        Assert.assertNull(
+        Assert.assertFalse(
                 "TextField should not be focused before the shortcut event is triggered.",
-                shortcutField.getAttribute("focused"));
+                shortcutField.hasAttribute("focused"));
 
         SendKeysHelper.sendKeys(driver, Keys.ALT, "1");
         Assert.assertTrue(
                 "TextField should be focused after the shortcut event is triggered.",
-                shortcutField.getAttribute("focused").equals("true")
-                        || shortcutField.getAttribute("focused").equals(""));
+                shortcutField.hasAttribute("focused"));
     }
 
     @Test
     public void passwordFieldHasPlaceholder() {
         WebElement passwordField = findElement(
                 By.id("password-field-with-value-change-listener"));
-        Assert.assertEquals(passwordField.getAttribute("placeholder"),
+        Assert.assertEquals(passwordField.getDomAttribute("placeholder"),
                 "placeholder text");
     }
 
