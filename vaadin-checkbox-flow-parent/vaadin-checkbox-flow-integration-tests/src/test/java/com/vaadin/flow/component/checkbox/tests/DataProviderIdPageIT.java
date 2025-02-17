@@ -19,8 +19,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
+import com.vaadin.flow.component.checkbox.testbench.CheckboxGroupElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-checkbox/data-provider-id")
@@ -32,10 +33,9 @@ public class DataProviderIdPageIT extends AbstractComponentIT {
 
         findElement(By.id("select-by-id")).click();
 
-        TestBenchElement barCheckboxGroup = $("vaadin-checkbox-group")
-                .id("id-data-provider").$("vaadin-checkbox").all().get(1);
-        String isChecked = barCheckboxGroup.getAttribute("checked");
-        Assert.assertEquals(Boolean.TRUE.toString(), isChecked);
+        CheckboxElement barCheckbox = $(CheckboxGroupElement.class)
+                .id("id-data-provider").$(CheckboxElement.class).all().get(1);
+        Assert.assertTrue(barCheckbox.isChecked());
     }
 
     @Test
@@ -44,10 +44,9 @@ public class DataProviderIdPageIT extends AbstractComponentIT {
 
         findElement(By.id("select-by-equals")).click();
 
-        TestBenchElement barCheckboxGroup = $("vaadin-checkbox-group")
-                .id("standard-equals").$("vaadin-checkbox").all().get(1);
-        String isChecked = barCheckboxGroup.getAttribute("checked");
-        Assert.assertEquals(Boolean.TRUE.toString(), isChecked);
+        CheckboxElement barCheckbox = $(CheckboxGroupElement.class)
+                .id("standard-equals").$(CheckboxElement.class).all().get(1);
+        Assert.assertTrue(barCheckbox.isChecked());
     }
 
     @Test
@@ -56,9 +55,8 @@ public class DataProviderIdPageIT extends AbstractComponentIT {
 
         findElement(By.id("no-selection")).click();
 
-        TestBenchElement barCheckboxGroup = $("vaadin-checkbox-group")
-                .id("id-data-provider").$("vaadin-checkbox").all().get(1);
-        String isChecked = barCheckboxGroup.getAttribute("checked");
-        Assert.assertNull(isChecked);
+        CheckboxElement barCheckbox = $(CheckboxGroupElement.class)
+                .id("id-data-provider").$(CheckboxElement.class).all().get(1);
+        Assert.assertFalse(barCheckbox.isChecked());
     }
 }
