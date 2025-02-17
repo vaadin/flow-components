@@ -30,7 +30,7 @@ public class ExplicitLumoTemplateIT extends AbstractThemedTemplateIT {
         open();
 
         WebElement html = findElement(By.tagName("html"));
-        Assert.assertEquals(Lumo.DARK, html.getAttribute("theme"));
+        Assert.assertEquals(Lumo.DARK, html.getDomAttribute("theme"));
     }
 
     @Override
