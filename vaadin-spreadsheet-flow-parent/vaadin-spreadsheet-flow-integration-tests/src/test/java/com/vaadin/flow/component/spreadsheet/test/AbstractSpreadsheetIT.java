@@ -432,8 +432,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     public String getSelectionFormula() {
         final var sprElement = getSpreadsheet();
 
-        TestBenchElement selection = $("*").withClassName("sheet-selection")
-                .first();
+        TestBenchElement selection = sprElement.$("*")
+                .withClassName("sheet-selection").first();
         final Set<String> classes = selection.getClassNames();
 
         int startRow = -1;
