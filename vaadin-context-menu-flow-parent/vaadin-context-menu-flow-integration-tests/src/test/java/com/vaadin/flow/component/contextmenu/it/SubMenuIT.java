@@ -196,7 +196,8 @@ public class SubMenuIT extends AbstractContextMenuIT {
     }
 
     private void assertHasPopup(TestBenchElement item, boolean isParent) {
-        boolean hasPopup = item.hasAttribute("aria-haspopup");
+        boolean hasPopup = Boolean
+                .parseBoolean(item.getDomAttribute("aria-haspopup"));
         if (isParent) {
             Assert.assertTrue("Item should have aria-haspopup set to true",
                     hasPopup);

@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -303,8 +304,9 @@ public class GridStylingIT extends AbstractComponentIT {
 
     static void assertCellClassNames(GridElement grid, int rowIndex,
             int colIndex, String expectedClassNames) {
-        String classNames = grid.getCell(rowIndex, colIndex)
-                .getDomAttribute("class");
+        String classNames = Optional.ofNullable(
+                grid.getCell(rowIndex, colIndex).getDomAttribute("class"))
+                .orElse("");
         Assert.assertEquals(String.format(
                 "Unexpected class names in cell at row %s, col %s.", rowIndex,
                 colIndex), expectedClassNames, classNames);
