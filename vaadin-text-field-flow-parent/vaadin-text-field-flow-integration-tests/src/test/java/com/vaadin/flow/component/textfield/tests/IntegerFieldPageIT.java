@@ -125,7 +125,7 @@ public class IntegerFieldPageIT extends AbstractComponentIT {
         blur();
 
         TestBenchElement clearButton = field.$(TestBenchElement.class)
-                .attributeContains("part", "clear-button").first();
+                .withAttributeContainingWord("part", "clear-button").first();
         clearButton.click();
 
         assertValueChange(2, 300, null);
@@ -136,7 +136,7 @@ public class IntegerFieldPageIT extends AbstractComponentIT {
         field = $(IntegerFieldElement.class).id("step-integer-field");
 
         TestBenchElement increaseButton = field.$(TestBenchElement.class)
-                .attributeContains("part", "increase-button").first();
+                .withAttributeContainingWord("part", "increase-button").first();
 
         increaseButton.click();
         assertValueChange(1, null, 4);

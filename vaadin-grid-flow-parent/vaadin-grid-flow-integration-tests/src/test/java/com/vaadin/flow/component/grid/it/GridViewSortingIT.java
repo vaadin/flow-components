@@ -255,7 +255,7 @@ public class GridViewSortingIT extends AbstractComponentIT {
             String orderValue = String
                     .valueOf(querySortOrders.indexOf(querySortOrder) + 1);
             TestBenchElement orderElement = columnSorter.$("*")
-                    .attribute("part", "order").first();
+                    .withAttribute("part", "order").first();
             Assert.assertEquals(orderValue, orderElement.getText());
         });
     }

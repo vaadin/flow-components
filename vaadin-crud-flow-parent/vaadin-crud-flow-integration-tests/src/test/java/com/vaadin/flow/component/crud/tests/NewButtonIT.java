@@ -11,8 +11,6 @@ package com.vaadin.flow.component.crud.tests;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -41,11 +39,6 @@ public class NewButtonIT extends AbstractComponentIT {
     }
 
     private boolean verifyButtonRendered(CrudElement crud) {
-        try {
-            WebElement el = crud.$("*").attribute("slot", "new-button").first();
-        } catch (NoSuchElementException e) {
-            return false;
-        }
-        return true;
+        return crud.$("*").withAttribute("slot", "new-button").exists();
     }
 }

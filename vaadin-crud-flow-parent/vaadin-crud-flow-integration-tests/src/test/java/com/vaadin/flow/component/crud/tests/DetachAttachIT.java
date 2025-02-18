@@ -48,8 +48,8 @@ public class DetachAttachIT extends AbstractComponentIT {
         crud = $(CrudElement.class).waitForFirst();
         crud.openRowForEditing(0);
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
     }
 }

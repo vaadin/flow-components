@@ -158,7 +158,7 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
             Assert.assertEquals("Invalid placeholder text", expectedItemText,
                     selectedItem.getText());
             TestBenchElement valueButton = selectElement
-                    .$(TestBenchElement.class).attribute("slot", "value")
+                    .$(TestBenchElement.class).withAttribute("slot", "value")
                     .first();
             Assert.assertTrue(valueButton.hasAttribute("placeholder"));
         }
