@@ -44,8 +44,8 @@ public class HelperTextPageIT extends AbstractComboBoxIT {
     public void assertHelperComponent() {
         ComboBoxElement comboHelperComponent = $(ComboBoxElement.class)
                 .id("combobox-helper-component");
-        Assert.assertEquals("helper-component",
-                comboHelperComponent.getHelperComponent().getAttribute("id"));
+        Assert.assertEquals("helper-component", comboHelperComponent
+                .getHelperComponent().getDomAttribute("id"));
 
         clickButton("empty-helper-component");
         Assert.assertEquals(null, comboHelperComponent.getHelperComponent());

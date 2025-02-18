@@ -71,7 +71,7 @@ public class PreserveOnRefreshIT extends AbstractSpreadsheetIT {
         spreadsheetElement = getSpreadsheetElement();
         input = spreadsheetElement.findElement(By.cssSelector("input"));
         assertComponentVisible(spreadsheetElement, "vaadin-text-field");
-        Assert.assertEquals(sampleText, input.getAttribute("value"));
+        Assert.assertEquals(sampleText, input.getDomProperty("value"));
     }
 
     @Test

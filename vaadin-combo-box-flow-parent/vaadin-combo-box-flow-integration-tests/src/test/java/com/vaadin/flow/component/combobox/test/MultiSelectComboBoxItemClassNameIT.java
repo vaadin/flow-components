@@ -100,7 +100,7 @@ public class MultiSelectComboBoxItemClassNameIT extends AbstractComponentIT {
                 .$("vaadin-multi-select-combo-box-item");
 
         for (int i = 0; i < expectedClassNames.length; i++) {
-            Assert.assertEquals(items.get(i).getAttribute("class"),
+            Assert.assertEquals(items.get(i).getDomAttribute("class"),
                     expectedClassNames[i]);
         }
     }
@@ -111,7 +111,7 @@ public class MultiSelectComboBoxItemClassNameIT extends AbstractComponentIT {
 
         for (int i = 0; i < expectedClassNames.length; i++) {
             // Skip first chip as it's used for overflow items
-            Assert.assertEquals(chips.get(i + 1).getAttribute("class"),
+            Assert.assertEquals(chips.get(i + 1).getDomAttribute("class"),
                     expectedClassNames[i]);
         }
     }

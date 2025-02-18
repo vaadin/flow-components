@@ -44,17 +44,17 @@ public class HorizontalLayoutViewIT extends AbstractComponentIT {
 
         Assert.assertTrue(
                 "By default layout should contain spacing theme in 'theme' attribute",
-                hLayout.getAttribute("theme").contains("spacing"));
+                hLayout.getDomAttribute("theme").contains("spacing"));
         Assert.assertTrue(
                 "By default layout should contain margin theme in 'theme' attribute",
-                hLayout.getAttribute("theme").contains("margin"));
+                hLayout.getDomAttribute("theme").contains("margin"));
 
         checkThemeChanges(hLayout, "spacing", false);
         checkThemeChanges(hLayout, "margin", false);
 
         Assert.assertNull(
                 "After turning off spacing and margin, layout should not contain 'theme' attribute",
-                hLayout.getAttribute("theme"));
+                hLayout.getDomAttribute("theme"));
 
         checkThemeChanges(hLayout, "padding", true);
         checkThemeChanges(hLayout, "margin", true);
@@ -64,7 +64,7 @@ public class HorizontalLayoutViewIT extends AbstractComponentIT {
 
         Assert.assertNull(
                 "After turning off everything, layout should not contain 'theme' attribute",
-                hLayout.getAttribute("theme"));
+                hLayout.getDomAttribute("theme"));
     }
 
     @Test
@@ -200,11 +200,12 @@ public class HorizontalLayoutViewIT extends AbstractComponentIT {
             boolean shouldPresent) {
         findElement(By.id(String.format("toggle-%s", themeName))).click();
         if (shouldPresent) {
-            waitUntil(dr -> layoutToCheck.getAttribute("theme") != null
-                    && layoutToCheck.getAttribute("theme").contains(themeName));
+            waitUntil(dr -> layoutToCheck.getDomAttribute("theme") != null
+                    && layoutToCheck.getDomAttribute("theme")
+                            .contains(themeName));
         } else {
-            waitUntil(dr -> layoutToCheck.getAttribute("theme") == null
-                    || !layoutToCheck.getAttribute("theme")
+            waitUntil(dr -> layoutToCheck.getDomAttribute("theme") == null
+                    || !layoutToCheck.getDomAttribute("theme")
                             .contains(themeName));
         }
     }

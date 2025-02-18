@@ -293,7 +293,7 @@ public class DatePickerCustomFormatIT extends AbstractComponentIT {
         TestBenchElement input = $(DatePickerElement.class).id(id)
                 .findElement(By.tagName("input"));
 
-        while (!input.getAttribute("value").isEmpty()) {
+        while (!input.getPropertyString("value").isEmpty()) {
             input.sendKeys(Keys.BACK_SPACE);
         }
         input.sendKeys(value);

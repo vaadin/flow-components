@@ -231,9 +231,9 @@ public class DialogTestPageIT extends AbstractComponentIT {
         findElement(By.id("button-for-dialog-with-div")).click();
         WebElement overlay = getOverlayContent().$("*").id("overlay");
         Assert.assertTrue(
-                overlay.getAttribute("style").contains("width: 100%;"));
+                overlay.getDomAttribute("style").contains("width: 100%;"));
         Assert.assertTrue(
-                overlay.getAttribute("style").contains("height: 100%;"));
+                overlay.getDomAttribute("style").contains("height: 100%;"));
 
         WebElement div = findElement(By.id("div-in-dialog"));
         WebElement content = overlay.findElement(By.id("content"));

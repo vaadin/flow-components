@@ -147,7 +147,7 @@ public class GridViewSortingIT extends AbstractComponentIT {
 
         WebElement sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter")
                 .first();
-        Assert.assertNull(sorter.getAttribute("direction"));
+        Assert.assertNull(sorter.getDomProperty("direction"));
     }
 
     @Test
@@ -249,7 +249,7 @@ public class GridViewSortingIT extends AbstractComponentIT {
             String directionValue = direction == SortDirection.ASCENDING ? "asc"
                     : "desc";
             Assert.assertEquals(directionValue,
-                    columnSorter.getAttribute("direction"));
+                    columnSorter.getDomProperty("direction"));
 
             // Check order part displays correct order value
             String orderValue = String

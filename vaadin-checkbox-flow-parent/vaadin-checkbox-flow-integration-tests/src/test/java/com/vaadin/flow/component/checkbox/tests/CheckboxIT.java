@@ -89,8 +89,9 @@ public class CheckboxIT extends AbstractComponentIT {
 
     @Test
     public void disabledCheckbox() {
-        WebElement checkbox = layout.findElement(By.id("disabled-checkbox"));
-        Assert.assertEquals("true", checkbox.getAttribute("disabled"));
+        CheckboxElement checkbox = layout.$(CheckboxElement.class)
+                .id("disabled-checkbox");
+        Assert.assertFalse(checkbox.isEnabled());
         WebElement message = layout
                 .findElement(By.id("disabled-checkbox-message"));
         Assert.assertEquals("", message.getText());
@@ -103,21 +104,21 @@ public class CheckboxIT extends AbstractComponentIT {
 
     @Test
     public void indeterminateCheckbox() {
-        WebElement checkbox = layout
-                .findElement(By.id("indeterminate-checkbox"));
+        CheckboxElement checkbox = layout.$(CheckboxElement.class)
+                .id("indeterminate-checkbox");
         WebElement button = layout.findElement(By.id("reset-indeterminate"));
-        Assert.assertEquals("This checkbox should be in indeterminate state",
-                "true", checkbox.getAttribute("indeterminate"));
+        Assert.assertTrue("This checkbox should be in indeterminate state",
+                checkbox.hasAttribute("indeterminate"));
 
         checkbox.click();
-        Assert.assertNotEquals(
+        Assert.assertFalse(
                 "Checkbox should not be in indeterminate state after clicking it",
-                "true", checkbox.getAttribute("indeterminate"));
+                checkbox.hasAttribute("indeterminate"));
 
         clickElementWithJs(button);
-        Assert.assertEquals(
+        Assert.assertTrue(
                 "This checkbox should be in indeterminate state after resetting",
-                "true", checkbox.getAttribute("indeterminate"));
+                checkbox.hasAttribute("indeterminate"));
     }
 
     @Test
@@ -139,7 +140,7 @@ public class CheckboxIT extends AbstractComponentIT {
                 .findElement(By.cssSelector("[slot=input]"));
         Assert.assertEquals(
                 "Accessible checkbox should have the aria-label attribute",
-                "Click me", inputElement.getAttribute("aria-label"));
+                "Click me", inputElement.getDomAttribute("aria-label"));
     }
 
     @Test

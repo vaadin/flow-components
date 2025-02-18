@@ -117,17 +117,16 @@ public class GridSingleSelectionIT extends AbstractComponentIT {
         TestBenchElement table = grid.$("table").first();
         Assert.assertTrue(table.hasAttribute("aria-multiselectable"));
         Assert.assertFalse(Boolean
-                .parseBoolean(table.getAttribute("aria-multiselectable")));
+                .parseBoolean(table.getDomAttribute("aria-multiselectable")));
 
         GridTRElement firstRow = grid.getRow(0);
         firstRow.select();
-        Assert.assertTrue(firstRow.hasAttribute("aria-selected"));
-        Assert.assertTrue(
-                Boolean.parseBoolean(firstRow.getAttribute("aria-selected")));
+        Assert.assertTrue(Boolean
+                .parseBoolean(firstRow.getDomAttribute("aria-selected")));
 
         GridTRElement secondRow = grid.getRow(1);
-        Assert.assertFalse(
-                Boolean.parseBoolean(secondRow.getAttribute("aria-selected")));
+        Assert.assertFalse(Boolean
+                .parseBoolean(secondRow.getDomAttribute("aria-selected")));
     }
 
     // Regression test for: https://github.com/vaadin/flow-components/issues/324

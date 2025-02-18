@@ -51,7 +51,7 @@ public class NullValueChangeIT extends AbstractComponentIT {
                 comboBox);
 
         Assert.assertEquals("_inputElementValue must be empty.", "",
-                comboBox.getAttribute("_inputElementValue"));
+                comboBox.getDomProperty("_inputElementValue"));
     }
 
 }

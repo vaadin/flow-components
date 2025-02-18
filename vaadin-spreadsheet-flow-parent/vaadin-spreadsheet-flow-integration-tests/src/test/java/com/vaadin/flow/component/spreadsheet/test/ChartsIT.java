@@ -211,7 +211,7 @@ public class ChartsIT extends AbstractSpreadsheetIT {
 
     private TestBenchElement getChartInShadowRoot(WebElement overlayElement) {
         var slot = overlayElement.findElement(By.tagName("slot"));
-        var slotName = slot.getAttribute("name");
+        var slotName = slot.getDomAttribute("name");
         var chart = getSpreadsheet().findElement(
                 By.cssSelector("[slot=\"" + slotName + "\"] vaadin-chart"));
         return chart.$(DivElement.class).first();
@@ -219,7 +219,7 @@ public class ChartsIT extends AbstractSpreadsheetIT {
 
     private TestBenchElement getMinimizeButton(WebElement overlayElement) {
         var slot = overlayElement.findElement(By.tagName("slot"));
-        var slotName = slot.getAttribute("name");
+        var slotName = slot.getDomAttribute("name");
         return getSpreadsheet().findElement(
                 By.cssSelector("[slot=\"" + slotName + "\"] .minimize-button"));
     }

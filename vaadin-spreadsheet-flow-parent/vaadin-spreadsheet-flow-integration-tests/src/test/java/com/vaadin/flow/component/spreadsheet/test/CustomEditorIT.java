@@ -39,7 +39,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         Assert.assertEquals(sampleText, getCellValue("B2"));
         clickCell("B2");
         Assert.assertEquals(sampleText,
-                getEditorElement("input").getAttribute("value"));
+                getEditorElement("input").getDomProperty("value"));
     }
 
     @Test
@@ -89,7 +89,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
                 getCellValue("D2"));
         clickCell("D2");
         Assert.assertEquals(sampleLocalDateTime,
-                getEditorElement("input").getAttribute("value"));
+                getEditorElement("input").getDomProperty("value"));
     }
 
     @Test
@@ -112,7 +112,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         Assert.assertEquals(sampleText, getCellValue("E2"));
         clickCell("E2");
         Assert.assertEquals(sampleText,
-                getEditorElement("textarea").getAttribute("value").trim());
+                getEditorElement("textarea").getDomProperty("value").trim());
     }
 
     @Test
@@ -137,7 +137,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         Assert.assertEquals(sampleValue, getCellValue("F2"));
         clickCell("F2");
         Assert.assertEquals(sampleValue,
-                getEditorElement("input").getAttribute("value"));
+                getEditorElement("input").getDomProperty("value"));
     }
 
     @Test
