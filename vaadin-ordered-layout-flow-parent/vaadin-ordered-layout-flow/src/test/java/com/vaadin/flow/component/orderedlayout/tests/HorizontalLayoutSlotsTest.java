@@ -304,6 +304,14 @@ public class HorizontalLayoutSlotsTest {
         Assert.assertEquals(div1.getElement().getAttribute("slot"), "end");
     }
 
+    @Test
+    public void addComponentAtIndex_firstComponentAdded() {
+        Div div1 = new Div();
+        layout.addComponentAtIndex(0, div1);
+
+        Assert.assertEquals(div1, layout.getComponentAt(0));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void addToMiddle_textNodeAsComponent_throws() {
         Text textNode = new Text("Text");
