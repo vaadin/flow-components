@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import org.jsoup.nodes.Document;
+
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEvent;
@@ -262,6 +264,16 @@ public class RichTextEditor
     private static String modelToPresentation(String htmlValue) {
         // Sanitize HTML sent to client
         return sanitize(htmlValue);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        Document document = org.jsoup.Jsoup.parse(getValue());
+        String text = document.body().text();
+        boolean hasText = !text.trim().isEmpty();
+        boolean hasImages = document.selectFirst("img") != null;
+
+        return !hasText && !hasImages;
     }
 
     /**
@@ -1004,6 +1016,11 @@ public class RichTextEditor
         @Override
         public String getEmptyValue() {
             return "";
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return RichTextEditor.this.isEmpty();
         }
     }
 
