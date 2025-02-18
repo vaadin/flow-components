@@ -36,7 +36,7 @@ public class BasicIT extends AbstractComponentIT {
         final CustomFieldElement customField = $(CustomFieldElement.class)
                 .waitForFirst();
         Assert.assertEquals("",
-                $("div").attribute("id", "result").get(0).getText());
+                $("div").withAttribute("id", "result").first().getText());
         TextFieldElement field1 = getById(customField, "field1");
         field1.setValue("1");
         TextFieldElement field2 = getById(customField, "field2");
@@ -44,13 +44,13 @@ public class BasicIT extends AbstractComponentIT {
         $("button").waitForFirst().click();
         executeScript(
                 "!!document.activeElement ? document.activeElement.blur() : 0");
-        waitUntil(e -> "3"
-                .equals($("div").attribute("id", "result").get(0).getText()));
+        waitUntil(e -> "3".equals(
+                $("div").withAttribute("id", "result").first().getText()));
     }
 
     private TextFieldElement getById(CustomFieldElement customField,
             String id) {
-        return customField.$(TextFieldElement.class).attribute("id", id)
+        return customField.$(TextFieldElement.class).withAttribute("id", id)
                 .waitForFirst();
     }
 }

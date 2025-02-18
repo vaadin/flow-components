@@ -154,7 +154,7 @@ public class GridViewEditorIT extends AbstractComponentIT {
         nameInput.sendKeys(Keys.ENTER);
 
         GridTHTDElement editColumn = row.getCell(grid.getAllColumns().get(2));
-        editColumn.$("vaadin-button").attribute("class", "save").first()
+        editColumn.$("vaadin-button").withAttribute("class", "save").first()
                 .click();
 
         String validation = findElement(By.id("validation")).getText();
@@ -165,7 +165,7 @@ public class GridViewEditorIT extends AbstractComponentIT {
         // No save events
         Assert.assertEquals("", msg.getText());
 
-        editColumn.$("vaadin-button").attribute("class", "cancel").first()
+        editColumn.$("vaadin-button").withAttribute("class", "cancel").first()
                 .click();
 
         Assert.assertEquals(personName, nameCell.getText());

@@ -94,8 +94,8 @@ public class ChartsIT extends AbstractSpreadsheetIT {
 
         // Get any element from the shadow root of the minimize button
         var shadowRootElement = $("vaadin-button")
-                .attribute("class", "minimize-button").first().$("div")
-                .attribute("class", "vaadin-button-container").first();
+                .withAttribute("class", "minimize-button").first().$("div")
+                .withAttribute("class", "vaadin-button-container").first();
 
         // Dispatch a mouseover event to the shadow root element
         executeScript(
@@ -112,8 +112,8 @@ public class ChartsIT extends AbstractSpreadsheetIT {
 
         // Get any element from the shadow root of the minimize button
         var shadowRootElement = $("vaadin-button")
-                .attribute("class", "minimize-button").first().$("div")
-                .attribute("class", "vaadin-button-container").first();
+                .withAttribute("class", "minimize-button").first().$("div")
+                .withAttribute("class", "vaadin-button-container").first();
 
         // Dispatch a dblclick event to the shadow root element
         executeScript(
