@@ -35,10 +35,10 @@ public class CompositeIT extends AbstractComponentIT {
         Assert.assertFalse(crud.getEditorSaveButton().isEnabled());
 
         $("vaadin-crud-dialog-overlay").first().$("div")
-                .attribute("editor-role", "language").first()
+                .withAttribute("editor-role", "language").first()
                 .$(ButtonElement.class).first().click();
 
-        $(TextFieldElement.class).attribute("editor-role", "language-field")
+        $(TextFieldElement.class).withAttribute("editor-role", "language-field")
                 .first().setValue("English");
 
         $(TestBenchElement.class).withId("overlay").last()

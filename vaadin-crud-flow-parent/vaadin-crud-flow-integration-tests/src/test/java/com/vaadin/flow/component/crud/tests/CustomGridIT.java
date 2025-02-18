@@ -36,8 +36,8 @@ public class CustomGridIT extends AbstractComponentIT {
         crud.openRowForEditing(0);
         Assert.assertTrue(crud.isEditorOpen());
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
 
         Assert.assertEquals("Sayo", lastNameField.getValue());
 
@@ -56,8 +56,8 @@ public class CustomGridIT extends AbstractComponentIT {
         crud.openRowForEditing(0);
         Assert.assertTrue(crud.isEditorOpen());
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
 
         Assert.assertEquals("Sayo", lastNameField.getValue());
         lastNameField.setValue("Otto");
@@ -120,7 +120,7 @@ public class CustomGridIT extends AbstractComponentIT {
 
     private String getEditorHeaderText(CrudElement crud) {
         return crud.getEditor().$(TestBenchElement.class)
-                .attribute("slot", "header").first().getText();
+                .withAttribute("slot", "header").first().getText();
     }
 
     private ButtonElement customGridClickToEditButton() {

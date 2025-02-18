@@ -119,7 +119,7 @@ public class EmailFieldPageIT extends AbstractComponentIT {
         blur();
 
         WebElement clearButton = field.$("*")
-                .attributeContains("part", "clear-button").first();
+                .withAttributeContainingWord("part", "clear-button").first();
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();
