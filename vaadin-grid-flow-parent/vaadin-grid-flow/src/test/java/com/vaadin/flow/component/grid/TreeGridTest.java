@@ -19,11 +19,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.treegrid.HierarchyColumnComponentRenderer;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import com.vaadin.flow.function.ValueProvider;
 
 public class TreeGridTest {
 
@@ -71,6 +75,23 @@ public class TreeGridTest {
                 treeGrid.getDataCommunicator().getKeyMapper().get("key 1"));
         Assert.assertNotNull(
                 treeGrid.getDataCommunicator().getKeyMapper().get("key 2"));
+    }
+
+    private interface TestInterface {}
+
+    private class TestRenderer extends HierarchyColumnComponentRenderer<Span, Item> implements TestInterface {
+        public TestRenderer(ValueProvider<Item, Span> componentProvider, TreeGrid<Item> grid) {
+            super(componentProvider, grid);
+        }
+    }
+
+    @Test
+    public void addHierarchyColumn_usesGivenRenderer() {
+        TestRenderer renderer = new TestRenderer(item -> new Span(item.getKey()), treeGrid);
+        Column<Item> column = treeGrid.addComponentHierarchyColumn(renderer);
+
+        Assert.assertTrue(
+            column.getRenderer() instanceof TestRenderer);
     }
 
     private void fakeClientCommunication() {
