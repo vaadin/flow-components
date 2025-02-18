@@ -126,7 +126,7 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         blur();
 
         WebElement clearButton = field.$("*")
-                .attributeContains("part", "clear-button").first();
+                .withAttributeContainingWord("part", "clear-button").first();
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();
@@ -138,7 +138,7 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         TestBenchElement field = $("*").id("step-number-field");
 
         WebElement increaseButton = field.$("*")
-                .attributeContains("part", "increase-button").first();
+                .withAttributeContainingWord("part", "increase-button").first();
         increaseButton.click();
 
         String value = findElement(By.id("step-message")).getText();

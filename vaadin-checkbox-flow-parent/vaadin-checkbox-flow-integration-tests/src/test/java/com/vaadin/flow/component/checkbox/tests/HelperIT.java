@@ -44,7 +44,7 @@ public class HelperIT extends AbstractComponentIT {
         TestBenchElement checkboxGroup = $("vaadin-checkbox-group").first();
 
         TestBenchElement helperComponent = checkboxGroup.$("span")
-                .attributeContains("slot", "helper").first();
+                .withAttribute("slot", "helper").first();
         Assert.assertEquals("Helper text", helperComponent.getText());
 
     }
