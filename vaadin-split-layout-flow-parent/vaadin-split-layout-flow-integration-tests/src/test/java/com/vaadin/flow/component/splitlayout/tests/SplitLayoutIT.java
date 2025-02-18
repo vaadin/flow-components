@@ -131,7 +131,7 @@ public class SplitLayoutIT extends AbstractComponentIT {
                 splitLayout.getDomAttribute("theme"));
 
         findElement(By.id("remove-variant-button")).click();
-        Assert.assertNull(splitLayout.getDomProperty("theme"));
+        Assert.assertNull(splitLayout.getDomAttribute("theme"));
     }
 
     @Element("*")
