@@ -312,7 +312,8 @@ public class SpreadsheetElement extends TestBenchElement {
     private boolean isNonCoherentlySelected(WebElement element) {
         // an element is non-coherently selected if the class attribute
         // contains "cell-range"
-        return element.getAttribute("class").contains("cell-range")
+        return Optional.ofNullable(element.getDomAttribute("class")).orElse("")
+                .contains("cell-range")
                 || "solid".equals(element.getCssValue("outline-style"));
     }
 

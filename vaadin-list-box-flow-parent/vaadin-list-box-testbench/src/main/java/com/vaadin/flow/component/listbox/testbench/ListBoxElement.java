@@ -44,7 +44,7 @@ public class ListBoxElement extends TestBenchElement
 
     @Override
     public String getSelectedText() {
-        return getItems().filter(i -> i.getAttribute("selected") != null)
+        return getItems().filter(i -> i.getDomAttribute("selected") != null)
                 .findFirst().map(WebElement::getText).orElse(null);
     }
 

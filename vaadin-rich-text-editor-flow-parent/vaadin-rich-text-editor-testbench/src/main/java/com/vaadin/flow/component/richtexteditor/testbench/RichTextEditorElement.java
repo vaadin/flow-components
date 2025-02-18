@@ -18,12 +18,13 @@ import com.vaadin.testbench.elementsbase.Element;
 public class RichTextEditorElement extends TestBenchElement {
 
     public TestBenchElement getEditor() {
-        return $("div").attributeContains("class", "ql-editor").first();
+        return $("div").withAttributeContainingWord("class", "ql-editor")
+                .first();
     }
 
     public List getTitles() {
-        TestBenchElement toolbar = $("div").attributeContains("part", "toolbar")
-                .first();
+        TestBenchElement toolbar = $("div")
+                .withAttributeContainingWord("part", "toolbar").first();
         List<TestBenchElement> buttonTooltips = toolbar
                 .$("button + vaadin-tooltip").all();
         return buttonTooltips.stream()

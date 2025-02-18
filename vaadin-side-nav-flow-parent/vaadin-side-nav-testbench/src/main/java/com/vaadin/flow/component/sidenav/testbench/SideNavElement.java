@@ -35,7 +35,7 @@ import com.vaadin.testbench.elementsbase.Element;
 public class SideNavElement extends TestBenchElement {
 
     public String getLabel() {
-        return $("span").attributeContains("slot", "label").first().getText();
+        return $("span").withAttribute("slot", "label").first().getText();
     }
 
     public boolean isCollapsible() {
