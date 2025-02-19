@@ -269,8 +269,16 @@ public class RichTextEditor
     @Override
     public boolean isEmpty() {
         Document document = org.jsoup.Jsoup.parse(getValue());
-        String text = document.body().text();
-        boolean hasText = !text.trim().isEmpty();
+
+        // Get non-normalized text including spaces and newlines
+        // <br>s count as newlines
+        String text = document.body().wholeText();
+
+        // Remove first newline occurrence as Quill editor adds a single <br> in
+        // every element even without the user having typed anything
+        text = text.replaceFirst("\n", "");
+
+        boolean hasText = !text.isEmpty();
         boolean hasImages = document.selectFirst("img") != null;
 
         return !hasText && !hasImages;
