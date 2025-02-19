@@ -19,6 +19,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.treegrid.HierarchyColumnComponentRenderer;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
@@ -71,6 +75,15 @@ public class TreeGridTest {
                 treeGrid.getDataCommunicator().getKeyMapper().get("key 1"));
         Assert.assertNotNull(
                 treeGrid.getDataCommunicator().getKeyMapper().get("key 2"));
+    }
+
+    @Test
+    public void addHierarchyColumn_withRenderer() {
+        HierarchyColumnComponentRenderer<Component, Item> renderer = new HierarchyColumnComponentRenderer<>(
+                item -> new Span(), treeGrid);
+        Column<Item> column = treeGrid.addComponentHierarchyColumn(renderer);
+
+        Assert.assertEquals(renderer, column.getRenderer());
     }
 
     private void fakeClientCommunication() {
