@@ -681,29 +681,9 @@ public class TreeGrid<T> extends Grid<T>
      */
     public <V extends Component> Column<T> addComponentHierarchyColumn(
             ValueProvider<T, V> componentProvider) {
-        return addColumn(new HierarchyColumnComponentRenderer<>(
-                componentProvider, this));
-    }
-
-    /**
-     * Adds a new Hierarchy column that shows components.
-     * <p>
-     * <em>NOTE:</em> Using {@link ComponentRenderer} is not as efficient as the
-     * built in renderers.
-     * </p>
-     *
-     * @param componentRenderer
-     *            the renderer used to create a component for the given item
-     * @param <V>
-     *            the component type
-     * @return the new column
-     * @see #addColumn(Renderer)
-     * @see #removeColumn(Column)
-     */
-    public <V extends Component> Column<T> addComponentHierarchyColumn(
-            HierarchyColumnComponentRenderer<V, T> componentRenderer) {
-        return addColumn(componentRenderer.withProperty("children",
-                item -> getDataCommunicator().hasChildren(item)));
+        return addColumn(new HierarchyColumnComponentRenderer<V, T>(
+                componentProvider, this).withProperty("children",
+                        item -> getDataCommunicator().hasChildren(item)));
     }
 
     /**
