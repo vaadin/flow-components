@@ -188,24 +188,27 @@
           return;
         }
         if (selectionMode === 'SINGLE') {
-          grid.selectedItems = [];
           selectedKeys = {};
         }
 
-        grid.selectedItems = grid.selectedItems.concat(items);
         items.forEach(item => {
           if (item) {
             selectedKeys[item.key] = item;
+            item.selected = true;
             if (userOriginated) {
-              item.selected = true;
               grid.$server.select(item.key);
             }
           }
-          const isSelectedItemDifferentOrNull = !grid.activeItem || !item || item.key != grid.activeItem.key;
+
+        // FYI: In single selection mode, the server can send items = [null]
+        // which means a "Deselect All" command.
+        const isSelectedItemDifferentOrNull = !grid.activeItem || !item || item.key != grid.activeItem.key;
           if (!userOriginated && selectionMode === 'SINGLE' && isSelectedItemDifferentOrNull) {
             grid.activeItem = item;
           }
         });
+        
+        grid.selectedItems = Object.values(selectedKeys);
       });
 
       grid.$connector.doDeselection = tryCatchWrapper(function(items, userOriginated) {
@@ -226,8 +229,8 @@
           }
           if (itemToDeselect) {
             delete selectedKeys[itemToDeselect.key];
+            delete itemToDeselect.selected;
             if (userOriginated) {
-              delete itemToDeselect.selected;
               grid.$server.deselect(itemToDeselect.key);
             }
           }

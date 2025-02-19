@@ -31,6 +31,8 @@ import com.vaadin.flow.router.Route;
 public class GridMultiSelectionColumnPage extends Div {
 
     public static final int ITEM_COUNT = 1000;
+
+    static final String IN_MEMORY_GRID_ID = "in-memory-grid";
     static final String MULTI_SELECT_GRID_ALL_SELECTED_GRID_ID = "multi-select-grid-all-selected";
     static final String MULTI_SELECT_GRID_ONE_NOT_SELECTED_GRID_ID = "multi-select-grid-one-deselected";
 
@@ -74,7 +76,7 @@ public class GridMultiSelectionColumnPage extends Div {
         grid.setItems(
                 IntStream.range(0, ITEM_COUNT).mapToObj(Integer::toString));
         setUp(grid);
-        grid.setId("in-memory-grid");
+        grid.setId(IN_MEMORY_GRID_ID);
         add(new H2("In-memory grid"), grid);
     }
 
