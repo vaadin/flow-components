@@ -79,16 +79,16 @@ public class GridViewSelectionIT extends AbstractComponentIT {
         // deselect 1
         getCellContent(grid.getCell(0, 0)).click();
         Assert.assertEquals("Select all should be checked", "true",
-                selectAllCheckbox.getAttribute("checked"));
+                selectAllCheckbox.getDomAttribute("checked"));
         Assert.assertEquals("Select all should be indeterminate", "true",
-                selectAllCheckbox.getAttribute("indeterminate"));
+                selectAllCheckbox.getDomAttribute("indeterminate"));
 
         // reselect 1
         getCellContent(grid.getCell(0, 0)).click();
         Assert.assertEquals("Select all should be checked", "true",
-                selectAllCheckbox.getAttribute("checked"));
+                selectAllCheckbox.getDomAttribute("checked"));
         Assert.assertNull("Select all should not be indeterminate",
-                selectAllCheckbox.getAttribute("indeterminate"));
+                selectAllCheckbox.getDomAttribute("indeterminate"));
     }
 
     /**
@@ -126,18 +126,18 @@ public class GridViewSelectionIT extends AbstractComponentIT {
         TestBenchElement table = grid.$("table").first();
         // table should have aria-multiselectable set to true
         Assert.assertTrue(Boolean
-                .parseBoolean(table.getAttribute("aria-multiselectable")));
+                .parseBoolean(table.getDomAttribute("aria-multiselectable")));
 
         Assert.assertTrue(Boolean
-                .parseBoolean(grid.getRow(0).getAttribute("aria-selected")));
+                .parseBoolean(grid.getRow(0).getDomAttribute("aria-selected")));
         Assert.assertTrue(Boolean
-                .parseBoolean(grid.getRow(1).getAttribute("aria-selected")));
+                .parseBoolean(grid.getRow(1).getDomAttribute("aria-selected")));
         Assert.assertFalse(Boolean
-                .parseBoolean(grid.getRow(2).getAttribute("aria-selected")));
+                .parseBoolean(grid.getRow(2).getDomAttribute("aria-selected")));
 
         grid.select(2);
         Assert.assertTrue(Boolean
-                .parseBoolean(grid.getRow(2).getAttribute("aria-selected")));
+                .parseBoolean(grid.getRow(2).getDomAttribute("aria-selected")));
     }
 
     @Test

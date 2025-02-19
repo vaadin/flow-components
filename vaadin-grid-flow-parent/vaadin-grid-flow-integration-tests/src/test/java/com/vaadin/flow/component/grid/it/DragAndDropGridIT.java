@@ -147,7 +147,7 @@ public class DragAndDropGridIT extends AbstractComponentIT {
         fireDrop(0, "on-top");
         Assert.assertEquals("<b>2</b>",
                 findElement(By.id("drop-data-html-message"))
-                        .getAttribute("innerHTML"));
+                        .getDomProperty("innerHTML"));
     }
 
     @Test

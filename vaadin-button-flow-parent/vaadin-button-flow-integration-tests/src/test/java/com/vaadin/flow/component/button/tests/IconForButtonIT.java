@@ -31,7 +31,7 @@ public class IconForButtonIT extends AbstractComponentIT {
 
         TestBenchElement button = $("vaadin-button").first();
         TestBenchElement icon = button.$("vaadin-icon").first();
-        String slot = icon.getAttribute("slot");
+        String slot = icon.getDomAttribute("slot");
 
         // self check: this is expected in the initialization and not part of
         // the test
@@ -42,7 +42,7 @@ public class IconForButtonIT extends AbstractComponentIT {
         Assert.assertEquals("Updated text", button.getText());
 
         icon = button.$("vaadin-icon").first();
-        slot = icon.getAttribute("slot");
+        slot = icon.getDomAttribute("slot");
         // slot should have the same value after text update
         Assert.assertEquals("prefix", slot);
     }

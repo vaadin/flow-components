@@ -47,7 +47,7 @@ public class CustomHelperIT extends AbstractComponentIT {
                 CustomFieldElement.class).id("custom-field-helper-component");
 
         Assert.assertEquals("helper-component", customFieldHelperComponent
-                .getHelperComponent().getAttribute("id"));
+                .getHelperComponent().getDomAttribute("id"));
 
         $("button").id("button-clear-helper-component").click();
 
@@ -66,7 +66,7 @@ public class CustomHelperIT extends AbstractComponentIT {
         $("button").id("button-add-helper-component").click();
 
         Assert.assertEquals("helper-component-lazy", customFieldHelperComponent
-                .getHelperComponent().getAttribute("id"));
+                .getHelperComponent().getDomAttribute("id"));
     }
 
 }

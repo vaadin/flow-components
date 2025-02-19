@@ -45,8 +45,8 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
 
         WebElement overlay = $(DIALOG_OVERLAY_TAG).first();
 
-        String overlayClassNames = overlay.getAttribute("class");
-        String dialogClassNames = dialog.getAttribute("class");
+        String overlayClassNames = overlay.getDomAttribute("class");
+        String dialogClassNames = dialog.getDomAttribute("class");
 
         Assert.assertEquals("custom", dialogClassNames);
         Assert.assertEquals("custom", overlayClassNames);
@@ -63,8 +63,8 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         DialogElement dialog = $(DialogElement.class).first();
         WebElement overlay = $(DIALOG_OVERLAY_TAG).first();
 
-        String overlayClassNames = overlay.getAttribute("class");
-        String dialogClassNames = dialog.getAttribute("class");
+        String overlayClassNames = overlay.getDomAttribute("class");
+        String dialogClassNames = dialog.getDomAttribute("class");
 
         Assert.assertEquals("custom added", dialogClassNames);
         Assert.assertEquals("custom added", overlayClassNames);
@@ -81,8 +81,8 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         DialogElement dialog = $(DialogElement.class).first();
         WebElement overlay = $(DIALOG_OVERLAY_TAG).first();
 
-        String overlayClassNames = overlay.getAttribute("class");
-        String dialogClassNames = dialog.getAttribute("class");
+        String overlayClassNames = overlay.getDomAttribute("class");
+        String dialogClassNames = dialog.getDomAttribute("class");
 
         Assert.assertEquals("", dialogClassNames);
         Assert.assertEquals("", overlayClassNames);
@@ -105,8 +105,8 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         DialogElement dialog = $(DialogElement.class).first();
         WebElement overlay = $(DIALOG_OVERLAY_TAG).first();
 
-        String overlayClassNames = overlay.getAttribute("class");
-        String dialogClassNames = dialog.getAttribute("class");
+        String overlayClassNames = overlay.getDomAttribute("class");
+        String dialogClassNames = dialog.getDomAttribute("class");
 
         Assert.assertEquals("added", dialogClassNames);
         Assert.assertEquals("added", overlayClassNames);

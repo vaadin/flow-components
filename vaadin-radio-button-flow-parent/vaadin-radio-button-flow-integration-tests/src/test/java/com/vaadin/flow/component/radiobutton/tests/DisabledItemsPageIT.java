@@ -48,7 +48,8 @@ public class DisabledItemsPageIT extends AbstractComponentIT {
         for (WebElement button : group
                 .findElements(By.tagName("vaadin-radio-button"))) {
             Assert.assertEquals("All buttons should be disabled",
-                    Boolean.TRUE.toString(), button.getAttribute("disabled"));
+                    Boolean.TRUE.toString(),
+                    button.getDomAttribute("disabled"));
         }
     }
 
@@ -62,7 +63,7 @@ public class DisabledItemsPageIT extends AbstractComponentIT {
                 .findElements(By.tagName("vaadin-radio-button"))) {
             Assert.assertEquals("All buttons should be disabled",
                     Boolean.TRUE.toString(),
-                    radioButton.getAttribute("disabled"));
+                    radioButton.getDomAttribute("disabled"));
         }
 
         // Click button to enable items
@@ -72,9 +73,10 @@ public class DisabledItemsPageIT extends AbstractComponentIT {
         WebElement firstButton = radioButtons.get(0);
         WebElement secondButton = radioButtons.get(1);
         Assert.assertNull("First button should not be disabled",
-                firstButton.getAttribute("disabled"));
+                firstButton.getDomAttribute("disabled"));
         Assert.assertEquals("Second button should be disabled",
-                Boolean.TRUE.toString(), secondButton.getAttribute("disabled"));
+                Boolean.TRUE.toString(),
+                secondButton.getDomAttribute("disabled"));
     }
 
     @Test
@@ -91,9 +93,10 @@ public class DisabledItemsPageIT extends AbstractComponentIT {
         WebElement firstButton = radioButtons.get(0);
         WebElement secondButton = radioButtons.get(1);
         Assert.assertNull("First button should not be disabled",
-                firstButton.getAttribute("disabled"));
+                firstButton.getDomAttribute("disabled"));
         Assert.assertEquals("Second button should be disabled",
-                Boolean.TRUE.toString(), secondButton.getAttribute("disabled"));
+                Boolean.TRUE.toString(),
+                secondButton.getDomAttribute("disabled"));
     }
 
 }

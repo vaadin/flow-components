@@ -18,6 +18,7 @@ package com.vaadin.flow.component.messages.tests;
 import static org.hamcrest.CoreMatchers.startsWith;
 
 import java.util.List;
+import java.util.Set;
 
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
@@ -103,12 +104,12 @@ public class MessageListIT extends AbstractComponentIT {
 
         clickElementWithJs("addClassNames");
         Assert.assertEquals("Unexpected class name after adding class names",
-                "urgent pinned",
-                getFirstMessage(messageList).getAttribute("class"));
+                Set.of("urgent", "pinned"),
+                getFirstMessage(messageList).getClassNames());
 
         clickElementWithJs("removeClassNames");
         Assert.assertEquals("Unexpected class name after removing class names",
-                "pinned", getFirstMessage(messageList).getAttribute("class"));
+                Set.of("pinned"), getFirstMessage(messageList).getClassNames());
     }
 
     @Test

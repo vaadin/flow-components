@@ -94,8 +94,8 @@ public class ChartsIT extends AbstractSpreadsheetIT {
 
         // Get any element from the shadow root of the minimize button
         var shadowRootElement = $("vaadin-button")
-                .attribute("class", "minimize-button").first().$("div")
-                .attribute("class", "vaadin-button-container").first();
+                .withClassName("minimize-button").first().$("div")
+                .withClassName("vaadin-button-container").first();
 
         // Dispatch a mouseover event to the shadow root element
         executeScript(
@@ -112,8 +112,8 @@ public class ChartsIT extends AbstractSpreadsheetIT {
 
         // Get any element from the shadow root of the minimize button
         var shadowRootElement = $("vaadin-button")
-                .attribute("class", "minimize-button").first().$("div")
-                .attribute("class", "vaadin-button-container").first();
+                .withClassName("minimize-button").first().$("div")
+                .withClassName("vaadin-button-container").first();
 
         // Dispatch a dblclick event to the shadow root element
         executeScript(
@@ -211,7 +211,7 @@ public class ChartsIT extends AbstractSpreadsheetIT {
 
     private TestBenchElement getChartInShadowRoot(WebElement overlayElement) {
         var slot = overlayElement.findElement(By.tagName("slot"));
-        var slotName = slot.getAttribute("name");
+        var slotName = slot.getDomAttribute("name");
         var chart = getSpreadsheet().findElement(
                 By.cssSelector("[slot=\"" + slotName + "\"] vaadin-chart"));
         return chart.$(DivElement.class).first();
@@ -219,7 +219,7 @@ public class ChartsIT extends AbstractSpreadsheetIT {
 
     private TestBenchElement getMinimizeButton(WebElement overlayElement) {
         var slot = overlayElement.findElement(By.tagName("slot"));
-        var slotName = slot.getAttribute("name");
+        var slotName = slot.getDomAttribute("name");
         return getSpreadsheet().findElement(
                 By.cssSelector("[slot=\"" + slotName + "\"] .minimize-button"));
     }

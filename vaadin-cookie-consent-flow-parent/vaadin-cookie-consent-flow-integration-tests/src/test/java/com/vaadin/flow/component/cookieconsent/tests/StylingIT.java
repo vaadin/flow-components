@@ -59,6 +59,6 @@ public class StylingIT extends AbstractComponentIT {
     }
 
     private String getBannerClassName() {
-        return getConsentBanner().getAttribute("class");
+        return getConsentBanner().getDomAttribute("class");
     }
 }

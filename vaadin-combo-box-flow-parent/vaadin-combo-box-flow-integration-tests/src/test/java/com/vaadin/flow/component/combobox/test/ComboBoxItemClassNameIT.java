@@ -66,7 +66,7 @@ public class ComboBoxItemClassNameIT extends AbstractComponentIT {
                 .$("vaadin-combo-box-item");
 
         for (int i = 0; i < expectedClassNames.length; i++) {
-            Assert.assertEquals(items.get(i).getAttribute("class"),
+            Assert.assertEquals(items.get(i).getDomAttribute("class"),
                     expectedClassNames[i]);
         }
     }

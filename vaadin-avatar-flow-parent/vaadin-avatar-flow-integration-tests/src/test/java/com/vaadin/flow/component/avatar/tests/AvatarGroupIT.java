@@ -68,7 +68,7 @@ public class AvatarGroupIT extends AbstractComponentIT {
         Assert.assertEquals("red", getAvatarClassName(0));
 
         findElement(By.id("remove-class-names")).click();
-        Assert.assertEquals("", getAvatarClassName(0));
+        Assert.assertNull(getAvatarClassName(0));
     }
 
     private String getAvatarAbbr(int index) {
@@ -78,6 +78,6 @@ public class AvatarGroupIT extends AbstractComponentIT {
 
     private String getAvatarClassName(int index) {
         return $(AvatarGroupElement.class).waitForFirst()
-                .getAvatarElement(index).getAttribute("class");
+                .getAvatarElement(index).getDomAttribute("class");
     }
 }

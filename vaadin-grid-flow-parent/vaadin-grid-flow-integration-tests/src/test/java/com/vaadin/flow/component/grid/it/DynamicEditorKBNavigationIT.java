@@ -79,7 +79,7 @@ public class DynamicEditorKBNavigationIT extends AbstractComponentIT {
 
         TestBenchElement emailField = emailCell.$("vaadin-text-field").first();
         String isReadonly = emailField.$("input").first()
-                .getAttribute("readonly");
+                .getDomAttribute("readonly");
 
         Assert.assertEquals(Boolean.TRUE.toString(), isReadonly);
 
@@ -90,9 +90,9 @@ public class DynamicEditorKBNavigationIT extends AbstractComponentIT {
         new Actions(getDriver()).sendKeys(Keys.BACK_SPACE).build().perform();
 
         emailField = emailCell.$("vaadin-text-field").first();
-        Assert.assertNotNull(emailField.getAttribute("focused"));
+        Assert.assertNotNull(emailField.getDomAttribute("focused"));
         Assert.assertEquals("Not a subscriber",
-                emailField.getAttribute("value"));
+                emailField.getDomProperty("value"));
 
         // Change the subscriber status back
         checkbox = subscriberCell.$("vaadin-checkbox").first();

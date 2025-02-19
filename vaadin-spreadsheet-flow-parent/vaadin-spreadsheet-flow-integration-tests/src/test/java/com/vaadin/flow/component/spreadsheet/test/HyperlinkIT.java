@@ -177,7 +177,7 @@ public class HyperlinkIT extends AbstractSpreadsheetIT {
 
     public String getSelectedCell() {
         String elemClass = findElementInShadowRoot(
-                By.cssSelector(".sheet-selection")).getAttribute("class");
+                By.cssSelector(".sheet-selection")).getDomAttribute("class");
 
         int rowStart = elemClass.indexOf("row");
         if (rowStart == -1) {

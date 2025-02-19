@@ -79,7 +79,7 @@ public class VirtualListIT extends AbstractComponentIT {
         clickElementWithJs("list-with-strings-accessible-name");
 
         Assert.assertEquals("Accessible Item 1",
-                firstChildElement.getAttribute("aria-label"));
+                firstChildElement.getDomAttribute("aria-label"));
 
         var secondChildElement = virtualList
                 .findElement(By.xpath("//*[text()='Item 2']"));
@@ -264,7 +264,7 @@ public class VirtualListIT extends AbstractComponentIT {
 
         assertListContainsMaxItems(items.size(), 25);
 
-        MatcherAssert.assertThat(list.getAttribute("innerText"), CoreMatchers
+        MatcherAssert.assertThat(list.getDomProperty("innerText"), CoreMatchers
                 .not(CoreMatchers.containsString("the-placeholder")));
 
         // Scroll to bottom and set an attribute when a placeholder becomes
@@ -289,14 +289,14 @@ public class VirtualListIT extends AbstractComponentIT {
                 list);
 
         waitUntil(driver -> "true"
-                .equals(list.getAttribute("placeholderWasHere")));
+                .equals(list.getDomAttribute("placeholderWasHere")));
 
-        waitUntil(driver -> list.getAttribute("innerText")
+        waitUntil(driver -> list.getDomProperty("innerText")
                 .contains("Person 100"));
 
         MatcherAssert.assertThat(
                 "The VirtualList shouldn't display any placeholders after the data is loaded",
-                list.getAttribute("innerText"), CoreMatchers
+                list.getDomProperty("innerText"), CoreMatchers
                         .not(CoreMatchers.containsString("the-placeholder")));
 
         assertListContainsMaxItems(items.size(), 25);
@@ -379,9 +379,9 @@ public class VirtualListIT extends AbstractComponentIT {
                 list);
 
         invisible.click();
-        waitUntil(driver -> "true".equals(list.getAttribute("hidden")));
+        waitUntil(driver -> "true".equals(list.getDomAttribute("hidden")));
         visible.click();
-        waitUntil(driver -> list.getAttribute("hidden") == null);
+        waitUntil(driver -> list.getDomAttribute("hidden") == null);
         assertItemsArePresent(list, 20);
         Assert.assertTrue("The $connector instance should be preserved",
                 (Boolean) executeScript(

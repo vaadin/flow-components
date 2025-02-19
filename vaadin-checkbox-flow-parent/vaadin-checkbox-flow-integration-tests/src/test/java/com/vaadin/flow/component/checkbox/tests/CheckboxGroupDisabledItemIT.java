@@ -94,9 +94,8 @@ public class CheckboxGroupDisabledItemIT extends AbstractComponentIT {
         // Re-enable group
         toggleEnabledButton.click();
 
-        Assert.assertEquals("Second checkbox should be disabled",
-                Boolean.TRUE.toString(),
-                checkboxes.get(1).getAttribute("disabled"));
+        Assert.assertFalse("Second checkbox should be disabled",
+                checkboxes.get(1).isEnabled());
     }
 
 }

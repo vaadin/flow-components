@@ -46,7 +46,7 @@ public class UpdateEditorComponentIT extends AbstractComponentIT {
 
         TestBenchElement textField = nameCell.$("vaadin-text-field").first()
                 .$("input").first();
-        Assert.assertEquals("foo", textField.getAttribute("value"));
+        Assert.assertEquals("foo", textField.getDomProperty("value"));
 
         // close the editor via clicking another cell
         grid.getRow(1).click(10, 10);
@@ -59,6 +59,6 @@ public class UpdateEditorComponentIT extends AbstractComponentIT {
         // Now it should be a text area component
         TestBenchElement textArea = nameCell.$("vaadin-text-area").first()
                 .$("textarea").first();
-        Assert.assertEquals("foo", textArea.getAttribute("value"));
+        Assert.assertEquals("foo", textArea.getDomProperty("value"));
     }
 }

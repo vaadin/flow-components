@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openqa.selenium.By;
 
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
@@ -34,11 +34,11 @@ public class DetachReattachIT extends AbstractComponentIT {
         open();
 
         clickButton("setValue");
-        List checkedBeforeDetach = getCheckboxexCheckedState();
+        List<Boolean> checkedBeforeDetach = getCheckboxesCheckedState();
         clickButton("detach");
         clickButton("attach");
         Assert.assertEquals("Checkboxes should remain checked on reattach",
-                checkedBeforeDetach, getCheckboxexCheckedState());
+                checkedBeforeDetach, getCheckboxesCheckedState());
     }
 
     @Test
@@ -51,15 +51,14 @@ public class DetachReattachIT extends AbstractComponentIT {
         clickButton("attach");
         Assert.assertTrue(
                 "Checkboxes should not be checked after deselectAll on reattach",
-                getCheckboxexCheckedState().stream()
-                        .allMatch(checked -> checked == null));
+                getCheckboxesCheckedState().stream()
+                        .noneMatch(checked -> checked));
     }
 
-    private List getCheckboxexCheckedState() {
+    private List<Boolean> getCheckboxesCheckedState() {
         TestBenchElement group = $("vaadin-checkbox-group").first();
-        return group.findElements(By.tagName("vaadin-checkbox")).stream()
-                .map(checkbox -> checkbox.getAttribute("checked"))
-                .collect(Collectors.toList());
+        return group.$(CheckboxElement.class).all().stream()
+                .map(CheckboxElement::isChecked).collect(Collectors.toList());
     }
 
     private void clickButton(String id) {

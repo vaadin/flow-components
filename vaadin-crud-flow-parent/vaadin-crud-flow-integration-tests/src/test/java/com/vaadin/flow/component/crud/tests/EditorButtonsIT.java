@@ -46,8 +46,8 @@ public class EditorButtonsIT extends AbstractComponentIT {
         CrudElement crud = getCrud();
         crud.openRowForEditing(0);
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
 
         Assert.assertFalse(crud.getEditorSaveButton().isEnabled());
@@ -61,8 +61,8 @@ public class EditorButtonsIT extends AbstractComponentIT {
         assertTrue(crud.isEditorOpen());
 
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
 
         ButtonElement saveButton = crud.getEditorSaveButton();
@@ -80,8 +80,8 @@ public class EditorButtonsIT extends AbstractComponentIT {
         assertFalse(saveButton.isEnabled());
 
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
 
         assertTrue(saveButton.isEnabled());
@@ -99,8 +99,8 @@ public class EditorButtonsIT extends AbstractComponentIT {
         assertFalse("Save button should be disabled", saveButton.isEnabled());
 
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
 
         assertFalse("Save button should remain disabled",
@@ -123,8 +123,8 @@ public class EditorButtonsIT extends AbstractComponentIT {
                 cancelButton.isEnabled());
 
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
 
         assertFalse("Cancel button should remain disabled",
@@ -147,8 +147,8 @@ public class EditorButtonsIT extends AbstractComponentIT {
                 deleteButton.isEnabled());
 
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
 
         assertFalse("Delete button should remain disabled",
@@ -168,8 +168,8 @@ public class EditorButtonsIT extends AbstractComponentIT {
         getTestButton("add-enter-shortcut-button").click();
 
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue(lastNameExpected);
 
         // invoke shortcut
