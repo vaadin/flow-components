@@ -121,7 +121,7 @@ public interface ThemableLayout extends HasElement {
      */
     default void setSpacing(String spacing) {
         setSpacing(true);
-        getElement().getStyle().set("--_gap", spacing);
+        getElement().getStyle().set("gap", spacing);
     }
 
     /**
