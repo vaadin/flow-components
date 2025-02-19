@@ -191,8 +191,6 @@
           selectedKeys = {};
         }
 
-        // FYI: In single selection mode, the server can send items = [null]
-        // which means a "Deselect All" command.
         items.forEach(item => {
           if (item) {
             selectedKeys[item.key] = item;
@@ -201,7 +199,10 @@
               grid.$server.select(item.key);
             }
           }
-          const isSelectedItemDifferentOrNull = !grid.activeItem || !item || item.key != grid.activeItem.key;
+
+        // FYI: In single selection mode, the server can send items = [null]
+        // which means a "Deselect All" command.
+        const isSelectedItemDifferentOrNull = !grid.activeItem || !item || item.key != grid.activeItem.key;
           if (!userOriginated && selectionMode === 'SINGLE' && isSelectedItemDifferentOrNull) {
             grid.activeItem = item;
           }
