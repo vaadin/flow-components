@@ -18,6 +18,7 @@ package com.vaadin.flow.component.orderedlayout;
 import java.util.Set;
 
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.dom.ThemeList;
 
@@ -93,16 +94,58 @@ public interface ThemableLayout extends HasElement {
      *            it if {@code false}
      */
     default void setSpacing(boolean spacing) {
+        if (!spacing) {
+            getElement().getStyle().remove("gap");
+        }
         getThemeList().set("spacing", spacing);
     }
 
     /**
-     * Shows if {@code spacing} theme setting is applied to the component.
+     * Shows if {@code spacing} setting is applied to the component, either by
+     * setting the {@code spacing} theme or by setting the {@code gap} style.
      *
      * @return {@code true} if theme setting is applied, {@code false} otherwise
      */
     default boolean isSpacing() {
-        return getThemeList().contains("spacing");
+        return getThemeList().contains("spacing")
+                || getElement().getStyle().has("gap");
+    }
+
+    /**
+     * Sets the spacing between the components inside the layout.
+     *
+     * @param spacing
+     *            the spacing between the components. The value must be a valid
+     *            CSS length, i.e. must provide a unit (e.g. "1px", "1rem",
+     *            "1%") for values other than 0.
+     */
+    default void setSpacing(String spacing) {
+        setSpacing(true);
+        getElement().getStyle().set("--_gap", spacing);
+    }
+
+    /**
+     * Sets the spacing between the components inside the layout.
+     *
+     * @param spacing
+     *            the spacing between the components
+     * @param unit
+     *            the unit of the spacing value
+     */
+    default void setSpacing(float spacing, Unit unit) {
+        if (spacing < 0) {
+            setSpacing(false);
+        }
+        setSpacing(spacing + unit.toString());
+    }
+
+    /**
+     * Gets the spacing between the components inside the layout.
+     *
+     * @return the spacing between the components
+     */
+    default String getSpacing() {
+        return getElement().getStyle().get("gap");
     }
 
     /**

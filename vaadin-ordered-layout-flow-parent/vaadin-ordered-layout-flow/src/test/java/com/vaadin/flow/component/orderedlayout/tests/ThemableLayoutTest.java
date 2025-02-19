@@ -15,12 +15,14 @@
  */
 package com.vaadin.flow.component.orderedlayout.tests;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import com.vaadin.flow.component.Unit;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -67,6 +69,40 @@ public class ThemableLayoutTest {
     @Test
     public void checkWrap() {
         checkThemeToggling("wrap", layout::isWrap, layout::setWrap);
+    }
+
+    @Test
+    public void checkSpacingStringSetter() {
+        layout.setSpacing("20px");
+        assertTrue("Expected spacing to be applied after setting it",
+                layout.isSpacing());
+        assertEquals("Expected spacing to be '20px'", "20px",
+                layout.getSpacing());
+    }
+
+    @Test
+    public void checkSpacingUnitSetter() {
+        layout.setSpacing(2, Unit.REM);
+        assertTrue("Expected spacing to be applied after setting it",
+            layout.isSpacing());
+        assertEquals("Expected spacing to be '2.0rem'", "2.0rem",
+            layout.getSpacing());
+    }
+
+    @Test
+    public void checkIsSpacing() {
+        layout.setSpacing("20px");
+        assertTrue("Expected spacing to be applied after setting it",
+                layout.isSpacing());
+        layout.setSpacing(false);
+        assertFalse("Expected no spacing applied after removing it",
+                layout.isSpacing());
+        layout.setSpacing(true);
+        assertTrue("Expected spacing to be applied after setting it",
+                layout.isSpacing());
+        layout.setSpacing(false);
+        assertFalse("Expected no spacing applied after removing it",
+                layout.isSpacing());
     }
 
     private void checkThemeToggling(String themeName,
