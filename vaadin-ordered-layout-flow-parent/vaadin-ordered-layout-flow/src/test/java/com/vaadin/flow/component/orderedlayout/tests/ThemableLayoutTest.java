@@ -22,10 +22,10 @@ import static org.junit.Assert.assertTrue;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import com.vaadin.flow.component.Unit;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.orderedlayout.ThemableLayout;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
@@ -84,9 +84,9 @@ public class ThemableLayoutTest {
     public void checkSpacingUnitSetter() {
         layout.setSpacing(2, Unit.REM);
         assertTrue("Expected spacing to be applied after setting it",
-            layout.isSpacing());
+                layout.isSpacing());
         assertEquals("Expected spacing to be '2.0rem'", "2.0rem",
-            layout.getSpacing());
+                layout.getSpacing());
     }
 
     @Test
