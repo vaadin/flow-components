@@ -702,8 +702,7 @@ public class TreeGrid<T> extends Grid<T>
      */
     public <V extends Component> Column<T> addComponentHierarchyColumn(
             HierarchyColumnComponentRenderer<V, T> componentRenderer) {
-        return addColumn(componentRenderer.withProperty("children",
-                item -> getDataCommunicator().hasChildren(item)));
+        return addColumn(componentRenderer);
     }
 
     /**
