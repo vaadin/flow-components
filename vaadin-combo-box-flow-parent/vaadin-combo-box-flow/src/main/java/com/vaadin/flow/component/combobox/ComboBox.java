@@ -460,6 +460,6 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      * between keystrokes until filtering is triggered.
      */
     public void setFilterTimeout(int filterTimeout) {
-
+        getElement().setProperty("filterDebouncerTimer", filterTimeout + "");
     }
 }
