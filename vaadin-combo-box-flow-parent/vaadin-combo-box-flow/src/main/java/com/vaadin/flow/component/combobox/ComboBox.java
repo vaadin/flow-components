@@ -456,8 +456,9 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
      * typing, before triggering a server-side visit to filter items. The
      * default is 500ms.
      *
-     * @param filterTimeout the time in milliseconds that needs to happen
-     * between keystrokes until filtering is triggered.
+     * @param filterTimeout
+     *            the time in milliseconds that needs to happen between
+     *            keystrokes until filtering is triggered.
      */
     public void setFilterTimeout(int filterTimeout) {
         getElement().setProperty("filterDebouncerTimer", filterTimeout + "");
