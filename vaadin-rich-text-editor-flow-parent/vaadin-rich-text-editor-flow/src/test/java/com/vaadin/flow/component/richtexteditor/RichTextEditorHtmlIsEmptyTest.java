@@ -12,7 +12,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class RichTextEditorIsEmptyTest {
+public class RichTextEditorHtmlIsEmptyTest {
     private RichTextEditor editor;
 
     @Before
@@ -27,7 +27,7 @@ public class RichTextEditorIsEmptyTest {
     }
 
     @Test
-    public void quillDefaultHtml_isEmpty() {
+    public void hasQuillDefaultHtml_isEmpty() {
         // This is the default value of the Quill editor when there is no text
         editor.setValue("<p><br></p>");
         Assert.assertTrue(editor.isEmpty());
@@ -35,7 +35,7 @@ public class RichTextEditorIsEmptyTest {
     }
 
     @Test
-    public void singleLineBreak_isEmpty() {
+    public void hasSingleLineBreak_isEmpty() {
         editor.setValue("<h1><br></h1>");
         Assert.assertTrue(editor.isEmpty());
         Assert.assertTrue(editor.asHtml().isEmpty());
@@ -96,7 +96,7 @@ public class RichTextEditorIsEmptyTest {
 
     @Test
     public void hasImage_notEmpty() {
-        editor.setValue("<img src='https://vaadin.com'>");
+        editor.setValue("<img>");
         Assert.assertFalse(editor.isEmpty());
         Assert.assertFalse(editor.asHtml().isEmpty());
     }

@@ -1046,17 +1046,17 @@ public class RichTextEditor
         /**
          * Returns whether the value is considered to be empty.
          * <p>
-         * As the editor's HTML value always contains a minimal markup, this does
-         * not check if the value is an empty string. Instead, this method considers
-         * the value to not be empty if the user has added some content, which can
-         * be:
+         * As the editor's HTML value always contains a minimal markup, this
+         * does not check if the value is an empty string. Instead, this method
+         * considers the value to not be empty if the user has added some
+         * content, which can be:
          * <ul>
          * <li>Text, whitespaces or line breaks</li>
          * <li>An image</li>
          * </ul>
          * <p>
-         * Note that a single empty HTML tag, such as a heading, blockquote, etc.,
-         * is not considered as content.
+         * Note that a single empty HTML tag, such as a heading, blockquote,
+         * etc., is not considered as content.
          *
          * @return {@code true} if considered empty; {@code false} if not
          */
