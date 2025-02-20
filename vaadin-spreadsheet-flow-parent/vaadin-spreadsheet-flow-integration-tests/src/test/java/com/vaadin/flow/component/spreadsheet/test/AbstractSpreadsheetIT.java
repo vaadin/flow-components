@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -238,7 +239,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     public boolean isCellActiveWithinSelection(String address) {
         SheetCellElement cell = getSpreadsheet().getCellAt(address);
         return cell.isCellSelected()
-                && !cell.getAttribute("class").contains("cell-range");
+                && !cell.getClassNames().contains("cell-range");
     }
 
     public void clickOnColumnHeader(String columnAddress, Keys... modifiers) {
@@ -407,7 +408,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     }
 
     public String getAddressFieldValue() {
-        return getAddressField().getAttribute("value");
+        return getAddressField().getDomProperty("value");
     }
 
     public void setAddressFieldValue(String address) {
@@ -425,15 +426,15 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     }
 
     public String getFormulaFieldValue() {
-        return getFormulaField().getAttribute("value");
+        return getFormulaField().getDomProperty("value");
     }
 
     public String getSelectionFormula() {
         final var sprElement = getSpreadsheet();
 
-        WebElement selection = findElementInShadowRoot(
-                org.openqa.selenium.By.className("sheet-selection"));
-        final String[] classes = selection.getAttribute("class").split(" ");
+        TestBenchElement selection = sprElement.$("*")
+                .withClassName("sheet-selection").first();
+        final Set<String> classes = selection.getClassNames();
 
         int startRow = -1;
         int startColumn = -1;

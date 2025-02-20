@@ -92,7 +92,7 @@ public class HelperIT extends AbstractComponentIT {
         CheckboxElement checkboxHelperComponent = $(CheckboxElement.class)
                 .id("checkbox-helper-component");
         Assert.assertEquals("helper-component", checkboxHelperComponent
-                .getHelperComponent().getAttribute("id"));
+                .getHelperComponent().getDomAttribute("id"));
 
         $("button").id("empty-helper-component").click();
         Assert.assertEquals(null, checkboxHelperComponent.getHelperComponent());

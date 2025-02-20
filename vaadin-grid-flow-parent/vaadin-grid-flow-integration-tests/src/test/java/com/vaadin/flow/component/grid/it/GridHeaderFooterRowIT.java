@@ -88,11 +88,11 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
             if (haveTemplates) {
                 Assert.assertTrue(
                         templates.stream().allMatch(template -> template
-                                .getAttribute("class").contains(className)));
+                                .getDomAttribute("class").contains(className)));
             } else {
                 Assert.assertTrue(
                         templates.stream().noneMatch(template -> template
-                                .getAttribute("class").contains(className)));
+                                .getDomAttribute("class").contains(className)));
             }
         });
     }
@@ -123,7 +123,7 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
         clickButton("append-header-without-content");
         List<WebElement> headerCells = getHeaderCells();
         String lastHeaderContent = headerCells.get(headerCells.size() - 1)
-                .getAttribute("innerHTML");
+                .getDomProperty("innerHTML");
         Assert.assertTrue(
                 "The appended header should be empty, but contained text: '"
                         + lastHeaderContent + "'",
@@ -243,7 +243,7 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
                 2, headerCells.size());
         Assert.assertThat(
                 "The first header cell should contain the multiselection checkbox",
-                headerCells.get(0).getAttribute("innerHTML"),
+                headerCells.get(0).getDomProperty("innerHTML"),
                 CoreMatchers.containsString("vaadin-checkbox"));
         Assert.assertEquals(
                 "The second header cell should contain the set text", "0",
@@ -368,13 +368,13 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
     private void assertHeaderHasGridSorter(int headerIndexFromTop) {
         List<WebElement> headerCells = getHeaderCells();
         WebElement cellWithSorter = headerCells.get(headerIndexFromTop);
-        Assert.assertThat(cellWithSorter.getAttribute("innerHTML"),
+        Assert.assertThat(cellWithSorter.getDomProperty("innerHTML"),
                 CoreMatchers.containsString("vaadin-grid-sorter"));
 
         Assert.assertTrue("Only one header should have the sorting indicators",
                 headerCells.stream()
                         .filter(cell -> !cell.equals(cellWithSorter))
-                        .noneMatch(cell -> cell.getAttribute("innerHTML")
+                        .noneMatch(cell -> cell.getDomProperty("innerHTML")
                                 .contains("vaadin-grid-sorter")));
     }
 
@@ -392,12 +392,12 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
         WebElement thead = grid.$("*").id("header");
 
         List<WebElement> headers = thead.findElements(By.tagName("tr")).stream()
-                .filter(tr -> tr.getAttribute("hidden") == null)
+                .filter(tr -> tr.getDomAttribute("hidden") == null)
                 .flatMap(tr -> tr.findElements(By.tagName("th")).stream())
                 .collect(Collectors.toList());
 
         List<String> cellNames = headers.stream().map(header -> header
-                .findElement(By.tagName("slot")).getAttribute("name"))
+                .findElement(By.tagName("slot")).getDomAttribute("name"))
                 .collect(Collectors.toList());
 
         List<WebElement> headerCells = cellNames.stream()
@@ -410,7 +410,7 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
 
     private List<String> getHeaderContents() {
         return getHeaderCells().stream()
-                .map(cell -> cell.getAttribute("innerHTML"))
+                .map(cell -> cell.getDomProperty("innerHTML"))
                 .collect(Collectors.toList());
     }
 
@@ -429,12 +429,12 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
         WebElement tfoot = grid.$("*").id("footer");
 
         List<WebElement> footers = tfoot.findElements(By.tagName("tr")).stream()
-                .filter(tr -> tr.getAttribute("hidden") == null)
+                .filter(tr -> tr.getDomAttribute("hidden") == null)
                 .flatMap(tr -> tr.findElements(By.tagName("td")).stream())
                 .collect(Collectors.toList());
 
         List<String> cellNames = footers.stream().map(footer -> footer
-                .findElement(By.tagName("slot")).getAttribute("name"))
+                .findElement(By.tagName("slot")).getDomAttribute("name"))
                 .collect(Collectors.toList());
 
         List<WebElement> footerCells = cellNames.stream()

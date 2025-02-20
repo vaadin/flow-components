@@ -49,7 +49,7 @@ public class TextFieldPageIT extends AbstractComponentIT {
     public void assertReadOnly() {
         WebElement webComponent = findElement(By.tagName("vaadin-text-field"));
 
-        Assert.assertNull(webComponent.getAttribute("readonly"));
+        Assert.assertNull(webComponent.getDomAttribute("readonly"));
 
         WebElement button = findElement(By.id("read-only"));
         button.click();
@@ -66,7 +66,7 @@ public class TextFieldPageIT extends AbstractComponentIT {
     @Test
     public void assertRequired() {
         WebElement webComponent = findElement(By.tagName("vaadin-text-field"));
-        Assert.assertNull(webComponent.getAttribute("required"));
+        Assert.assertNull(webComponent.getDomAttribute("required"));
         WebElement button = findElement(By.id("required"));
         button.click();
         waitUntil(
@@ -271,21 +271,21 @@ public class TextFieldPageIT extends AbstractComponentIT {
         WebElement textField = findElement(
                 By.id("text-field-with-value-change-listener"));
         Assert.assertEquals("placeholder text",
-                textField.getAttribute("placeholder"));
+                textField.getDomAttribute("placeholder"));
     }
 
     @Test
     public void assertFocusShortcut() {
-        WebElement shortcutField = findElement(By.id("shortcut-field"));
-        Assert.assertNull(
+        TextFieldElement shortcutField = $(TextFieldElement.class)
+                .id("shortcut-field");
+        Assert.assertFalse(
                 "TextField should not be focused before the shortcut event is triggered.",
-                shortcutField.getAttribute("focused"));
+                shortcutField.hasAttribute("focused"));
 
         SendKeysHelper.sendKeys(driver, Keys.ALT, "1");
         Assert.assertTrue(
                 "TextField should be focused after the shortcut event is triggered.",
-                shortcutField.getAttribute("focused").equals("true")
-                        || shortcutField.getAttribute("focused").equals(""));
+                shortcutField.hasAttribute("focused"));
     }
 
     @Test
@@ -310,7 +310,7 @@ public class TextFieldPageIT extends AbstractComponentIT {
         TextFieldElement textFieldElement = $(TextFieldElement.class)
                 .id("helper-component-field");
         Assert.assertEquals("helper-component",
-                textFieldElement.getHelperComponent().getAttribute("id"));
+                textFieldElement.getHelperComponent().getDomProperty("id"));
     }
 
     @Test
@@ -318,7 +318,7 @@ public class TextFieldPageIT extends AbstractComponentIT {
         TextFieldElement textFieldElement = $(TextFieldElement.class)
                 .id("helper-component-field");
         Assert.assertEquals("helper-component",
-                textFieldElement.getHelperComponent().getAttribute("id"));
+                textFieldElement.getHelperComponent().getDomProperty("id"));
 
         $(TestBenchElement.class).id("clear-helper-component-button").click();
         Assert.assertNull(textFieldElement.getHelperComponent());

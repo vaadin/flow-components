@@ -123,7 +123,8 @@ public class GridViewUsingComponentsIT extends AbstractComponentIT {
         return cells.stream()
                 .map(cell -> cell.findElements(By.tagName(componentTag)))
                 .filter(list -> !list.isEmpty()).map(list -> list.get(0))
-                .anyMatch(cell -> text.equals(cell.getAttribute("innerHTML")));
+                .anyMatch(
+                        cell -> text.equals(cell.getDomProperty("innerHTML")));
     }
 
     private void assertComponentRendereredDetails(WebElement grid, int rowIndex,
@@ -144,7 +145,7 @@ public class GridViewUsingComponentsIT extends AbstractComponentIT {
 
         Pattern pattern = Pattern.compile("<span>Name:\\s?([\\w\\s]*)</span>");
         Matcher innerHTML = pattern
-                .matcher(layouts.get(0).getAttribute("innerHTML"));
+                .matcher(layouts.get(0).getDomProperty("innerHTML"));
         Assert.assertTrue(
                 "No result found for " + pattern.toString()
                         + " when searching for name: " + personName,

@@ -75,12 +75,12 @@ public class CustomGridIT extends AbstractComponentIT {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         GridElement grid = $(GridElement.class).first();
 
-        Assert.assertNotEquals("no-border", crud.getAttribute("theme"));
-        Assert.assertNotEquals("no-border", grid.getAttribute("theme"));
+        Assert.assertNotEquals("no-border", crud.getDomAttribute("theme"));
+        Assert.assertNotEquals("no-border", grid.getDomAttribute("theme"));
 
         toggleBordersButton().click();
-        Assert.assertEquals("no-border", crud.getAttribute("theme"));
-        Assert.assertNotEquals("no-border", grid.getAttribute("theme"));
+        Assert.assertEquals("no-border", crud.getDomAttribute("theme"));
+        Assert.assertNotEquals("no-border", grid.getDomAttribute("theme"));
     }
 
     @Test

@@ -153,7 +153,7 @@ public class VirtualListViewIT extends AbstractComponentIT {
                 "return Vaadin.Flow.clients.ROOT.getByNodeId(arguments[0]).textContent",
                 nodeId);
         Assert.assertEquals("The placeholder component of the '"
-                + list.getAttribute("id")
+                + list.getDomAttribute("id")
                 + "' virtual-list should have the '-----' as text content",
                 "-----", text);
     }
@@ -168,13 +168,13 @@ public class VirtualListViewIT extends AbstractComponentIT {
 
         List<WebElement> content = list
                 .findElements(By.cssSelector("vaadin-vertical-layout")).stream()
-                .filter(element -> !element.getAttribute("innerHTML")
+                .filter(element -> !element.getDomProperty("innerHTML")
                         .contains("-----")) // placeholders
                 .collect(Collectors.toList());
 
-        waitUntil(driver -> content.get(0).getAttribute("disabled") != null);
+        waitUntil(driver -> content.get(0).getDomAttribute("disabled") != null);
         Optional<WebElement> notDisabled = content.stream()
-                .filter(item -> item.getAttribute("disabled") == null)
+                .filter(item -> item.getDomAttribute("disabled") == null)
                 .findFirst();
 
         if (notDisabled.isPresent()) {
@@ -188,7 +188,7 @@ public class VirtualListViewIT extends AbstractComponentIT {
         JsonArray items = VirtualListIT.getItems(getDriver(), list);
         Assert.assertEquals(
                 "There should be " + expectedSize + " items in the '"
-                        + list.getAttribute("id") + "' virtual-list",
+                        + list.getDomAttribute("id") + "' virtual-list",
                 expectedSize, items.length());
     }
 
@@ -211,7 +211,7 @@ public class VirtualListViewIT extends AbstractComponentIT {
         var keyForFirstName = obj.keySet().stream()
                 .filter(key -> key.endsWith("firstName")).findFirst().get();
         Assert.assertEquals("The placeholderItem object of the '"
-                + list.getAttribute("id")
+                + list.getDomAttribute("id")
                 + "' virtual-list should have the '-----' as firstName property",
                 "-----", obj.get(keyForFirstName));
     }
