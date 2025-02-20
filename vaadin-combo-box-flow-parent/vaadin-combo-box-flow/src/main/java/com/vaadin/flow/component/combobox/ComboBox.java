@@ -450,4 +450,16 @@ public class ComboBox<T> extends ComboBoxBase<ComboBox<T>, T, T>
             return this;
         }
     }
+
+    /**
+     * Sets the "debounce timeout" that the component waits for a short pause in
+     * typing, before triggering a server-side visit to filter items. The
+     * default is 500ms.
+     *
+     * @param filterTimeout the time in milliseconds that needs to happen
+     * between keystrokes until filtering is triggered.
+     */
+    public void setFilterTimeout(int filterTimeout) {
+
+    }
 }
