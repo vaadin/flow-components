@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import org.jsoup.nodes.Document;
+
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEvent;
@@ -262,6 +264,41 @@ public class RichTextEditor
     private static String modelToPresentation(String htmlValue) {
         // Sanitize HTML sent to client
         return sanitize(htmlValue);
+    }
+
+    /**
+     * Returns whether the value is considered to be empty.
+     * <p>
+     * As the editor's HTML value always contains a minimal markup, this does
+     * not check if the value is an empty string. Instead, this method considers
+     * the value to not be empty if the user has added some content, which can
+     * be:
+     * <ul>
+     * <li>Text, whitespaces or line breaks</li>
+     * <li>An image</li>
+     * </ul>
+     * <p>
+     * Note that a single empty HTML tag, such as a heading, blockquote, etc.,
+     * is not considered as content.
+     *
+     * @return {@code true} if considered empty; {@code false} if not
+     */
+    @Override
+    public boolean isEmpty() {
+        Document document = org.jsoup.Jsoup.parse(getValue());
+
+        // Get non-normalized text including spaces and newlines
+        // Note that <br>s count as newlines
+        String text = document.body().wholeText();
+
+        // Remove first newline occurrence as Quill editor adds a single <br> in
+        // every element even without the user having typed anything
+        text = text.replaceFirst("\n", "");
+
+        boolean hasText = !text.isEmpty();
+        boolean hasImages = document.selectFirst("img") != null;
+
+        return !hasText && !hasImages;
     }
 
     /**
@@ -1004,6 +1041,28 @@ public class RichTextEditor
         @Override
         public String getEmptyValue() {
             return "";
+        }
+
+        /**
+         * Returns whether the value is considered to be empty.
+         * <p>
+         * As the editor's HTML value always contains a minimal markup, this
+         * does not check if the value is an empty string. Instead, this method
+         * considers the value to not be empty if the user has added some
+         * content, which can be:
+         * <ul>
+         * <li>Text, whitespaces or line breaks</li>
+         * <li>An image</li>
+         * </ul>
+         * <p>
+         * Note that a single empty HTML tag, such as a heading, blockquote,
+         * etc., is not considered as content.
+         *
+         * @return {@code true} if considered empty; {@code false} if not
+         */
+        @Override
+        public boolean isEmpty() {
+            return RichTextEditor.this.isEmpty();
         }
     }
 
