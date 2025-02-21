@@ -120,7 +120,6 @@ public interface ThemableLayout extends HasElement {
      *            "1%") for values other than 0.
      */
     default void setSpacing(String spacing) {
-        setSpacing(true);
         getElement().getStyle().set("gap", spacing);
     }
 
