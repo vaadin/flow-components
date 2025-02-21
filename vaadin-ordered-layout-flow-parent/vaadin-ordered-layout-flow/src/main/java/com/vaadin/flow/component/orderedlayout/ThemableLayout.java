@@ -141,6 +141,12 @@ public interface ThemableLayout extends HasElement {
     /**
      * Gets the spacing between the components inside the layout.
      *
+     * <p>
+     * The value returned is the value set by {@link #setSpacing(String)} or
+     * {@link #setSpacing(float, Unit)}. If the spacing was set using
+     * {@link #setSpacing(boolean)}, this method will return {@code null}. On
+     * this case, use {@link #isSpacing()} instead.
+     *
      * @return the spacing between the components
      */
     default String getSpacing() {
