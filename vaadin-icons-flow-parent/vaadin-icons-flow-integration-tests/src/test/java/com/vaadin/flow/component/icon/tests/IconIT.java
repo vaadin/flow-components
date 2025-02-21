@@ -102,7 +102,7 @@ public class IconIT extends AbstractComponentIT {
     private void assertIconProperty(WebElement icon, String collection,
             String iconName) {
         Assert.assertEquals(collection + ":" + iconName,
-                icon.getAttribute("icon"));
+                icon.getDomAttribute("icon"));
     }
 
     private void assertCssValue(WebElement element, String propertyName,

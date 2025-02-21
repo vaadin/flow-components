@@ -73,7 +73,7 @@ public class PreserveOnRefreshIT extends AbstractComponentIT {
         getDriver().navigate().refresh();
         TestBenchElement notification = $(NOTIFICATION_TAG).first();
         boolean containsComponentContent = notification.$("span")
-                .attribute("id", "component-content").exists();
+                .withAttribute("id", "component-content").exists();
         Assert.assertTrue(
                 "Notification card does not contain added component anymore",
                 containsComponentContent);

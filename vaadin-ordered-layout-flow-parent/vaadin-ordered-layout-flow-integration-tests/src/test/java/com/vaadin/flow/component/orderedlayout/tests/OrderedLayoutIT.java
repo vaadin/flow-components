@@ -77,11 +77,12 @@ public class OrderedLayoutIT extends AbstractComponentIT {
         layoutToCheck.findElement(By.id(String.format("toggle-%s", themeName)))
                 .click();
         if (shouldPresent) {
-            waitUntil(dr -> layoutToCheck.getAttribute("theme") != null
-                    && layoutToCheck.getAttribute("theme").contains(themeName));
+            waitUntil(dr -> layoutToCheck.getDomAttribute("theme") != null
+                    && layoutToCheck.getDomAttribute("theme")
+                            .contains(themeName));
         } else {
-            waitUntil(dr -> layoutToCheck.getAttribute("theme") == null
-                    || !layoutToCheck.getAttribute("theme")
+            waitUntil(dr -> layoutToCheck.getDomAttribute("theme") == null
+                    || !layoutToCheck.getDomAttribute("theme")
                             .contains(themeName));
         }
     }

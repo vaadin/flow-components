@@ -45,7 +45,7 @@ public class DashboardElement extends TestBenchElement {
 
     private Float getSortIndex(TestBenchElement element) {
         var wrapper = element.getPropertyElement("parentElement");
-        var slotName = wrapper.getAttribute("slot");
+        var slotName = wrapper.getDomAttribute("slot");
         var slotNumber = Float.parseFloat(slotName.split("-")[1]);
         var wrapperParent = wrapper.getPropertyElement("parentElement");
         if ($(DashboardSectionElement.class).all().contains(wrapperParent)) {

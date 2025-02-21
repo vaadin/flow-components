@@ -44,12 +44,12 @@ public class AppLayoutIT extends AbstractComponentIT {
 
         Assert.assertNotNull(layout.getDrawerToggle());
 
-        layout.$("a").attribute("href", "vaadin-app-layout/Page1").first()
+        layout.$("a").withAttribute("href", "vaadin-app-layout/Page1").first()
                 .click();
         Assert.assertEquals("This is Page 1", $(AppLayoutElement.class)
                 .waitForFirst().getContent().getText());
 
-        layout.$("a").attribute("href", "vaadin-app-layout/Page2").first()
+        layout.$("a").withAttribute("href", "vaadin-app-layout/Page2").first()
                 .click();
         Assert.assertEquals("This is Page 2", $(AppLayoutElement.class)
                 .waitForFirst().getContent().getText());

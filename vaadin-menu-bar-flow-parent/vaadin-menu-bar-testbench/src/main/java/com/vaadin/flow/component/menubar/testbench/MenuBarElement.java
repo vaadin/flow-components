@@ -17,6 +17,7 @@ package com.vaadin.flow.component.menubar.testbench;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
@@ -62,7 +63,7 @@ public class MenuBarElement extends TestBenchElement {
     }
 
     private boolean isOverflowButton(TestBenchElement element) {
-        return element.getAttribute("slot").contains("overflow");
+        return Objects.equals("overflow", element.getDomAttribute("slot"));
     }
 
     private boolean isVisible(TestBenchElement element) {

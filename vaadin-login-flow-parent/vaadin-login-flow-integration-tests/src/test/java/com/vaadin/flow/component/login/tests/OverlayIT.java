@@ -100,7 +100,7 @@ public class OverlayIT extends AbstractLoginIT {
 
         title = loginOverlay.getTitleComponent();
         Assert.assertEquals("vaadin:vaadin-h",
-                title.$("vaadin-icon").first().getAttribute("icon"));
+                title.$("vaadin-icon").first().getDomAttribute("icon"));
 
         Assert.assertEquals("Component title", title.$("h3").first().getText());
 

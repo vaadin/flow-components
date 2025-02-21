@@ -88,8 +88,7 @@ public class CheckboxGroupIT extends AbstractComponentIT {
         CheckboxGroupElement group = $(CheckboxGroupElement.class)
                 .id("checkbox-group-disabled");
 
-        Assert.assertEquals(Boolean.TRUE.toString(),
-                group.getAttribute("disabled"));
+        Assert.assertFalse(group.isEnabled());
     }
 
     @Test
@@ -124,10 +123,8 @@ public class CheckboxGroupIT extends AbstractComponentIT {
 
         List<CheckboxElement> checkboxes = group.getCheckboxes();
 
-        Assert.assertEquals(Boolean.TRUE.toString(),
-                checkboxes.get(1).getAttribute("readonly"));
-        Assert.assertEquals(Boolean.TRUE.toString(),
-                group.getAttribute("readonly"));
+        Assert.assertTrue(checkboxes.get(1).hasAttribute("readonly"));
+        Assert.assertTrue(group.hasAttribute("readonly"));
 
         scrollToElement(group);
         getCommandExecutor().executeScript("window.scrollBy(0,50);");
@@ -159,10 +156,10 @@ public class CheckboxGroupIT extends AbstractComponentIT {
                 .id("checkbox-group-theme-variants");
 
         scrollToElement(group);
-        Assert.assertEquals("vertical", group.getAttribute("theme"));
+        Assert.assertEquals("vertical", group.getDomAttribute("theme"));
 
         findElement(By.id("remove-theme-variant-button")).click();
-        Assert.assertNull(group.getAttribute("theme"));
+        Assert.assertNull(group.getDomAttribute("theme"));
     }
 
     @Test
@@ -202,7 +199,7 @@ public class CheckboxGroupIT extends AbstractComponentIT {
         WebElement anchor = checkboxes.get(2).findElement(By.tagName("img"));
 
         Assert.assertEquals("https://vaadin.com/images/vaadin-logo.svg",
-                anchor.getAttribute("src"));
+                anchor.getDomAttribute("src"));
 
         Assert.assertEquals("Bill", checkboxes.get(2).getText());
     }

@@ -53,7 +53,7 @@ public class DynamicContextMenuGridIT extends AbstractComponentIT {
         verifyOpened();
 
         Assert.assertEquals("Person 40",
-                $(OVERLAY_TAG).first().getAttribute("innerText"));
+                $(OVERLAY_TAG).first().getDomProperty("innerText"));
 
         $("body").first().click();
         verifyClosed();
@@ -74,7 +74,7 @@ public class DynamicContextMenuGridIT extends AbstractComponentIT {
 
         verifyOpened();
         Assert.assertEquals("Person 40",
-                $(OVERLAY_TAG).first().getAttribute("innerText"));
+                $(OVERLAY_TAG).first().getDomProperty("innerText"));
     }
 
     private void verifyOpened() {

@@ -348,7 +348,7 @@ public class GridElement extends TestBenchElement {
         List<WebElement> headerCells = headerRows.get(rowIndex)
                 .findElements(By.tagName("th"));
         String slotName = headerCells.get(columnIndex)
-                .findElement(By.tagName("slot")).getAttribute("name");
+                .findElement(By.tagName("slot")).getDomAttribute("name");
 
         return findElement(By.cssSelector(
                 "vaadin-grid-cell-content[slot='" + slotName + "']"));
