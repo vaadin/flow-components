@@ -31,8 +31,8 @@ function parseISO(text) {
     minutes: parseInt(timeObject.minutes || 0),
     seconds: parseInt(timeObject.seconds || 0),
     milliseconds: parseInt(timeObject.milliseconds || 0)
-  }
-};
+  };
+}
 
 window.Vaadin.Flow.timepickerConnector = {};
 window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
@@ -57,9 +57,7 @@ window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
       locale = 'en-US';
       // FIXME should do a callback for server to throw an exception ?
       throw new Error(
-        'vaadin-time-picker: The locale ' +
-          locale +
-          ' is not supported, falling back to default locale setting(en-US).'
+        'vaadin-time-picker: The locale ' + locale + ' is not supported, falling back to default locale setting(en-US).'
       );
     }
 
@@ -158,9 +156,7 @@ window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
             minutes: minutes ? parseDigitsIntoInteger(minutes[0].replace(separator, '')) : 0,
             seconds: seconds ? parseDigitsIntoInteger(seconds[0].replace(separator, '')) : 0,
             milliseconds:
-              minutes && seconds && milliseconds
-                ? parseMillisecondsIntoInteger(milliseconds[0].replace('.', ''))
-                : 0
+              minutes && seconds && milliseconds ? parseMillisecondsIntoInteger(milliseconds[0].replace('.', '')) : 0
           };
           cachedTimeString = timeString;
           return cachedTimeObject;
@@ -182,4 +178,4 @@ window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
       );
     }
   };
-}
+};

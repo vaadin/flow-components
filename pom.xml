@@ -558,6 +558,18 @@
                             <file>${spotless.licence-header}</file>
                         </licenseHeader>
                     </java>
+                    <typescript>
+                        <includes>
+                            <include>src/**/*.js</include>
+                            <include>src/**/*.ts</include>
+                        </includes>
+                        <excludes>
+                            <exclude>src/**/SpreadsheetSingleScriptTemplate.js</exclude>
+                        </excludes>
+                        <prettier>
+                            <configFile>${maven.multiModuleProjectDirectory}/.prettierrc</configFile>
+                        </prettier>
+                    </typescript>
                     <pom>
                         <sortPom>
                             <expandEmptyElements>false</expandEmptyElements>
