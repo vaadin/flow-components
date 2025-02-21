@@ -73,12 +73,14 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
     /**
      * {@inheritDoc}
      * <p>
-     * Note that column related data is sent to the client side even if the
-     * column is invisible. Use {@link Grid#removeColumn(Column)} to remove
-     * column (or don't add the column all) and avoid sending extra data.
+     * By default, every added column sends data to the client side regardless
+     * of its visibility state. To avoid sending extra data, either remove the
+     * column using {@link Grid#removeColumn(Column)} or use
+     * {@link Column#setGenerateDataWhenHidden(boolean)}.
      * </p>
      *
      * @see Grid#removeColumn(Column)
+     * @see Column#setGenerateDataWhenHidden(boolean)
      */
     @Override
     public void setVisible(boolean visible) {
