@@ -160,7 +160,7 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void close_reopenBeforeClientResponse_notAutoRemoved() {
+    public void close_reopenBeforeClientResponse_autoRemovedAndAutoAdded() {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
