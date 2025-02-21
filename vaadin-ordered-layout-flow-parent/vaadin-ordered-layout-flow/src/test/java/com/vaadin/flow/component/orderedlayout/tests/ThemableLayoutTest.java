@@ -17,6 +17,7 @@ package com.vaadin.flow.component.orderedlayout.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.function.Consumer;
@@ -103,6 +104,17 @@ public class ThemableLayoutTest {
         layout.setSpacing(false);
         assertFalse("Expected no spacing applied after removing it",
                 layout.isSpacing());
+    }
+
+    @Test
+    public void removeSpacing_gapIsRemoved() {
+        layout.setSpacing("20px");
+        layout.setSpacing(false);
+        assertFalse("Expected spacing to be removed after setting it to false",
+                layout.isSpacing());
+        assertNull("Expected spacing to be null", layout.getSpacing());
+        assertNull("Expected gap to be null",
+                layout.getElement().getStyle().get("gap"));
     }
 
     private void checkThemeToggling(String themeName,
