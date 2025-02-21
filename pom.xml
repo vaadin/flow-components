@@ -562,6 +562,8 @@
                         <includes>
                             <include>src/**/*.js</include>
                             <include>src/**/*.ts</include>
+                            <include>frontend/**/*.js</include>
+                            <include>frontend/**/*.ts</include>
                         </includes>
                         <excludes>
                             <exclude>src/**/SpreadsheetSingleScriptTemplate.js</exclude>
