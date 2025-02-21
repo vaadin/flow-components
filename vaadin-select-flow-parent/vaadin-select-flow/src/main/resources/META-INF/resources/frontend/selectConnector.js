@@ -1,4 +1,4 @@
-window.Vaadin.Flow.selectConnector = {}
+window.Vaadin.Flow.selectConnector = {};
 window.Vaadin.Flow.selectConnector.initLazy = (select) => {
   // do not init this connector twice for the given select
   if (select.$connector) {
@@ -16,4 +16,4 @@ window.Vaadin.Flow.selectConnector.initLazy = (select) => {
       root.appendChild(listBox);
     }
   };
-}
+};

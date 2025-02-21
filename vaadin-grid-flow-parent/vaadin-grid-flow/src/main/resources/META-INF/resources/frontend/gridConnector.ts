@@ -42,9 +42,9 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   let cache = {};
 
   /* parentRequestDelay - optimizes parent requests by batching several requests
-    *  into one request. Delay in milliseconds. Disable by setting to 0.
-    *  parentRequestBatchMaxSize - maximum size of the batch.
-    */
+   *  into one request. Delay in milliseconds. Disable by setting to 0.
+   *  parentRequestBatchMaxSize - maximum size of the batch.
+   */
   const parentRequestDelay = 50;
   const parentRequestBatchMaxSize = 20;
 
@@ -234,11 +234,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     const delay = grid._hasData ? rootRequestDelay : 0;
 
     rootRequestDebouncer = Debouncer.debounce(rootRequestDebouncer, timeOut.after(delay), () => {
-      grid.$connector.fetchPage(
-        (firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size),
-        page,
-        root
-      );
+      grid.$connector.fetchPage((firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size), page, root);
     });
   };
 
@@ -496,9 +492,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     const items = cache[parentKey][page];
     const parentItem = createEmptyItemFromKey(parentKey);
 
-    let gridCache = parentKey === root
-      ? dataProviderController.rootCache
-      : dataProviderController.getItemSubCache(parentItem);
+    let gridCache =
+      parentKey === root ? dataProviderController.rootCache : dataProviderController.getItemSubCache(parentItem);
 
     // Force update unless there's a callback waiting
     if (gridCache && !gridCache.pendingRequests[page]) {
@@ -704,9 +699,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       return;
     }
     if (index % grid.pageSize != 0) {
-      throw (
-        'Got cleared data for index ' + index + ' which is not aligned with the page size of ' + grid.pageSize
-      );
+      throw 'Got cleared data for index ' + index + ' which is not aligned with the page size of ' + grid.pageSize;
     }
 
     let firstPage = Math.floor(index / grid.pageSize);

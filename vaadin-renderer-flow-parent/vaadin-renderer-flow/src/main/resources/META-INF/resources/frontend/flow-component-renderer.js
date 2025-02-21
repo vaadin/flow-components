@@ -24,7 +24,7 @@ function getNode(appid, nodeid) {
  * @param {Element} root
  */
 function setChildNodes(appid, nodeIds, root) {
-  render(litHtml`${nodeIds.map(id => flowComponentDirective(appid, id))}`, root);
+  render(litHtml`${nodeIds.map((id) => flowComponentDirective(appid, id))}`, root);
 }
 
 /**
@@ -75,7 +75,7 @@ class FlowComponentRenderer extends PolymerElement {
   static get properties() {
     return {
       nodeid: Number,
-      appid: String,
+      appid: String
     };
   }
   static get observers() {
@@ -85,11 +85,7 @@ class FlowComponentRenderer extends PolymerElement {
   ready() {
     super.ready();
     this.addEventListener('click', function (event) {
-      if (
-        this.firstChild &&
-        typeof this.firstChild.click === 'function' &&
-        event.target === this
-      ) {
+      if (this.firstChild && typeof this.firstChild.click === 'function' && event.target === this) {
         event.stopPropagation();
         this.firstChild.click();
       }
@@ -98,9 +94,7 @@ class FlowComponentRenderer extends PolymerElement {
   }
 
   _asyncAttachRenderedComponentIfAble() {
-    this._debouncer = Debouncer.debounce(this._debouncer, idlePeriod, () =>
-      this._attachRenderedComponentIfAble()
-    );
+    this._debouncer = Debouncer.debounce(this._debouncer, idlePeriod, () => this._attachRenderedComponentIfAble());
   }
 
   _attachRenderedComponentIfAble() {
@@ -140,11 +134,7 @@ class FlowComponentRenderer extends PolymerElement {
     try {
       return window.Vaadin.Flow.clients[this.appid].getByNodeId(this.nodeid);
     } catch (error) {
-      console.error(
-        'Could not get node %s from app %s',
-        this.nodeid,
-        this.appid
-      );
+      console.error('Could not get node %s from app %s', this.nodeid, this.appid);
       console.error(error);
     }
     return null;

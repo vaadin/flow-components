@@ -1062,13 +1062,13 @@ export const spreadsheetStyles = css`
   /*
    * Lumo theme variant styles
    */
-  :host([theme~="lumo"]) {
-	--default-background-color: var(--lumo-base-color);
-	--default-color: var(--lumo-body-text-color);
+  :host([theme~='lumo']) {
+    --default-background-color: var(--lumo-base-color);
+    --default-color: var(--lumo-body-text-color);
     background-color: var(--lumo-base-color);
   }
 
-  :where(:host([theme~="lumo"])) .v-spreadsheet .sheet .cell {
+  :where(:host([theme~='lumo'])) .v-spreadsheet .sheet .cell {
     font-family: var(--lumo-font-family);
     color: var(--lumo-body-text-color);
     background-color: var(--lumo-base-color);
@@ -1078,178 +1078,179 @@ export const spreadsheetStyles = css`
     padding: 0 var(--lumo-space-xs);
     --default-font-family: var(--lumo-font-family) !important;
     --default-font-size: var(--lumo-font-size-s) !important;
-  } 
+  }
 
-  :host([theme~="lumo"]) .v-spreadsheet {
+  :host([theme~='lumo']) .v-spreadsheet {
     border: 1px solid var(--lumo-contrast-20pct);
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-m);
     color: var(--lumo-body-text-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar {
+  :host([theme~='lumo']) .v-spreadsheet .functionbar {
     background-color: var(--lumo-base-color);
     border-bottom: 1px solid var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar .functionfield,
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar .addressfield {
+  :host([theme~='lumo']) .v-spreadsheet .functionbar .functionfield,
+  :host([theme~='lumo']) .v-spreadsheet .functionbar .addressfield {
     font-size: var(--lumo-font-size-s);
     font-family: var(--lumo-font-family);
     color: var(--lumo-body-text-color);
     background-color: var(--lumo-base-color);
-    padding: 0px 0px 0px var(--lumo-space-s);  }
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar .arrow {
+    padding: 0px 0px 0px var(--lumo-space-s);
+  }
+  :host([theme~='lumo']) .v-spreadsheet .functionbar .arrow {
     font-size: var(--lumo-font-size-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar .fixed-left-panel {
+  :host([theme~='lumo']) .v-spreadsheet .functionbar .fixed-left-panel {
     border-right: 1px solid var(--lumo-contrast-20pct);
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
   }
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar .adjusting-right-panel {
+  :host([theme~='lumo']) .v-spreadsheet .functionbar .adjusting-right-panel {
     padding-right: var(--lumo-space-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar .addressfield {
+  :host([theme~='lumo']) .v-spreadsheet .functionbar .addressfield {
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
   }
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar .formulaoverlay {
+  :host([theme~='lumo']) .v-spreadsheet .functionbar .formulaoverlay {
     color: var(--lumo-contrast-20pct);
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .functionbar .formulaoverlay span {
+  :host([theme~='lumo']) .v-spreadsheet .functionbar .formulaoverlay span {
     border-radius: var(--lumo-border-radius-s);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet .cell.selected-cell-highlight {
+  :host([theme~='lumo']) .v-spreadsheet .sheet .cell.selected-cell-highlight {
     outline: solid var(--lumo-contrast-80pct) 1px;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet div.custom-editor-cell {
+  :host([theme~='lumo']) .v-spreadsheet .sheet div.custom-editor-cell {
     padding: var(--lumo-space-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet > input[type='text'] {
+  :host([theme~='lumo']) .v-spreadsheet .sheet > input[type='text'] {
     margin-left: -1px;
     margin-top: -1px;
     box-shadow: var(--lumo-box-shadow-s);
     color: var(--lumo-body-text-color);
     outline: 1px solid var(--lumo-primary-color) !important;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet .floater {
+  :host([theme~='lumo']) .v-spreadsheet .sheet .floater {
     background-color: var(--lumo-base-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .top-left-pane,
-  :host([theme~="lumo"]) .v-spreadsheet .top-right-pane,
-  :host([theme~="lumo"]) .v-spreadsheet .bottom-left-pane {
+  :host([theme~='lumo']) .v-spreadsheet .top-left-pane,
+  :host([theme~='lumo']) .v-spreadsheet .top-right-pane,
+  :host([theme~='lumo']) .v-spreadsheet .bottom-left-pane {
     border-right: 1px solid var(--lumo-contrast-50pct);
-    border-bottom: 1px solid  var(--lumo-contrast-50pct);
+    border-bottom: 1px solid var(--lumo-contrast-50pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .top-left-pane.inactive,
-  :host([theme~="lumo"]) .v-spreadsheet .top-right-pane.inactive,
-  :host([theme~="lumo"]) .v-spreadsheet .bottom-left-pane.inactive {
+  :host([theme~='lumo']) .v-spreadsheet .top-left-pane.inactive,
+  :host([theme~='lumo']) .v-spreadsheet .top-right-pane.inactive,
+  :host([theme~='lumo']) .v-spreadsheet .bottom-left-pane.inactive {
     border-right: 0;
     border-bottom: 0;
-  }  
-  :host([theme~="lumo"]) .v-spreadsheet .ch,
-  :host([theme~="lumo"]) .v-spreadsheet .rh,
-  :host([theme~="lumo"]) .v-spreadsheet .corner {
+  }
+  :host([theme~='lumo']) .v-spreadsheet .ch,
+  :host([theme~='lumo']) .v-spreadsheet .rh,
+  :host([theme~='lumo']) .v-spreadsheet .corner {
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     background-color: var(--lumo-base-color);
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .rh {
+  :host([theme~='lumo']) .v-spreadsheet .rh {
     border-right: 1px solid var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .rh.selected-row-header {
+  :host([theme~='lumo']) .v-spreadsheet .rh.selected-row-header {
     border-right: 2px solid var(--lumo-primary-color-50pct);
     background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct)) !important;
     background-color: var(--lumo-base-color) !important;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .rh .header-resize-dnd-second {
+  :host([theme~='lumo']) .v-spreadsheet .rh .header-resize-dnd-second {
     border-bottom: 1px solid var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .rh.resize-extra {
+  :host([theme~='lumo']) .v-spreadsheet .rh.resize-extra {
     border-bottom: 1px solid var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .ch {
+  :host([theme~='lumo']) .v-spreadsheet .ch {
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     border-bottom: 1px solid var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .ch.selected-column-header {
+  :host([theme~='lumo']) .v-spreadsheet .ch.selected-column-header {
     border-bottom: 2px solid var(--lumo-primary-color-50pct);
     background-image: linear-gradient(var(--lumo-primary-color-10pct), var(--lumo-primary-color-10pct)) !important;
     background-color: var(--lumo-base-color) !important;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .ch .header-resize-dnd-second {
+  :host([theme~='lumo']) .v-spreadsheet .ch .header-resize-dnd-second {
     border-right: 1px solid var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .ch.resize-extra {
+  :host([theme~='lumo']) .v-spreadsheet .ch.resize-extra {
     border-right: 1px solid var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet > div.resize-line {
+  :host([theme~='lumo']) .v-spreadsheet > div.resize-line {
     background: var(--lumo-primary-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .corner {
+  :host([theme~='lumo']) .v-spreadsheet .corner {
     border-bottom: 1px solid var(--lumo-contrast-20pct);
     border-right: 1px solid var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet .cell-comment-triangle {
+  :host([theme~='lumo']) .v-spreadsheet .sheet .cell-comment-triangle {
     border-color: transparent var(--lumo-warning-color) transparent transparent;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet .cell-invalidformula-triangle {
+  :host([theme~='lumo']) .v-spreadsheet .sheet .cell-invalidformula-triangle {
     border-color: transparent var(--lumo-error-color) transparent transparent;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet .comment-overlay-line {
+  :host([theme~='lumo']) .v-spreadsheet .sheet .comment-overlay-line {
     background-color: var(--lumo-contrast-10pct) !important;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-top,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-left,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-bottom,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-right {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-top,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-left,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-bottom,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-right {
     background-color: var(--lumo-primary-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-top.extend,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-left.extend,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-bottom.extend,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-right.extend {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-top.extend,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-left.extend,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-bottom.extend,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-right.extend {
     background-color: var(--lumo-success-color) !important;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection .s-corner {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection .s-corner {
     background-color: var(--lumo-success-color);
     outline: 2px solid var(--lumo-base-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.paintmode {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection.paintmode {
     background-color: var(--lumo-success-color-10pct) !important;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.paintmode .s-top,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.paintmode .s-left,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.paintmode .s-bottom,
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.paintmode .s-right {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection.paintmode .s-top,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection.paintmode .s-left,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection.paintmode .s-bottom,
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection.paintmode .s-right {
     background-color: var(--lumo-success-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet {
     background: var(--lumo-base-color);
     border-top: 1px solid var(--lumo-contrast-20pct);
     height: calc(var(--lumo-font-size-s) + 14px);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options {
     background: var(--lumo-base-color);
     cursor: var(--lumo-clickable-cursor);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div {
     cursor: var(--lumo-clickable-cursor);
     color: var(--lumo-primary-text-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div:hover {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div:hover {
     background: var(--lumo-primary-color-10pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.hidden {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-options div.hidden {
     color: var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container {
     height: calc(var(--lumo-font-size-s) + 12px);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab {
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
     font-weight: 400;
@@ -1266,28 +1267,33 @@ export const spreadsheetStyles = css`
     margin-left: var(--lumo-space-s);
     padding: var(--lumo-space-xs) var(--lumo-space-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab.selected-tab {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab.selected-tab {
     background: var(--lumo-base-color);
     color: var(--lumo-primary-text-color);
     box-shadow: var(--lumo-box-shadow-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-container .sheet-tabsheet-tab.selected-tab input[type='text'] {
+  :host([theme~='lumo'])
+    .v-spreadsheet
+    .sheet-tabsheet
+    .sheet-tabsheet-container
+    .sheet-tabsheet-tab.selected-tab
+    input[type='text'] {
     font-family: var(--lumo-font-familty);
     font-size: var(--lumo-font-size-s);
     color: var(--lumo-primary-text-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-temp {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-temp {
     font-family: var(--lumo-font-family);
     font-size: var(--lumo-font-size-s);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-infolabel {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-tabsheet .sheet-tabsheet-infolabel {
     background: var(--lumo-contrast-5pct);
     font-size: var(--lumo-font-size-s);
     border-left: 1px solid var(--lumo-contrast-20pct);
     padding-left: var(--lumo-space-xs);
     padding-right: var(--lumo-space-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet div div.popupbutton {
+  :host([theme~='lumo']) .v-spreadsheet .sheet div div.popupbutton {
     color: var(--lumo-body-text-color);
     cursor: var(--lumo-clickable-cursor);
     height: 100%;
@@ -1298,116 +1304,116 @@ export const spreadsheetStyles = css`
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     border-radius: var(--lumo-border-radius-s);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet div div.popupbutton:after {
+  :host([theme~='lumo']) .v-spreadsheet .sheet div div.popupbutton:after {
     font-family: 'lumo-icons';
     content: var(--lumo-icons-angle-down);
     font-size: var(--lumo-font-size-xs);
     color: var(--lumo-body-text-color);
     vertical-align: top;
   }
-  :host([theme~="lumo"]) .popupbutton.active {
+  :host([theme~='lumo']) .popupbutton.active {
     box-shadow: var(--lumo-box-shadow-xs) inset;
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.touch.fill .fill-touch-square > .square {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection.touch.fill .fill-touch-square > .square {
     background-color: var(--lumo-success-color);
     border: 2px solid var(--lumo-base-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet-selection.touch .s-corner {
+  :host([theme~='lumo']) .v-spreadsheet .sheet-selection.touch .s-corner {
     background-color: var(--lumo-primary-color);
     border-radius: var(--lumo-border-radius-m);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-pane,
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-freeze-pane {
+  :host([theme~='lumo']) .v-spreadsheet .col-group-pane,
+  :host([theme~='lumo']) .v-spreadsheet .col-group-freeze-pane {
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     border-bottom: 1px solid var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-pane .grouping,
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-freeze-pane .grouping {
+  :host([theme~='lumo']) .v-spreadsheet .col-group-pane .grouping,
+  :host([theme~='lumo']) .v-spreadsheet .col-group-freeze-pane .grouping {
     border-top: 2px solid var(--lumo-contrast-20pct);
     border-left: 2px solid var(--lumo-contrast-20pct);
     cursor: var(--lumo-clickable-cursor);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-pane .grouping .expand,
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-freeze-pane .grouping .expand {
+  :host([theme~='lumo']) .v-spreadsheet .col-group-pane .grouping .expand,
+  :host([theme~='lumo']) .v-spreadsheet .col-group-freeze-pane .grouping .expand {
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-30pct), var(--lumo-contrast-30pct));
     font-size: var(--lumo-font-size-s);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-pane .grouping.inversed,
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-freeze-pane .grouping.inversed {
+  :host([theme~='lumo']) .v-spreadsheet .col-group-pane .grouping.inversed,
+  :host([theme~='lumo']) .v-spreadsheet .col-group-freeze-pane .grouping.inversed {
     border-right: 2px solid var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-freeze-pane {
+  :host([theme~='lumo']) .v-spreadsheet .col-group-freeze-pane {
     border-right: 1px solid var(--lumo-contrast-50pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-border .border {
+  :host([theme~='lumo']) .v-spreadsheet .col-group-border .border {
     border-bottom: 1px dotted var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-pane,
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-freeze-pane {
+  :host([theme~='lumo']) .v-spreadsheet .row-group-pane,
+  :host([theme~='lumo']) .v-spreadsheet .row-group-freeze-pane {
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
     border-right: 1px solid var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-pane .grouping,
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-freeze-pane .grouping {
+  :host([theme~='lumo']) .v-spreadsheet .row-group-pane .grouping,
+  :host([theme~='lumo']) .v-spreadsheet .row-group-freeze-pane .grouping {
     border-top: 2px solid var(--lumo-contrast-20pct);
     border-left: 2px solid var(--lumo-contrast-20pct);
     cursor: var(--lumo-clickable-cursor);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-pane .grouping .expand,
+  :host([theme~='lumo']) .v-spreadsheet .row-group-pane .grouping .expand,
   .v-spreadsheet .row-group-freeze-pane .grouping .expand {
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-30pct), var(--lumo-contrast-30pct));
     font-size: var(--lumo-font-size-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-pane .grouping.inversed,
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-freeze-pane .grouping.inversed {
+  :host([theme~='lumo']) .v-spreadsheet .row-group-pane .grouping.inversed,
+  :host([theme~='lumo']) .v-spreadsheet .row-group-freeze-pane .grouping.inversed {
     border-bottom: 2px solid var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-freeze-pane {
+  :host([theme~='lumo']) .v-spreadsheet .row-group-freeze-pane {
     border-bottom: 1px solid var(--lumo-contrast-50pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-border .border {
+  :host([theme~='lumo']) .v-spreadsheet .row-group-border .border {
     border-right: 1px dotted var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .expandbutton {
+  :host([theme~='lumo']) .v-spreadsheet .expandbutton {
     font-size: var(--lumo-font-size-s);
     cursor: var(--lumo-clickable-cursor);
     color: var(--lumo-body-text-color);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .expandbutton:active {
+  :host([theme~='lumo']) .v-spreadsheet .expandbutton:active {
     border-color: var(--lumo-contrast-20pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-summary .expandbutton {
+  :host([theme~='lumo']) .v-spreadsheet .col-group-summary .expandbutton {
     margin-right: var(--lumo-space-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-summary .expandbutton {
+  :host([theme~='lumo']) .v-spreadsheet .row-group-summary .expandbutton {
     margin-left: var(--lumo-space-xs);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .grouping-corner {
+  :host([theme~='lumo']) .v-spreadsheet .grouping-corner {
     border-right: 1px solid var(--lumo-contrast-20pct);
     border-bottom: 1px solid var(--lumo-contrast-20pct);
     background-color: var(--lumo-base-color);
-    background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));        
+    background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
   }
-  :host([theme~="lumo"]) .v-spreadsheet .col-group-summary {
+  :host([theme~='lumo']) .v-spreadsheet .col-group-summary {
     border-bottom: 1px solid var(--lumo-contrast-20pct);
     border-right: 1px solid var(--lumo-contrast-20pct);
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
   }
-  :host([theme~="lumo"]) .v-spreadsheet .row-group-summary {
+  :host([theme~='lumo']) .v-spreadsheet .row-group-summary {
     border-bottom: 1px solid var(--lumo-contrast-20pct);
     border-right: 1px solid var(--lumo-contrast-20pct);
     background-color: var(--lumo-base-color);
     background-image: linear-gradient(var(--lumo-contrast-5pct), var(--lumo-contrast-5pct));
   }
-  :host([theme~="lumo"]) .cell-range-bg-color {
+  :host([theme~='lumo']) .cell-range-bg-color {
     background-color: var(--lumo-primary-color-10pct);
   }
-  :host([theme~="lumo"]) .v-spreadsheet .sheet .cell .cell-range {
+  :host([theme~='lumo']) .v-spreadsheet .sheet .cell .cell-range {
     background-image: var(--lumo-primary-color-10pct) !important;
     background-color: var(--lumo-primary-color-10pct) !important;
   }

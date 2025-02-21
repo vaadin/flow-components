@@ -55,7 +55,7 @@ function init(target) {
     removeConnector() {
       this.removeListener();
       target.$contextMenuTargetConnector = undefined;
-    },
+    }
   };
 }
 
