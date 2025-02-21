@@ -99,6 +99,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
         HasValidationProperties, HasValidator<TValue>, HasPlaceholder {
     private static final int DEFAULT_FILTER_TIMEOUT = 500;
 
+    private String lastKnownFilter;
+
     /**
      * Registration for custom value listeners that disallows entering custom
      * values as soon as there are no more listeners for the custom value event
@@ -346,9 +348,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      *
      * @return the filter string
      */
-    @Synchronize(property = "filter", value = "filter-changed")
     protected String getFilter() {
-        return getElement().getProperty("filter");
+        return lastKnownFilter;
     }
 
     /**
@@ -359,7 +360,11 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * @param filter
      *            the String value to set
      */
+    @Deprecated
     protected void setFilter(String filter) {
+        lastKnownFilter = filter;
+        // MT 20250-02-21 I assume client side never uses this, probably the
+        // whole method is obsolete
         getElement().setProperty("filter", filter == null ? "" : filter);
     }
 
@@ -1367,6 +1372,7 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      */
     @ClientCallable
     private void setViewportRange(int start, int length, String filter) {
+        this.lastKnownFilter = filter;
         dataController.setViewportRange(start, length, filter);
     }
 
