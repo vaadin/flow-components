@@ -39,6 +39,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
@@ -46,8 +47,6 @@ import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
-import com.vaadin.flow.internal.StateTree;
-import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -77,9 +76,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/dialog", version = "24.7.0-alpha9")
+@NpmPackage(value = "@vaadin/dialog", version = "24.7.0-alpha10")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
@@ -87,7 +86,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
 
-    private boolean autoAddedToTheUi;
     private int configuredCloseActionListeners;
     private String minWidth;
     private String maxWidth;
@@ -95,8 +93,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
     private String maxHeight;
     private DialogHeader dialogHeader;
     private DialogFooter dialogFooter;
-
-    private Registration afterProgrammaticNavigationListenerRegistration;
 
     /**
      * Creates an empty dialog.
@@ -132,6 +128,9 @@ public class Dialog extends Component implements HasComponents, HasSize,
         });
 
         setOverlayRole("dialog");
+
+        // Initialize auto-add behavior
+        new OverlayAutoAddController<>(this, this::isModal);
     }
 
     /**
@@ -884,46 +883,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
                 ui -> ui.setChildComponentModal(this, visible && isModal()));
     }
 
-    private UI getCurrentUI() {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        return ui;
-    }
-
-    private void ensureAttached() {
-        UI ui = getCurrentUI();
-        StateTree.ExecutionRegistration addToUiRegistration = ui
-                .beforeClientResponse(ui, context -> {
-                    if (getElement().getNode().getParent() == null
-                            && isOpened()) {
-                        ui.addToModalComponent(this);
-                        ui.setChildComponentModal(this, isModal());
-                        autoAddedToTheUi = true;
-                    }
-                    if (afterProgrammaticNavigationListenerRegistration != null) {
-                        afterProgrammaticNavigationListenerRegistration
-                                .remove();
-                    }
-                });
-        if (ui.getSession() != null) {
-            afterProgrammaticNavigationListenerRegistration = ui
-                    .addAfterNavigationListener(event -> {
-                        if (event.getLocationChangeEvent()
-                                .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
-                            addToUiRegistration.remove();
-                            afterProgrammaticNavigationListenerRegistration
-                                    .remove();
-                        }
-                    });
-        }
-    }
-
     /**
      * Registers event listeners on the dialog's overlay that prevent it from
      * closing itself on outside click and escape press. Instead, the event
@@ -982,12 +941,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     private void doSetOpened(boolean opened, boolean fromClient) {
-        if (opened) {
-            ensureAttached();
-        } else if (autoAddedToTheUi) {
-            getElement().removeFromParent();
-            autoAddedToTheUi = false;
-        }
         setModality(opened && isModal());
         getElement().setProperty("opened", opened);
         fireEvent(new OpenedChangeEvent(this, fromClient));

@@ -37,14 +37,13 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
-import com.vaadin.flow.internal.StateTree;
-import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -54,9 +53,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha9")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/notification", version = "24.7.0-alpha9")
+@NpmPackage(value = "@vaadin/notification", version = "24.7.0-alpha10")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -65,11 +64,6 @@ public class Notification extends Component implements HasComponents, HasStyle,
     private static final int DEFAULT_DURATION = 5000;
     private static final Position DEFAULT_POSITION = Position.BOTTOM_START;
     private static final String OPENED_PROPERTY = "opened";
-    private static final String OPENED_CHANGED_EVENT = "opened-changed";
-
-    private boolean autoAddedToTheUi = false;
-
-    private Registration afterProgrammaticNavigationListenerRegistration;
 
     /**
      * Enumeration of all available positions for notification component
@@ -251,18 +245,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
                 event -> fireEvent(
                         new OpenedChangeEvent(this, event.isUserOriginated())));
 
-        getElement().addEventListener(OPENED_CHANGED_EVENT,
-                event -> removeAutoAdded());
-    }
-
-    /**
-     * Removes the notification from its parent if it was added automatically.
-     */
-    private void removeAutoAdded() {
-        if (autoAddedToTheUi && !isOpened()) {
-            autoAddedToTheUi = false;
-            getElement().removeFromParent();
-        }
+        // Initialize auto add behavior
+        new OverlayAutoAddController<>(this);
     }
 
     /**
@@ -454,37 +438,6 @@ public class Notification extends Component implements HasComponents, HasStyle,
      *            it
      */
     public void setOpened(boolean opened) {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        StateTree.ExecutionRegistration addToUiRegistration = ui
-                .beforeClientResponse(ui, context -> {
-                    if (isOpened()
-                            && getElement().getNode().getParent() == null) {
-                        ui.addToModalComponent(this);
-                        autoAddedToTheUi = true;
-                    }
-                    if (afterProgrammaticNavigationListenerRegistration != null) {
-                        afterProgrammaticNavigationListenerRegistration
-                                .remove();
-                    }
-                });
-        if (ui.getSession() != null) {
-            afterProgrammaticNavigationListenerRegistration = ui
-                    .addAfterNavigationListener(event -> {
-                        if (event.getLocationChangeEvent()
-                                .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
-                            addToUiRegistration.remove();
-                            afterProgrammaticNavigationListenerRegistration
-                                    .remove();
-                        }
-                    });
-        }
         getElement().setProperty(OPENED_PROPERTY, opened);
     }
 
@@ -682,7 +635,6 @@ public class Notification extends Component implements HasComponents, HasStyle,
             // itself when its parent, for example a dialog, gets attached
             // again.
             setOpened(false);
-            removeAutoAdded();
         });
     }
 
