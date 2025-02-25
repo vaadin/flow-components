@@ -53,8 +53,8 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
                 "Second menu item", "Disabled menu item" },
                 getMenuItemCaptions());
 
-        Assert.assertEquals("The last item is supposed to be disabled", "true",
-                getMenuItems().get(2).getAttribute("disabled"));
+        Assert.assertFalse("The last item is supposed to be disabled",
+                getMenuItems().get(2).isEnabled());
 
         $("body").first().click();
         verifyClosed();

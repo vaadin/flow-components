@@ -22,17 +22,14 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
-import com.vaadin.flow.internal.StateTree;
-import com.vaadin.flow.router.NavigationTrigger;
-import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code <vaadin-login-overlay>} component.
@@ -47,9 +44,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/login", version = "24.7.0-alpha7")
+@NpmPackage(value = "@vaadin/login", version = "24.7.0-alpha10")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
 public class LoginOverlay extends AbstractLogin implements HasStyle {
 
@@ -57,26 +54,18 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     private LoginOverlayFooter footer;
     private LoginOverlayCustomFormArea customFormArea;
 
-    private boolean autoAddedToTheUi;
-
-    private Registration afterProgrammaticNavigationListenerRegistration;
-
     public LoginOverlay() {
-        initEnsureDetachListener();
+        init();
     }
 
     public LoginOverlay(LoginI18n i18n) {
         super(i18n);
-        initEnsureDetachListener();
+        init();
     }
 
-    private void initEnsureDetachListener() {
-        getElement().addPropertyChangeListener("opened", event -> {
-            if (autoAddedToTheUi && !isOpened()) {
-                getElement().removeFromParent();
-                autoAddedToTheUi = false;
-            }
-        });
+    private void init() {
+        // Initialize auto-add behavior
+        new OverlayAutoAddController<>(this);
     }
 
     /**
@@ -107,48 +96,9 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
      */
     public void setOpened(boolean opened) {
         if (opened) {
-            ensureAttached();
             setEnabled(true);
         }
         getElement().setProperty("opened", opened);
-    }
-
-    private UI getCurrentUI() {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        return ui;
-    }
-
-    private void ensureAttached() {
-        if (getElement().getNode().getParent() == null) {
-            UI ui = getCurrentUI();
-            StateTree.ExecutionRegistration addToUiRegistration = ui
-                    .beforeClientResponse(ui, context -> {
-                        ui.addToModalComponent(this);
-                        autoAddedToTheUi = true;
-                        if (afterProgrammaticNavigationListenerRegistration != null) {
-                            afterProgrammaticNavigationListenerRegistration
-                                    .remove();
-                        }
-                    });
-            if (ui.getSession() != null) {
-                afterProgrammaticNavigationListenerRegistration = ui
-                        .addAfterNavigationListener(event -> {
-                            if (event.getLocationChangeEvent()
-                                    .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
-                                addToUiRegistration.remove();
-                                afterProgrammaticNavigationListenerRegistration
-                                        .remove();
-                            }
-                        });
-            }
-        }
     }
 
     /**

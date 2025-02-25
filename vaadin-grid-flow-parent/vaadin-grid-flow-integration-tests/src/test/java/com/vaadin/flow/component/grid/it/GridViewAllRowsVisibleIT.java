@@ -38,8 +38,8 @@ public class GridViewAllRowsVisibleIT extends AbstractComponentIT {
 
     @Test
     public void allRowsVisible_allRowsAreFetched() {
-        Assert.assertEquals("Grid should have allRowsVisible set to true",
-                "true", grid.getAttribute("allRowsVisible"));
+        Assert.assertTrue("Grid should have allRowsVisible set to true",
+                grid.getPropertyBoolean("allRowsVisible"));
     }
 
     @Test

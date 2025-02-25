@@ -71,7 +71,7 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
         }
 
         private void clear(TestBenchElement input) {
-            String value = input.getAttribute("value");
+            String value = input.getDomProperty("value");
             if (value.length() > 0) {
                 CharSequence[] clearSequence = new CharSequence[value.length()];
                 for (int i = 0; i < clearSequence.length; i++) {
@@ -158,7 +158,7 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
             Assert.assertEquals("Invalid placeholder text", expectedItemText,
                     selectedItem.getText());
             TestBenchElement valueButton = selectElement
-                    .$(TestBenchElement.class).attribute("slot", "value")
+                    .$(TestBenchElement.class).withAttribute("slot", "value")
                     .first();
             Assert.assertTrue(valueButton.hasAttribute("placeholder"));
         }
@@ -181,7 +181,7 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
 
             Assert.assertEquals(
                     "EmptySelectionItem not selected based on value attribute",
-                    "", selectedItem.getAttribute("value"));
+                    "", selectedItem.getDomProperty("value"));
         }
 
         void valueChangeEvent(String value, String oldValue, boolean fromClient,

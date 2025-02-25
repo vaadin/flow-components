@@ -91,7 +91,7 @@ public class LeadingQuoteIT extends AbstractSpreadsheetIT {
 
     private String getInlineEditorValue(String cell) {
         WebElement cellEditor = getInlineEditor(cell);
-        return cellEditor.getAttribute("value");
+        return cellEditor.getDomProperty("value");
     }
 
     private String getFormulaBarValue(String cell) {

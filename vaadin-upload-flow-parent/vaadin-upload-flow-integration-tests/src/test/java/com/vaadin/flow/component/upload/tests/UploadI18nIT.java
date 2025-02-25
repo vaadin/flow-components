@@ -40,9 +40,9 @@ public class UploadI18nIT extends AbstractUploadIT {
         open();
 
         UploadElement upload = $(UploadElement.class).id("upload-full-i18n");
-        WebElement addButton = upload.$("*").attribute("slot", "add-button")
+        WebElement addButton = upload.$("*").withAttribute("slot", "add-button")
                 .first();
-        WebElement dropLabel = upload.$("*").attribute("slot", "drop-label")
+        WebElement dropLabel = upload.$("*").withAttribute("slot", "drop-label")
                 .first();
 
         Assert.assertEquals(UploadTestsI18N.RUSSIAN_FULL.getAddFiles().getOne(),
@@ -80,9 +80,9 @@ public class UploadI18nIT extends AbstractUploadIT {
         open();
 
         UploadElement upload = $(UploadElement.class).id("upload-partial-i18n");
-        WebElement addButton = upload.$("*").attribute("slot", "add-button")
+        WebElement addButton = upload.$("*").withAttribute("slot", "add-button")
                 .first();
-        WebElement dropLabel = upload.$("*").attribute("slot", "drop-label")
+        WebElement dropLabel = upload.$("*").withAttribute("slot", "drop-label")
                 .first();
 
         // This label should still be the default one
@@ -136,7 +136,7 @@ public class UploadI18nIT extends AbstractUploadIT {
         UploadElement upload = $(UploadElement.class)
                 .id("upload-detach-reattach-i18n");
 
-        WebElement dropLabel = upload.$("*").attribute("slot", "drop-label")
+        WebElement dropLabel = upload.$("*").withAttribute("slot", "drop-label")
                 .first();
 
         Assert.assertEquals(

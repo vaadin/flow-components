@@ -49,7 +49,7 @@ public class BasicIT extends AbstractComponentIT {
 
         DetailsElement detailsThemed = detailsElements.get(2);
         List<String> themes = Arrays
-                .asList(detailsThemed.getAttribute("theme").split(" "));
+                .asList(detailsThemed.getDomAttribute("theme").split(" "));
         Assert.assertTrue(themes.containsAll(Stream.of(DetailsVariant.values())
                 .map(DetailsVariant::getVariantName)
                 .collect(Collectors.toList())));

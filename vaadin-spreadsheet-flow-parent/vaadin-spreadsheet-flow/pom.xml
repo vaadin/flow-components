@@ -30,7 +30,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>license-checker</artifactId>
-            <version>1.13.3</version>
+            <version>1.13.4</version>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -87,6 +87,10 @@
                 <exclusion>
                     <groupId>com.github.javaparser</groupId>
                     <artifactId>javaparser-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

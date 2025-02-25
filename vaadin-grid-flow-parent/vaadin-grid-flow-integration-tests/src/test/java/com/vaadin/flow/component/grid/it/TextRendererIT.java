@@ -41,7 +41,7 @@ public class TextRendererIT extends AbstractComponentIT {
 
         // self check: click is handled with a result on the client side
         String classNames = findElement(By.tagName("vaadin-grid"))
-                .getAttribute("class");
+                .getDomAttribute("class");
         Assert.assertThat(classNames, CoreMatchers.containsString("refreshed"));
 
         Set<String> cellsAfterRefresh = findElements(

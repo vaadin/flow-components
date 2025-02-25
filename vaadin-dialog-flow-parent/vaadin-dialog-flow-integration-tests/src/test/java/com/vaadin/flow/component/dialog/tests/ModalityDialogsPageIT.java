@@ -70,7 +70,7 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
 
         Assert.assertFalse("Backdrop was not removed from dom",
                 $(TestBenchElement.class).id("overlay").$(DivElement.class)
-                        .attributeContains("id", "backdrop").exists());
+                        .withAttribute("id", "backdrop").exists());
 
         $(NativeButtonElement.class).id("log").click();
 

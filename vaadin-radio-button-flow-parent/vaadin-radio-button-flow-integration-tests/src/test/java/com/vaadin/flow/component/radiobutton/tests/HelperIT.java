@@ -35,7 +35,7 @@ public class HelperIT extends AbstractComponentIT {
         TestBenchElement radioGroup = $("vaadin-radio-group").first();
 
         TestBenchElement helperComponent = radioGroup.$("span")
-                .attributeContains("slot", "helper").first();
+                .withAttribute("slot", "helper").first();
         Assert.assertEquals("Helper text", helperComponent.getText());
 
     }

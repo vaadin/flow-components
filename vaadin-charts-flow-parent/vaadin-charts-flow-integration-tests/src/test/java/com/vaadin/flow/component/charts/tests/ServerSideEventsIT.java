@@ -267,8 +267,8 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     private WebElement findLegendItem() {
-        return getChartElement().$("*")
-                .attributeContains("class", "highcharts-legend-item").first();
+        return getChartElement().$("*").withClassName("highcharts-legend-item")
+                .first();
     }
 
     private WebElement findCheckBox() {
@@ -280,8 +280,8 @@ public class ServerSideEventsIT extends AbstractTBTest {
     }
 
     private WebElement findCheckBox(int index) {
-        return getChartElement().$("input")
-                .attributeContains("type", "checkbox").get(index);
+        return getChartElement().$("input").withAttribute("type", "checkbox")
+                .get(index);
     }
 
     private WebElement findDisableVisibityToggle() {

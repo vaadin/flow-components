@@ -51,13 +51,13 @@ public class GridHeaderRowWithComponentsIT extends AbstractComponentIT {
         Assert.assertThat(
                 "The first header cell should contain the component "
                         + "of the first appended header row",
-                headerCells.get(0).getAttribute("innerHTML"),
+                headerCells.get(0).getDomProperty("innerHTML"),
                 CoreMatchers.containsString("<label>foo</label>"));
 
         Assert.assertThat(
                 "The second header cell should contain the component "
                         + "of the second appended header row",
-                headerCells.get(1).getAttribute("innerHTML"),
+                headerCells.get(1).getDomProperty("innerHTML"),
                 CoreMatchers.containsString("<label>bar</label>"));
     }
 
@@ -65,7 +65,7 @@ public class GridHeaderRowWithComponentsIT extends AbstractComponentIT {
     public void prependHeader_setText_setComponent_componentOverridesText() {
         findElement(By.id("set-both-text-and-component")).click();
         String headerContent = getHeaderCells().get(0)
-                .getAttribute("innerHTML");
+                .getDomProperty("innerHTML");
 
         Assert.assertThat(
                 "The header cell should not contain the text after "
@@ -83,7 +83,7 @@ public class GridHeaderRowWithComponentsIT extends AbstractComponentIT {
         List<WebElement> headers = thead.findElements(By.tagName("th"));
 
         List<String> cellNames = headers.stream().map(header -> header
-                .findElement(By.tagName("slot")).getAttribute("name"))
+                .findElement(By.tagName("slot")).getDomAttribute("name"))
                 .collect(Collectors.toList());
 
         List<WebElement> headerCells = cellNames.stream()

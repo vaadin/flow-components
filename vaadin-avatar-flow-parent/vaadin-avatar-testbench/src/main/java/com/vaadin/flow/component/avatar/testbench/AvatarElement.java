@@ -36,7 +36,7 @@ public class AvatarElement extends TestBenchElement {
      * @return the tooltip text
      */
     public String getTitle() {
-        return getAttribute("title");
+        return getDomAttribute("title");
     }
 
     /**

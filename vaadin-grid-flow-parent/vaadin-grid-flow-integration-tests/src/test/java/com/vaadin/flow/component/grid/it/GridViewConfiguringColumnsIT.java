@@ -64,16 +64,16 @@ public class GridViewConfiguringColumnsIT extends AbstractComponentIT {
                 .executeScript(firstCellHiddenScript, grid));
 
         Assert.assertNotEquals("true",
-                grid.getAttribute("columnReorderingAllowed"));
+                grid.getDomProperty("columnReorderingAllowed"));
 
         WebElement toggleUserReordering = findElement(
                 By.id("toggle-user-reordering"));
         clickElementWithJs(toggleUserReordering);
         Assert.assertEquals("true",
-                grid.getAttribute("columnReorderingAllowed"));
+                grid.getDomProperty("columnReorderingAllowed"));
         clickElementWithJs(toggleUserReordering);
         Assert.assertNotEquals("true",
-                grid.getAttribute("columnReorderingAllowed"));
+                grid.getDomProperty("columnReorderingAllowed"));
 
         String frozenStatusScript = "return arguments[0].frozen";
         assertFrozenColumn(grid, frozenStatusScript, "toggle-id-column-frozen",

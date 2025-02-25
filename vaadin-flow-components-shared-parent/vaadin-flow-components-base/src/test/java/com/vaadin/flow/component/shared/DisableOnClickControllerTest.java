@@ -51,6 +51,17 @@ public class DisableOnClickControllerTest {
     }
 
     @Test
+    public void setDisableOnClick_updatesAttribute() {
+        component.setDisableOnClick(true);
+        Assert.assertTrue(
+                component.getElement().hasAttribute("disableonclick"));
+
+        component.setDisableOnClick(false);
+        Assert.assertFalse(
+                component.getElement().hasAttribute("disableonclick"));
+    }
+
+    @Test
     public void disableOnClickNotSetUp_click_componentIsStillEnabled() {
         var componentIsEnabled = new AtomicBoolean(true);
         component.addClickListener(

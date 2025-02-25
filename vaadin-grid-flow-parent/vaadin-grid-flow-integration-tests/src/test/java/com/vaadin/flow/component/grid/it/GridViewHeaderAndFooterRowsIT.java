@@ -115,6 +115,7 @@ public class GridViewHeaderAndFooterRowsIT extends AbstractComponentIT {
         return cells.stream()
                 .map(cell -> cell.findElements(By.tagName(componentTag)))
                 .filter(list -> !list.isEmpty()).map(list -> list.get(0))
-                .anyMatch(cell -> text.equals(cell.getAttribute("innerHTML")));
+                .anyMatch(
+                        cell -> text.equals(cell.getDomProperty("innerHTML")));
     }
 }

@@ -52,7 +52,7 @@ public class SideNavItemElement extends TestBenchElement {
     }
 
     public String getPath() {
-        return getAttribute("path");
+        return getDomAttribute("path");
     }
 
     public boolean isExpanded() {
