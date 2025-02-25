@@ -41,7 +41,6 @@ export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridCo
     }
   }
 
-
   /**
    * Override a method from `GridSelectionColumnBaseMixin` to handle the user
    * selecting all items.
