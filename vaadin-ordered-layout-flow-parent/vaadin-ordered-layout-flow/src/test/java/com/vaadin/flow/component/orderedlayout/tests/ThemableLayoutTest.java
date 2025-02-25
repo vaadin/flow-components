@@ -15,7 +15,9 @@
  */
 package com.vaadin.flow.component.orderedlayout.tests;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.function.Consumer;
@@ -24,6 +26,7 @@ import java.util.function.Supplier;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.orderedlayout.ThemableLayout;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
@@ -67,6 +70,51 @@ public class ThemableLayoutTest {
     @Test
     public void checkWrap() {
         checkThemeToggling("wrap", layout::isWrap, layout::setWrap);
+    }
+
+    @Test
+    public void checkSpacingStringSetter() {
+        layout.setSpacing("20px");
+        assertTrue("Expected spacing to be applied after setting it",
+                layout.isSpacing());
+        assertEquals("Expected spacing to be '20px'", "20px",
+                layout.getSpacing());
+    }
+
+    @Test
+    public void checkSpacingUnitSetter() {
+        layout.setSpacing(2, Unit.REM);
+        assertTrue("Expected spacing to be applied after setting it",
+                layout.isSpacing());
+        assertEquals("Expected spacing to be '2.0rem'", "2.0rem",
+                layout.getSpacing());
+    }
+
+    @Test
+    public void checkIsSpacing() {
+        layout.setSpacing("20px");
+        assertTrue("Expected spacing to be applied after setting it",
+                layout.isSpacing());
+        layout.setSpacing(false);
+        assertFalse("Expected no spacing applied after removing it",
+                layout.isSpacing());
+        layout.setSpacing(true);
+        assertTrue("Expected spacing to be applied after setting it",
+                layout.isSpacing());
+        layout.setSpacing(false);
+        assertFalse("Expected no spacing applied after removing it",
+                layout.isSpacing());
+    }
+
+    @Test
+    public void removeSpacing_gapIsRemoved() {
+        layout.setSpacing("20px");
+        layout.setSpacing(false);
+        assertFalse("Expected spacing to be removed after setting it to false",
+                layout.isSpacing());
+        assertNull("Expected spacing to be null", layout.getSpacing());
+        assertNull("Expected gap to be null",
+                layout.getElement().getStyle().get("gap"));
     }
 
     private void checkThemeToggling(String themeName,
