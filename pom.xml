@@ -88,6 +88,8 @@
         <jakarta.servlet.api.version>5.0.0</jakarta.servlet.api.version>
         <jakarta.web.api.version>10.0.0</jakarta.web.api.version>
         <spring-data-commons.version>3.4.3</spring-data-commons.version>
+        <spotless-npm-executable/>
+        <spotless-node-executable/>
 
         <!-- spreadsheet -->
         <poi.version>5.4.0</poi.version>
@@ -569,6 +571,8 @@
                             <exclude>src/**/SpreadsheetSingleScriptTemplate.js</exclude>
                         </excludes>
                         <prettier>
+                            <npmExecutable>${spotless-npm-executable}</npmExecutable>
+                            <nodeExecutable>${spotless-node-executable}</nodeExecutable>
                             <configFile>${maven.multiModuleProjectDirectory}/.prettierrc</configFile>
                         </prettier>
                     </typescript>
