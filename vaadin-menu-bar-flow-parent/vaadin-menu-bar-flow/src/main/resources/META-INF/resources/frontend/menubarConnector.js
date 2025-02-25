@@ -15,28 +15,28 @@
  */
 import './contextMenuConnector.js';
 
-  /**
-   * Initializes the connector for a menu bar element.
-   *
-   * @param {HTMLElement} menubar
-   * @param {string} appId
-   */
-  function initLazy(menubar, appId) {
-    if (menubar.$connector) {
-      return;
-    }
+/**
+ * Initializes the connector for a menu bar element.
+ *
+ * @param {HTMLElement} menubar
+ * @param {string} appId
+ */
+function initLazy(menubar, appId) {
+  if (menubar.$connector) {
+    return;
+  }
 
-    const observer = new MutationObserver((records) => {
-      const hasChangedAttributes = records.some((entry) => {
-        const oldValue = entry.oldValue;
-        const newValue = entry.target.getAttribute(entry.attributeName);
-        return oldValue !== newValue;
-      });
-
-      if (hasChangedAttributes) {
-        menubar.$connector.generateItems();
-      }
+  const observer = new MutationObserver((records) => {
+    const hasChangedAttributes = records.some((entry) => {
+      const oldValue = entry.oldValue;
+      const newValue = entry.target.getAttribute(entry.attributeName);
+      return oldValue !== newValue;
     });
+
+    if (hasChangedAttributes) {
+      menubar.$connector.generateItems();
+    }
+  });
 
   menubar.$connector = {
     /**
@@ -55,46 +55,46 @@ import './contextMenuConnector.js';
         return;
       }
 
-        if (!menubar._container) {
-          // Menu-bar defers first buttons render to avoid re-layout
-          // See https://github.com/vaadin/web-components/issues/7271
-          queueMicrotask(() => menubar.$connector.generateItems(nodeId));
-          return;
-        }
+      if (!menubar._container) {
+        // Menu-bar defers first buttons render to avoid re-layout
+        // See https://github.com/vaadin/web-components/issues/7271
+        queueMicrotask(() => menubar.$connector.generateItems(nodeId));
+        return;
+      }
 
-        if (nodeId) {
-          menubar.__generatedItems = window.Vaadin.Flow.contextMenuConnector.generateItemsTree(appId, nodeId);
-        }
+      if (nodeId) {
+        menubar.__generatedItems = window.Vaadin.Flow.contextMenuConnector.generateItemsTree(appId, nodeId);
+      }
 
-        let items = menubar.__generatedItems || [];
+      let items = menubar.__generatedItems || [];
 
-        items.forEach((item) => {
-          // Propagate disabled state from items to parent buttons
-          item.disabled = item.component.disabled;
+      items.forEach((item) => {
+        // Propagate disabled state from items to parent buttons
+        item.disabled = item.component.disabled;
 
-          // Saving item to component because `_item` can be reassigned to a new value
-          // when the component goes to the overflow menu
-          item.component._rootItem = item;
+        // Saving item to component because `_item` can be reassigned to a new value
+        // when the component goes to the overflow menu
+        item.component._rootItem = item;
+      });
+
+      // Observe for hidden and disabled attributes in case they are changed by Flow.
+      // When a change occurs, the observer will re-generate items on top of the existing tree
+      // to sync the new attribute values with the corresponding properties in the items array.
+      items.forEach((item) => {
+        observer.observe(item.component, {
+          attributeFilter: ['hidden', 'disabled'],
+          attributeOldValue: true
         });
+      });
 
-        // Observe for hidden and disabled attributes in case they are changed by Flow.
-        // When a change occurs, the observer will re-generate items on top of the existing tree
-        // to sync the new attribute values with the corresponding properties in the items array.
-        items.forEach((item) => {
-          observer.observe(item.component, {
-            attributeFilter: ['hidden', 'disabled'],
-            attributeOldValue: true
-          });
-        });
+      // Remove hidden items entirely from the array. Just hiding them
+      // could cause the overflow button to be rendered without items.
+      //
+      // The items-prop needs to be set even when all items are visible
+      // to update the disabled state and re-render buttons.
+      items = items.filter((item) => !item.component.hidden);
 
-        // Remove hidden items entirely from the array. Just hiding them
-        // could cause the overflow button to be rendered without items.
-        //
-        // The items-prop needs to be set even when all items are visible
-        // to update the disabled state and re-render buttons.
-        items = items.filter((item) => !item.component.hidden);
-
-        menubar.items = items;
+      menubar.items = items;
 
       // Propagate click events from the menu buttons to the item components
       menubar._buttons.forEach((button) => {
@@ -111,12 +111,12 @@ import './contextMenuConnector.js';
   };
 }
 
-  function setClassName(component) {
-    const item = component._rootItem || component._item;
+function setClassName(component) {
+  const item = component._rootItem || component._item;
 
-    if (item) {
-      item.className = component.className;
-    }
+  if (item) {
+    item.className = component.className;
   }
+}
 
 window.Vaadin.Flow.menubarConnector = { initLazy, setClassName };
