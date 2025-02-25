@@ -15,12 +15,24 @@
  */
 package com.vaadin.flow.component.orderedlayout;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.ElementDetachEvent;
+import com.vaadin.flow.dom.ElementDetachListener;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * Horizontal Layout places components side-by-side in a row. By default, it has
@@ -28,9 +40,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * it contains.
  */
 @Tag("vaadin-horizontal-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha7")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/horizontal-layout", version = "24.7.0-alpha7")
+@NpmPackage(value = "@vaadin/horizontal-layout", version = "24.7.0-alpha10")
 @JsModule("@vaadin/horizontal-layout/src/vaadin-horizontal-layout.js")
 public class HorizontalLayout extends Component implements ThemableLayout,
         FlexComponent, ClickNotifier<HorizontalLayout> {
@@ -260,5 +272,243 @@ public class HorizontalLayout extends Component implements ThemableLayout,
         add(components);
         setWidthFull();
         expand(components);
+    }
+
+    @Override
+    public void replace(Component oldComponent, Component newComponent) {
+        String oldSlotName = oldComponent != null
+                ? oldComponent.getElement().getAttribute("slot")
+                : null;
+
+        String newSlotName = newComponent != null
+                ? newComponent.getElement().getAttribute("slot")
+                : null;
+
+        FlexComponent.super.replace(oldComponent, newComponent);
+
+        if (newComponent != null && oldComponent != null) {
+            if (oldSlotName == null) {
+                newComponent.getElement().removeAttribute("slot");
+            } else {
+                newComponent.getElement().setAttribute("slot", oldSlotName);
+            }
+
+            if (newSlotName == null) {
+                oldComponent.getElement().removeAttribute("slot");
+            } else {
+                oldComponent.getElement().setAttribute("slot", newSlotName);
+            }
+        }
+
+        updateChildDetachListeners();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method only adds components to the start slot.
+     */
+    @Override
+    public void add(Collection<Component> components) {
+        addToStart(components);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This method only adds components to the start slot.
+     */
+    @Override
+    public void add(Component... components) {
+        addToStart(components);
+    }
+
+    @Override
+    public void addComponentAtIndex(int index, Component component) {
+        Component oldComponent = getComponentCount() > index
+                ? getComponentAt(index)
+                : null;
+        String slotName = oldComponent != null
+                ? oldComponent.getElement().getAttribute("slot")
+                : null;
+
+        FlexComponent.super.addComponentAtIndex(index, component);
+
+        if (slotName == null) {
+            component.getElement().removeAttribute("slot");
+        } else {
+            component.getElement().setAttribute("slot", slotName);
+        }
+
+        updateChildDetachListeners();
+    }
+
+    /**
+     * Adds the components to the <em>start</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the start slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToStart(Component... components) {
+        Objects.requireNonNull(components, "Components should not be null");
+
+        addToStart(Arrays.asList(components));
+    }
+
+    /**
+     * Adds the components to the <em>start</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the start slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToStart(Collection<Component> components) {
+        var idx = getChildren().filter((child) -> {
+            var slotName = child.getElement().getAttribute("slot");
+            return slotName == null;
+        }).count();
+
+        final AtomicInteger itemCounter = new AtomicInteger((int) idx);
+
+        components.stream()
+                .map(component -> Objects.requireNonNull(component,
+                        "Component to add cannot be null"))
+                .forEach((component) -> {
+                    getElement().insertChild(itemCounter.getAndIncrement(),
+                            component.getElement());
+                });
+    }
+
+    /**
+     * Adds the components to the <em>middle</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the middle slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToMiddle(Component... components) {
+        Objects.requireNonNull(components, "Components should not be null");
+
+        addToMiddle(Arrays.asList(components));
+    }
+
+    /**
+     * Adds the components to the <em>middle</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the middle slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToMiddle(Collection<Component> components) {
+        Objects.requireNonNull(components, "Components should not be null");
+
+        var idx = getChildren().filter((child) -> {
+            var slotName = child.getElement().getAttribute("slot");
+            return slotName == null || slotName.equals("middle");
+        }).count();
+
+        final AtomicInteger itemCounter = new AtomicInteger((int) idx);
+
+        components.stream()
+                .map(component -> Objects.requireNonNull(component,
+                        "Component to add cannot be null"))
+                .forEach((component) -> {
+                    if (component instanceof Text) {
+                        throw new IllegalArgumentException("Text as a middle"
+                                + " slot content is not supported. "
+                                + "Consider wrapping the Text inside a Div.");
+                    }
+
+                    component.getElement().setAttribute("slot", "middle");
+                    getElement().insertChild(itemCounter.getAndIncrement(),
+                            component.getElement());
+                });
+
+        updateChildDetachListeners();
+    }
+
+    /**
+     * Adds the components to the <em>middle</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the middle slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToEnd(Component... components) {
+        Objects.requireNonNull(components, "Components should not be null");
+
+        addToEnd(Arrays.asList(components));
+    }
+
+    /**
+     * Adds the components to the <em>end</em> slot of this layout.
+     *
+     * @param components
+     *            Components to add to the middle slot.
+     * @throws NullPointerException
+     *             if any of the components is null or if the components array
+     *             is null.
+     */
+    public void addToEnd(Collection<Component> components) {
+        Objects.requireNonNull(components, "Components should not be null");
+
+        components.stream()
+                .map(component -> Objects.requireNonNull(component,
+                        "Component to add cannot be null"))
+                .forEach((component) -> {
+                    if (component instanceof Text) {
+                        throw new IllegalArgumentException("Text as an end"
+                                + " slot content is not supported. "
+                                + "Consider wrapping the Text inside a Div.");
+                    }
+
+                    component.getElement().setAttribute("slot", "end");
+                    getElement().appendChild(component.getElement());
+                });
+
+        updateChildDetachListeners();
+    }
+
+    private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
+    // Must not use lambda here as that would break serialization. See
+    // https://github.com/vaadin/flow-components/issues/5597
+    private ElementDetachListener childDetachListener = new ElementDetachListener() {
+        @Override
+        public void onDetach(ElementDetachEvent e) {
+            var child = e.getSource();
+            var childDetachedFromLayout = !getElement().getChildren().anyMatch(
+                    layoutChild -> Objects.equals(child, layoutChild));
+
+            if (childDetachedFromLayout) {
+                // The child was removed from the layout
+                // Clear slot to avoid problems when moving to other layout
+                child.removeAttribute("slot");
+
+                // Remove the registration for the child detach listener
+                childDetachListenerMap.get(child).remove();
+                childDetachListenerMap.remove(child);
+            }
+        }
+    };
+
+    private void updateChildDetachListeners() {
+        // Add detach listeners (child may be removed with removeFromParent())
+        getElement().getChildren().forEach(child -> {
+            if (!childDetachListenerMap.containsKey(child)) {
+                childDetachListenerMap.put(child,
+                        child.addDetachListener(childDetachListener));
+            }
+        });
     }
 }

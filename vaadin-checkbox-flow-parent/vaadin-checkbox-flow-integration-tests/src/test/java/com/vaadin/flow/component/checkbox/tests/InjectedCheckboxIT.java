@@ -32,8 +32,7 @@ public class InjectedCheckboxIT extends AbstractComponentIT {
         TestBenchElement checkbox = $("inject-checkbox").first()
                 .$("vaadin-checkbox").first();
 
-        String isChecked = checkbox.getAttribute("checked");
-        Assert.assertEquals(Boolean.TRUE.toString(), isChecked);
+        Assert.assertTrue(checkbox.getPropertyBoolean("checked"));
 
         Assert.assertEquals("Accept",
                 checkbox.getPropertyString("textContent").trim());

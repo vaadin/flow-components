@@ -107,7 +107,8 @@ public class MapElement extends TestBenchElement {
      * @return attribution container div
      */
     public TestBenchElement getAttributionContainer() {
-        return $("div").attributeContains("class", "ol-attribution").first();
+        return $("div").withAttributeContainingWord("class", "ol-attribution")
+                .first();
     }
 
     /**

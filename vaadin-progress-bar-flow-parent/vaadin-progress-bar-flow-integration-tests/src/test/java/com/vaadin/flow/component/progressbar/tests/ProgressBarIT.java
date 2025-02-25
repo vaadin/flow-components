@@ -59,13 +59,13 @@ public class ProgressBarIT extends AbstractComponentIT {
         scrollToElement(progressBar);
 
         Assert.assertEquals(ProgressBarVariant.LUMO_ERROR.getVariantName(),
-                progressBar.getAttribute("theme"));
+                progressBar.getDomAttribute("theme"));
 
         findElement(By.id("remove-theme-variant-button")).click();
-        Assert.assertNull(progressBar.getAttribute("theme"));
+        Assert.assertNull(progressBar.getDomAttribute("theme"));
     }
 
     private String valueOf(WebElement progressBar) {
-        return progressBar.getAttribute("value");
+        return progressBar.getDomProperty("value");
     }
 }

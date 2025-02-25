@@ -30,8 +30,23 @@ public enum MenuBarVariant implements ThemeVariant {
     LUMO_ICON("icon"),
     LUMO_END_ALIGNED("end-aligned"),
     LUMO_DROPDOWN_INDICATORS("dropdown-indicators"),
+    /**
+     * @deprecated Since 24.7, the Material theme is deprecated and will be
+     *             removed in Vaadin 25.
+     */
+    @Deprecated
     MATERIAL_CONTAINED("contained"),
+    /**
+     * @deprecated Since 24.7, the Material theme is deprecated and will be
+     *             removed in Vaadin 25.
+     */
+    @Deprecated
     MATERIAL_OUTLINED("outlined"),
+    /**
+     * @deprecated Since 24.7, the Material theme is deprecated and will be
+     *             removed in Vaadin 25.
+     */
+    @Deprecated
     MATERIAL_END_ALIGNED("end-aligned");
 
     private final String variant;

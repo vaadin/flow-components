@@ -91,14 +91,14 @@ public class BasicUseIT extends AbstractComponentIT {
         GridElement grid = $(GridElement.class).waitForFirst();
         Assert.assertEquals("Sort by First Name",
                 grid.getHeaderCellContent(0, 0).$("vaadin-grid-sorter").first()
-                        .getAttribute("aria-label"));
+                        .getDomAttribute("aria-label"));
     }
 
     @Test
     public void filterHasAriaLabel() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         Assert.assertEquals("Filter by First Name",
-                crud.getFilterFields().get(0).getAttribute("aria-label"));
+                crud.getFilterFields().get(0).getDomAttribute("aria-label"));
     }
 
     @Test
@@ -158,22 +158,22 @@ public class BasicUseIT extends AbstractComponentIT {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         GridElement grid = $(GridElement.class).first();
 
-        Assert.assertNotEquals("no-border", crud.getAttribute("theme"));
-        Assert.assertNotEquals("no-border", grid.getAttribute("theme"));
+        Assert.assertNotEquals("no-border", crud.getDomAttribute("theme"));
+        Assert.assertNotEquals("no-border", grid.getDomAttribute("theme"));
 
         getTestButton("toggleBorders").click();
-        Assert.assertEquals("no-border", crud.getAttribute("theme"));
-        Assert.assertEquals("no-border", grid.getAttribute("theme"));
+        Assert.assertEquals("no-border", crud.getDomAttribute("theme"));
+        Assert.assertEquals("no-border", grid.getDomAttribute("theme"));
 
         getTestButton("toggleBorders").click();
-        Assert.assertNotEquals("no-border", crud.getAttribute("theme"));
-        Assert.assertNotEquals("no-border", grid.getAttribute("theme"));
+        Assert.assertNotEquals("no-border", crud.getDomAttribute("theme"));
+        Assert.assertNotEquals("no-border", grid.getDomAttribute("theme"));
     }
 
     @Test
     public void toolbarVisibleByDefault() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
-        Assert.assertNull(crud.getAttribute("no-toolbar"));
+        Assert.assertFalse(crud.hasAttribute("no-toolbar"));
     }
 
     @Test

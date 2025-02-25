@@ -36,8 +36,8 @@ public class CustomGridIT extends AbstractComponentIT {
         crud.openRowForEditing(0);
         Assert.assertTrue(crud.isEditorOpen());
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
 
         Assert.assertEquals("Sayo", lastNameField.getValue());
 
@@ -56,8 +56,8 @@ public class CustomGridIT extends AbstractComponentIT {
         crud.openRowForEditing(0);
         Assert.assertTrue(crud.isEditorOpen());
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
 
         Assert.assertEquals("Sayo", lastNameField.getValue());
         lastNameField.setValue("Otto");
@@ -75,12 +75,12 @@ public class CustomGridIT extends AbstractComponentIT {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         GridElement grid = $(GridElement.class).first();
 
-        Assert.assertNotEquals("no-border", crud.getAttribute("theme"));
-        Assert.assertNotEquals("no-border", grid.getAttribute("theme"));
+        Assert.assertNotEquals("no-border", crud.getDomAttribute("theme"));
+        Assert.assertNotEquals("no-border", grid.getDomAttribute("theme"));
 
         toggleBordersButton().click();
-        Assert.assertEquals("no-border", crud.getAttribute("theme"));
-        Assert.assertNotEquals("no-border", grid.getAttribute("theme"));
+        Assert.assertEquals("no-border", crud.getDomAttribute("theme"));
+        Assert.assertNotEquals("no-border", grid.getDomAttribute("theme"));
     }
 
     @Test
@@ -120,7 +120,7 @@ public class CustomGridIT extends AbstractComponentIT {
 
     private String getEditorHeaderText(CrudElement crud) {
         return crud.getEditor().$(TestBenchElement.class)
-                .attribute("slot", "header").first().getText();
+                .withAttribute("slot", "header").first().getText();
     }
 
     private ButtonElement customGridClickToEditButton() {

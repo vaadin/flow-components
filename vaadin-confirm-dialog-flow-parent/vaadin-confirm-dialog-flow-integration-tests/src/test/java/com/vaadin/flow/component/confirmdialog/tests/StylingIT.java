@@ -91,6 +91,6 @@ public class StylingIT extends AbstractComponentIT {
     }
 
     private String getOverlayClassName() {
-        return getOverlay().getAttribute("class");
+        return getOverlay().getDomAttribute("class");
     }
 }

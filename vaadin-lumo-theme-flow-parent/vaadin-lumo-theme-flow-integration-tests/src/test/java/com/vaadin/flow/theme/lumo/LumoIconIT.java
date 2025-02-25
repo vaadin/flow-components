@@ -50,7 +50,7 @@ public class LumoIconIT extends AbstractComponentIT {
 
     private void assertIconExists(String iconName) {
         ElementQuery<TestBenchElement> icon = $(TestBenchElement.class)
-                .attribute("icon", iconName);
+                .withAttribute("icon", iconName);
 
         Assert.assertTrue("Could not find icon: " + iconName, icon.exists());
     }

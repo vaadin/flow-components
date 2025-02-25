@@ -20,7 +20,6 @@ import static com.vaadin.flow.component.grid.it.GridFilteringPage.LAZY_FILTERABL
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
@@ -43,7 +42,7 @@ public class GridFilteringIT extends AbstractComponentIT {
         // Blur input to get value change
         executeScript("arguments[0].blur();", input);
 
-        WebElement grid = findElement(By.id("data-grid"));
+        GridElement grid = $(GridElement.class).id("data-grid");
         // empty Grid content
         Object size = executeScript("return arguments[0].size", grid);
         Assert.assertEquals("0", size.toString());
@@ -56,7 +55,7 @@ public class GridFilteringIT extends AbstractComponentIT {
         waitUntil(driver -> executeScript("return arguments[0].size", grid)
                 .toString().equals("3"));
 
-        waitUntil(driver -> "false".equals(grid.getAttribute("loading")));
+        waitUntil(driver -> !grid.hasAttribute("loading"));
     }
 
     @Test // for https://github.com/vaadin/flow/issues/9988

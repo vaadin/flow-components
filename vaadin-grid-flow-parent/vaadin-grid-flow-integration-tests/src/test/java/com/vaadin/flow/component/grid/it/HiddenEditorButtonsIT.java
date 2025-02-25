@@ -45,21 +45,21 @@ public class HiddenEditorButtonsIT extends AbstractComponentIT {
     @Test
     public void editItem_buttonsAreShown_confirmEdit_buttonsAreHidden() {
         TestBenchElement editButton = grid.findElement(By.id("edit-1"));
-        Assert.assertNull(editButton.getAttribute("hidden"));
+        Assert.assertNull(editButton.getDomAttribute("hidden"));
         editButton.click();
 
         waitForElementPresent(By.id("editor"));
 
-        Assert.assertEquals("true", editButton.getAttribute("hidden"));
+        Assert.assertEquals("true", editButton.getDomAttribute("hidden"));
         waitForElementPresent(By.id("save-1"));
         waitForElementPresent(By.id("cancel-1"));
 
         TestBenchElement editor = grid.findElement(By.id("editor"));
         editor.sendKeys("234");
         TestBenchElement saveButton = grid.findElement(By.id("save-1"));
-        Assert.assertNull(saveButton.getAttribute("hidden"));
+        Assert.assertNull(saveButton.getDomAttribute("hidden"));
         TestBenchElement cancelButton = grid.findElement(By.id("cancel-1"));
-        Assert.assertNull(cancelButton.getAttribute("hidden"));
+        Assert.assertNull(cancelButton.getDomAttribute("hidden"));
         saveButton.click();
 
         waitForElementNotPresent(By.id("editor"));
@@ -67,18 +67,18 @@ public class HiddenEditorButtonsIT extends AbstractComponentIT {
         editButton = grid.findElement(By.id("edit-1"));
         waitForElementNotPresent(By.id("save-1"));
         waitForElementNotPresent(By.id("cancel-1"));
-        Assert.assertNull(editButton.getAttribute("hidden"));
+        Assert.assertNull(editButton.getDomAttribute("hidden"));
     }
 
     @Test
     public void editItem_scrollAway_scrollBack_buttonsAreStillVisible() {
         TestBenchElement editButton = grid.findElement(By.id("edit-1"));
-        Assert.assertNull(editButton.getAttribute("hidden"));
+        Assert.assertNull(editButton.getDomAttribute("hidden"));
         editButton.click();
 
         waitForElementPresent(By.id("editor"));
 
-        Assert.assertEquals("true", editButton.getAttribute("hidden"));
+        Assert.assertEquals("true", editButton.getDomAttribute("hidden"));
         waitForElementPresent(By.id("save-1"));
         waitForElementPresent(By.id("cancel-1"));
 
@@ -90,30 +90,30 @@ public class HiddenEditorButtonsIT extends AbstractComponentIT {
         waitForElementPresent(By.id("editor"));
 
         TestBenchElement saveButton = grid.findElement(By.id("save-1"));
-        Assert.assertNull(saveButton.getAttribute("hidden"));
+        Assert.assertNull(saveButton.getDomAttribute("hidden"));
         TestBenchElement cancelButton = grid.findElement(By.id("cancel-1"));
-        Assert.assertNull(cancelButton.getAttribute("hidden"));
+        Assert.assertNull(cancelButton.getDomAttribute("hidden"));
     }
 
     @Test
     public void editItem_scrollAway_editAnotherItem_scrollBack_buttonsAreHidden() {
         TestBenchElement editButton = grid.findElement(By.id("edit-1"));
-        Assert.assertNull(editButton.getAttribute("hidden"));
+        Assert.assertNull(editButton.getDomAttribute("hidden"));
         editButton.click();
 
         waitForElementPresent(By.id("editor"));
 
-        Assert.assertEquals("true", editButton.getAttribute("hidden"));
+        Assert.assertEquals("true", editButton.getDomAttribute("hidden"));
         waitForElementPresent(By.id("save-1"));
         waitForElementPresent(By.id("cancel-1"));
 
         grid.scrollToRow(1000);
         waitForElementPresent(By.id("edit-1000"));
         editButton = grid.findElement(By.id("edit-1000"));
-        Assert.assertNull(editButton.getAttribute("hidden"));
+        Assert.assertNull(editButton.getDomAttribute("hidden"));
         editButton.click();
 
-        Assert.assertEquals("true", editButton.getAttribute("hidden"));
+        Assert.assertEquals("true", editButton.getDomAttribute("hidden"));
         waitForElementPresent(By.id("save-1000"));
         waitForElementPresent(By.id("cancel-1000"));
 
@@ -124,7 +124,7 @@ public class HiddenEditorButtonsIT extends AbstractComponentIT {
         waitForElementNotPresent(By.id("editor"));
 
         editButton = grid.findElement(By.id("edit-1"));
-        Assert.assertNull(editButton.getAttribute("hidden"));
+        Assert.assertNull(editButton.getDomAttribute("hidden"));
     }
 
 }
