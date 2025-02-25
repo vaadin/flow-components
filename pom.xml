@@ -77,6 +77,8 @@
         <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
         <spotless.plugin.version>2.44.2</spotless.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
+        <spotless.npmExecutable/>
+        <spotless.nodeExecutable/>
         <failsafe.forkCount>4</failsafe.forkCount>
         <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
         <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
@@ -88,8 +90,6 @@
         <jakarta.servlet.api.version>5.0.0</jakarta.servlet.api.version>
         <jakarta.web.api.version>10.0.0</jakarta.web.api.version>
         <spring-data-commons.version>3.4.3</spring-data-commons.version>
-        <spotless-npm-executable/>
-        <spotless-node-executable/>
 
         <!-- spreadsheet -->
         <poi.version>5.4.0</poi.version>
@@ -571,8 +571,8 @@
                             <exclude>src/**/SpreadsheetSingleScriptTemplate.js</exclude>
                         </excludes>
                         <prettier>
-                            <npmExecutable>${spotless-npm-executable}</npmExecutable>
-                            <nodeExecutable>${spotless-node-executable}</nodeExecutable>
+                            <npmExecutable>${spotless.npmExecutable}</npmExecutable>
+                            <nodeExecutable>${spotless.nodeExecutable}</nodeExecutable>
                             <configFile>${maven.multiModuleProjectDirectory}/.prettierrc</configFile>
                         </prettier>
                     </typescript>
