@@ -1,36 +1,27 @@
-/* ====================================================================
-   Licensed to the Apache Software Foundation (ASF) under one or more
-   contributor license agreements.  See the NOTICE file distributed with
-   this work for additional information regarding copyright ownership.
-   The ASF licenses this file to You under the Apache License, Version 2.0
-   (the "License"); you may not use this file except in compliance with
-   the License.  You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-==================================================================== */
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package org.apache.poi.ss.format;
+
+import static org.apache.poi.ss.format.CellFormatter.quote;
+
+import java.awt.*;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.*;
+import javax.swing.*;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.util.CodepointsUtil;
 import org.apache.poi.util.LocaleUtil;
-
-import javax.swing.*;
-
-import java.awt.*;
-import java.util.*;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static org.apache.poi.ss.format.CellFormatter.quote;
 
 /*
  * Note: This file has been overridden by Vaadin to allow proper formatting
@@ -54,17 +45,18 @@ import static org.apache.poi.ss.format.CellFormatter.quote;
  * values.
  * <p>
  * Each format part can contain a color, a condition, and will always contain a
- * format specification.  For example {@code "[Red][>=10]#"} has a color
+ * format specification. For example {@code "[Red][>=10]#"} has a color
  * ({@code [Red]}), a condition ({@code >=10}) and a format specification
  * ({@code #}).
  * <p>
  * This class also contains patterns for matching the subparts of format
- * specification.  These are used internally, but are made public in case other
+ * specification. These are used internally, but are made public in case other
  * code has use for them.
  */
 @SuppressWarnings("RegExpRepeatedSpace")
 public class CellFormatPart {
-    private static final Logger LOG = LogManager.getLogger(CellFormatPart.class);
+    private static final Logger LOG = LogManager
+            .getLogger(CellFormatPart.class);
 
     static final Map<String, Color> NAMED_COLORS;
     static final List<Color> INDEXED_COLORS;
@@ -107,84 +99,84 @@ public class CellFormatPart {
     static {
         // Build indexed color list based on this table
         // https://www.excelsupersite.com/what-are-the-56-colorindex-colors-in-excel/
-        INDEXED_COLORS = List.of(
-            new Color(0x000000),      // Color 1 / black
-            new Color(0xFFFFFF),      // Color 2 / white
-            new Color(0xFF0000),      // Color 3 / red
-            new Color(0x00FF00),      // Color 4 / green
-            new Color(0x0000FF),      // Color 5 / blue
-            new Color(0xFFFF00),      // Color 6 / yellow
-            new Color(0xFF00FF),      // Color 7 / magenta
-            new Color(0x00FFFF),      // Color 8 / cyan
-            new Color(0x800000),      // Color 9
-            new Color(0x008000),      // Color 10
-            new Color(0x000080),      // Color 11
-            new Color(0x808000),      // Color 12
-            new Color(0x800080),      // Color 13
-            new Color(0x008080),      // Color 14
-            new Color(0xC0C0C0),      // Color 15
-            new Color(0x808080),      // Color 16
-            new Color(0x9999FF),      // Color 17
-            new Color(0x993366),      // Color 18
-            new Color(0xFFFFCC),      // Color 19
-            new Color(0xCCFFFF),      // Color 20
-            new Color(0x660066),      // Color 21
-            new Color(0xFF8080),      // Color 22
-            new Color(0x0066CC),      // Color 23
-            new Color(0xCCCCFF),      // Color 24
-            new Color(0x000080),      // Color 25
-            new Color(0xFF00FF),      // Color 26
-            new Color(0xFFFF00),      // Color 27
-            new Color(0x00FFFF),      // Color 28
-            new Color(0x800080),      // Color 29
-            new Color(0x800000),      // Color 30
-            new Color(0x008080),      // Color 31
-            new Color(0x0000FF),      // Color 32
-            new Color(0x00CCFF),      // Color 33
-            new Color(0xCCFFFF),      // Color 34
-            new Color(0xCCFFCC),      // Color 35
-            new Color(0xFFFF99),      // Color 36
-            new Color(0x99CCFF),      // Color 37
-            new Color(0xFF99CC),      // Color 38
-            new Color(0xCC99FF),      // Color 39
-            new Color(0xFFCC99),      // Color 40
-            new Color(0x3366FF),      // Color 41
-            new Color(0x33CCCC),      // Color 42
-            new Color(0x99CC00),      // Color 43
-            new Color(0xFFCC00),      // Color 44
-            new Color(0xFF9900),      // Color 45
-            new Color(0xFF6600),      // Color 46
-            new Color(0x666699),      // Color 47
-            new Color(0x969696),      // Color 48
-            new Color(0x003366),      // Color 49
-            new Color(0x339966),      // Color 50
-            new Color(0x003300),      // Color 51
-            new Color(0x333300),      // Color 52
-            new Color(0x993300),      // Color 53
-            new Color(0x993366),      // Color 54
-            new Color(0x333399),      // Color 55
-            new Color(0x333333)       // Color 56
+        INDEXED_COLORS = List.of(new Color(0x000000), // Color 1 / black
+                new Color(0xFFFFFF), // Color 2 / white
+                new Color(0xFF0000), // Color 3 / red
+                new Color(0x00FF00), // Color 4 / green
+                new Color(0x0000FF), // Color 5 / blue
+                new Color(0xFFFF00), // Color 6 / yellow
+                new Color(0xFF00FF), // Color 7 / magenta
+                new Color(0x00FFFF), // Color 8 / cyan
+                new Color(0x800000), // Color 9
+                new Color(0x008000), // Color 10
+                new Color(0x000080), // Color 11
+                new Color(0x808000), // Color 12
+                new Color(0x800080), // Color 13
+                new Color(0x008080), // Color 14
+                new Color(0xC0C0C0), // Color 15
+                new Color(0x808080), // Color 16
+                new Color(0x9999FF), // Color 17
+                new Color(0x993366), // Color 18
+                new Color(0xFFFFCC), // Color 19
+                new Color(0xCCFFFF), // Color 20
+                new Color(0x660066), // Color 21
+                new Color(0xFF8080), // Color 22
+                new Color(0x0066CC), // Color 23
+                new Color(0xCCCCFF), // Color 24
+                new Color(0x000080), // Color 25
+                new Color(0xFF00FF), // Color 26
+                new Color(0xFFFF00), // Color 27
+                new Color(0x00FFFF), // Color 28
+                new Color(0x800080), // Color 29
+                new Color(0x800000), // Color 30
+                new Color(0x008080), // Color 31
+                new Color(0x0000FF), // Color 32
+                new Color(0x00CCFF), // Color 33
+                new Color(0xCCFFFF), // Color 34
+                new Color(0xCCFFCC), // Color 35
+                new Color(0xFFFF99), // Color 36
+                new Color(0x99CCFF), // Color 37
+                new Color(0xFF99CC), // Color 38
+                new Color(0xCC99FF), // Color 39
+                new Color(0xFFCC99), // Color 40
+                new Color(0x3366FF), // Color 41
+                new Color(0x33CCCC), // Color 42
+                new Color(0x99CC00), // Color 43
+                new Color(0xFFCC00), // Color 44
+                new Color(0xFF9900), // Color 45
+                new Color(0xFF6600), // Color 46
+                new Color(0x666699), // Color 47
+                new Color(0x969696), // Color 48
+                new Color(0x003366), // Color 49
+                new Color(0x339966), // Color 50
+                new Color(0x003300), // Color 51
+                new Color(0x333300), // Color 52
+                new Color(0x993300), // Color 53
+                new Color(0x993366), // Color 54
+                new Color(0x333399), // Color 55
+                new Color(0x333333) // Color 56
         );
-        
+
         // Build named color list based on HSSFColorPredefined, just as
         // Apache POI does it originally. This gives us a wider range
         // of acceptable colors, but also puts out outside the acceptable
         // color range of Excel.
-        NAMED_COLORS = new TreeMap<>(
-            String.CASE_INSENSITIVE_ORDER);
-            
-         for (HSSFColor.HSSFColorPredefined color : HSSFColor.HSSFColorPredefined.values()) {
-             String name = color.name().toLowerCase();
-             short[] rgb = color.getTriplet();
-             Color c = new Color(rgb[0], rgb[1], rgb[2]);
-             NAMED_COLORS.put(name, c);
-             if (name.indexOf("_percent") > 0) {
-                NAMED_COLORS.put(name.replace("_percent", "%")
-                    .replaceAll("\\_", " "), c);
-             }
-             if (name.indexOf('_') > 0) {
-                 NAMED_COLORS.put(name.replaceAll("\\_", " "), c);
-             }
+        NAMED_COLORS = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
+        for (HSSFColor.HSSFColorPredefined color : HSSFColor.HSSFColorPredefined
+                .values()) {
+            String name = color.name().toLowerCase();
+            short[] rgb = color.getTriplet();
+            Color c = new Color(rgb[0], rgb[1], rgb[2]);
+            NAMED_COLORS.put(name, c);
+            if (name.indexOf("_percent") > 0) {
+                NAMED_COLORS.put(
+                        name.replace("_percent", "%").replaceAll("\\_", " "),
+                        c);
+            }
+            if (name.indexOf('_') > 0) {
+                NAMED_COLORS.put(name.replaceAll("\\_", " "), c);
+            }
         }
 
         // Replace the standard colors with standard values
@@ -199,38 +191,41 @@ public class CellFormatPart {
         NAMED_COLORS.put("cyan", INDEXED_COLORS.get(7));
 
         // A condition specification
-        String condition = "([<>=]=?|!=|<>)    # The operator\n" +
-                "  \\s*(-?([0-9]+(?:\\.[0-9]*)?)|(\\.[0-9]*))\\s*  # The constant to test against\n";
+        String condition = "([<>=]=?|!=|<>)    # The operator\n"
+                + "  \\s*(-?([0-9]+(?:\\.[0-9]*)?)|(\\.[0-9]*))\\s*  # The constant to test against\n";
 
         // A currency symbol / string, in a specific locale
         String currency = "(\\[\\$.{0,3}(-[0-9a-f]{3,4})?])";
 
         // A number specification
-        // Note: careful that in something like ##, that the trailing comma is not caught up in the integer part
+        // Note: careful that in something like ##, that the trailing comma is
+        // not caught up in the integer part
 
         // A part of a specification
-        //noinspection RegExpRedundantEscape
-        String part = "\\\\.                     # Quoted single character\n" +
-                "|\"([^\\\\\"]|\\\\.)*\"         # Quoted string of characters (handles escaped quotes like \\\") \n" +
-                "|"+currency+"                   # Currency symbol in a given locale\n" +
-                "|_.                             # Space as wide as a given character\n" +
-                "|\\*.                           # Repeating fill character\n" +
-                "|@                              # Text: cell text\n" +
-                "|([0?\\#][0?\\#,]*)             # Number: digit + other digits and commas\n" +
-                "|e[-+]                          # Number: Scientific: Exponent\n" +
-                "|m{1,5}                         # Date: month or minute spec\n" +
-                "|d{1,4}                         # Date: day/date spec\n" +
-                "|y{2,4}                         # Date: year spec\n" +
-                "|h{1,2}                         # Date: hour spec\n" +
-                "|s{1,2}                         # Date: second spec\n" +
-                "|am?/pm?                        # Date: am/pm spec\n" +
-                "|\\[h{1,2}]                     # Elapsed time: hour spec\n" +
-                "|\\[m{1,2}]                     # Elapsed time: minute spec\n" +
-                "|\\[s{1,2}]                     # Elapsed time: second spec\n" +
-                "|[^;]                           # A character\n" + "";
+        // noinspection RegExpRedundantEscape
+        String part = "\\\\.                     # Quoted single character\n"
+                + "|\"([^\\\\\"]|\\\\.)*\"         # Quoted string of characters (handles escaped quotes like \\\") \n"
+                + "|" + currency
+                + "                   # Currency symbol in a given locale\n"
+                + "|_.                             # Space as wide as a given character\n"
+                + "|\\*.                           # Repeating fill character\n"
+                + "|@                              # Text: cell text\n"
+                + "|([0?\\#][0?\\#,]*)             # Number: digit + other digits and commas\n"
+                + "|e[-+]                          # Number: Scientific: Exponent\n"
+                + "|m{1,5}                         # Date: month or minute spec\n"
+                + "|d{1,4}                         # Date: day/date spec\n"
+                + "|y{2,4}                         # Date: year spec\n"
+                + "|h{1,2}                         # Date: hour spec\n"
+                + "|s{1,2}                         # Date: second spec\n"
+                + "|am?/pm?                        # Date: am/pm spec\n"
+                + "|\\[h{1,2}]                     # Elapsed time: hour spec\n"
+                + "|\\[m{1,2}]                     # Elapsed time: minute spec\n"
+                + "|\\[s{1,2}]                     # Elapsed time: second spec\n"
+                + "|[^;]                           # A character\n" + "";
 
         // Build the color code matching expression.
-        // We should match any named color in the set as well as a string in the form
+        // We should match any named color in the set as well as a string in the
+        // form
         // of "Color 8" or "Color 15".
         String color = "\\[(";
         for (String key : NAMED_COLORS.keySet()) {
@@ -240,12 +235,13 @@ public class CellFormatPart {
         // Match the indexed color table
         color += "color\\ [0-9]+)\\]";
 
-        String format = "(?:" + color + ")?               # Text color\n" +
-                "(?:\\[" + condition + "])?               # Condition\n" +
-                // see https://msdn.microsoft.com/en-ca/goglobal/bb964664.aspx and https://bz.apache.org/ooo/show_bug.cgi?id=70003
+        String format = "(?:" + color + ")?               # Text color\n"
+                + "(?:\\[" + condition + "])?               # Condition\n" +
+                // see https://msdn.microsoft.com/en-ca/goglobal/bb964664.aspx
+                // and https://bz.apache.org/ooo/show_bug.cgi?id=70003
                 // we ignore these for now though
-                "(?:\\[\\$-[0-9a-fA-F]+])?                # Optional locale id, ignored currently\n" +
-                "((?:" + part + ")+)                      # Format spec\n";
+                "(?:\\[\\$-[0-9a-fA-F]+])?                # Optional locale id, ignored currently\n"
+                + "((?:" + part + ")+)                      # Format spec\n";
 
         int flags = Pattern.COMMENTS | Pattern.CASE_INSENSITIVE;
         COLOR_PAT = Pattern.compile(color, flags);
@@ -264,14 +260,14 @@ public class CellFormatPart {
         SPECIFICATION_GROUP = findGroup(FORMAT_PAT, "[Blue][>1]\\a ?", "\\a ?");
 
         // Once patterns have been compiled, add indexed colors to
-        // NAMED_COLORS so they can be easily picked up by an unmodified 
+        // NAMED_COLORS so they can be easily picked up by an unmodified
         // getColor() implementation
         for (int i = 0; i < INDEXED_COLORS.size(); ++i) {
             NAMED_COLORS.put("color " + (i + 1), INDEXED_COLORS.get(i));
         }
         // NOTE: the INDEXED_COLORS list is retained for future use, even
-        //       though it is not currently utilized outside the static
-        //       initialization logic.
+        // though it is not currently utilized outside the static
+        // initialization logic.
     }
 
     interface PartHandler {
@@ -282,7 +278,8 @@ public class CellFormatPart {
     /**
      * Create an object to represent a format part.
      *
-     * @param desc The string to parse.
+     * @param desc
+     *            The string to parse.
      */
     public CellFormatPart(String desc) {
         this(LocaleUtil.getUserLocale(), desc);
@@ -291,14 +288,16 @@ public class CellFormatPart {
     /**
      * Create an object to represent a format part.
      *
-     * @param locale The locale to use.
-     * @param desc The string to parse.
+     * @param locale
+     *            The locale to use.
+     * @param desc
+     *            The string to parse.
      */
     public CellFormatPart(Locale locale, String desc) {
         Matcher m = FORMAT_PAT.matcher(desc);
         if (!m.matches()) {
-            throw new IllegalArgumentException("Unrecognized format: " + quote(
-                    desc));
+            throw new IllegalArgumentException(
+                    "Unrecognized format: " + quote(desc));
         }
         color = getColor(m);
         condition = getCondition(m);
@@ -309,10 +308,11 @@ public class CellFormatPart {
     /**
      * Returns {@code true} if this format part applies to the given value. If
      * the value is a number and this is part has a condition, returns
-     * {@code true} only if the number passes the condition.  Otherwise, this
+     * {@code true} only if the number passes the condition. Otherwise, this
      * always return {@code true}.
      *
-     * @param valueObject The value to evaluate.
+     * @param valueObject
+     *            The value to evaluate.
      *
      * @return {@code true} if this format part applies to the given value.
      */
@@ -331,20 +331,23 @@ public class CellFormatPart {
      * Returns the number of the first group that is the same as the marker
      * string. Starts from group 1.
      *
-     * @param pat    The pattern to use.
-     * @param str    The string to match against the pattern.
-     * @param marker The marker value to find the group of.
+     * @param pat
+     *            The pattern to use.
+     * @param str
+     *            The string to match against the pattern.
+     * @param marker
+     *            The marker value to find the group of.
      *
      * @return The matching group number.
      *
-     * @throws IllegalArgumentException No group matches the marker.
+     * @throws IllegalArgumentException
+     *             No group matches the marker.
      */
     private static int findGroup(Pattern pat, String str, String marker) {
         Matcher m = pat.matcher(str);
         if (!m.find())
-            throw new IllegalArgumentException(
-                    "Pattern \"" + pat.pattern() + "\" doesn't match \"" + str +
-                            "\"");
+            throw new IllegalArgumentException("Pattern \"" + pat.pattern()
+                    + "\" doesn't match \"" + str + "\"");
         for (int i = 1; i <= m.groupCount(); i++) {
             String grp = m.group(i);
             if (grp != null && grp.equals(marker))
@@ -358,7 +361,8 @@ public class CellFormatPart {
      * Returns the color specification from the matcher, or {@code null} if
      * there is none.
      *
-     * @param m The matcher for the format part.
+     * @param m
+     *            The matcher for the format part.
      *
      * @return The color specification or {@code null}.
      */
@@ -380,7 +384,8 @@ public class CellFormatPart {
      * Returns the condition specification from the matcher, or {@code null} if
      * there is none.
      *
-     * @param m The matcher for the format part.
+     * @param m
+     *            The matcher for the format part.
      *
      * @return The condition specification or {@code null}.
      */
@@ -388,15 +393,17 @@ public class CellFormatPart {
         String mdesc = m.group(CONDITION_OPERATOR_GROUP);
         if (mdesc == null || mdesc.length() == 0)
             return null;
-        return CellFormatCondition.getInstance(m.group(
-                CONDITION_OPERATOR_GROUP), m.group(CONDITION_VALUE_GROUP));
+        return CellFormatCondition.getInstance(
+                m.group(CONDITION_OPERATOR_GROUP),
+                m.group(CONDITION_VALUE_GROUP));
     }
 
     /**
      * Returns the CellFormatType object implied by the format specification for
      * the format part.
      *
-     * @param matcher The matcher for the format part.
+     * @param matcher
+     *            The matcher for the format part.
      *
      * @return The CellFormatType.
      */
@@ -409,7 +416,8 @@ public class CellFormatPart {
      * Returns the formatter object implied by the format specification for the
      * format part.
      *
-     * @param matcher The matcher for the format part.
+     * @param matcher
+     *            The matcher for the format part.
      *
      * @return The formatter.
      */
@@ -426,9 +434,11 @@ public class CellFormatPart {
                 currencyRepl = "$";
             } else if (!currencyPart.contains("-")) {
                 // Accounting formats such as USD [$USD]
-                currencyRepl = currencyPart.substring(2, currencyPart.indexOf("]"));
+                currencyRepl = currencyPart.substring(2,
+                        currencyPart.indexOf("]"));
             } else {
-                currencyRepl = currencyPart.substring(2, currencyPart.lastIndexOf('-'));
+                currencyRepl = currencyPart.substring(2,
+                        currencyPart.lastIndexOf('-'));
             }
             fdesc = fdesc.replace(currencyPart, currencyRepl);
         }
@@ -440,7 +450,8 @@ public class CellFormatPart {
     /**
      * Returns the type of format.
      *
-     * @param fdesc The format specification
+     * @param fdesc
+     *            The format specification
      *
      * @return The type of format.
      */
@@ -491,8 +502,9 @@ public class CellFormatPart {
                         return CellFormatType.NUMBER;
                     }
                     // Something else inside [] which isn't supported!
-                    throw new IllegalArgumentException("Unsupported [] format block '" +
-                                                       repl + "' in '" + fdesc + "' with c2: " + c2);
+                    throw new IllegalArgumentException(
+                            "Unsupported [] format block '" + repl + "' in '"
+                                    + fdesc + "' with c2: " + c2);
                 case "#":
                 case "?":
                     return CellFormatType.NUMBER;
@@ -510,11 +522,13 @@ public class CellFormatPart {
 
     /**
      * Returns a version of the original string that has any special characters
-     * quoted (or escaped) as appropriate for the cell format type.  The format
+     * quoted (or escaped) as appropriate for the cell format type. The format
      * type object is queried to see what is special.
      *
-     * @param repl The original string.
-     * @param type The format type representation object.
+     * @param repl
+     *            The original string.
+     * @param type
+     *            The format type representation object.
      *
      * @return A version of the string with any special characters replaced.
      *
@@ -522,7 +536,8 @@ public class CellFormatPart {
      */
     static String quoteSpecial(String repl, CellFormatType type) {
         StringBuilder sb = new StringBuilder();
-        PrimitiveIterator.OfInt codePoints = CodepointsUtil.primitiveIterator(repl);
+        PrimitiveIterator.OfInt codePoints = CodepointsUtil
+                .primitiveIterator(repl);
 
         int codepoint;
         while (codePoints.hasNext()) {
@@ -544,10 +559,11 @@ public class CellFormatPart {
     }
 
     /**
-     * Apply this format part to the given value.  This returns a {@link
-     * CellFormatResult} object with the results.
+     * Apply this format part to the given value. This returns a
+     * {@link CellFormatResult} object with the results.
      *
-     * @param value The value to apply this format part to.
+     * @param value
+     *            The value to apply this format part to.
      *
      * @return A {@link CellFormatResult} object containing the results of
      *         applying the format to the value.
@@ -570,8 +586,10 @@ public class CellFormatPart {
      * Apply this format part to the given value, applying the result to the
      * given label.
      *
-     * @param label The label
-     * @param value The value to apply this format part to.
+     * @param label
+     *            The label
+     * @param value
+     *            The value to apply this format part to.
      *
      * @return {@code true} if the
      */
@@ -606,19 +624,19 @@ public class CellFormatPart {
     public static StringBuffer parseFormat(String fdesc, CellFormatType type,
             PartHandler partHandler) {
 
-        // Quoting is very awkward.  In the Java classes, quoting is done
+        // Quoting is very awkward. In the Java classes, quoting is done
         // between ' chars, with '' meaning a single ' char. The problem is that
-        // in Excel, it is legal to have two adjacent escaped strings.  For
-        // example, consider the Excel format "\a\b#".  The naive (and easy)
-        // translation into Java DecimalFormat is "'a''b'#".  For the number 17,
+        // in Excel, it is legal to have two adjacent escaped strings. For
+        // example, consider the Excel format "\a\b#". The naive (and easy)
+        // translation into Java DecimalFormat is "'a''b'#". For the number 17,
         // in Excel you would get "ab17", but in Java it would be "a'b17" -- the
-        // '' is in the middle of the quoted string in Java.  So the trick we
+        // '' is in the middle of the quoted string in Java. So the trick we
         // use is this: When we encounter a ' char in the Excel format, we
-        // output a \u0000 char into the string.  Now we know that any '' in the
-        // output is the result of two adjacent escaped strings.  So after the
+        // output a \u0000 char into the string. Now we know that any '' in the
+        // output is the result of two adjacent escaped strings. So after the
         // main loop, we have to do two passes: One to eliminate any ''
         // sequences, to make "'a''b'" become "'ab'", and another to replace any
-        // \u0000 with '' to mean a quote char.  Oy.
+        // \u0000 with '' to mean a quote char. Oy.
         //
         // For formats that don't use "'" we don't do any of this
         Matcher m = SPECIFICATION_PAT.matcher(fdesc);
@@ -630,8 +648,8 @@ public class CellFormatPart {
                 if (repl == null) {
                     switch (part.charAt(0)) {
                     case '\"':
-                        repl = quoteSpecial(part.substring(1,
-                                part.length() - 1), type);
+                        repl = quoteSpecial(
+                                part.substring(1, part.length() - 1), type);
                         break;
                     case '\\':
                         repl = quoteSpecial(part.substring(1), type);
@@ -639,7 +657,8 @@ public class CellFormatPart {
                     case '_':
                         repl = " ";
                         break;
-                    case '*': //!! We don't do this for real, we just put in 3 of them
+                    case '*': // !! We don't do this for real, we just put in 3
+                              // of them
                         repl = expandChar(part);
                         break;
                     default:
@@ -653,7 +672,8 @@ public class CellFormatPart {
         m.appendTail(fmt);
 
         if (type.isSpecial('\'')) {
-            // Now the next pass for quoted characters: Remove '' chars, making "'a''b'" into "'ab'"
+            // Now the next pass for quoted characters: Remove '' chars, making
+            // "'a''b'" into "'ab'"
             int pos = 0;
             while ((pos = fmt.indexOf("''", pos)) >= 0) {
                 fmt.delete(pos, pos + 2);
@@ -679,18 +699,21 @@ public class CellFormatPart {
 
     /**
      * Expands a character. This is only partly done, because we don't have the
-     * correct info.  In Excel, this would be expanded to fill the rest of the
+     * correct info. In Excel, this would be expanded to fill the rest of the
      * cell, but we don't know, in general, what the "rest of the cell" is.
      *
-     * @param part The character to be repeated is the second character in this
-     *             string.
+     * @param part
+     *            The character to be repeated is the second character in this
+     *            string.
      *
      * @return The character repeated three times.
      */
     static String expandChar(String part) {
         List<String> codePoints = new ArrayList<>();
         CodepointsUtil.iteratorFor(part).forEachRemaining(codePoints::add);
-        if (codePoints.size() < 2) throw new IllegalArgumentException("Expected part string to have at least 2 chars");
+        if (codePoints.size() < 2)
+            throw new IllegalArgumentException(
+                    "Expected part string to have at least 2 chars");
         String ch = codePoints.get(1);
         return ch + ch + ch;
     }
@@ -699,8 +722,10 @@ public class CellFormatPart {
      * Returns the string from the group, or {@code ""} if the group is
      * {@code null}.
      *
-     * @param m The matcher.
-     * @param g The group number.
+     * @param m
+     *            The matcher.
+     * @param g
+     *            The group number.
      *
      * @return The group or {@code ""}.
      */

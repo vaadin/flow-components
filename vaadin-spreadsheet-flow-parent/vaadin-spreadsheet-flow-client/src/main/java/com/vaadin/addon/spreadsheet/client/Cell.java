@@ -238,7 +238,8 @@ public class Cell {
         return value;
     }
 
-    public void setValue(String value, String cellStyle, String textColor, boolean needsMeasure) {
+    public void setValue(String value, String cellStyle, String textColor,
+            boolean needsMeasure) {
         if (!this.cellStyle.equals(cellStyle)) {
             this.cellStyle = cellStyle;
             updateClassName();
