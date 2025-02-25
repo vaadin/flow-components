@@ -244,7 +244,8 @@ public class CellValueManager implements Serializable {
             }
 
             if (formatter instanceof CustomDataFormatter) {
-                String color = ((CustomDataFormatter)formatter).getCellTextColor(cell);
+                String color = ((CustomDataFormatter) formatter)
+                        .getCellTextColor(cell);
                 if (color != null) {
                     cellData.textColor = color;
                 }

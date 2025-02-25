@@ -136,7 +136,8 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
         }
     }
 
-    private CellFormatResult formatTextUsingCellFormat(Cell cell, String format) {
+    private CellFormatResult formatTextUsingCellFormat(Cell cell,
+            String format) {
         return CellFormat.getInstance(locale, format).apply(cell);
     }
 
@@ -145,8 +146,11 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
      * CellFormat logic, which parses and evaluates the cell's format string
      * against the cell's current value.
      * 
-     * @param cell The cell to get the applicable custom formatting text color for.
-     * @return a CSS color value string, or null if no text color should be applied.
+     * @param cell
+     *            The cell to get the applicable custom formatting text color
+     *            for.
+     * @return a CSS color value string, or null if no text color should be
+     *         applied.
      */
     public String getCellTextColor(Cell cell) {
         try {
@@ -156,7 +160,7 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
             }
 
             CellFormatResult result = formatTextUsingCellFormat(cell, format);
-            
+
             if (result.textColor == null) {
                 return null;
             }
@@ -165,10 +169,10 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
 
             // rgb(N,N,N) turned out to be the most reliably transmitted string
             // in testing
-            String css = "rgb(" + color.getRed() + "," + color.getGreen() + "," +
-                color.getBlue() + ")";
+            String css = "rgb(" + color.getRed() + "," + color.getGreen() + ","
+                    + color.getBlue() + ")";
             return css;
-        } catch(Exception e) {
+        } catch (Exception e) {
             return null;
         }
     }

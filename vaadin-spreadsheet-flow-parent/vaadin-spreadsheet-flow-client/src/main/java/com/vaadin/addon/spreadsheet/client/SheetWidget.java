@@ -3144,7 +3144,7 @@ public class SheetWidget extends Panel {
                     // unless this is checked for.
                     continue;
                 }
-                
+
                 int cIndex = cell.getCol();
 
                 // scroll right
@@ -3733,7 +3733,7 @@ public class SheetWidget extends Panel {
         Cell originalCell = getCell(region.col1, region.row1);
         if (originalCell != null) {
             originalCell.setValue(mCell.getValue(), mCell.getCellStyle(),
-                originalCell.getTextColor(),false);
+                    originalCell.getTextColor(), false);
         }
         mergedCells.remove(region.id).getElement().removeFromParent();
         overflownMergedCells.remove(region);
@@ -4223,10 +4223,10 @@ public class SheetWidget extends Panel {
             Iterator<CellData> i = cellData2.iterator();
             while (i.hasNext()) {
                 CellData cd = i.next();
-                topLeftCells
-                        .get((cd.row - 1) * horizontalSplitPosition + cd.col
-                                - 1)
-                        .setValue(cd.value, cd.cellStyle, cd.textColor, cd.needsMeasure);
+                topLeftCells.get(
+                        (cd.row - 1) * horizontalSplitPosition + cd.col - 1)
+                        .setValue(cd.value, cd.cellStyle, cd.textColor,
+                                cd.needsMeasure);
                 String key = toKey(cd.col, cd.row);
                 setMergedCellValue(key, cd.value, cd.cellStyle, cd.textColor,
                         cd.needsMeasure);
@@ -4274,11 +4274,12 @@ public class SheetWidget extends Panel {
                         c1 = row.get(0).getCol();
                     }
                 }
-                row.get(cd.col - c1).setValue(cd.value, cd.cellStyle, cd.textColor,
-                        cd.needsMeasure);
+                row.get(cd.col - c1).setValue(cd.value, cd.cellStyle,
+                        cd.textColor, cd.needsMeasure);
             }
             String key = toKey(cd.col, cd.row);
-            setMergedCellValue(key, cd.value, cd.cellStyle, cd.textColor, cd.needsMeasure);
+            setMergedCellValue(key, cd.value, cd.cellStyle, cd.textColor,
+                    cd.needsMeasure);
             if (cd.value == null) {
                 cachedCellData.remove(key);
             } else {
@@ -4311,7 +4312,8 @@ public class SheetWidget extends Panel {
                 }
 
                 if (cell != null) {
-                    cell.setValue(cd.value, cd.cellStyle, cd.textColor, cd.needsMeasure);
+                    cell.setValue(cd.value, cd.cellStyle, cd.textColor,
+                            cd.needsMeasure);
                     cell.markAsOverflowDirty();
                 }
                 int j = verticalSplitPosition > 0 ? 0 : firstColumnIndex;
