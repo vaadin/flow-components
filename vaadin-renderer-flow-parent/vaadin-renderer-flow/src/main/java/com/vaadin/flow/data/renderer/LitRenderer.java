@@ -41,6 +41,7 @@ import com.vaadin.flow.internal.nodefeature.ReturnChannelMap;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
 import com.vaadin.flow.shared.Registration;
 
+import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
@@ -195,9 +196,9 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                 .getFeature(ReturnChannelMap.class)
                 .registerChannel(arguments -> {
                     // Invoked when the client calls one of the client callables
-                    String handlerName = arguments.getString(0);
-                    String itemKey = arguments.getString(1);
-                    JsonArray args = arguments.getArray(2);
+                    String handlerName = arguments.get(0).textValue();
+                    String itemKey = arguments.get(1).textValue();
+                    JsonArray args = Json.instance().parse(arguments.get(2).toString());
 
                     SerializableBiConsumer<SOURCE, JsonArray> handler = clientCallables
                             .get(handlerName);
