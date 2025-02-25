@@ -8,11 +8,13 @@
  */
 package com.vaadin.flow.component.spreadsheet;
 
+import java.awt.Color;
 import java.io.Serializable;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
 import org.apache.poi.ss.format.CellFormat;
+import org.apache.poi.ss.format.CellFormatResult;
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -127,15 +129,48 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
 
         if (isOnlyLiteralFormat(format)) {
             // CellFormat can format literals correctly
-            return formatTextUsingCellFormat(cell, format);
+            return formatTextUsingCellFormat(cell, format).text;
         } else {
             // DataFormatter can format numbers correctly
             return super.formatCellValue(cell, evaluator, cfEvaluator);
         }
     }
 
-    private String formatTextUsingCellFormat(Cell cell, String format) {
-        return CellFormat.getInstance(locale, format).apply(cell).text;
+    private CellFormatResult formatTextUsingCellFormat(Cell cell, String format) {
+        return CellFormat.getInstance(locale, format).apply(cell);
+    }
+
+    /**
+     * Get the applicable text color for the cell. This uses Apache POI's
+     * CellFormat logic, which parses and evaluates the cell's format string
+     * against the cell's current value.
+     * 
+     * @param cell The cell to get the applicable custom formatting text color for.
+     * @return a CSS color value string, or null if no text color should be applied.
+     */
+    public String getCellTextColor(Cell cell) {
+        try {
+            final String format = cell.getCellStyle().getDataFormatString();
+            if (format == null || format.isEmpty() || isGeneralFormat(format)) {
+                return null;
+            }
+
+            CellFormatResult result = formatTextUsingCellFormat(cell, format);
+            
+            if (result.textColor == null) {
+                return null;
+            }
+
+            Color color = result.textColor; // AWT color value returned by POI
+
+            // rgb(N,N,N) turned out to be the most reliably transmitted string
+            // in testing
+            String css = "rgb(" + color.getRed() + "," + color.getGreen() + "," +
+                color.getBlue() + ")";
+            return css;
+        } catch(Exception e) {
+            return null;
+        }
     }
 
     private String getNumericFormat(double value, String[] formatParts) {
@@ -181,6 +216,6 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
             return "";
         }
 
-        return formatTextUsingCellFormat(cell, formatString);
+        return formatTextUsingCellFormat(cell, formatString).text;
     }
 }
