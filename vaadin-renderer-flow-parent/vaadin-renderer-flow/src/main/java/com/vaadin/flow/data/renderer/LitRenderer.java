@@ -198,7 +198,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                     // Invoked when the client calls one of the client callables
                     String handlerName = arguments.get(0).textValue();
                     String itemKey = arguments.get(1).textValue();
-                    JsonArray args = Json.instance().parse(arguments.get(2).toString());
+                    JsonArray args = Json.instance()
+                            .parse(arguments.get(2).toString());
 
                     SerializableBiConsumer<SOURCE, JsonArray> handler = clientCallables
                             .get(handlerName);
