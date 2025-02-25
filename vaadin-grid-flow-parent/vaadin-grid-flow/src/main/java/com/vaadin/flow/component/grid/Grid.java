@@ -269,7 +269,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 enqueue("$connector.updateUniqueItemIdPath",
                         data.getUniqueKeyProperty());
             }
-            getElement().setProperty("size", size);
         }
 
         @Override
