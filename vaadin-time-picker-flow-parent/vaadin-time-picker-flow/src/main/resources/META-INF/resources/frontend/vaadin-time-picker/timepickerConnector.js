@@ -10,29 +10,29 @@ import {
 } from './helpers.js';
 import { TimePicker } from '@vaadin/time-picker/src/vaadin-time-picker.js';
 
-  // Execute callback when predicate returns true.
-  // Try again later if predicate returns false.
-  function when(predicate, callback, timeout = 0) {
-    if (predicate()) {
-      callback();
-    } else {
-      setTimeout(() => when(predicate, callback, 200), timeout);
-    }
+// Execute callback when predicate returns true.
+// Try again later if predicate returns false.
+function when(predicate, callback, timeout = 0) {
+  if (predicate()) {
+    callback();
+  } else {
+    setTimeout(() => when(predicate, callback, 200), timeout);
   }
+}
 
-  function parseISO(text) {
-    // The default i18n parser of the web component is ISO 8601 compliant.
-    const timeObject = TimePicker.properties.i18n.value().parseTime(text);
+function parseISO(text) {
+  // The default i18n parser of the web component is ISO 8601 compliant.
+  const timeObject = TimePicker.properties.i18n.value().parseTime(text);
 
-    // The web component returns an object with string values
-    // while the connector expects number values.
-    return {
-      hours: parseInt(timeObject.hours || 0),
-      minutes: parseInt(timeObject.minutes || 0),
-      seconds: parseInt(timeObject.seconds || 0),
-      milliseconds: parseInt(timeObject.milliseconds || 0)
-    }
+  // The web component returns an object with string values
+  // while the connector expects number values.
+  return {
+    hours: parseInt(timeObject.hours || 0),
+    minutes: parseInt(timeObject.minutes || 0),
+    seconds: parseInt(timeObject.seconds || 0),
+    milliseconds: parseInt(timeObject.milliseconds || 0)
   };
+}
 
 window.Vaadin.Flow.timepickerConnector = {};
 window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
@@ -57,9 +57,7 @@ window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
       locale = 'en-US';
       // FIXME should do a callback for server to throw an exception ?
       throw new Error(
-        'vaadin-time-picker: The locale ' +
-          locale +
-          ' is not supported, falling back to default locale setting(en-US).'
+        'vaadin-time-picker: The locale ' + locale + ' is not supported, falling back to default locale setting(en-US).'
       );
     }
 
@@ -158,9 +156,7 @@ window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
             minutes: minutes ? parseDigitsIntoInteger(minutes[0].replace(separator, '')) : 0,
             seconds: seconds ? parseDigitsIntoInteger(seconds[0].replace(separator, '')) : 0,
             milliseconds:
-              minutes && seconds && milliseconds
-                ? parseMillisecondsIntoInteger(milliseconds[0].replace('.', ''))
-                : 0
+              minutes && seconds && milliseconds ? parseMillisecondsIntoInteger(milliseconds[0].replace('.', '')) : 0
           };
           cachedTimeString = timeString;
           return cachedTimeObject;
@@ -182,4 +178,4 @@ window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
       );
     }
   };
-}
+};
