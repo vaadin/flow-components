@@ -550,6 +550,8 @@
                         <excludes>
                             <!-- Do not modify GWT sources / license headers -->
                             <exclude>**/com/google/gwt/**/*.*</exclude>
+                            <!-- Do not modify Apache POI sources / license headers -->
+                            <exclude>**/org/apache/poi/**/*.*</exclude>
                         </excludes>
                         <endWithNewline/>
                         <removeUnusedImports/>
