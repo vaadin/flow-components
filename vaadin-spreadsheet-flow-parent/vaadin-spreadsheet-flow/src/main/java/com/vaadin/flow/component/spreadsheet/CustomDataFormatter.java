@@ -13,8 +13,8 @@ import java.io.Serializable;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import org.apache.poi.ss.format.CellFormatResult;
 import org.apache.poi.ss.format.CellFormat;
+import org.apache.poi.ss.format.CellFormatResult;
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
