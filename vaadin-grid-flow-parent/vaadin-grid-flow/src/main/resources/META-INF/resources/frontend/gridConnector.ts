@@ -542,6 +542,27 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
   };
 
+  /**
+   * Update the given page of items in the DOM, if the items are visible
+   */
+  const updatePageInDom = function (pageItems) {
+    const firstItem = pageItems[0];
+    if (!firstItem) {
+      return;
+    }
+
+    // Item might not be in grid cache yet if there is a pending request for that page
+    const firstItemContext = dataProviderController.getItemContext(firstItem);
+    if (!firstItemContext) {
+      return;
+    }
+
+    // Update the visible rows in the grid
+    const flatStartIndex = firstItemContext.flatIndex;
+    const flatEndIndex = flatStartIndex + pageItems.length - 1;
+    grid.__updateVisibleRows(flatStartIndex, flatEndIndex);
+  };
+
   grid.$connector.set = function (index, items, parentKey) {
     if (index % grid.pageSize != 0) {
       throw 'Got new data to index ' + index + ' which is not aligned with the page size of ' + grid.pageSize;
@@ -567,11 +588,9 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       grid.$connector.doSelection(slice.filter((item) => item.selected));
       grid.$connector.doDeselection(slice.filter((item) => !item.selected && selectedKeys[item.key]));
 
-      const updatedItems = updateGridCache(page, pkey);
-      if (updatedItems) {
-        itemsUpdated(updatedItems);
-        updateGridItemsInDomBasedOnCache(updatedItems);
-      }
+      updateGridCache(page, pkey);
+      itemsUpdated(slice);
+      updatePageInDom(slice);
     }
   };
 
