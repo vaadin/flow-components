@@ -13,8 +13,8 @@ import java.io.Serializable;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import org.apache.poi.ss.format.CellFormat;
 import org.apache.poi.ss.format.CellFormatResult;
+import org.apache.poi.ss.format.CustomCellFormat;
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -138,7 +138,9 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
 
     private CellFormatResult formatTextUsingCellFormat(Cell cell,
             String format) {
-        return CellFormat.getInstance(locale, format).apply(cell);
+        // TODO: replace this with a reference to CellFormat when moving back to
+        // mainline Apache POI.
+        return CustomCellFormat.getInstance(locale, format).apply(cell);
     }
 
     /**
