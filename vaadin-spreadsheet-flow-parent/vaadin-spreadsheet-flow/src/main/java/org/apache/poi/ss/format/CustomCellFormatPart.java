@@ -63,8 +63,8 @@ import static org.apache.poi.ss.format.CellFormatter.quote;
  * code has use for them.
  */
 @SuppressWarnings("RegExpRepeatedSpace")
-public class CellFormatPart {
-    private static final Logger LOG = LogManager.getLogger(CellFormatPart.class);
+public class CustomCellFormatPart {
+    private static final Logger LOG = LogManager.getLogger(CustomCellFormatPart.class);
 
     static final Map<String, Color> NAMED_COLORS;
     static final List<Color> INDEXED_COLORS;
@@ -284,7 +284,7 @@ public class CellFormatPart {
      *
      * @param desc The string to parse.
      */
-    public CellFormatPart(String desc) {
+    public CustomCellFormatPart(String desc) {
         this(LocaleUtil.getUserLocale(), desc);
     }
 
@@ -294,7 +294,7 @@ public class CellFormatPart {
      * @param locale The locale to use.
      * @param desc The string to parse.
      */
-    public CellFormatPart(Locale locale, String desc) {
+    public CustomCellFormatPart(Locale locale, String desc) {
         Matcher m = FORMAT_PAT.matcher(desc);
         if (!m.matches()) {
             throw new IllegalArgumentException("Unrecognized format: " + quote(
