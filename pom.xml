@@ -77,6 +77,8 @@
         <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
         <spotless.plugin.version>2.44.2</spotless.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
+        <spotless.npmExecutable/>
+        <spotless.nodeExecutable/>
         <failsafe.forkCount>4</failsafe.forkCount>
         <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
         <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
@@ -560,6 +562,22 @@
                             <file>${spotless.licence-header}</file>
                         </licenseHeader>
                     </java>
+                    <typescript>
+                        <includes>
+                            <include>src/**/*.js</include>
+                            <include>src/**/*.ts</include>
+                            <include>frontend/**/*.js</include>
+                            <include>frontend/**/*.ts</include>
+                        </includes>
+                        <excludes>
+                            <exclude>src/**/SpreadsheetSingleScriptTemplate.js</exclude>
+                        </excludes>
+                        <prettier>
+                            <npmExecutable>${spotless.npmExecutable}</npmExecutable>
+                            <nodeExecutable>${spotless.nodeExecutable}</nodeExecutable>
+                            <configFile>${maven.multiModuleProjectDirectory}/.prettierrc</configFile>
+                        </prettier>
+                    </typescript>
                     <pom>
                         <sortPom>
                             <expandEmptyElements>false</expandEmptyElements>
