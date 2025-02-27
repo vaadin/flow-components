@@ -733,7 +733,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   };
 
   grid.$connector.reset = function () {
-    grid.size = 0;
     cache = {};
     dataProviderController.rootCache.items = [];
     lastRequestedRanges = {};
