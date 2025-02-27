@@ -734,19 +734,11 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   grid.$connector.reset = function () {
     cache = {};
-    dataProviderController.rootCache.items = [];
+    dataProviderController.clearCache();
     lastRequestedRanges = {};
-    if (ensureSubCacheDebouncer) {
-      ensureSubCacheDebouncer.cancel();
-    }
-    if (parentRequestDebouncer) {
-      parentRequestDebouncer.cancel();
-    }
-    if (rootRequestDebouncer) {
-      rootRequestDebouncer.cancel();
-    }
-    ensureSubCacheDebouncer = undefined;
-    parentRequestDebouncer = undefined;
+    ensureSubCacheDebouncer?.cancel();
+    parentRequestDebouncer?.cancel();
+    rootRequestDebouncer?.cancel();
     ensureSubCacheQueue = [];
     parentRequestQueue = [];
     updateAllGridRowsInDomBasedOnCache();
