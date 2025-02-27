@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-popover-flow-parent</artifactId>
-        <version>24.7-SNAPSHOT</version>
+        <version>24.8-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-popover-integration-tests</artifactId>
     <packaging>war</packaging>
