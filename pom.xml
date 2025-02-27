@@ -7,7 +7,7 @@
         <version>2.2.1</version>
     </parent>
     <artifactId>vaadin-flow-components</artifactId>
-    <version>24.7-SNAPSHOT</version>
+    <version>24.8-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Flow Components Root Project</name>
     <url>https://vaadin.com/components</url>
@@ -62,7 +62,7 @@
         <module>vaadin-side-nav-flow-parent</module>
     </modules>
     <properties>
-        <flow.version>24.7-SNAPSHOT</flow.version>
+        <flow.version>24.8-SNAPSHOT</flow.version>
         <testbench.version>9.3.10</testbench.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
