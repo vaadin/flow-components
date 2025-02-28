@@ -55,7 +55,22 @@ public class GridScrollToPage extends Div {
                 });
         addRowsAndScrollToEnd.setId("add-row-and-scroll-to-end");
 
+        NativeButton addRowAndScrollToIndex = new NativeButton(
+                "Add row and scroll to index", e -> {
+                    items.add(String.valueOf(items.size()));
+                    grid.getDataProvider().refreshAll();
+                    grid.scrollToIndex(items.size() - 1);
+                });
+        addRowAndScrollToIndex.setId("add-row-and-scroll-to-index");
+
+        NativeButton setSmallPageSize = new NativeButton(
+                "Set small page size (5)", e -> {
+                    grid.setPageSize(5);
+                });
+        setSmallPageSize.setId("set-small-page-size");
+
         add(grid, scrollToStart, scrollToEnd, scrollToRow500, grid2,
-                addRowsAndScrollToEnd);
+                addRowsAndScrollToEnd, addRowAndScrollToIndex,
+                setSmallPageSize);
     }
 }
