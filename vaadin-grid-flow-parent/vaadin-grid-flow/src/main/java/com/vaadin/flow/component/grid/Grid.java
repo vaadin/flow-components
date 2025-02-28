@@ -4036,7 +4036,7 @@ public class Grid<T> extends Component implements HasDataProvider<T>, HasStyle,
         // Preload the items
         setRequestedRange(targetPageStartIndex, preloadedItemsCount);
 
-        // Scroll to the requested index            
+        // Scroll to the requested index
         getElement().callJsFunction("scrollToIndex", rowIndex);
     }
 
