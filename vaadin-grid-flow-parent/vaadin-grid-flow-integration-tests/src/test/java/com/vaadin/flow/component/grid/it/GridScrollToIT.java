@@ -16,6 +16,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 /**
@@ -75,6 +76,42 @@ public class GridScrollToIT extends AbstractComponentIT {
         button.click();
         Assert.assertEquals(0, grid.getFirstVisibleRowIndex());
         Assert.assertEquals(3, grid.getLastVisibleRowIndex());
+    }
+
+    @Test
+    public void grid_addItem_scrollToIndex_twice() {
+        $("button").id("add-row-and-scroll-to-index").click();
+        // Wait until finished loading
+        waitUntil(e -> !grid.getRow(grid.getFirstVisibleRowIndex())
+                .hasAttribute("loading"));
+
+        $("button").id("add-row-and-scroll-to-index").click();
+        waitUntil(e -> !grid.getRow(grid.getFirstVisibleRowIndex())
+                .hasAttribute("loading"));
+
+        // Find the content element of the first visible row cell
+        TestBenchElement slot = grid.getCell(grid.getFirstVisibleRowIndex(), 0)
+                .findElement(By.tagName("slot"));
+        TestBenchElement content = grid
+                .findElement(By.cssSelector("vaadin-grid-cell-content[slot='"
+                        + slot.getPropertyString("name") + "']"));
+        // Expect the content element to be displayed
+        Assert.assertTrue(content.isDisplayed());
+    }
+
+    @Test
+    public void grid_smallPageSize_addItem_scrollToIndex_twice() {
+        // Set page size to 5
+        $("button").id("set-small-page-size").click();
+
+        $("button").id("add-row-and-scroll-to-index").click();
+        // Wait until finished loading
+        waitUntil(e -> !grid.getRow(grid.getFirstVisibleRowIndex())
+                .hasAttribute("loading"));
+
+        $("button").id("add-row-and-scroll-to-index").click();
+        waitUntil(e -> !grid.getRow(grid.getFirstVisibleRowIndex())
+                .hasAttribute("loading"));
     }
 
 }
