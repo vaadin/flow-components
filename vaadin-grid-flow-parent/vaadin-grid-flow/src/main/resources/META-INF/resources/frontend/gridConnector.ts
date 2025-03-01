@@ -69,7 +69,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   let sorterDirectionsSetFromServer = false;
 
-  grid.size = 0; // To avoid NaN here and there before we get proper data
   grid.itemIdPath = 'key';
 
   function createEmptyItemFromKey(key) {
@@ -743,8 +742,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     parentRequestQueue = [];
     updateAllGridRowsInDomBasedOnCache();
   };
-
-  grid.$connector.updateSize = (newSize) => (grid.size = newSize);
 
   grid.$connector.updateUniqueItemIdPath = (path) => (grid.itemIdPath = path);
 
