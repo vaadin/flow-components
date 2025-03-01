@@ -508,7 +508,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                             // initial display only used single column width,
                             // re-calculate with merged width
                             cell.setValue(cell.getValue(), cell.getCellStyle(),
-                                    false);
+                                    cell.getTextColor(), false);
                         }
                         i++;
                     }
