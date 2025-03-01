@@ -30,7 +30,7 @@ describe('grid connector', () => {
   });
 
   it('should add root level items', async () => {
-    setRootItems(grid.$connector, [{ key: '0', name: 'foo' }]);
+    setRootItems(grid, [{ key: '0', name: 'foo' }]);
     await nextFrame();
 
     expect(getBodyRowCount(grid)).to.equal(1);
@@ -39,7 +39,7 @@ describe('grid connector', () => {
 
   describe('empty grid', () => {
     it('should not have loading state when refreshing grid', async () => {
-      setRootItems(grid.$connector, []);
+      setRootItems(grid, []);
       await nextFrame();
 
       // Force grid to refresh data
@@ -50,7 +50,7 @@ describe('grid connector', () => {
     });
 
     it('should not request items when refreshing grid', async () => {
-      setRootItems(grid.$connector, []);
+      setRootItems(grid, []);
       await nextFrame();
 
       // Force grid to refresh data
@@ -72,7 +72,7 @@ describe('grid connector', () => {
       grid.$connector.reset();
 
       // Add all root items
-      setRootItems(grid.$connector, items);
+      setRootItems(grid, items);
       await nextFrame();
     });
 
@@ -82,7 +82,7 @@ describe('grid connector', () => {
         clear(grid.$connector, 0, 50);
         await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
         expect(grid.$server.setRequestedRange).to.be.calledOnceWith(0, 50);
-        setRootItems(grid.$connector, items, 0, 50);
+        setRootItems(grid, items, 0, 50);
         grid.$server.setRequestedRange.resetHistory();
       });
 
@@ -91,7 +91,7 @@ describe('grid connector', () => {
         clear(grid.$connector, 0, 100);
 
         // Add the first page items back before the request timeout (partial/incomplete preload)
-        setRootItems(grid.$connector, items, 0, grid.pageSize);
+        setRootItems(grid, items, 0, grid.pageSize);
         await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
 
         // Grid should have requested for the missing items
@@ -103,7 +103,7 @@ describe('grid connector', () => {
         clear(grid.$connector, 0, 100);
 
         // Add all the items back before the request timeout
-        setRootItems(grid.$connector, items);
+        setRootItems(grid, items);
         await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
 
         // Grid should not have request for items
@@ -118,7 +118,7 @@ describe('grid connector', () => {
         grid.scrollToIndex(50);
         await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
         expect(grid.$server.setRequestedRange).to.have.been.calledOnceWith(25, 75);
-        setRootItems(grid.$connector, items, 25, 75);
+        setRootItems(grid, items, 25, 75);
         grid.$server.setRequestedRange.resetHistory();
       });
 
@@ -129,7 +129,7 @@ describe('grid connector', () => {
         // - Preload first two pages so that grid doesn't need to request a new range yet
         grid.scrollToIndex(0);
         clear(grid.$connector, 50, grid.pageSize);
-        setRootItems(grid.$connector, items, 0, 50);
+        setRootItems(grid, items, 0, 50);
         await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
         expect(grid.$server.setRequestedRange).to.not.have.been.called;
 

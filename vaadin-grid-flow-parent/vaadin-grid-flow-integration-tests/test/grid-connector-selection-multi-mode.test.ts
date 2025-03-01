@@ -22,7 +22,7 @@ describe('grid connector - selection – multi mode', () => {
     selectionColumn = grid.querySelector('vaadin-grid-flow-selection-column')!;
     initSelectionColumn(grid, selectionColumn);
 
-    setRootItems(grid.$connector, [
+    setRootItems(grid, [
       { key: '0', name: 'foo' },
       { key: '1', name: 'bar' }
     ]);

@@ -24,7 +24,7 @@ describe('grid connector - sorting', () => {
     grid.$connector.setHeaderRenderer(columns[0], { content: 'Name', showSorter: true, sorterPath: 'name' });
     grid.$connector.setHeaderRenderer(columns[1], { content: 'Price', showSorter: true, sorterPath: 'price' });
 
-    setRootItems(grid.$connector, [
+    setRootItems(grid, [
       { key: '0', name: 'Macbook', price: 2500 },
       { key: '1', name: 'iPad', price: 1000 }
     ]);

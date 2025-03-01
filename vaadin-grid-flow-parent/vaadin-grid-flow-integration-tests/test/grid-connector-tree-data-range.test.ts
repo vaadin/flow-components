@@ -61,7 +61,7 @@ describe('grid connector - tree data range', () => {
     init(grid);
     await nextFrame();
 
-    setRootItems(grid.$connector, rootItems);
+    setRootItems(grid, rootItems);
     expandItems(grid.$connector, [rootItems[0]]);
 
     await nextFrame();
