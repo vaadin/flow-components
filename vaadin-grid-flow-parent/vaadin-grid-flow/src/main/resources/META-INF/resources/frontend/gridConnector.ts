@@ -854,6 +854,11 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // Clear current update state
     currentUpdateSetRange = null;
     currentUpdateClearRange = null;
+    // If grid still has no data, then pending requests must have been cleared before cache was updated
+    // Trigger respective controller events to ensure that the grid is aware of the new data
+    if (!grid._hasData) {
+      dataProviderController.dispatchEvent(new CustomEvent('page-received'));
+    }
 
     // Let server know we're done
     grid.$server.confirmUpdate(id);
