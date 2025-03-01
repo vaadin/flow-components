@@ -15,7 +15,7 @@ describe('grid connector - data range', () => {
   function setRootItemsRange(start: number, count: number) {
     const items = Array.from({ length: rootSize }, (_, i) => ({ key: `${i}`, name: `Item-${i}` }));
 
-    grid.$connector.updateSize(rootSize);
+    grid.size = rootSize;
 
     if (lastRequestedRange) {
       grid.$connector.clear(lastRequestedRange[0], lastRequestedRange[1]);
@@ -53,7 +53,7 @@ describe('grid connector - data range', () => {
     await nextFrame();
 
     grid.pageSize = PAGE_SIZE;
-    grid.$connector.updateSize(rootSize);
+    grid.size = rootSize;
 
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
     expectRequestedRange([0, PAGE_SIZE]);
@@ -75,7 +75,7 @@ describe('grid connector - data range', () => {
   it('should request correct range when size decreases after scrolling (start -> end)', async () => {
     grid.scrollToIndex(rootSize - 1);
     rootSize /= 2;
-    grid.$connector.updateSize(rootSize);
+    grid.size = rootSize;
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
     expectRequestedRange([rootSize - PAGE_SIZE, PAGE_SIZE * 2]);
   });
@@ -131,7 +131,7 @@ describe('grid connector - data range', () => {
     grid.scrollToIndex(rootSize - 1);
     grid.scrollToIndex(0);
     rootSize /= 2;
-    grid.$connector.updateSize(rootSize);
+    grid.size = rootSize;
     await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
     expectRequestedRange([rootSize - PAGE_SIZE, PAGE_SIZE]);
   });

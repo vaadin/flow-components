@@ -15,7 +15,7 @@ describe('grid connector - row details', () => {
 
     init(grid);
 
-    setRootItems(grid.$connector, [
+    setRootItems(grid, [
       { key: '0', name: 'foo' },
       { key: '1', name: 'bar' }
     ]);
@@ -53,7 +53,7 @@ describe('grid connector - row details', () => {
   });
 
   it('should set details visible for item selected from data', async () => {
-    setRootItems(grid.$connector, [{ key: '0', name: 'foo', selected: true }]);
+    setRootItems(grid, [{ key: '0', name: 'foo', selected: true }]);
     expect(grid.$server.setDetailsVisible).to.be.calledWith('0');
   });
 });

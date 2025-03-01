@@ -20,7 +20,7 @@ describe('grid connector - cell focus', () => {
     keyColumn._flowId = columnFlowId;
 
     init(grid);
-    setRootItems(grid.$connector, [{ key: '0', name: 'foo' }]);
+    setRootItems(grid, [{ key: '0', name: 'foo' }]);
     await nextFrame();
   });
 
@@ -39,7 +39,7 @@ describe('grid connector - cell focus', () => {
       root.innerHTML = '<div class="details">Details</div>';
     };
 
-    setRootItems(grid.$connector, [{ key: '0', name: 'foo', detailsOpened: true }]);
+    setRootItems(grid, [{ key: '0', name: 'foo', detailsOpened: true }]);
 
     getBodyCell(grid, 0, 0)?.focus();
     await sendKeys({ press: 'ArrowUp' });

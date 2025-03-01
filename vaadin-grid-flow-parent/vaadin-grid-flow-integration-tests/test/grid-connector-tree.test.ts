@@ -36,7 +36,7 @@ describe('grid connector - tree', () => {
   it('should render the tree structure', async () => {
     // Add an expanded root item
     const rootItem = { key: '0', name: 'foo', children: true };
-    setRootItems(grid.$connector, [rootItem]);
+    setRootItems(grid, [rootItem]);
     expandItems(grid.$connector, [rootItem]);
 
     // Add an expanded child item
@@ -58,7 +58,7 @@ describe('grid connector - tree', () => {
   it('should not update rows each time child items are set', async () => {
     // Add an expanded root item
     const rootItem = { key: '0', name: 'foo', children: true };
-    setRootItems(grid.$connector, [rootItem]);
+    setRootItems(grid, [rootItem]);
     expandItems(grid.$connector, [rootItem]);
 
     const spy = sinon.spy(grid, '__updateVisibleRows');
@@ -95,7 +95,7 @@ describe('grid connector - tree', () => {
 
     // Add an expanded root item
     const rootItem = { key: '0', name: 'foo', children: true };
-    setRootItems(grid.$connector, [rootItem]);
+    setRootItems(grid, [rootItem]);
     expandItems(grid.$connector, [rootItem]);
 
     // Add a child item
@@ -113,7 +113,7 @@ describe('grid connector - tree', () => {
   it('should request server for child items', async () => {
     // Add an expanded root item
     const rootItem = { key: '0', name: 'foo', children: true };
-    setRootItems(grid.$connector, [rootItem]);
+    setRootItems(grid, [rootItem]);
     expandItems(grid.$connector, [rootItem]);
     await nextFrame();
 
@@ -132,7 +132,7 @@ describe('grid connector - tree', () => {
   it('should render child nodes lazily', async () => {
     // Add an expanded root item
     const rootItem = { key: '0', name: 'foo', children: true };
-    setRootItems(grid.$connector, [rootItem]);
+    setRootItems(grid, [rootItem]);
     expandItems(grid.$connector, [rootItem]);
     await nextFrame();
 
@@ -159,7 +159,7 @@ describe('grid connector - tree', () => {
     // Add an expanded root item with long content
     const rootItem = { key: '0', name: 'foo bar baz qux', children: true };
     expandItems(grid.$connector, [rootItem]);
-    setRootItems(grid.$connector, [rootItem]);
+    setRootItems(grid, [rootItem]);
 
     await nextFrame();
 
@@ -183,7 +183,7 @@ describe('grid connector - tree', () => {
     setChildItems(grid.$connector, rootItem, [childItem]);
 
     // Add the expanded root item
-    setRootItems(grid.$connector, [rootItem]);
+    setRootItems(grid, [rootItem]);
 
     expect(getBodyCellText(grid, 1, 0)).to.equal('foo bar');
   });
@@ -192,7 +192,7 @@ describe('grid connector - tree', () => {
     // Add expanded root items
     const rootItem = { key: '0', name: 'foo', children: true };
     const rootItem2 = { key: '1', name: 'bat', children: true };
-    setRootItems(grid.$connector, [rootItem, rootItem2]);
+    setRootItems(grid, [rootItem, rootItem2]);
     expandItems(grid.$connector, [rootItem, rootItem2]);
 
     // Add 100 child items for the first root item
@@ -209,7 +209,7 @@ describe('grid connector - tree', () => {
   it('should not request items for expanded and immediately collapsed parent', async () => {
     // Add expandable root item
     const rootItem = { key: '0', name: 'foo', children: true };
-    setRootItems(grid.$connector, [rootItem]);
+    setRootItems(grid, [rootItem]);
 
     // Expand the root item
     expandItems(grid.$connector, [rootItem]);
@@ -227,7 +227,7 @@ describe('grid connector - tree', () => {
   it('should not request items for expanded and shortly collapsed parent', async () => {
     // Add expandable root item
     const rootItem = { key: '0', name: 'foo', children: true };
-    setRootItems(grid.$connector, [rootItem]);
+    setRootItems(grid, [rootItem]);
 
     // Expand the root item
     expandItems(grid.$connector, [rootItem]);

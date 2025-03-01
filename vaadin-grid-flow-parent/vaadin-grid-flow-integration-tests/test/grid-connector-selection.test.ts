@@ -15,7 +15,7 @@ describe('grid connector - selection', () => {
 
     init(grid);
 
-    setRootItems(grid.$connector, [
+    setRootItems(grid, [
       { key: '0', name: 'foo' },
       { key: '1', name: 'bar' }
     ]);
@@ -84,20 +84,20 @@ describe('grid connector - selection', () => {
     });
 
     it('should apply selection from data', async () => {
-      setRootItems(grid.$connector, [{ key: '0', name: 'foo', selected: true }]);
+      setRootItems(grid, [{ key: '0', name: 'foo', selected: true }]);
       expect(grid.selectedItems.length).to.equal(1);
       expect(grid.selectedItems[0].key).to.equal('0');
     });
 
     it('should apply deselection from data', async () => {
       getBodyCellContent(grid, 0, 0)!.click();
-      setRootItems(grid.$connector, [{ key: '0', name: 'foo' }]);
+      setRootItems(grid, [{ key: '0', name: 'foo' }]);
       expect(grid.selectedItems).to.be.empty;
     });
 
     it('should avoid another re-render on items update', async () => {
       const items = [{ key: '0', name: 'foo', selected: true }];
-      setRootItems(grid.$connector, items);
+      setRootItems(grid, items);
       await nextFrame();
 
       const spy = sinon.spy(grid, '__updateVisibleRows');
@@ -151,7 +151,7 @@ describe('grid connector - selection', () => {
           name: i.toString(),
           selectable: i >= 2
         }));
-        setRootItems(grid.$connector, items);
+        setRootItems(grid, items);
         await nextFrame();
         grid.requestContentUpdate();
       });
@@ -188,7 +188,7 @@ describe('grid connector - selection', () => {
 
         // update grid items to make the item non-selectable
         const updatedItems = items.map((item) => ({ ...item, selectable: false }));
-        setRootItems(grid.$connector, updatedItems);
+        setRootItems(grid, updatedItems);
 
         // active item still references the original item with selectable: true
         expect(grid.activeItem.selectable).to.be.true;
@@ -243,7 +243,7 @@ describe('grid connector - selection', () => {
     });
 
     it('should not apply selection from data', async () => {
-      setRootItems(grid.$connector, [{ key: '0', name: 'foo', selected: true }]);
+      setRootItems(grid, [{ key: '0', name: 'foo', selected: true }]);
       expect(grid.selectedItems).to.be.empty;
     });
   });

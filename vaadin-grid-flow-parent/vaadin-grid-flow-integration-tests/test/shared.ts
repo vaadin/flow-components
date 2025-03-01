@@ -12,7 +12,6 @@ import { GridSorter } from '@vaadin/grid/all-imports.js';
 export type GridConnector = {
   updateFlatData: (updatedItems: Item[]) => void;
   initLazy: (grid: Grid) => void;
-  updateSize: (size: number) => void;
   set: (index: number, items: any[], parentKey?: string) => void;
   confirm: (index: number) => void;
   confirmParent: (index: number, parentKey: string, levelSize: number) => void;
@@ -166,11 +165,11 @@ export function getBodyCellText(grid: Grid, rowIndex: number, columnIndex: numbe
 /**
  * Sets the root level items for the grid connector.
  */
-export function setRootItems(gridConnector: GridConnector, items: Item[], index = 0, length?: number): void {
-  gridConnector.updateSize(items.length);
+export function setRootItems(grid: FlowGrid, items: Item[], index = 0, length?: number): void {
+  grid.size = items.length;
   const itemSlice = length ? items.slice(index, index + length) : items;
-  gridConnector.set(index, itemSlice, undefined);
-  gridConnector.confirm(0);
+  grid.$connector.set(index, itemSlice, undefined);
+  grid.$connector.confirm(0);
 }
 
 /**

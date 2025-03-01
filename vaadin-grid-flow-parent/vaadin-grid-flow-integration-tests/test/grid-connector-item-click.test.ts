@@ -21,7 +21,7 @@ describe('grid connector - item click', () => {
     column = grid.querySelector<GridColumn & { _flowId: string }>('[path="name"]')!;
     column._flowId = columnFlowId;
 
-    setRootItems(grid.$connector, [
+    setRootItems(grid, [
       { key: '0', name: 'foo' },
       { key: '1', name: 'bar' }
     ]);
@@ -95,7 +95,7 @@ describe('grid connector - item click', () => {
     grid.rowDetailsRenderer = (root) => {
       root.innerHTML = '<div class="details">Details</div>';
     };
-    setRootItems(grid.$connector, [
+    setRootItems(grid, [
       { key: '0', name: 'foo', detailsOpened: true },
       { key: '1', name: 'bar' }
     ]);

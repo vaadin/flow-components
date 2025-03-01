@@ -69,7 +69,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   let sorterDirectionsSetFromServer = false;
 
-  grid.size = 0; // To avoid NaN here and there before we get proper data
   grid.itemIdPath = 'key';
 
   function createEmptyItemFromKey(key) {
@@ -744,8 +743,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     updateAllGridRowsInDomBasedOnCache();
   };
 
-  grid.$connector.updateSize = (newSize) => (grid.size = newSize);
-
   grid.$connector.updateUniqueItemIdPath = (path) => (grid.itemIdPath = path);
 
   grid.$connector.expandItems = function (items) {
@@ -857,6 +854,11 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // Clear current update state
     currentUpdateSetRange = null;
     currentUpdateClearRange = null;
+    // If grid still has no data, then pending requests must have been cleared before cache was updated
+    // Trigger respective controller events to ensure that the grid is aware of the new data
+    if (!grid._hasData) {
+      dataProviderController.dispatchEvent(new CustomEvent('page-received'));
+    }
 
     // Let server know we're done
     grid.$server.confirmUpdate(id);
