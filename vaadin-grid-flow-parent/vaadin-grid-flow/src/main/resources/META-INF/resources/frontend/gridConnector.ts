@@ -227,15 +227,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     return parentKey === root ? dataProviderController.rootCache : dataProviderController.getItemSubCache(parentItem);
   };
 
-  grid.$connector.requestPage = function (page, parentKey) {
-    pendingRequests[parentKey] = page;
-
-    const delay = grid._hasData ? rootRequestDelay : 0;
-    loadDebouncer = Debouncer.debounce(loadDebouncer, timeOut.after(delay), () => {
-      grid.$connector.load();
-    });
-  };
-
   grid.dataProvider = function (params) {
     const { page, parentItem } = params;
     const parentKey = parentItem ? grid.getItemId(parentItem) : root;
