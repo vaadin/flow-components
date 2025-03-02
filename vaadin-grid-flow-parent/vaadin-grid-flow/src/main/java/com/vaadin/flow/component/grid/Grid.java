@@ -260,11 +260,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         protected UpdateQueue(UpdateQueueData data, int size) {
             this.data = data;
-            // 'size' property is not synchronized by the web component since
-            // there are no events for it, but we
-            // need to sync it otherwise server will overwrite client value with
-            // the old server one
-            enqueue("$connector.updateSize", size);
             if (data.getUniqueKeyProperty() != null) {
                 enqueue("$connector.updateUniqueItemIdPath",
                         data.getUniqueKeyProperty());
