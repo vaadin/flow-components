@@ -18,6 +18,7 @@ package com.vaadin.flow.component.formlayout.tests;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 
@@ -107,5 +108,66 @@ public class FormLayoutTest {
 
         String appliedWidth = formLayout.getLabelWidth();
         Assert.assertEquals(appliedWidth, "2em");
+    }
+
+    @Test
+    public void setAutoResponsive_getAutoResponsive() {
+        FormLayout formLayout = new FormLayout();
+        Assert.assertFalse(formLayout.isAutoResponsive());
+
+        formLayout.setAutoResponsive(true);
+        Assert.assertTrue(formLayout.isAutoResponsive());
+    }
+
+    @Test
+    public void setAutoRows_getAutoRows() {
+        FormLayout formLayout = new FormLayout();
+        Assert.assertFalse(formLayout.isAutoRows());
+
+        formLayout.setAutoRows(true);
+        Assert.assertTrue(formLayout.isAutoRows());
+    }
+
+    @Test
+    public void setColumnWidth_getColumnWidth() {
+        FormLayout formLayout = new FormLayout();
+
+        formLayout.setColumnWidth("10em");
+        Assert.assertEquals("10em", formLayout.getColumnWidth());
+
+        formLayout.setColumnWidth(160, Unit.PIXELS);
+        Assert.assertEquals("160.0px", formLayout.getColumnWidth());
+    }
+
+    @Test
+    public void setMaxColumns_getMaxColumns() {
+        FormLayout formLayout = new FormLayout();
+
+        formLayout.setMaxColumns(4);
+        Assert.assertEquals(4, formLayout.getMaxColumns());
+    }
+
+    @Test
+    public void setExpandColumns_isExpandColumns() {
+        FormLayout formLayout = new FormLayout();
+
+        formLayout.setExpandColumns(true);
+        Assert.assertTrue(formLayout.isExpandColumns());
+    }
+
+    @Test
+    public void setExpandFields_isExpandFields() {
+        FormLayout formLayout = new FormLayout();
+
+        formLayout.setExpandFields(true);
+        Assert.assertTrue(formLayout.isExpandFields());
+    }
+
+    @Test
+    public void setLabelsAside_isLabelsAside() {
+        FormLayout formLayout = new FormLayout();
+
+        formLayout.setLabelsAside(true);
+        Assert.assertTrue(formLayout.isLabelsAside());
     }
 }
