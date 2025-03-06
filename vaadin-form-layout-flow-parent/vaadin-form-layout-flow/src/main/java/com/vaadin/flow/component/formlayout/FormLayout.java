@@ -30,10 +30,12 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.JsonSerializable;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.dom.ElementFactory;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -460,7 +462,20 @@ public class FormLayout extends Component
      *      position</a>
      */
     public void setLabelWidth(String width) {
-        this.getStyle().set("--vaadin-form-item-label-width", width);
+        this.getStyle().set("--vaadin-form-layout-label-width", width);
+    }
+
+    /**
+     * Set the width of side-positioned label.
+     *
+     * @param width
+     *            the value of the width
+     * @param unit
+     *            the CSS unit of the width
+     * @see #setLabelWidth(String)
+     */
+    public void setLabelWidth(float width, Unit unit) {
+        setLabelWidth(width + unit.toString());
     }
 
     /**
@@ -472,6 +487,213 @@ public class FormLayout extends Component
      *      position</a>
      */
     public String getLabelWidth() {
-        return this.getStyle().get("--vaadin-form-item-label-width");
+        return this.getStyle().get("--vaadin-form-layout-label-width");
+    }
+
+    /**
+     * Enables the auto responsive mode where the component automatically
+     * creates and adjusts columns based on the container's width. Columns have
+     * a fixed width defined by {@link #setColumnWidth(String)} and their number
+     * increases up to the limit set by {@link #setMaxColumns(int)}. The
+     * component dynamically adjusts the number of columns as the container size
+     * changes. When this mode is enabled, the {@link ResponsiveStep} are
+     * ignored.
+     * <p>
+     * By default, each field is placed on a new row. To organize fields into
+     * rows, there are two options:
+     * <ol>
+     * <li>Use {@link FormRow} to explicitly group fields into rows.</li>
+     *
+     * <li>Enable the {@link #setAutoRows(boolean)} property to automatically
+     * arrange fields in available columns, wrapping to a new row when
+     * necessary. {@link ElementFactory#createBr()} elements can be used to
+     * force a new row.</li>
+     * </ol>
+     *
+     * @param autoResponsive
+     *            {@code true} to enable auto responsive mode, {@code false}
+     *            otherwise
+     */
+    public void setAutoResponsive(boolean autoResponsive) {
+        getElement().setProperty("autoResponsive", autoResponsive);
+    }
+
+    /**
+     * Returns whether the auto responsive mode is enabled.
+     *
+     * @return {@code true} if auto responsive mode is enabled, {@code false}
+     *         otherwise
+     * @see #setAutoResponsive(boolean)
+     */
+    public boolean isAutoResponsive() {
+        return getElement().getProperty("autoResponsive", false);
+    }
+
+    /**
+     * When enabled with {@link #setAutoResponsive(boolean)}, distributes fields
+     * across columns by placing each field in the next available column and
+     * wrapping to the next row when the current row is full.
+     * {@link ElementFactory#createBr()} elements can be used to force a new
+     * row. Default is {@code false}.
+     *
+     * @param autoRows
+     *            {@code true} to enable auto rows mode, {@code false} otherwise
+     */
+    public void setAutoRows(boolean autoRows) {
+        getElement().setProperty("autoRows", autoRows);
+    }
+
+    /**
+     * Returns whether the auto rows mode is enabled.
+     *
+     * @return {@code true} if auto rows mode is enabled, {@code false}
+     *         otherwise
+     * @see #setAutoRows(boolean)
+     */
+    public boolean isAutoRows() {
+        return getElement().getProperty("autoRows", false);
+    }
+
+    /**
+     * When {@link #setAutoResponsive(boolean)} is enabled, defines the width of
+     * each column. The value must be defined in CSS length units, e.g.,
+     * {@code 100px} or {@code 13em}. The default value is {@code 13em}.
+     *
+     * @param columnWidth
+     *            the width of each column
+     */
+    public void setColumnWidth(String columnWidth) {
+        getElement().setProperty("columnWidth", columnWidth);
+    }
+
+    /**
+     * When {@link #setAutoResponsive(boolean)} is enabled, defines the width of
+     * each column. The value must be defined with a {@link Unit}, e.g.,
+     * {@code 100} and {@link Unit#PIXELS}.
+     *
+     * @param columnWidth
+     *            the width of each column
+     * @param unit
+     *            the CSS unit of the width
+     */
+    public void setColumnWidth(float columnWidth, Unit unit) {
+        setColumnWidth(columnWidth + unit.toString());
+    }
+
+    /**
+     * Returns the defined width of each column. It always returns the string
+     * value with the CSS length unit.
+     *
+     * @return the width of each column
+     * @see #setColumnWidth(String)
+     * @see #setColumnWidth(float, Unit)
+     */
+    public String getColumnWidth() {
+        return getElement().getProperty("columnWidth", "");
+    }
+
+    /**
+     * When {@code #setAutoResponsive(boolean)} is enabled, defines the maximum
+     * number of columns that the layout can create. The layout will create
+     * columns up to this limit based on the available container width. The
+     * default value is {@code 10}.
+     *
+     * @param maxColumns
+     *            the maximum number of columns
+     */
+    public void setMaxColumns(int maxColumns) {
+        getElement().setProperty("maxColumns", maxColumns);
+    }
+
+    /**
+     * Returns the maximum number of columns that the layout can create.
+     *
+     * @return the maximum number of columns
+     * @see #setMaxColumns(int)
+     */
+    public int getMaxColumns() {
+        return getElement().getProperty("maxColumns", 0);
+    }
+
+    /**
+     * When {@link #setAutoResponsive(boolean)} is enabled, specifies whether
+     * the columns should expand in width to evenly fill any remaining space
+     * after the layout has created as many fixed-width
+     * ({@link #setColumnWidth(String)}) columns as possible within the
+     * {@link #setMaxColumns(int)} limit. The default value is {@code false}.
+     *
+     * @param expandColumns
+     *            {@code true} to expand columns, {@code false} otherwise
+     */
+    public void setExpandColumns(boolean expandColumns) {
+        getElement().setProperty("expandColumns", expandColumns);
+    }
+
+    /**
+     * Returns whether the columns should expand in width to evenly fill any
+     * remaining space. The default value is {@code false}.
+     *
+     * @return {@code true} if columns should expand, {@code false} otherwise
+     * @see #setExpandColumns(boolean)
+     */
+    public boolean isExpandColumns() {
+        return getElement().getProperty("expandColumns", false);
+    }
+
+    /**
+     * When {@link #setAutoResponsive(boolean)} is enabled, specifies whether
+     * fields should stretch to take up all available space within columns. This
+     * setting also applies to fields inside {@link FormItem} elements. The
+     * default value is {@code false}.
+     *
+     * @param expandFields
+     *            {@code true} to expand fields, {@code false} otherwise
+     */
+    public void setExpandFields(boolean expandFields) {
+
+        getElement().setProperty("expandFields", expandFields);
+    }
+
+    /**
+     * Returns whether fields should stretch to take up all available space
+     * within columns.
+     *
+     * @return {@code true} if fields should expand, {@code false} otherwise
+     * @see #setExpandFields(boolean)
+     */
+    public boolean isExpandFields() {
+        return getElement().getProperty("expandFields", false);
+    }
+
+    /**
+     * When enabled with {@link #setAutoResponsive(boolean)}, {@link FormItem}
+     * prefers positioning labels beside the fields. If the layout is too narrow
+     * to fit a single column with side labels, they revert to their default
+     * position above the fields.
+     * <p>
+     * To customize the label width and the gap between the label and the field,
+     * use the following CSS properties:
+     * <ul>
+     * <li>{@code --vaadin-form-layout-label-width}</li>
+     * <li>{@code --vaadin-form-layout-label-spacing}</li>
+     * </ul>
+     *
+     * @param labelsAside
+     *            {@code true} to position labels aside, {@code false} otherwise
+     */
+    public void setLabelsAside(boolean labelsAside) {
+        getElement().setProperty("labelsAside", labelsAside);
+    }
+
+    /**
+     * Returns whether {@link FormItem} prefers positioning labels beside the
+     * fields.
+     *
+     * @return {@code true} if labels are positioned aside, {@code false}
+     *         otherwise
+     * @see #setLabelsAside(boolean)
+     */
+    public boolean isLabelsAside() {
+        return getElement().getProperty("labelsAside", false);
     }
 }
