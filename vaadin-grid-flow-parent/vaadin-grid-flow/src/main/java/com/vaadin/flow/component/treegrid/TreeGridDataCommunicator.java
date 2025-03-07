@@ -153,12 +153,13 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
             if (!cache.hasItem(index)) {
                 List<T> childItems = fetchDataProviderChildren(
                         cache.getParentItem(), Range.between(index, end))
-                        .toList();
+                                .toList();
                 cache.setItems(index, childItems);
             }
 
             T item = cache.getItem(index);
-            if (isExpanded(item) && !cache.hasCache(index)) {
+            if (!isFlatHierarchy() && isExpanded(item)
+                    && !cache.hasCache(index)) {
                 int childCount = getDataProviderChildCount(item);
                 cache.createCache(index, childCount);
             }
@@ -173,6 +174,10 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
         update.clear(end, flatSize - end);
         update.set(start, result.stream().map(this::generateItemJson).toList());
         update.commit(nextUpdateId++);
+    }
+
+    public boolean isFlatHierarchy() {
+        return getDataProvider().isFlatHierarchy();
     }
 
     /** @see HierarchicalDataCommunicator#hasChildren(T) */
@@ -228,6 +233,10 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
 
     /** @see HierarchicalDataCommunicator#getParentItem(T) */
     public T getParentItem(T item) {
+        if (isFlatHierarchy()) {
+            return getDataProvider().getParentItem(item);
+        }
+
         var itemContext = rootCache.getItemContext(item);
         if (itemContext == null) {
             return null;
@@ -237,6 +246,10 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
 
     /** @see HierarchicalDataCommunicator#getDepth(T) */
     public int getDepth(T item) {
+        if (isFlatHierarchy()) {
+            return getDataProvider().getDepth(item);
+        }
+
         var itemContext = rootCache.getItemContext(item);
         if (itemContext == null) {
             return -1;
@@ -290,7 +303,7 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
     private Stream<T> fetchDataProviderChildren(T parent, Range range) {
         HierarchicalQuery<T, Object> query = new HierarchicalQuery<>(
                 range.getStart(), range.length(), getBackEndSorting(),
-                getInMemorySorting(), getFilter(), parent);
+                getInMemorySorting(), getFilter(), expandedItemIds, parent);
 
         return ((HierarchicalDataProvider<T, Object>) getDataProvider())
                 .fetchChildren(query);
@@ -299,7 +312,7 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
     @SuppressWarnings("unchecked")
     private int getDataProviderChildCount(T parent) {
         HierarchicalQuery<T, Object> query = new HierarchicalQuery<>(
-                getFilter(), parent);
+                getFilter(), expandedItemIds, parent);
 
         return ((HierarchicalDataProvider<T, Object>) getDataProvider())
                 .getChildCount(query);
