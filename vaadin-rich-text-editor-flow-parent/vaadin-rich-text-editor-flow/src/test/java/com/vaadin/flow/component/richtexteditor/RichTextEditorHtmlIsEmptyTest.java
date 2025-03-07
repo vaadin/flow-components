@@ -24,6 +24,7 @@ public class RichTextEditorHtmlIsEmptyTest {
     public void initialValue_isEmpty() {
         Assert.assertTrue(editor.isEmpty());
         Assert.assertTrue(editor.asHtml().isEmpty());
+        Assert.assertEquals(editor.getValue(), editor.getEmptyValue());
     }
 
     @Test
@@ -32,7 +33,7 @@ public class RichTextEditorHtmlIsEmptyTest {
         editor.setValue("<p><br></p>");
         Assert.assertTrue(editor.isEmpty());
         Assert.assertTrue(editor.asHtml().isEmpty());
-        Assert.assertEquals("<p><br></p>", editor.getEmptyValue());
+        Assert.assertEquals(editor.getValue(), editor.getEmptyValue());
     }
 
     @Test
@@ -40,17 +41,17 @@ public class RichTextEditorHtmlIsEmptyTest {
         editor.setValue("<h1><br></h1>");
         Assert.assertTrue(editor.isEmpty());
         Assert.assertTrue(editor.asHtml().isEmpty());
-        Assert.assertEquals("<h1><br></h1>", editor.getEmptyValue());
+        Assert.assertEquals(editor.getValue(), editor.getEmptyValue());
 
         editor.setValue("<blockquote><br></blockquote>");
         Assert.assertTrue(editor.isEmpty());
         Assert.assertTrue(editor.asHtml().isEmpty());
-        Assert.assertEquals("<blockquote><br></blockquote>", editor.getEmptyValue());
+        Assert.assertEquals(editor.getValue(), editor.getEmptyValue());
 
         editor.setValue("<ul><li><br></li></ul>");
         Assert.assertTrue(editor.isEmpty());
         Assert.assertTrue(editor.asHtml().isEmpty());
-        Assert.assertEquals("<ul><li><br></li></ul>", editor.getEmptyValue());
+        Assert.assertEquals(editor.getValue(), editor.getEmptyValue());
     }
 
     @Test
