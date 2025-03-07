@@ -1040,7 +1040,9 @@ public class RichTextEditor
 
         @Override
         public String getEmptyValue() {
-            return "";
+            // If current value is satisfying isEmpty condition, use it to
+            // satisfy Binder's asRequired.
+            return isEmpty() ? getValue() : "";
         }
 
         /**
