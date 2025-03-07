@@ -491,6 +491,113 @@ public class FormLayout extends Component
     }
 
     /**
+     * Sets the gap between the label and the field when labels are positioned
+     * aside. The value must be defined in CSS length units, e.g., {@code 1em}
+     * or {@code 10px}.
+     *
+     * @param labelSpacing the gap between the label and the field
+     * @see #setLabelSpacing(float, Unit)
+     */
+    public void setLabelSpacing(String labelSpacing) {
+        this.getStyle().set("--vaadin-form-layout-label-spacing", labelSpacing);
+    }
+
+    /**
+     * Sets the gap between the label and the field when labels are positioned
+     * aside. The value must be defined with a {@link Unit}, e.g., {@code 1} and
+     * {@link Unit#EM}.
+     *
+     * @param labelSpacing the gap between the label and the field
+     * @param unit the CSS unit of the gap
+     * @see #setLabelSpacing(String)
+     */
+    public void setLabelSpacing(float labelSpacing, Unit unit) {
+        setLabelSpacing(labelSpacing + unit.toString());
+    }
+
+    /**
+     * Returns the gap between the label and the field when labels are positioned
+     * aside. It always returns the string value with the CSS length unit.
+     *
+     * @return the gap between the label and the field
+     * @see #setLabelSpacing(String)
+     * @see #setLabelSpacing(float, Unit)
+     */
+    public String getLabelSpacing() {
+        return this.getStyle().get("--vaadin-form-layout-label-spacing");
+    }
+
+    /**
+     * Sets the gap between the columns. The value must be defined in CSS length
+     * units, e.g., {@code 1em} or {@code 10px}.
+     *
+     * @param columnSpacing the gap between the columns
+     * @see #setColumnSpacing(float, Unit)
+     */
+    public void setColumnSpacing(String columnSpacing) {
+        this.getStyle().set("--vaadin-form-layout-column-spacing", columnSpacing);
+    }
+
+    /**
+     * Sets the gap between the columns. The value must be defined with a
+     * {@link Unit}, e.g., {@code 1} and {@link Unit#EM}.
+     *
+     * @param columnSpacing the gap between the columns
+     * @param unit the CSS unit of the gap
+     * @see #setColumnSpacing(String)
+     */
+    public void setColumnSpacing(float columnSpacing, Unit unit) {
+        setColumnSpacing(columnSpacing + unit.toString());
+    }
+
+    /**
+     * Returns the gap between the columns. It always returns the string value
+     * with the CSS length unit.
+     *
+     * @return the gap between the columns
+     * @see #setColumnSpacing(String)
+     * @see #setColumnSpacing(float, Unit)
+     */
+    public String getColumnSpacing() {
+        return this.getStyle().get("--vaadin-form-layout-column-spacing");
+    }
+
+    /**
+     * Sets the gap between the rows. The value must be defined in CSS length
+     * units, e.g., {@code 1em} or {@code 10px}.
+     *
+     * @param rowSpacing the gap between the rows
+     * @see #setRowSpacing(float, Unit)
+     */
+    public void setRowSpacing(String rowSpacing) {
+        this.getStyle().set("--vaadin-form-layout-row-spacing", rowSpacing);
+    }
+
+    /**
+     * Sets the gap between the rows. The value must be defined with a
+     * {@link Unit}, e.g., {@code 1} and {@link Unit#EM}.
+     *
+     * @param rowSpacing the gap between the rows
+     * @param unit the CSS unit of the gap
+     * @see #setRowSpacing(String)
+     */
+    public void setRowSpacing(float rowSpacing, Unit unit) {
+        setRowSpacing(rowSpacing + unit.toString());
+    }
+
+    /**
+     * Returns the gap between the rows. It always returns the string value with
+     * the CSS length unit.
+     *
+     * @return the gap between the rows
+     * @see #setRowSpacing(String)
+     * @see #setRowSpacing(float, Unit)
+     */
+    public String getRowSpacing() {
+        return this.getStyle().get("--vaadin-form-layout-row-spacing");
+    }
+
+    /**
      * Enables the auto responsive mode where the component automatically
      * creates and adjusts columns based on the container's width. Columns have
      * a fixed width defined by {@link #setColumnWidth(String)} and their number
@@ -666,13 +773,23 @@ public class FormLayout extends Component
     }
 
     /**
+     * <p>
      * When enabled with {@link #setAutoResponsive(boolean)}, {@link FormItem}
      * prefers positioning labels beside the fields. If the layout is too narrow
      * to fit a single column with side labels, they revert to their default
      * position above the fields.
+     * </p>
      * <p>
      * To customize the label width and the gap between the label and the field,
-     * use the following CSS properties:
+     * use the following methods:
+     * </p>
+     * <ul>
+     *     <li>{@link #setLabelWidth(String)}</li>
+     *     <li>{@link #setLabelSpacing(String)}</li>
+     * </ul>
+     * <p>
+     *     Alternatively, you can use the following CSS custom properties:
+     * </p>
      * <ul>
      * <li>{@code --vaadin-form-layout-label-width}</li>
      * <li>{@code --vaadin-form-layout-label-spacing}</li>
@@ -696,4 +813,5 @@ public class FormLayout extends Component
     public boolean isLabelsAside() {
         return getElement().getProperty("labelsAside", false);
     }
+
 }
