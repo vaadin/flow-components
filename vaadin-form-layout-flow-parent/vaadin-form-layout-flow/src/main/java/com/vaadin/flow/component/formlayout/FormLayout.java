@@ -495,7 +495,8 @@ public class FormLayout extends Component
      * aside. The value must be defined in CSS length units, e.g., {@code 1em}
      * or {@code 10px}.
      *
-     * @param labelSpacing the gap between the label and the field
+     * @param labelSpacing
+     *            the gap between the label and the field
      * @see #setLabelSpacing(float, Unit)
      */
     public void setLabelSpacing(String labelSpacing) {
@@ -507,8 +508,10 @@ public class FormLayout extends Component
      * aside. The value must be defined with a {@link Unit}, e.g., {@code 1} and
      * {@link Unit#EM}.
      *
-     * @param labelSpacing the gap between the label and the field
-     * @param unit the CSS unit of the gap
+     * @param labelSpacing
+     *            the gap between the label and the field
+     * @param unit
+     *            the CSS unit of the gap
      * @see #setLabelSpacing(String)
      */
     public void setLabelSpacing(float labelSpacing, Unit unit) {
@@ -516,8 +519,9 @@ public class FormLayout extends Component
     }
 
     /**
-     * Returns the gap between the label and the field when labels are positioned
-     * aside. It always returns the string value with the CSS length unit.
+     * Returns the gap between the label and the field when labels are
+     * positioned aside. It always returns the string value with the CSS length
+     * unit.
      *
      * @return the gap between the label and the field
      * @see #setLabelSpacing(String)
@@ -531,19 +535,23 @@ public class FormLayout extends Component
      * Sets the gap between the columns. The value must be defined in CSS length
      * units, e.g., {@code 1em} or {@code 10px}.
      *
-     * @param columnSpacing the gap between the columns
+     * @param columnSpacing
+     *            the gap between the columns
      * @see #setColumnSpacing(float, Unit)
      */
     public void setColumnSpacing(String columnSpacing) {
-        this.getStyle().set("--vaadin-form-layout-column-spacing", columnSpacing);
+        this.getStyle().set("--vaadin-form-layout-column-spacing",
+                columnSpacing);
     }
 
     /**
      * Sets the gap between the columns. The value must be defined with a
      * {@link Unit}, e.g., {@code 1} and {@link Unit#EM}.
      *
-     * @param columnSpacing the gap between the columns
-     * @param unit the CSS unit of the gap
+     * @param columnSpacing
+     *            the gap between the columns
+     * @param unit
+     *            the CSS unit of the gap
      * @see #setColumnSpacing(String)
      */
     public void setColumnSpacing(float columnSpacing, Unit unit) {
@@ -566,7 +574,8 @@ public class FormLayout extends Component
      * Sets the gap between the rows. The value must be defined in CSS length
      * units, e.g., {@code 1em} or {@code 10px}.
      *
-     * @param rowSpacing the gap between the rows
+     * @param rowSpacing
+     *            the gap between the rows
      * @see #setRowSpacing(float, Unit)
      */
     public void setRowSpacing(String rowSpacing) {
@@ -577,8 +586,10 @@ public class FormLayout extends Component
      * Sets the gap between the rows. The value must be defined with a
      * {@link Unit}, e.g., {@code 1} and {@link Unit#EM}.
      *
-     * @param rowSpacing the gap between the rows
-     * @param unit the CSS unit of the gap
+     * @param rowSpacing
+     *            the gap between the rows
+     * @param unit
+     *            the CSS unit of the gap
      * @see #setRowSpacing(String)
      */
     public void setRowSpacing(float rowSpacing, Unit unit) {
@@ -784,11 +795,11 @@ public class FormLayout extends Component
      * use the following methods:
      * </p>
      * <ul>
-     *     <li>{@link #setLabelWidth(String)}</li>
-     *     <li>{@link #setLabelSpacing(String)}</li>
+     * <li>{@link #setLabelWidth(String)}</li>
+     * <li>{@link #setLabelSpacing(String)}</li>
      * </ul>
      * <p>
-     *     Alternatively, you can use the following CSS custom properties:
+     * Alternatively, you can use the following CSS custom properties:
      * </p>
      * <ul>
      * <li>{@code --vaadin-form-layout-label-width}</li>
