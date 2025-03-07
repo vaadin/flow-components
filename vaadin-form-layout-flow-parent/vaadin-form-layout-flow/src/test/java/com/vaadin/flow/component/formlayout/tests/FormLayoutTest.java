@@ -140,6 +140,39 @@ public class FormLayoutTest {
     }
 
     @Test
+    public void setColumnSpacing_getColumnSpacing() {
+        FormLayout formLayout = new FormLayout();
+
+        formLayout.setColumnSpacing("10em");
+        Assert.assertEquals("10em", formLayout.getColumnSpacing());
+
+        formLayout.setColumnSpacing(160, Unit.PIXELS);
+        Assert.assertEquals("160.0px", formLayout.getColumnSpacing());
+    }
+
+    @Test
+    public void setRowSpacing_getRowSpacing() {
+        FormLayout formLayout = new FormLayout();
+
+        formLayout.setRowSpacing("10em");
+        Assert.assertEquals("10em", formLayout.getRowSpacing());
+
+        formLayout.setRowSpacing(160, Unit.PIXELS);
+        Assert.assertEquals("160.0px", formLayout.getRowSpacing());
+    }
+
+    @Test
+    public void setLabelSpacing_getLabelSpacing() {
+        FormLayout formLayout = new FormLayout();
+
+        formLayout.setLabelSpacing("10em");
+        Assert.assertEquals("10em", formLayout.getLabelSpacing());
+
+        formLayout.setLabelSpacing(160, Unit.PIXELS);
+        Assert.assertEquals("160.0px", formLayout.getLabelSpacing());
+    }
+
+    @Test
     public void setMaxColumns_getMaxColumns() {
         FormLayout formLayout = new FormLayout();
 
