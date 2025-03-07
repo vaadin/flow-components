@@ -152,7 +152,7 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
 
             if (!cache.hasItem(index)) {
                 List<T> childItems = fetchDataProviderChildren(
-                        cache.getParentItem(), Range.between(index, end))
+                        cache.getParentItem(), Range.between(index, Math.min(end, cache.getSize())))
                                 .toList();
                 cache.setItems(index, childItems);
             }
@@ -185,52 +185,6 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
         return getDataProvider().hasChildren(item);
     }
 
-    /** @see HierarchicalDataCommunicator#isExpanded(T) */
-    public boolean isExpanded(T item) {
-        if (item == null) {
-            // Root nodes are always visible.
-            return true;
-        }
-        return expandedItemIds.contains(getDataProvider().getId(item));
-    }
-
-    /** @see HierarchicalDataCommunicator#expand(T item) */
-    public void expand(T item) {
-        expand(Arrays.asList(item));
-    }
-
-    /** @see HierarchicalDataCommunicator#expand(Collection) */
-    public Collection<T> expand(Collection<T> items) {
-        List<T> expandedItems = items.stream().filter(item -> {
-            if (!hasChildren(item)) {
-                return false;
-            }
-
-            return expandedItemIds.add(getDataProvider().getId(item));
-        }).toList();
-
-        requestFlush();
-        return expandedItems;
-    }
-
-    /** @see HierarchicalDataCommunicator#collapse(T) */
-    public void collapse(T item) {
-        collapse(Arrays.asList(item));
-    }
-
-    /** @see HierarchicalDataCommunicator#collapse(Collection) */
-    public Collection<T> collapse(Collection<T> items) {
-        List<T> collapsedItems = items.stream().filter(
-                item -> expandedItemIds.remove(getDataProvider().getId(item)))
-                .toList();
-
-        rootCache.removeDescendantCacheIf(
-                (cache) -> !isExpanded(cache.getParentItem()));
-
-        requestFlush();
-        return collapsedItems;
-    }
-
     /** @see HierarchicalDataCommunicator#getParentItem(T) */
     public T getParentItem(T item) {
         if (isFlatHierarchy()) {
@@ -255,6 +209,61 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
             return -1;
         }
         return itemContext.cache().getDepth();
+    }
+
+    /** @see HierarchicalDataCommunicator#isExpanded(T) */
+    public boolean isExpanded(T item) {
+        if (item == null) {
+            // Root nodes are always visible.
+            return true;
+        }
+        return expandedItemIds.contains(getDataProvider().getId(item));
+    }
+
+    /** @see HierarchicalDataCommunicator#expand(T item) */
+    public void expand(T item) {
+        expand(Arrays.asList(item));
+    }
+
+    /** @see HierarchicalDataCommunicator#expand(Collection) */
+    public Collection<T> expand(Collection<T> items) {
+        List<T> expandedItems = items.stream().filter(item -> {
+            if (!hasChildren(item)) {
+                return false;
+            }
+
+            return expandedItemIds.add(getDataProvider().getId(item));
+        }).toList();
+
+        if (isFlatHierarchy()) {
+            reset();
+        } else {
+            requestFlush();
+        }
+
+        return expandedItems;
+    }
+
+    /** @see HierarchicalDataCommunicator#collapse(T) */
+    public void collapse(T item) {
+        collapse(Arrays.asList(item));
+    }
+
+    /** @see HierarchicalDataCommunicator#collapse(Collection) */
+    public Collection<T> collapse(Collection<T> items) {
+        List<T> collapsedItems = items.stream().filter(
+                item -> expandedItemIds.remove(getDataProvider().getId(item)))
+                .toList();
+
+        if (isFlatHierarchy()) {
+            reset();
+        } else {
+            rootCache.removeDescendantCacheIf(
+                (cache) -> !isExpanded(cache.getParentItem()));
+            requestFlush();
+        }
+
+        return collapsedItems;
     }
 
     private JsonValue generateItemJson(T item) {

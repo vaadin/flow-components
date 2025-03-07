@@ -15,106 +15,128 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.treegrid.TreeGrid;
-import com.vaadin.flow.data.bean.HierarchicalTestBean;
-import com.vaadin.flow.data.bean.PeopleGenerator;
-import com.vaadin.flow.data.bean.PersonWithLevel;
-import com.vaadin.flow.data.provider.hierarchy.AbstractBackEndHierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.AbstractHierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.FlatHierarchyDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
-import com.vaadin.flow.data.provider.hierarchy.TreeData;
-import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/tree-grid-basic")
 public class TreeGridBasicPage extends Div {
-    private List<Item> items = buildItemsHierarchy();
+    private class DataProvider
+            extends AbstractHierarchicalDataProvider<Item, String>
+            implements FlatHierarchyDataProvider<Item, String> {
+        private List<Item> items = buildItemsHierarchy();
 
-    private class DataProvider extends AbstractBackEndHierarchicalDataProvider<Item, String> {
         @Override
         public int getChildCount(HierarchicalQuery<Item, String> query) {
-            return query.getParent() == null ? items.size() : query.getParent().getChildItems().size();
+            Set<Object> expandedItemIds = query.getExpandedItemIds();
+            return getFlatItems(expandedItemIds).size();
+        }
+
+        @Override
+        public Stream<Item> fetchChildren(
+                HierarchicalQuery<Item, String> query) {
+            int offset = query.getOffset();
+            int limit = query.getLimit();
+            Set<Object> expandedItemIds = query.getExpandedItemIds();
+            return getFlatItems(expandedItemIds).subList(offset, offset + limit)
+                    .stream();
         }
 
         @Override
         public boolean hasChildren(Item item) {
-            return item.getChildItems() != null && !item.getChildItems().isEmpty();
+            return item.getChildItems() != null
+                    && !item.getChildItems().isEmpty();
         }
 
         @Override
-        public Stream<Item> fetchChildrenFromBackEnd(HierarchicalQuery<Item, String> query) {
-            return query.getParent() == null ? items.stream() : query.getParent().getChildItems().stream();
+        public Item getParentItem(Item item) {
+            return item.getParentItem();
+        }
+
+        @Override
+        public int getDepth(Item item) {
+            return item.getDepth();
+        }
+
+        @Override
+        public Object getId(Item item) {
+            return item.getName();
+        }
+
+        @Override
+        public boolean isInMemory() {
+            return false;
+        }
+
+        private List<Item> getFlatItems(Set<Object> expandedItemIds) {
+            return items.stream()
+                    .flatMap(item -> expandedItemIds.contains(getId(item))
+                            ? Stream.concat(Stream.of(item),
+                                    item.getChildItems().stream())
+                            : Stream.of(item))
+                    .toList();
+        }
+
+        private List<Item> buildItemsHierarchy() {
+            return IntStream.range(0, 100).mapToObj(i -> {
+                Item item = new Item("Item " + i);
+                item.setChildItems(IntStream.range(0, 50).mapToObj(
+                        j -> new Item(item, "Child Item " + i + "-" + j))
+                        .toList());
+                return item;
+            }).toList();
         }
     }
 
     private class Item {
         private String name;
-
+        private Item parentItem;
         private List<Item> childItems;
+
+        public Item(String name) {
+            this.name = name;
+        }
+
+        public Item(Item parentItem, String name) {
+            this.name = name;
+            this.parentItem = parentItem;
+        }
 
         public String getName() {
             return name;
         }
 
-        public void setName(String name) {
-            this.name = name;
+        public int getDepth() {
+            return parentItem == null ? 0 : parentItem.getDepth() + 1;
         }
 
-        public List<Item> getChildItems() {
-            return childItems;
+        public Item getParentItem() {
+            return parentItem;
         }
 
         public void setChildItems(List<Item> childItems) {
             this.childItems = childItems;
         }
+
+        public List<Item> getChildItems() {
+            return childItems;
+        }
     }
 
     public TreeGridBasicPage() {
         TreeGrid<Item> grid = new TreeGrid<>();
-        grid.addHierarchyColumn(person -> person.getFirstName())
-                .setHeader("First name");
+        grid.addHierarchyColumn(item -> item.getName()).setHeader("Name");
         grid.setDataProvider(new DataProvider());
 
-        // NativeButton expandAll = new NativeButton("Expand all",
-        //         e -> grid.expandRecursively(data.getRootItems(), 3));
-        // expandAll.setId("expand-all");
-
-        // NativeButton refreshItem = new NativeButton("Refresh item", e -> {
-        //     PersonWithLevel person = data.getChildren(people.get(0)).get(1);
-        //     person.setFirstName("Updated");
-        //     grid.getDataProvider().refreshItem(person);
-        // });
-
         add(grid);
-    }
-
-    private List<Item> getFlatItems() {
-        return items.stream()
-            .flatMap(item -> expandedItems.contains(item)
-                ? Stream.concat(Stream.of(item), item.childItems().stream())
-                : Stream.of(item))
-            .toList();
-    }
-
-    private List<Item> buildItemsHierarchy() {
-        return IntStream.range(0, 100)
-            .mapToObj(i -> new Item("Item " + i,
-                IntStream.range(0, 50)
-                    .mapToObj(j -> new Item("Child Item " + i + "-" + j, null))
-                    .toList()))
-            .toList();
     }
 
 }
