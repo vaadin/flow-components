@@ -280,17 +280,13 @@ public class FormLayout extends Component
     }
 
     /**
-     * <p>
      * Server-side component for the {@code <vaadin-form-row>} element. Used to
      * arrange fields into rows inside a {@link FormLayout} when
      * {@code #setAutoResponsive(boolean)} is enabled.
-     * </p>
      * <p>
-     * Each {@code <vaadin-form-row>} always starts on a new row. Fields that
+     * Each {@link FormRow} always starts on a new row. Fields that
      * exceed the available columns wrap to a new row, which then remains
-     * reserved exclusively for the fields of that {@code <vaadin-form-row>}
-     * element. wrap components for display in a {@link FormLayout}.
-     * </p>
+     * reserved exclusively for the fields of that {@link FormRow}.
      *
      * @author Vaadin Ltd
      */
