@@ -23,12 +23,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.vaadin.flow.component.charts.model.AnnotationItemLabel;
-import com.vaadin.flow.component.charts.model.AnnotationItemLabelPoint;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.charts.model.AnnotationItemLabel;
+import com.vaadin.flow.component.charts.model.AnnotationItemLabelPoint;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -217,8 +217,7 @@ public class SVGGeneratorTest {
     }
 
     @Test
-    public void exportWithLabel()
-            throws IOException, InterruptedException {
+    public void exportWithLabel() throws IOException, InterruptedException {
         var conf = createPieChartConfiguration();
         var label = new AnnotationItemLabel("Blue");
         label.setPoint(new AnnotationItemLabelPoint(350, 170));
