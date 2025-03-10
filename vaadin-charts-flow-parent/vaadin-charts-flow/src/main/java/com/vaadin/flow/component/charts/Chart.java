@@ -90,9 +90,9 @@ import elemental.json.impl.JreJsonFactory;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-chart")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-rc1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha1")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/charts", version = "24.7.0-rc1")
+@NpmPackage(value = "@vaadin/charts", version = "24.8.0-alpha1")
 @JsModule("@vaadin/charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
@@ -610,7 +610,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     /**
      * Adds a point drag start listener, which will be notified when starting to
      * drag a point.
-     * 
+     *
      * @param listener
      */
     public Registration addPointDragStartListener(
@@ -620,7 +620,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
     /**
      * Adds a point drop listener, which will be notified point is dropped.
-     * 
+     *
      * @param listener
      */
     public Registration addPointDropListener(
@@ -631,7 +631,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     /**
      * Adds a point drag listener, which will be notified while point is
      * dragged.
-     * 
+     *
      * @param listener
      */
     public Registration addPointDragListener(
