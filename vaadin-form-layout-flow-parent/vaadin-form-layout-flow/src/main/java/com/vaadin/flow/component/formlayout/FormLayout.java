@@ -453,7 +453,7 @@ public class FormLayout extends Component
     }
 
     /**
-     * Set the width of side-positioned label.
+     * Sets the width of side-positioned label.
      *
      * @param width
      *            the value and CSS unit as a string
@@ -462,11 +462,11 @@ public class FormLayout extends Component
      *      position</a>
      */
     public void setLabelWidth(String width) {
-        this.getStyle().set("--vaadin-form-layout-label-width", width);
+        getStyle().set("--vaadin-form-layout-label-width", width);
     }
 
     /**
-     * Set the width of side-positioned label.
+     * Sets the width of side-positioned label.
      *
      * @param width
      *            the value of the width
@@ -475,11 +475,12 @@ public class FormLayout extends Component
      * @see #setLabelWidth(String)
      */
     public void setLabelWidth(float width, Unit unit) {
+        Objects.requireNonNull(unit, "Unit cannot be null");
         setLabelWidth(width + unit.toString());
     }
 
     /**
-     * Get the width of side-positioned label.
+     * Gets the width of side-positioned label.
      *
      * @return the value and CSS unit as a string
      * @see <a href=
@@ -487,26 +488,26 @@ public class FormLayout extends Component
      *      position</a>
      */
     public String getLabelWidth() {
-        return this.getStyle().get("--vaadin-form-layout-label-width");
+        return getStyle().get("--vaadin-form-layout-label-width");
     }
 
     /**
-     * Sets the gap between the label and the field when labels are positioned
-     * aside. The value must be defined in CSS length units, e.g., {@code 1em}
-     * or {@code 10px}.
+     * Sets the gap between the label and the field which is used when labels
+     * are positioned aside. The value must be provided in CSS length units,
+     * e.g. {@code 1em}.
      *
      * @param labelSpacing
      *            the gap between the label and the field
      * @see #setLabelSpacing(float, Unit)
      */
     public void setLabelSpacing(String labelSpacing) {
-        this.getStyle().set("--vaadin-form-layout-label-spacing", labelSpacing);
+        getStyle().set("--vaadin-form-layout-label-spacing", labelSpacing);
     }
 
     /**
-     * Sets the gap between the label and the field when labels are positioned
-     * aside. The value must be defined with a {@link Unit}, e.g., {@code 1} and
-     * {@link Unit#EM}.
+     * Sets the gap between the label and the field which is used when labels
+     * are positioned aside. The value must be provided with a {@link Unit},
+     * e.g., {@code 1} and {@link Unit#EM}.
      *
      * @param labelSpacing
      *            the gap between the label and the field
@@ -515,38 +516,37 @@ public class FormLayout extends Component
      * @see #setLabelSpacing(String)
      */
     public void setLabelSpacing(float labelSpacing, Unit unit) {
+        Objects.requireNonNull(unit, "Unit cannot be null");
         setLabelSpacing(labelSpacing + unit.toString());
     }
 
     /**
-     * Returns the gap between the label and the field when labels are
-     * positioned aside. It always returns the string value with the CSS length
-     * unit.
+     * Gets the gap between the label and the field which is used when labels
+     * are positioned aside.
      *
-     * @return the gap between the label and the field
+     * @return the value and CSS unit as a string
      * @see #setLabelSpacing(String)
      * @see #setLabelSpacing(float, Unit)
      */
     public String getLabelSpacing() {
-        return this.getStyle().get("--vaadin-form-layout-label-spacing");
+        return getStyle().get("--vaadin-form-layout-label-spacing");
     }
 
     /**
-     * Sets the gap between the columns. The value must be defined in CSS length
-     * units, e.g., {@code 1em} or {@code 10px}.
+     * Sets the gap between the columns. The value must be provided in CSS
+     * length units, e.g. {@code 1em}.
      *
      * @param columnSpacing
      *            the gap between the columns
      * @see #setColumnSpacing(float, Unit)
      */
     public void setColumnSpacing(String columnSpacing) {
-        this.getStyle().set("--vaadin-form-layout-column-spacing",
-                columnSpacing);
+        getStyle().set("--vaadin-form-layout-column-spacing", columnSpacing);
     }
 
     /**
-     * Sets the gap between the columns. The value must be defined with a
-     * {@link Unit}, e.g., {@code 1} and {@link Unit#EM}.
+     * Sets the gap between the columns. The value must be provided with a
+     * {@link Unit}, e.g. {@code 1} and {@link Unit#EM}.
      *
      * @param columnSpacing
      *            the gap between the columns
@@ -555,35 +555,35 @@ public class FormLayout extends Component
      * @see #setColumnSpacing(String)
      */
     public void setColumnSpacing(float columnSpacing, Unit unit) {
+        Objects.requireNonNull(unit, "Unit cannot be null");
         setColumnSpacing(columnSpacing + unit.toString());
     }
 
     /**
-     * Returns the gap between the columns. It always returns the string value
-     * with the CSS length unit.
+     * Gets the gap between the columns.
      *
-     * @return the gap between the columns
+     * @return the value and CSS unit as a string
      * @see #setColumnSpacing(String)
      * @see #setColumnSpacing(float, Unit)
      */
     public String getColumnSpacing() {
-        return this.getStyle().get("--vaadin-form-layout-column-spacing");
+        return getStyle().get("--vaadin-form-layout-column-spacing");
     }
 
     /**
-     * Sets the gap between the rows. The value must be defined in CSS length
-     * units, e.g., {@code 1em} or {@code 10px}.
+     * Sets the gap between the rows. The value must be provided in CSS length
+     * units, e.g. {@code 1em}.
      *
      * @param rowSpacing
      *            the gap between the rows
      * @see #setRowSpacing(float, Unit)
      */
     public void setRowSpacing(String rowSpacing) {
-        this.getStyle().set("--vaadin-form-layout-row-spacing", rowSpacing);
+        getStyle().set("--vaadin-form-layout-row-spacing", rowSpacing);
     }
 
     /**
-     * Sets the gap between the rows. The value must be defined with a
+     * Sets the gap between the rows. The value must be provided with a
      * {@link Unit}, e.g., {@code 1} and {@link Unit#EM}.
      *
      * @param rowSpacing
@@ -593,23 +593,23 @@ public class FormLayout extends Component
      * @see #setRowSpacing(String)
      */
     public void setRowSpacing(float rowSpacing, Unit unit) {
+        Objects.requireNonNull(unit, "Unit cannot be null");
         setRowSpacing(rowSpacing + unit.toString());
     }
 
     /**
-     * Returns the gap between the rows. It always returns the string value with
-     * the CSS length unit.
+     * Gets the gap between the rows.
      *
-     * @return the gap between the rows
+     * @return the value and CSS unit as a string
      * @see #setRowSpacing(String)
      * @see #setRowSpacing(float, Unit)
      */
     public String getRowSpacing() {
-        return this.getStyle().get("--vaadin-form-layout-row-spacing");
+        return getStyle().get("--vaadin-form-layout-row-spacing");
     }
 
     /**
-     * Enables the auto responsive mode where the component automatically
+     * Enables the auto responsive mode in which the component automatically
      * creates and adjusts columns based on the container's width. Columns have
      * a fixed width defined by {@link #setColumnWidth(String)} and their number
      * increases up to the limit set by {@link #setMaxColumns(int)}. The
@@ -620,12 +620,11 @@ public class FormLayout extends Component
      * By default, each field is placed on a new row. To organize fields into
      * rows, there are two options:
      * <ol>
-     * <li>Use {@link FormRow} to explicitly group fields into rows.</li>
-     *
+     * <li>Use {@link FormRow} to explicitly group fields into rows.
      * <li>Enable the {@link #setAutoRows(boolean)} property to automatically
      * arrange fields in available columns, wrapping to a new row when
      * necessary. {@link ElementFactory#createBr()} elements can be used to
-     * force a new row.</li>
+     * force a new row.
      * </ol>
      *
      * @param autoResponsive
@@ -637,7 +636,7 @@ public class FormLayout extends Component
     }
 
     /**
-     * Returns whether the auto responsive mode is enabled.
+     * Gets whether the auto responsive mode is enabled.
      *
      * @return {@code true} if auto responsive mode is enabled, {@code false}
      *         otherwise
@@ -648,11 +647,16 @@ public class FormLayout extends Component
     }
 
     /**
-     * When enabled with {@link #setAutoResponsive(boolean)}, distributes fields
-     * across columns by placing each field in the next available column and
-     * wrapping to the next row when the current row is full.
+     * Sets whether the component should automatically distribute fields across
+     * columns by placing each field in the next available column and wrapping
+     * to the next row when the current row is full.
      * {@link ElementFactory#createBr()} elements can be used to force a new
-     * row. Default is {@code false}.
+     * row.
+     * <p>
+     * The default value is {@code false}.
+     * <p>
+     * This setting only applies when {@link #setAutoResponsive(boolean)} is
+     * enabled.
      *
      * @param autoRows
      *            {@code true} to enable auto rows mode, {@code false} otherwise
@@ -662,7 +666,8 @@ public class FormLayout extends Component
     }
 
     /**
-     * Returns whether the auto rows mode is enabled.
+     * Gets whether the component is set to automatically distribute fields
+     * across columns when {@link #setAutoResponsive(boolean)} is enabled.
      *
      * @return {@code true} if auto rows mode is enabled, {@code false}
      *         otherwise
@@ -673,36 +678,53 @@ public class FormLayout extends Component
     }
 
     /**
-     * When {@link #setAutoResponsive(boolean)} is enabled, defines the width of
-     * each column. The value must be defined in CSS length units, e.g.,
-     * {@code 100px} or {@code 13em}. The default value is {@code 13em}.
+     * Sets the width of columns that the component should use when
+     * {@link #setAutoResponsive(boolean)} is enabled. The value must be
+     * provided in CSS length units, e.g. {@code 100px}.
+     * <p>
+     * By default, the web component uses a width of {@code 13em}.
+     * <p>
+     * This setting only applies when {@link #setAutoResponsive(boolean)} is
+     * enabled.
      *
      * @param columnWidth
-     *            the width of each column
+     *            the width of columns
      */
     public void setColumnWidth(String columnWidth) {
+        Objects.requireNonNull(columnWidth, "Column width cannot be null");
+        if (columnWidth.isBlank()) {
+            throw new IllegalArgumentException("Column width cannot be empty");
+        }
+
         getElement().setProperty("columnWidth", columnWidth);
     }
 
     /**
-     * When {@link #setAutoResponsive(boolean)} is enabled, defines the width of
-     * each column. The value must be defined with a {@link Unit}, e.g.,
-     * {@code 100} and {@link Unit#PIXELS}.
+     * Sets the width of columns that the component should use when
+     * {@link #setAutoResponsive(boolean)} is enabled. The value must be
+     * provided with a {@link Unit}, e.g. {@code 100} and {@link Unit#PIXELS}.
+     * <p>
+     * By default, the web component uses a width of {@code 13em}.
+     * <p>
+     * This setting only applies when {@link #setAutoResponsive(boolean)} is
+     * enabled.
      *
      * @param columnWidth
-     *            the width of each column
+     *            the width of columns
      * @param unit
      *            the CSS unit of the width
      */
     public void setColumnWidth(float columnWidth, Unit unit) {
+        Objects.requireNonNull(unit, "Unit cannot be null");
         setColumnWidth(columnWidth + unit.toString());
     }
 
     /**
-     * Returns the defined width of each column. It always returns the string
-     * value with the CSS length unit.
+     * Gets the width of columns that is used when
+     * {@link #setAutoResponsive(boolean)} is enabled.
      *
-     * @return the width of each column
+     * @return the value and CSS unit as a string, or an empty string if not
+     *         explicitly set
      * @see #setColumnWidth(String)
      * @see #setColumnWidth(float, Unit)
      */
@@ -711,10 +733,14 @@ public class FormLayout extends Component
     }
 
     /**
-     * When {@code #setAutoResponsive(boolean)} is enabled, defines the maximum
-     * number of columns that the layout can create. The layout will create
-     * columns up to this limit based on the available container width. The
-     * default value is {@code 10}.
+     * Sets the maximum number of columns that the component can create The
+     * component will create columns up to this limit based on the available
+     * container width.
+     * <p>
+     * By default, the web component uses a maximum of 10 columns.
+     * <p>
+     * This setting only applies when {@link #setAutoResponsive(boolean)} is
+     * enabled.
      *
      * @param maxColumns
      *            the maximum number of columns
@@ -724,9 +750,10 @@ public class FormLayout extends Component
     }
 
     /**
-     * Returns the maximum number of columns that the layout can create.
+     * Gets the maximum number of columns that the component can create when
+     * {@code #setAutoResponsive(boolean)} is enabled.
      *
-     * @return the maximum number of columns
+     * @return the maximum number of columns or 0 if not explicitly set
      * @see #setMaxColumns(int)
      */
     public int getMaxColumns() {
@@ -734,11 +761,15 @@ public class FormLayout extends Component
     }
 
     /**
-     * When {@link #setAutoResponsive(boolean)} is enabled, specifies whether
-     * the columns should expand in width to evenly fill any remaining space
-     * after the layout has created as many fixed-width
+     * Sets whether the columns should expand in width to evenly fill any
+     * remaining space after the component has created as many fixed-width
      * ({@link #setColumnWidth(String)}) columns as possible within the
-     * {@link #setMaxColumns(int)} limit. The default value is {@code false}.
+     * {@link #setMaxColumns(int)} limit.
+     * <p>
+     * The default value is {@code false}.
+     * <p>
+     * This setting only applies when {@link #setAutoResponsive(boolean)} is
+     * enabled.
      *
      * @param expandColumns
      *            {@code true} to expand columns, {@code false} otherwise
@@ -748,8 +779,8 @@ public class FormLayout extends Component
     }
 
     /**
-     * Returns whether the columns should expand in width to evenly fill any
-     * remaining space. The default value is {@code false}.
+     * Gets whether the columns should expand in width to evenly fill any
+     * remaining space when {@link #setAutoResponsive(boolean)} is enabled.
      *
      * @return {@code true} if columns should expand, {@code false} otherwise
      * @see #setExpandColumns(boolean)
@@ -759,22 +790,24 @@ public class FormLayout extends Component
     }
 
     /**
-     * When {@link #setAutoResponsive(boolean)} is enabled, specifies whether
-     * fields should stretch to take up all available space within columns. This
-     * setting also applies to fields inside {@link FormItem} elements. The
-     * default value is {@code false}.
+     * Sets whether fields should stretch to take up all available space within
+     * columns, including fields inside {@link FormItem} elements.
+     * <p>
+     * The default value is {@code false}.
+     * <p>
+     * This setting only applies when {@link #setAutoResponsive(boolean)} is
+     * enabled.
      *
      * @param expandFields
      *            {@code true} to expand fields, {@code false} otherwise
      */
     public void setExpandFields(boolean expandFields) {
-
         getElement().setProperty("expandFields", expandFields);
     }
 
     /**
-     * Returns whether fields should stretch to take up all available space
-     * within columns.
+     * Gets whether fields should stretch to take up all available space within
+     * columns when {@link #setAutoResponsive(boolean)} is enabled.
      *
      * @return {@code true} if fields should expand, {@code false} otherwise
      * @see #setExpandFields(boolean)
@@ -784,23 +817,22 @@ public class FormLayout extends Component
     }
 
     /**
+     * Sets whether {@link FormItem} should prefer positioning labels beside the
+     * fields. If the layout is too narrow to fit a single column with a side
+     * label, labels will automatically switch to their default position above
+     * the fields until the layout gets wide again.
      * <p>
-     * When enabled with {@link #setAutoResponsive(boolean)}, {@link FormItem}
-     * prefers positioning labels beside the fields. If the layout is too narrow
-     * to fit a single column with side labels, they revert to their default
-     * position above the fields.
-     * </p>
+     * This setting only applies when {@link #setAutoResponsive(boolean)} is
+     * enabled.
      * <p>
      * To customize the label width and the gap between the label and the field,
      * use the following methods:
-     * </p>
      * <ul>
      * <li>{@link #setLabelWidth(String)}</li>
      * <li>{@link #setLabelSpacing(String)}</li>
      * </ul>
      * <p>
      * Alternatively, you can use the following CSS custom properties:
-     * </p>
      * <ul>
      * <li>{@code --vaadin-form-layout-label-width}</li>
      * <li>{@code --vaadin-form-layout-label-spacing}</li>
@@ -814,8 +846,8 @@ public class FormLayout extends Component
     }
 
     /**
-     * Returns whether {@link FormItem} prefers positioning labels beside the
-     * fields.
+     * Gets whether {@link FormItem} is set to prefer positioning labels beside
+     * the fields when {@link #setAutoResponsive(boolean)} is enabled.
      *
      * @return {@code true} if labels are positioned aside, {@code false}
      *         otherwise
@@ -824,5 +856,4 @@ public class FormLayout extends Component
     public boolean isLabelsAside() {
         return getElement().getProperty("labelsAside", false);
     }
-
 }
