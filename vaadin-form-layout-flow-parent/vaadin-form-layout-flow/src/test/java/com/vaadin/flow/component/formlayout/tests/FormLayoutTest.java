@@ -25,6 +25,7 @@ import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.dom.Element;
 
 public class FormLayoutTest {
 
@@ -118,51 +119,38 @@ public class FormLayoutTest {
     public void addFormRow() {
         FormLayout formLayout = new FormLayout();
         FormRow row = formLayout.addFormRow(new Input(), new Input());
-        // Assert row has 2 children
-        Assert.assertEquals(2, row.getChildren().count());
-        // Assert parent is the formLayout
-        Assert.assertTrue(row.getParent().isPresent());
-        Assert.assertEquals(formLayout, row.getParent().get());
+        Assert.assertEquals(1, row.getElement().getChildCount());
+        Assert.assertEquals(formLayout.getElement(), row.getElement().getParent());
     }
 
     @Test
     public void formRow_addFormItem() {
         FormRow row = new FormRow();
         FormItem item = row.addFormItem(new Input(), "custom label");
-        // Assert item has a label
+        Assert.assertEquals(1, item.getElement().getChildCount());
 
-        var label = item.getChildren()
-                .filter(child -> "label"
-                        .equals(child.getElement().getAttribute("slot")))
-                .findFirst().map(NativeLabel.class::cast);
-        Assert.assertTrue(label.isPresent());
-        Assert.assertEquals("custom label", label.get().getText());
+        Element input = item.getElement().getChild(0);
+        Assert.assertNotNull(input);
+        Assert.assertEquals(Input.class, input.getClass());
 
-        // Assert item has a component
-        var component = item.getChildren().filter(
-                child -> child.getElement().getAttribute("slot") == null)
-                .findFirst().map(Input.class::cast);
-        Assert.assertTrue(component.isPresent());
-        Assert.assertEquals(Input.class, component.get().getClass());
+        Element label = item.getElement().getChild(1);
+        Assert.assertNotNull(label);
+        Assert.assertEquals(NativeLabel.class, label.getClass());
+        Assert.assertEquals("custom label", label.getText());
     }
 
     @Test
     public void formRow_addFormItemWithComponent() {
         FormRow row = new FormRow();
         FormItem item = row.addFormItem(new Input(), new Span("custom label"));
-        // Assert item has a label
-        var label = item.getChildren()
-                .filter(child -> "label"
-                        .equals(child.getElement().getAttribute("slot")))
-                .findFirst().map(Span.class::cast);
-        Assert.assertTrue(label.isPresent());
-        Assert.assertEquals("custom label", label.get().getText());
 
-        // Assert item has a component
-        var component = item.getChildren().filter(
-                child -> child.getElement().getAttribute("slot") == null)
-                .findFirst().map(Input.class::cast);
-        Assert.assertTrue(component.isPresent());
-        Assert.assertEquals(Input.class, component.get().getClass());
+        Element input = item.getElement().getChild(0);
+        Assert.assertNotNull(input);
+        Assert.assertEquals(Input.class, input.getClass());
+
+        Element label = item.getElement().getChild(1);
+        Assert.assertNotNull(label);
+        Assert.assertEquals(Span.class, label.getClass());
+        Assert.assertEquals("custom label", label.getText());
     }
 }
