@@ -723,13 +723,13 @@ public class FormLayout extends Component
      * Gets the width of columns that is used when
      * {@link #setAutoResponsive(boolean)} is enabled.
      *
-     * @return the value and CSS unit as a string, or an empty string if not
+     * @return the value and CSS unit as a string, or {@code null} if not
      *         explicitly set
      * @see #setColumnWidth(String)
      * @see #setColumnWidth(float, Unit)
      */
     public String getColumnWidth() {
-        return getElement().getProperty("columnWidth", "");
+        return getElement().getProperty("columnWidth");
     }
 
     /**
