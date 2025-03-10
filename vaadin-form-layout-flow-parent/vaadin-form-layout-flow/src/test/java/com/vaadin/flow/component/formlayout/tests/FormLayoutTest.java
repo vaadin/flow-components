@@ -102,53 +102,49 @@ public class FormLayoutTest {
     }
 
     @Test
-    public void setAutoResponsive_getAutoResponsive() {
+    public void setLabelWidth_getLabelWidth() {
         FormLayout formLayout = new FormLayout();
         Assert.assertFalse(
-                formLayout.getElement().hasProperty("autoResponsive"));
-        Assert.assertFalse(formLayout.isAutoResponsive());
+                formLayout.getStyle().has("--vaadin-form-layout-label-width"));
+        Assert.assertNull(formLayout.getLabelWidth());
 
-        formLayout.setAutoResponsive(true);
-        Assert.assertTrue(
-                formLayout.getElement().getProperty("autoResponsive", false));
-        Assert.assertTrue(formLayout.isAutoResponsive());
-    }
+        formLayout.setLabelWidth("2em");
+        Assert.assertEquals("2em",
+                formLayout.getStyle().get("--vaadin-form-layout-label-width"));
+        Assert.assertEquals("2em", formLayout.getLabelWidth());
 
-    @Test
-    public void setAutoRows_getAutoRows() {
-        FormLayout formLayout = new FormLayout();
-        Assert.assertFalse(formLayout.getElement().hasProperty("autoRows"));
-        Assert.assertFalse(formLayout.isAutoRows());
-
-        formLayout.setAutoRows(true);
-        Assert.assertTrue(
-                formLayout.getElement().getProperty("autoRows", false));
-        Assert.assertTrue(formLayout.isAutoRows());
-    }
-
-    @Test
-    public void setColumnWidth_getColumnWidth() {
-        FormLayout formLayout = new FormLayout();
-        Assert.assertFalse(formLayout.getElement().hasProperty("columnWidth"));
-        Assert.assertNull(formLayout.getColumnWidth());
-
-        formLayout.setColumnWidth("10em");
-        Assert.assertEquals("10em",
-                formLayout.getElement().getProperty("columnWidth"));
-        Assert.assertEquals("10em", formLayout.getColumnWidth());
-
-        formLayout.setColumnWidth(160, Unit.PIXELS);
+        formLayout.setLabelWidth(160, Unit.PIXELS);
         Assert.assertEquals("160.0px",
-                formLayout.getElement().getProperty("columnWidth"));
-        Assert.assertEquals("160.0px", formLayout.getColumnWidth());
+                formLayout.getStyle().get("--vaadin-form-layout-label-width"));
+        Assert.assertEquals("160.0px", formLayout.getLabelWidth());
 
-        Assert.assertThrows("Column width cannot be null",
-                NullPointerException.class,
-                () -> formLayout.setColumnWidth(null));
+        formLayout.setLabelWidth(null);
+        Assert.assertFalse(
+                formLayout.getStyle().has("--vaadin-form-layout-label-width"));
+        Assert.assertNull(formLayout.getLabelWidth());
+    }
 
-        Assert.assertThrows("Column width cannot be empty",
-                IllegalArgumentException.class,
-                () -> formLayout.setColumnWidth(""));
+    @Test
+    public void setLabelSpacing_getLabelSpacing() {
+        FormLayout formLayout = new FormLayout();
+        Assert.assertFalse(formLayout.getStyle()
+                .has("--vaadin-form-layout-label-spacing"));
+        Assert.assertNull(formLayout.getLabelSpacing());
+
+        formLayout.setLabelSpacing("10em");
+        Assert.assertEquals("10em", formLayout.getStyle()
+                .get("--vaadin-form-layout-label-spacing"));
+        Assert.assertEquals("10em", formLayout.getLabelSpacing());
+
+        formLayout.setLabelSpacing(160, Unit.PIXELS);
+        Assert.assertEquals("160.0px", formLayout.getStyle()
+                .get("--vaadin-form-layout-label-spacing"));
+        Assert.assertEquals("160.0px", formLayout.getLabelSpacing());
+
+        formLayout.setLabelSpacing(null);
+        Assert.assertFalse(formLayout.getStyle()
+                .has("--vaadin-form-layout-label-spacing"));
+        Assert.assertNull(formLayout.getLabelSpacing());
     }
 
     @Test
@@ -198,49 +194,53 @@ public class FormLayoutTest {
     }
 
     @Test
-    public void setLabelWidth_getLabelWidth() {
+    public void setAutoResponsive_getAutoResponsive() {
         FormLayout formLayout = new FormLayout();
         Assert.assertFalse(
-                formLayout.getStyle().has("--vaadin-form-layout-label-width"));
-        Assert.assertNull(formLayout.getLabelWidth());
+                formLayout.getElement().hasProperty("autoResponsive"));
+        Assert.assertFalse(formLayout.isAutoResponsive());
 
-        formLayout.setLabelWidth("2em");
-        Assert.assertEquals("2em",
-                formLayout.getStyle().get("--vaadin-form-layout-label-width"));
-        Assert.assertEquals("2em", formLayout.getLabelWidth());
-
-        formLayout.setLabelWidth(160, Unit.PIXELS);
-        Assert.assertEquals("160.0px",
-                formLayout.getStyle().get("--vaadin-form-layout-label-width"));
-        Assert.assertEquals("160.0px", formLayout.getLabelWidth());
-
-        formLayout.setLabelWidth(null);
-        Assert.assertFalse(
-                formLayout.getStyle().has("--vaadin-form-layout-label-width"));
-        Assert.assertNull(formLayout.getLabelWidth());
+        formLayout.setAutoResponsive(true);
+        Assert.assertTrue(
+                formLayout.getElement().getProperty("autoResponsive", false));
+        Assert.assertTrue(formLayout.isAutoResponsive());
     }
 
     @Test
-    public void setLabelSpacing_getLabelSpacing() {
+    public void setAutoRows_getAutoRows() {
         FormLayout formLayout = new FormLayout();
-        Assert.assertFalse(formLayout.getStyle()
-                .has("--vaadin-form-layout-label-spacing"));
-        Assert.assertNull(formLayout.getLabelSpacing());
+        Assert.assertFalse(formLayout.getElement().hasProperty("autoRows"));
+        Assert.assertFalse(formLayout.isAutoRows());
 
-        formLayout.setLabelSpacing("10em");
-        Assert.assertEquals("10em", formLayout.getStyle()
-                .get("--vaadin-form-layout-label-spacing"));
-        Assert.assertEquals("10em", formLayout.getLabelSpacing());
+        formLayout.setAutoRows(true);
+        Assert.assertTrue(
+                formLayout.getElement().getProperty("autoRows", false));
+        Assert.assertTrue(formLayout.isAutoRows());
+    }
 
-        formLayout.setLabelSpacing(160, Unit.PIXELS);
-        Assert.assertEquals("160.0px", formLayout.getStyle()
-                .get("--vaadin-form-layout-label-spacing"));
-        Assert.assertEquals("160.0px", formLayout.getLabelSpacing());
+    @Test
+    public void setColumnWidth_getColumnWidth() {
+        FormLayout formLayout = new FormLayout();
+        Assert.assertFalse(formLayout.getElement().hasProperty("columnWidth"));
+        Assert.assertNull(formLayout.getColumnWidth());
 
-        formLayout.setLabelSpacing(null);
-        Assert.assertFalse(formLayout.getStyle()
-                .has("--vaadin-form-layout-label-spacing"));
-        Assert.assertNull(formLayout.getLabelSpacing());
+        formLayout.setColumnWidth("10em");
+        Assert.assertEquals("10em",
+                formLayout.getElement().getProperty("columnWidth"));
+        Assert.assertEquals("10em", formLayout.getColumnWidth());
+
+        formLayout.setColumnWidth(160, Unit.PIXELS);
+        Assert.assertEquals("160.0px",
+                formLayout.getElement().getProperty("columnWidth"));
+        Assert.assertEquals("160.0px", formLayout.getColumnWidth());
+
+        Assert.assertThrows("Column width cannot be null",
+                NullPointerException.class,
+                () -> formLayout.setColumnWidth(null));
+
+        Assert.assertThrows("Column width cannot be empty",
+                IllegalArgumentException.class,
+                () -> formLayout.setColumnWidth(""));
     }
 
     @Test

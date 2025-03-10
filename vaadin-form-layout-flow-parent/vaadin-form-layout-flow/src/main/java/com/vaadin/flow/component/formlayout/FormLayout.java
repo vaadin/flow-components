@@ -666,8 +666,9 @@ public class FormLayout extends Component
     }
 
     /**
-     * Gets whether the component is set to automatically distribute fields
-     * across columns when {@link #setAutoResponsive(boolean)} is enabled.
+     * Gets whether the component is configured to automatically distribute
+     * fields across columns when {@link #setAutoResponsive(boolean)} is
+     * enabled.
      *
      * @return {@code true} if auto rows mode is enabled, {@code false}
      *         otherwise
@@ -733,7 +734,7 @@ public class FormLayout extends Component
     }
 
     /**
-     * Sets the maximum number of columns that the component can create The
+     * Sets the maximum number of columns that the component can create. The
      * component will create columns up to this limit based on the available
      * container width.
      * <p>
@@ -761,10 +762,8 @@ public class FormLayout extends Component
     }
 
     /**
-     * Sets whether the columns should expand in width to evenly fill any
-     * remaining space after the component has created as many fixed-width
-     * ({@link #setColumnWidth(String)}) columns as possible within the
-     * {@link #setMaxColumns(int)} limit.
+     * Sets whether the columns should evenly expand in width to fill any
+     * remaining space after all columns have been created.
      * <p>
      * The default value is {@code false}.
      * <p>
@@ -779,8 +778,8 @@ public class FormLayout extends Component
     }
 
     /**
-     * Gets whether the columns should expand in width to evenly fill any
-     * remaining space when {@link #setAutoResponsive(boolean)} is enabled.
+     * Gets whether columns are configured to expand to fill remaining space
+     * when {@link #setAutoResponsive(boolean)} is enabled.
      *
      * @return {@code true} if columns should expand, {@code false} otherwise
      * @see #setExpandColumns(boolean)
@@ -791,7 +790,7 @@ public class FormLayout extends Component
 
     /**
      * Sets whether fields should stretch to take up all available space within
-     * columns, including fields inside {@link FormItem} elements.
+     * columns. Fields inside {@link FormItem} elements are also included.
      * <p>
      * The default value is {@code false}.
      * <p>
@@ -806,8 +805,8 @@ public class FormLayout extends Component
     }
 
     /**
-     * Gets whether fields should stretch to take up all available space within
-     * columns when {@link #setAutoResponsive(boolean)} is enabled.
+     * Gets whether fields are configured to stretch to take up all available
+     * space within columns when {@link #setAutoResponsive(boolean)} is enabled.
      *
      * @return {@code true} if fields should expand, {@code false} otherwise
      * @see #setExpandFields(boolean)
@@ -846,8 +845,8 @@ public class FormLayout extends Component
     }
 
     /**
-     * Gets whether {@link FormItem} is set to prefer positioning labels beside
-     * the fields when {@link #setAutoResponsive(boolean)} is enabled.
+     * Gets whether {@link FormItem} is configured to prefer positioning labels
+     * beside the fields when {@link #setAutoResponsive(boolean)} is enabled.
      *
      * @return {@code true} if labels are positioned aside, {@code false}
      *         otherwise
