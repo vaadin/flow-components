@@ -282,11 +282,26 @@ public class FormLayout extends Component
     /**
      * Server-side component for the {@code <vaadin-form-row>} element. Used to
      * arrange fields into rows inside a {@link FormLayout} when
-     * {@code #setAutoResponsive(boolean)} is enabled.
+     * {@link FormLayout#setAutoResponsive(boolean) auto-responsive mode} is
+     * enabled.
      * <p>
-     * Each {@link FormRow} always starts on a new row. Fields that exceed the
-     * available columns wrap to a new row, which then remains reserved
-     * exclusively for the fields of that {@link FormRow}.
+     * Each FormRow always starts on a new row. Fields that exceed the available
+     * columns wrap to a new row, which then remains reserved exclusively for
+     * the fields of that FormRow.
+     * <p>
+     * Example of creating a FormRow with two fields and a single field that
+     * spans two columns:
+     *
+     * <pre>
+     * FormLayout formLayout = new FormLayout();
+     * formLayout.setAutoResponsive(true);
+     * formLayout.addFormRow(new TextField("First name"),
+     *         new TextField("Last name"));
+     *
+     * TextArea addressField = new TextArea("Address");
+     * formLayout.setColspan(addressField, 2);
+     * formLayout.addFormRow(addressField);
+     * </pre>
      *
      * @author Vaadin Ltd
      */
@@ -325,6 +340,17 @@ public class FormLayout extends Component
             return addFormItem(field, new NativeLabel(label));
         }
 
+        /**
+         * Creates a new {@link FormItem} with the given field and label
+         * components and adds it to the form row.
+         *
+         * @param field
+         *            the field component to be wrapped in a form item
+         * @param label
+         *            the label component to be displayed
+         *
+         * @return the created form item
+         */
         public FormItem addFormItem(Component field, Component label) {
             FormItem formItem = new FormItem(field);
             formItem.addToLabel(label);
