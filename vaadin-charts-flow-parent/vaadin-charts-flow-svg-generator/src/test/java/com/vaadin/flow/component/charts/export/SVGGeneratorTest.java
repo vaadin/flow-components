@@ -23,6 +23,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.vaadin.flow.component.charts.model.AnnotationItemLabel;
+import com.vaadin.flow.component.charts.model.AnnotationItemLabelPoint;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -212,6 +214,19 @@ public class SVGGeneratorTest {
         ListSeries series = new ListSeries(data);
         configuration.addSeries(series);
         svgGenerator.generate(configuration);
+    }
+
+    @Test
+    public void exportWithLabel()
+            throws IOException, InterruptedException {
+        var conf = createPieChartConfiguration();
+        var label = new AnnotationItemLabel("Blue");
+        label.setPoint(new AnnotationItemLabelPoint(350, 170));
+        conf.addLabel(label);
+        var svg = svgGenerator.generate(conf);
+        var pieChartPath = Paths.get("src", "test", "resources", "label.svg");
+        var expectedSVG = readUtf8File(pieChartPath);
+        assertEquals(replaceIds(expectedSVG), replaceIds(svg));
     }
 
     private Configuration createPieChartConfiguration() {
