@@ -120,7 +120,8 @@ public class FormLayoutTest {
         FormLayout formLayout = new FormLayout();
         FormRow row = formLayout.addFormRow(new Input(), new Input());
         Assert.assertEquals(1, row.getElement().getChildCount());
-        Assert.assertEquals(formLayout.getElement(), row.getElement().getParent());
+        Assert.assertEquals(formLayout.getElement(),
+                row.getElement().getParent());
     }
 
     @Test

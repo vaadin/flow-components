@@ -284,9 +284,9 @@ public class FormLayout extends Component
      * arrange fields into rows inside a {@link FormLayout} when
      * {@code #setAutoResponsive(boolean)} is enabled.
      * <p>
-     * Each {@link FormRow} always starts on a new row. Fields that
-     * exceed the available columns wrap to a new row, which then remains
-     * reserved exclusively for the fields of that {@link FormRow}.
+     * Each {@link FormRow} always starts on a new row. Fields that exceed the
+     * available columns wrap to a new row, which then remains reserved
+     * exclusively for the fields of that {@link FormRow}.
      *
      * @author Vaadin Ltd
      */
