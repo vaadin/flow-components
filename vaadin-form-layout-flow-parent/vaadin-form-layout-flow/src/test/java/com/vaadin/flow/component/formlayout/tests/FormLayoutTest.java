@@ -20,7 +20,12 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.formlayout.FormLayout.FormItem;
+import com.vaadin.flow.component.formlayout.FormLayout.FormRow;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
+import com.vaadin.flow.component.html.Input;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.dom.Element;
 
 public class FormLayoutTest {
 
@@ -288,5 +293,46 @@ public class FormLayoutTest {
         Assert.assertTrue(
                 formLayout.getElement().getProperty("labelsAside", false));
         Assert.assertTrue(formLayout.isLabelsAside());
+    }
+
+    @Test
+    public void addFormRow() {
+        FormLayout formLayout = new FormLayout();
+        FormRow row = formLayout.addFormRow(new Input(), new Input());
+        Assert.assertEquals(2, row.getElement().getChildCount());
+        Assert.assertEquals(formLayout.getElement(),
+                row.getElement().getParent());
+    }
+
+    @Test
+    public void formRow_addFormItem() {
+        FormRow row = new FormRow();
+        FormItem item = row.addFormItem(new Input(), "custom label");
+        Assert.assertEquals(2, item.getElement().getChildCount());
+
+        Element input = item.getElement().getChild(0);
+        Assert.assertNotNull(input);
+        Assert.assertEquals("input", input.getTag());
+
+        Element label = item.getElement().getChild(1);
+        Assert.assertNotNull(label);
+        Assert.assertEquals("label", label.getTag());
+        Assert.assertEquals("custom label", label.getText());
+    }
+
+    @Test
+    public void formRow_addFormItemWithComponent() {
+        FormRow row = new FormRow();
+        FormItem item = row.addFormItem(new Input(), new Span("custom label"));
+        Assert.assertEquals(2, item.getElement().getChildCount());
+
+        Element input = item.getElement().getChild(0);
+        Assert.assertNotNull(input);
+        Assert.assertEquals("input", input.getTag());
+
+        Element label = item.getElement().getChild(1);
+        Assert.assertNotNull(label);
+        Assert.assertEquals("span", label.getTag());
+        Assert.assertEquals("custom label", label.getText());
     }
 }
