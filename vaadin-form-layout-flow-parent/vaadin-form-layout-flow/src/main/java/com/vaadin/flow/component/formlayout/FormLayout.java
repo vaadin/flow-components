@@ -280,6 +280,85 @@ public class FormLayout extends Component
     }
 
     /**
+     * Server-side component for the {@code <vaadin-form-row>} element. Used to
+     * arrange fields into rows inside a {@link FormLayout} when
+     * {@link FormLayout#setAutoResponsive(boolean) auto-responsive mode} is
+     * enabled.
+     * <p>
+     * Each FormRow always starts on a new row. Fields that exceed the available
+     * columns wrap to a new row, which then remains reserved exclusively for
+     * the fields of that FormRow.
+     * <p>
+     * Example of creating a FormRow with two fields and a single field that
+     * spans two columns:
+     *
+     * <pre>
+     * FormLayout formLayout = new FormLayout();
+     * formLayout.setAutoResponsive(true);
+     * formLayout.addFormRow(new TextField("First name"),
+     *         new TextField("Last name"));
+     *
+     * TextArea addressField = new TextArea("Address");
+     * formLayout.setColspan(addressField, 2);
+     * formLayout.addFormRow(addressField);
+     * </pre>
+     *
+     * @author Vaadin Ltd
+     */
+    @Tag("vaadin-form-row")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha2")
+    @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+    @NpmPackage(value = "@vaadin/form-layout", version = "24.8.0-alpha2")
+    @JsModule("@vaadin/form-layout/src/vaadin-form-row.js")
+    public static class FormRow extends Component implements HasComponents {
+
+        /**
+         * Constructs an empty FormRow. Components to wrap can be added after
+         * construction with {@link #add(Component...)}, or by using the
+         * {@link #addFormItem(Component, String)} and
+         * {@link #addFormItem(Component, Component)} methods.
+         *
+         * @see HasComponents#add(Component...)
+         */
+        public FormRow() {
+        }
+
+        /**
+         * Creates a new {@link FormItem} with the given component and the label
+         * string, and adds it to the form row. The label is inserted into the
+         * form item as a {@link NativeLabel}.
+         *
+         * @param field
+         *            the field component to be wrapped in a form item
+         * @param label
+         *            the label text to be displayed
+         *
+         * @return the created form item
+         */
+        public FormItem addFormItem(Component field, String label) {
+            return addFormItem(field, new NativeLabel(label));
+        }
+
+        /**
+         * Creates a new {@link FormItem} with the given field and label
+         * components and adds it to the form row.
+         *
+         * @param field
+         *            the field component to be wrapped in a form item
+         * @param label
+         *            the label component to be displayed
+         *
+         * @return the created form item
+         */
+        public FormItem addFormItem(Component field, Component label) {
+            FormItem formItem = new FormItem(field);
+            formItem.addToLabel(label);
+            add(formItem);
+            return formItem;
+        }
+    }
+
+    /**
      * Constructs an empty layout. Components can be added with
      * {@link #add(Component...)}.
      */
@@ -448,6 +527,22 @@ public class FormLayout extends Component
         formItem.addToLabel(label);
         add(formItem);
         return formItem;
+    }
+
+    /**
+     * Convenience method dor creating and adding a new {@link FormRow} to this
+     * layout. The method accepts a list of components that will be added to the
+     * row.
+     *
+     * @param components
+     *            the components to add to the row
+     * @return the created form row
+     */
+    public FormRow addFormRow(Component... components) {
+        FormRow formRow = new FormRow();
+        formRow.add(components);
+        add(formRow);
+        return formRow;
     }
 
     /**
