@@ -386,6 +386,16 @@ public class FormLayout extends Component
 
     /**
      * Configure the responsive steps used in this layout.
+     * <p>
+     * NOTE: Responsive steps are ignored when auto-responsive mode is enabled.
+     * This mode may be enabled either explicitly by calling
+     * {@link #setAutoResponsive(boolean)} with {@code true} or implicitly if
+     * the following feature flag is set in
+     * {@code src/main/resources/vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.defaultAutoResponsiveFormLayout = true
+     * </pre>
      *
      * @see ResponsiveStep
      *
@@ -611,12 +621,12 @@ public class FormLayout extends Component
 
     /**
      * When set to {@code true}, the component automatically creates and adjusts
-     * columns based on the container's width.
-     * <p>
-     * In this mode, columns have a fixed width defined by
-     * {@link #setColumnWidth(String)} and their number increases up to the
-     * limit set by {@link #setMaxColumns(int)}. The component dynamically
-     * adjusts the number of columns as the container size changes.
+     * columns based on the container's width. Columns have a fixed width
+     * defined by {@link #setColumnWidth(String)} and their number increases up
+     * to the limit set by {@link #setMaxColumns(int)}. The component
+     * dynamically adjusts the number of columns as the container size changes.
+     * When this mode is enabled, the {@link ResponsiveStep responsive steps}
+     * are ignored.
      * <p>
      * By default, each field is placed on a new row. To organize fields into
      * rows, there are two options:
@@ -627,8 +637,8 @@ public class FormLayout extends Component
      * necessary. {@link ElementFactory#createBr()} elements can be used to
      * force a new row.
      * </ol>
-     * NOTE: The auto-responsive mode is disabled by default unless the following
-     * feature flag is enabled in
+     * NOTE: The auto-responsive mode is disabled by default unless the
+     * following feature flag is enabled in
      * {@code src/main/resources/vaadin-featureflags.properties}:
      *
      * <pre>
@@ -636,8 +646,8 @@ public class FormLayout extends Component
      * </pre>
      *
      * @param autoResponsive
-     *            {@code true} to enable auto responsive mode, {@code false}
-     *            to disable
+     *            {@code true} to enable auto responsive mode, {@code false} to
+     *            disable
      */
     public void setAutoResponsive(boolean autoResponsive) {
         getElement().setProperty("autoResponsive", autoResponsive);
