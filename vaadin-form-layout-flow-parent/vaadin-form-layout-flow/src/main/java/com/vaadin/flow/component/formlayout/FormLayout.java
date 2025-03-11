@@ -306,12 +306,11 @@ public class FormLayout extends Component
      * @author Vaadin Ltd
      */
     @Tag("vaadin-form-row")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-beta1")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha2")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-    @NpmPackage(value = "@vaadin/form-layout", version = "24.7.0-beta1")
+    @NpmPackage(value = "@vaadin/form-layout", version = "24.8.0-alpha2")
     @JsModule("@vaadin/form-layout/src/vaadin-form-row.js")
-    public static class FormRow extends Component
-            implements HasComponents, HasStyle {
+    public static class FormRow extends Component implements HasComponents {
 
         /**
          * Constructs an empty FormRow. Components to wrap can be added after
