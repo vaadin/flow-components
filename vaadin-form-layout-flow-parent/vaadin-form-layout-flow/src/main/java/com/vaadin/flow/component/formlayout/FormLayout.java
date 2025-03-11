@@ -387,15 +387,8 @@ public class FormLayout extends Component
     /**
      * Configure the responsive steps used in this layout.
      * <p>
-     * NOTE: Responsive steps are ignored when auto-responsive mode is enabled.
-     * This mode may be enabled either explicitly by calling
-     * {@link #setAutoResponsive(boolean)} with {@code true} or implicitly if
-     * the following feature flag is set in
-     * {@code src/main/resources/vaadin-featureflags.properties}:
-     *
-     * <pre>
-     * com.vaadin.experimental.defaultAutoResponsiveFormLayout = true
-     * </pre>
+     * NOTE: Responsive steps are ignored when
+     * {@link #setAutoResponsive(boolean) auto-responsive mode} is enabled.
      *
      * @see ResponsiveStep
      *
@@ -419,6 +412,9 @@ public class FormLayout extends Component
 
     /**
      * Configure the responsive steps used in this layout.
+     * <p>
+     * NOTE: Responsive steps are ignored when
+     * {@link #setAutoResponsive(boolean) auto-responsive mode} is enabled.
      *
      * @see ResponsiveStep
      *
@@ -637,13 +633,6 @@ public class FormLayout extends Component
      * necessary. {@link ElementFactory#createBr()} elements can be used to
      * force a new row.
      * </ol>
-     * NOTE: The auto-responsive mode is disabled by default unless the
-     * following feature flag is enabled in
-     * {@code src/main/resources/vaadin-featureflags.properties}:
-     *
-     * <pre>
-     * com.vaadin.experimental.defaultAutoResponsiveFormLayout = true
-     * </pre>
      *
      * @param autoResponsive
      *            {@code true} to enable auto responsive mode, {@code false} to
