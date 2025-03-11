@@ -35,6 +35,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
 
 import elemental.json.Json;
@@ -609,13 +610,13 @@ public class FormLayout extends Component
     }
 
     /**
-     * Enables the auto responsive mode in which the component automatically
-     * creates and adjusts columns based on the container's width. Columns have
-     * a fixed width defined by {@link #setColumnWidth(String)} and their number
-     * increases up to the limit set by {@link #setMaxColumns(int)}. The
-     * component dynamically adjusts the number of columns as the container size
-     * changes. When this mode is enabled, the {@link ResponsiveStep} are
-     * ignored.
+     * When set to {@code true}, the component automatically creates and adjusts
+     * columns based on the container's width.
+     * <p>
+     * In this mode, columns have a fixed width defined by
+     * {@link #setColumnWidth(String)} and their number increases up to the
+     * limit set by {@link #setMaxColumns(int)}. The component dynamically
+     * adjusts the number of columns as the container size changes.
      * <p>
      * By default, each field is placed on a new row. To organize fields into
      * rows, there are two options:
@@ -626,24 +627,20 @@ public class FormLayout extends Component
      * necessary. {@link ElementFactory#createBr()} elements can be used to
      * force a new row.
      * </ol>
+     * NOTE: The auto-responsive mode is disabled by default unless the following
+     * feature flag is enabled in
+     * {@code src/main/resources/vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.defaultAutoResponsiveFormLayout = true
+     * </pre>
      *
      * @param autoResponsive
      *            {@code true} to enable auto responsive mode, {@code false}
-     *            otherwise
+     *            to disable
      */
     public void setAutoResponsive(boolean autoResponsive) {
         getElement().setProperty("autoResponsive", autoResponsive);
-    }
-
-    /**
-     * Gets whether the auto responsive mode is enabled.
-     *
-     * @return {@code true} if auto responsive mode is enabled, {@code false}
-     *         otherwise
-     * @see #setAutoResponsive(boolean)
-     */
-    public boolean isAutoResponsive() {
-        return getElement().getProperty("autoResponsive", false);
     }
 
     /**
