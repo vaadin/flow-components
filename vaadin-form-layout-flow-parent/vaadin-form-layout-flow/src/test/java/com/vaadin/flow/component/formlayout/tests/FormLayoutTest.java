@@ -18,6 +18,7 @@ package com.vaadin.flow.component.formlayout.tests;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.formlayout.FormLayout.FormItem;
 import com.vaadin.flow.component.formlayout.FormLayout.FormRow;
@@ -108,10 +109,190 @@ public class FormLayoutTest {
     @Test
     public void setLabelWidth_getLabelWidth() {
         FormLayout formLayout = new FormLayout();
-        formLayout.setLabelWidth("2em");
+        Assert.assertFalse(
+                formLayout.getStyle().has("--vaadin-form-layout-label-width"));
+        Assert.assertNull(formLayout.getLabelWidth());
 
-        String appliedWidth = formLayout.getLabelWidth();
-        Assert.assertEquals(appliedWidth, "2em");
+        formLayout.setLabelWidth("2em");
+        Assert.assertEquals("2em",
+                formLayout.getStyle().get("--vaadin-form-layout-label-width"));
+        Assert.assertEquals("2em", formLayout.getLabelWidth());
+
+        formLayout.setLabelWidth(160, Unit.PIXELS);
+        Assert.assertEquals("160.0px",
+                formLayout.getStyle().get("--vaadin-form-layout-label-width"));
+        Assert.assertEquals("160.0px", formLayout.getLabelWidth());
+
+        formLayout.setLabelWidth(null);
+        Assert.assertFalse(
+                formLayout.getStyle().has("--vaadin-form-layout-label-width"));
+        Assert.assertNull(formLayout.getLabelWidth());
+    }
+
+    @Test
+    public void setLabelSpacing_getLabelSpacing() {
+        FormLayout formLayout = new FormLayout();
+        Assert.assertFalse(formLayout.getStyle()
+                .has("--vaadin-form-layout-label-spacing"));
+        Assert.assertNull(formLayout.getLabelSpacing());
+
+        formLayout.setLabelSpacing("10em");
+        Assert.assertEquals("10em", formLayout.getStyle()
+                .get("--vaadin-form-layout-label-spacing"));
+        Assert.assertEquals("10em", formLayout.getLabelSpacing());
+
+        formLayout.setLabelSpacing(160, Unit.PIXELS);
+        Assert.assertEquals("160.0px", formLayout.getStyle()
+                .get("--vaadin-form-layout-label-spacing"));
+        Assert.assertEquals("160.0px", formLayout.getLabelSpacing());
+
+        formLayout.setLabelSpacing(null);
+        Assert.assertFalse(formLayout.getStyle()
+                .has("--vaadin-form-layout-label-spacing"));
+        Assert.assertNull(formLayout.getLabelSpacing());
+    }
+
+    @Test
+    public void setColumnSpacing_getColumnSpacing() {
+        FormLayout formLayout = new FormLayout();
+        Assert.assertFalse(formLayout.getStyle()
+                .has("--vaadin-form-layout-column-spacing"));
+        Assert.assertNull(formLayout.getColumnSpacing());
+
+        formLayout.setColumnSpacing("10em");
+        Assert.assertEquals("10em", formLayout.getStyle()
+                .get("--vaadin-form-layout-column-spacing"));
+        Assert.assertEquals("10em", formLayout.getColumnSpacing());
+
+        formLayout.setColumnSpacing(160, Unit.PIXELS);
+        Assert.assertEquals("160.0px", formLayout.getStyle()
+                .get("--vaadin-form-layout-column-spacing"));
+        Assert.assertEquals("160.0px", formLayout.getColumnSpacing());
+
+        formLayout.setColumnSpacing(null);
+        Assert.assertFalse(formLayout.getStyle()
+                .has("--vaadin-form-layout-column-spacing"));
+        Assert.assertNull(formLayout.getColumnSpacing());
+    }
+
+    @Test
+    public void setRowSpacing_getRowSpacing() {
+        FormLayout formLayout = new FormLayout();
+        Assert.assertFalse(
+                formLayout.getStyle().has("--vaadin-form-layout-row-spacing"));
+        Assert.assertNull(formLayout.getRowSpacing());
+
+        formLayout.setRowSpacing("10em");
+        Assert.assertEquals("10em",
+                formLayout.getStyle().get("--vaadin-form-layout-row-spacing"));
+        Assert.assertEquals("10em", formLayout.getRowSpacing());
+
+        formLayout.setRowSpacing(160, Unit.PIXELS);
+        Assert.assertEquals("160.0px",
+                formLayout.getStyle().get("--vaadin-form-layout-row-spacing"));
+        Assert.assertEquals("160.0px", formLayout.getRowSpacing());
+
+        formLayout.setRowSpacing(null);
+        Assert.assertFalse(
+                formLayout.getStyle().has("--vaadin-form-layout-row-spacing"));
+        Assert.assertNull(formLayout.getRowSpacing());
+    }
+
+    @Test
+    public void setAutoResponsive_getAutoResponsive() {
+        FormLayout formLayout = new FormLayout();
+        Assert.assertFalse(
+                formLayout.getElement().hasProperty("autoResponsive"));
+
+        formLayout.setAutoResponsive(true);
+        Assert.assertTrue(
+                formLayout.getElement().getProperty("autoResponsive", false));
+    }
+
+    @Test
+    public void setAutoRows_getAutoRows() {
+        FormLayout formLayout = new FormLayout();
+        Assert.assertFalse(formLayout.getElement().hasProperty("autoRows"));
+        Assert.assertFalse(formLayout.isAutoRows());
+
+        formLayout.setAutoRows(true);
+        Assert.assertTrue(
+                formLayout.getElement().getProperty("autoRows", false));
+        Assert.assertTrue(formLayout.isAutoRows());
+    }
+
+    @Test
+    public void setColumnWidth_getColumnWidth() {
+        FormLayout formLayout = new FormLayout();
+        Assert.assertFalse(formLayout.getElement().hasProperty("columnWidth"));
+        Assert.assertNull(formLayout.getColumnWidth());
+
+        formLayout.setColumnWidth("10em");
+        Assert.assertEquals("10em",
+                formLayout.getElement().getProperty("columnWidth"));
+        Assert.assertEquals("10em", formLayout.getColumnWidth());
+
+        formLayout.setColumnWidth(160, Unit.PIXELS);
+        Assert.assertEquals("160.0px",
+                formLayout.getElement().getProperty("columnWidth"));
+        Assert.assertEquals("160.0px", formLayout.getColumnWidth());
+
+        Assert.assertThrows("Column width cannot be null",
+                NullPointerException.class,
+                () -> formLayout.setColumnWidth(null));
+
+        Assert.assertThrows("Column width cannot be empty",
+                IllegalArgumentException.class,
+                () -> formLayout.setColumnWidth(""));
+    }
+
+    @Test
+    public void setMaxColumns_getMaxColumns() {
+        FormLayout formLayout = new FormLayout();
+        Assert.assertEquals(0, formLayout.getMaxColumns());
+        Assert.assertFalse(formLayout.getElement().hasProperty("maxColumns"));
+
+        formLayout.setMaxColumns(4);
+        Assert.assertEquals(4, formLayout.getMaxColumns());
+        Assert.assertEquals(4,
+                formLayout.getElement().getProperty("maxColumns", 0));
+    }
+
+    @Test
+    public void setExpandColumns_isExpandColumns() {
+        FormLayout formLayout = new FormLayout();
+        Assert.assertFalse(
+                formLayout.getElement().hasProperty("expandColumns"));
+        Assert.assertFalse(formLayout.isExpandColumns());
+
+        formLayout.setExpandColumns(true);
+        Assert.assertTrue(
+                formLayout.getElement().getProperty("expandColumns", false));
+        Assert.assertTrue(formLayout.isExpandColumns());
+    }
+
+    @Test
+    public void setExpandFields_isExpandFields() {
+        FormLayout formLayout = new FormLayout();
+        Assert.assertFalse(formLayout.getElement().hasProperty("expandFields"));
+        Assert.assertFalse(formLayout.isExpandFields());
+
+        formLayout.setExpandFields(true);
+        Assert.assertTrue(
+                formLayout.getElement().getProperty("expandFields", false));
+        Assert.assertTrue(formLayout.isExpandFields());
+    }
+
+    @Test
+    public void setLabelsAside_isLabelsAside() {
+        FormLayout formLayout = new FormLayout();
+        Assert.assertFalse(formLayout.getElement().hasProperty("labelsAside"));
+        Assert.assertFalse(formLayout.isLabelsAside());
+
+        formLayout.setLabelsAside(true);
+        Assert.assertTrue(
+                formLayout.getElement().getProperty("labelsAside", false));
+        Assert.assertTrue(formLayout.isLabelsAside());
     }
 
     @Test
