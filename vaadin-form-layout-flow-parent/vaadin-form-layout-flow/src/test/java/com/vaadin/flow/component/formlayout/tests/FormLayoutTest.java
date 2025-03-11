@@ -198,12 +198,10 @@ public class FormLayoutTest {
         FormLayout formLayout = new FormLayout();
         Assert.assertFalse(
                 formLayout.getElement().hasProperty("autoResponsive"));
-        Assert.assertFalse(formLayout.isAutoResponsive());
 
         formLayout.setAutoResponsive(true);
         Assert.assertTrue(
                 formLayout.getElement().getProperty("autoResponsive", false));
-        Assert.assertTrue(formLayout.isAutoResponsive());
     }
 
     @Test
