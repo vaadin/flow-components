@@ -77,7 +77,7 @@ import elemental.json.JsonValue;
  * {@link #setColumnWidth(String) columnWidth} and {@link #setMaxColumns(int)
  * maxColumns} properties control the column width (13em by default) and the
  * maximum number of columns (10 by default) that the Form Layout can create.
- * 
+ *
  * <pre>
  * FormLayout formLayout = new FormLayout();
  * formLayout.setAutoResponsive(true);
@@ -98,7 +98,7 @@ import elemental.json.JsonValue;
  * </ul>
  * <p>
  * Here is an example of using {@link FormRow}:
- * 
+ *
  * <pre>
  * FormLayout formLayout = new FormLayout();
  * formLayout.setAutoResponsive(true);
@@ -126,7 +126,7 @@ import elemental.json.JsonValue;
  * beside fields, you need to wrap each field in a {@link FormItem} element and
  * define its labels on the wrapper. Then, you can enable the
  * {@link #setLabelsAside(boolean) labelsAside} property:
- * 
+ *
  * <pre>
  * FormLayout formLayout = new FormLayout();
  * formLayout.setAutoResponsive(true);
