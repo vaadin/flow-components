@@ -69,6 +69,93 @@ import elemental.json.JsonValue;
  * importance.</li>
  * </ul>
  *
+ * <h2>Auto Responsive Mode</h2>
+ * <p>
+ * To avoid manually dealing with responsive breakpoints, Form Layout provides
+ * an auto-responsive mode that automatically creates and adjusts fixed-width
+ * columns based on the container's available space. The
+ * {@link #setColumnWidth(String) columnWidth} and {@link #setMaxColumns(int)
+ * maxColumns} properties control the column width (13em by default) and the
+ * maximum number of columns (10 by default) that the Form Layout can create.
+ * <p>
+ * The auto-responsive mode is disabled by default. To enable it for an
+ * individual instance, set the {@link #setAutoResponsive(boolean)
+ * autoResponsive} property to {@code true}:
+ *
+ * <pre>
+ * FormLayout formLayout = new FormLayout();
+ * formLayout.setAutoResponsive(true);
+ * formLayout.add(new TextField("First name"), new TextField("Last name"));
+ * formLayout.add(new TextArea("Address"), 2);
+ * </pre>
+ *
+ * <p>
+ * You can also enable it for all instances by enabling the following feature
+ * flag in {@code src/main/resources/vaadin-featureflags.properties}:
+ *
+ * <pre>
+ * com.vaadin.experimental.defaultAutoResponsiveFormLayout = true
+ * </pre>
+ *
+ * <h3>Organizing Fields into Rows</h3>
+ * <p>
+ * By default, each field is placed on a new row. To organize fields into rows,
+ * you can either:
+ * <ul>
+ * <li>Manually wrap fields into {@link FormRow} elements.
+ * <li>Enable the {@link #setAutoRows(boolean) autoRows} property to let Form
+ * Layout automatically arrange fields in available columns, wrapping to a new
+ * row when necessary. HTML {@link ElementFactory#createBr() br} elements can be
+ * used to force a new row.
+ * </ul>
+ * <p>
+ * Here is an example of using {@link FormRow}:
+ *
+ * <pre>
+ * FormLayout formLayout = new FormLayout();
+ * formLayout.setAutoResponsive(true);
+ * formLayout.addFormRow(new TextField("First name"),
+ *         new TextField("Last name"));
+ * TextArea addressField = new TextArea("Address");
+ * formLayout.setColspan(addressField, 2);
+ * formLayout.addFormRow(addressField);
+ * </pre>
+ *
+ * <h3>Expanding Columns and Fields</h3>
+ * <p>
+ * You can configure Form Layout to expand columns to evenly fill any remaining
+ * space after all fixed-width columns have been created. To enable this, set
+ * the {@link #setExpandColumns(boolean) expandColumns} property to
+ * {@code true}.
+ * <p>
+ * Also, Form Layout can stretch fields to make them take up all available space
+ * within columns. To enable this, set the {@link #setExpandFields(boolean)
+ * expandFields} property to {@code true}.
+ *
+ * <h3>Customizing Label Position</h3>
+ * <p>
+ * By default, Form Layout displays labels above the fields. To position labels
+ * beside fields, you need to wrap each field in a {@link FormItem} element and
+ * define its labels on the wrapper. Then, you can enable the
+ * {@link #setLabelsAside(boolean) labelsAside} property:
+ *
+ * <pre>
+ * FormLayout formLayout = new FormLayout();
+ * formLayout.setAutoResponsive(true);
+ * formLayout.setLabelsAside(true);
+ *
+ * FormRow firstRow = formLayout.addFormRow();
+ * firstRow.addFormItem(new TextField(), "First Name");
+ * firstRow.addFormItem(new TextField(), "Last Name");
+ *
+ * FormRow secondRow = formLayout.addFormRow();
+ * FormItem addressField = secondRow.addFormItem(new TextArea(), "Address");
+ * formLayout.setColspan(addressField, 2);
+ * </pre>
+ * <p>
+ * With this, FormLayout will display labels beside fields, falling back to the
+ * default position above the fields only when there isn't enough space.
+ *
  * @author Vaadin Ltd
  */
 @Tag("vaadin-form-layout")
@@ -466,8 +553,14 @@ public class FormLayout extends Component
     /**
      * Configure the responsive steps used in this layout.
      * <p>
-     * NOTE: Responsive steps are ignored when
-     * {@link #setAutoResponsive(boolean) auto-responsive mode} is enabled.
+     * NOTE: Responsive steps are ignored in auto-responsive mode, which may be
+     * enabled explicitly via {@link #setAutoResponsive(boolean)} or implicitly
+     * if the following feature flag is set in
+     * {@code src/main/resources/vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.defaultAutoResponsiveFormLayout = true
+     * </pre>
      *
      * @see ResponsiveStep
      *
@@ -492,8 +585,14 @@ public class FormLayout extends Component
     /**
      * Configure the responsive steps used in this layout.
      * <p>
-     * NOTE: Responsive steps are ignored when
-     * {@link #setAutoResponsive(boolean) auto-responsive mode} is enabled.
+     * NOTE: Responsive steps are ignored in auto-responsive mode, which may be
+     * enabled explicitly via {@link #setAutoResponsive(boolean)} or implicitly
+     * if the following feature flag is set in
+     * {@code src/main/resources/vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.defaultAutoResponsiveFormLayout = true
+     * </pre>
      *
      * @see ResponsiveStep
      *
@@ -716,8 +815,8 @@ public class FormLayout extends Component
      * defined by {@link #setColumnWidth(String)} and their number increases up
      * to the limit set by {@link #setMaxColumns(int)}. The component
      * dynamically adjusts the number of columns as the container size changes.
-     * When this mode is enabled, the {@link ResponsiveStep responsive steps}
-     * are ignored.
+     * When this mode is enabled, {@link ResponsiveStep Responsive steps} are
+     * ignored.
      * <p>
      * By default, each field is placed on a new row. To organize fields into
      * rows, there are two options:
@@ -728,6 +827,15 @@ public class FormLayout extends Component
      * necessary. {@link ElementFactory#createBr()} elements can be used to
      * force a new row.
      * </ol>
+     * <p>
+     * The auto-responsive mode is disabled by default. To enable it for an
+     * individual instance, use this method. Alternatively, if you want it to be
+     * enabled for all instances by default, enable the following feature flag
+     * in {@code src/main/resources/vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.defaultAutoResponsiveFormLayout = true
+     * </pre>
      *
      * @param autoResponsive
      *            {@code true} to enable auto responsive mode, {@code false} to
