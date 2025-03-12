@@ -77,12 +77,24 @@ import elemental.json.JsonValue;
  * {@link #setColumnWidth(String) columnWidth} and {@link #setMaxColumns(int)
  * maxColumns} properties control the column width (13em by default) and the
  * maximum number of columns (10 by default) that the Form Layout can create.
+ * <p>
+ * The auto-responsive mode is disabled by default. To enable it for an
+ * individual instance, set the {@link #setAutoResponsive(boolean)
+ * autoResponsive} property to {@code true}:
  *
  * <pre>
  * FormLayout formLayout = new FormLayout();
  * formLayout.setAutoResponsive(true);
  * formLayout.add(new TextField("First name"), new TextField("Last name"));
  * formLayout.add(new TextArea("Address"), 2);
+ * </pre>
+ *
+ * <p>
+ * You can also enable it for all instances by enabling the following feature
+ * flag in {@code src/main/resources/vaadin-featureflags.properties}:
+ *
+ * <pre>
+ * com.vaadin.experimental.defaultAutoResponsiveFormLayout = true
  * </pre>
  *
  * <h3>Organizing Fields into Rows</h3>
@@ -541,10 +553,9 @@ public class FormLayout extends Component
     /**
      * Configure the responsive steps used in this layout.
      * <p>
-     * NOTE: Responsive steps are ignored when auto-responsive mode is enabled.
-     * This mode may be enabled either explicitly by calling
-     * {@link #setAutoResponsive(boolean)} with {@code true} or implicitly if
-     * the following feature flag is set in
+     * NOTE: Responsive steps are ignored in auto-responsive mode, which may be
+     * enabled explicitly via {@link #setAutoResponsive(boolean)} or implicitly
+     * if the following feature flag is set in
      * {@code src/main/resources/vaadin-featureflags.properties}:
      *
      * <pre>
@@ -574,8 +585,14 @@ public class FormLayout extends Component
     /**
      * Configure the responsive steps used in this layout.
      * <p>
-     * NOTE: Responsive steps are ignored when
-     * {@link #setAutoResponsive(boolean) auto-responsive mode} is enabled.
+     * NOTE: Responsive steps are ignored in auto-responsive mode, which may be
+     * enabled explicitly via {@link #setAutoResponsive(boolean)} or implicitly
+     * if the following feature flag is set in
+     * {@code src/main/resources/vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.defaultAutoResponsiveFormLayout = true
+     * </pre>
      *
      * @see ResponsiveStep
      *
@@ -798,8 +815,8 @@ public class FormLayout extends Component
      * defined by {@link #setColumnWidth(String)} and their number increases up
      * to the limit set by {@link #setMaxColumns(int)}. The component
      * dynamically adjusts the number of columns as the container size changes.
-     * When this mode is enabled, the {@link ResponsiveStep responsive steps}
-     * are ignored.
+     * When this mode is enabled, {@link ResponsiveStep Responsive steps} are
+     * ignored.
      * <p>
      * By default, each field is placed on a new row. To organize fields into
      * rows, there are two options:
@@ -810,9 +827,11 @@ public class FormLayout extends Component
      * necessary. {@link ElementFactory#createBr()} elements can be used to
      * force a new row.
      * </ol>
-     * NOTE: The auto-responsive mode is disabled by default unless the
-     * following feature flag is enabled in
-     * {@code src/main/resources/vaadin-featureflags.properties}:
+     * <p>
+     * The auto-responsive mode is disabled by default. To enable it for an
+     * individual instance, use this method. Alternatively, if you want it to be
+     * enabled for all instances by default, enable the following feature flag
+     * in {@code src/main/resources/vaadin-featureflags.properties}:
      *
      * <pre>
      * com.vaadin.experimental.defaultAutoResponsiveFormLayout = true
