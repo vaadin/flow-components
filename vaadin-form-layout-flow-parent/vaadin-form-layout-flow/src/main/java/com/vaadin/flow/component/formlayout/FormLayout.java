@@ -77,6 +77,7 @@ import elemental.json.JsonValue;
  * {@link #setColumnWidth(String) columnWidth} and {@link #setMaxColumns(int)
  * maxColumns} properties control the column width (13em by default) and the
  * maximum number of columns (10 by default) that the Form Layout can create.
+ * 
  * <pre>
  * FormLayout formLayout = new FormLayout();
  * formLayout.setAutoResponsive(true);
@@ -97,10 +98,12 @@ import elemental.json.JsonValue;
  * </ul>
  * <p>
  * Here is an example of using {@link FormRow}:
+ * 
  * <pre>
  * FormLayout formLayout = new FormLayout();
  * formLayout.setAutoResponsive(true);
- * formLayout.addFormRow(new TextField("First name"), new TextField("Last name"));
+ * formLayout.addFormRow(new TextField("First name"),
+ *         new TextField("Last name"));
  * TextArea addressField = new TextArea("Address");
  * formLayout.setColspan(addressField, 2);
  * formLayout.addFormRow(addressField);
@@ -110,18 +113,20 @@ import elemental.json.JsonValue;
  * <p>
  * You can configure Form Layout to expand columns to evenly fill any remaining
  * space after all fixed-width columns have been created. To enable this, set
- * the {@link #setExpandColumns(boolean) expandColumns} property to {@code true}.
+ * the {@link #setExpandColumns(boolean) expandColumns} property to
+ * {@code true}.
  * <p>
  * Also, Form Layout can stretch fields to make them take up all available space
- * within columns. To enable this, set the
- * {@link #setExpandFields(boolean) expandFields} property to {@code true}.
+ * within columns. To enable this, set the {@link #setExpandFields(boolean)
+ * expandFields} property to {@code true}.
  *
  * <h3>Customizing Label Position</h3>
  * <p>
  * By default, Form Layout displays labels above the fields. To position labels
- * beside fields, you need to wrap each field in a {@link FormItem} element
- * and define its labels on the wrapper. Then, you can enable the
+ * beside fields, you need to wrap each field in a {@link FormItem} element and
+ * define its labels on the wrapper. Then, you can enable the
  * {@link #setLabelsAside(boolean) labelsAside} property:
+ * 
  * <pre>
  * FormLayout formLayout = new FormLayout();
  * formLayout.setAutoResponsive(true);
