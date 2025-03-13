@@ -451,7 +451,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     @Synchronize(property = "opened", value = "opened-changed", allowInert = true)
     public boolean isOpened() {
-        return getElement().getProperty(OPENED_PROPERTY, true);
+        return getElement().getProperty(OPENED_PROPERTY, false);
     }
 
     /**
