@@ -87,7 +87,7 @@ public class Card extends Component implements HasSize,
     }
 
     /**
-     * Sets the component used as the card's title. If a {@link setHeader(Component) header component} is
+     * Sets the component used as the card's title. If a {@link #setHeader(Component) header component} is
      * set, the title will not be displayed.
      * <p>
      * Passing {@code null} removes the current title from the card.
@@ -109,7 +109,7 @@ public class Card extends Component implements HasSize,
     }
 
     /**
-     * Sets the component used as the card's subtitle. If a {@link setHeader(Component) header component} is
+     * Sets the component used as the card's subtitle. If a {@link #setHeader(Component) header component} is
      * set, the subtitle will not be displayed.
      * <p>
      * Passing {@code null} removes the current subtitle from the card.
@@ -132,7 +132,7 @@ public class Card extends Component implements HasSize,
 
     /**
      * Sets the component used as the card's header. The header is prioritized
-     * over the {@link setTitle(Component) title} and {@link setSubtitle(Component) subtitle} components, and will be displayed instead.
+     * over the {@link #setTitle(Component) title} and {@link #setSubtitle(Component) subtitle} components, and will be displayed instead.
      * <p>
      * Passing {@code null} removes the current header component from the card.
      *
