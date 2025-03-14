@@ -56,9 +56,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-rc1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/button", version = "24.7.0-rc1")
+@NpmPackage(value = "@vaadin/button", version = "24.7.0")
 @JsModule("@vaadin/button/src/vaadin-button.js")
 public class Button extends Component
         implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,
