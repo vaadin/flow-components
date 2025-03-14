@@ -45,7 +45,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.select.data.SelectDataView;
 import com.vaadin.flow.component.select.data.SelectListDataView;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasPrefix;
@@ -181,6 +180,8 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     public Select() {
         super("value", null, String.class, Select::presentationToModel,
                 Select::modelToPresentation);
+
+        getElement().setProperty("manualValidation", true);
 
         setInvalid(false);
         setOpened(false);
@@ -897,8 +898,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-
-        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     /**

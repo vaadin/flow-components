@@ -38,7 +38,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
@@ -181,6 +180,8 @@ public class RadioButtonGroup<T>
         super("value", null, String.class,
                 RadioButtonGroup::presentationToModel,
                 RadioButtonGroup::modelToPresentation);
+
+        getElement().setProperty("manualValidation", true);
 
         addValueChangeListener(e -> validate());
 
@@ -437,8 +438,6 @@ public class RadioButtonGroup<T>
         if (getDataProvider() != null) {
             setupDataProviderListener(getDataProvider());
         }
-
-        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     @Override

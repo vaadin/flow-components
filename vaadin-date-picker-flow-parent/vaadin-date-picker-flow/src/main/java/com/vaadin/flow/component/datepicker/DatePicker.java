@@ -44,7 +44,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
@@ -250,6 +249,8 @@ public class DatePicker
      */
     private DatePicker(LocalDate initialDate, boolean isInitialValueOptional) {
         super("value", null, String.class, PARSER, FORMATTER);
+
+        getElement().setProperty("manualValidation", true);
 
         // Initialize property value unless it has already been set from a
         // template
@@ -519,7 +520,6 @@ public class DatePicker
         super.onAttach(attachEvent);
         initConnector();
         requestI18nUpdate();
-        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     private void initConnector() {

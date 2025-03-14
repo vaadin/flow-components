@@ -21,8 +21,6 @@ import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -134,6 +132,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             SerializableFunction<T, String> formatter, double absoluteMin,
             double absoluteMax) {
         super(null, null, String.class, parser, formatter, true);
+
+        getElement().setProperty("manualValidation", true);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
@@ -407,12 +407,6 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
                 .subtract(BigDecimal.valueOf(stepBasis))
                 .remainder(BigDecimal.valueOf(step))
                 .compareTo(BigDecimal.ZERO) == 0;
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     /**
