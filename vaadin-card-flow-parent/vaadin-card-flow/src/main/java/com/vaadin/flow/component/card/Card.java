@@ -52,13 +52,13 @@ import com.vaadin.flow.dom.Element;
 public class Card extends Component implements HasSize,
         HasThemeVariant<CardVariant>, HasComponents, HasAriaLabel {
 
-    static final String MEDIA_SLOT_NAME = "media";
-    static final String TITLE_SLOT_NAME = "title";
-    static final String SUBTITLE_SLOT_NAME = "subtitle";
-    static final String HEADER_SLOT_NAME = "header";
-    static final String HEADER_PREFIX_SLOT_NAME = "header-prefix";
-    static final String HEADER_SUFFIX_SLOT_NAME = "header-suffix";
-    static final String FOOTER_SLOT_NAME = "footer";
+    private static final String MEDIA_SLOT_NAME = "media";
+    private static final String TITLE_SLOT_NAME = "title";
+    private static final String SUBTITLE_SLOT_NAME = "subtitle";
+    private static final String HEADER_SLOT_NAME = "header";
+    private static final String HEADER_PREFIX_SLOT_NAME = "header-prefix";
+    private static final String HEADER_SUFFIX_SLOT_NAME = "header-suffix";
+    private static final String FOOTER_SLOT_NAME = "footer";
 
     private Element contentRoot;
 
