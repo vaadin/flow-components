@@ -23,6 +23,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
@@ -34,9 +35,16 @@ import com.vaadin.flow.component.html.Span;
  */
 public class CardTest {
 
+    private Card card;
+
+    @Before
+    public void setup() {
+        card = new Card();
+        card.setFeatureFlagEnabled();
+    }
+
     @Test
     public void titleNullByDefault() {
-        var card = new Card();
         Assert.assertNull(card.getTitle());
     }
 
@@ -52,7 +60,6 @@ public class CardTest {
 
     @Test
     public void subtitleNullByDefault() {
-        var card = new Card();
         Assert.assertNull(card.getSubtitle());
     }
 
@@ -69,7 +76,6 @@ public class CardTest {
 
     @Test
     public void mediaNullByDefault() {
-        var card = new Card();
         Assert.assertNull(card.getMedia());
     }
 
@@ -85,7 +91,6 @@ public class CardTest {
 
     @Test
     public void headerNullByDefault() {
-        var card = new Card();
         Assert.assertNull(card.getHeader());
     }
 
@@ -101,7 +106,6 @@ public class CardTest {
 
     @Test
     public void headerPrefixNullByDefault() {
-        var card = new Card();
         Assert.assertNull(card.getHeaderPrefix());
     }
 
@@ -119,7 +123,6 @@ public class CardTest {
 
     @Test
     public void headerSuffixNullByDefault() {
-        var card = new Card();
         Assert.assertNull(card.getHeaderSuffix());
     }
 
@@ -137,13 +140,11 @@ public class CardTest {
 
     @Test
     public void hasNoFooterComponentsByDefault() {
-        var card = new Card();
         Assert.assertEquals(0, card.getFooterComponents().length);
     }
 
     @Test
     public void addToFooterInArray_footerUpdated() {
-        var card = new Card();
         var firstFooterContent = new Div();
         var secondFooterContent = new Div();
         card.addToFooter(firstFooterContent, secondFooterContent);
@@ -155,7 +156,6 @@ public class CardTest {
 
     @Test
     public void addToFooterSeparately_footerUpdated() {
-        var card = new Card();
         var firstFooterContent = new Div();
         var secondFooterContent = new Div();
         card.addToFooter(firstFooterContent);
@@ -168,7 +168,6 @@ public class CardTest {
 
     @Test
     public void addToFooter_slotAttributeSet() {
-        var card = new Card();
         var footerComponents = List.of(new Div(), new Span());
         footerComponents.forEach(card::addToFooter);
         footerComponents.forEach(footerComponent -> {
@@ -181,37 +180,31 @@ public class CardTest {
 
     @Test
     public void cardHasNoChildrenByDefault() {
-        var card = new Card();
         Assert.assertTrue(card.getChildren().findAny().isEmpty());
     }
 
     @Test(expected = NullPointerException.class)
     public void addNullCollection_throwsNullPointerException() {
-        var card = new Card();
         card.add((Collection<Component>) null);
     }
 
     @Test(expected = NullPointerException.class)
     public void addNullArray_throwsNullPointerException() {
-        var card = new Card();
         card.add((Component[]) null);
     }
 
     @Test(expected = NullPointerException.class)
     public void addNullComponentInArray_throwsNullPointerException() {
-        var card = new Card();
         card.add(new Div(), null);
     }
 
     @Test(expected = NullPointerException.class)
     public void addNullComponentInCollection_throwsNullPointerException() {
-        var card = new Card();
         card.add(Arrays.asList(new Div(), null));
     }
 
     @Test
     public void addNullComponentInCollection_childrenNotUpdated() {
-        var card = new Card();
         try {
             card.add(new Div(), null);
         } catch (NullPointerException e) {
@@ -225,7 +218,6 @@ public class CardTest {
         var contentWithAnotherParent = new Span();
         var otherParent = new Div();
         otherParent.add(contentWithAnotherParent);
-        var card = new Card();
         var content = new Div();
         card.add(content);
         card.remove(List.of(contentWithAnotherParent));
@@ -234,7 +226,6 @@ public class CardTest {
     @Test
     public void removeContentWithNoParent_childrenNotUpdated() {
         var contentWithNoParent = new Span();
-        var card = new Card();
         var content = new Div();
         card.add(content);
         card.remove(List.of(contentWithNoParent));
@@ -243,20 +234,17 @@ public class CardTest {
 
     @Test(expected = NullPointerException.class)
     public void cardWithContent_removeNull_throwsNullPointerException() {
-        var card = new Card();
         card.add(new Span());
         card.remove(Collections.singletonList(null));
     }
 
     @Test(expected = NullPointerException.class)
     public void cardWithoutContent_removeNull_throwsNullPointerException() {
-        var card = new Card();
         card.remove(Collections.singletonList(null));
     }
 
     @Test
     public void removeAll_allChildrenRemoved() {
-        var card = new Card();
         card.add(new Div(), new Div());
         card.removeAll();
         Assert.assertTrue(card.getChildren().findAny().isEmpty());
@@ -264,7 +252,6 @@ public class CardTest {
 
     @Test
     public void emptyCard_addComponentAtIndex_componentAddedAtCorrectIndex() {
-        var card = new Card();
         var component = new Div();
         card.addComponentAtIndex(0, component);
         var firstComponent = card.getChildren().findFirst();
@@ -274,7 +261,6 @@ public class CardTest {
 
     @Test
     public void addComponentAtNextIndex_componentAddedAtCorrectIndex() {
-        var card = new Card();
         card.add(new Span());
         var component = new Div();
         var initialCount = (int) card.getChildren().count();
@@ -286,7 +272,6 @@ public class CardTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void addComponentAtOutOfBoundsIndex_throwsIllegalArgumentException() {
-        var card = new Card();
         card.add(new Span());
         var component = new Div();
         card.addComponentAtIndex((int) card.getChildren().count() + 1,
@@ -295,7 +280,6 @@ public class CardTest {
 
     @Test
     public void addComponentAtIndex_componentsAddedAtCorrectIndexes() {
-        var card = new Card();
         card.add(new Span());
         var component = new Div();
         card.addComponentAtIndex(0, component);
@@ -306,20 +290,17 @@ public class CardTest {
 
     @Test
     public void cardThemeVariantsEmptyByDefault() {
-        var card = new Card();
         Assert.assertTrue(card.getThemeNames().isEmpty());
     }
 
     @Test
     public void ariaRoleEmptyByDefault() {
-        var card = new Card();
         Assert.assertTrue(card.getAriaRole().isEmpty());
     }
 
     @Test
     public void setAriaRole_ariaRoleUpdated() {
         var ariaRole = "custom-role";
-        var card = new Card();
         card.setAriaRole(ariaRole);
         Assert.assertTrue(card.getAriaRole().isPresent());
         Assert.assertEquals(ariaRole, card.getAriaRole().get());
@@ -327,15 +308,13 @@ public class CardTest {
 
     @Test
     public void setAriaRoleNull_ariaRoleUpdated() {
-        var card = new Card();
         card.setAriaRole("custom-role");
         card.setAriaRole(null);
         Assert.assertTrue(card.getAriaRole().isEmpty());
     }
 
-    private static void setSlotContent_slotContentIsSet(
+    private void setSlotContent_slotContentIsSet(
             BiConsumer<Card, Component> setter, String slotName) {
-        var card = new Card();
         var slotContent = new Div();
         setter.accept(card, slotContent);
         var slotElement = slotContent.getElement().getParent();
@@ -343,10 +322,9 @@ public class CardTest {
         Assert.assertEquals(slotName, slotElement.getAttribute("slot"));
     }
 
-    private static void slotBasedFieldUpdatedCorrectly(
+    private void slotBasedFieldUpdatedCorrectly(
             Function<Card, Component> getter,
             BiConsumer<Card, Component> setter) {
-        var card = new Card();
         var component = new Span("Text");
         setter.accept(card, component);
         Assert.assertEquals(component, getter.apply(card));
