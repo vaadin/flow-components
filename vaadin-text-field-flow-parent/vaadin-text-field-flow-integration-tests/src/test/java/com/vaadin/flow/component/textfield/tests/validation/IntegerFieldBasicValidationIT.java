@@ -278,6 +278,26 @@ public class IntegerFieldBasicValidationIT
     }
 
     @Test
+    public void detach_attachAndInvalidate_preservesInvalidState() {
+        detachField();
+        attachAndInvalidateField();
+
+        assertServerInvalid();
+        assertClientInvalid();
+    }
+
+    @Test
+    public void detach_hide_attach_showAndInvalidate_preservesInvalidState() {
+        detachField();
+        hideField();
+        attachField();
+        showAndInvalidateField();
+
+        assertServerInvalid();
+        assertClientInvalid();
+    }
+
+    @Test
     public void webComponentCanNotModifyInvalidState() {
         assertWebComponentCanNotModifyInvalidState();
 
