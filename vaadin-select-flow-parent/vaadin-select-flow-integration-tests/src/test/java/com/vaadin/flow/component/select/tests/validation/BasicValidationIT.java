@@ -86,7 +86,6 @@ public class BasicValidationIT extends AbstractValidationIT<SelectElement> {
     }
 
     @Test
-<<<<<<< Updated upstream
     public void detach_attachAndInvalidate_preservesInvalidState() {
         detachField();
         attachAndInvalidateField();
@@ -107,17 +106,6 @@ public class BasicValidationIT extends AbstractValidationIT<SelectElement> {
     }
 
     @Test
-    public void webComponentCanNotModifyInvalidState() {
-        assertWebComponentCanNotModifyInvalidState();
-
-        detachAndReattachField();
-
-        assertWebComponentCanNotModifyInvalidState();
-    }
-
-    @Test
-=======
->>>>>>> Stashed changes
     public void clientSideInvalidStateIsNotPropagatedToServer() {
         // Make the field invalid
         $("button").id(REQUIRED_BUTTON).click();
