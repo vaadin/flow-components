@@ -32,18 +32,17 @@ public final class ClientValidationUtil {
 
     public static <C extends Component & HasValidation> void preventWebComponentFromModifyingInvalidState(
             C component) {
-        component.getElement().executeJs(
-                "this._shouldSetInvalid = function (invalid) { return false }");
+        StringBuilder expression = new StringBuilder(
+                "this._shouldSetInvalid = function (invalid) { return false };");
 
-        component.getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(component, context -> {
-                    /*
-                     * Workaround the case where the client side validation
-                     * overrides the invalid state before the
-                     * `_shouldSetInvalid` method is overridden above.
-                     */
-                    component.getElement().executeJs("this.invalid = $0",
-                            component.isInvalid());
-                }));
+        /*
+         * Workaround the case where the client side validation overrides the
+         * invalid state before the `_shouldSetInvalid` method is overridden
+         * above.
+         */
+        expression.append("this.invalid = ").append(component.isInvalid())
+                .append(";");
+
+        component.getElement().executeJs(expression.toString());
     }
 }
