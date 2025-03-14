@@ -109,7 +109,7 @@ public class Card extends Component implements HasSize,
     }
 
     /**
-     * Sets the component used as the card's subtitle. If a header component is
+     * Sets the component used as the card's subtitle. If a {@link setHeader(Component) header component} is
      * set, the subtitle will not be displayed.
      * <p>
      * Passing {@code null} removes the current subtitle from the card.
