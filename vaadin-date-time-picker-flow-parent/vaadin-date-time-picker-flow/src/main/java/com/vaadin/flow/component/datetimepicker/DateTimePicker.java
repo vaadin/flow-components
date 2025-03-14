@@ -232,6 +232,8 @@ public class DateTimePicker
         SlotUtils.addToSlot(this, "date-picker", datePicker);
         SlotUtils.addToSlot(this, "time-picker", timePicker);
 
+        getElement().setProperty("manualValidation", true);
+
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
