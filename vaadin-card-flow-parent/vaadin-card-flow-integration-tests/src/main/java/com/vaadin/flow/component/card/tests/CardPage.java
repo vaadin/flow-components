@@ -40,8 +40,10 @@ public class CardPage extends Div {
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod "
                         + "tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim "
                         + "veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex "
-                        + "ea commodo consequat."));
-        card.add(new NativeButton("Interactive Content"));
+                        + "ea commodo consequat."),
+                new NativeButton("Interactive Content"));
+        card.addToFooter(new Div("Footer text"),
+                new NativeButton("Interactive Footer Content"));
 
         card.getStyle().set("background-color", "lightblue");
         card.setMaxWidth("300px");

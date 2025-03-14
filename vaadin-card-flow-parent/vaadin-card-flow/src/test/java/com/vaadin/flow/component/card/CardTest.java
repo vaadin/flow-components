@@ -167,11 +167,9 @@ public class CardTest {
     public void addToFooter_slotAttributeSet() {
         var footerComponents = List.of(new Div(), new Span());
         footerComponents.forEach(card::addToFooter);
-        footerComponents.forEach(footerComponent -> {
-            var slotElement = footerComponent.getElement().getParent();
-            Assert.assertNotNull(slotElement);
-            Assert.assertEquals("footer", slotElement.getAttribute("slot"));
-        });
+        footerComponents
+                .forEach(footerComponent -> Assert.assertEquals("footer",
+                        footerComponent.getElement().getAttribute("slot")));
     }
 
     @Test
@@ -313,9 +311,8 @@ public class CardTest {
             BiConsumer<Card, Component> setter, String slotName) {
         var slotContent = new Div();
         setter.accept(card, slotContent);
-        var slotElement = slotContent.getElement().getParent();
-        Assert.assertNotNull(slotElement);
-        Assert.assertEquals(slotName, slotElement.getAttribute("slot"));
+        Assert.assertEquals(slotName,
+                slotContent.getElement().getAttribute("slot"));
     }
 
     private void slotBasedFieldUpdatedCorrectly(

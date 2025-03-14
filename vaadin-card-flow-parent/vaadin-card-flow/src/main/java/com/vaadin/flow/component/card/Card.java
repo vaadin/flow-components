@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
@@ -209,17 +208,12 @@ public class Card extends Component implements HasSize,
     public void addToFooter(Component... footerComponent) {
         Objects.requireNonNull(footerComponent,
                 "Components should not be null");
-        var elementsToAdd = Arrays.stream(footerComponent)
+        var componentsToAdd = Arrays.stream(footerComponent)
                 .map(component -> Objects.requireNonNull(component,
                         "Component to add cannot be null"))
-                .map(Component::getElement).toList();
-        if (!elementsToAdd.isEmpty()) {
-            var footerRoot = new AtomicReference<Element>();
-            SlotUtils.getElementsInSlot(this, FOOTER_SLOT_NAME).findFirst()
-                    .ifPresentOrElse(footerRoot::set,
-                            () -> footerRoot.set(initSlot(FOOTER_SLOT_NAME)));
-            elementsToAdd.forEach(footerRoot.get()::appendChild);
-        }
+                .toList();
+        componentsToAdd.forEach(component -> SlotUtils.addToSlot(this,
+                FOOTER_SLOT_NAME, component));
     }
 
     /**
@@ -228,10 +222,9 @@ public class Card extends Component implements HasSize,
      * @return an array of footer components
      */
     public Component[] getFooterComponents() {
-        return SlotUtils.getElementsInSlot(this, FOOTER_SLOT_NAME).findFirst()
-                .map(element -> element.getChildren().map(Element::getComponent)
-                        .map(Optional::orElseThrow).toArray(Component[]::new))
-                .orElseGet(() -> new Component[0]);
+        return SlotUtils.getElementsInSlot(this, FOOTER_SLOT_NAME)
+                .map(Element::getComponent).map(Optional::orElseThrow)
+                .toArray(Component[]::new);
     }
 
     @Override
@@ -374,33 +367,14 @@ public class Card extends Component implements HasSize,
 
     private void setSlotContent(String slotName, Component slotContent) {
         if (slotContent == null) {
-            SlotUtils.getElementsInSlot(this, slotName).findFirst()
-                    .ifPresent(Element::removeAllChildren);
             SlotUtils.clearSlot(this, slotName);
-            return;
+        } else {
+            SlotUtils.setSlot(this, slotName, slotContent);
         }
-        var slotElement = new AtomicReference<Element>();
-        SlotUtils.getElementsInSlot(this, slotName).findFirst().ifPresentOrElse(
-                slotElement::set, () -> slotElement.set(initSlot(slotName)));
-        slotElement.get().removeAllChildren();
-        slotElement.get().appendChild(slotContent.getElement());
-    }
-
-    private Element initSlot(String slotName) {
-        var div = new Element("div");
-        SlotUtils.setSlot(this, slotName, div);
-        return div;
     }
 
     private Component getSlotContent(String slotName) {
-        var slotElement = SlotUtils.getElementsInSlot(this, slotName)
-                .findFirst();
-        if (slotElement.isEmpty()) {
-            return null;
-        }
-        var childElement = slotElement.get().getChildren().findFirst()
-                .orElseThrow();
-        return childElement.getComponent().orElseThrow();
+        return SlotUtils.getChildInSlot(this, slotName);
     }
 
     private void initContentRoot() {
