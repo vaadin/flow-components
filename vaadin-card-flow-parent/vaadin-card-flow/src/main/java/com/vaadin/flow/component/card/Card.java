@@ -132,7 +132,7 @@ public class Card extends Component implements HasSize,
 
     /**
      * Sets the component used as the card's header. The header is prioritized
-     * over the title and subtitle components, and will be displayed instead.
+     * over the {@link setTitle(Component) title} and {@link setSubtitle(Component) subtitle} components, and will be displayed instead.
      * <p>
      * Passing {@code null} removes the current header component from the card.
      *
