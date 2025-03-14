@@ -23,6 +23,7 @@ import com.vaadin.flow.component.HasValidation;
  * to valid as a result of client-side validation.
  *
  * @author Vaadin Ltd
+ * @deprecated since 24.6, use {@code getElement().setProperty("manualValidation", true)} instead.
  */
 public final class ClientValidationUtil {
 
@@ -30,6 +31,9 @@ public final class ClientValidationUtil {
         // utility class should not be instantiated
     }
 
+    /**
+     * @deprecated since 24.6, use {@code getElement().setProperty("manualValidation", true)} instead.
+     */
     public static <C extends Component & HasValidation> void preventWebComponentFromModifyingInvalidState(
             C component) {
         StringBuilder expression = new StringBuilder(

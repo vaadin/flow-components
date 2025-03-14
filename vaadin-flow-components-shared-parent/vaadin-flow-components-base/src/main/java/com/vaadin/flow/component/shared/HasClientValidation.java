@@ -23,6 +23,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -51,6 +52,17 @@ public interface HasClientValidation extends Serializable {
     @Deprecated
     default Registration addClientValidatedEventListener(
             ComponentEventListener<ClientValidatedEvent> listener) {
+        ((HasElement) this).getElement().executeJs(
+                """
+                            this._requestValidation = function () {
+                                Object.getPrototypeOf(this)._requestValidation.call(this);
+                                if (this.manualValidation) {
+                                    const valid = this.checkValidity();
+                                    this.dispatchEvent(new CustomEvent('validated', { detail: { valid } }));
+                                }
+                            }
+                        """);
+
         return ComponentUtil.addListener((Component) this,
                 ClientValidatedEvent.class, listener);
     }
