@@ -55,7 +55,7 @@ public class CardTest {
 
     @Test
     public void setTitle_slotAttributeSet() {
-        setSlotContent_slotContentIsSet(Card::setTitle, Card.TITLE_SLOT_NAME);
+        setSlotContent_slotContentIsSet(Card::setTitle, "title");
     }
 
     @Test
@@ -70,8 +70,7 @@ public class CardTest {
 
     @Test
     public void setSubtitle_slotAttributeSet() {
-        setSlotContent_slotContentIsSet(Card::setSubtitle,
-                Card.SUBTITLE_SLOT_NAME);
+        setSlotContent_slotContentIsSet(Card::setSubtitle, "subtitle");
     }
 
     @Test
@@ -86,7 +85,7 @@ public class CardTest {
 
     @Test
     public void setMedia_slotAttributeSet() {
-        setSlotContent_slotContentIsSet(Card::setMedia, Card.MEDIA_SLOT_NAME);
+        setSlotContent_slotContentIsSet(Card::setMedia, "media");
     }
 
     @Test
@@ -101,7 +100,7 @@ public class CardTest {
 
     @Test
     public void setHeader_slotAttributeSet() {
-        setSlotContent_slotContentIsSet(Card::setHeader, Card.HEADER_SLOT_NAME);
+        setSlotContent_slotContentIsSet(Card::setHeader, "header");
     }
 
     @Test
@@ -117,8 +116,7 @@ public class CardTest {
 
     @Test
     public void setHeaderPrefix_slotAttributeSet() {
-        setSlotContent_slotContentIsSet(Card::setHeaderPrefix,
-                Card.HEADER_PREFIX_SLOT_NAME);
+        setSlotContent_slotContentIsSet(Card::setHeaderPrefix, "header-prefix");
     }
 
     @Test
@@ -134,8 +132,7 @@ public class CardTest {
 
     @Test
     public void setHeaderSuffix_slotAttributeSet() {
-        setSlotContent_slotContentIsSet(Card::setHeaderSuffix,
-                Card.HEADER_SUFFIX_SLOT_NAME);
+        setSlotContent_slotContentIsSet(Card::setHeaderSuffix, "header-suffix");
     }
 
     @Test
@@ -173,8 +170,7 @@ public class CardTest {
         footerComponents.forEach(footerComponent -> {
             var slotElement = footerComponent.getElement().getParent();
             Assert.assertNotNull(slotElement);
-            Assert.assertEquals(Card.FOOTER_SLOT_NAME,
-                    slotElement.getAttribute("slot"));
+            Assert.assertEquals("footer", slotElement.getAttribute("slot"));
         });
     }
 
