@@ -240,7 +240,14 @@ public class CellValueManager implements Serializable {
                                 cell.getColumnIndex() + 1,
                                 cell.getRowIndex() + 1);
                     }
+                }
+            }
 
+            if (formatter instanceof CustomDataFormatter) {
+                String color = ((CustomDataFormatter) formatter)
+                        .getCellTextColor(cell);
+                if (color != null) {
+                    cellData.textColor = color;
                 }
             }
 
