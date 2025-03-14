@@ -87,7 +87,7 @@ public class Card extends Component implements HasSize,
     }
 
     /**
-     * Sets the component used as the card's title. If a header component is
+     * Sets the component used as the card's title. If a {@link setHeader(Component) header component} is
      * set, the title will not be displayed.
      * <p>
      * Passing {@code null} removes the current title from the card.
