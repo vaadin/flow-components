@@ -288,6 +288,7 @@ public class BasicValidationIT
     }
 
     @Test
+<<<<<<< Updated upstream
     public void detach_attachAndInvalidate_preservesInvalidState() {
         detachField();
         attachAndInvalidateField();
@@ -317,6 +318,8 @@ public class BasicValidationIT
     }
 
     @Test
+=======
+>>>>>>> Stashed changes
     public void clientSideInvalidStateIsNotPropagatedToServer() {
         // Make the field invalid
         $("button").id(REQUIRED_BUTTON).click();
