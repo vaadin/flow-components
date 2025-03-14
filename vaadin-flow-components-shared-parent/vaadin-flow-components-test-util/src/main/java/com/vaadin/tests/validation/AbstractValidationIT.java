@@ -15,12 +15,15 @@
  */
 package com.vaadin.tests.validation;
 
+import static com.vaadin.tests.validation.AbstractValidationPage.ATTACH_AND_INVALIDATE_FIELD_BUTTON;
 import static com.vaadin.tests.validation.AbstractValidationPage.ATTACH_FIELD_BUTTON;
 import static com.vaadin.tests.validation.AbstractValidationPage.DETACH_FIELD_BUTTON;
+import static com.vaadin.tests.validation.AbstractValidationPage.HIDE_FIELD_BUTTON;
 import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDATION_COUNTER;
 import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDATION_COUNTER_RESET_BUTTON;
 import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
 import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON;
+import static com.vaadin.tests.validation.AbstractValidationPage.SHOW_AND_INVALIDATE_FIELD_BUTTON;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -107,12 +110,33 @@ public abstract class AbstractValidationIT<T extends TestBenchElement>
     }
 
     protected void detachAndReattachField() {
+        detachField();
+        attachField();
+    }
+
+    protected void detachField() {
         $("button").id(DETACH_FIELD_BUTTON).click();
         // Verify element has been removed
         waitUntil(ExpectedConditions.stalenessOf(testField));
+    }
 
+    protected void attachField() {
         $("button").id(ATTACH_FIELD_BUTTON).click();
         // Retrieve new element instance
         testField = getTestField();
+    }
+
+    protected void attachAndInvalidateField() {
+        $("button").id(ATTACH_AND_INVALIDATE_FIELD_BUTTON).click();
+        // Retrieve new element instance
+        testField = getTestField();
+    }
+
+    protected void hideField() {
+        $("button").id(HIDE_FIELD_BUTTON).click();
+    }
+
+    protected void showAndInvalidateField() {
+        $("button").id(SHOW_AND_INVALIDATE_FIELD_BUTTON).click();
     }
 }
