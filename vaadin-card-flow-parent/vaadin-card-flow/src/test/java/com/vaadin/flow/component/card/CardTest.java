@@ -55,7 +55,7 @@ public class CardTest {
 
     @Test
     public void setTitle_slotAttributeSet() {
-        setSlotContent_slotContentIsSet(Card::setTitle, "title");
+        setSlotContent_slotAttributeIsSet(Card::setTitle, "title");
     }
 
     @Test
@@ -70,7 +70,7 @@ public class CardTest {
 
     @Test
     public void setSubtitle_slotAttributeSet() {
-        setSlotContent_slotContentIsSet(Card::setSubtitle, "subtitle");
+        setSlotContent_slotAttributeIsSet(Card::setSubtitle, "subtitle");
     }
 
     @Test
@@ -85,7 +85,7 @@ public class CardTest {
 
     @Test
     public void setMedia_slotAttributeSet() {
-        setSlotContent_slotContentIsSet(Card::setMedia, "media");
+        setSlotContent_slotAttributeIsSet(Card::setMedia, "media");
     }
 
     @Test
@@ -100,7 +100,7 @@ public class CardTest {
 
     @Test
     public void setHeader_slotAttributeSet() {
-        setSlotContent_slotContentIsSet(Card::setHeader, "header");
+        setSlotContent_slotAttributeIsSet(Card::setHeader, "header");
     }
 
     @Test
@@ -116,7 +116,8 @@ public class CardTest {
 
     @Test
     public void setHeaderPrefix_slotAttributeSet() {
-        setSlotContent_slotContentIsSet(Card::setHeaderPrefix, "header-prefix");
+        setSlotContent_slotAttributeIsSet(Card::setHeaderPrefix,
+                "header-prefix");
     }
 
     @Test
@@ -132,7 +133,8 @@ public class CardTest {
 
     @Test
     public void setHeaderSuffix_slotAttributeSet() {
-        setSlotContent_slotContentIsSet(Card::setHeaderSuffix, "header-suffix");
+        setSlotContent_slotAttributeIsSet(Card::setHeaderSuffix,
+                "header-suffix");
     }
 
     @Test
@@ -307,7 +309,7 @@ public class CardTest {
         Assert.assertTrue(card.getAriaRole().isEmpty());
     }
 
-    private void setSlotContent_slotContentIsSet(
+    private void setSlotContent_slotAttributeIsSet(
             BiConsumer<Card, Component> setter, String slotName) {
         var slotContent = new Div();
         setter.accept(card, slotContent);
