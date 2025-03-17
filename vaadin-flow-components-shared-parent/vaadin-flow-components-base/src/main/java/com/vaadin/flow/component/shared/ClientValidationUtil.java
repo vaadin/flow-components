@@ -23,7 +23,7 @@ import com.vaadin.flow.component.HasValidation;
  * to valid as a result of client-side validation.
  *
  * @author Vaadin Ltd
- * @deprecated since 24.6, use
+ * @deprecated since 24.8, use
  *             {@code getElement().setProperty("manualValidation", true)}
  *             instead.
  */
@@ -34,7 +34,7 @@ public final class ClientValidationUtil {
     }
 
     /**
-     * @deprecated since 24.6, use
+     * @deprecated since 24.8, use
      *             {@code getElement().setProperty("manualValidation", true)}
      *             instead.
      */
