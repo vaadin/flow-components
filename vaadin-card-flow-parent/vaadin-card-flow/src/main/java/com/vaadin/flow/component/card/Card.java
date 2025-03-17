@@ -73,7 +73,7 @@ public class Card extends Component implements HasSize,
      *            the media component, or {@code null} to remove
      */
     public void setMedia(Component media) {
-        setSlotContent(MEDIA_SLOT_NAME, media);
+        SlotUtils.setSlot(this, MEDIA_SLOT_NAME, media);
     }
 
     /**
@@ -82,7 +82,7 @@ public class Card extends Component implements HasSize,
      * @return the media component, or {@code null} if none is set
      */
     public Component getMedia() {
-        return getSlotContent(MEDIA_SLOT_NAME);
+        return SlotUtils.getChildInSlot(this, MEDIA_SLOT_NAME);
     }
 
     /**
@@ -96,7 +96,7 @@ public class Card extends Component implements HasSize,
      *            the title component, or {@code null} to remove
      */
     public void setTitle(Component title) {
-        setSlotContent(TITLE_SLOT_NAME, title);
+        SlotUtils.setSlot(this, TITLE_SLOT_NAME, title);
     }
 
     /**
@@ -105,7 +105,7 @@ public class Card extends Component implements HasSize,
      * @return the title component, or {@code null} if none is set
      */
     public Component getTitle() {
-        return getSlotContent(TITLE_SLOT_NAME);
+        return SlotUtils.getChildInSlot(this, TITLE_SLOT_NAME);
     }
 
     /**
@@ -119,7 +119,7 @@ public class Card extends Component implements HasSize,
      *            the subtitle component, or {@code null} to remove
      */
     public void setSubtitle(Component subtitle) {
-        setSlotContent(SUBTITLE_SLOT_NAME, subtitle);
+        SlotUtils.setSlot(this, SUBTITLE_SLOT_NAME, subtitle);
     }
 
     /**
@@ -128,7 +128,7 @@ public class Card extends Component implements HasSize,
      * @return the subtitle component, or {@code null} if none is set
      */
     public Component getSubtitle() {
-        return getSlotContent(SUBTITLE_SLOT_NAME);
+        return SlotUtils.getChildInSlot(this, SUBTITLE_SLOT_NAME);
     }
 
     /**
@@ -143,7 +143,7 @@ public class Card extends Component implements HasSize,
      *            the header component, or {@code null} to remove
      */
     public void setHeader(Component header) {
-        setSlotContent(HEADER_SLOT_NAME, header);
+        SlotUtils.setSlot(this, HEADER_SLOT_NAME, header);
     }
 
     /**
@@ -152,7 +152,7 @@ public class Card extends Component implements HasSize,
      * @return the header component, or {@code null} if none is set
      */
     public Component getHeader() {
-        return getSlotContent(HEADER_SLOT_NAME);
+        return SlotUtils.getChildInSlot(this, HEADER_SLOT_NAME);
     }
 
     /**
@@ -165,7 +165,7 @@ public class Card extends Component implements HasSize,
      *            the header prefix component, or {@code null} to remove
      */
     public void setHeaderPrefix(Component headerPrefix) {
-        setSlotContent(HEADER_PREFIX_SLOT_NAME, headerPrefix);
+        SlotUtils.setSlot(this, HEADER_PREFIX_SLOT_NAME, headerPrefix);
     }
 
     /**
@@ -174,7 +174,7 @@ public class Card extends Component implements HasSize,
      * @return the header prefix component, or {@code null} if none is set
      */
     public Component getHeaderPrefix() {
-        return getSlotContent(HEADER_PREFIX_SLOT_NAME);
+        return SlotUtils.getChildInSlot(this, HEADER_PREFIX_SLOT_NAME);
     }
 
     /**
@@ -187,7 +187,7 @@ public class Card extends Component implements HasSize,
      *            the header suffix component, or {@code null} to remove
      */
     public void setHeaderSuffix(Component headerSuffix) {
-        setSlotContent(HEADER_SUFFIX_SLOT_NAME, headerSuffix);
+        SlotUtils.setSlot(this, HEADER_SUFFIX_SLOT_NAME, headerSuffix);
     }
 
     /**
@@ -196,7 +196,7 @@ public class Card extends Component implements HasSize,
      * @return the header suffix component, or {@code null} if none is set
      */
     public Component getHeaderSuffix() {
-        return getSlotContent(HEADER_SUFFIX_SLOT_NAME);
+        return SlotUtils.getChildInSlot(this, HEADER_SUFFIX_SLOT_NAME);
     }
 
     /**
@@ -363,18 +363,6 @@ public class Card extends Component implements HasSize,
         if (!enabled) {
             throw new ExperimentalFeatureException();
         }
-    }
-
-    private void setSlotContent(String slotName, Component slotContent) {
-        if (slotContent == null) {
-            SlotUtils.clearSlot(this, slotName);
-        } else {
-            SlotUtils.setSlot(this, slotName, slotContent);
-        }
-    }
-
-    private Component getSlotContent(String slotName) {
-        return SlotUtils.getChildInSlot(this, slotName);
     }
 
     private void initContentRoot() {
