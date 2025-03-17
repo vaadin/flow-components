@@ -42,6 +42,12 @@ public abstract class AbstractBasicValidationTest<C extends AbstractField<C, V> 
     }
 
     @Test
+    public void webComponentManualValidationEnabled() {
+        Assert.assertTrue(
+                testField.getElement().getProperty("manualValidation", false));
+    }
+
+    @Test
     public void setRequired_setManualValidation_fireValueChangeEvent_noValidation() {
         testField.setRequiredIndicatorVisible(true);
         testField.setManualValidation(true);

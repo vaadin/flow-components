@@ -92,23 +92,6 @@ public abstract class AbstractValidationIT<T extends TestBenchElement>
         return !testField.getPropertyBoolean("invalid");
     }
 
-    protected void assertWebComponentCanNotModifyInvalidState() {
-        // There is no good integration test for this, as triggering client
-        // validation will also trigger server validation, with the same
-        // validation constraints as the client validation, making it impossible
-        // to test a difference.
-        // Instead, we test that the web component has been properly configured
-        // to prevent itself from changing the invalid state.
-        Assert.assertFalse(shouldSetInvalid(true));
-        Assert.assertFalse(shouldSetInvalid(false));
-    }
-
-    private boolean shouldSetInvalid(boolean invalid) {
-        return (Boolean) getCommandExecutor().executeScript(
-                "const field = arguments[0]; const invalid = arguments[1]; return field._shouldSetInvalid(invalid)",
-                testField, invalid);
-    }
-
     protected void detachAndReattachField() {
         detachField();
         attachField();

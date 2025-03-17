@@ -96,15 +96,6 @@ public class BasicValidationIT
     }
 
     @Test
-    public void webComponentCanNotModifyInvalidState() {
-        assertWebComponentCanNotModifyInvalidState();
-
-        detachAndReattachField();
-
-        assertWebComponentCanNotModifyInvalidState();
-    }
-
-    @Test
     public void clientSideInvalidStateIsNotPropagatedToServer() {
         // Make field invalid
         $("button").id(SET_INVALID_BUTTON).click();
