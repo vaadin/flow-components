@@ -240,6 +240,23 @@ public class CardTest {
     }
 
     @Test
+    public void removeAll_onlyRemovesContent() {
+        card.setTitle(new Div());
+        card.setSubtitle(new Div());
+        card.setHeader(new Div());
+        card.setHeaderPrefix(new Div());
+        card.setHeaderSuffix(new Div());
+        card.setMedia(new Div());
+        card.removeAll();
+        Assert.assertNotNull(card.getTitle());
+        Assert.assertNotNull(card.getSubtitle());
+        Assert.assertNotNull(card.getHeader());
+        Assert.assertNotNull(card.getHeaderPrefix());
+        Assert.assertNotNull(card.getHeaderSuffix());
+        Assert.assertNotNull(card.getMedia());
+    }
+
+    @Test
     public void removeAll_allChildrenRemoved() {
         card.add(new Div(), new Div());
         card.removeAll();
