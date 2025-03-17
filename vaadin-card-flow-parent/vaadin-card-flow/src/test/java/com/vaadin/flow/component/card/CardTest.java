@@ -22,11 +22,13 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 
@@ -39,8 +41,16 @@ public class CardTest {
 
     @Before
     public void setup() {
+        var ui = new UI();
+        UI.setCurrent(ui);
         card = new Card();
         card.setFeatureFlagEnabled();
+        ui.add(card);
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test
@@ -258,9 +268,13 @@ public class CardTest {
 
     @Test
     public void removeAll_allChildrenRemoved() {
-        card.add(new Div(), new Div());
+        var component1 = new Div();
+        var component2 = new Span();
+        card.add(component1, component2);
         card.removeAll();
         Assert.assertTrue(card.getChildren().findAny().isEmpty());
+        Assert.assertFalse(component1.isAttached());
+        Assert.assertFalse(component2.isAttached());
     }
 
     @Test
@@ -270,6 +284,7 @@ public class CardTest {
         var firstComponent = card.getChildren().findFirst();
         Assert.assertTrue(firstComponent.isPresent());
         Assert.assertEquals(component, firstComponent.get());
+        Assert.assertTrue(component.isAttached());
     }
 
     @Test
@@ -281,6 +296,7 @@ public class CardTest {
         var firstComponent = card.getChildren().skip(initialCount).findFirst();
         Assert.assertTrue(firstComponent.isPresent());
         Assert.assertEquals(component, firstComponent.get());
+        Assert.assertTrue(component.isAttached());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -299,6 +315,7 @@ public class CardTest {
         var firstComponent = card.getChildren().findFirst();
         Assert.assertTrue(firstComponent.isPresent());
         Assert.assertEquals(component, firstComponent.get());
+        Assert.assertTrue(component.isAttached());
     }
 
     @Test
@@ -337,13 +354,35 @@ public class CardTest {
     private void slotBasedFieldUpdatedCorrectly(
             Function<Card, Component> getter,
             BiConsumer<Card, Component> setter) {
+        // Set slot component
         var component = new Span("Text");
         setter.accept(card, component);
         Assert.assertEquals(component, getter.apply(card));
+        Assert.assertTrue(component.isAttached());
+        Assert.assertTrue(isAncestor(component, card));
+        // Set another slot component
         var anotherComponent = new Div("New Text");
         setter.accept(card, anotherComponent);
         Assert.assertEquals(anotherComponent, getter.apply(card));
+        Assert.assertTrue(anotherComponent.isAttached());
+        Assert.assertTrue(isAncestor(anotherComponent, card));
+        Assert.assertFalse(component.isAttached());
+        Assert.assertFalse(isAncestor(component, card));
+        // Set null
         setter.accept(card, null);
         Assert.assertNull(getter.apply(card));
+        Assert.assertFalse(anotherComponent.isAttached());
+        Assert.assertFalse(isAncestor(anotherComponent, card));
+    }
+
+    private boolean isAncestor(Component component, Card probableAncestor) {
+        var parent = component.getParent();
+        while (parent.isPresent()) {
+            if (parent.get().equals(probableAncestor)) {
+                return true;
+            }
+            parent = parent.get().getParent();
+        }
+        return false;
     }
 }
