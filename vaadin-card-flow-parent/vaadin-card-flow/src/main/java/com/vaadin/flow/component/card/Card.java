@@ -367,6 +367,7 @@ public class Card extends Component implements HasSize,
 
     private void initContentRoot() {
         contentRoot = new Element("div");
+        contentRoot.getStyle().set("display", "contents");
         getElement().appendChild(contentRoot);
     }
 }
