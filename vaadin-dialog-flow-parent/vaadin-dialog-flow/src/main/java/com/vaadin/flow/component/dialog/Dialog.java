@@ -873,7 +873,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @return the {@code opened} property from the dialog
      */
-    @Synchronize(property = "opened", value = "opened-changed")
+    @Synchronize(property = "opened", value = "opened-changed", allowInert = true)
     public boolean isOpened() {
         return getElement().getProperty("opened", false);
     }
