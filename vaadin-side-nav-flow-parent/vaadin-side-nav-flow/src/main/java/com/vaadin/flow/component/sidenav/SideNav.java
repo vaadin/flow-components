@@ -134,7 +134,7 @@ public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
      *
      * @return true if the side navigation menu is expanded, false if collapsed
      */
-    @Synchronize(property = "collapsed", value = "collapsed-changed")
+    @Synchronize(property = "collapsed", value = "collapsed-changed", allowInert = true)
     public boolean isExpanded() {
         return !getElement().getProperty("collapsed", false);
     }
