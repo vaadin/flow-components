@@ -496,7 +496,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      *
      * @return the {@code opened} property from the webcomponent
      */
-    @Synchronize(property = "opened", value = "opened-changed")
+    @Synchronize(property = "opened", value = "opened-changed", allowInert = true)
     public boolean isOpened() {
         return getElement().getProperty(OPENED_PROPERTY, false);
     }
