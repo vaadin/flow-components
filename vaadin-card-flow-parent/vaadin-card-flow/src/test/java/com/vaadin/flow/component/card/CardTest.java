@@ -376,13 +376,6 @@ public class CardTest {
     }
 
     private boolean isAncestor(Component component, Card probableAncestor) {
-        var parent = component.getParent();
-        while (parent.isPresent()) {
-            if (parent.get().equals(probableAncestor)) {
-                return true;
-            }
-            parent = parent.get().getParent();
-        }
-        return false;
+        return probableAncestor.getElement().getNode().isAncestorOf(component.getElement().getNode());
     }
 }
