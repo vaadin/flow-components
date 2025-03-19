@@ -60,6 +60,7 @@
         <module>vaadin-spreadsheet-flow-parent</module>
         <module>vaadin-field-highlighter-flow-parent</module>
         <module>vaadin-side-nav-flow-parent</module>
+        <module>vaadin-master-detail-layout-flow-parent</module>
     </modules>
     <properties>
         <flow.version>24.8-SNAPSHOT</flow.version>
