@@ -553,6 +553,7 @@
                             <!-- Do not modify Apache POI sources / license headers -->
                             <exclude>**/org/apache/poi/**/*.*</exclude>
                         </excludes>
+                        <toggleOffOn/>
                         <endWithNewline/>
                         <removeUnusedImports/>
                         <importOrder>
