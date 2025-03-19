@@ -36,7 +36,6 @@ import java.util.WeakHashMap;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.format.CellFormatPart;
 import org.apache.poi.ss.formula.BaseFormulaEvaluator;
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
@@ -142,11 +141,6 @@ public class Spreadsheet extends Component
                         "vaadin-spreadsheet-flow", version);
             }
         }
-
-        // Force load our variant CellFormatPart.java
-        // TODO: this is a hack; remove this once color support is fixed in POI
-        CellFormatPart cf = new CellFormatPart("general");
-        cf.applies(1000d);
     }
 
     @Override

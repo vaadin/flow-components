@@ -63,16 +63,16 @@ import static org.apache.poi.ss.format.CellFormatter.quote;
  * code has use for them.
  */
 @SuppressWarnings("RegExpRepeatedSpace")
-public class CellFormatPart {
-    private static final Logger LOG = LogManager.getLogger(CellFormatPart.class);
+public class VCellFormatPart {
+    private static final Logger LOG = LogManager.getLogger(VCellFormatPart.class);
 
     static final Map<String, Color> NAMED_COLORS;
     static final List<Color> INDEXED_COLORS;
 
     private final Color color;
     private final CellFormatCondition condition;
-    private final CellFormatter format;
-    private final CellFormatType type;
+    private final VCellFormatter format;
+    private final VCellFormatType type;
 
     /** Pattern for the color part of a cell format part. */
     public static final Pattern COLOR_PAT;
@@ -275,7 +275,7 @@ public class CellFormatPart {
     }
 
     interface PartHandler {
-        String handlePart(Matcher m, String part, CellFormatType type,
+        String handlePart(Matcher m, String part, VCellFormatType type,
                 StringBuffer desc);
     }
 
@@ -284,7 +284,7 @@ public class CellFormatPart {
      *
      * @param desc The string to parse.
      */
-    public CellFormatPart(String desc) {
+    public VCellFormatPart(String desc) {
         this(LocaleUtil.getUserLocale(), desc);
     }
 
@@ -294,7 +294,7 @@ public class CellFormatPart {
      * @param locale The locale to use.
      * @param desc The string to parse.
      */
-    public CellFormatPart(Locale locale, String desc) {
+    public VCellFormatPart(Locale locale, String desc) {
         Matcher m = FORMAT_PAT.matcher(desc);
         if (!m.matches()) {
             throw new IllegalArgumentException("Unrecognized format: " + quote(
@@ -393,14 +393,14 @@ public class CellFormatPart {
     }
 
     /**
-     * Returns the CellFormatType object implied by the format specification for
+     * Returns the VCellFormatType object implied by the format specification for
      * the format part.
      *
      * @param matcher The matcher for the format part.
      *
-     * @return The CellFormatType.
+     * @return The VCellFormatType.
      */
-    private CellFormatType getCellFormatType(Matcher matcher) {
+    private VCellFormatType getCellFormatType(Matcher matcher) {
         String fdesc = matcher.group(SPECIFICATION_GROUP);
         return formatType(fdesc);
     }
@@ -413,7 +413,7 @@ public class CellFormatPart {
      *
      * @return The formatter.
      */
-    private CellFormatter getFormatter(Locale locale, Matcher matcher) {
+    private VCellFormatter getFormatter(Locale locale, Matcher matcher) {
         String fdesc = matcher.group(SPECIFICATION_GROUP);
 
         // For now, we don't support localised currencies, so simplify if there
@@ -444,10 +444,10 @@ public class CellFormatPart {
      *
      * @return The type of format.
      */
-    private CellFormatType formatType(String fdesc) {
+    private VCellFormatType formatType(String fdesc) {
         fdesc = fdesc.trim();
         if (fdesc.isEmpty() || fdesc.equalsIgnoreCase("General"))
-            return CellFormatType.GENERAL;
+            return VCellFormatType.GENERAL;
 
         Matcher m = SPECIFICATION_PAT.matcher(fdesc);
         boolean couldBeDate = false;
@@ -460,12 +460,12 @@ public class CellFormatPart {
 
                 switch (c1) {
                 case "@":
-                    return CellFormatType.TEXT;
+                    return VCellFormatType.TEXT;
                 case "d":
                 case "D":
                 case "y":
                 case "Y":
-                    return CellFormatType.DATE;
+                    return VCellFormatType.DATE;
                 case "h":
                 case "H":
                 case "m":
@@ -484,28 +484,28 @@ public class CellFormatPart {
                     if (codePoints.hasNext())
                         c2 = codePoints.next().toLowerCase(Locale.ROOT);
                     if ("h".equals(c2) || "m".equals(c2) || "s".equals(c2)) {
-                        return CellFormatType.ELAPSED;
+                        return VCellFormatType.ELAPSED;
                     }
                     if ("$".equals(c2)) {
                         // Localised currency
-                        return CellFormatType.NUMBER;
+                        return VCellFormatType.NUMBER;
                     }
                     // Something else inside [] which isn't supported!
                     throw new IllegalArgumentException("Unsupported [] format block '" +
                                                        repl + "' in '" + fdesc + "' with c2: " + c2);
                 case "#":
                 case "?":
-                    return CellFormatType.NUMBER;
+                    return VCellFormatType.NUMBER;
                 }
             }
         }
 
         // Nothing definitive was found, so we figure out it deductively
         if (couldBeDate)
-            return CellFormatType.DATE;
+            return VCellFormatType.DATE;
         if (seenZero)
-            return CellFormatType.NUMBER;
-        return CellFormatType.TEXT;
+            return VCellFormatType.NUMBER;
+        return VCellFormatType.TEXT;
     }
 
     /**
@@ -518,9 +518,9 @@ public class CellFormatPart {
      *
      * @return A version of the string with any special characters replaced.
      *
-     * @see CellFormatType#isSpecial(char)
+     * @see VCellFormatType#isSpecial(char)
      */
-    static String quoteSpecial(String repl, CellFormatType type) {
+    static String quoteSpecial(String repl, VCellFormatType type) {
         StringBuilder sb = new StringBuilder();
         PrimitiveIterator.OfInt codePoints = CodepointsUtil.primitiveIterator(repl);
 
@@ -585,12 +585,12 @@ public class CellFormatPart {
     }
 
     /**
-     * Returns the CellFormatType object implied by the format specification for
+     * Returns the VCellFormatType object implied by the format specification for
      * the format part.
      *
-     * @return The CellFormatType.
+     * @return The VCellFormatType.
      */
-    CellFormatType getCellFormatType() {
+    VCellFormatType getCellFormatType() {
         return type;
     }
 
@@ -603,7 +603,7 @@ public class CellFormatPart {
         return condition != null;
     }
 
-    public static StringBuffer parseFormat(String fdesc, CellFormatType type,
+    public static StringBuffer parseFormat(String fdesc, VCellFormatType type,
             PartHandler partHandler) {
 
         // Quoting is very awkward.  In the Java classes, quoting is done

@@ -28,7 +28,7 @@ import org.apache.poi.ss.formula.eval.RefListEval;
 import org.apache.poi.ss.formula.eval.ValueEval;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.VDataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -280,7 +280,7 @@ public class SpreadsheetUtil implements Serializable {
             return null;
         }
         if (cell.getCellStyle().getDataFormatString() != null) {
-            DataFormatter df = new CustomDataFormatter(locale);
+            VDataFormatter df = new CustomDataFormatter(locale);
             try {
                 Method formatter = df.getClass().getDeclaredMethod("getFormat",
                         Cell.class);
