@@ -45,7 +45,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.select.data.SelectDataView;
 import com.vaadin.flow.component.select.data.SelectListDataView;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasPrefix;
@@ -112,9 +111,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/select", version = "24.7.0-beta1")
+@NpmPackage(value = "@vaadin/select", version = "24.8.0-alpha3")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 @JsModule("./selectConnector.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
@@ -181,6 +180,8 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     public Select() {
         super("value", null, String.class, Select::presentationToModel,
                 Select::modelToPresentation);
+
+        getElement().setProperty("manualValidation", true);
 
         setInvalid(false);
         setOpened(false);
@@ -294,7 +295,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-select-list-box")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-beta1")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha3")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     private class InternalListBox extends Component
             implements HasItemComponents<T> {
@@ -897,8 +898,6 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         initConnector();
-
-        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     /**

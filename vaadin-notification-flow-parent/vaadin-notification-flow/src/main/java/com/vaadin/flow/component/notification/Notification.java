@@ -53,9 +53,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/notification", version = "24.7.0-beta1")
+@NpmPackage(value = "@vaadin/notification", version = "24.8.0-alpha3")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -449,7 +449,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      *
      * @return the {@code opened} property from the webcomponent
      */
-    @Synchronize(property = "opened", value = "opened-changed")
+    @Synchronize(property = "opened", value = "opened-changed", allowInert = true)
     public boolean isOpened() {
         return getElement().getProperty(OPENED_PROPERTY, false);
     }

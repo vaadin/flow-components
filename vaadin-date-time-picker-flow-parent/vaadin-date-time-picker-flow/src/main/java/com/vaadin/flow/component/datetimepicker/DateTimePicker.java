@@ -26,14 +26,12 @@ import java.util.function.Function;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
@@ -93,9 +91,9 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "24.7.0-beta1")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "24.8.0-alpha3")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -233,6 +231,8 @@ public class DateTimePicker
 
         SlotUtils.addToSlot(this, "date-picker", datePicker);
         SlotUtils.addToSlot(this, "time-picker", timePicker);
+
+        getElement().setProperty("manualValidation", true);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
@@ -915,12 +915,6 @@ public class DateTimePicker
         getElement().setProperty("autoOpenDisabled", !autoOpen);
         datePicker.setAutoOpen(autoOpen);
         timePicker.setAutoOpen(autoOpen);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     private String getI18nErrorMessage(

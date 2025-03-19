@@ -22,7 +22,6 @@ import java.util.function.Function;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
@@ -32,7 +31,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
@@ -80,9 +78,9 @@ import com.vaadin.flow.dom.PropertyChangeListener;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-checkbox")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox", version = "24.7.0-beta1")
+@NpmPackage(value = "@vaadin/checkbox", version = "24.8.0-alpha3")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
         implements ClickNotifier<Checkbox>, Focusable<Checkbox>, HasAriaLabel,
@@ -116,6 +114,7 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
      */
     public Checkbox() {
         super("checked", false, false);
+        getElement().setProperty("manualValidation", true);
         getElement().addPropertyChangeListener("indeterminate",
                 "indeterminate-changed", NO_OP);
         getElement().addPropertyChangeListener("checked", "checked-changed",
@@ -225,13 +224,6 @@ public class Checkbox extends AbstractSinglePropertyField<Checkbox, Boolean>
             ValueChangeListener<ComponentValueChangeEvent<Checkbox, Boolean>> listener) {
         this(labelText, initialValue);
         addValueChangeListener(listener);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-
-        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     /**

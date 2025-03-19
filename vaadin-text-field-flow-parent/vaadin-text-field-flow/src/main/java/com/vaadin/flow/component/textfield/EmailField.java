@@ -20,11 +20,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.ValidationUtil;
@@ -90,9 +88,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-email-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/email-field", version = "24.7.0-beta1")
+@NpmPackage(value = "@vaadin/email-field", version = "24.8.0-alpha3")
 @JsModule("@vaadin/email-field/src/vaadin-email-field.js")
 public class EmailField extends TextFieldBase<EmailField, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextFieldVariant> {
@@ -156,6 +154,8 @@ public class EmailField extends TextFieldBase<EmailField, String>
      */
     public EmailField() {
         super("", "", false, true);
+
+        getElement().setProperty("manualValidation", true);
 
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
@@ -414,12 +414,6 @@ public class EmailField extends TextFieldBase<EmailField, String>
      */
     protected void validate() {
         validationController.validate(getValue());
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     /**

@@ -44,7 +44,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
@@ -128,9 +127,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.0-beta1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-picker", version = "24.7.0-beta1")
+@NpmPackage(value = "@vaadin/date-picker", version = "24.8.0-alpha3")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "2.29.3")
@@ -250,6 +249,8 @@ public class DatePicker
      */
     private DatePicker(LocalDate initialDate, boolean isInitialValueOptional) {
         super("value", null, String.class, PARSER, FORMATTER);
+
+        getElement().setProperty("manualValidation", true);
 
         // Initialize property value unless it has already been set from a
         // template
@@ -519,7 +520,6 @@ public class DatePicker
         super.onAttach(attachEvent);
         initConnector();
         requestI18nUpdate();
-        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
     }
 
     private void initConnector() {
