@@ -1,4 +1,4 @@
-# Maste Detail Layout component for Vaadin Flow
+# Master Detail Layout component for Vaadin Flow
 
 This project is the Component wrapper implementation of [`<vaadin-master-detail-layout>`](https://github.com/vaadin/web-components/tree/main/packages/master-detail-layout)
 element for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
