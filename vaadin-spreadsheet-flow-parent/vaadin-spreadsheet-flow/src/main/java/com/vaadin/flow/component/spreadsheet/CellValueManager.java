@@ -91,7 +91,6 @@ public class CellValueManager implements Serializable {
     private CellValueHandler customCellValueHandler;
     private CellDeletionHandler customCellDeletionHandler;
 
-    // TODO: replace this with DataFormatter when POI support custom color
     private DataFormatter formatter = new CustomDataFormatter();
 
     /** Cell keys that have values sent to client side and are cached there. */

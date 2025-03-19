@@ -45,6 +45,7 @@ import org.apache.poi.ss.usermodel.VDataFormatter;
  * with the parser.
  */
 class CustomDataFormatter extends VDataFormatter implements Serializable {
+    // TODO: return parent class to DataFormatter once POI is fixed
 
     private static final Pattern NUMBER_PATTERN = Pattern.compile("[0#]+");
 
