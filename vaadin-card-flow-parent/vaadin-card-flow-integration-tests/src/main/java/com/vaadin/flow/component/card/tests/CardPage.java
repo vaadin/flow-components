@@ -33,7 +33,6 @@ public class CardPage extends Div {
         card.setSubtitle(new Span("Subtitle"));
         card.setMedia(
                 new Image("https://vaadin.com/images/vaadin-logo.svg", ""));
-        card.setHeader(new Span("Header"));
         card.setHeaderPrefix(new Span("Header prefix"));
         card.setHeaderSuffix(new Span("Header suffix"));
         card.add(new Text(
@@ -49,5 +48,15 @@ public class CardPage extends Div {
         card.setMaxWidth("300px");
         card.setMaxHeight("500px");
         add(card);
+
+        var setStringTitle = new NativeButton("Set string title",
+                event -> card.setTitle("String title"));
+        setStringTitle.setId("set-string-title");
+        add(setStringTitle);
+
+        var setTitleComponent = new NativeButton("Set title component",
+                event -> card.setTitle(new Div("Title component")));
+        setTitleComponent.setId("set-title-component");
+        add(setTitleComponent);
     }
 }

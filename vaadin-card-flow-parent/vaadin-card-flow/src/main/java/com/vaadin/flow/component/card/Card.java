@@ -30,6 +30,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -86,9 +87,71 @@ public class Card extends Component implements HasSize,
     }
 
     /**
+     * Sets the title property. If a {@link #setHeader(Component) header
+     * component} is set, the title will not be displayed. Setting a title this
+     * way removes any title component set using {@link #setTitle(Component)}.
+     * Setting {@code null} or empty string removes any previously set
+     * {@code String} titles.
+     *
+     * @param title
+     *            the title property
+     * @see #setTitle(String, Integer)
+     * @see #setTitleHeadingLevel(Integer)
+     * @see #getTitleAsText()
+     */
+    public void setTitle(String title) {
+        getElement().setProperty("title", title);
+    }
+
+    /**
+     * Sets the title and the heading level for the title. If a
+     * {@link #setHeader(Component) header component} is set, the title will not
+     * be displayed. Setting a title this way removes any title component set
+     * using {@link #setTitle(String)}. Setting {@code null} or empty title
+     * removes any previously set {@code String} titles.
+     *
+     * @param title
+     *            the title property
+     * @param titleHeadingLevel
+     *            the title heading level property,
+     * @see #setTitle(String)
+     * @see #setTitleHeadingLevel(Integer)
+     * @see #getTitleAsText()
+     */
+    public void setTitle(String title, Integer titleHeadingLevel) {
+        setTitleHeadingLevel(titleHeadingLevel);
+        setTitle(title);
+    }
+
+    /**
+     * Sets the title heading level property for the titles set using
+     * {@link #setTitle(String)}. The acceptable range is [1, 6] and the default
+     * is 2. Setting {@code null} resets it to default. Does not affect the
+     * title components set using {@link #setTitle(Component)}.
+     *
+     * @param titleHeadingLevel
+     *            the title heading level property, {@code null} or in the range
+     *            [1, 6]
+     * @throws IllegalArgumentException
+     *             if the title heading level property is an integer out of the
+     *             range [1, 6]
+     */
+    public void setTitleHeadingLevel(Integer titleHeadingLevel) {
+        if (titleHeadingLevel == null) {
+            getElement().removeProperty("titleHeadingLevel");
+            return;
+        }
+        if (titleHeadingLevel < 1 || titleHeadingLevel > 6) {
+            throw new IllegalArgumentException(
+                    "Title heading level must be between 1 and 6.");
+        }
+        getElement().setProperty("titleHeadingLevel", titleHeadingLevel);
+    }
+
+    /**
      * Sets the component used as the card's title. If a
      * {@link #setHeader(Component) header component} is set, the title will not
-     * be displayed.
+     * be displayed. This also removes any previously set {@code String} titles.
      * <p>
      * Passing {@code null} removes the current title from the card.
      *
@@ -100,11 +163,24 @@ public class Card extends Component implements HasSize,
     }
 
     /**
-     * Gets the current title component.
+     * Gets the value of the title property. Returns empty if no title is set.
+     *
+     * @return the value of the title property
+     */
+    @Synchronize(property = "title", value = "title-changed")
+    public String getTitleAsText() {
+        return getElement().getProperty("title", "");
+    }
+
+    /**
+     * Gets the current title component set using {@link #setTitle(Component)}.
      *
      * @return the title component, or {@code null} if none is set
      */
     public Component getTitle() {
+        if (!getTitleAsText().isEmpty()) {
+            return null;
+        }
         return SlotUtils.getChildInSlot(this, TITLE_SLOT_NAME);
     }
 
