@@ -25,15 +25,17 @@ import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-card")
 public class CardIT extends AbstractComponentIT {
+
+    private CardElement card;
+
     @Before
     public void init() {
         open();
+        card = $(CardElement.class).waitForFirst();
     }
 
     @Test
     public void rendersCardComponent() {
-        CardElement card = $(CardElement.class).waitForFirst();
-
         boolean hasShadowRoot = (Boolean) executeScript(
                 "return arguments[0].shadowRoot !== null", card);
         String componentName = (String) executeScript(
@@ -42,5 +44,30 @@ public class CardIT extends AbstractComponentIT {
 
         Assert.assertTrue(hasShadowRoot);
         Assert.assertEquals("vaadin-card", componentName);
+        Assert.assertNotNull(card.getTitle());
+        Assert.assertNotNull(card.getSubtitle());
+        Assert.assertNotNull(card.getMedia());
+        Assert.assertNotNull(card.getHeaderPrefix());
+        Assert.assertNotNull(card.getHeaderSuffix());
+        Assert.assertFalse(card.getFooterElements().isEmpty());
+        Assert.assertFalse(card.getContentElements().isEmpty());
+    }
+
+    @Test
+    public void setTitleComponent_setTitleString_titleComponentIsRemoved() {
+        clickElementWithJs("set-title-component");
+        var titleComponent = card.getTitle();
+        clickElementWithJs("set-string-title");
+        Assert.assertNotEquals(titleComponent, card.getTitle());
+        Assert.assertEquals("String title", card.getStringTitle());
+    }
+
+    @Test
+    public void setStringTitle_setTitleComponent_stringTitleIsRemoved() {
+        clickElementWithJs("set-string-title");
+        var stringTitleComponent = card.getTitle();
+        clickElementWithJs("set-title-component");
+        Assert.assertNotEquals(stringTitleComponent, card.getTitle());
+        Assert.assertEquals("", card.getStringTitle());
     }
 }
