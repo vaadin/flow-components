@@ -13,16 +13,16 @@ import java.io.Serializable;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import org.apache.poi.ss.format.VCellFormat;
 import org.apache.poi.ss.format.CellFormatResult;
+import org.apache.poi.ss.format.VCellFormat;
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.VDataFormatter;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.VDataFormatter;
 
 /**
- * POI library has two classes {@link org.apache.poi.ss.format.VCellFormat} and
+ * POI library has two classes {@link org.apache.poi.ss.format.CellFormat} and
  * {@link org.apache.poi.ss.usermodel.DataFormatter} to deal with custom
  * formatting. The implementation is sometimes buggy!
  * <p>
@@ -34,7 +34,7 @@ import org.apache.poi.ss.usermodel.FormulaEvaluator;
  * 2) Custom formats that have empty parts (i.e. they render a certain value as
  * empty) are not rendered correctly.
  * <p>
- * VCellFormat does okay job for text formatting and literals (including empty
+ * CellFormat does okay job for text formatting and literals (including empty
  * parts)
  * <p>
  * DataFormatter can correctly format numbers using the locale, but cannot
@@ -66,15 +66,15 @@ class CustomDataFormatter extends VDataFormatter implements Serializable {
     }
 
     /**
-     * This method delegates cell formatting to VCellFormat if it's needed to
-     * format a text or a literal, because VCellFormat handles text formatting
+     * This method delegates cell formatting to CellFormat if it's needed to
+     * format a text or a literal, because CellFormat handles text formatting
      * much better than DataFormatter.
      * <p>
      * Otherwise use <code>DataFormatter#formatCellValue</code>
      **/
     @Override
     public String formatCellValue(Cell cell, FormulaEvaluator evaluator,
-            ConditionalFormattingEvaluator cfEvaluator) { 
+            ConditionalFormattingEvaluator cfEvaluator) {
 
         if (cell == null || cell.getCellStyle() == null) {
             return super.formatCellValue(cell, evaluator, cfEvaluator);
@@ -128,7 +128,7 @@ class CustomDataFormatter extends VDataFormatter implements Serializable {
         }
 
         if (isOnlyLiteralFormat(format)) {
-            // VCellFormat can format literals correctly
+            // CellFormat can format literals correctly
             return formatTextUsingCellFormat(cell, format).text;
         } else {
             // DataFormatter can format numbers correctly
@@ -138,14 +138,14 @@ class CustomDataFormatter extends VDataFormatter implements Serializable {
 
     private CellFormatResult formatTextUsingCellFormat(Cell cell,
             String format) {
-        // TODO: replace this with a reference to VCellFormat when moving back to
-        // mainline Apache POI.
+        // TODO: replace this with a reference to CellFormat when moving back
+        // to mainline Apache POI.
         return VCellFormat.getInstance(locale, format).apply(cell);
     }
 
     /**
      * Get the applicable text color for the cell. This uses Apache POI's
-     * VCellFormat logic, which parses and evaluates the cell's format string
+     * CellFormat logic, which parses and evaluates the cell's format string
      * against the cell's current value.
      * 
      * @param cell
@@ -214,7 +214,7 @@ class CustomDataFormatter extends VDataFormatter implements Serializable {
     }
 
     /**
-     * DataFormatter cannot format strings, but VCellFormat can.
+     * DataFormatter cannot format strings, but CellFormat can.
      */
     private String formatStringCellValue(Cell cell, String formatString,
             String[] parts) {
