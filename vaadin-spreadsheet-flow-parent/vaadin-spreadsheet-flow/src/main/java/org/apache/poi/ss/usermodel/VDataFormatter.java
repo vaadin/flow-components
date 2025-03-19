@@ -119,7 +119,7 @@ public class VDataFormatter extends DataFormatter {
 
     //
     // NOTE: this class exists in order to support our custom CellFormatPart class,
-    // VCellFormat. In order to achieve this support, the function 
+    // VCellFormatPart. In order to achieve this support, the function 
     // getFormat(double, int, String, boolean) needs to get an instance of VCellFormat.
     // Because this function is private, and it is called by other methods, those
     // methods, along with all their dependencies, need to be duplicated and, if they
@@ -155,8 +155,7 @@ public class VDataFormatter extends DataFormatter {
     /**
      * A regex to match the colour formatting's rules.
      * Allowed colours are: Black, Blue, Cyan, Green,
-     *  Magenta, Red, White, Yellow, "Color n" (1<=n<=56)
-     * 
+     * Magenta, Red, White, Yellow, "Color n" (1<=n<=56)
      */
     private static final Pattern colorPattern =
        Pattern.compile("(\\[BLACK])|(\\[BLUE])|(\\[CYAN])|(\\[GREEN])|" +
@@ -176,13 +175,13 @@ public class VDataFormatter extends DataFormatter {
 
     /**
      * A regex to detect if an alternate grouping character is used
-     *  in a numeric format
+     * in a numeric format
      */
     private static final Pattern alternateGrouping = Pattern.compile("([#0]([^.#0])[#0]{3})");
 
     /**
-      * Cells formatted with a date or time format and which contain invalid date or time values
-     *  show 255 pound signs ("#").
+      * Cells formatted with a date or time format and which contain invalid
+      * date or time values show 255 pound signs ("#").
       */
      private static final String invalidDateTimeString;
      static {
@@ -191,18 +190,13 @@ public class VDataFormatter extends DataFormatter {
          invalidDateTimeString = buf.toString();
      }
 
-    /**
-     * A map to cache formats.
-     *  Map<String,Format> formats
-     */
-    private final Map<String,Format> formats = new HashMap<>();
-
     /** For logging any problems we find */
     private static final Logger LOG = PoiLogManager.getLogger(VDataFormatter.class);
 
 
-    /////////////// INSTANCE VARS ////////////////
 
+    /** A map to cache formats. */
+    private final Map<String,Format> formats = new HashMap<>();
     
     /** The decimal symbols of the locale used for formatting values. */
     private DecimalFormatSymbols decimalSymbols;
@@ -329,7 +323,7 @@ public class VDataFormatter extends DataFormatter {
 
     /**
      * Formats the given raw cell value, based on the supplied
-     *  format index and string, according to excel style rules.
+     * format index and string, according to excel style rules.
      * @see #formatCellValue(Cell)
      */
     @Override
