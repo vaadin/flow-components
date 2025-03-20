@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 
 public class MasterDetailLayoutTest {
@@ -64,6 +65,11 @@ public class MasterDetailLayoutTest {
         layout.setMaster(null);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void setMasterText_throws() {
+        layout.setMaster(new Text("master"));
+    }
+
     @Test
     public void setMaster_preservesDetail() {
         var detail = new Div();
@@ -105,6 +111,11 @@ public class MasterDetailLayoutTest {
         Assert.assertNull(detail.getElement().getAttribute("slot"));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void setDetailText_throws() {
+        layout.setDetail(new Text("detail"));
+    }
+
     @Test
     public void setDetail_preservesMaster() {
         var master = new Div();
@@ -112,6 +123,7 @@ public class MasterDetailLayoutTest {
         var detail = new Div();
         layout.setDetail(detail);
 
+        Assert.assertEquals(2, layout.getElement().getChildCount());
         assertMasterContent(master);
         assertDetailContent(detail);
     }

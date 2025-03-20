@@ -21,6 +21,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
@@ -88,6 +89,12 @@ public class MasterDetailLayout extends Component
     }
 
     private void doSetDetail(HasElement hasElement) {
+        if (hasElement instanceof Text) {
+            throw new IllegalArgumentException(
+                    "Text as a slot content is not supported. "
+                            + "Consider wrapping the Text inside a Div.");
+        }
+
         SlotUtils.clearSlot(this, "detail");
         if (hasElement != null) {
             SlotUtils.addToSlot(this, "detail", hasElement.getElement());
