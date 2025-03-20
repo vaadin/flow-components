@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -35,11 +36,12 @@ public class CardElement extends TestBenchElement {
      * @return the content elements
      */
     public List<TestBenchElement> getContents() {
-        var contentWrapper = findElement(By.cssSelector("div:not([slot])"));
-        if (contentWrapper == null) {
+        try {
+            var contentWrapper = findElement(By.cssSelector("div:not([slot])"));
+            return contentWrapper.getPropertyElements("children");
+        } catch (NoSuchElementException e) {
             return Collections.emptyList();
         }
-        return contentWrapper.getPropertyElements("children");
     }
 
     /**
@@ -118,6 +120,11 @@ public class CardElement extends TestBenchElement {
     }
 
     private TestBenchElement getElementInSlot(String slotName) {
-        return findElement(By.cssSelector("[slot='%s']".formatted(slotName)));
+        try {
+            return findElement(
+                    By.cssSelector("[slot='%s']".formatted(slotName)));
+        } catch (NoSuchElementException e) {
+            return null;
+        }
     }
 }
