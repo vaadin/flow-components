@@ -19,17 +19,16 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.masterdetaillayout.MasterDetailLayout;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-master-detail-layout/master-detail-layout-test")
+@Route("vaadin-master-detail-layout")
 public class MasterDetailLayoutPage extends Div {
     public MasterDetailLayoutPage() {
         MasterDetailLayout layout = new MasterDetailLayout();
 
         Div master = new Div("Master content");
-        layout.getElement().appendChild(master.getElement());
+        layout.setMaster(master);
 
         Div detail = new Div("Detail content");
-        detail.getElement().setAttribute("slot", "detail");
-        layout.getElement().appendChild(detail.getElement());
+        layout.setDetail(detail);
 
         add(layout);
     }
