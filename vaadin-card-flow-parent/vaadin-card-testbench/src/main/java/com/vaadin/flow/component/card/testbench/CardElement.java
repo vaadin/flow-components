@@ -34,7 +34,7 @@ public class CardElement extends TestBenchElement {
      *
      * @return the content elements
      */
-    public List<TestBenchElement> getContentElements() {
+    public List<TestBenchElement> getContents() {
         var contentWrapper = findElement(By.cssSelector("div:not([slot])"));
         if (contentWrapper == null) {
             return Collections.emptyList();
@@ -110,7 +110,7 @@ public class CardElement extends TestBenchElement {
      *
      * @return the footer elements
      */
-    public List<TestBenchElement> getFooterElements() {
+    public List<TestBenchElement> getFooterContents() {
         return wrapElements(
                 getWrappedElement()
                         .findElements(By.cssSelector("[slot='footer']")),
