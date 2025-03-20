@@ -22,6 +22,7 @@ import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
@@ -128,6 +129,22 @@ public class MasterDetailLayout extends Component
     }
 
     /**
+     * Sets the size of the master area in CSS length units. When specified, it
+     * prevents the master area from growing or shrinking. If there is not
+     * enough space to show master and detail areas next to each other, the
+     * layout switches to the overlay mode.
+     *
+     * @param size
+     *            the size of the master area
+     * @param unit
+     *            the unit
+     */
+    public void setMasterSize(float size, Unit unit) {
+        Objects.requireNonNull(unit, "Unit cannot be null");
+        getElement().setProperty("masterSize", HasSize.getCssSize(size, unit));
+    }
+
+    /**
      * Gets the minimum size of the master area.
      *
      * @return the minimum size of the master area in CSS length units, or
@@ -148,6 +165,23 @@ public class MasterDetailLayout extends Component
      */
     public void setMasterMinSize(String minSize) {
         getElement().setProperty("masterMinSize", minSize);
+    }
+
+    /**
+     * Sets the minimum size of the master area in CSS length units. When
+     * specified, it prevents the master area from shrinking below this size. If
+     * there is not enough space to show master and detail areas next to each
+     * other, the layout switches to the overlay mode.
+     *
+     * @param minSize
+     *            the minimum size of the master area
+     * @param unit
+     *            the unit
+     */
+    public void setMasterMinSize(float minSize, Unit unit) {
+        Objects.requireNonNull(unit, "Unit cannot be null");
+        getElement().setProperty("masterMinSize",
+                HasSize.getCssSize(minSize, unit));
     }
 
     /**
@@ -174,6 +208,22 @@ public class MasterDetailLayout extends Component
     }
 
     /**
+     * Sets the size of the detail area in CSS length units. When specified, it
+     * prevents the detail area from growing or shrinking. If there is not
+     * enough space to show master and detail areas next to each other, the
+     * layout switches to the overlay mode.
+     *
+     * @param size
+     *            the size of the detail area
+     * @param unit
+     *            the unit
+     */
+    public void setDetailSize(float size, Unit unit) {
+        Objects.requireNonNull(unit, "Unit cannot be null");
+        getElement().setProperty("detailSize", HasSize.getCssSize(size, unit));
+    }
+
+    /**
      * Gets the minimum size of the detail area.
      *
      * @return the minimum size of the detail area in CSS length units, or
@@ -194,6 +244,23 @@ public class MasterDetailLayout extends Component
      */
     public void setDetailMinSize(String minSize) {
         getElement().setProperty("detailMinSize", minSize);
+    }
+
+    /**
+     * Sets the minimum size of the detail area in CSS length units. When
+     * specified, it prevents the detail area from shrinking below this size. If
+     * there is not enough space to show master and detail areas next to each
+     * other, the layout switches to the overlay mode.
+     *
+     * @param minSize
+     *            the minimum size of the detail area
+     * @param unit
+     *            the unit
+     */
+    public void setDetailMinSize(float minSize, Unit unit) {
+        Objects.requireNonNull(unit, "Unit cannot be null");
+        getElement().setProperty("detailMinSize",
+                HasSize.getCssSize(minSize, unit));
     }
 
     @Override
