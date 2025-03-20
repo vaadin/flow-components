@@ -49,8 +49,8 @@ public class CardIT extends AbstractComponentIT {
         Assert.assertNotNull(card.getMedia());
         Assert.assertNotNull(card.getHeaderPrefix());
         Assert.assertNotNull(card.getHeaderSuffix());
-        Assert.assertFalse(card.getFooterElements().isEmpty());
-        Assert.assertFalse(card.getContentElements().isEmpty());
+        Assert.assertFalse(card.getFooterContents().isEmpty());
+        Assert.assertFalse(card.getContents().isEmpty());
     }
 
     @Test
