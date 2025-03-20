@@ -43,6 +43,9 @@ import com.vaadin.flow.router.RouterLayout;
 public class MasterDetailLayout extends Component
         implements HasSize, RouterLayout {
 
+    public static final String MASTER_SLOT = "";
+    public static final String DETAIL_SLOT = "detail";
+
     /**
      * Gets the component currently in the master area.
      *
@@ -62,8 +65,8 @@ public class MasterDetailLayout extends Component
      */
     public void setMaster(Component component) {
         Objects.requireNonNull(component, "Master component cannot be null");
-        SlotUtils.clearSlot(this, "");
-        SlotUtils.addToSlot(this, "", component);
+        SlotUtils.clearSlot(this, MASTER_SLOT);
+        SlotUtils.addToSlot(this, MASTER_SLOT, component);
     }
 
     /**
@@ -73,7 +76,7 @@ public class MasterDetailLayout extends Component
      *         component in the detail area
      */
     public Component getDetail() {
-        return SlotUtils.getElementsInSlot(this, "detail").findFirst()
+        return SlotUtils.getElementsInSlot(this, DETAIL_SLOT).findFirst()
                 .flatMap(Element::getComponent).orElse(null);
     }
 
@@ -89,15 +92,15 @@ public class MasterDetailLayout extends Component
     }
 
     private void doSetDetail(HasElement hasElement) {
-        if (hasElement instanceof Text) {
+        if (hasElement != null && hasElement instanceof Text) {
             throw new IllegalArgumentException(
                     "Text as a slot content is not supported. "
                             + "Consider wrapping the Text inside a Div.");
         }
 
-        SlotUtils.clearSlot(this, "detail");
+        SlotUtils.clearSlot(this, DETAIL_SLOT);
         if (hasElement != null) {
-            SlotUtils.addToSlot(this, "detail", hasElement.getElement());
+            SlotUtils.addToSlot(this, DETAIL_SLOT, hasElement.getElement());
         }
     }
 
