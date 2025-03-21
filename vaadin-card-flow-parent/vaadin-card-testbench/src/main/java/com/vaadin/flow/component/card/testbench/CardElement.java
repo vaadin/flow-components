@@ -113,10 +113,8 @@ public class CardElement extends TestBenchElement {
      * @return the footer elements
      */
     public List<TestBenchElement> getFooterContents() {
-        return wrapElements(
-                getWrappedElement()
-                        .findElements(By.cssSelector("[slot='footer']")),
-                getCommandExecutor());
+        return findElements(By.cssSelector("[slot='footer']")).stream()
+                .map(el -> (TestBenchElement) el).toList();
     }
 
     private TestBenchElement getElementInSlot(String slotName) {
