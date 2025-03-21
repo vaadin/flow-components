@@ -103,7 +103,7 @@ public class SheetWidget extends Panel {
     private static final String EDITING_CELL_STYLE = "{ display: inline !important;"
             + " outline: none !important; width: auto !important; z-index: -10; }";
     private static final String HYPERLINK_CELL_STYLE = "{ cursor: pointer !important; }";
-    private static final String MERGED_REGION_CELL_STYLE = "{ display: none; }";
+    private static final String MERGED_REGION_CELL_STYLE = "{ display: none !important; }";
     private static final String FREEZE_PANEL_OVERFLOW_STYLE = "{ overflow: hidden; }";
 
     final Logger debugConsole = Logger.getLogger("spreadsheet SheetWidget");
@@ -3548,7 +3548,8 @@ public class SheetWidget extends Panel {
         StringBuilder sb = new StringBuilder();
         for (int r = region.row1; r <= region.row2; r++) {
             for (int c = region.col1; c <= region.col2; c++) {
-                sb.append(toCssKey(c, r));
+                sb.append(toCssKey(c, r)).append(":not(.")
+                        .append(MERGED_CELL_CLASSNAME).append(")");
                 if (r != region.row2 || c != region.col2) {
                     sb.append(",");
                 }

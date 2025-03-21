@@ -11,6 +11,7 @@ package com.vaadin.flow.component.spreadsheet.test;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 import com.vaadin.flow.testutil.TestPath;
@@ -83,5 +84,34 @@ public class MergeIT extends AbstractSpreadsheetIT {
         loadTestFixture(TestFixtures.MergeCells);
 
         Assert.assertEquals("A1 text", getMergedCellContent("A1"));
+    }
+
+    @Test
+    public void mergeCells_subcellsShouldHaveDisplayNone() {
+        for (var row = 1; row <= 2; row++) {
+            for (var col = 1; col <= 2; col++) {
+                assertCellHasDisplayNone(row, col, false);
+            }
+        }
+        selectRegion("A1", "B2");
+        loadTestFixture(TestFixtures.MergeCells);
+        for (var row = 1; row <= 2; row++) {
+            for (var col = 1; col <= 2; col++) {
+                assertCellHasDisplayNone(row, col, true);
+            }
+        }
+    }
+
+    private void assertCellHasDisplayNone(int row, int col,
+            boolean hasDisplayNone) {
+        var cellSelector = String.format(".cell.row%d.col%d:not(merged-cell)",
+                row, col);
+        var element = findElementInShadowRoot(By.cssSelector(cellSelector));
+        var display = element.getCssValue("display");
+        if (hasDisplayNone) {
+            Assert.assertEquals("none", display);
+        } else {
+            Assert.assertNotEquals("none", display);
+        }
     }
 }
