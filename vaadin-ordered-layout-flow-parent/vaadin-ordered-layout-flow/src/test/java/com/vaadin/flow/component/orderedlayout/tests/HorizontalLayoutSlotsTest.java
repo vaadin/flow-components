@@ -305,6 +305,54 @@ public class HorizontalLayoutSlotsTest {
     }
 
     @Test
+    public void add_sameComponentAddedTwice_doesNotThrow() {
+        Div div1 = new Div();
+        Div div2 = new Div();
+
+        layout.add(div1);
+        layout.add(div1, div2);
+
+        Assert.assertEquals(div1, layout.getComponentAt(0));
+        Assert.assertEquals(div2, layout.getComponentAt(1));
+    }
+
+    @Test
+    public void add_sameComponentAddedTwice_changeOrder_doesNotThrow() {
+        Div div1 = new Div();
+        Div div2 = new Div();
+
+        layout.add(div1);
+        layout.add(div2, div1);
+
+        Assert.assertEquals(div2, layout.getComponentAt(0));
+        Assert.assertEquals(div1, layout.getComponentAt(1));
+    }
+
+    @Test
+    public void addToMiddle_sameComponentAddedTwice_doesNotThrow() {
+        Div div1 = new Div();
+        Div div2 = new Div();
+
+        layout.addToMiddle(div1);
+        layout.addToMiddle(div1, div2);
+
+        Assert.assertEquals(div1, layout.getComponentAt(0));
+        Assert.assertEquals(div2, layout.getComponentAt(1));
+    }
+
+    @Test
+    public void addToMiddle_sameComponentAddedTwice_changeOrder_doesNotThrow() {
+        Div div1 = new Div();
+        Div div2 = new Div();
+
+        layout.addToMiddle(div1);
+        layout.addToMiddle(div2, div1);
+
+        Assert.assertEquals(div2, layout.getComponentAt(0));
+        Assert.assertEquals(div1, layout.getComponentAt(1));
+    }
+
+    @Test
     public void addComponentAtIndex_firstComponentAdded() {
         Div div1 = new Div();
         layout.addComponentAtIndex(0, div1);
