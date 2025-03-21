@@ -87,11 +87,11 @@ public class Card extends Component implements HasSize,
     }
 
     /**
-     * Sets the title property. If a {@link #setHeader(Component) header
-     * component} is set, the title will not be displayed. Setting a title this
-     * way removes any title component set using {@link #setTitle(Component)}.
-     * Setting {@code null} or empty string removes any previously set
-     * {@code String} titles.
+     * Sets the {@code cardTitle} property. If a {@link #setHeader(Component)
+     * header component} is set, the title will not be displayed. Setting a
+     * title this way removes any title component set using
+     * {@link #setTitle(Component)}. Setting {@code null} or empty string
+     * removes any previously set {@code String} titles.
      *
      * @param title
      *            the title property
@@ -100,7 +100,7 @@ public class Card extends Component implements HasSize,
      * @see #getTitleAsText()
      */
     public void setTitle(String title) {
-        getElement().setProperty("title", title);
+        getElement().setProperty("cardTitle", title);
     }
 
     /**
@@ -163,13 +163,14 @@ public class Card extends Component implements HasSize,
     }
 
     /**
-     * Gets the value of the title property. Returns empty if no title is set.
+     * Gets the value of the {@code cardTitle} property. Returns empty if no
+     * title is set.
      *
      * @return the value of the title property
      */
-    @Synchronize(property = "title", value = "title-changed")
+    @Synchronize(property = "cardTitle", value = "card-title-changed")
     public String getTitleAsText() {
-        return getElement().getProperty("title", "");
+        return getElement().getProperty("cardTitle", "");
     }
 
     /**
