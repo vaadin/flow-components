@@ -120,11 +120,8 @@ public class CardElement extends TestBenchElement {
     }
 
     private TestBenchElement getElementInSlot(String slotName) {
-        try {
-            return findElement(
-                    By.cssSelector("[slot='%s']".formatted(slotName)));
-        } catch (NoSuchElementException e) {
-            return null;
-        }
+        return (TestBenchElement) findElements(
+                By.cssSelector("[slot='%s']".formatted(slotName))).stream()
+                .findFirst().orElse(null);
     }
 }
