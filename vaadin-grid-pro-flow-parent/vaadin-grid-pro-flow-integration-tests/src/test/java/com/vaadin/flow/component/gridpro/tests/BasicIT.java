@@ -210,8 +210,21 @@ public class BasicIT extends AbstractComponentIT {
 
     @Test
     public void itemClickListenerListenerCalledOnce() {
+        GridTHTDElement cell = grid.getCell(0, 1);
+        cell.click(10, 10);
+
+        String eventsPanelText = getPanelText("events-panel");
+        Assert.assertEquals(1, eventsPanelText.split("ItemClicked").length - 1);
+        Assert.assertTrue(eventsPanelText
+                .contains("Person{id=1, age=23, name='Person 1', "
+                        + "isSubscriber=false, email='person1@vaadin.com', "
+                        + "department=sales, city='City 1', employmentYear=2019}"));
+    }
+
+    @Test
+    public void columnUsesFocusButtonMode_itemClickListenerListenerCalledOnce() {
         GridTHTDElement cell = grid.getCell(0, 2);
-        cell.click();
+        cell.click(10, 10);
 
         String eventsPanelText = getPanelText("events-panel");
         Assert.assertEquals(1, eventsPanelText.split("ItemClicked").length - 1);
