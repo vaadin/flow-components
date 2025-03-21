@@ -18,6 +18,7 @@ import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.gridpro.GridPro;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
@@ -84,12 +85,16 @@ public class MainView extends VerticalLayout {
 
         ComboBox<Department> cb = new ComboBox<>();
         cb.setItems(Department.values());
-        grid.addEditColumn(Person::getDepartment)
+        Grid.Column<Person> departmentColumn = grid
+                .addEditColumn(Person::getDepartment)
                 .custom(cb, (item, newValue) -> {
                     item.setDepartment(newValue);
                     itemDisplayPanel.setText(item.toString());
                     subPropertyDisplayPanel.setText(String.valueOf(newValue));
                 }).setHeader("Department").setWidth("300px");
+        // Force enable focus button mode to verify that item click listener
+        // also works when focusable div is rendered as cell content
+        departmentColumn.getElement().executeJs("this._focusButtonMode = true");
 
         ComponentRenderer<Span, Person> booleanRenderer = new ComponentRenderer<>(
                 person -> new Span(person.isSubscriber() ? "Yes" : "No"));
