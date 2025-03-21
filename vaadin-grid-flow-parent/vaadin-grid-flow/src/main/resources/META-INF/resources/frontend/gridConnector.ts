@@ -1102,12 +1102,19 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
     const path = event.composedPath();
     const idx = path.findIndex((node) => node.localName === 'td' || node.localName === 'th');
+    const cell = path[idx];
     const content = path.slice(0, idx);
 
     // Do not fire item click event if cell content contains focusable elements.
     // Use this instead of event.target to detect cases like icon inside button.
     // See https://github.com/vaadin/flow-components/issues/4065
-    if (content.some((node) => isFocusable(node) || node instanceof HTMLLabelElement)) {
+    if (
+      content.some((node) => {
+        // Ignore focus buttons that the component renders into cells in focus button mode on MacOS
+        const focusable = cell._focusButton !== node && isFocusable(node);
+        return focusable || node instanceof HTMLLabelElement;
+      })
+    ) {
       return;
     }
 
