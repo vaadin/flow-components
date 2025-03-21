@@ -36,12 +36,11 @@ public class CardElement extends TestBenchElement {
      * @return the content elements
      */
     public List<TestBenchElement> getContents() {
-        try {
-            var contentWrapper = findElement(By.cssSelector("div:not([slot])"));
-            return contentWrapper.getPropertyElements("children");
-        } catch (NoSuchElementException e) {
-            return Collections.emptyList();
-        }
+        return findElements(By.cssSelector("div:not([slot])")).stream()
+                .findFirst()
+                .map(wrapper -> ((TestBenchElement) wrapper)
+                        .getPropertyElements("children"))
+                .orElse(Collections.emptyList());
     }
 
     /**
