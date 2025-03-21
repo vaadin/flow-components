@@ -57,7 +57,7 @@ public class CardElement extends TestBenchElement {
      * @return title property value
      */
     public String getStringTitle() {
-        return getPropertyString("title");
+        return getPropertyString("cardTitle");
     }
 
     /**
