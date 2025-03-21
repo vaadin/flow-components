@@ -379,7 +379,11 @@ public class HorizontalLayout extends Component implements ThemableLayout,
                 .map(component -> Objects.requireNonNull(component,
                         "Component to add cannot be null"))
                 .forEach((component) -> {
-                    getElement().insertChild(itemCounter.getAndIncrement(),
+                    var isChild = getElement()
+                            .equals(component.getElement().getParent());
+                    getElement().insertChild(
+                            isChild ? itemCounter.get()
+                                    : itemCounter.getAndIncrement(),
                             component.getElement());
                 });
     }
@@ -429,7 +433,12 @@ public class HorizontalLayout extends Component implements ThemableLayout,
                     }
 
                     component.getElement().setAttribute("slot", "middle");
-                    getElement().insertChild(itemCounter.getAndIncrement(),
+
+                    var isChild = getElement()
+                            .equals(component.getElement().getParent());
+                    getElement().insertChild(
+                            isChild ? itemCounter.get()
+                                    : itemCounter.getAndIncrement(),
                             component.getElement());
                 });
 
