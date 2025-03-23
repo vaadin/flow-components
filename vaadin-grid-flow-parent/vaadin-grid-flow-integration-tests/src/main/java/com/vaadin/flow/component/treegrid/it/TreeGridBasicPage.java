@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.hierarchy.AbstractHierarchicalDataProvider;
-import com.vaadin.flow.data.provider.hierarchy.FlatHierarchyDataProvider;
+import com.vaadin.flow.data.provider.hierarchy.FlatHierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.router.Route;
 
@@ -31,7 +31,7 @@ import com.vaadin.flow.router.Route;
 public class TreeGridBasicPage extends Div {
     private class DataProvider
             extends AbstractHierarchicalDataProvider<Item, String>
-            implements FlatHierarchyDataProvider<Item, String> {
+            implements FlatHierarchicalDataProvider<Item, String> {
         private List<Item> items = buildItemsHierarchy();
 
         @Override
