@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Div;
 
 public class MasterDetailLayoutTest {
@@ -173,11 +174,27 @@ public class MasterDetailLayoutTest {
     }
 
     @Test
+    public void setMasterSizeWithUnit_getMasterSize() {
+        layout.setMasterSize(30, Unit.EM);
+        Assert.assertEquals("30.0em", layout.getMasterSize());
+        Assert.assertEquals("30.0em",
+                layout.getElement().getProperty("masterSize"));
+    }
+
+    @Test
     public void setMasterMinSize_getMasterMinSize() {
         String minSize = "200px";
         layout.setMasterMinSize(minSize);
         Assert.assertEquals(minSize, layout.getMasterMinSize());
         Assert.assertEquals(minSize,
+                layout.getElement().getProperty("masterMinSize"));
+    }
+
+    @Test
+    public void setMasterMinSizeWithUnit_getMasterMinSize() {
+        layout.setMasterMinSize(30, Unit.EM);
+        Assert.assertEquals("30.0em", layout.getMasterMinSize());
+        Assert.assertEquals("30.0em",
                 layout.getElement().getProperty("masterMinSize"));
     }
 
@@ -191,11 +208,27 @@ public class MasterDetailLayoutTest {
     }
 
     @Test
+    public void setDetailSizeWithUnit_getDetailSize() {
+        layout.setDetailSize(30, Unit.EM);
+        Assert.assertEquals("30.0em", layout.getDetailSize());
+        Assert.assertEquals("30.0em",
+                layout.getElement().getProperty("detailSize"));
+    }
+
+    @Test
     public void setDetailMinSize_getDetailMinSize() {
         String minSize = "250px";
         layout.setDetailMinSize(minSize);
         Assert.assertEquals(minSize, layout.getDetailMinSize());
         Assert.assertEquals(minSize,
+                layout.getElement().getProperty("detailMinSize"));
+    }
+
+    @Test
+    public void setDetailMinSizeWithUnit_getDetailMinSize() {
+        layout.setDetailMinSize(30, Unit.EM);
+        Assert.assertEquals("30.0em", layout.getDetailMinSize());
+        Assert.assertEquals("30.0em",
                 layout.getElement().getProperty("detailMinSize"));
     }
 
