@@ -170,11 +170,20 @@ class CustomDataFormatter extends VDataFormatter implements Serializable {
 
             Color color = result.textColor; // AWT color value returned by POI
 
-            // rgb(N,N,N) turned out to be the most reliably transmitted string
-            // in testing
-            String css = "rgb(" + color.getRed() + "," + color.getGreen() + ","
-                    + color.getBlue() + ")";
-            return css;
+            // Convert calculated color value to simplest parseable hex string
+            // @formatter:off
+            final int cval = (color.getRed() << 16) | 
+                (color.getGreen() << 8) | color.getBlue();
+            final String hex = Integer.toHexString(cval);
+            switch (hex.length()) {
+                case 1: return "00000" + hex;
+                case 2: return "0000" + hex;
+                case 3: return "000" + hex;
+                case 4: return "00" + hex;
+                case 5: return "0" + hex;
+                default: return hex;
+            }
+            // @formatter:on
         } catch (Exception e) {
             return null;
         }

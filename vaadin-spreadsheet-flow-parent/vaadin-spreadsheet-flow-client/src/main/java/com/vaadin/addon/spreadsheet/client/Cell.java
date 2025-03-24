@@ -114,7 +114,7 @@ public class Cell {
         }
 
         if (textColor != null) {
-            element.getStyle().setColor(textColor);
+            element.getStyle().setColor("#" + textColor);
         }
 
         appendOverlayElements();
