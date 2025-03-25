@@ -24,10 +24,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.formlayout.testbench.FormItemElement;
 import com.vaadin.flow.component.formlayout.testbench.FormLayoutElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -101,8 +99,8 @@ public class FormLayoutIT extends AbstractComponentIT {
 
         formLayout.getFormItemByLabel("First name").getInput().sendKeys("foo");
         formLayout.getFormItemByLabel("Last name").getInput().sendKeys("bar");
-        formLayout.getFormItemByLabel("Phone").getInput()
-                .sendKeys("123-456-789");
+        formLayout.$(FormItemElement.class).id("phone-item")
+                .$(TextFieldElement.class).first().setValue("123-456-789");
         formLayout.getFormItemByLabel("E-mail").getInput()
                 .sendKeys("example@foo.bar");
 
