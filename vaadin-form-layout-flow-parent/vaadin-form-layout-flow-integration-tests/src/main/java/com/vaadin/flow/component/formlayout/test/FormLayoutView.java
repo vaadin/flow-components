@@ -182,6 +182,7 @@ public class FormLayoutView extends Div {
 
     private void createFormLayoutWithItems() {
         FormLayout layoutWithFormItems = new FormLayout();
+        layoutWithFormItems.setId("binder-form-layout");
 
         TextField firstName = new TextField();
         firstName.setPlaceholder("John");
