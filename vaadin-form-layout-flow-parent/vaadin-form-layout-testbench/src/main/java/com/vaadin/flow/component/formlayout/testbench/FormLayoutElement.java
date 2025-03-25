@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.formlayout.testbench;
 
+import java.util.List;
+
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -24,4 +26,30 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-form-layout")
 public class FormLayoutElement extends TestBenchElement {
+
+    /**
+     * Retrieves all form items of type {@link FormItemElement}.
+     *
+     * @return a list of all {@link FormItemElement} instances.
+     */
+    public List<FormItemElement> getFormItems() {
+        return $(FormItemElement.class).all();
+    }
+
+    /**
+     * Retrieves a form item element by its label.
+     *
+     * @param label
+     *            the label of the form item to retrieve
+     * @return the form item element with the specified label
+     * @throws IllegalArgumentException
+     *             if no form item is found with the specified label
+     */
+    public FormItemElement getFormItemByLabel(String label) {
+        return getFormItems().stream().filter(item -> {
+            var itemLabel = item.getLabel();
+            return itemLabel != null && itemLabel.getText().equals(label);
+        }).findFirst().orElseThrow(() -> new IllegalArgumentException(
+                "No form item found with label: " + label));
+    }
 }
