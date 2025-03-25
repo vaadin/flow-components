@@ -256,6 +256,7 @@ public class FormLayoutView extends Div {
         layoutWithBinder.addFormItem(birthDate, "Birthdate");
         layoutWithBinder.addFormItem(email, "E-mail");
         FormItem phoneItem = layoutWithBinder.addFormItem(phone, "Phone");
+        phoneItem.setId("phone-item");
         phoneItem.add(doNotCall);
 
         // Button bar
