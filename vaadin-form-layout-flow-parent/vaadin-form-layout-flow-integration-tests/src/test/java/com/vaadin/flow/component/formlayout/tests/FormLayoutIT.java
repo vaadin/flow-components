@@ -24,6 +24,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.formlayout.testbench.FormItemElement;
+import com.vaadin.flow.component.formlayout.testbench.FormLayoutElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -47,9 +51,8 @@ public class FormLayoutIT extends AbstractComponentIT {
      * you resize the browser window
      */
     public void custom_responsive_layouting() {
-        WebElement firstLayout = findElement(By.tagName("vaadin-form-layout"));
-        List<WebElement> textFields = firstLayout
-                .findElements(By.tagName("vaadin-text-field"));
+        FormLayoutElement firstLayout = $(FormLayoutElement.class).first();
+        List<TextFieldElement> textFields = firstLayout.$(TextFieldElement.class).all();
         Assert.assertEquals(3, textFields.size());
 
         // 3 columns, all should be horizontally aligned (tolerance of some
@@ -92,10 +95,16 @@ public class FormLayoutIT extends AbstractComponentIT {
                         .equals(info.getText()));
 
         // Fill form: there shouldn't be an error
-        $("vaadin-text-field").id("binder-first-name").sendKeys("foo");
-        $("vaadin-text-field").id("binder-last-name").sendKeys("bar");
-        $("vaadin-text-field").id("binder-phone").sendKeys("123-456-789");
-        $("vaadin-text-field").id("binder-email").sendKeys("example@foo.bar");
+        FormLayoutElement formLayout = $(FormLayoutElement.class)
+                .id("binder-form-layout");
+
+        formLayout.getFormItemByLabel("First name").getInput().sendKeys("foo");
+        formLayout.getFormItemByLabel("Last name").getInput().sendKeys("bar");
+        formLayout.getFormItemByLabel("Phone").getInput()
+                .sendKeys("123-456-789");
+        formLayout.getFormItemByLabel("Email").getInput()
+                .sendKeys("example@foo.bar");
+
         setValue("binder-birth-date", "2003-01-02");
         setChecked("binder-do-not-call", true);
         forceClick(save);
