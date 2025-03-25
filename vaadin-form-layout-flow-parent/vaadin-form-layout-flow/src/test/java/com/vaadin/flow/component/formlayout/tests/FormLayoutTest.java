@@ -202,22 +202,22 @@ public class FormLayoutTest {
     public void setAutoResponsive_getAutoResponsive() {
         FormLayout formLayout = new FormLayout();
         Assert.assertFalse(
-                formLayout.getElement().hasProperty("autoResponsive"));
+                formLayout.getElement().hasAttribute("auto-responsive"));
 
         formLayout.setAutoResponsive(true);
         Assert.assertTrue(
-                formLayout.getElement().getProperty("autoResponsive", false));
+                formLayout.getElement().hasAttribute("auto-responsive"));
     }
 
     @Test
     public void setAutoRows_getAutoRows() {
         FormLayout formLayout = new FormLayout();
-        Assert.assertFalse(formLayout.getElement().hasProperty("autoRows"));
+        Assert.assertFalse(formLayout.getElement().hasAttribute("auto-rows"));
         Assert.assertFalse(formLayout.isAutoRows());
 
         formLayout.setAutoRows(true);
         Assert.assertTrue(
-                formLayout.getElement().getProperty("autoRows", false));
+                formLayout.getElement().hasAttribute("auto-rows"));
         Assert.assertTrue(formLayout.isAutoRows());
     }
 
@@ -262,36 +262,36 @@ public class FormLayoutTest {
     public void setExpandColumns_isExpandColumns() {
         FormLayout formLayout = new FormLayout();
         Assert.assertFalse(
-                formLayout.getElement().hasProperty("expandColumns"));
+                formLayout.getElement().hasAttribute("expand-columns"));
         Assert.assertFalse(formLayout.isExpandColumns());
 
         formLayout.setExpandColumns(true);
         Assert.assertTrue(
-                formLayout.getElement().getProperty("expandColumns", false));
+                formLayout.getElement().hasAttribute("expand-columns"));
         Assert.assertTrue(formLayout.isExpandColumns());
     }
 
     @Test
     public void setExpandFields_isExpandFields() {
         FormLayout formLayout = new FormLayout();
-        Assert.assertFalse(formLayout.getElement().hasProperty("expandFields"));
+        Assert.assertFalse(formLayout.getElement().hasAttribute("expand-fields"));
         Assert.assertFalse(formLayout.isExpandFields());
 
         formLayout.setExpandFields(true);
         Assert.assertTrue(
-                formLayout.getElement().getProperty("expandFields", false));
+                formLayout.getElement().hasAttribute("expand-fields"));
         Assert.assertTrue(formLayout.isExpandFields());
     }
 
     @Test
     public void setLabelsAside_isLabelsAside() {
         FormLayout formLayout = new FormLayout();
-        Assert.assertFalse(formLayout.getElement().hasProperty("labelsAside"));
+        Assert.assertFalse(formLayout.getElement().hasAttribute("labels-aside"));
         Assert.assertFalse(formLayout.isLabelsAside());
 
         formLayout.setLabelsAside(true);
         Assert.assertTrue(
-                formLayout.getElement().getProperty("labelsAside", false));
+                formLayout.getElement().hasAttribute("labels-aside"));
         Assert.assertTrue(formLayout.isLabelsAside());
     }
 

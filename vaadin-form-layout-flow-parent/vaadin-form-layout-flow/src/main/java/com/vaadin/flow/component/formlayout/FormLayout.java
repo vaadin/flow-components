@@ -842,7 +842,7 @@ public class FormLayout extends Component
      *            disable
      */
     public void setAutoResponsive(boolean autoResponsive) {
-        getElement().setProperty("autoResponsive", autoResponsive);
+        getElement().setAttribute("auto-responsive", autoResponsive);
     }
 
     /**
@@ -861,7 +861,7 @@ public class FormLayout extends Component
      *            {@code true} to enable auto rows mode, {@code false} otherwise
      */
     public void setAutoRows(boolean autoRows) {
-        getElement().setProperty("autoRows", autoRows);
+        getElement().setAttribute("auto-rows", autoRows);
     }
 
     /**
@@ -874,7 +874,7 @@ public class FormLayout extends Component
      * @see #setAutoRows(boolean)
      */
     public boolean isAutoRows() {
-        return getElement().getProperty("autoRows", false);
+        return getElement().hasAttribute("auto-rows");
     }
 
     /**
@@ -973,7 +973,7 @@ public class FormLayout extends Component
      *            {@code true} to expand columns, {@code false} otherwise
      */
     public void setExpandColumns(boolean expandColumns) {
-        getElement().setProperty("expandColumns", expandColumns);
+        getElement().setAttribute("expand-columns", expandColumns);
     }
 
     /**
@@ -984,7 +984,7 @@ public class FormLayout extends Component
      * @see #setExpandColumns(boolean)
      */
     public boolean isExpandColumns() {
-        return getElement().getProperty("expandColumns", false);
+        return getElement().hasAttribute("expand-columns");
     }
 
     /**
@@ -1000,7 +1000,7 @@ public class FormLayout extends Component
      *            {@code true} to expand fields, {@code false} otherwise
      */
     public void setExpandFields(boolean expandFields) {
-        getElement().setProperty("expandFields", expandFields);
+        getElement().setAttribute("expand-fields", expandFields);
     }
 
     /**
@@ -1011,7 +1011,7 @@ public class FormLayout extends Component
      * @see #setExpandFields(boolean)
      */
     public boolean isExpandFields() {
-        return getElement().getProperty("expandFields", false);
+        return getElement().hasAttribute("expand-fields");
     }
 
     /**
@@ -1040,7 +1040,7 @@ public class FormLayout extends Component
      *            {@code true} to position labels aside, {@code false} otherwise
      */
     public void setLabelsAside(boolean labelsAside) {
-        getElement().setProperty("labelsAside", labelsAside);
+        getElement().setAttribute("labels-aside", labelsAside);
     }
 
     /**
@@ -1052,6 +1052,6 @@ public class FormLayout extends Component
      * @see #setLabelsAside(boolean)
      */
     public boolean isLabelsAside() {
-        return getElement().getProperty("labelsAside", false);
+        return getElement().hasAttribute("labels-aside");
     }
 }
