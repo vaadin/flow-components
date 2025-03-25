@@ -52,7 +52,8 @@ public class FormLayoutIT extends AbstractComponentIT {
      */
     public void custom_responsive_layouting() {
         FormLayoutElement firstLayout = $(FormLayoutElement.class).first();
-        List<TextFieldElement> textFields = firstLayout.$(TextFieldElement.class).all();
+        List<TextFieldElement> textFields = firstLayout
+                .$(TextFieldElement.class).all();
         Assert.assertEquals(3, textFields.size());
 
         // 3 columns, all should be horizontally aligned (tolerance of some
@@ -102,7 +103,7 @@ public class FormLayoutIT extends AbstractComponentIT {
         formLayout.getFormItemByLabel("Last name").getInput().sendKeys("bar");
         formLayout.getFormItemByLabel("Phone").getInput()
                 .sendKeys("123-456-789");
-        formLayout.getFormItemByLabel("Email").getInput()
+        formLayout.getFormItemByLabel("E-mail").getInput()
                 .sendKeys("example@foo.bar");
 
         setValue("binder-birth-date", "2003-01-02");
