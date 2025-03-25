@@ -1,0 +1,66 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
+package com.vaadin.flow.component.formlayout.testbench;
+
+import java.util.Objects;
+
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
+
+/**
+ * A TestBench element representing a <code>&lt;vaadin-form-item&gt;</code>
+ * element.
+ */
+@Element("vaadin-form-item")
+public class FormItemElement extends TestBenchElement {
+
+    /**
+     * Retrieves the label element from the form items label slot.
+     *
+     * @return the label element as a TestBenchElement
+     */
+    public TestBenchElement getLabel() {
+        return (TestBenchElement) executeScript(
+                "const formItem = arguments[0];"
+                        + "return Array.from(formItem.children).filter("
+                        + "el => el.getAttribute('slot') === 'label'" + ")[0];",
+                this);
+    }
+
+    /**
+     * Retrieves the text of the label element associated with this form item.
+     *
+     * @return the text of the label element
+     * @throws NullPointerException
+     *             if the label element is not found
+     */
+    public String getLabelText() {
+        var label = getLabel();
+        Objects.requireNonNull(label, "Label element not found");
+        return label.getText();
+    }
+
+    /**
+     * Retrieves the input element associated with the label of this form item.
+     *
+     * @return the input element associated with the label of this form item.
+     */
+    public TestBenchElement getInput() {
+        String id = getLabel().getAttribute("id");
+        return $(TestBenchElement.class).attribute("aria-labelledby", id)
+                .first();
+    }
+}
