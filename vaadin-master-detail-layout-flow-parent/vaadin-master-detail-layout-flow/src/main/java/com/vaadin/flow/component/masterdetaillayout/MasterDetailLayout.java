@@ -17,6 +17,7 @@ package com.vaadin.flow.component.masterdetaillayout;
 
 import java.util.Objects;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasSize;
@@ -25,6 +26,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.RouterLayout;
@@ -45,7 +47,9 @@ public class MasterDetailLayout extends Component
         implements HasSize, RouterLayout {
 
     public static final String MASTER_SLOT = "";
-    public static final String DETAIL_SLOT = "detail";
+
+    private HasElement detail;
+    private PendingJavaScriptResult pendingDetailsUpdate;
 
     /**
      * Gets the component currently in the master area.
@@ -77,8 +81,7 @@ public class MasterDetailLayout extends Component
      *         component in the detail area
      */
     public Component getDetail() {
-        return SlotUtils.getElementsInSlot(this, DETAIL_SLOT).findFirst()
-                .flatMap(Element::getComponent).orElse(null);
+        return detail.getElement().getComponent().orElse(null);
     }
 
     /**
@@ -99,10 +102,27 @@ public class MasterDetailLayout extends Component
                             + "Consider wrapping the Text inside a Div.");
         }
 
-        SlotUtils.clearSlot(this, DETAIL_SLOT);
-        if (hasElement != null) {
-            SlotUtils.addToSlot(this, DETAIL_SLOT, hasElement.getElement());
+        if (detail != null) {
+            getElement().removeVirtualChild(detail.getElement());
         }
+        detail = hasElement;
+        if (detail != null) {
+            getElement().appendVirtualChild(detail.getElement());
+        }
+        updateDetails();
+    }
+
+    private void updateDetails() {
+        if (pendingDetailsUpdate != null) {
+            pendingDetailsUpdate.cancelExecution();
+        }
+        pendingDetailsUpdate = getElement().executeJs("this.setDetail($0)",
+                detail != null ? detail.getElement() : null);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        updateDetails();
     }
 
     /**

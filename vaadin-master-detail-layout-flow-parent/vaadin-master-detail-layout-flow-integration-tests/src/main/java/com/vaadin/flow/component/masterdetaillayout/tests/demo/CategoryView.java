@@ -45,6 +45,8 @@ public class CategoryView extends MasterDetailLayout
         setMaster(createMasterContent());
         setMasterMinSize("500px");
         setDetailMinSize("300px");
+
+        getElement().setProperty("stackThreshold", "800px");
     }
 
     private Component createMasterContent() {
