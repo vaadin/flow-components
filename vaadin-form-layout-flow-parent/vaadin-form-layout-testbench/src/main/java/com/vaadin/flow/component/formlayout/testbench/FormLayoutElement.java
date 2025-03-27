@@ -46,10 +46,8 @@ public class FormLayoutElement extends TestBenchElement {
      *             if no form item is found with the specified label
      */
     public FormItemElement getFormItemByLabel(String label) {
-        return getFormItems().stream().filter(item -> {
-            var itemLabel = item.getLabel();
-            return itemLabel != null && itemLabel.getText().equals(label);
-        }).findFirst().orElseThrow(() -> new IllegalArgumentException(
-                "No form item found with label: " + label));
+        return getFormItems().stream()
+                .filter(item -> label.equals(item.getLabelText())).findFirst()
+                .orElse(null);
     }
 }
