@@ -49,8 +49,7 @@ public class FormItemElement extends TestBenchElement {
      */
     public String getLabelText() {
         var label = getLabel();
-        Objects.requireNonNull(label, "Label element not found");
-        return label.getText();
+        return label != null ? label.getText() : null;
     }
 
     /**
