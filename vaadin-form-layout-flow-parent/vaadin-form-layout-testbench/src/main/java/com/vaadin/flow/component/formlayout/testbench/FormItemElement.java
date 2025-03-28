@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.formlayout.testbench;
 
-import java.util.Objects;
-
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
