@@ -26,7 +26,7 @@ import com.vaadin.flow.dom.Element;
  *
  * @author Vaadin Ltd
  */
-abstract class SideNavItemContainer extends Component {
+public abstract class SideNavItemContainer extends Component {
 
     /**
      * Implement this method to set up/modify the SideNavItem right before it's
