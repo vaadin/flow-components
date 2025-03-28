@@ -57,7 +57,7 @@ public class FormItemElement extends TestBenchElement {
      *
      * @return the input element associated with the label of this form item.
      */
-    public TestBenchElement getInput() {
+    public TestBenchElement getField() {
         return getPropertyElements("children").stream()
                 .filter((element) -> element.getDomProperty("validate") != null)
                 .findFirst().orElse(null);
