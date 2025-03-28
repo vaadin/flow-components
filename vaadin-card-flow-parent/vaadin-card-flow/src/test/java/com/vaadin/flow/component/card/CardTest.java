@@ -69,6 +69,39 @@ public class CardTest {
     }
 
     @Test
+    public void stringTitleIsEmptyByDefault() {
+        Assert.assertEquals("", card.getTitleAsText());
+    }
+
+    @Test
+    public void setStringTitle_titleIsSet() {
+        var title = "Some Title";
+        card.setTitle(title);
+        Assert.assertEquals(title, card.getTitleAsText());
+        title = "Other Title";
+        card.setTitle(title, 2);
+        Assert.assertEquals(title, card.getTitleAsText());
+    }
+
+    @Test
+    public void setStringTitle_setNullStringTitle_titleCleared() {
+        card.setTitle("Some Title");
+        card.setTitle((String) null);
+        Assert.assertEquals("", card.getTitleAsText());
+    }
+
+    @Test
+    public void setTitleHeadingLevel_throwsIllegalArgumentExceptionOnlyForOutOfRange() {
+        card.setTitleHeadingLevel(null);
+        card.setTitleHeadingLevel(1);
+        card.setTitleHeadingLevel(6);
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> card.setTitleHeadingLevel(7));
+        Assert.assertThrows(IllegalArgumentException.class,
+                () -> card.setTitleHeadingLevel(0));
+    }
+
+    @Test
     public void subtitleNullByDefault() {
         Assert.assertNull(card.getSubtitle());
     }
