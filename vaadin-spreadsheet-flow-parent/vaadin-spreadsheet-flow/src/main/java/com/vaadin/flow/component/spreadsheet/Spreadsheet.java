@@ -237,6 +237,14 @@ public class Spreadsheet extends Component
 
     private Locale locale;
 
+    /**
+     * Used for disabling style recalculation during repeated
+     * calls to certain methods as an optimization. See
+     * {@link #setActiveStyleRecalculation(boolean)}.
+     */
+    private boolean activeStyleRecalculation = true;
+
+
     int getCols() {
         return cols;
     }
@@ -3306,7 +3314,45 @@ public class Spreadsheet extends Component
     public boolean isColumnHidden(int columnIndex) {
         return getActiveSheet().isColumnHidden(columnIndex);
     }
+        
+    /**
+     * Enables or disables automatic style updates in
+     * {@link #setRowHidden(int, boolean)} and
+     * {@link #setRowHeight(int, float)}. Should be set to
+     * false before repeated calls to above mentioned methods,
+     * then set to true again, followed by a call to
+     * {@link #recalculateSheetStyles()} in order to ensure that the
+     * visual/client side representation is updated.
+     * <br>
+     * Defaults to true.
+     * 
+     * @param enabled if false, above mentioned methods will not
+     *                automatically update the visual representation
+     *                of the sheet until set to true again.
+     */
+    public void setActiveStyleRecalculation(boolean enabled) {
+    	activeStyleRecalculation = enabled;
+    }
+    
+    /**
+     * Performs sheet size recalculation and updates styles
+     * if necessary. Should be called manually after calls to
+     * {@link #setRowHidden(int, boolean)} or
+     * {@link #setRowHeight(int, float)} after
+     * {@link #setActiveStyleRecalculation(boolean)} has been
+     * enabled (and subsequently disabled).
+     */
+    public void recalculateSheetStyles() {
+        SpreadsheetFactory.calculateSheetSizes(this, getActiveSheet());
+    	
+        if (hasSheetOverlays()) {
+            reloadImageSizesFromPOI = true;
+            loadOrUpdateOverlays();
+        }
 
+        getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
+    }
+    
     /**
      * Hides or shows the given row, see {@link Row#setZeroHeight(boolean)}.
      *
@@ -3323,17 +3369,10 @@ public class Spreadsheet extends Component
         }
         row.setZeroHeight(hidden);
 
-        // can't assume the state already had room for the row in its
-        // arrays, it may have been created above. This avoids
-        // ArrayIndexOutOfBoundsException
-        SpreadsheetFactory.calculateSheetSizes(this, getActiveSheet());
-
-        if (hasSheetOverlays()) {
-            reloadImageSizesFromPOI = true;
-            loadOrUpdateOverlays();
+        // Only recalculate styles if it is not actively disabled
+        if (activeStyleRecalculation) {
+        	recalculateSheetStyles();
         }
-
-        getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
     }
 
     /**
@@ -3967,27 +4006,20 @@ public class Spreadsheet extends Component
      *            New row height in points
      */
     public void setRowHeight(int index, float height) {
-        if (height == 0.0F) {
-            setRowHidden(index, true);
-        } else {
-            Row row = getActiveSheet().getRow(index);
-            ArrayList<Integer> _hiddenRowIndexes = new ArrayList<>(
-                    getHiddenRowIndexes());
-            if (_hiddenRowIndexes.contains(Integer.valueOf(index + 1))) {
-                _hiddenRowIndexes.remove(Integer.valueOf(index + 1));
-                if (row != null && row.getZeroHeight()) {
-                    row.setZeroHeight(false);
-                }
-            }
-            if (row == null) {
-                row = getActiveSheet().createRow(index);
-            }
-            row.setHeightInPoints(height);
-            setHiddenRowIndexes(_hiddenRowIndexes);
-            // can't assume the state already had room for the row in its
-            // arrays, it may have been created above. This avoids
-            // ArrayIndexOutOfBoundsException
-            SpreadsheetFactory.calculateSheetSizes(this, getActiveSheet());
+        Row row = getActiveSheet().getRow(index);
+        if (row == null) {
+        	row = getActiveSheet().createRow(index);
+        }
+                
+        if (height == 0.0f) {
+            row.setZeroHeight(true);
+        } else {      	
+        	row.setZeroHeight(false);           	
+            row.setHeightInPoints(height);            
+        }
+        
+        if (activeStyleRecalculation) {
+    		recalculateSheetStyles();
         }
     }
 

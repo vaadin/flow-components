@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFTable;
@@ -252,10 +253,49 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
             popupButton.markActive(!temp.isEmpty());
             filteredRows.addAll(temp);
         }
-        Spreadsheet spreadsheet = getSpreadsheet();
-        for (int r = filteringRegion.getFirstRow(); r <= filteringRegion
-                .getLastRow(); r++) {
-            spreadsheet.setRowHidden(r, filteredRows.contains(r));
+
+        // Perform hiding/unhiding as an inlined operation, without going through
+        // the usual API. This cuts down on unnecessary and repeated operations
+        // greatly.
+        final Spreadsheet spreadsheet = getSpreadsheet();
+        final Sheet sheet = spreadsheet.getActiveSheet();
+        final int from = filteringRegion.getFirstRow();
+        final int to = filteringRegion.getLastRow();
+        boolean modified = false;
+        
+        for (int i = from; i <= to; ++i) {
+        	Row r = sheet.getRow(i);
+        	if (r == null) {
+        		// This check is likely unnecessary, but left intact regardless
+        		r = sheet.createRow(i);
+        	}
+        	
+        	if (r.getZeroHeight()) { // isRowHidden
+        		if (!filteredRows.contains(i)) {
+        			// Row should not be hidden
+        			// This is the only meaningful operation performed by
+        			// setRowHidden(false)
+        			r.setZeroHeight(false);
+        			modified = true;
+        		}
+        	} else {
+        		if (filteredRows.contains(i)) {
+        			// Row should be hidden.
+        			// This is the only meaningful operation performed by
+        			// setRowHidden(true)
+        			r.setZeroHeight(true);
+        			modified = true;
+        		}
+        	}
+        }
+
+        // Recalculate sheet sizes, reload overlays and update styles if
+        // necessary. We need to call this method if we've altered visibility
+        // of rows. This operation used to be handled by 
+        // Spreadsheet#setRowHidden(int,boolean) as a side effect; doing
+        // it once at this point speeds up operations a lot
+        if (modified) {
+        	spreadsheet.recalculateSheetStyles();
         }
     }
 
