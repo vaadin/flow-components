@@ -51,9 +51,9 @@ public class FormItemElement extends TestBenchElement {
     }
 
     /**
-     * Retrieves the input element associated with the label of this form item.
+     * Retrieves the field element associated with this form item.
      *
-     * @return the input element associated with the label of this form item.
+     * @return the field element associated with this form item.
      */
     public TestBenchElement getField() {
         return getPropertyElements("children").stream()
