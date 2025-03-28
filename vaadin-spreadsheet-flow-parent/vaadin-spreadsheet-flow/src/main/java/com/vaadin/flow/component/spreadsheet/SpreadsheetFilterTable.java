@@ -257,8 +257,8 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
         }
 
         // Perform hiding/unhiding as an inlined operation, without going
-        // through the usual API. This cuts down on unnecessary and
-        // repeated operations greatly.
+        // through the spreadsheet setRowHidden API. This cuts down on
+        // unnecessary and repeated operations greatly.
         final Spreadsheet spreadsheet = getSpreadsheet();
         final Sheet sheet = spreadsheet.getActiveSheet();
         final int from = filteringRegion.getFirstRow();
@@ -268,23 +268,19 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
         for (int i = from; i <= to; ++i) {
             Row r = sheet.getRow(i);
             if (r == null) {
-                // This check is likely unnecessary, but left intact regardless
+                // This check should be unnecessary, but left intact regardless
                 r = sheet.createRow(i);
             }
 
-            if (r.getZeroHeight()) { // isRowHidden
+            if (r.getZeroHeight()) { // equivalent to ss.isRowHidden()
                 if (!filteredRows.contains(i)) {
                     // Row should not be hidden
-                    // This is the only meaningful operation performed by
-                    // setRowHidden(false)
                     r.setZeroHeight(false);
                     modified = true;
                 }
             } else {
                 if (filteredRows.contains(i)) {
                     // Row should be hidden.
-                    // This is the only meaningful operation performed by
-                    // setRowHidden(true)
                     r.setZeroHeight(true);
                     modified = true;
                 }
