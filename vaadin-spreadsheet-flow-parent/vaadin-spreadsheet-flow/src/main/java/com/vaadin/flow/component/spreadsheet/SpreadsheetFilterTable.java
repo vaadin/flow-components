@@ -255,9 +255,8 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
         }
 
         // Perform hiding/unhiding as an inlined operation, without going
-        // through
-        // the usual API. This cuts down on unnecessary and repeated operations
-        // greatly.
+        // through the usual API. This cuts down on unnecessary and
+        // repeated operations greatly.
         final Spreadsheet spreadsheet = getSpreadsheet();
         final Sheet sheet = spreadsheet.getActiveSheet();
         final int from = filteringRegion.getFirstRow();
