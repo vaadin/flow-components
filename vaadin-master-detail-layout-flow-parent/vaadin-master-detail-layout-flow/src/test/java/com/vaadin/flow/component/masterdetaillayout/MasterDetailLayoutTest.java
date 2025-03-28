@@ -241,6 +241,8 @@ public class MasterDetailLayoutTest {
 
         Assert.assertEquals(layout.getOrientation(),
                 MasterDetailLayout.Orientation.VERTICAL);
+        Assert.assertEquals("vertical",
+                layout.getElement().getProperty("orientation"));
     }
 
     @Test
@@ -252,6 +254,8 @@ public class MasterDetailLayoutTest {
 
         Assert.assertEquals(layout.getContainment(),
                 MasterDetailLayout.Containment.VIEWPORT);
+        Assert.assertEquals("viewport",
+                layout.getElement().getProperty("containment"));
     }
 
     @Test

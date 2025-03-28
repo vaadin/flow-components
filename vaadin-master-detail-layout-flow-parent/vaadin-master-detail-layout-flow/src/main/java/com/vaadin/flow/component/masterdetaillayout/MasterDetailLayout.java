@@ -279,7 +279,7 @@ public class MasterDetailLayout extends Component
     }
 
     /**
-     * Gets the orientation of the layout.
+     * Gets the orientation of the layout. Defaults to {@code horizontal}
      *
      * @return the orientation
      */
@@ -303,7 +303,7 @@ public class MasterDetailLayout extends Component
     }
 
     /**
-     * Gets the containment of the layout.
+     * Gets the containment of the layout. Defaults to {@code layout}
      *
      * @return the containment
      */
