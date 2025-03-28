@@ -150,10 +150,12 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
             popupButton.markActive(false);
         }
         Spreadsheet spreadsheet = getSpreadsheet();
-        for (int r = filteringRegion.getFirstRow(); r <= filteringRegion
-                .getLastRow(); r++) {
-            spreadsheet.setRowHidden(r, false);
-        }
+        spreadsheet.deferSizeCalculations(() -> {
+            for (int r = filteringRegion.getFirstRow(); r <= filteringRegion
+                    .getLastRow(); r++) {
+                spreadsheet.setRowHidden(r, false);
+            }
+        });
     }
 
     /**

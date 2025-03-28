@@ -3275,31 +3275,19 @@ public class Spreadsheet extends Component
      *            True to hide the target column, false to show it.
      */
     public void setColumnHidden(int columnIndex, boolean hidden) {
+        final boolean shouldShow = !hidden && isColumnHidden(columnIndex);
+
         getActiveSheet().setColumnHidden(columnIndex, hidden);
-        ArrayList<Integer> _hiddenColumnIndexes = new ArrayList<>(
-                getHiddenColumnIndexes());
-        int[] _colW = Arrays.copyOf(getColW(), getColW().length);
-        if (hidden && !_hiddenColumnIndexes.contains(columnIndex + 1)) {
-            _hiddenColumnIndexes.add(columnIndex + 1);
-            _colW[columnIndex] = 0;
-        } else if (!hidden && _hiddenColumnIndexes.contains(columnIndex + 1)) {
-            _hiddenColumnIndexes
-                    .remove(_hiddenColumnIndexes.indexOf(columnIndex + 1));
-            _colW[columnIndex] = (int) getActiveSheet()
-                    .getColumnWidthInPixels(columnIndex);
+
+        if (shouldShow) {
             getCellValueManager().clearCacheForColumn(columnIndex + 1);
             getCellValueManager().loadCellData(firstRow, columnIndex + 1,
                     lastRow, columnIndex + 1);
         }
-        setHiddenColumnIndexes(_hiddenColumnIndexes);
-        setColW(_colW);
 
-        if (hasSheetOverlays()) {
-            reloadImageSizesFromPOI = true;
-            loadOrUpdateOverlays();
+        if (activeStyleRecalculation) {
+            recalculateSheetStyles();
         }
-
-        getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
     }
 
     /**
@@ -3315,31 +3303,32 @@ public class Spreadsheet extends Component
     }
 
     /**
-     * Enables or disables automatic style updates in
-     * {@link #setRowHidden(int, boolean)} and
-     * {@link #setRowHeight(int, float)}. Should be set to false before repeated
-     * calls to above mentioned methods, then set to true again, followed by a
-     * call to {@link #recalculateSheetStyles()} in order to ensure that the
-     * visual/client side representation is updated. <br>
-     * Defaults to true.
+     * Disable full-document size recalculations during repeated row/column size
+     * and visibility changes. Intended for use with long operations making
+     * repeated alterations to the document. Recalculates document sizes and
+     * styles after runnable has finished running.
      * 
-     * @param enabled
-     *            if false, above mentioned methods will not automatically
-     *            update the visual representation of the sheet until set to
-     *            true again.
+     * @param until
+     *            Runnable/lambda that executes document modification operations
      */
-    public void setActiveStyleRecalculation(boolean enabled) {
-        activeStyleRecalculation = enabled;
+    void deferSizeCalculations(Runnable until) {
+        activeStyleRecalculation = false;
+        try {
+            until.run();
+        } finally {
+            activeStyleRecalculation = true;
+        }
+        recalculateSheetStyles();
     }
 
     /**
      * Performs sheet size recalculation and updates styles if necessary. Should
-     * be called manually after calls to {@link #setRowHidden(int, boolean)} or
-     * {@link #setRowHeight(int, float)} after
-     * {@link #setActiveStyleRecalculation(boolean)} has been enabled (and
-     * subsequently disabled).
+     * be called if full document size recalculations have been disabled by
+     * toggling {@link #activeStyleRecalculation} to false, performing
+     * row/column resizing/hiding/unhiding and then back to true.
+     * {@link #deferSizeCalculations(Runnable)} handles this automatically.
      */
-    public void recalculateSheetStyles() {
+    void recalculateSheetStyles() {
         SpreadsheetFactory.calculateSheetSizes(this, getActiveSheet());
 
         if (hasSheetOverlays()) {

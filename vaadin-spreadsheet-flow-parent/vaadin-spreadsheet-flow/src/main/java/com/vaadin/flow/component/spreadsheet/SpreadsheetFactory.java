@@ -1069,12 +1069,14 @@ public class SpreadsheetFactory implements Serializable {
              * invisible frozen rows/columns are effectively hidden in Excel. We
              * mimic this behavior here.
              */
-            for (int col = 0; col < leftCol; col++) {
-                spreadsheet.setColumnHidden(col, true);
-            }
-            for (int row = 0; row < topRow; row++) {
-                spreadsheet.setRowHidden(row, true);
-            }
+            spreadsheet.deferSizeCalculations(() -> {
+                for (int col = 0; col < leftCol; col++) {
+                    spreadsheet.setColumnHidden(col, true);
+                }
+                for (int row = 0; row < topRow; row++) {
+                    spreadsheet.setRowHidden(row, true);
+                }
+            });
         } else {
             spreadsheet.setVerticalSplitPosition(0);
             spreadsheet.setHorizontalSplitPosition(0);
