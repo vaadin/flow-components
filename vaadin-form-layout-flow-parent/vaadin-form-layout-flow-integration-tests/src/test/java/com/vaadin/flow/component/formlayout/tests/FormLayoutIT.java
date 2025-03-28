@@ -98,11 +98,11 @@ public class FormLayoutIT extends AbstractComponentIT {
         FormLayoutElement formLayout = $(FormLayoutElement.class)
                 .id("binder-form-layout");
 
-        formLayout.getFormItemByLabel("First name").getInput().sendKeys("foo");
-        formLayout.getFormItemByLabel("Last name").getInput().sendKeys("bar");
+        formLayout.getFormItemByLabel("First name").getField().sendKeys("foo");
+        formLayout.getFormItemByLabel("Last name").getField().sendKeys("bar");
         formLayout.$(FormItemElement.class).id("phone-item")
                 .$(TextFieldElement.class).first().setValue("123-456-789");
-        formLayout.getFormItemByLabel("E-mail").getInput()
+        formLayout.getFormItemByLabel("E-mail").getField()
                 .sendKeys("example@foo.bar");
 
         setValue("binder-birth-date", "2003-01-02");
