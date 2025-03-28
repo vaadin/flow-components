@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.masterdetaillayout;
 
+import java.util.Locale;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -46,6 +47,20 @@ public class MasterDetailLayout extends Component
 
     public static final String MASTER_SLOT = "";
     public static final String DETAIL_SLOT = "detail";
+
+    /**
+     * Supported orientation values for {@link MasterDetailLayout}.
+     */
+    public enum Orientation {
+        HORIZONTAL, VERTICAL
+    }
+
+    /**
+     * Supported containment values for {@link MasterDetailLayout}.
+     */
+    public enum Containment {
+        LAYOUT, VIEWPORT
+    }
 
     /**
      * Gets the component currently in the master area.
@@ -261,6 +276,132 @@ public class MasterDetailLayout extends Component
         Objects.requireNonNull(unit, "Unit cannot be null");
         getElement().setProperty("detailMinSize",
                 HasSize.getCssSize(minSize, unit));
+    }
+
+    /**
+     * Gets the orientation of the layout. Defaults to {@code horizontal}
+     *
+     * @return the orientation
+     */
+    public Orientation getOrientation() {
+        String orientation = getElement().getProperty("orientation");
+        if (orientation != null) {
+            return Orientation.valueOf(orientation.toUpperCase());
+        }
+        return Orientation.HORIZONTAL;
+    }
+
+    /**
+     * Sets the orientation of the layout.
+     *
+     * @param orientation
+     *            the orientation
+     */
+    public void setOrientation(Orientation orientation) {
+        getElement().setProperty("orientation",
+                orientation.name().toLowerCase(Locale.ENGLISH));
+    }
+
+    /**
+     * Gets the containment of the layout. Defaults to {@code layout}
+     *
+     * @return the containment
+     */
+    public Containment getContainment() {
+        String containment = getElement().getProperty("containment");
+        if (containment != null) {
+            return Containment.valueOf(containment.toUpperCase());
+        }
+        return Containment.LAYOUT;
+    }
+
+    /**
+     * Sets the containment of the layout.
+     *
+     * @param orientation
+     *            the orientation
+     */
+    public void setContainment(Containment containment) {
+        getElement().setProperty("containment",
+                containment.name().toLowerCase(Locale.ENGLISH));
+    }
+
+    /**
+     * Gets whether the layout overlay mode is enforced.
+     *
+     * @return {@code true} if the overlay mode is enforced, {@code false}
+     *         otherwise
+     */
+    public boolean isForceOverlay() {
+        return getElement().getProperty("forceOverlay", false);
+    }
+
+    /**
+     * Sets whether the layout overlay mode is enforced.
+     *
+     * @param forceOverlay
+     *            {@code true} if the overlay mode is enforced, {@code false}
+     *            otherwise
+     */
+    public void setForceOverlay(boolean forceOverlay) {
+        getElement().setProperty("forceOverlay", forceOverlay);
+    }
+
+    /**
+     * Gets whether the layout animation is enabled.
+     *
+     * @return {@code true} if the animation is enabled, {@code false} otherwise
+     */
+    public boolean isAnimationEnabled() {
+        return !getElement().getProperty("noAnimation", false);
+    }
+
+    /**
+     * Sets whether the layout animation is enabled.
+     *
+     * @param enabled
+     *            {@code true} if the animation is enabled, {@code false}
+     *            otherwise
+     */
+    public void setAnimationEnabled(boolean enabled) {
+        getElement().setProperty("noAnimation", !enabled);
+    }
+
+    /**
+     * Gets the threshold (in CSS length units) at which the layout switches to
+     * the "stack" mode, making detail area fully cover the master area.
+     *
+     * @return the stack threshold in CSS length units, or {@code null} if the
+     *         threshold is not set
+     */
+    public String getStackThreshold() {
+        return getElement().getProperty("stackThreshold");
+    }
+
+    /**
+     * Sets the threshold (in CSS length units) at which the layout switches to
+     * the "stack" mode, making detail area fully cover the master area.
+     *
+     * @param threshold
+     *            the stack threshold in CSS length units
+     */
+    public void setStackThreshold(String threshold) {
+        getElement().setProperty("stackThreshold", threshold);
+    }
+
+    /**
+     * Sets the threshold (in CSS length units) at which the layout switches to
+     * the "stack" mode, making detail area fully cover the master area.
+     *
+     * @param threshold
+     *            the stack threshold
+     * @param unit
+     *            the unit
+     */
+    public void setStackThreshold(float threshold, Unit unit) {
+        Objects.requireNonNull(unit, "Unit cannot be null");
+        getElement().setProperty("stackThreshold",
+                HasSize.getCssSize(threshold, unit));
     }
 
     @Override
