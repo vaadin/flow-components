@@ -927,20 +927,17 @@ public class FormLayout extends Component
      * {@link #setAutoResponsive(boolean)} is enabled. The value must be
      * provided in CSS length units, e.g. {@code 100px}.
      * <p>
-     * By default, the web component uses a width of {@code 13em}.
+     * When the column width is {@code null}, the web component defaults to
+     * {@code 12em} or uses the value of {@code --vaadin-field-default-width} if
+     * that CSS custom property is defined.
      * <p>
      * This setting only applies when {@link #setAutoResponsive(boolean)} is
      * enabled.
      *
      * @param columnWidth
-     *            the width of columns
+     *            the width of columns or {@code null} to use the default
      */
     public void setColumnWidth(String columnWidth) {
-        Objects.requireNonNull(columnWidth, "Column width cannot be null");
-        if (columnWidth.isBlank()) {
-            throw new IllegalArgumentException("Column width cannot be empty");
-        }
-
         getElement().setProperty("columnWidth", columnWidth);
     }
 
@@ -949,7 +946,9 @@ public class FormLayout extends Component
      * {@link #setAutoResponsive(boolean)} is enabled. The value must be
      * provided with a {@link Unit}, e.g. {@code 100} and {@link Unit#PIXELS}.
      * <p>
-     * By default, the web component uses a width of {@code 13em}.
+     * When the column width is {@code null}, the web component defaults to
+     * {@code 12em} or uses the value of {@code --vaadin-field-default-width} if
+     * that CSS custom property is defined.
      * <p>
      * This setting only applies when {@link #setAutoResponsive(boolean)} is
      * enabled.
@@ -967,9 +966,13 @@ public class FormLayout extends Component
     /**
      * Gets the width of columns that is used when
      * {@link #setAutoResponsive(boolean)} is enabled.
+     * <p>
+     * When the column width is {@code null}, the web component defaults to
+     * {@code 12em} or uses the value of {@code --vaadin-field-default-width} if
+     * that CSS custom property is defined.
      *
-     * @return the value and CSS unit as a string, or {@code null} if not
-     *         explicitly set
+     * @return the value and CSS unit as a string, or {@code null} if not set,
+     *         in which case the web component uses its default value
      * @see #setColumnWidth(String)
      * @see #setColumnWidth(float, Unit)
      */
