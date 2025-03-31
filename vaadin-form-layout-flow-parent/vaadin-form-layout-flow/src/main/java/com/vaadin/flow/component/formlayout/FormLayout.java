@@ -902,7 +902,7 @@ public class FormLayout extends Component
      * provided with a {@link Unit}, e.g. {@code 100} and {@link Unit#PIXELS}.
      * <p>
      * When the column width is {@code null}, the web component defaults to
-     * {@code 12em} or uses the value of {@code --vaadin-field-default-width`}
+     * {@code 12em} or uses the value of {@code --vaadin-field-default-width}
      * if that CSS custom property is defined.
      * <p>
      * This setting only applies when {@link #setAutoResponsive(boolean)} is
