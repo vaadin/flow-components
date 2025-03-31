@@ -232,6 +232,75 @@ public class MasterDetailLayoutTest {
                 layout.getElement().getProperty("detailMinSize"));
     }
 
+    @Test
+    public void setOrientation_getOrientation() {
+        Assert.assertEquals(layout.getOrientation(),
+                MasterDetailLayout.Orientation.HORIZONTAL);
+
+        layout.setOrientation(MasterDetailLayout.Orientation.VERTICAL);
+
+        Assert.assertEquals(layout.getOrientation(),
+                MasterDetailLayout.Orientation.VERTICAL);
+        Assert.assertEquals("vertical",
+                layout.getElement().getProperty("orientation"));
+    }
+
+    @Test
+    public void setContainment_getContainment() {
+        Assert.assertEquals(layout.getContainment(),
+                MasterDetailLayout.Containment.LAYOUT);
+
+        layout.setContainment(MasterDetailLayout.Containment.VIEWPORT);
+
+        Assert.assertEquals(layout.getContainment(),
+                MasterDetailLayout.Containment.VIEWPORT);
+        Assert.assertEquals("viewport",
+                layout.getElement().getProperty("containment"));
+    }
+
+    @Test
+    public void setForceOverlay_isForceOverlay() {
+        Assert.assertFalse(layout.isForceOverlay());
+        Assert.assertFalse(
+                layout.getElement().getProperty("forceOverlay", false));
+
+        layout.setForceOverlay(true);
+
+        Assert.assertTrue(layout.isForceOverlay());
+        Assert.assertTrue(
+                layout.getElement().getProperty("forceOverlay", false));
+    }
+
+    @Test
+    public void setAnimationEnabled_isAnimationEnabled() {
+        Assert.assertTrue(layout.isAnimationEnabled());
+        Assert.assertFalse(
+                layout.getElement().getProperty("noAnimation", false));
+
+        layout.setAnimationEnabled(false);
+
+        Assert.assertFalse(layout.isAnimationEnabled());
+        Assert.assertTrue(
+                layout.getElement().getProperty("noAnimation", false));
+    }
+
+    @Test
+    public void setStackThreshold_getStackThreshold() {
+        String threshold = "600px";
+        layout.setStackThreshold(threshold);
+        Assert.assertEquals(threshold, layout.getStackThreshold());
+        Assert.assertEquals(threshold,
+                layout.getElement().getProperty("stackThreshold"));
+    }
+
+    @Test
+    public void setStackThresholdWithUnit_getStackThreshold() {
+        layout.setStackThreshold(30, Unit.EM);
+        Assert.assertEquals("30.0em", layout.getStackThreshold());
+        Assert.assertEquals("30.0em",
+                layout.getElement().getProperty("stackThreshold"));
+    }
+
     private void assertMasterContent(Component component) {
         Assert.assertEquals("", component.getElement().getAttribute("slot"));
         Assert.assertEquals(layout.getElement(),
