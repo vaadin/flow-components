@@ -59,6 +59,9 @@ public class Card extends Component implements HasSize,
     private static final String HEADER_SUFFIX_SLOT_NAME = "header-suffix";
     private static final String FOOTER_SLOT_NAME = "footer";
 
+    private static final String CARD_TITLE_PROPERTY = "cardTitle";
+    private static final String TITLE_HEADING_LEVEL_PROPERTY = "titleHeadingLevel";
+
     private Element contentRoot;
 
     private boolean featureFlagEnabled;
@@ -125,27 +128,20 @@ public class Card extends Component implements HasSize,
 
     /**
      * Sets the title heading level property for the titles set using
-     * {@link #setTitle(String)}. The acceptable range is [1, 6] and the default
-     * is 2. Setting {@code null} resets it to default. Does not affect the
-     * title components set using {@link #setTitle(Component)}.
+     * {@link #setTitle(String)}. The default is 2. Setting {@code null} resets
+     * it to default. Does not affect the title components set using
+     * {@link #setTitle(Component)}.
      *
      * @param titleHeadingLevel
-     *            the title heading level property, {@code null} or in the range
-     *            [1, 6]
-     * @throws IllegalArgumentException
-     *             if the title heading level property is an integer out of the
-     *             range [1, 6]
+     *            the title heading level property, {@code null} to remove
      */
     public void setTitleHeadingLevel(Integer titleHeadingLevel) {
         if (titleHeadingLevel == null) {
-            getElement().removeProperty("titleHeadingLevel");
-            return;
+            getElement().removeProperty(TITLE_HEADING_LEVEL_PROPERTY);
+        } else {
+            getElement().setProperty(TITLE_HEADING_LEVEL_PROPERTY,
+                    titleHeadingLevel);
         }
-        if (titleHeadingLevel < 1 || titleHeadingLevel > 6) {
-            throw new IllegalArgumentException(
-                    "Title heading level must be between 1 and 6.");
-        }
-        getElement().setProperty("titleHeadingLevel", titleHeadingLevel);
     }
 
     /**
@@ -170,7 +166,7 @@ public class Card extends Component implements HasSize,
      * @return the value of the title property
      */
     public String getTitleAsText() {
-        return getElement().getProperty("cardTitle", "");
+        return getElement().getProperty(CARD_TITLE_PROPERTY, "");
     }
 
     /**

@@ -93,14 +93,23 @@ public class CardTest {
     }
 
     @Test
-    public void setTitleHeadingLevel_throwsIllegalArgumentExceptionOnlyForOutOfRange() {
-        card.setTitleHeadingLevel(null);
+    public void setTitleHeadingLevel_elementPropertyIsUpdated() {
+        var titleHeadingLevel = 1;
+        card.setTitleHeadingLevel(titleHeadingLevel);
+        Assert.assertEquals(titleHeadingLevel,
+                card.getElement().getProperty("titleHeadingLevel", -1));
+        titleHeadingLevel = 7;
+        card.setTitleHeadingLevel(titleHeadingLevel);
+        Assert.assertEquals(titleHeadingLevel,
+                card.getElement().getProperty("titleHeadingLevel", -1));
+    }
+
+    @Test
+    public void setTitleHeadingLevelNull_elementPropertyIsRemoved() {
         card.setTitleHeadingLevel(1);
-        card.setTitleHeadingLevel(6);
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> card.setTitleHeadingLevel(7));
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> card.setTitleHeadingLevel(0));
+        card.setTitleHeadingLevel(null);
+        Assert.assertFalse(card.getElement().hasProperty("titleHeadingLevel"));
+    }
 
     @Test
     public void setStringTitle_setComponentTitle_stringTitleIsRemoved() {
