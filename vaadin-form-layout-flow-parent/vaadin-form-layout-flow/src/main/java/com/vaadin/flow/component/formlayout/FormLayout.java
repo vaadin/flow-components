@@ -385,12 +385,14 @@ public class FormLayout extends Component
      * <pre>
      * FormLayout formLayout = new FormLayout();
      * formLayout.setAutoResponsive(true);
-     * formLayout.addFormRow(new TextField("First name"),
-     *         new TextField("Last name"));
      *
-     * TextArea addressField = new TextArea("Address");
-     * formLayout.setColspan(addressField, 2);
-     * formLayout.addFormRow(addressField);
+     * FormRow row0 = new FormRow();
+     * row0.add(new TextField("First name"), new TextField("Last name"));
+     *
+     * FormRow row1 = new FormRow();
+     * row1.add(new TextArea("Address"), 2); // shorthand for {@link #add} + {@link #setColspan}
+     *
+     * formLayout.add(row0, row1);
      * </pre>
      *
      * @author Vaadin Ltd
