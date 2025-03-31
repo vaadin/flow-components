@@ -414,6 +414,57 @@ public class FormLayout extends Component
         }
 
         /**
+         * Adds a component with the desired colspan. This method is a shorthand
+         * for calling {@link #add(Component...)} and
+         * {@link #setColspan(Component, int)}
+         *
+         * @param component
+         *            the component to add
+         *
+         * @param colspan
+         *            the desired colspan for the component
+         *
+         */
+        public void add(Component component, int colspan) {
+            add(component);
+            setColspan(component, colspan);
+        }
+
+        /**
+         * Sets the colspan of the given component's element. Will default to 1
+         * if an integer lower than 1 is supplied. You can directly add
+         * components with the wanted colspan with {@link #add(Component, int)}.
+         *
+         * @param component
+         *            the component to set the colspan for, not {@code null}
+         *
+         * @param colspan
+         *            the desired colspan for the component
+         *
+         */
+        public void setColspan(Component component, int colspan) {
+            Objects.requireNonNull(component, "component cannot be null");
+            component.getElement().setAttribute("colspan",
+                    String.valueOf(Math.max(1, colspan)));
+        }
+
+        /**
+         * Gets the colspan of the given component. If none is set, returns 1.
+         *
+         * @param component
+         *            the component whose colspan is retrieved
+         * @return the colspan of the given component or 1 if none is set
+         */
+        public int getColspan(Component component) {
+            String colspan = component.getElement().getAttribute("colspan");
+            if (colspan != null && colspan.matches("\\d+")) {
+                return Integer.parseInt(colspan);
+            } else {
+                return 1;
+            }
+        }
+
+        /**
          * Creates a new {@link FormItem} with the given component and the label
          * string, and adds it to the form row. The label is inserted into the
          * form item as a {@link NativeLabel}.
@@ -482,13 +533,8 @@ public class FormLayout extends Component
      */
     public void setColspan(Component component, int colspan) {
         Objects.requireNonNull(component, "component cannot be null");
-        String strColspan = "";
-        if (colspan < 1) {
-            strColspan = "1";
-        } else {
-            strColspan = String.valueOf(colspan);
-        }
-        component.getElement().setAttribute("colspan", strColspan);
+        component.getElement().setAttribute("colspan",
+                String.valueOf(Math.max(1, colspan)));
     }
 
     /**
@@ -517,13 +563,9 @@ public class FormLayout extends Component
      * @return the colspan of the given component or 1 if none is set
      */
     public int getColspan(Component component) {
-        String strColspan = component.getElement().getAttribute("colspan");
-        if (strColspan == null) {
-            return 1;
-            // need this in case the colspan is modified outside the API to an
-            // incorrect format somehow.
-        } else if (strColspan.matches("\\d+")) {
-            return Integer.parseInt(strColspan);
+        String colspan = component.getElement().getAttribute("colspan");
+        if (colspan != null && colspan.matches("\\d+")) {
+            return Integer.parseInt(colspan);
         } else {
             return 1;
         }
