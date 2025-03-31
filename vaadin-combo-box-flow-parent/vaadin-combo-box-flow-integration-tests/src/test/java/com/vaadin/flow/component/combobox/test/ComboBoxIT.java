@@ -49,6 +49,7 @@ public class ComboBoxIT extends AbstractComboBoxIT {
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id("string-selection-box");
         WebElement message = findElement(By.id("string-selection-message"));
+        Assert.assertEquals("Input browser name", comboBox.getPlaceholder());
 
         comboBox.openPopup();
         executeScript(
