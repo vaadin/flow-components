@@ -86,7 +86,7 @@ import elemental.json.JsonValue;
  * FormLayout formLayout = new FormLayout();
  * formLayout.setAutoResponsive(true);
  * formLayout.add(new TextField("First name"), new TextField("Last name"));
- * formLayout.add(new TextArea("Address"), 2);
+ * formLayout.add(new TextArea("Address"), 2); // colspan 2
  * </pre>
  *
  * <p>
@@ -112,17 +112,17 @@ import elemental.json.JsonValue;
  * Here is an example of using {@link FormRow}:
  *
  * <pre>
-* FormLayout formLayout = new FormLayout();
-* formLayout.setAutoResponsive(true);
-*
-* FormRow row0 = new FormRow();
-* row0.add(new TextField("First name"), new TextField("Last name"));
-*
-* FormRow row1 = new FormRow();
-* row1.add(new TextArea("Address"), 2); // shorthand for {@code add} and {@code setColspan}
-*
-* formLayout.add(row0, row1);
-* </pre>
+ * FormLayout formLayout = new FormLayout();
+ * formLayout.setAutoResponsive(true);
+ *
+ * FormRow firstRow = new FormRow();
+ * firstRow.add(new TextField("First name"), new TextField("Last name"));
+ *
+ * FormRow secondRow = new FormRow();
+ * secondRow.add(new TextArea("Address"), 2); // colspan 2
+ *
+ * formLayout.add(firstRow, secondRow);
+ * </pre>
  *
  * <h3>Expanding Columns and Fields</h3>
  * <p>
@@ -147,13 +147,15 @@ import elemental.json.JsonValue;
  * formLayout.setAutoResponsive(true);
  * formLayout.setLabelsAside(true);
  *
- * FormRow firstRow = formLayout.addFormRow();
+ * FormRow firstRow = new FormRow();
  * firstRow.addFormItem(new TextField(), "First Name");
  * firstRow.addFormItem(new TextField(), "Last Name");
  *
- * FormRow secondRow = formLayout.addFormRow();
+ * FormRow secondRow = new FormRow();
  * FormItem addressField = secondRow.addFormItem(new TextArea(), "Address");
- * formLayout.setColspan(addressField, 2);
+ * secondRow.setColspan(addressField, 2);
+ *
+ * formLayout.add(firstRow, secondRow);
  * </pre>
  * <p>
  * With this, FormLayout will display labels beside fields, falling back to the
@@ -389,13 +391,13 @@ public class FormLayout extends Component
      * FormLayout formLayout = new FormLayout();
      * formLayout.setAutoResponsive(true);
      *
-     * FormRow row0 = new FormRow();
-     * row0.add(new TextField("First name"), new TextField("Last name"));
+     * FormRow firstRow = new FormRow();
+     * firstRow.add(new TextField("First name"), new TextField("Last name"));
      *
-     * FormRow row1 = new FormRow();
-     * row1.add(new TextArea("Address"), 2); // shorthand for {@code add} and {@code setColspan}
+     * FormRow secondRow = new FormRow();
+     * secondRow.add(new TextArea("Address"), 2); // colspan 2
      *
-     * formLayout.add(row0, row1);
+     * formLayout.add(firstRow, secondRow);
      * </pre>
      *
      * @author Vaadin Ltd
