@@ -99,6 +99,19 @@ public class CardTest {
                 () -> card.setTitleHeadingLevel(7));
         Assert.assertThrows(IllegalArgumentException.class,
                 () -> card.setTitleHeadingLevel(0));
+
+    @Test
+    public void setStringTitle_setComponentTitle_stringTitleIsRemoved() {
+        card.setTitle("Some Title");
+        card.setTitle(new Div("Other Title"));
+        Assert.assertEquals("", card.getTitleAsText());
+    }
+
+    @Test
+    public void setComponentTitle_setStringTitle_componentTitleIsRemoved() {
+        card.setTitle(new Div("Other Title"));
+        card.setTitle("Some Title");
+        Assert.assertNull(card.getTitle());
     }
 
     @Test
