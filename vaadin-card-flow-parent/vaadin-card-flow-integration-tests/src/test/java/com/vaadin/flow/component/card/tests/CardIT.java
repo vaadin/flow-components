@@ -68,6 +68,6 @@ public class CardIT extends AbstractComponentIT {
         var stringTitleComponent = card.getTitle();
         clickElementWithJs("set-title-component");
         Assert.assertNotEquals(stringTitleComponent, card.getTitle());
-        Assert.assertEquals("", card.getStringTitle());
+        Assert.assertNull(card.getStringTitle());
     }
 }
