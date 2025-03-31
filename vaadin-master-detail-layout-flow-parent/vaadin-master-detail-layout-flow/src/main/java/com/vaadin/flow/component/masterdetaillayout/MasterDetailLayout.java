@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.masterdetaillayout;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -81,7 +82,9 @@ public class MasterDetailLayout extends Component
      *         component in the detail area
      */
     public Component getDetail() {
-        return detail.getElement().getComponent().orElse(null);
+        return Optional.ofNullable(detail)
+                .flatMap(hasElement -> hasElement.getElement().getComponent())
+                .orElse(null);
     }
 
     /**
