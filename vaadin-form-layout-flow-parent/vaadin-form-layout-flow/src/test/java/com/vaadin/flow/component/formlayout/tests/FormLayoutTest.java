@@ -346,6 +346,9 @@ public class FormLayoutTest {
 
         row.setColspan(input, 2);
         Assert.assertEquals(2, row.getColspan(input));
+
+        row.setColspan(input, -1);
+        Assert.assertEquals(1, row.getColspan(input));
     }
 
     @Test
