@@ -19,31 +19,28 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 /**
- * A TestBench element representing a <code>&lt;vaadin-form-item&gt;</code>
- * element.
+ * A TestBench element representing a {@code <vaadin-form-item>} element.
  */
 @Element("vaadin-form-item")
 public class FormItemElement extends TestBenchElement {
 
     /**
-     * Retrieves the label element from the form items label slot.
+     * Gets the label element from the label slot.
      *
-     * @return the label element as a TestBenchElement
+     * @return the label element as a TestBenchElement or {@code null} if the
+     *         form item contains no label.
      */
     public TestBenchElement getLabel() {
-        return (TestBenchElement) executeScript(
-                "const formItem = arguments[0];"
-                        + "return Array.from(formItem.children).filter("
-                        + "el => el.getAttribute('slot') === 'label'" + ")[0];",
-                this);
+        return (TestBenchElement) executeScript("""
+                return arguments[0].querySelector(':scope > [slot="label"]');
+                """, this);
     }
 
     /**
-     * Retrieves the text of the label element associated with this form item.
+     * Gets the text of the label element.
      *
-     * @return the text of the label element
-     * @throws NullPointerException
-     *             if the label element is not found
+     * @return the text of the label element or {@code null} if the form item
+     *         contains no label.
      */
     public String getLabelText() {
         var label = getLabel();
@@ -51,13 +48,16 @@ public class FormItemElement extends TestBenchElement {
     }
 
     /**
-     * Retrieves the field element associated with this form item.
+     * Gets the field element.
      *
-     * @return the field element associated with this form item.
+     * @return the field element as a TestBenchElement or {@code null} if the
+     *         form item contains no field.
      */
     public TestBenchElement getField() {
-        return getPropertyElements("children").stream()
-                .filter((element) -> element.getDomProperty("validate") != null)
-                .findFirst().orElse(null);
+        return (TestBenchElement) executeScript(
+                """
+                        return [...arguments[0].children].find((child) => child.validate || child.checkValidity);
+                        """,
+                this);
     }
 }

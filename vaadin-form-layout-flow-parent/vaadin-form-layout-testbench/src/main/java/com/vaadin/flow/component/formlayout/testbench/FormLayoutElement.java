@@ -41,9 +41,7 @@ public class FormLayoutElement extends TestBenchElement {
      *
      * @param label
      *            the label of the form item to retrieve
-     * @return the form item element with the specified label
-     * @throws IllegalArgumentException
-     *             if no form item is found with the specified label
+     * @return the form item element or {@code null} if not found
      */
     public FormItemElement getFormItemByLabel(String label) {
         return getFormItems().stream()
