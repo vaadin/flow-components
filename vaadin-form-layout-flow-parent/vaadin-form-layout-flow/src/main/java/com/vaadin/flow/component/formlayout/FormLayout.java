@@ -112,14 +112,17 @@ import elemental.json.JsonValue;
  * Here is an example of using {@link FormRow}:
  *
  * <pre>
- * FormLayout formLayout = new FormLayout();
- * formLayout.setAutoResponsive(true);
- * formLayout.addFormRow(new TextField("First name"),
- *         new TextField("Last name"));
- * TextArea addressField = new TextArea("Address");
- * formLayout.setColspan(addressField, 2);
- * formLayout.addFormRow(addressField);
- * </pre>
+* FormLayout formLayout = new FormLayout();
+* formLayout.setAutoResponsive(true);
+*
+* FormRow row0 = new FormRow();
+* row0.add(new TextField("First name"), new TextField("Last name"));
+*
+* FormRow row1 = new FormRow();
+* row1.add(new TextArea("Address"), 2); // shorthand for {@code add} and {@code setColspan}
+*
+* formLayout.add(row0, row1);
+* </pre>
  *
  * <h3>Expanding Columns and Fields</h3>
  * <p>
@@ -390,7 +393,7 @@ public class FormLayout extends Component
      * row0.add(new TextField("First name"), new TextField("Last name"));
      *
      * FormRow row1 = new FormRow();
-     * row1.add(new TextArea("Address"), 2); // shorthand for {@link #add} + {@link #setColspan}
+     * row1.add(new TextArea("Address"), 2); // shorthand for {@code add} and {@code setColspan}
      *
      * formLayout.add(row0, row1);
      * </pre>
