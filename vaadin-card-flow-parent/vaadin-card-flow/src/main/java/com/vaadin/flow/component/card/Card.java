@@ -99,7 +99,8 @@ public class Card extends Component implements HasSize,
      * @see #getTitleAsText()
      */
     public void setTitle(String title) {
-        getElement().setProperty("cardTitle", title);
+        doSetTitle((Component) null);
+        doSetTitle(title);
     }
 
     /**
@@ -158,7 +159,8 @@ public class Card extends Component implements HasSize,
      *            the title component, or {@code null} to remove
      */
     public void setTitle(Component title) {
-        SlotUtils.setSlot(this, TITLE_SLOT_NAME, title);
+        doSetTitle((String) null);
+        doSetTitle(title);
     }
 
     /**
@@ -444,5 +446,17 @@ public class Card extends Component implements HasSize,
         contentRoot = new Element("div");
         contentRoot.getStyle().set("display", "contents");
         getElement().appendChild(contentRoot);
+    }
+
+    private void doSetTitle(String title) {
+        if (title == null) {
+            getElement().removeProperty(CARD_TITLE_PROPERTY);
+        } else {
+            getElement().setProperty(CARD_TITLE_PROPERTY, title);
+        }
+    }
+
+    private void doSetTitle(Component title) {
+        SlotUtils.setSlot(this, TITLE_SLOT_NAME, title);
     }
 }
