@@ -78,9 +78,11 @@ public class CardTest {
         var title = "Some Title";
         card.setTitle(title);
         Assert.assertEquals(title, card.getTitleAsText());
+        Assert.assertEquals(title, card.getElement().getProperty("cardTitle"));
         title = "Other Title";
         card.setTitle(title, 2);
         Assert.assertEquals(title, card.getTitleAsText());
+        Assert.assertEquals(title, card.getElement().getProperty("cardTitle"));
     }
 
     @Test
