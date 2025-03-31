@@ -27,6 +27,7 @@ import com.vaadin.flow.component.HasValidation;
  *             {@code getElement().setProperty("manualValidation", true)}
  *             instead.
  */
+@Deprecated
 public final class ClientValidationUtil {
 
     private ClientValidationUtil() {
@@ -38,6 +39,7 @@ public final class ClientValidationUtil {
      *             {@code getElement().setProperty("manualValidation", true)}
      *             instead.
      */
+    @Deprecated
     public static <C extends Component & HasValidation> void preventWebComponentFromModifyingInvalidState(
             C component) {
         StringBuilder expression = new StringBuilder(
