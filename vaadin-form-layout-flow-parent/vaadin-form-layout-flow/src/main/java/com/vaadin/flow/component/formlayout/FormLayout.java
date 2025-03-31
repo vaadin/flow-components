@@ -422,10 +422,8 @@ public class FormLayout extends Component
          *
          * @param component
          *            the component to add
-         *
          * @param colspan
          *            the desired colspan for the component
-         *
          */
         public void add(Component component, int colspan) {
             add(component);
@@ -439,10 +437,8 @@ public class FormLayout extends Component
          *
          * @param component
          *            the component to set the colspan for, not {@code null}
-         *
          * @param colspan
          *            the desired colspan for the component
-         *
          */
         public void setColspan(Component component, int colspan) {
             Objects.requireNonNull(component, "component cannot be null");
