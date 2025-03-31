@@ -30,7 +30,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -168,7 +167,6 @@ public class Card extends Component implements HasSize,
      *
      * @return the value of the title property
      */
-    @Synchronize(property = "cardTitle", value = "card-title-changed")
     public String getTitleAsText() {
         return getElement().getProperty("cardTitle", "");
     }
