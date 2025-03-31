@@ -110,7 +110,7 @@ public class Card extends Component implements HasSize,
      * Sets the title and the heading level for the title. If a
      * {@link #setHeader(Component) header component} is set, the title will not
      * be displayed. Setting a title this way removes any title component set
-     * using {@link #setTitle(String)}. Setting {@code null} or empty title
+     * using {@link #setTitle(Component)}. Setting {@code null} or empty title
      * removes any previously set {@code String} titles.
      *
      * @param title
