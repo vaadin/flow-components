@@ -237,13 +237,9 @@ public class FormLayoutTest {
                 formLayout.getElement().getProperty("columnWidth"));
         Assert.assertEquals("160.0px", formLayout.getColumnWidth());
 
-        Assert.assertThrows("Column width cannot be null",
-                NullPointerException.class,
-                () -> formLayout.setColumnWidth(null));
-
-        Assert.assertThrows("Column width cannot be empty",
-                IllegalArgumentException.class,
-                () -> formLayout.setColumnWidth(""));
+        formLayout.setColumnWidth(null);
+        Assert.assertNull(formLayout.getElement().getProperty("columnWidth"));
+        Assert.assertNull(formLayout.getColumnWidth());
     }
 
     @Test
