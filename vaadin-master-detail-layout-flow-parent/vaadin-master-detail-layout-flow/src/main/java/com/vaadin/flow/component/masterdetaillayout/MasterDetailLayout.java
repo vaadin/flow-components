@@ -17,7 +17,9 @@ package com.vaadin.flow.component.masterdetaillayout;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasSize;
@@ -26,6 +28,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.RouterLayout;
@@ -38,15 +41,17 @@ import com.vaadin.flow.router.RouterLayout;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-master-detail-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha5")
-@NpmPackage(value = "@vaadin/master-detail-layout", version = "24.8.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha6")
+@NpmPackage(value = "@vaadin/master-detail-layout", version = "24.8.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/master-detail-layout/src/vaadin-master-detail-layout.js")
 public class MasterDetailLayout extends Component
         implements HasSize, RouterLayout {
 
     public static final String MASTER_SLOT = "";
-    public static final String DETAIL_SLOT = "detail";
+
+    private HasElement detail;
+    private PendingJavaScriptResult pendingDetailsUpdate;
 
     /**
      * Supported orientation values for {@link MasterDetailLayout}.
@@ -92,8 +97,9 @@ public class MasterDetailLayout extends Component
      *         component in the detail area
      */
     public Component getDetail() {
-        return SlotUtils.getElementsInSlot(this, DETAIL_SLOT).findFirst()
-                .flatMap(Element::getComponent).orElse(null);
+        return Optional.ofNullable(detail)
+                .flatMap(hasElement -> hasElement.getElement().getComponent())
+                .orElse(null);
     }
 
     /**
@@ -114,10 +120,28 @@ public class MasterDetailLayout extends Component
                             + "Consider wrapping the Text inside a Div.");
         }
 
-        SlotUtils.clearSlot(this, DETAIL_SLOT);
-        if (hasElement != null) {
-            SlotUtils.addToSlot(this, DETAIL_SLOT, hasElement.getElement());
+        if (detail != null) {
+            getElement().removeVirtualChild(detail.getElement());
         }
+        detail = hasElement;
+        if (detail != null) {
+            getElement().appendVirtualChild(detail.getElement());
+        }
+        updateDetails();
+    }
+
+    private void updateDetails() {
+        if (pendingDetailsUpdate != null) {
+            pendingDetailsUpdate.cancelExecution();
+        }
+        pendingDetailsUpdate = getElement().executeJs("this._setDetail($0)",
+                detail != null ? detail.getElement() : null);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        updateDetails();
     }
 
     /**

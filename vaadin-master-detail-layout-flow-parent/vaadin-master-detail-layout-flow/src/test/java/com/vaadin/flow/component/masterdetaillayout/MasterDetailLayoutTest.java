@@ -18,18 +18,32 @@ package com.vaadin.flow.component.masterdetaillayout;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
 
 public class MasterDetailLayoutTest {
+    private UI ui;
     private MasterDetailLayout layout;
 
     @Before
     public void init() {
+        ui = new UI();
+        UI.setCurrent(ui);
+        var session = Mockito.mock(VaadinSession.class);
+        Mockito.when(session.hasLock()).thenReturn(true);
+        ui.getInternals().setSession(session);
+        var service = Mockito.mock(VaadinService.class);
+        Mockito.when(session.getService()).thenReturn(service);
+
         layout = new MasterDetailLayout();
+        ui.add(layout);
     }
 
     @Test
@@ -72,23 +86,12 @@ public class MasterDetailLayoutTest {
     }
 
     @Test
-    public void setMaster_preservesDetail() {
-        var detail = new Div();
-        layout.setDetail(detail);
-        var master = new Div();
-        layout.setMaster(master);
-
-        Assert.assertEquals(2, layout.getElement().getChildCount());
-        assertMasterContent(master);
-        assertDetailContent(detail);
-    }
-
-    @Test
     public void setDetail() {
         var detail = new Div();
         layout.setDetail(detail);
 
         assertDetailContent(detail);
+        assertSetDetailCall(detail);
     }
 
     @Test
@@ -108,25 +111,9 @@ public class MasterDetailLayoutTest {
         layout.setDetail(newDetail);
 
         assertDetailContent(newDetail);
+        assertSetDetailCall(newDetail);
+        Assert.assertEquals(newDetail, layout.getDetail());
         Assert.assertNull(detail.getElement().getParent());
-        Assert.assertNull(detail.getElement().getAttribute("slot"));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void setDetailText_throws() {
-        layout.setDetail(new Text("detail"));
-    }
-
-    @Test
-    public void setDetail_preservesMaster() {
-        var master = new Div();
-        layout.setMaster(master);
-        var detail = new Div();
-        layout.setDetail(detail);
-
-        Assert.assertEquals(2, layout.getElement().getChildCount());
-        assertMasterContent(master);
-        assertDetailContent(detail);
     }
 
     @Test
@@ -136,9 +123,27 @@ public class MasterDetailLayoutTest {
 
         layout.setDetail(null);
 
-        Assert.assertEquals(0, layout.getElement().getChildCount());
+        assertSetDetailCall(null);
+        Assert.assertNull(layout.getDetail());
         Assert.assertNull(detail.getElement().getParent());
-        Assert.assertNull(detail.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void setDetail_detach_attach() {
+        var detail = new Div();
+        layout.setDetail(detail);
+        fakeClientCommunication();
+        ui.getInternals().dumpPendingJavaScriptInvocations();
+
+        ui.remove(layout);
+        ui.add(layout);
+
+        assertSetDetailCall(detail);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setDetailText_throws() {
+        layout.setDetail(new Text("detail"));
     }
 
     @Test
@@ -147,6 +152,7 @@ public class MasterDetailLayoutTest {
         layout.showRouterLayoutContent(detail);
 
         assertDetailContent(detail);
+        assertSetDetailCall(detail);
         Assert.assertEquals(detail, layout.getDetail());
     }
 
@@ -160,8 +166,15 @@ public class MasterDetailLayoutTest {
         layout.showRouterLayoutContent(newDetail);
 
         assertDetailContent(newDetail);
+        assertSetDetailCall(newDetail);
+        Assert.assertEquals(newDetail, layout.getDetail());
         Assert.assertNull(detail.getElement().getParent());
-        Assert.assertNull(detail.getElement().getAttribute("slot"));
+
+        layout.removeRouterLayoutContent(newDetail);
+
+        assertSetDetailCall(null);
+        Assert.assertNull(layout.getDetail());
+        Assert.assertNull(newDetail.getElement().getParent());
     }
 
     @Test
@@ -308,9 +321,32 @@ public class MasterDetailLayoutTest {
     }
 
     private void assertDetailContent(Component component) {
-        Assert.assertEquals("detail",
-                component.getElement().getAttribute("slot"));
         Assert.assertEquals(layout.getElement(),
                 component.getElement().getParent());
+        Assert.assertTrue(component.getElement().isVirtualChild());
+    }
+
+    private void assertSetDetailCall(Component component) {
+        fakeClientCommunication();
+        var pendingJavaScriptInvocations = ui.getInternals()
+                .dumpPendingJavaScriptInvocations();
+
+        Assert.assertEquals(1, pendingJavaScriptInvocations.size());
+
+        var pendingJavaScriptInvocation = pendingJavaScriptInvocations.get(0);
+        var parameters = pendingJavaScriptInvocation.getInvocation()
+                .getParameters();
+        var element = component != null ? component.getElement() : null;
+
+        Assert.assertEquals(
+                "return (async function() { this._setDetail($0)}).apply($1)",
+                pendingJavaScriptInvocation.getInvocation().getExpression());
+        Assert.assertEquals(element, parameters.get(0));
+    }
+
+    protected void fakeClientCommunication() {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
     }
 }
