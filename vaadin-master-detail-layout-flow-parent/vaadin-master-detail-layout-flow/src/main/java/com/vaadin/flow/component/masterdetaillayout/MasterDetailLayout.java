@@ -303,7 +303,8 @@ public class MasterDetailLayout extends Component
     }
 
     /**
-     * Gets the orientation of the layout. Defaults to {@code horizontal}
+     * Gets the orientation of the layout. Defaults to
+     * {@link Orientation#HORIZONTAL}.
      *
      * @return the orientation
      */
@@ -322,12 +323,14 @@ public class MasterDetailLayout extends Component
      *            the orientation
      */
     public void setOrientation(Orientation orientation) {
+        Objects.requireNonNull(orientation, "Orientation cannot be null");
         getElement().setProperty("orientation",
                 orientation.name().toLowerCase(Locale.ENGLISH));
     }
 
     /**
-     * Gets the containment of the layout. Defaults to {@code layout}
+     * Gets the containment of the layout. Defaults to
+     * {@link Containment#LAYOUT}.
      *
      * @return the containment
      */
@@ -340,12 +343,16 @@ public class MasterDetailLayout extends Component
     }
 
     /**
-     * Sets the containment of the layout.
+     * Sets the containment of the layout.When set to
+     * {@link Containment#LAYOUT}, the overlay is confined to the layout. When
+     * set to {@link Containment#VIEWPORT}, the overlay is confined to the
+     * browser's viewport.
      *
-     * @param orientation
-     *            the orientation
+     * @param containment
+     *            the containment
      */
     public void setContainment(Containment containment) {
+        Objects.requireNonNull(containment, "Containment cannot be null");
         getElement().setProperty("containment",
                 containment.name().toLowerCase(Locale.ENGLISH));
     }
