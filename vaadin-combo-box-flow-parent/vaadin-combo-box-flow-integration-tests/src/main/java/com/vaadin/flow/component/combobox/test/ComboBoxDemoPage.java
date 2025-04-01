@@ -118,6 +118,7 @@ public class ComboBoxDemoPage extends VerticalLayout {
         Div message = createMessageDiv("string-selection-message");
 
         ComboBox<String> comboBox = new ComboBox<>("Browsers");
+        comboBox.setPlaceholder("Input browser name");
         comboBox.setItems("Google Chrome", "Mozilla Firefox", "Opera",
                 "Apple Safari", "Microsoft Edge");
 
