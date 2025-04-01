@@ -175,9 +175,6 @@ public class Card extends Component implements HasSize,
      * @return the title component, or {@code null} if none is set
      */
     public Component getTitle() {
-        if (!getTitleAsText().isEmpty()) {
-            return null;
-        }
         return SlotUtils.getChildInSlot(this, TITLE_SLOT_NAME);
     }
 
