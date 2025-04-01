@@ -20,6 +20,9 @@ import java.util.concurrent.TimeoutException;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.testutil.TestPath;
+
+@TestPath("vaadin-spreadsheet")
 public class FilterTableLargeIT extends AbstractSpreadsheetIT {
 
     @Before
