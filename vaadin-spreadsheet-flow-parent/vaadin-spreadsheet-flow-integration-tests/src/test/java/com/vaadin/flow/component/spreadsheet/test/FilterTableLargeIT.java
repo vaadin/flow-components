@@ -57,6 +57,8 @@ public class FilterTableLargeIT extends AbstractSpreadsheetIT {
         } catch (ExecutionException e) {
             fail("Excecution exception occurred while filtering large table");
             e.printStackTrace();
+        } finally {
+        	exec.shutdownNow();
         }
 
         // Completing the filter event without running into TimeoutException
