@@ -519,6 +519,30 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
         return true;
     }
 
+    /**
+     * Sets the root heading level used by sections and widgets, which controls
+     * their <code>aria-level</code> attributes on title elements. The nested
+     * widgets will have their {@code aria-level} one higher than the root
+     * heading level.
+     * <p>
+     * For example, if root heading level is set to {@code 1}:
+     * <ul>
+     * <li>Sections and non-nested widgets will have {@code aria-level="1"}</li>
+     * <li>Nested widgets will have {@code aria-level="2"}</li>
+     * </ul>
+     * Setting it {@code null} resets it to the default value of {@code 2}.
+     *
+     * @param rootHeadingLevel
+     *            the root heading level property, {@code null} to remove
+     */
+    public void setRootHeadingLevel(Integer rootHeadingLevel) {
+        if (rootHeadingLevel == null) {
+            getElement().removeProperty("rootHeadingLevel");
+        } else {
+            getElement().setProperty("rootHeadingLevel", rootHeadingLevel);
+        }
+    }
+
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);

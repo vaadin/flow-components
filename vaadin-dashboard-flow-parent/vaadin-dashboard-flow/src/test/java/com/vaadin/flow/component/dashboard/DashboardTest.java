@@ -1074,6 +1074,26 @@ public class DashboardTest extends DashboardTestBase {
         assertItemSelectedChangedEventCorrectlyFired(widget, false);
     }
 
+    @Test
+    public void setRootHeadingLevel_elementPropertyIsUpdated() {
+        var rootHeadingLevel = 1;
+        dashboard.setRootHeadingLevel(rootHeadingLevel);
+        Assert.assertEquals(rootHeadingLevel,
+                dashboard.getElement().getProperty("rootHeadingLevel", -1));
+        rootHeadingLevel = 7;
+        dashboard.setRootHeadingLevel(rootHeadingLevel);
+        Assert.assertEquals(rootHeadingLevel,
+                dashboard.getElement().getProperty("rootHeadingLevel", -1));
+    }
+
+    @Test
+    public void setTitleHeadingLevelNull_elementPropertyIsRemoved() {
+        dashboard.setRootHeadingLevel(1);
+        dashboard.setRootHeadingLevel(null);
+        Assert.assertFalse(
+                dashboard.getElement().hasProperty("rootHeadingLevel"));
+    }
+
     private void assertItemSelectedChangedEventCorrectlyFired(Component item,
             boolean selected) {
         AtomicInteger listenerInvokedCount = new AtomicInteger(0);
