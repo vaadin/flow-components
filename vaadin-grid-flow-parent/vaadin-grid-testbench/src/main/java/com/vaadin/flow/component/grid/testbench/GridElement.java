@@ -243,7 +243,23 @@ public class GridElement extends TestBenchElement {
      *             if no row with given index exists
      */
     public GridTRElement getRow(int rowIndex) throws IndexOutOfBoundsException {
-        if (!isRowInView(rowIndex)) {
+        return getRow(rowIndex, true);
+    }
+
+    /**
+     * Gets the <code>tr</code> element for the given row index.
+     *
+     * @param rowIndex
+     *            the row index
+     * @param scroll
+     *            scroll to index to reveal the row
+     * @return the tr element for the row
+     * @throws IndexOutOfBoundsException
+     *             if no row with given index exists
+     */
+    public GridTRElement getRow(int rowIndex, boolean scroll)
+            throws IndexOutOfBoundsException {
+        if (scroll && !isRowInView(rowIndex)) {
             scrollToFlatRow(rowIndex);
         }
         var rows = getRows(rowIndex, rowIndex);
