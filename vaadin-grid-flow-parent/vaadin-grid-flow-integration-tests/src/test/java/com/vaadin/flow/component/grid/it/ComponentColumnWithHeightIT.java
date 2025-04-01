@@ -62,6 +62,6 @@ public class ComponentColumnWithHeightIT extends AbstractComponentIT {
         // Expect the y position of the last row to equal the y position + the
         // height of the previous row
         Assert.assertEquals(expected,
-                grid.getRow(initialLastRow + 1).getLocation().y);
+                grid.getRow(initialLastRow + 1, false).getLocation().y);
     }
 }
