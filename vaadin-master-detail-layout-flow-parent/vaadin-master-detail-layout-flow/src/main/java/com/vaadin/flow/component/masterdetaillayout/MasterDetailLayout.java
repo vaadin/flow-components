@@ -38,8 +38,8 @@ import com.vaadin.flow.router.RouterLayout;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-master-detail-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha5")
-@NpmPackage(value = "@vaadin/master-detail-layout", version = "24.8.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha6")
+@NpmPackage(value = "@vaadin/master-detail-layout", version = "24.8.0-alpha6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/master-detail-layout/src/vaadin-master-detail-layout.js")
 public class MasterDetailLayout extends Component
