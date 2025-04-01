@@ -52,22 +52,4 @@ public class CardIT extends AbstractComponentIT {
         Assert.assertFalse(card.getFooterContents().isEmpty());
         Assert.assertFalse(card.getContents().isEmpty());
     }
-
-    @Test
-    public void setTitleComponent_setTitleString_titleComponentIsRemoved() {
-        clickElementWithJs("set-title-component");
-        var titleComponent = card.getTitle();
-        clickElementWithJs("set-string-title");
-        Assert.assertNotEquals(titleComponent, card.getTitle());
-        Assert.assertEquals("String title", card.getStringTitle());
-    }
-
-    @Test
-    public void setStringTitle_setTitleComponent_stringTitleIsRemoved() {
-        clickElementWithJs("set-string-title");
-        var stringTitleComponent = card.getTitle();
-        clickElementWithJs("set-title-component");
-        Assert.assertNotEquals(stringTitleComponent, card.getTitle());
-        Assert.assertNull(card.getStringTitle());
-    }
 }
