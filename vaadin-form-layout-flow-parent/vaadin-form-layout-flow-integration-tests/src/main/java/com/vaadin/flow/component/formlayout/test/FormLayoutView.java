@@ -182,6 +182,7 @@ public class FormLayoutView extends Div {
 
     private void createFormLayoutWithItems() {
         FormLayout layoutWithFormItems = new FormLayout();
+        layoutWithFormItems.setId("form-layout-form-items");
 
         TextField firstName = new TextField();
         firstName.setPlaceholder("John");
@@ -230,6 +231,8 @@ public class FormLayoutView extends Div {
 
     private void createFormLayoutWithBinder() {
         FormLayout layoutWithBinder = new FormLayout();
+        layoutWithBinder.setId("binder-form-layout");
+
         Binder<Contact> binder = new Binder<>();
 
         // The object that will be edited
@@ -255,6 +258,7 @@ public class FormLayoutView extends Div {
         layoutWithBinder.addFormItem(birthDate, "Birthdate");
         layoutWithBinder.addFormItem(email, "E-mail");
         FormItem phoneItem = layoutWithBinder.addFormItem(phone, "Phone");
+        phoneItem.setId("phone-item");
         phoneItem.add(doNotCall);
 
         // Button bar
