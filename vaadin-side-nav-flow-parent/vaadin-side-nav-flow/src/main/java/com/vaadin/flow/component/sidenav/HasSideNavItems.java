@@ -19,25 +19,21 @@ import java.util.List;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.dom.Element;
 
 /**
- * Base class for components used in the side navigation item hierarchy.
+ * {@code HasSideNavItems} is an interface for components used in the side
+ * navigation item hierarchy. The implementing components can contain and manage
+ * multiple {@code SideNavItem} instances. The interface defines methods for
+ * adding, removing, and accessing the items within a container.
+ *
+ * @see SideNav
+ * @see SideNavItem
  *
  * @author Vaadin Ltd
  */
-abstract class SideNavItemContainer extends Component {
-
-    /**
-     * Implement this method to set up/modify the SideNavItem right before it's
-     * added to the list of the navigation items.
-     *
-     * @param item
-     *            Item to be set up
-     */
-    protected void setupSideNavItem(SideNavItem item) {
-        // no setup by default
-    }
+public interface HasSideNavItems extends HasElement {
 
     /**
      * Adds navigation menu item(s) to the menu.
@@ -45,7 +41,7 @@ abstract class SideNavItemContainer extends Component {
      * @param items
      *            the navigation menu item(s) to add
      */
-    public void addItem(SideNavItem... items) {
+    default void addItem(SideNavItem... items) {
         assert items != null;
 
         for (SideNavItem item : items) {
@@ -61,7 +57,7 @@ abstract class SideNavItemContainer extends Component {
      * @param item
      *            the item to add, value must not be null
      */
-    public void addItemAsFirst(SideNavItem item) {
+    default void addItemAsFirst(SideNavItem item) {
         addItemAtIndex(0, item);
     }
 
@@ -75,7 +71,7 @@ abstract class SideNavItemContainer extends Component {
      * @param item
      *            the item to add, value must not be null
      */
-    public void addItemAtIndex(int index, SideNavItem item) {
+    default void addItemAtIndex(int index, SideNavItem item) {
         assert item != null;
 
         if (index < 0) {
@@ -109,7 +105,7 @@ abstract class SideNavItemContainer extends Component {
      * @return the child {@link SideNavItem} instances in this navigation menu
      * @see #addItem(SideNavItem...)
      */
-    public List<SideNavItem> getItems() {
+    default List<SideNavItem> getItems() {
         return getElement().getChildren().map(Element::getComponent)
                 .flatMap(Optional::stream)
                 .filter(component -> component instanceof SideNavItem)
@@ -124,7 +120,7 @@ abstract class SideNavItemContainer extends Component {
      * @param items
      *            the menu item(s) to remove
      */
-    public void remove(SideNavItem... items) {
+    default void remove(SideNavItem... items) {
         for (SideNavItem item : items) {
             Optional<Component> parent = item.getParent();
             if (parent.isPresent() && parent.get() == this) {
@@ -136,10 +132,13 @@ abstract class SideNavItemContainer extends Component {
     /**
      * Removes all navigation menu items from this item.
      */
-    public void removeAll() {
+    default void removeAll() {
         final List<Element> items = getItems().stream()
                 .map(Component::getElement).toList();
         getElement().removeChild(items);
     }
 
+    private void setupSideNavItem(SideNavItem item) {
+        item.getElement().setAttribute("slot", "children");
+    }
 }
