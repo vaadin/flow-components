@@ -134,12 +134,13 @@ public class MasterDetailLayout extends Component
         if (pendingDetailsUpdate != null) {
             pendingDetailsUpdate.cancelExecution();
         }
-        pendingDetailsUpdate = getElement().executeJs("this.setDetail($0)",
+        pendingDetailsUpdate = getElement().executeJs("this._setDetail($0)",
                 detail != null ? detail.getElement() : null);
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
         updateDetails();
     }
 

@@ -339,7 +339,7 @@ public class MasterDetailLayoutTest {
         var element = component != null ? component.getElement() : null;
 
         Assert.assertEquals(
-                "return (async function() { this.setDetail($0)}).apply($1)",
+                "return (async function() { this._setDetail($0)}).apply($1)",
                 pendingJavaScriptInvocation.getInvocation().getExpression());
         Assert.assertEquals(element, parameters.get(0));
     }
