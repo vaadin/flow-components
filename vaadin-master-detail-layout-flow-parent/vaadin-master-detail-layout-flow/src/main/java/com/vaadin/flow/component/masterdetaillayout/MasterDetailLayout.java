@@ -317,7 +317,9 @@ public class MasterDetailLayout extends Component
     }
 
     /**
-     * Sets the orientation of the layout.
+     * Sets the orientation of the layout. Defines how master and detail areas
+     * are shown next to each other, and whether size and min-size are applied
+     * as width or height.
      *
      * @param orientation
      *            the orientation
