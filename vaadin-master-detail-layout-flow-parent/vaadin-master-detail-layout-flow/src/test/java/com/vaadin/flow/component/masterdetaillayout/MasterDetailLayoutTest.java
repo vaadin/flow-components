@@ -91,7 +91,7 @@ public class MasterDetailLayoutTest {
         layout.setDetail(detail);
 
         assertDetailContent(detail);
-        assertSetDetailCall(detail);
+        assertSetDetailCall(detail, true);
     }
 
     @Test
@@ -111,7 +111,7 @@ public class MasterDetailLayoutTest {
         layout.setDetail(newDetail);
 
         assertDetailContent(newDetail);
-        assertSetDetailCall(newDetail);
+        assertSetDetailCall(newDetail, true);
         Assert.assertEquals(newDetail, layout.getDetail());
         Assert.assertNull(detail.getElement().getParent());
     }
@@ -123,7 +123,7 @@ public class MasterDetailLayoutTest {
 
         layout.setDetail(null);
 
-        assertSetDetailCall(null);
+        assertSetDetailCall(null, true);
         Assert.assertNull(layout.getDetail());
         Assert.assertNull(detail.getElement().getParent());
     }
@@ -132,13 +132,30 @@ public class MasterDetailLayoutTest {
     public void setDetail_detach_attach() {
         var detail = new Div();
         layout.setDetail(detail);
-        fakeClientCommunication();
-        ui.getInternals().dumpPendingJavaScriptInvocations();
+        assertSetDetailCall(detail, true);
 
         ui.remove(layout);
         ui.add(layout);
 
-        assertSetDetailCall(detail);
+        assertSetDetailCall(detail, true);
+    }
+
+    @Test
+    public void setDetail_usesViewTransitionAfterFirstRoundtrip() {
+        // No transition if component is attached in first roundtrip
+        var detail = new Div();
+        layout.setDetail(detail);
+        assertSetDetailCall(detail, true);
+
+        // Use transition when updating details in second roundtrip
+        var newDetail = new Div();
+        layout.setDetail(newDetail);
+        assertSetDetailCall(newDetail, false);
+
+        // No transition when detaching and reattaching the component
+        ui.remove(layout);
+        ui.add(layout);
+        assertSetDetailCall(newDetail, true);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -152,7 +169,7 @@ public class MasterDetailLayoutTest {
         layout.showRouterLayoutContent(detail);
 
         assertDetailContent(detail);
-        assertSetDetailCall(detail);
+        assertSetDetailCall(detail, true);
         Assert.assertEquals(detail, layout.getDetail());
     }
 
@@ -166,13 +183,13 @@ public class MasterDetailLayoutTest {
         layout.showRouterLayoutContent(newDetail);
 
         assertDetailContent(newDetail);
-        assertSetDetailCall(newDetail);
+        assertSetDetailCall(newDetail, true);
         Assert.assertEquals(newDetail, layout.getDetail());
         Assert.assertNull(detail.getElement().getParent());
 
         layout.removeRouterLayoutContent(newDetail);
 
-        assertSetDetailCall(null);
+        assertSetDetailCall(null, false);
         Assert.assertNull(layout.getDetail());
         Assert.assertNull(newDetail.getElement().getParent());
     }
@@ -326,7 +343,8 @@ public class MasterDetailLayoutTest {
         Assert.assertTrue(component.getElement().isVirtualChild());
     }
 
-    private void assertSetDetailCall(Component component) {
+    private void assertSetDetailCall(Component component,
+            boolean skipTransition) {
         fakeClientCommunication();
         var pendingJavaScriptInvocations = ui.getInternals()
                 .dumpPendingJavaScriptInvocations();
@@ -339,9 +357,10 @@ public class MasterDetailLayoutTest {
         var element = component != null ? component.getElement() : null;
 
         Assert.assertEquals(
-                "return (async function() { this._setDetail($0)}).apply($1)",
+                "return (async function() { this._setDetail($0, $1)}).apply($2)",
                 pendingJavaScriptInvocation.getInvocation().getExpression());
         Assert.assertEquals(element, parameters.get(0));
+        Assert.assertEquals(skipTransition, parameters.get(1));
     }
 
     protected void fakeClientCommunication() {
