@@ -30,7 +30,7 @@ public class FilterTableLargeIT extends AbstractSpreadsheetIT {
 
     @Test
     public void filteringShouldNotTakeForever() {
-    	
+
         // Select MaritalStatus filter cell
         getSpreadsheet().getCellAt(1, 15).popupButtonClick();
 
@@ -48,9 +48,9 @@ public class FilterTableLargeIT extends AbstractSpreadsheetIT {
             doFilter.get(5, TimeUnit.SECONDS);
         } catch (TimeoutException tex) {
             doFilter.cancel(true);
-            fail("Execution timeout while waiting for large table filter;" +
-                  " 5 second timeout implies filter operation optimization " +
-                  " is not in place");
+            fail("Execution timeout while waiting for large table filter;"
+                    + " 5 second timeout implies filter operation optimization "
+                    + " is not in place");
         } catch (InterruptedException e) {
             fail("Execution of large table filter interrupted");
             e.printStackTrace();
@@ -58,7 +58,7 @@ public class FilterTableLargeIT extends AbstractSpreadsheetIT {
             fail("Excecution exception occurred while filtering large table");
             e.printStackTrace();
         } finally {
-        	exec.shutdownNow();
+            exec.shutdownNow();
         }
 
         // Completing the filter event without running into TimeoutException
