@@ -243,6 +243,9 @@ public class GridElement extends TestBenchElement {
      *             if no row with given index exists
      */
     public GridTRElement getRow(int rowIndex) throws IndexOutOfBoundsException {
+        if (!isRowInView(rowIndex)) {
+            scrollToFlatRow(rowIndex);
+        }
         var rows = getRows(rowIndex, rowIndex);
         return rows.size() == 1 ? rows.get(0) : null;
     }
