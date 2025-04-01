@@ -139,6 +139,8 @@ public interface HasSideNavItems extends HasElement {
     }
 
     private void setupSideNavItem(SideNavItem item) {
-        item.getElement().setAttribute("slot", "children");
+        if (this instanceof SideNavItem) {
+            item.getElement().setAttribute("slot", "children");
+        }
     }
 }
