@@ -331,4 +331,27 @@ public class FormLayoutTest {
         Assert.assertEquals("span", label.getTag());
         Assert.assertEquals("custom label", label.getText());
     }
+
+    @Test
+    public void formRow_setColspan_getColspan() {
+        Input input = new Input();
+        FormRow row = new FormRow();
+        row.add(input);
+
+        Assert.assertEquals(1, row.getColspan(input));
+
+        row.setColspan(input, 2);
+        Assert.assertEquals(2, row.getColspan(input));
+
+        row.setColspan(input, -1);
+        Assert.assertEquals(1, row.getColspan(input));
+    }
+
+    @Test
+    public void formRow_addComponentWithColspan() {
+        Input input = new Input();
+        FormRow row = new FormRow();
+        row.add(input, 2);
+        Assert.assertEquals(2, row.getColspan(input));
+    }
 }
