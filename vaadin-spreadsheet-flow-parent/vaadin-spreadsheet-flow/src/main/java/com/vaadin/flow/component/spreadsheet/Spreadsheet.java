@@ -3353,12 +3353,12 @@ public class Spreadsheet extends Component
         if (row == null) {
             row = activeSheet.createRow(rowIndex);
         }
-        
+
         // Do not recalculate anything unnecessarily
         if (row.getZeroHeight() == hidden) {
-        	return;
+            return;
         }
-        
+
         row.setZeroHeight(hidden);
 
         // Only recalculate styles if it is not actively disabled
@@ -4005,10 +4005,10 @@ public class Spreadsheet extends Component
 
         final boolean hide = (height == 0.0f);
         if (row.getZeroHeight() && hide) {
-        	// Row is already hidden, no need to do anything else
-        	return;
+            // Row is already hidden, no need to do anything else
+            return;
         }
-        
+
         if (hide) {
             row.setZeroHeight(true);
         } else {
