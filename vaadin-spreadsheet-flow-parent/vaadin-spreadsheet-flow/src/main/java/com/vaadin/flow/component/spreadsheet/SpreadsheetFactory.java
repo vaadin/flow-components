@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
+import java.util.stream.IntStream;
 
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.hssf.usermodel.HSSFPatriarch;
@@ -1069,12 +1070,10 @@ public class SpreadsheetFactory implements Serializable {
              * invisible frozen rows/columns are effectively hidden in Excel. We
              * mimic this behavior here.
              */
-            for (int col = 0; col < leftCol; col++) {
-                spreadsheet.setColumnHidden(col, true);
-            }
-            for (int row = 0; row < topRow; row++) {
-                spreadsheet.setRowHidden(row, true);
-            }
+            spreadsheet.setColumnsHidden(
+                    IntStream.range(0, leftCol).boxed().toList(), true);
+            spreadsheet.setRowsHidden(
+                    IntStream.range(0, topRow).boxed().toList(), true);
         } else {
             spreadsheet.setVerticalSplitPosition(0);
             spreadsheet.setHorizontalSplitPosition(0);

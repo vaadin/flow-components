@@ -33,6 +33,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -1747,7 +1749,7 @@ public class Spreadsheet extends Component
                 SpreadsheetFactory.reloadSpreadsheetData(this,
                         getActiveSheet());
 
-                getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
+                reloadSheetStyles(false, false);
             }
         }
     }
@@ -3268,6 +3270,17 @@ public class Spreadsheet extends Component
      *            True to hide the target column, false to show it.
      */
     public void setColumnHidden(int columnIndex, boolean hidden) {
+        doSetColumnHidden(columnIndex, hidden);
+        reloadSheetStyles(false, true);
+    }
+
+    void setColumnsHidden(Collection<Integer> columnIndexes, boolean hidden) {
+        columnIndexes
+                .forEach(columnIndex -> doSetColumnHidden(columnIndex, hidden));
+        reloadSheetStyles(false, true);
+    }
+
+    private void doSetColumnHidden(int columnIndex, boolean hidden) {
         getActiveSheet().setColumnHidden(columnIndex, hidden);
         ArrayList<Integer> _hiddenColumnIndexes = new ArrayList<>(
                 getHiddenColumnIndexes());
@@ -3286,13 +3299,6 @@ public class Spreadsheet extends Component
         }
         setHiddenColumnIndexes(_hiddenColumnIndexes);
         setColW(_colW);
-
-        if (hasSheetOverlays()) {
-            reloadImageSizesFromPOI = true;
-            loadOrUpdateOverlays();
-        }
-
-        getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
     }
 
     /**
@@ -3316,24 +3322,37 @@ public class Spreadsheet extends Component
      *            True to hide the target row, false to show it.
      */
     public void setRowHidden(int rowIndex, boolean hidden) {
+        doSetRowHidden(rowIndex, hidden);
+        reloadSheetStyles(true, true);
+    }
+
+    void setRowsHidden(Collection<Integer> rowIndexes, boolean hidden) {
+        rowIndexes.forEach(rowIndex -> doSetRowHidden(rowIndex, hidden));
+        reloadSheetStyles(true, true);
+    }
+
+    private void reloadSheetStyles(boolean calculateSheetSizes,
+            boolean updateOverlays) {
+        if (calculateSheetSizes) {
+            // can't assume the state already had room for the row in its
+            // arrays, it may have been created recently. This avoids
+            // ArrayIndexOutOfBoundsException
+            SpreadsheetFactory.calculateSheetSizes(this, getActiveSheet());
+        }
+        if (updateOverlays && hasSheetOverlays()) {
+            reloadImageSizesFromPOI = true;
+            loadOrUpdateOverlays();
+        }
+        getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
+    }
+
+    private void doSetRowHidden(int rowIndex, boolean hidden) {
         final Sheet activeSheet = getActiveSheet();
         Row row = activeSheet.getRow(rowIndex);
         if (row == null) {
             row = activeSheet.createRow(rowIndex);
         }
         row.setZeroHeight(hidden);
-
-        // can't assume the state already had room for the row in its
-        // arrays, it may have been created above. This avoids
-        // ArrayIndexOutOfBoundsException
-        SpreadsheetFactory.calculateSheetSizes(this, getActiveSheet());
-
-        if (hasSheetOverlays()) {
-            reloadImageSizesFromPOI = true;
-            loadOrUpdateOverlays();
-        }
-
-        getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
     }
 
     /**
@@ -3945,11 +3964,8 @@ public class Spreadsheet extends Component
         command.captureValues(
                 newRowSizes.keySet().toArray(new Integer[newRowSizes.size()]));
         historyManager.addCommand(command);
-        for (Entry<Integer, Float> entry : newRowSizes.entrySet()) {
-            int index = entry.getKey();
-            float height = entry.getValue();
-            setRowHeight(index - 1, height);
-        }
+        setRowHeights(newRowSizes.entrySet().stream().collect(Collectors
+                .toMap(entry -> entry.getKey() - 1, Entry::getValue)));
 
         if (hasSheetOverlays()) {
             reloadImageSizesFromPOI = true;
@@ -3967,8 +3983,34 @@ public class Spreadsheet extends Component
      *            New row height in points
      */
     public void setRowHeight(int index, float height) {
+        doSetRowHeight(index, height);
+        var isRowHidden = height == 0.0F;
+        reloadSheetStyles(isRowHidden, isRowHidden);
+    }
+
+    /**
+     * Sets the row height for multiple rows. Used internally in order to defer
+     * the style calculations until all the row heights are updated.
+     *
+     * @see #setRowHeight(int, float)
+     *
+     * @param rowIndexToHeight
+     *            Map of 0-based row indexes to the new row height in points
+     */
+    void setRowHeights(Map<Integer, Float> rowIndexToHeight) {
+        var isAnyRowHidden = new AtomicBoolean();
+        rowIndexToHeight.forEach((key, value) -> {
+            doSetRowHeight(key, value);
+            if (value == 0.0F) {
+                isAnyRowHidden.set(true);
+            }
+        });
+        reloadSheetStyles(isAnyRowHidden.get(), isAnyRowHidden.get());
+    }
+
+    private void doSetRowHeight(int index, float height) {
         if (height == 0.0F) {
-            setRowHidden(index, true);
+            doSetRowHidden(index, true);
         } else {
             Row row = getActiveSheet().getRow(index);
             ArrayList<Integer> _hiddenRowIndexes = new ArrayList<>(
@@ -3984,10 +4026,6 @@ public class Spreadsheet extends Component
             }
             row.setHeightInPoints(height);
             setHiddenRowIndexes(_hiddenRowIndexes);
-            // can't assume the state already had room for the row in its
-            // arrays, it may have been created above. This avoids
-            // ArrayIndexOutOfBoundsException
-            SpreadsheetFactory.calculateSheetSizes(this, getActiveSheet());
         }
     }
 
@@ -3997,11 +4035,8 @@ public class Spreadsheet extends Component
         command.captureValues(newColumnSizes.keySet()
                 .toArray(new Integer[newColumnSizes.size()]));
         historyManager.addCommand(command);
-        for (Entry<Integer, Integer> entry : newColumnSizes.entrySet()) {
-            int index = entry.getKey();
-            int width = entry.getValue();
-            setColumnWidth(index - 1, width);
-        }
+        setColumnWidths(newColumnSizes.entrySet().stream().collect(Collectors
+                .toMap(entry -> entry.getKey() - 1, Entry::getValue)));
 
         if (hasSheetOverlays()) {
             reloadImageSizesFromPOI = true;
@@ -4019,8 +4054,36 @@ public class Spreadsheet extends Component
      *            New column width in pixels
      */
     public void setColumnWidth(int index, int width) {
+        doSetColumnWidth(index, width);
         if (width == 0) {
-            setColumnHidden(index, true);
+            reloadSheetStyles(false, true);
+        }
+    }
+
+    /**
+     * Sets the column width for multiple columns. Used internally in order to
+     * defer the style calculations until all the column widths are updated.
+     *
+     * @see #setColumnWidth(int, int)
+     *
+     * @param columnIndexToWidth
+     *            Map of 0-based column indexes to the new column width in
+     *            pixels
+     */
+    void setColumnWidths(Map<Integer, Integer> columnIndexToWidth) {
+        var isAnyColumnHidden = new AtomicBoolean();
+        columnIndexToWidth.forEach((key, value) -> {
+            isAnyColumnHidden.set(value == 0);
+            doSetColumnWidth(key, value);
+        });
+        if (isAnyColumnHidden.get()) {
+            reloadSheetStyles(false, true);
+        }
+    }
+
+    private void doSetColumnWidth(int index, int width) {
+        if (width == 0) {
+            doSetColumnHidden(index, true);
         } else {
             ArrayList<Integer> _hiddenColumnIndexes = new ArrayList<>(
                     getHiddenColumnIndexes());
