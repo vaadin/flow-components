@@ -59,6 +59,9 @@ public class Card extends Component implements HasSize,
     private static final String HEADER_SUFFIX_SLOT_NAME = "header-suffix";
     private static final String FOOTER_SLOT_NAME = "footer";
 
+    private static final String CARD_TITLE_PROPERTY = "cardTitle";
+    private static final String TITLE_HEADING_LEVEL_PROPERTY = "titleHeadingLevel";
+
     private Element contentRoot;
 
     private boolean featureFlagEnabled;
@@ -86,9 +89,65 @@ public class Card extends Component implements HasSize,
     }
 
     /**
+     * Sets the {@code cardTitle} property. If a {@link #setHeader(Component)
+     * header component} is set, the title will not be displayed. Setting a
+     * title this way removes any title component set using
+     * {@link #setTitle(Component)}. Setting {@code null} or empty string
+     * removes any previously set {@code String} titles.
+     *
+     * @param title
+     *            the title property
+     * @see #setTitle(String, Integer)
+     * @see #setTitleHeadingLevel(Integer)
+     * @see #getTitleAsText()
+     */
+    public void setTitle(String title) {
+        doSetTitle((Component) null);
+        doSetTitle(title);
+    }
+
+    /**
+     * Sets the title and the heading level for the title. If a
+     * {@link #setHeader(Component) header component} is set, the title will not
+     * be displayed. Setting a title this way removes any title component set
+     * using {@link #setTitle(Component)}. Setting {@code null} or empty title
+     * removes any previously set {@code String} titles.
+     *
+     * @param title
+     *            the title property
+     * @param titleHeadingLevel
+     *            the title heading level property,
+     * @see #setTitle(String)
+     * @see #setTitleHeadingLevel(Integer)
+     * @see #getTitleAsText()
+     */
+    public void setTitle(String title, Integer titleHeadingLevel) {
+        setTitleHeadingLevel(titleHeadingLevel);
+        setTitle(title);
+    }
+
+    /**
+     * Sets the title heading level property for the titles set using
+     * {@link #setTitle(String)}. The default is 2. Setting {@code null} resets
+     * it to default. Does not affect the title components set using
+     * {@link #setTitle(Component)}.
+     *
+     * @param titleHeadingLevel
+     *            the title heading level property, {@code null} to remove
+     */
+    public void setTitleHeadingLevel(Integer titleHeadingLevel) {
+        if (titleHeadingLevel == null) {
+            getElement().removeProperty(TITLE_HEADING_LEVEL_PROPERTY);
+        } else {
+            getElement().setProperty(TITLE_HEADING_LEVEL_PROPERTY,
+                    titleHeadingLevel);
+        }
+    }
+
+    /**
      * Sets the component used as the card's title. If a
      * {@link #setHeader(Component) header component} is set, the title will not
-     * be displayed.
+     * be displayed. This also removes any previously set {@code String} titles.
      * <p>
      * Passing {@code null} removes the current title from the card.
      *
@@ -96,11 +155,22 @@ public class Card extends Component implements HasSize,
      *            the title component, or {@code null} to remove
      */
     public void setTitle(Component title) {
-        SlotUtils.setSlot(this, TITLE_SLOT_NAME, title);
+        doSetTitle((String) null);
+        doSetTitle(title);
     }
 
     /**
-     * Gets the current title component.
+     * Gets the value of the {@code cardTitle} property. Returns empty if no
+     * title is set.
+     *
+     * @return the value of the title property
+     */
+    public String getTitleAsText() {
+        return getElement().getProperty(CARD_TITLE_PROPERTY, "");
+    }
+
+    /**
+     * Gets the current title component set using {@link #setTitle(Component)}.
      *
      * @return the title component, or {@code null} if none is set
      */
@@ -369,5 +439,17 @@ public class Card extends Component implements HasSize,
         contentRoot = new Element("div");
         contentRoot.getStyle().set("display", "contents");
         getElement().appendChild(contentRoot);
+    }
+
+    private void doSetTitle(String title) {
+        if (title == null) {
+            getElement().removeProperty(CARD_TITLE_PROPERTY);
+        } else {
+            getElement().setProperty(CARD_TITLE_PROPERTY, title);
+        }
+    }
+
+    private void doSetTitle(Component title) {
+        SlotUtils.setSlot(this, TITLE_SLOT_NAME, title);
     }
 }

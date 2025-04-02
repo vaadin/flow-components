@@ -25,15 +25,17 @@ import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-card")
 public class CardIT extends AbstractComponentIT {
+
+    private CardElement card;
+
     @Before
     public void init() {
         open();
+        card = $(CardElement.class).waitForFirst();
     }
 
     @Test
     public void rendersCardComponent() {
-        CardElement card = $(CardElement.class).waitForFirst();
-
         boolean hasShadowRoot = (Boolean) executeScript(
                 "return arguments[0].shadowRoot !== null", card);
         String componentName = (String) executeScript(
@@ -42,5 +44,12 @@ public class CardIT extends AbstractComponentIT {
 
         Assert.assertTrue(hasShadowRoot);
         Assert.assertEquals("vaadin-card", componentName);
+        Assert.assertNotNull(card.getTitle());
+        Assert.assertNotNull(card.getSubtitle());
+        Assert.assertNotNull(card.getMedia());
+        Assert.assertNotNull(card.getHeaderPrefix());
+        Assert.assertNotNull(card.getHeaderSuffix());
+        Assert.assertFalse(card.getFooterContents().isEmpty());
+        Assert.assertFalse(card.getContents().isEmpty());
     }
 }
