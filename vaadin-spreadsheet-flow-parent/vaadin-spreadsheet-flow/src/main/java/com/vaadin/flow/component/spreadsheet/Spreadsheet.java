@@ -3274,6 +3274,16 @@ public class Spreadsheet extends Component
         reloadSheetStyles(false, true);
     }
 
+    /**
+     * Hides or shows the given columns. Used internally in order to defer the
+     * style calculations until visibility of all columns are updated.
+     *
+     * @see #setColumnHidden(int, boolean)
+     *
+     * @param columnIndexToHidden
+     *            Map of 0-based column indexes to the indicator whether the
+     *            column should be hidden
+     */
     void setColumnsHidden(Map<Integer, Boolean> columnIndexToHidden) {
         columnIndexToHidden.forEach(this::doSetColumnHidden);
         reloadSheetStyles(false, true);
@@ -3325,6 +3335,16 @@ public class Spreadsheet extends Component
         reloadSheetStyles(true, true);
     }
 
+    /**
+     * Hides or shows the given rows. Used internally in order to defer the
+     * style calculations until visibility of all rows are updated.
+     *
+     * @see #setRowHidden(int, boolean)
+     *
+     * @param rowIndexToHidden
+     *            Map of 0-based row indexes to the indicator whether the row
+     *            should be hidden
+     */
     void setRowsHidden(Map<Integer, Boolean> rowIndexToHidden) {
         rowIndexToHidden.forEach(this::doSetRowHidden);
         reloadSheetStyles(true, true);
