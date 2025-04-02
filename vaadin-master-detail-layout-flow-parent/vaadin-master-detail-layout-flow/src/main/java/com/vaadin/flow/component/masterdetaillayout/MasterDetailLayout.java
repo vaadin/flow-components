@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
@@ -52,6 +53,7 @@ public class MasterDetailLayout extends Component
 
     private HasElement detail;
     private PendingJavaScriptResult pendingDetailsUpdate;
+    private boolean hasInitialized = false;
 
     /**
      * Supported orientation values for {@link MasterDetailLayout}.
@@ -134,14 +136,24 @@ public class MasterDetailLayout extends Component
         if (pendingDetailsUpdate != null) {
             pendingDetailsUpdate.cancelExecution();
         }
-        pendingDetailsUpdate = getElement().executeJs("this._setDetail($0)",
-                detail != null ? detail.getElement() : null);
+        boolean skipTransition = !hasInitialized;
+        pendingDetailsUpdate = getElement().executeJs("this._setDetail($0, $1)",
+                detail != null ? detail.getElement() : null, skipTransition);
     }
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         updateDetails();
+        attachEvent.getUI().beforeClientResponse(this, executionContext -> {
+            this.hasInitialized = true;
+        });
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        super.onDetach(detachEvent);
+        this.hasInitialized = false;
     }
 
     /**
