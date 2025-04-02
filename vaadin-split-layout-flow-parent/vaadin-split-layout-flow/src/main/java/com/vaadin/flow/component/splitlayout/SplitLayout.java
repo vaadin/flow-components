@@ -63,6 +63,10 @@ public class SplitLayout extends Component
         VERTICAL, HORIZONTAL;
     }
 
+    public enum FlexArea {
+        BOTH, PRIMARY, SECONDARY;
+    }
+
     /**
      * Constructs an empty SplitLayout.
      */
@@ -84,10 +88,10 @@ public class SplitLayout extends Component
             splitterPosition = calcNewSplitterPosition(
                     e.primaryComponentFlexBasis, e.secondaryComponentFlexBasis);
 
-            setPrimaryStyle("flex",
-                    String.format("1 1 %s", e.primaryComponentFlexBasis));
-            setSecondaryStyle("flex",
-                    String.format("1 1 %s", e.secondaryComponentFlexBasis));
+            setPrimaryStyle("flex-basis",
+                    e.primaryComponentFlexBasis);
+            setSecondaryStyle("flex-basis",
+                    e.secondaryComponentFlexBasis);
         });
     }
 
@@ -121,6 +125,29 @@ public class SplitLayout extends Component
         this(orientation);
         addToPrimary(primaryComponent);
         addToSecondary(secondaryComponent);
+    }
+
+    public void setPrimarySize(String size) {
+        Objects.requireNonNull(size, "Size cannot be null");
+        setPrimaryStyle("flex-basis", size);
+        setSecondaryStyle("flex-basis", "auto");
+    }
+
+    public void setSecondarySize(String size) {
+        Objects.requireNonNull(size, "Size cannot be null");
+        setPrimaryStyle("flex-basis", "auto");
+        setSecondaryStyle("flex-basis", size);
+    }
+
+    public void setFlexArea(FlexArea flexArea) {
+        Objects.requireNonNull(flexArea, "FlexArea cannot be null");
+        getElement().setProperty("flexArea",
+        flexArea.toString().toLowerCase(Locale.ENGLISH));
+    }
+
+    public FlexArea getFlexArea() {
+        String flexArea = getElement().getProperty("flexArea");
+        return FlexArea.valueOf(flexArea.toUpperCase());
     }
 
     /**
@@ -259,8 +286,8 @@ public class SplitLayout extends Component
         }
         double primary = Math.min(Math.max(this.splitterPosition, 0), 100);
         double secondary = 100 - primary;
-        setPrimaryStyle("flex", String.format("1 1 %s%%", primary));
-        setSecondaryStyle("flex", String.format("1 1 %s%%", secondary));
+        setPrimaryStyle("flex-basis", String.format("%s%%", primary));
+        setSecondaryStyle("flex-basis", String.format("%s%%", secondary));
     }
 
     /**
