@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
@@ -1071,9 +1073,11 @@ public class SpreadsheetFactory implements Serializable {
              * mimic this behavior here.
              */
             spreadsheet.setColumnsHidden(
-                    IntStream.range(0, leftCol).boxed().toList(), true);
+                    IntStream.range(0, leftCol).boxed().collect(Collectors
+                            .toMap(Function.identity(), index -> true)));
             spreadsheet.setRowsHidden(
-                    IntStream.range(0, topRow).boxed().toList(), true);
+                    IntStream.range(0, topRow).boxed().collect(Collectors
+                            .toMap(Function.identity(), index -> true)));
         } else {
             spreadsheet.setVerticalSplitPosition(0);
             spreadsheet.setHorizontalSplitPosition(0);

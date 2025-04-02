@@ -3274,9 +3274,8 @@ public class Spreadsheet extends Component
         reloadSheetStyles(false, true);
     }
 
-    void setColumnsHidden(Collection<Integer> columnIndexes, boolean hidden) {
-        columnIndexes
-                .forEach(columnIndex -> doSetColumnHidden(columnIndex, hidden));
+    void setColumnsHidden(Map<Integer, Boolean> columnIndexToHidden) {
+        columnIndexToHidden.forEach(this::doSetColumnHidden);
         reloadSheetStyles(false, true);
     }
 
@@ -3326,8 +3325,8 @@ public class Spreadsheet extends Component
         reloadSheetStyles(true, true);
     }
 
-    void setRowsHidden(Collection<Integer> rowIndexes, boolean hidden) {
-        rowIndexes.forEach(rowIndex -> doSetRowHidden(rowIndex, hidden));
+    void setRowsHidden(Map<Integer, Boolean> rowIndexToHidden) {
+        rowIndexToHidden.forEach(this::doSetRowHidden);
         reloadSheetStyles(true, true);
     }
 
