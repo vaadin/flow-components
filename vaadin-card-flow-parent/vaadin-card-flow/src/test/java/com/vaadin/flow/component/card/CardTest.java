@@ -69,6 +69,63 @@ public class CardTest {
     }
 
     @Test
+    public void stringTitleIsEmptyByDefault() {
+        Assert.assertEquals("", card.getTitleAsText());
+    }
+
+    @Test
+    public void setStringTitle_titleIsSet() {
+        var title = "Some Title";
+        card.setTitle(title);
+        Assert.assertEquals(title, card.getTitleAsText());
+        Assert.assertEquals(title, card.getElement().getProperty("cardTitle"));
+        title = "Other Title";
+        card.setTitle(title, 2);
+        Assert.assertEquals(title, card.getTitleAsText());
+        Assert.assertEquals(title, card.getElement().getProperty("cardTitle"));
+    }
+
+    @Test
+    public void setStringTitle_setNullStringTitle_titleCleared() {
+        card.setTitle("Some Title");
+        card.setTitle((String) null);
+        Assert.assertEquals("", card.getTitleAsText());
+    }
+
+    @Test
+    public void setTitleHeadingLevel_elementPropertyIsUpdated() {
+        var titleHeadingLevel = 1;
+        card.setTitleHeadingLevel(titleHeadingLevel);
+        Assert.assertEquals(titleHeadingLevel,
+                card.getElement().getProperty("titleHeadingLevel", -1));
+        titleHeadingLevel = 7;
+        card.setTitleHeadingLevel(titleHeadingLevel);
+        Assert.assertEquals(titleHeadingLevel,
+                card.getElement().getProperty("titleHeadingLevel", -1));
+    }
+
+    @Test
+    public void setTitleHeadingLevelNull_elementPropertyIsRemoved() {
+        card.setTitleHeadingLevel(1);
+        card.setTitleHeadingLevel(null);
+        Assert.assertFalse(card.getElement().hasProperty("titleHeadingLevel"));
+    }
+
+    @Test
+    public void setStringTitle_setComponentTitle_stringTitleIsRemoved() {
+        card.setTitle("Some Title");
+        card.setTitle(new Div("Other Title"));
+        Assert.assertEquals("", card.getTitleAsText());
+    }
+
+    @Test
+    public void setComponentTitle_setStringTitle_componentTitleIsRemoved() {
+        card.setTitle(new Div("Other Title"));
+        card.setTitle("Some Title");
+        Assert.assertNull(card.getTitle());
+    }
+
+    @Test
     public void subtitleNullByDefault() {
         Assert.assertNull(card.getSubtitle());
     }

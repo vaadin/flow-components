@@ -264,28 +264,38 @@ public class MasterDetailLayoutTest {
 
     @Test
     public void setOrientation_getOrientation() {
-        Assert.assertEquals(layout.getOrientation(),
-                MasterDetailLayout.Orientation.HORIZONTAL);
+        Assert.assertEquals(MasterDetailLayout.Orientation.HORIZONTAL,
+                layout.getOrientation());
 
         layout.setOrientation(MasterDetailLayout.Orientation.VERTICAL);
 
-        Assert.assertEquals(layout.getOrientation(),
-                MasterDetailLayout.Orientation.VERTICAL);
+        Assert.assertEquals(MasterDetailLayout.Orientation.VERTICAL,
+                layout.getOrientation());
         Assert.assertEquals("vertical",
                 layout.getElement().getProperty("orientation"));
     }
 
+    @Test(expected = NullPointerException.class)
+    public void setOrientationNull_throws() {
+        layout.setOrientation(null);
+    }
+
     @Test
     public void setContainment_getContainment() {
-        Assert.assertEquals(layout.getContainment(),
-                MasterDetailLayout.Containment.LAYOUT);
+        Assert.assertEquals(MasterDetailLayout.Containment.LAYOUT,
+                layout.getContainment());
 
         layout.setContainment(MasterDetailLayout.Containment.VIEWPORT);
 
-        Assert.assertEquals(layout.getContainment(),
-                MasterDetailLayout.Containment.VIEWPORT);
+        Assert.assertEquals(MasterDetailLayout.Containment.VIEWPORT,
+                layout.getContainment());
         Assert.assertEquals("viewport",
                 layout.getElement().getProperty("containment"));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setContainmentNull_throws() {
+        layout.setContainment(null);
     }
 
     @Test
