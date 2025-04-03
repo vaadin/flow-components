@@ -23,13 +23,15 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
+import com.vaadin.flow.component.contextmenu.testbench.ContextMenuItemElement;
+import com.vaadin.flow.component.contextmenu.testbench.ContextMenuOverlayElement;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 public abstract class AbstractContextMenuIT extends AbstractComponentIT {
 
     public static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
-
+    
     protected void rightClickOn(String id) {
         Actions action = new Actions(getDriver());
         WebElement element = findElement(By.id(id));
@@ -44,12 +46,12 @@ public abstract class AbstractContextMenuIT extends AbstractComponentIT {
         $("body").first().click();
     }
 
-    protected TestBenchElement getOverlay() {
-        return $(OVERLAY_TAG).first();
+    protected ContextMenuOverlayElement getOverlay() {
+        return $(ContextMenuOverlayElement.class).first();
     }
 
-    protected List<TestBenchElement> getAllOverlays() {
-        return $(OVERLAY_TAG).all();
+    protected List<ContextMenuOverlayElement> getAllOverlays() {
+        return $(ContextMenuOverlayElement.class).all();
     }
 
     protected void verifyNumOfOverlays(int expected) {
@@ -74,22 +76,20 @@ public abstract class AbstractContextMenuIT extends AbstractComponentIT {
         return getMenuItemCaptions(getMenuItems());
     }
 
-    protected String[] getMenuItemCaptions(List<TestBenchElement> menuItems) {
-        return menuItems.stream().map(WebElement::getText)
+    protected String[] getMenuItemCaptions(List<ContextMenuItemElement> menuItems) {
+        return menuItems.stream().map(ContextMenuItemElement::getText)
                 .toArray(String[]::new);
     }
 
-    protected List<TestBenchElement> getMenuItems() {
+    protected List<ContextMenuItemElement> getMenuItems() {
         return getMenuItems(getOverlay());
     }
 
-    protected List<TestBenchElement> getMenuItems(TestBenchElement overlay) {
+    protected List<TestBenchElement> getMenuItems(ContextMenuOverlayElement overlay) {
         return overlay.$("vaadin-context-menu-item").all();
     }
 
-    protected void openSubMenu(TestBenchElement parentItem) {
-        executeScript(
-                "arguments[0].dispatchEvent(new Event('mouseover', {bubbles:true}))",
-                parentItem);
+    protected void openSubMenu(ContextMenuItemElement parentItem) {
+        parentItem.openSubMenu();
     }
 }
