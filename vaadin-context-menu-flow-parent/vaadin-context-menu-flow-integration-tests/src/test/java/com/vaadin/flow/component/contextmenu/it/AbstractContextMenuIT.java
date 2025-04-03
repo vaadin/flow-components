@@ -86,7 +86,7 @@ public abstract class AbstractContextMenuIT extends AbstractComponentIT {
     }
 
     protected List<ContextMenuItemElement> getMenuItems(ContextMenuOverlayElement overlay) {
-        return overlay.$("vaadin-context-menu-item").all();
+        return overlay.getMenuItems();
     }
 
     protected void openSubMenu(ContextMenuItemElement parentItem) {
