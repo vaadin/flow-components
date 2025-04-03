@@ -20,6 +20,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
+import com.vaadin.flow.component.contextmenu.testbench.ContextMenuElement;
+import com.vaadin.flow.component.contextmenu.testbench.ContextMenuItemElement;
+import com.vaadin.flow.component.contextmenu.testbench.ContextMenuOverlayElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
@@ -168,7 +171,7 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
     @Test
     public void clickNonCheckableItem_checkedStateNotUpdated() {
         rightClickOn("context-menu-checkable-item-target");
-        TestBenchElement item = getMenuItems().get(0);
+        ContextMenuItemElement item = getMenuItems().get(0);
         item.click();
         Assert.assertEquals("false",
                 findElement(By.id("checked-message")).getText());
@@ -183,7 +186,7 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
         clickElementWithJs("toggle-checkable");
 
         rightClickOn("context-menu-checkable-item-target");
-        TestBenchElement item = getMenuItems().get(0);
+        ContextMenuItemElement item = getMenuItems().get(0);
         assertCheckedInClientSide(item, false);
 
         item.click();
@@ -206,7 +209,7 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
     @Test
     public void initiallyCheckedItem_hasCheckmark() {
         rightClickOn("context-menu-checkable-item-target");
-        TestBenchElement item = getMenuItems().get(1);
+        ContextMenuItemElement item = getMenuItems().get(1);
         assertCheckedInClientSide(item, true);
     }
 
