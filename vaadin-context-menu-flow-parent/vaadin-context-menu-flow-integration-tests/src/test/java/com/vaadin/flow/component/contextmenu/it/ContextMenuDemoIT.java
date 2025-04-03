@@ -25,7 +25,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.component.contextmenu.testbench.ContextMenuElement;
 import com.vaadin.flow.component.contextmenu.testbench.ContextMenuItemElement;
 import com.vaadin.flow.component.contextmenu.testbench.ContextMenuOverlayElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -98,13 +97,15 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
 
         openSubMenu(getMenuItems().get(1));
 
-        waitUntil(driver -> $(ContextMenuOverlayElement.class).all().size() == 2);
+        waitUntil(
+                driver -> $(ContextMenuOverlayElement.class).all().size() == 2);
         List<ContextMenuOverlayElement> overlays =
                 $(ContextMenuOverlayElement.class).all();
 
         openSubMenu(getMenuItems(overlays.get(1)).get(1));
 
-        waitUntil(driver -> $(ContextMenuOverlayElement.class).all().size() == 3);
+        waitUntil(
+                driver -> $(ContextMenuOverlayElement.class).all().size() == 3);
         overlays = $(ContextMenuOverlayElement.class).all();
 
         getMenuItems(overlays.get(2)).get(0).click();
@@ -169,10 +170,11 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
         verifyOpened();
 
         openSubMenu(getMenuItems().get(1));
-        waitUntil(driver -> $(ContextMenuOverlayElement.class).all().size() == 2);
+        waitUntil(
+                driver -> $(ContextMenuOverlayElement.class).all().size() == 2);
 
-        ContextMenuOverlayElement subMenuOverlay =
-                $(ContextMenuOverlayElement.class).all().get(1);
+        ContextMenuOverlayElement subMenuOverlay = $(
+                ContextMenuOverlayElement.class).all().get(1);
 
         TestBenchElement overlayContainer = subMenuOverlay
                 .$("vaadin" + "-context-menu-list-box").first();
@@ -215,7 +217,8 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
         return getOverlay().getMenuItems();
     }
 
-    private List<ContextMenuItemElement> getMenuItems(ContextMenuOverlayElement overlay) {
+    private List<ContextMenuItemElement> getMenuItems(
+            ContextMenuOverlayElement overlay) {
         return overlay.getMenuItems();
     }
 
