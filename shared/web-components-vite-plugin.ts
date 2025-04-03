@@ -32,3 +32,76 @@ export function useLocalWebComponents(webComponentsRepoPath: string): PluginOpti
     }
   };
 }
+
+/**
+ * Vite plugin that resolves Vaadin web components to Lit versions
+ */
+export function useLitWebComponents(): PluginOption {
+  return {
+    name: 'use-lit-web-components',
+    config() {
+      return {
+        resolve: {
+          alias: [
+            'accordion',
+            'accordion-panel',
+            'app-layout',
+            'drawer-toggle',
+            'avatar',
+            'avatar-group',
+            'checkbox',
+            'combo-box',
+            'context-menu',
+            'custom-field',
+            'date-picker',
+            'date-time-picker',
+            'details',
+            'dialog',
+            'email-field',
+            'horizontal-layout',
+            'list-box',
+            'integer-field',
+            'item',
+            'map',
+            'multi-select-combo-box',
+            'notification',
+            'number-field',
+            'password-field',
+            'radio-button',
+            'radio-button-group',
+            'scroller',
+            'select',
+            'split-layout',
+            'tabs',
+            'tab',
+            'tabsheet',
+            'text-area',
+            'text-field',
+            'time-picker',
+            'vertical-layout',
+            'virtual-list'
+          ].flatMap((component) => {
+            return [
+              {
+                find: new RegExp(`^@vaadin/([^\/]+)\/vaadin-${component}.js`),
+                replacement: `@vaadin/$1/vaadin-lit-${component}.js`
+              },
+              {
+                find: new RegExp(`^@vaadin/([^\/]+)\/src/vaadin-${component}.js`),
+                replacement: `@vaadin/$1/src/vaadin-lit-${component}.js`
+              },
+              {
+                find: new RegExp(`^@vaadin/([^\/]+)\/theme/lumo/vaadin-${component}.js`),
+                replacement: `@vaadin/$1/theme/lumo/vaadin-lit-${component}.js`
+              },
+              {
+                find: new RegExp(`^@vaadin/([^\/]+)\/theme/material/vaadin-${component}.js`),
+                replacement: `@vaadin/$1/theme/material/vaadin-lit-${component}.js`
+              }
+            ];
+          })
+        }
+      };
+    }
+  };
+}
