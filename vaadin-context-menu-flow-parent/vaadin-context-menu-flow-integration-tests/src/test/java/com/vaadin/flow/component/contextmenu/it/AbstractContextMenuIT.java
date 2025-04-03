@@ -31,7 +31,7 @@ import com.vaadin.tests.AbstractComponentIT;
 public abstract class AbstractContextMenuIT extends AbstractComponentIT {
 
     public static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
-    
+
     protected void rightClickOn(String id) {
         Actions action = new Actions(getDriver());
         WebElement element = findElement(By.id(id));
@@ -76,7 +76,8 @@ public abstract class AbstractContextMenuIT extends AbstractComponentIT {
         return getMenuItemCaptions(getMenuItems());
     }
 
-    protected String[] getMenuItemCaptions(List<ContextMenuItemElement> menuItems) {
+    protected String[] getMenuItemCaptions(
+            List<ContextMenuItemElement> menuItems) {
         return menuItems.stream().map(ContextMenuItemElement::getText)
                 .toArray(String[]::new);
     }
@@ -85,7 +86,8 @@ public abstract class AbstractContextMenuIT extends AbstractComponentIT {
         return getMenuItems(getOverlay());
     }
 
-    protected List<ContextMenuItemElement> getMenuItems(ContextMenuOverlayElement overlay) {
+    protected List<ContextMenuItemElement> getMenuItems(
+            ContextMenuOverlayElement overlay) {
         return overlay.getMenuItems();
     }
 
