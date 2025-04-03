@@ -59,8 +59,8 @@ import elemental.json.JsonArray;
 @Tag("vaadin-side-nav-item")
 @NpmPackage(value = "@vaadin/side-nav", version = "24.8.0-alpha8")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
-public class SideNavItem extends SideNavItemContainer
-        implements HasEnabled, HasPrefix, HasSuffix {
+public class SideNavItem extends Component
+        implements HasSideNavItems, HasEnabled, HasPrefix, HasSuffix {
 
     private Element labelElement;
 
@@ -195,11 +195,6 @@ public class SideNavItem extends SideNavItemContainer
         setPath(view, routeParameters);
         setLabel(label);
         setPrefixComponent(prefixComponent);
-    }
-
-    @Override
-    protected void setupSideNavItem(SideNavItem item) {
-        item.getElement().setAttribute("slot", "children");
     }
 
     /**

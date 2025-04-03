@@ -18,6 +18,7 @@ package com.vaadin.flow.component.sidenav.tests;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.html.testbench.DivElement;
 import com.vaadin.flow.component.html.testbench.NativeButtonElement;
@@ -70,6 +71,9 @@ public class SideNavIT extends AbstractComponentIT {
     public void clickNavigableParent_urlChanged() {
         navigableParent.click();
 
+        waitUntil(
+                driver -> findElement(By.id("navigate-to-main-page")) != null);
+
         Assert.assertTrue(getDriver().getCurrentUrl()
                 .contains("side-nav-test-target-view"));
     }
@@ -78,6 +82,9 @@ public class SideNavIT extends AbstractComponentIT {
     public void clickChildOfNavigableParent_urlChanged() {
         navigableParent.toggle();
         navigableParent.getItems().get(0).click();
+
+        waitUntil(
+                driver -> findElement(By.id("navigate-to-main-page")) != null);
 
         Assert.assertTrue(getDriver().getCurrentUrl()
                 .contains("side-nav-test-target-view"));
