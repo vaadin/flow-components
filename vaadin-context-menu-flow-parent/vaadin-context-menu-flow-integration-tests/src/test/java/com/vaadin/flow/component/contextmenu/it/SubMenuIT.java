@@ -49,7 +49,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
         openSubMenu(getMenuItems().get(0));
         verifyNumOfOverlays(2);
 
-        List<ContextMenuItemElement> overlays = getAllOverlays();
+        List<ContextMenuOverlayElement> overlays = getAllOverlays();
         ContextMenuItemElement subItem = getMenuItems(overlays.get(1)).get(0);
         Assert.assertEquals("bar", subItem.getText());
 
