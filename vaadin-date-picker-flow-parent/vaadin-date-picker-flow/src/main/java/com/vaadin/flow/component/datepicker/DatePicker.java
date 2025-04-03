@@ -158,7 +158,7 @@ public class DatePicker
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
 
-    private String unparsableInputValue = null;
+    private String unparsableInput = null;
 
     private SerializableFunction<String, Result<LocalDate>> fallbackParser;
     private String fallbackParserErrorMessage = null;
@@ -169,7 +169,7 @@ public class DatePicker
     private Validator<LocalDate> defaultValidator = (value, context) -> {
         boolean fromComponent = context == null;
 
-        if (unparsableInputValue != null) {
+        if (unparsableInput != null) {
             if (fallbackParserErrorMessage != null) {
                 return ValidationResult.error(getI18nErrorMessage(
                         DatePickerI18n::getBadInputErrorMessage));
@@ -676,7 +676,7 @@ public class DatePicker
      *         <code>false</code> otherwise
      */
     protected boolean isInputValuePresent() {
-        return !getInputElementValue().isEmpty();
+        return !isEmpty() || unparsableInput != null;
     }
 
     /**
@@ -684,9 +684,9 @@ public class DatePicker
      * when the web component dispatches a `change` or `unparsable-change`
      * event.
      * <p>
-     * NOTE: {@link #setValue(LocalDate)} does not update the input element value
-     * on the server, because it requires date formatting, which is only available
-     * on the web component's side.
+     * NOTE: {@link #setValue(LocalDate)} does not update the input element
+     * value on the server, because it requires date formatting, which is only
+     * available on the web component's side.
      *
      * @return the value of the input element
      */
@@ -756,10 +756,11 @@ public class DatePicker
 
     @Override
     public void setValue(LocalDate newValue) {
-        if (getValue() == null && newValue == null && unparsableInputValue != null) {
-            // When the value is programmatically cleared while the field contains
-            // an unparsable input, ValueChangeEvent isn't fired, so we need to call
-            // setModelValue manually to clear the bad input and trigger validation.
+        if (getValue() == null && newValue == null && unparsableInput != null) {
+            // When the value is programmatically cleared while the field
+            // contains an unparsable input, ValueChangeEvent isn't fired,
+            // so we need to call setModelValue manually to clear the bad
+            // input and trigger validation.
             setModelValue(newValue, false);
             return;
         }
@@ -777,25 +778,25 @@ public class DatePicker
             return;
         }
 
-        // Synchronize the unparsable input value
-        String oldUnparsableInputValue = this.unparsableInputValue;
+        // Synchronize unparsable input value
+        String oldUnparsableInput = this.unparsableInput;
 
         if (fromClient && newModelValue == null
                 && !getInputElementValue().isEmpty()) {
-            this.unparsableInputValue = getInputElementValue();
+            this.unparsableInput = getInputElementValue();
         } else {
-            this.unparsableInputValue = null;
+            this.unparsableInput = null;
         }
 
-        String newUnparsableInputValue = this.unparsableInputValue;
+        String newUnparsableInput = this.unparsableInput;
 
-        // Try to parse the unparsable input using the fallback parser
+        // Try to parse unparsable input using the fallback parser
         try {
             isFallbackParserRunning = true;
 
-            if (fallbackParser != null && newUnparsableInputValue != null) {
+            if (fallbackParser != null && newUnparsableInput != null) {
                 Result<LocalDate> result = runFallbackParser(
-                    newUnparsableInputValue);
+                        newUnparsableInput);
                 if (result.isError()) {
                     fallbackParserErrorMessage = result.getMessage()
                             .orElse(null);
@@ -814,24 +815,27 @@ public class DatePicker
 
         super.setModelValue(newModelValue, fromClient);
 
-        // Handle cases where the model value remains unchanged but a change was still notified.
-        // This can happen in the following situations:
-        // 1. The user modifies the input but it still remains unparsable (unparsable-change event)
-        // 2. The user enters an unparsable input into empty field (unparsable-change event)
-        // 3. The user clears an unparsable input (unparsable-change event)
-        // 4. The value is programmatically cleared while the field contains an unparsable input (setValue)
+        // Handle cases where the model value remains unchanged but a change was
+        // still notified. This can happen in the following situations:
+        // 1. The user modifies the input but it still remains unparsable
+        // 2. The user enters an unparsable input into empty field
+        // 3. The user clears an unparsable input
+        // 4. The value is programmatically cleared while the field contains an
+        // unparsable input
         if (newModelValue == null && oldModelValue == null) {
-            if (oldUnparsableInputValue != null || newUnparsableInputValue != null) {
-                // Trigger validation when there was a change that didn't fire a ValueChangeEvent,
-                // but the field still needs to be revalidated (see cases 1, 2, 3, 4).
+            if (oldUnparsableInput != null || newUnparsableInput != null) {
+                // Trigger validation when there was a change that didn't fire a
+                // ValueChangeEvent, but the field still needs to be revalidated
+                // (see cases 1, 2, 3, 4).
                 validate();
                 fireValidationStatusChangeEvent();
             }
 
-            if (oldUnparsableInputValue != null && newUnparsableInputValue == null) {
-                // Ensure bad input is cleared when the value is cleared programmatically
-                // (see case 4)
-                getElement().executeJs("if (!this.value) this._inputElementValue = ''");
+            if (oldUnparsableInput != null && newUnparsableInput == null) {
+                // Ensure bad input is cleared when the value is cleared
+                // programmatically (see case 4)
+                getElement().executeJs(
+                        "if (!this.value) this._inputElementValue = ''");
             }
         }
     }
