@@ -25,6 +25,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
+import com.vaadin.flow.component.contextmenu.testbench.ContextMenuElement;
+import com.vaadin.flow.component.contextmenu.testbench.ContextMenuItemElement;
+import com.vaadin.flow.component.contextmenu.testbench.ContextMenuOverlayElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
@@ -95,13 +98,14 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
 
         openSubMenu(getMenuItems().get(1));
 
-        waitUntil(driver -> $(OVERLAY_TAG).all().size() == 2);
-        List<TestBenchElement> overlays = $(OVERLAY_TAG).all();
+        waitUntil(driver -> $(ContextMenuOverlayElement.class).all().size() == 2);
+        List<ContextMenuOverlayElement> overlays =
+                $(ContextMenuOverlayElement.class).all();
 
         openSubMenu(getMenuItems(overlays.get(1)).get(1));
 
-        waitUntil(driver -> $(OVERLAY_TAG).all().size() == 3);
-        overlays = $(OVERLAY_TAG).all();
+        waitUntil(driver -> $(ContextMenuOverlayElement.class).all().size() == 3);
+        overlays = $(ContextMenuOverlayElement.class).all();
 
         getMenuItems(overlays.get(2)).get(0).click();
 
@@ -118,7 +122,7 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
         rightClickOn(By.id("checkable-menu-items-target"));
         verifyOpened();
 
-        List<TestBenchElement> items = getMenuItems();
+        List<ContextMenuItemElement> items = getMenuItems();
         ContextMenuPageIT.assertCheckedInClientSide(items.get(0), false);
         ContextMenuPageIT.assertCheckedInClientSide(items.get(1), true);
 
@@ -165,9 +169,10 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
         verifyOpened();
 
         openSubMenu(getMenuItems().get(1));
-        waitUntil(driver -> $(OVERLAY_TAG).all().size() == 2);
+        waitUntil(driver -> $(ContextMenuOverlayElement.class).all().size() == 2);
 
-        TestBenchElement subMenuOverlay = $(OVERLAY_TAG).all().get(1);
+        ContextMenuOverlayElement subMenuOverlay =
+                $(ContextMenuOverlayElement.class).all().get(1);
 
         TestBenchElement overlayContainer = subMenuOverlay
                 .$("vaadin" + "-context-menu-list-box").first();
@@ -206,17 +211,15 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
                 .toArray(String[]::new);
     }
 
-    private List<TestBenchElement> getMenuItems() {
-        return getOverlay().$("vaadin-context-menu-item").all();
+    private List<ContextMenuItemElement> getMenuItems() {
+        return getOverlay().getMenuItems();
     }
 
-    private List<TestBenchElement> getMenuItems(TestBenchElement overlay) {
-        return overlay.$("vaadin-context-menu-item").all();
+    private List<ContextMenuItemElement> getMenuItems(ContextMenuOverlayElement overlay) {
+        return overlay.getMenuItems();
     }
 
-    private void openSubMenu(WebElement parentItem) {
-        executeScript(
-                "arguments[0].dispatchEvent(new Event('mouseover', {bubbles:true}))",
-                parentItem);
+    private void openSubMenu(ContextMenuItemElement parentItem) {
+        parentItem.openSubMenu();
     }
 }
