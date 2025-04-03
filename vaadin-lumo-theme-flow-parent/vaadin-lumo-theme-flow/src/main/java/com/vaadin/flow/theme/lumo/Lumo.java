@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,7 +17,6 @@ package com.vaadin.flow.theme.lumo;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.LoggerFactory;
@@ -29,17 +28,16 @@ import com.vaadin.flow.theme.AbstractTheme;
 /**
  * Lumo component theme class implementation.
  */
-@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "24.0.0-rc1")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "24.8.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "24.0.0-rc1")
-@JsModule("@vaadin/vaadin-lumo-styles/color.js")
-@JsModule("@vaadin/vaadin-lumo-styles/typography.js")
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "24.8.0-alpha8")
+@JsModule("@vaadin/vaadin-lumo-styles/color-global.js")
+@JsModule("@vaadin/vaadin-lumo-styles/typography-global.js")
 @JsModule("@vaadin/vaadin-lumo-styles/sizing.js")
 @JsModule("@vaadin/vaadin-lumo-styles/spacing.js")
 @JsModule("@vaadin/vaadin-lumo-styles/style.js")
 @JsModule("@vaadin/vaadin-lumo-styles/vaadin-iconset.js")
-@JsModule("./lumo-includes.ts")
 public class Lumo implements AbstractTheme {
 
     public static final String LIGHT = "light";
@@ -53,11 +51,6 @@ public class Lumo implements AbstractTheme {
     @Override
     public String getThemeUrl() {
         return "theme/lumo/";
-    }
-
-    @Override
-    public List<String> getHeaderInlineContents() {
-        return Collections.emptyList();
     }
 
     @Override
@@ -80,4 +73,5 @@ public class Lumo implements AbstractTheme {
         }
         return attributes;
     }
+
 }

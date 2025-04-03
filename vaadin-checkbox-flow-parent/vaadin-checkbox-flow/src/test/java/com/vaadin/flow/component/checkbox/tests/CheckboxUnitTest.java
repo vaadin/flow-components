@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,20 +15,30 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.HasValidationProperties;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
 public class CheckboxUnitTest {
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
 
     @Test
     public void initialValue() {
@@ -113,5 +123,49 @@ public class CheckboxUnitTest {
     public void implementsHasTooltip() {
         Checkbox checkbox = new Checkbox();
         Assert.assertTrue(checkbox instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementHasAriaLabel() {
+        Checkbox checkbox = new Checkbox();
+        Assert.assertTrue(checkbox instanceof HasAriaLabel);
+    }
+
+    @Test
+    public void setAriaLabel() {
+        Checkbox checkbox = new Checkbox();
+        checkbox.setAriaLabel("aria-label");
+
+        Assert.assertTrue(checkbox.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", checkbox.getAriaLabel().get());
+
+        checkbox.setAriaLabel(null);
+        Assert.assertTrue(checkbox.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        Checkbox checkbox = new Checkbox();
+        checkbox.setAriaLabelledBy("aria-labelledby");
+
+        Assert.assertTrue(checkbox.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby",
+                checkbox.getAriaLabelledBy().get());
+
+        checkbox.setAriaLabelledBy(null);
+        Assert.assertTrue(checkbox.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void implementsInputField() {
+        Checkbox field = new Checkbox();
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<Checkbox, Boolean>, Boolean>);
+    }
+
+    @Test
+    public void implementsHasValidationProperties() {
+        Checkbox field = new Checkbox();
+        Assert.assertTrue(field instanceof HasValidationProperties);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,7 +15,13 @@
  */
 package com.vaadin.flow.component.grid;
 
-import com.vaadin.flow.data.renderer.Renderer;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiFunction;
+
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -28,13 +34,9 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.SerializableComparator;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BiFunction;
-
-import static org.junit.Assert.assertNotNull;
+import com.vaadin.flow.function.ValueProvider;
 
 public class GridColumnTest {
 
@@ -59,6 +61,11 @@ public class GridColumnTest {
         fourthColumn = grid.addColumn(renderer);
 
         UI.setCurrent(new UI());
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test
@@ -189,6 +196,24 @@ public class GridColumnTest {
     }
 
     @Test
+    public void setRenderer() {
+        Renderer<String> newRenderer = LitRenderer
+                .<String> of("<span>${text}</span>")
+                .withProperty("text", ValueProvider.identity());
+        fourthColumn.setRenderer(newRenderer);
+        Assert.assertEquals(newRenderer, fourthColumn.getRenderer());
+    }
+
+    @Test
+    public void setRendererReturnsColumn() {
+        Renderer<String> newRenderer = LitRenderer
+                .<String> of("<span>${text}</span>")
+                .withProperty("text", ValueProvider.identity());
+        Grid.Column<String> result = fourthColumn.setRenderer(newRenderer);
+        Assert.assertEquals(fourthColumn, result);
+    }
+
+    @Test
     public void addColumn_defaultTextAlign() {
         Grid<Person> grid = new Grid<>();
 
@@ -292,6 +317,17 @@ public class GridColumnTest {
         assertEqualColumnClasses(regularColumn.getClass(), Column.class);
         assertEqualColumnClasses(extendedColumn.getClass(),
                 ExtendedColumn.class);
+    }
+
+    @Test
+    public void setColumnRowHeader_updatedPropertyValue() {
+        Grid<Person> grid = new Grid<>();
+
+        Column<Person> rowHeaderColumn = grid.addColumn(Person::getName);
+        rowHeaderColumn.setRowHeader(true);
+        Assert.assertTrue(
+                rowHeaderColumn.getElement().getProperty("rowHeader", false));
+        Assert.assertTrue(rowHeaderColumn.isRowHeader());
     }
 
     private void assertEqualColumnClasses(Class columnClass, Class compareTo) {

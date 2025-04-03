@@ -1,12 +1,16 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.crud.testbench;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
@@ -17,10 +21,6 @@ import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * TestBench element for the vaadin-crud element
@@ -44,7 +44,7 @@ public class CrudElement extends TestBenchElement {
      */
     public Optional<TestBenchElement> getNewItemButton() {
         ElementQuery<TestBenchElement> newButtonQuery = this
-                .$(TestBenchElement.class).attribute("slot", "new-button");
+                .$(TestBenchElement.class).withAttribute("slot", "new-button");
         return newButtonQuery.exists() ? Optional.of(newButtonQuery.last())
                 : Optional.empty();
     }
@@ -56,8 +56,8 @@ public class CrudElement extends TestBenchElement {
      * @return the filter field for each column
      */
     public List<TextFieldElement> getFilterFields() {
-        return this.$(TextFieldElement.class).attribute("crud-role", "Search")
-                .all();
+        return this.$(TextFieldElement.class)
+                .withAttribute("crud-role", "Search").all();
     }
 
     /**
@@ -66,7 +66,7 @@ public class CrudElement extends TestBenchElement {
      * @return the toolbar content
      */
     public List<TestBenchElement> getToolbar() {
-        return this.$(TestBenchElement.class).attribute("slot", "toolbar")
+        return this.$(TestBenchElement.class).withAttribute("slot", "toolbar")
                 .all();
     }
 
@@ -129,7 +129,7 @@ public class CrudElement extends TestBenchElement {
     public boolean isEditorOpen() {
         if (getEditorPosition().isEmpty()) {
             return $("vaadin-crud-dialog-overlay").onPage()
-                    .attribute("opened", "").exists();
+                    .withAttribute("opened").exists();
         }
         return getPropertyBoolean("editorOpened");
     }
@@ -161,7 +161,7 @@ public class CrudElement extends TestBenchElement {
     public TestBenchElement getEditor() {
         if (getEditorPosition().isEmpty()) {
             return $("vaadin-crud-dialog-overlay").onPage()
-                    .attribute("opened", "").first();
+                    .withAttribute("opened").first();
         }
         return this;
     }

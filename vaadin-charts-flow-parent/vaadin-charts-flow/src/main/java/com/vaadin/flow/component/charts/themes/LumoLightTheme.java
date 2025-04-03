@@ -1,16 +1,14 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.themes;
 
 import com.vaadin.flow.component.charts.model.AbstractDataLabels;
-import com.vaadin.flow.component.charts.model.Hover;
-import com.vaadin.flow.component.charts.model.States;
 import com.vaadin.flow.component.charts.model.style.AxisStyle;
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.model.style.FontWeight;
@@ -164,10 +162,6 @@ public class LumoLightTheme extends Theme {
         setDataLabelsDefaults(getPlotOptions().getPyramid().getDataLabels());
         setDataLabelsDefaults(getPlotOptions().getSpline().getDataLabels());
         setDataLabelsDefaults(getPlotOptions().getWaterfall().getDataLabels());
-
-        States states = new States();
-        states.setHover(new Hover(false));
-        getPlotOptions().getPie().setStates(states);
     }
 
     protected void setDataLabelsDefaults(AbstractDataLabels labels) {

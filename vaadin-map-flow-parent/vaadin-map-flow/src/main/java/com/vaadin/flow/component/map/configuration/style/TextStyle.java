@@ -1,4 +1,14 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.map.configuration.style;
+
+import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
@@ -6,10 +16,8 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 import com.vaadin.flow.component.map.configuration.Constants;
 
-import java.io.Serializable;
-
 /**
- * Text style that defines how to render texts, such as labels, on the map.
+ * Text style that defines how to render texts on the map.
  */
 public class TextStyle extends AbstractConfigurationObject {
     private String font;
@@ -32,9 +40,10 @@ public class TextStyle extends AbstractConfigurationObject {
         rotation = 0;
         rotateWithView = false;
         textAlign = TextAlign.CENTER;
-        fill = new Fill("#333");
-        stroke = new Stroke("#fff", 3);
+        textBaseline = TextBaseline.MIDDLE;
         padding = 0;
+        setFill(new Fill("#333"));
+        setStroke(new Stroke("#fff", 3));
     }
 
     @Override
@@ -75,8 +84,8 @@ public class TextStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the offset of the text from whatever it is anchored to, in pixels.
-     * For example, a marker label is anchored to the marker's position, and
-     * then shifted by the specified offset. Default is {@code {x: 0, y: 10}}
+     * For example, a marker text is anchored to the marker's position, and then
+     * shifted by the specified offset. Default is {@code {x: 0, y: 10}}
      *
      * @param offset
      *            the new offset
@@ -88,8 +97,8 @@ public class TextStyle extends AbstractConfigurationObject {
 
     /**
      * Sets the offset of the text from whatever it is anchored to, in pixels.
-     * For example, a marker label is anchored to the marker's position, and
-     * then shifted by the specified offset. Default is {@code {x: 0, y: 10}}
+     * For example, a marker text is anchored to the marker's position, and then
+     * shifted by the specified offset. Default is {@code {x: 0, y: 10}}
      *
      * @param x
      *            the horizontal offset in pixels

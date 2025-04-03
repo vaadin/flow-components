@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import static org.junit.Assert.assertFalse;
+import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
+
 import java.util.List;
 
 import org.junit.Assert;
@@ -26,12 +29,9 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-
-import static org.junit.Assert.assertFalse;
-import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for {@link IntegerField}.
@@ -125,7 +125,7 @@ public class IntegerFieldPageIT extends AbstractComponentIT {
         blur();
 
         TestBenchElement clearButton = field.$(TestBenchElement.class)
-                .attributeContains("part", "clear-button").first();
+                .withAttributeContainingWord("part", "clear-button").first();
         clearButton.click();
 
         assertValueChange(2, 300, null);
@@ -136,7 +136,7 @@ public class IntegerFieldPageIT extends AbstractComponentIT {
         field = $(IntegerFieldElement.class).id("step-integer-field");
 
         TestBenchElement increaseButton = field.$(TestBenchElement.class)
-                .attributeContains("part", "increase-button").first();
+                .withAttributeContainingWord("part", "increase-button").first();
 
         increaseButton.click();
         assertValueChange(1, null, 4);

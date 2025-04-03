@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,6 +17,7 @@ package com.vaadin.flow.component.menubar.testbench;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
@@ -62,7 +63,7 @@ public class MenuBarElement extends TestBenchElement {
     }
 
     private boolean isOverflowButton(TestBenchElement element) {
-        return element.getAttribute("slot").contains("overflow");
+        return Objects.equals("overflow", element.getDomAttribute("slot"));
     }
 
     private boolean isVisible(TestBenchElement element) {

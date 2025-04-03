@@ -29,7 +29,6 @@ error-screenshots
 **/frontend/generated
 **/frontend/index.html
 
-*.DS_Store
 vaadin-spreadsheet/errors
 */styles.css
 *styles.css

@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet;
@@ -20,12 +20,9 @@ import org.apache.poi.ss.usermodel.Sheet;
  * last selected cell is considered depends on which one happens later.
  */
 class SheetState implements Serializable {
-    private static Spreadsheet spreadSheet;
-    private static WeakHashMap<Sheet, String> selectedCells = new WeakHashMap<Sheet, String>();
+    private final WeakHashMap<Sheet, String> selectedCells = new WeakHashMap<Sheet, String>();
 
     SheetState(final Spreadsheet spreadSheet) {
-        this.spreadSheet = spreadSheet;
-
         spreadSheet.addSelectionChangeListener(
                 new Spreadsheet.SelectionChangeListener() {
                     @Override

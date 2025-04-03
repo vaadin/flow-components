@@ -1,26 +1,19 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-cookie-consent-flow-parent</artifactId>
-        <version>24.1-SNAPSHOT</version>
+        <version>24.8-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-cookie-consent-integration-tests</artifactId>
     <packaging>war</packaging>
     <name>Vaadin Cookie Consent Integration Tests</name>
+    <description>Vaadin Cookie Consent Integration Tests</description>
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-dev-server</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-lumo-theme</artifactId>
+            <artifactId>flow-client</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -28,7 +21,17 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-client</artifactId>
+            <artifactId>flow-html-components-testbench</artifactId>
+            <version>${flow.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-lit-template</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>flow-polymer-template</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -42,8 +45,7 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-testbench-core</artifactId>
-            <scope>test</scope>
+            <artifactId>vaadin-dev-server</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -53,17 +55,16 @@
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-lit-template</artifactId>
+            <artifactId>vaadin-lumo-theme</artifactId>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
-            <artifactId>flow-polymer-template</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>flow-html-components-testbench</artifactId>
-            <version>${flow.version}</version>
+            <artifactId>vaadin-testbench-core</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -80,6 +81,8 @@
                                 <include>vite.generated.ts</include>
                                 <include>types.d.ts</include>
                                 <include>tsconfig.json</include>
+                                <include>frontend/routes.tsx</include>
+                                <include>frontend/App.tsx</include>
                             </includes>
                         </fileset>
                         <fileset>
@@ -141,8 +144,8 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.eclipse.jetty</groupId>
-                        <artifactId>jetty-maven-plugin</artifactId>
+                        <groupId>org.eclipse.jetty.ee10</groupId>
+                        <artifactId>jetty-ee10-maven-plugin</artifactId>
                         <configuration>
                             <scan>5</scan>
                         </configuration>
@@ -150,6 +153,5 @@
                 </plugins>
             </build>
         </profile>
-
     </profiles>
 </project>

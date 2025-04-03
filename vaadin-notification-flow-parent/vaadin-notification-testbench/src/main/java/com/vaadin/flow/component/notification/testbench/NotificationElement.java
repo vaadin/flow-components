@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,8 +15,10 @@
  */
 package com.vaadin.flow.component.notification.testbench;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -60,6 +62,19 @@ public class NotificationElement extends TestBenchElement {
      * @return the card for the notification
      */
     private TestBenchElement getCard() {
-        return getPropertyElement("_card");
+        var card = getPropertyElement("_card");
+
+        try {
+            // Wait until the content becomes visible
+            waitUntil(driver -> {
+                var hasVisibleText = !card.getText().isEmpty();
+                var hasVisibleChildren = card.findElements(By.cssSelector("*"))
+                        .stream().anyMatch(element -> element.isDisplayed());
+                return hasVisibleText || hasVisibleChildren;
+            }, 1);
+        } catch (TimeoutException e) {
+            // Ignore, the card may be empty on purpose
+        }
+        return card;
     }
 }

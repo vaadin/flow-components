@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,7 +16,6 @@
 package com.vaadin.flow.theme.material;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.LoggerFactory;
@@ -27,14 +26,17 @@ import com.vaadin.flow.theme.AbstractTheme;
 
 /**
  * Material component theme class implementation.
+ *
+ * @deprecated Since 24.7, the Material theme is deprecated and will be removed
+ *             in Vaadin 25.
  */
-@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "24.0.0-rc1")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-rc1")
+@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "24.8.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha8")
+@NpmPackage(value = "@vaadin/vaadin-material-styles", version = "24.8.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/vaadin-material-styles", version = "24.0.0-rc1")
-@JsModule("@vaadin/vaadin-material-styles/color.js")
-@JsModule("@vaadin/vaadin-material-styles/typography.js")
-@JsModule("./material-includes.ts")
+@JsModule("@vaadin/vaadin-material-styles/color-global.js")
+@JsModule("@vaadin/vaadin-material-styles/typography-global.js")
+@Deprecated
 public class Material implements AbstractTheme {
     public static final String LIGHT = "light";
     public static final String DARK = "dark";
@@ -47,11 +49,6 @@ public class Material implements AbstractTheme {
     @Override
     public String getThemeUrl() {
         return "theme/material/";
-    }
-
-    @Override
-    public List<String> getHeaderInlineContents() {
-        return Collections.emptyList();
     }
 
     @Override

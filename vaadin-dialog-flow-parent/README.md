@@ -1,6 +1,6 @@
 # Dialog component for Vaadin Flow
 
-This project is the Component wrapper implementation of [`<vaadin-dialog>`](https://github.com/vaadin/vaadin-dialog) element
+This project is the Component wrapper implementation of [`<vaadin-dialog>`](https://github.com/vaadin/web-components/tree/main/packages/dialog) element
 for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Using the component in a Flow application

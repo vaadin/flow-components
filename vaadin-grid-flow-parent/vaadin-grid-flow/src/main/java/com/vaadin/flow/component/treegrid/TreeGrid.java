@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,6 +35,7 @@ import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
+import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.data.binder.PropertyDefinition;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
@@ -50,6 +51,7 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiFunction;
@@ -133,14 +135,14 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     private class TreeGridArrayUpdaterImpl implements TreeGridArrayUpdater {
+        // Approximated size of the viewport. Used for eager fetching.
+        private static final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
+
         private UpdateQueueData data;
         private SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory;
-
-        // Approximated size of the viewport. Used for eager fetching.
-        private final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
         private int viewportRemaining = 0;
         private final List<JsonValue> queuedParents = new ArrayList<>();
-        private VaadinRequest previousRequest;
+        private transient VaadinRequest previousRequest;
 
         public TreeGridArrayUpdaterImpl(
                 SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
@@ -218,12 +220,42 @@ public class TreeGrid<T> extends Grid<T>
      * automatically sets up columns based on the type of presented data.
      */
     public TreeGrid() {
-        super(50, TreeGridUpdateQueue::new,
-                new TreeDataCommunicatorBuilder<T>());
+        this(50, new TreeDataCommunicatorBuilder<T>());
+    }
+
+    /**
+     * Creates a new {@code TreeGrid} without support for creating columns based
+     * on property names. Use an alternative constructor, such as
+     * {@link TreeGrid#TreeGrid(Class)}, to create a {@code TreeGrid} that
+     * automatically sets up columns based on the type of presented data.
+     *
+     * @param pageSize
+     *            the page size. Must be greater than zero.
+     * @param dataCommunicatorBuilder
+     *            Builder for {@link DataCommunicator} implementation this Grid
+     *            uses to handle all data communication.
+     */
+    protected TreeGrid(int pageSize,
+            DataCommunicatorBuilder<T, TreeGridArrayUpdater> dataCommunicatorBuilder) {
+        super(pageSize, TreeGridUpdateQueue::new, dataCommunicatorBuilder);
 
         setUniqueKeyProperty("key");
         getArrayUpdater().getUpdateQueueData()
                 .setHasExpandedItems(getDataCommunicator()::hasExpandedItems);
+
+        addItemHasChildrenPathGenerator();
+    }
+
+    /**
+     * Adds a data generator that produces a value for the <vaadin-grid>'s
+     * itemHasChildrenPath property
+     */
+    private void addItemHasChildrenPathGenerator() {
+        addDataGenerator((T item, JsonObject jsonObject) -> {
+            if (getDataCommunicator().hasChildren(item)) {
+                jsonObject.put("children", true);
+            }
+        });
     }
 
     /**
@@ -237,12 +269,63 @@ public class TreeGrid<T> extends Grid<T>
      *            the bean type to use, not {@code null}
      */
     public TreeGrid(Class<T> beanType) {
-        super(beanType, TreeGridUpdateQueue::new,
-                new TreeDataCommunicatorBuilder<T>());
+        this(beanType, true);
+    }
+
+    /**
+     * Creates a new {@code TreeGrid} with an initial set of columns for each of
+     * the bean's properties. The property-values of the bean will be converted
+     * to Strings. Full names of the properties will be used as the
+     * {@link Column#setKey(String) column keys} and the property captions will
+     * be used as the {@link Column#setHeader(String) column headers}.
+     * <p>
+     * When autoCreateColumns is <code>true</code>, only the direct properties
+     * of the bean are included, and they will be in alphabetical order. Use
+     * {@link #setColumns(String...)} to define which properties to include and
+     * in which order. You can also add a column for an individual property with
+     * {@link #addColumn(String)}. Both of these methods support also
+     * sub-properties with dot-notation, e.g.
+     * <code>"property.nestedProperty"</code>.
+     *
+     * @param beanType
+     *            the bean type to use, not <code>null</code>
+     * @param autoCreateColumns
+     *            when <code>true</code>, columns are created automatically for
+     *            the properties of the beanType
+     */
+    public TreeGrid(Class<T> beanType, boolean autoCreateColumns) {
+        this(beanType, new TreeDataCommunicatorBuilder<>(), autoCreateColumns);
+    }
+
+    /**
+     * Creates a new {@code TreeGrid} with an initial set of columns for each of
+     * the bean's properties. The property-values of the bean will be converted
+     * to Strings. Full names of the properties will be used as the
+     * {@link Column#setKey(String) column keys} and the property captions will
+     * be used as the {@link Column#setHeader(String) column headers}.
+     *
+     * @param beanType
+     *            the bean type to use, not {@code null}
+     * @param dataCommunicatorBuilder
+     *            Builder for {@link DataCommunicator} implementation this Grid
+     *            uses to handle all data communication.
+     */
+    protected TreeGrid(Class<T> beanType,
+            DataCommunicatorBuilder<T, TreeGridArrayUpdater> dataCommunicatorBuilder) {
+        this(beanType, dataCommunicatorBuilder, true);
+    }
+
+    private TreeGrid(Class<T> beanType,
+            DataCommunicatorBuilder<T, TreeGridArrayUpdater> dataCommunicatorBuilder,
+            boolean autoCreateColumns) {
+        super(beanType, TreeGridUpdateQueue::new, dataCommunicatorBuilder,
+                autoCreateColumns);
 
         setUniqueKeyProperty("key");
         getArrayUpdater().getUpdateQueueData()
                 .setHasExpandedItems(getDataCommunicator()::hasExpandedItems);
+
+        addItemHasChildrenPathGenerator();
     }
 
     @Override
@@ -559,9 +642,10 @@ public class TreeGrid<T> extends Grid<T>
                         + "${item.name}</vaadin-grid-tree-toggle>")
                 .withProperty("children",
                         item -> getDataCommunicator().hasChildren(item))
-                .withProperty("name",
-                        value -> String.valueOf(valueProvider.apply(value)))
-                .withFunction("onClick", item -> {
+                .withProperty("name", value -> {
+                    Object name = valueProvider.apply(value);
+                    return name == null ? "" : String.valueOf(name);
+                }).withFunction("onClick", item -> {
                     if (getDataCommunicator().hasChildren(item)) {
                         if (isExpanded(item)) {
                             collapse(List.of(item), true);
@@ -597,9 +681,8 @@ public class TreeGrid<T> extends Grid<T>
      */
     public <V extends Component> Column<T> addComponentHierarchyColumn(
             ValueProvider<T, V> componentProvider) {
-        return addColumn(new HierarchyColumnComponentRenderer<V, T>(
-                componentProvider, this).withProperty("children",
-                        item -> getDataCommunicator().hasChildren(item)));
+        return addColumn(new HierarchyColumnComponentRenderer<>(
+                componentProvider, this));
     }
 
     /**
@@ -761,6 +844,7 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
+    @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setParentRequestedRange(int start, int length,
             String parentKey) {
@@ -770,6 +854,7 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
+    @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setParentRequestedRanges(JsonArray array) {
         for (int index = 0; index < array.length(); index++) {
@@ -792,6 +877,7 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
+    @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void confirmParentUpdate(int id, String parentKey) {
         getDataCommunicator().confirmUpdate(id, parentKey);
@@ -1026,18 +1112,76 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * The effective index of an item depends on the complete hierarchy of the
-     * tree. {@link TreeGrid} uses lazy loading for performance reasons and does
-     * not know about the complete hierarchy. Without the knowledge of the
-     * complete hierarchy, {@link TreeGrid} can’t reliably calculate an exact
-     * scroll position. <b>This uncertainty makes this method unreliable and so
-     * should be avoided.</b>
+     * Scrolls to the index of an item in the root level of the tree. To scroll
+     * to a nested item, use {@link #scrollToIndex(int...)}.
+     * <p>
+     * Scrolls so that the row is shown at the start of the visible area
+     * whenever possible.
+     * <p>
+     * If the index parameter exceeds current item set size the grid will scroll
+     * to the end.
      *
      * @param rowIndex
-     *            zero based index of the item to scroll to in the current view.
+     *            zero based index of the item in the root level of the tree
+     * @see TreeGrid#scrollToIndex(int...)
      */
     @Override
     public void scrollToIndex(int rowIndex) {
         super.scrollToIndex(rowIndex);
+    }
+
+    /**
+     * Scrolls to a nested item within the tree.
+     * <p>
+     * The `indexes` parameter can be either a single number or multiple
+     * numbers. The grid will first try to scroll to the item at the first index
+     * in the root level of the tree. In case the item at the first index is
+     * expanded, the grid will then try scroll to the item at the second index
+     * within the children of the expanded first item, and so on. Each given
+     * index points to a child of the item at the previous index.
+     *
+     * @param indexes
+     *            zero based row indexes to scroll to
+     * @see TreeGrid#scrollToIndex(int)
+     */
+    public void scrollToIndex(int... indexes) {
+        if (indexes.length == 0) {
+            throw new IllegalArgumentException(
+                    "At least one index should be provided.");
+        }
+        int pageSize = getPageSize();
+        int firstRootIndex = indexes[0] - indexes[0] % pageSize;
+        getDataCommunicator().setRequestedRange(firstRootIndex, pageSize);
+        String joinedIndexes = Arrays.stream(indexes).mapToObj(String::valueOf)
+                .collect(Collectors.joining(","));
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.scrollToIndex(" + joinedIndexes + ");")));
+    }
+
+    @Override
+    public void scrollToEnd() {
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.scrollToIndex(...Array(10).fill(Infinity))")));
+    }
+
+    /**
+     * TreeGrid does not support scrolling to a given item. Use
+     * {@link #scrollToIndex(int...)} instead.
+     * <p>
+     * This method is inherited from Grid and has been marked as deprecated to
+     * indicate that it is not supported. This method will throw an
+     * {@link UnsupportedOperationException}.
+     *
+     * @param item
+     *            the item to scroll to
+     * @deprecated
+     */
+    @Deprecated
+    @Override
+    public void scrollToItem(T item) {
+        throw new UnsupportedOperationException(
+                "scrollToItem method is not supported in TreeGrid");
     }
 }

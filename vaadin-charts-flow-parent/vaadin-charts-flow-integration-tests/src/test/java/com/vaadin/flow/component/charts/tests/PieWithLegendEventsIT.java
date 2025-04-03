@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.tests;
@@ -15,9 +15,9 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
+import com.vaadin.flow.component.charts.events.PointLegendItemClickEvent;
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.examples.pie.PieWithLegendEvents;
-import com.vaadin.flow.component.charts.events.PointLegendItemClickEvent;
 import com.vaadin.tests.elements.SpanElement;
 
 public class PieWithLegendEventsIT extends AbstractTBTest {
@@ -58,7 +58,7 @@ public class PieWithLegendEventsIT extends AbstractTBTest {
     }
 
     private WebElement getLegendElement() {
-        return getChartElement().$("*")
-                .attributeContains("class", "highcharts-legend-item").first();
+        return getChartElement().$("*").withClassName("highcharts-legend-item")
+                .first();
     }
 }

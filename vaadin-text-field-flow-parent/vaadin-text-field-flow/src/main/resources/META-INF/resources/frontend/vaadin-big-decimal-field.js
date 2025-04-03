@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,59 +13,58 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-(function () {
-  let memoizedTemplate;
+import { TextField } from '@vaadin/text-field/src/vaadin-text-field.js';
+import { defineCustomElement } from '@vaadin/component-base/src/define.js';
 
-  customElements.whenDefined('vaadin-text-field').then(() => {
-    class BigDecimalFieldElement extends customElements.get('vaadin-text-field') {
-      static get template() {
-        if (!memoizedTemplate) {
-          memoizedTemplate = super.template.cloneNode(true);
-          memoizedTemplate.innerHTML += `<style>
-                  :host {
-                    width: 8em;
-                  }
+let memoizedTemplate;
 
-                  :host([dir="rtl"]) [part="input-field"] {
-                    direction: ltr;
-                  }
+class BigDecimalField extends TextField {
+  static get template() {
+    if (!memoizedTemplate) {
+      memoizedTemplate = super.template.cloneNode(true);
+      memoizedTemplate.innerHTML += `<style>
+              :host {
+                width: 8em;
+              }
 
-                  :host([dir="rtl"]) [part="input-field"] ::slotted(input) {
-                    --_lumo-text-field-overflow-mask-image: linear-gradient(to left, transparent, #000 1.25em) !important;
-                  }
-            </style>`;
-        }
-        return memoizedTemplate;
-      }
+              :host([dir="rtl"]) [part="input-field"] {
+                direction: ltr;
+              }
 
-      static get is() {
-        return 'vaadin-big-decimal-field';
-      }
-
-      static get properties() {
-        return {
-          _decimalSeparator: {
-            type: String,
-            value: '.',
-            observer: '__decimalSeparatorChanged'
-          }
-        };
-      }
-
-      ready() {
-        super.ready();
-        this.inputElement.setAttribute('inputmode', 'decimal');
-      }
-
-      __decimalSeparatorChanged(separator, oldSeparator) {
-        this.allowedCharPattern = '[-+\\d' + separator + ']';
-
-        if (this.value && oldSeparator) {
-          this.value = this.value.split(oldSeparator).join(separator);
-        }
-      }
+              :host([dir="rtl"]) [part="input-field"] ::slotted(input) {
+                --_lumo-text-field-overflow-mask-image: linear-gradient(to left, transparent, #000 1.25em) !important;
+              }
+        </style>`;
     }
+    return memoizedTemplate;
+  }
 
-    customElements.define(BigDecimalFieldElement.is, BigDecimalFieldElement);
-  });
-})();
+  static get is() {
+    return 'vaadin-big-decimal-field';
+  }
+
+  static get properties() {
+    return {
+      _decimalSeparator: {
+        type: String,
+        value: '.',
+        observer: '__decimalSeparatorChanged'
+      }
+    };
+  }
+
+  ready() {
+    super.ready();
+    this.inputElement.setAttribute('inputmode', 'decimal');
+  }
+
+  __decimalSeparatorChanged(separator, oldSeparator) {
+    this.allowedCharPattern = '[-+\\d' + separator + ']';
+
+    if (this.value && oldSeparator) {
+      this.value = this.value.split(oldSeparator).join(separator);
+    }
+  }
+}
+
+defineCustomElement(BigDecimalField);

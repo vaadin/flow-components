@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.grid;
 
 import java.lang.reflect.InvocationTargetException;
@@ -130,6 +129,20 @@ public class GridTest {
         grid.setPageSize(10);
         grid.setAllRowsVisible(true);
         callSetRequestedRange(grid, 0, 600);
+    }
+
+    @Test
+    public void setAriaLabel() {
+        final Grid<String> grid = new Grid<>();
+        grid.setAriaLabel("test");
+        Assert.assertTrue(grid.getAriaLabel().isPresent());
+        Assert.assertEquals("test", grid.getAriaLabel().get());
+        Assert.assertEquals("test",
+                grid.getElement().getProperty("accessibleName"));
+
+        grid.setAriaLabel(null);
+        Assert.assertFalse(grid.getAriaLabel().isPresent());
+        Assert.assertFalse(grid.getElement().hasProperty("accessibleName"));
     }
 
     private void callSetRequestedRange(Grid<String> grid, int start,

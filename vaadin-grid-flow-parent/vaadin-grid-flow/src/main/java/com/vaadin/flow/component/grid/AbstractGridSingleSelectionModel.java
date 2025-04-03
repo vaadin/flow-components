@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -60,7 +60,8 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
 
     @Override
     public void selectFromClient(T item) {
-        if (isSelected(item)) {
+        boolean selectable = getGrid().isItemSelectable(item);
+        if (isSelected(item) || !selectable) {
             return;
         }
         doSelect(item, true);
@@ -74,15 +75,13 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
         doSelect(item, false);
 
         getGrid().doClientSideSelection(Collections.singleton(item));
-        if (item != null) {
-            getGrid().getDataCommunicator().refresh(item);
-        }
     }
 
     @Override
     public void deselectFromClient(T item) {
-        if (isSelected(item) && isDeselectAllowed()) {
-            selectFromClient(null);
+        boolean selectable = getGrid().isItemSelectable(item);
+        if (isSelected(item) && selectable && isDeselectAllowed()) {
+            doSelect(null, true);
         }
     }
 

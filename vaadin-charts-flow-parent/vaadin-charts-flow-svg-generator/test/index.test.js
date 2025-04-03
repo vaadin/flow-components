@@ -1,8 +1,13 @@
 const { expect } = require('chai')
+const rewire = require('rewire');
 const { JSDOM } = require('jsdom');
 const mock = require('mock-fs')
+const pixelWidth = require('string-pixel-width');
 
-const jsdomExporter = require('../jsdom-exporter.js')
+const jsdomExporter = rewire('../jsdom-exporter.js')
+
+const exporterDom = jsdomExporter.__get__("dom");
+const widthsMap = jsdomExporter.__get__("widthsMap");
 
 /**
  *
@@ -155,5 +160,24 @@ describe('timeline', () => {
     const document = parseSVG(result.svgString);
 
     expect(document.querySelector('.highcharts-navigator')).to.be.not.null;
+  });
+});
+
+describe('getSubStringLength', () => {
+  it('should measure strings split across multiple elements', () => {
+    let window = exporterDom.window;
+    let document = window.document;
+    let container = document.getElementById('container');
+    container.innerHTML = `
+    <svg>
+      <text style="font-family: arial; font-size: 12px;">01234<tspan>56789</tspan></text>
+    </svg>
+    `;
+    let text = container.querySelector('text');
+    expect(text).to.be.not.null;
+    expect(text.getSubStringLength(6, 3)).to.equal(pixelWidth("678", { size: 12, font: 'arial', map: widthsMap }))
+    expect(text.getSubStringLength(1, 2)).to.equal(pixelWidth("12", { size: 12, font: 'arial', map: widthsMap }))
+    expect(text.getSubStringLength(2, 6)).to.equal(pixelWidth("234567", { size: 12, font: 'arial', map: widthsMap }))
+    expect(text.getSubStringLength(0, 20)).to.equal(pixelWidth("0123456789", { size: 12, font: 'arial', map: widthsMap }))
   });
 });

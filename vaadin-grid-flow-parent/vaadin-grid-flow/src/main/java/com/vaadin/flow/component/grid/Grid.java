@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,6 +35,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
+
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
@@ -52,8 +55,6 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.dnd.DragSource;
-import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
@@ -66,7 +67,13 @@ import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.grid.editor.EditorImpl;
 import com.vaadin.flow.component.grid.editor.EditorRenderer;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.internal.AllowInert;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
+import com.vaadin.flow.component.shared.SelectionPreservationHandler;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.Tooltip.TooltipPosition;
 import com.vaadin.flow.data.binder.BeanPropertySet;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertyDefinition;
@@ -74,6 +81,7 @@ import com.vaadin.flow.data.binder.PropertySet;
 import com.vaadin.flow.data.binder.Setter;
 import com.vaadin.flow.data.event.SortEvent;
 import com.vaadin.flow.data.event.SortEvent.SortNotifier;
+import com.vaadin.flow.data.provider.AbstractDataView;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
@@ -92,12 +100,14 @@ import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
+import com.vaadin.flow.data.provider.ItemIndexProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.data.selection.MultiSelect;
@@ -122,13 +132,13 @@ import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonType;
 import elemental.json.JsonValue;
-import org.slf4j.LoggerFactory;
 
 /**
  * Grid is a component for showing tabular data. A basic Grid uses plain text to
@@ -205,16 +215,16 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-rc1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "24.0.0-rc1")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.0.0-rc1")
+@NpmPackage(value = "@vaadin/grid", version = "24.8.0-alpha8")
+@NpmPackage(value = "@vaadin/tooltip", version = "24.8.0-alpha8")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 @JsModule("./flow-component-renderer.js")
-@JsModule("./gridConnector.js")
+@JsModule("./gridConnector.ts")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Grid<T> extends Component implements HasStyle, HasSize,
         Focusable<Grid<T>>, SortNotifier<Grid<T>, GridSortOrder<T>>, HasTheme,
@@ -433,7 +443,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-rc1")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha8")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -528,7 +538,54 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         /**
+         * Set the renderer for this column.
+         *
+         * @param renderer
+         *            the new renderer to be used for this column, must not be
+         *            {@code null}
+         *
+         * @since 24.1
+         */
+        public Column<T> setRenderer(Renderer<T> renderer) {
+            this.renderer = Objects.requireNonNull(renderer,
+                    "Renderer must not be null.");
+
+            destroyDataGenerators();
+            if (rendering != null) {
+                rendering.getRegistration().remove();
+            }
+
+            rendering = renderer.render(getElement(), (KeyMapper<T>) getGrid()
+                    .getDataCommunicator().getKeyMapper());
+
+            columnDataGeneratorRegistration = rendering.getDataGenerator()
+                    .map(dataGenerator -> grid
+                            .addDataGenerator((DataGenerator) dataGenerator))
+                    .orElse(null);
+
+            // The editor renderer is a wrapper around the regular renderer, so
+            // we need to apply it again afterwards
+            if (editorRenderer != null) {
+                Rendering<T> editorRendering = editorRenderer
+                        .render(getElement(), null);
+                editorDataGeneratorRegistration = editorRendering
+                        .getDataGenerator()
+                        .map(dataGenerator -> grid.addDataGenerator(
+                                (DataGenerator) dataGenerator))
+                        .orElse(null);
+            }
+
+            getGrid().getDataCommunicator().reset();
+            return this;
+        }
+
+        /**
          * Sets the width of this column as a CSS-string.
+         * <p>
+         * Please note that using the {@code em} length unit is discouraged as
+         * it might lead to misalignment issues if the header, body, and footer
+         * cells have different font sizes. Instead, use {@code rem} if you need
+         * a length unit relative to the font size.
          *
          * @see #setFlexGrow(int)
          *
@@ -1006,7 +1063,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          * @throws NullPointerException
          *             if {@code classNameGenerator} is {@code null}
          * @see Grid#setClassNameGenerator(SerializableFunction)
+         * @deprecated {@link #setPartNameGenerator} should be used instead.
          */
+        @Deprecated
         public Column<T> setClassNameGenerator(
                 SerializableFunction<T, String> classNameGenerator) {
             Objects.requireNonNull(classNameGenerator,
@@ -1055,24 +1114,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         public Column<T> setTooltipGenerator(
                 SerializableFunction<T, String> tooltipGenerator) {
-            Objects.requireNonNull(tooltipGenerator,
+            this.tooltipGenerator = Objects.requireNonNull(tooltipGenerator,
                     "Tooltip generator can not be null");
 
-            if (!getGrid().getElement().getChildren().anyMatch(
-                    child -> "tooltip".equals(child.getAttribute("slot")))) {
-                // No <vaadin-tooltip> yet added to the grid, add one
-                Element tooltipElement = new Element("vaadin-tooltip");
-
-                tooltipElement.addAttachListener(e -> {
-                    // Assigns a generator that returns a column-specific
-                    // tooltip text from the item
-                    tooltipElement.executeJs(
-                            "this.generator = ({item, column}) => { return (item && item.gridtooltips && column) ? item.gridtooltips[column._flowId] : ''; }");
-                });
-                SlotUtils.addToSlot(getGrid(), "tooltip", tooltipElement);
-            }
-
-            this.tooltipGenerator = tooltipGenerator;
+            grid.addTooltipElementToTooltipSlot();
             getGrid().getDataCommunicator().reset();
             return this;
         }
@@ -1099,6 +1144,35 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         public SerializableFunction<T, String> getTooltipGenerator() {
             return tooltipGenerator;
+        }
+
+        /**
+         * Gets whether cells in this column should be announced as row headers.
+         *
+         * @return whether cells in this column should be announced as row
+         *         headers.
+         */
+        public boolean isRowHeader() {
+            return getElement().getProperty("rowHeader", false);
+        }
+
+        /**
+         * Sets whether cells in this column should be announced as row headers.
+         * When {@code true}, the cells for this column will be rendered with
+         * the {@code role} attribute set as {@code rowheader}, instead of the
+         * {@code gridcell} role value used by default.
+         * <p>
+         * When a column is set as row header, its cells will be announced by
+         * screen readers while navigating to help user identify the current row
+         * as uniquely as possible.
+         *
+         * @param rowHeader
+         *            whether cells in this column should be announced as row
+         *            headers
+         */
+        public Column<T> setRowHeader(boolean rowHeader) {
+            getElement().setProperty("rowHeader", rowHeader);
+            return this;
         }
 
         @Override
@@ -1342,6 +1416,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private GridSelectionModel<T> selectionModel;
     private SelectionMode selectionMode;
+    private SerializablePredicate<T> selectableProvider;
 
     private final DetailsManager detailsManager;
 
@@ -1377,17 +1452,90 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private SerializableFunction<T, String> classNameGenerator = item -> null;
     private SerializableFunction<T, String> partNameGenerator = item -> null;
-    private SerializablePredicate<T> dropFilter = item -> true;
-    private SerializablePredicate<T> dragFilter = item -> true;
+    private SerializablePredicate<T> defaultDropFilter = item -> true;
+    private SerializablePredicate<T> defaultDragFilter = item -> true;
+    private SerializablePredicate<T> dropFilter = defaultDropFilter;
+    private SerializablePredicate<T> dragFilter = defaultDragFilter;
     private Map<String, SerializableFunction<T, String>> dragDataGenerators = new HashMap<>();
 
     private Registration dataProviderChangeRegistration;
+
+    private SerializableFunction<T, String> tooltipGenerator = item -> null;
+
+    private SelectionPreservationHandler<T> selectionPreservationHandler;
+
+    private PendingJavaScriptResult pendingSorterUpdate;
+
+    private static final String EMPTY_STATE_SLOT = "empty-state";
+    private Component emptyStateComponent;
+    private String emptyStateText;
 
     /**
      * Creates a new instance, with page size of 50.
      */
     public Grid() {
         this(50);
+    }
+
+    /**
+     * Creates a new grid using the given generic {@link DataProvider}.
+     *
+     * @param dataProvider
+     *            the data provider, not {@code null}
+     *
+     */
+    public Grid(DataProvider<T, Void> dataProvider) {
+        this();
+        setItems(dataProvider);
+    }
+
+    /**
+     * Creates a new grid using the given {@link BackEndDataProvider}.
+     *
+     * @param dataProvider
+     *            the data provider, not {@code null}
+     *
+     */
+    public Grid(BackEndDataProvider<T, Void> dataProvider) {
+        this();
+        setItems(dataProvider);
+    }
+
+    /**
+     * Creates a new grid using the given {@link InMemoryDataProvider}.
+     *
+     * @param inMemoryDataProvider
+     *            the data provider, not {@code null}
+     *
+     */
+    public Grid(InMemoryDataProvider<T> inMemoryDataProvider) {
+        this();
+        setItems(inMemoryDataProvider);
+    }
+
+    /**
+     * Creates a new grid using the given {@link ListDataProvider}.
+     *
+     * @param dataProvider
+     *            the data provider, not {@code null}
+     *
+     */
+    public Grid(ListDataProvider<T> dataProvider) {
+        this();
+        setItems(dataProvider);
+    }
+
+    /**
+     * Creates a new grid using the given collection of items using a
+     * {@link ListDataProvider}.
+     *
+     * @param items
+     *            the collection of items, not {@code null}
+     *
+     */
+    public Grid(Collection<T> items) {
+        this();
+        setItems(items);
     }
 
     /**
@@ -1482,15 +1630,47 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             Class<T> beanType,
             SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuilder,
             B dataCommunicatorBuilder) {
+        this(beanType, updateQueueBuilder, dataCommunicatorBuilder, true);
+    }
+
+    /**
+     * Creates a new grid with an initial set of columns for each of the bean's
+     * properties. The property-values of the bean will be converted to Strings.
+     * Full names of the properties will be used as the
+     * {@link Column#setKey(String) column keys} and the property captions will
+     * be used as the {@link Column#setHeader(String) column headers}.
+     * <p>
+     * When autoCreateColumns is <code>true</code>, only the direct properties
+     * of the bean are included and they will be in alphabetical order. Use
+     * {@link Grid#setColumns(String...)} to define which properties to include
+     * and in which order. You can also add a column for an individual property
+     * with {@link #addColumn(String)}. Both of these methods support also
+     * sub-properties with dot-notation, eg.
+     * <code>"property.nestedProperty"</code>.
+     *
+     * @param beanType
+     *            the bean type to use, not <code>null</code>
+     * @param updateQueueBuilder
+     *            the builder for new {@link UpdateQueue} instance
+     * @param dataCommunicatorBuilder
+     *            Builder for {@link DataCommunicator} implementation this Grid
+     *            uses to handle all data communication.
+     * @param <B>
+     *            the data communicator builder type
+     * @param <U>
+     *            the GridArrayUpdater type
+     * @param autoCreateColumns
+     *            when <code>true</code>, columns are created automatically for
+     *            the properties of the beanType
+     */
+    protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
+            Class<T> beanType,
+            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuilder,
+            B dataCommunicatorBuilder, boolean autoCreateColumns) {
         this(50, updateQueueBuilder, dataCommunicatorBuilder);
-        Objects.requireNonNull(beanType, "Bean type can't be null");
         Objects.requireNonNull(dataCommunicatorBuilder,
                 "Data communicator builder can't be null");
-        this.beanType = beanType;
-        propertySet = BeanPropertySet.get(beanType);
-        propertySet.getProperties()
-                .filter(property -> !property.isSubProperty())
-                .forEach(this::addColumn);
+        configureBeanType(beanType, autoCreateColumns);
     }
 
     /**
@@ -1534,6 +1714,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         gridDataGenerator.addDataGenerator(this::generateTooltipTextData);
         gridDataGenerator.addDataGenerator(this::generateRowsDragAndDropAccess);
         gridDataGenerator.addDataGenerator(this::generateDragData);
+        gridDataGenerator.addDataGenerator(this::generateSelectableData);
 
         dataCommunicator = dataCommunicatorBuilder.build(getElement(),
                 gridDataGenerator, (U) arrayUpdater,
@@ -1550,6 +1731,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         addDragEndListener(this::onDragEnd);
 
         updateMultiSortPriority(defaultMultiSortPriority);
+
+        initSelectionPreservationHandler();
     }
 
     private void generateUniqueKeyData(T item, JsonObject jsonObject) {
@@ -1558,6 +1741,55 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (uniqueKeyPropertyName != null
                 && !jsonObject.hasKey(uniqueKeyPropertyName)) {
             jsonObject.put(uniqueKeyPropertyName, getUniqueKey(item));
+        }
+    }
+
+    private void initSelectionPreservationHandler() {
+        selectionPreservationHandler = new SelectionPreservationHandler<>(
+                SelectionPreservationMode.PRESERVE_ALL) {
+
+            @Override
+            public void onPreserveAll(DataChangeEvent<T> dataChangeEvent) {
+                // NO-OP
+            }
+
+            @Override
+            public void onPreserveExisting(DataChangeEvent<T> dataChangeEvent) {
+                Map<Object, T> deselectionCandidateIdsToItems = getSelectedItems()
+                        .stream().collect(Collectors
+                                .toMap(getDataProvider()::getId, item -> item));
+                if (deselectionCandidateIdsToItems.isEmpty()) {
+                    return;
+                }
+                @SuppressWarnings("unchecked")
+                Stream<T> itemsStream = getDataProvider().fetch(
+                        getDataCommunicator().buildQuery(0, Integer.MAX_VALUE));
+                Set<Object> existingItemIds = itemsStream
+                        .map(getDataProvider()::getId)
+                        .filter(deselectionCandidateIdsToItems::containsKey)
+                        .limit(deselectionCandidateIdsToItems.size())
+                        .collect(Collectors.toSet());
+                existingItemIds.forEach(deselectionCandidateIdsToItems::remove);
+                if (getSelectionModel() instanceof GridMultiSelectionModel) {
+                    asMultiSelect()
+                            .deselect(deselectionCandidateIdsToItems.values());
+                } else if (!deselectionCandidateIdsToItems.isEmpty()) {
+                    deselectAll();
+                }
+            }
+
+            @Override
+            public void onDiscard(DataChangeEvent<T> dataChangeEvent) {
+                deselectAll();
+            }
+        };
+    }
+
+    private void handleDataChange(DataChangeEvent<T> dataChangeEvent) {
+        onDataProviderChange();
+        if (!(dataChangeEvent instanceof DataChangeEvent.DataRefreshEvent)
+                && !(getSelectionModel() instanceof GridNoneSelectionModel)) {
+            selectionPreservationHandler.handleDataChange(dataChangeEvent);
         }
     }
 
@@ -2187,6 +2419,83 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return insertInmostColumnLayer(true, false).asHeaderRow();
     }
 
+    /**
+     * Removes the header row from the grid. Note that the default header row
+     * can be removed only if it is the only header row.
+     *
+     * @see #removeAllHeaderRows()
+     * @param headerRow
+     *            the header row to remove
+     * @throws UnsupportedOperationException
+     *             if default row is being removed while there are other header
+     *             rows
+     * @throws NoSuchElementException
+     *             if the header row cannot be found
+     */
+    public void removeHeaderRow(HeaderRow headerRow) {
+        Objects.requireNonNull(headerRow);
+        List<HeaderRow> headerRows = getHeaderRows();
+        if (headerRow.equals(defaultHeaderRow)) {
+            if (headerRows.size() != 1) {
+                throw new UnsupportedOperationException(
+                        "Default header row cannot be removed while there are other header rows.");
+            }
+            removeDefaultHeaderRow();
+        } else {
+            if (!headerRows.contains(headerRow)) {
+                throw new NoSuchElementException(
+                        "Header to remove cannot be found.");
+            }
+            if (getColumnLayers().get(0).equals(headerRow.layer)) {
+                // Bottom layer needs special handling and content manipulation
+                // because it cannot be removed.
+                removeNonDefaultHeaderInBottomLayer(headerRow);
+            } else {
+                removeColumnLayer(headerRow.layer);
+            }
+        }
+    }
+
+    private void removeNonDefaultHeaderInBottomLayer(HeaderRow headerRow) {
+        // Move content from next header row and remove that layer
+        List<HeaderRow> headerRows = getHeaderRows();
+        HeaderRow nextHeaderRow = headerRows.get(headerRows.size() - 2);
+        ColumnLayer layerToRemove = nextHeaderRow.layer;
+        moveRowContent(nextHeaderRow, headerRow);
+        headerRow.layer.setHeaderRow(nextHeaderRow);
+        if (nextHeaderRow.equals(defaultHeaderRow)) {
+            nextHeaderRow.layer.updateSortingIndicators(true);
+        }
+        layerToRemove.setHeaderRow(null);
+        clearRowContent(headerRow);
+        removeColumnLayer(layerToRemove);
+    }
+
+    /**
+     * Removes all header rows from the grid.
+     *
+     * @see #removeHeaderRow(HeaderRow)
+     */
+    public void removeAllHeaderRows() {
+        var headerRows = getHeaderRows();
+        if (headerRows.isEmpty()) {
+            return;
+        }
+        Collections.reverse(headerRows);
+        headerRows.stream()
+                .filter(headerRow -> !headerRow.equals(defaultHeaderRow))
+                .forEach(this::removeHeaderRow);
+        removeDefaultHeaderRow();
+    }
+
+    private void removeDefaultHeaderRow() {
+        defaultHeaderRow.getCells()
+                .forEach(headerCell -> headerCell.setText(null));
+        defaultHeaderRow.layer.setHeaderRow(null);
+        clearRowContent(defaultHeaderRow);
+        defaultHeaderRow = null;
+    }
+
     protected HeaderRow addFirstHeaderRow() {
         defaultHeaderRow = columnLayers.get(0).asHeaderRow();
         columnLayers.get(0).updateSortingIndicators(true);
@@ -2223,6 +2532,85 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             return columnLayers.get(0).asFooterRow();
         }
         return insertColumnLayer(getLastFooterLayerIndex() + 1).asFooterRow();
+    }
+
+    /**
+     * Removes the footer row from the grid.
+     *
+     * @see #removeAllFooterRows()
+     * @param footerRow
+     *            the footer row to remove
+     * @throws NoSuchElementException
+     *             if the footer row cannot be found
+     */
+    public void removeFooterRow(FooterRow footerRow) {
+        Objects.requireNonNull(footerRow);
+        if (!getFooterRows().contains(footerRow)) {
+            throw new NoSuchElementException(
+                    "Footer to remove cannot be found.");
+        }
+        if (getColumnLayers().get(0).equals(footerRow.layer)) {
+            // Bottom layer needs special handling and content manipulation
+            // because it cannot be removed.
+            removeFooterInBottomLayer(footerRow);
+        } else {
+            removeColumnLayer(footerRow.layer);
+        }
+    }
+
+    private void removeFooterInBottomLayer(FooterRow footerRow) {
+        List<FooterRow> footerRows = getFooterRows();
+        if (footerRows.size() == 1) {
+            // There is no other footer row to move content from. Therefore, the
+            // layer is cleared.
+            footerRow.getCells()
+                    .forEach(footerCell -> footerCell.setText(null));
+            footerRow.layer.setFooterRow(null);
+            clearRowContent(footerRow);
+            return;
+        }
+        // Move content from next footer row and remove that layer
+        FooterRow nextFooterRow = footerRows
+                .get(footerRows.indexOf(footerRow) + 1);
+        if (nextFooterRow.getCells().size() != footerRow.getCells().size()) {
+            throw new UnsupportedOperationException(
+                    "Top-most footer row cannot have joined cells.");
+        }
+        ColumnLayer layerToRemove = nextFooterRow.layer;
+        moveRowContent(nextFooterRow, footerRow);
+        footerRow.layer.setFooterRow(nextFooterRow);
+        layerToRemove.setFooterRow(null);
+        clearRowContent(footerRow);
+        removeColumnLayer(layerToRemove);
+    }
+
+    /**
+     * Removes all footer rows from the grid.
+     *
+     * @see #removeFooterRow(FooterRow)
+     */
+    public void removeAllFooterRows() {
+        getFooterRows().forEach(this::removeFooterRow);
+    }
+
+    private void clearRowContent(
+            AbstractRow<? extends AbstractRow.AbstractCell> row) {
+        row.cells.clear();
+        row.layer = null;
+    }
+
+    private void moveRowContent(
+            AbstractRow<? extends AbstractRow.AbstractCell> sourceRow,
+            AbstractRow<? extends AbstractRow.AbstractCell> targetRow) {
+        for (int i = 0; i < sourceRow.cells.size(); i++) {
+            AbstractRow.AbstractCell sourceCell = sourceRow.cells.get(i);
+            AbstractRow.AbstractCell targetCell = targetRow.cells.get(i);
+            if (sourceCell.getComponent() != null) {
+                targetCell.setComponent(sourceCell.getComponent());
+            } else {
+                targetCell.setText(sourceCell.getText());
+            }
+        }
     }
 
     protected List<ColumnLayer> getColumnLayers() {
@@ -2323,6 +2711,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the layer to remove, not the bottom layer
      */
     protected void removeColumnLayer(ColumnLayer layer) {
+        // This method is inadequately tested. Should be tested thoroughly if
+        // refactored. See:
+        // https://github.com/vaadin/flow-components/pull/5990#discussion_r1474599544
         if (layer.equals(columnLayers.get(0))) {
             throw new IllegalArgumentException(
                     "The bottom column layer cannot be removed");
@@ -2410,17 +2801,22 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     /**
-     * {@inheritDoc}
+     * Sets a generic data provider for the Grid to use.
+     * <p>
+     * Use this method when none of the {@code setItems} methods are applicable,
+     * e.g. when having a data provider with filter that cannot be transformed
+     * to {@code DataProvider<T, Void>}.
      *
-     * Use this method only when having a data provider with filter that cannot
-     * be transformed to {@code DataProvider<T, Void>}.
-     *
-     * @deprecated use instead one of the {@code setItems} methods which provide
-     *             access to either {@link GridListDataView} or
-     *             {@link GridLazyDataView}
+     * @param dataProvider
+     *            DataProvider instance to use, not <code>null</code>
      */
     public void setDataProvider(DataProvider<T, ?> dataProvider) {
         Objects.requireNonNull(dataProvider, "data provider cannot be null");
+        if (SelectionPreservationMode.PRESERVE_EXISTING.equals(
+                getSelectionPreservationMode()) && !dataProvider.isInMemory()) {
+            throw new UnsupportedOperationException(
+                    "Lazy data providers do not support preserve existing selection mode.");
+        }
         handleDataProviderChange(dataProvider);
 
         deselectAll();
@@ -2522,6 +2918,130 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return getLazyDataView();
     }
 
+    public interface SpringData extends Serializable {
+        /**
+         * Callback interface for fetching a list of items from a backend based
+         * on a Spring Data Pageable.
+         *
+         * @param <T>
+         *            the type of the items to fetch
+         */
+        @FunctionalInterface
+        public interface FetchCallback<PAGEABLE, T> extends Serializable {
+
+            /**
+             * Fetches a list of items based on a pageable. The pageable defines
+             * the paging of the items to fetch and the sorting.
+             *
+             * @param pageable
+             *            the pageable that defines which items to fetch and the
+             *            sort order
+             * @return a list of items
+             */
+            List<T> fetch(PAGEABLE pageable);
+        }
+
+        /**
+         * Callback interface for counting the number of items in a backend
+         * based on a Spring Data Pageable.
+         */
+        @FunctionalInterface
+        public interface CountCallback<PAGEABLE> extends Serializable {
+            /**
+             * Counts the number of available items based on a pageable. The
+             * pageable defines the paging of the items to fetch and the sorting
+             * and is provided although it is generally not needed for
+             * determining the number of items.
+             *
+             * @param pageable
+             *            the pageable that defines which items to fetch and the
+             *            sort order
+             * @return the number of available items
+             */
+            long count(PAGEABLE pageable);
+        }
+    }
+
+    /**
+     * Supply items lazily with a callback from a backend based on a Spring Data
+     * Pageable. The component will automatically fetch more items and adjust
+     * its size until the backend runs out of items. Usage example:
+     * <p>
+     * {@code component.setItemsPageable(pageable -> orderService.getOrders(pageable));}
+     * <p>
+     * The returned data view object can be used for further configuration, or
+     * later on fetched with {@link #getLazyDataView()}. For using in-memory
+     * data, like {@link java.util.Collection}, use
+     * {@link HasListDataView#setItems(Collection)} instead.
+     *
+     * @param fetchCallback
+     *            a function that returns a sorted list of items from the
+     *            backend based on the given pageable
+     * @return a data view for further configuration
+     */
+    public GridLazyDataView<T> setItemsPageable(
+            SpringData.FetchCallback<Pageable, T> fetchCallback) {
+        return setItems(
+                query -> handleSpringFetchCallback(query, fetchCallback));
+    }
+
+    /**
+     * Supply items lazily with callbacks: the first one fetches a list of items
+     * from a backend based on a Spring Data Pageable, the second provides the
+     * exact count of items in the backend. Use this in case getting the count
+     * is cheap and the user benefits from the component showing immediately the
+     * exact size. Usage example:
+     * <p>
+     * {@code component.setItemsPageable(
+     *                    pageable -> orderService.getOrders(pageable),
+     *                    pageable -> orderService.countOrders());}
+     * <p>
+     * The returned data view object can be used for further configuration, or
+     * later on fetched with {@link #getLazyDataView()}. For using in-memory
+     * data, like {@link java.util.Collection}, use
+     * {@link HasListDataView#setItems(Collection)} instead.
+     *
+     * @param fetchCallback
+     *            a function that returns a sorted list of items from the
+     *            backend based on the given pageable
+     * @param countCallback
+     *            a function that returns the number of items in the back end
+     * @return LazyDataView instance for further configuration
+     */
+    public GridLazyDataView<T> setItemsPageable(
+            SpringData.FetchCallback<Pageable, T> fetchCallback,
+            SpringData.CountCallback<Pageable> countCallback) {
+        return setItems(
+                query -> handleSpringFetchCallback(query, fetchCallback),
+                query -> handleSpringCountCallback(query, countCallback));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <PAGEABLE, T> Stream<T> handleSpringFetchCallback(
+            Query<T, Void> query,
+            SpringData.FetchCallback<PAGEABLE, T> fetchCallback) {
+        PAGEABLE pageable = (PAGEABLE) VaadinSpringDataHelpers
+                .toSpringPageRequest(query);
+        List<T> itemList = fetchCallback.fetch(pageable);
+        return itemList.stream();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <PAGEABLE> int handleSpringCountCallback(
+            Query<?, Void> query,
+            SpringData.CountCallback<PAGEABLE> countCallback) {
+        PAGEABLE pageable = (PAGEABLE) VaadinSpringDataHelpers
+                .toSpringPageRequest(query);
+        long count = countCallback.count(pageable);
+        if (count > Integer.MAX_VALUE) {
+            LoggerFactory.getLogger(Grid.class).warn(
+                    "The count of items in the backend ({}) exceeds the maximum supported by the Grid.",
+                    count);
+            return Integer.MAX_VALUE;
+        }
+        return (int) count;
+    }
+
     /**
      * Gets the lazy data view for the grid. This data view should only be used
      * when the items are provided lazily from the backend with:
@@ -2587,7 +3107,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             + pageSize);
         }
         getElement().setProperty("pageSize", pageSize);
-        getElement().callJsFunction("$connector.reset");
+        getElement()
+                .executeJs("if (this.$connector) { this.$connector.reset() }");
         getDataCommunicator().setPageSize(pageSize);
         setRequestedRange(0, pageSize);
         getDataCommunicator().reset();
@@ -2638,8 +3159,20 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     protected void updateSelectionModeOnClient() {
-        getElement().callJsFunction("$connector.setSelectionMode",
+        getElement().executeJs(
+                "if (this.$connector) { this.$connector.setSelectionMode($0) }",
                 selectionMode.name());
+    }
+
+    /**
+     * Returns the selection mode for this grid.
+     *
+     * @return the selection mode, not null
+     */
+    public SelectionMode getSelectionMode() {
+        assert selectionMode != null : "No selection mode set by "
+                + getClass().getName() + " constructor";
+        return selectionMode;
     }
 
     /**
@@ -2662,6 +3195,41 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         GridSelectionModel<T> model = selectionMode.createModel(this);
         setSelectionModel(model, selectionMode);
         return model;
+    }
+
+    SerializablePredicate<T> getItemSelectableProvider() {
+        return selectableProvider;
+    }
+
+    /**
+     * Sets a predicate to check whether a specific item in the grid may be
+     * selected or deselected by the user. The predicate receives an item
+     * instance and should return {@code true} if a user may change the
+     * selection state of that item, or {@code false} otherwise.
+     * <p>
+     * This function does not prevent programmatic selection/deselection of
+     * items. Changing the function does not modify the currently selected
+     * items.
+     * <p>
+     * When using multi-selection, setting a provider will hide the select all
+     * checkbox.
+     *
+     * @param provider
+     *            the function to use to determine whether an item may be
+     *            selected or deselected by the user, or {@code null} to allow
+     *            all items to be selected or deselected
+     */
+    public void setItemSelectableProvider(SerializablePredicate<T> provider) {
+        selectableProvider = provider;
+        getDataCommunicator().reset();
+
+        if (selectionModel instanceof AbstractGridMultiSelectionModel<T> multiSelectionModel) {
+            multiSelectionModel.updateSelectAllCheckBoxVisibility();
+        }
+    }
+
+    boolean isItemSelectable(T item) {
+        return selectableProvider == null || selectableProvider.test(item);
     }
 
     /**
@@ -2759,6 +3327,40 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         getSelectionModel().deselectAll();
     }
 
+    /**
+     * Sets the selection preservation mode. Determines what happens with the
+     * selection when {@link DataProvider#refreshAll} is called. The selection
+     * is discarded in any case when a new data provider is set. The default is
+     * {@link SelectionPreservationMode#PRESERVE_ALL}. Lazy data providers do
+     * not support {@link SelectionPreservationMode#PRESERVE_EXISTING}.
+     *
+     * @param selectionPreservationMode
+     *            the selection preservation mode to switch to, not {@code null}
+     *
+     * @see SelectionPreservationMode
+     */
+    public void setSelectionPreservationMode(
+            SelectionPreservationMode selectionPreservationMode) {
+        if (SelectionPreservationMode.PRESERVE_EXISTING.equals(
+                selectionPreservationMode) && !getDataProvider().isInMemory()) {
+            throw new UnsupportedOperationException(
+                    "Lazy data providers do not support preserve existing selection mode.");
+        }
+        selectionPreservationHandler
+                .setSelectionPreservationMode(selectionPreservationMode);
+    }
+
+    /**
+     * Gets the selection preservation mode.
+     *
+     * @return the selection preservation mode
+     *
+     * @see #setSelectionPreservationMode(SelectionPreservationMode)
+     */
+    public SelectionPreservationMode getSelectionPreservationMode() {
+        return selectionPreservationHandler.getSelectionPreservationMode();
+    }
+
     void doClientSideSelection(Set<T> items) {
         callSelectionFunctionForItems("doSelection", items);
     }
@@ -2782,21 +3384,22 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                     : null;
             jsonArray.set(jsonArray.length(), jsonObject);
         }
-        final SerializableRunnable jsFunctionCall = () -> getElement()
-                .callJsFunction("$connector." + function, jsonArray, false);
-        if (getElement().getNode().isAttached()) {
-            jsFunctionCall.run();
-        } else {
-            getElement().getNode()
-                    .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                            context -> jsFunctionCall.run()));
-        }
+
+        callJsFunctionBeforeClientResponse("$connector." + function, jsonArray,
+                false);
     }
 
     private JsonObject generateJsonForSelection(T item) {
         JsonObject json = Json.createObject();
         json.put("key", getDataCommunicator().getKeyMapper().key(item));
         return json;
+    }
+
+    private void callJsFunctionBeforeClientResponse(String functionName,
+            Serializable... arguments) {
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, context -> getElement()
+                        .callJsFunction(functionName, arguments)));
     }
 
     /**
@@ -3100,10 +3703,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            client-side, {@code false} to disable
      */
     public void setMultiSort(boolean multiSort) {
-        getElement().setAttribute("multi-sort", multiSort);
-        if (!multiSort) {
-            updateMultiSortOnShiftClick(false);
-        }
+        doSetMultiSort(multiSort);
     }
 
     /**
@@ -3118,7 +3718,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see MultiSortPriority
      */
     public void setMultiSort(boolean multiSort, MultiSortPriority priority) {
-        setMultiSort(multiSort);
+        doSetMultiSort(multiSort);
         updateMultiSortPriority(priority);
     }
 
@@ -3134,7 +3734,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            behavior
      */
     public void setMultiSort(boolean multiSort, boolean onShiftClickOnly) {
-        setMultiSort(multiSort);
+        doSetMultiSort(multiSort);
         if (multiSort) {
             updateMultiSortOnShiftClick(onShiftClickOnly);
         }
@@ -3157,8 +3757,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     public void setMultiSort(boolean multiSort, MultiSortPriority priority,
             boolean onShiftClickOnly) {
-        setMultiSort(multiSort, onShiftClickOnly);
+        doSetMultiSort(multiSort);
         updateMultiSortPriority(priority);
+        if (multiSort) {
+            updateMultiSortOnShiftClick(onShiftClickOnly);
+        }
+    }
+
+    private void doSetMultiSort(boolean multiSort) {
+        getElement().setAttribute("multi-sort", multiSort);
+        if (!multiSort) {
+            updateMultiSortOnShiftClick(false);
+        }
     }
 
     private void updateMultiSortOnShiftClick(boolean multiSortOnShiftClick) {
@@ -3193,6 +3803,30 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private void updateContextMenuTargetItem(String key, String colId) {
         getElement().setProperty("_contextMenuTargetItemKey", key);
         getElement().setProperty("_contextMenuTargetColumnId", colId);
+    }
+
+    /**
+     * Set the aria-label of the component to the given text.
+     *
+     * @param ariaLabel
+     *            the aria-label text to set or {@code null} to clear
+     */
+    public void setAriaLabel(String ariaLabel) {
+        if (ariaLabel == null) {
+            getElement().removeProperty("accessibleName");
+        } else {
+            getElement().setProperty("accessibleName", ariaLabel);
+        }
+    }
+
+    /**
+     * Gets the aria-label of the component.
+     *
+     * @return an optional aria-label of the component if no aria-label has been
+     *         set
+     */
+    public Optional<String> getAriaLabel() {
+        return Optional.ofNullable(getElement().getProperty("accessibleName"));
     }
 
     /**
@@ -3238,18 +3872,20 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         Optional<T> item = Optional
                 .ofNullable(getDataCommunicator().getKeyMapper().get(key));
         if (!item.isPresent()) {
-            LoggerFactory.getLogger(Grid.class).debug("Key not found: %s. "
-                    + "This can happen due to user action while changing"
+            LoggerFactory.getLogger(Grid.class).debug("Key not found: {}."
+                    + " This can happen due to user action while changing"
                     + " the data provider.", key);
         }
         return item;
     }
 
+    @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void confirmUpdate(int id) {
         getDataCommunicator().confirmUpdate(id);
     }
 
+    @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setRequestedRange(int start, int length) {
         if (length > 500 && length / getPageSize() > 10 && isAllRowsVisible()) {
@@ -3335,11 +3971,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
         updateClientSideSorterIndicators(sortOrder);
+        updateSelectionModeOnClient();
         if (getDataProvider() != null) {
             handleDataProviderChange(getDataProvider());
         }
+        // When the component is detached and reattached in the same roundtrip,
+        // data communicator will clear all data generators, which will also
+        // remove all components rendered by component renderers. Thus reset the
+        // data communicator to re-render components.
+        dataCommunicator.reset();
     }
 
     @Override
@@ -3408,6 +4049,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     private void updateClientSideSorterIndicators(
             List<GridSortOrder<T>> order) {
+        if (pendingSorterUpdate != null
+                && !pendingSorterUpdate.isSentToBrowser()) {
+            pendingSorterUpdate.cancelExecution();
+        }
+
         JsonArray directions = Json.createArray();
 
         for (int i = 0; i < order.size(); i++) {
@@ -3434,7 +4080,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         if (getElement().getNode().isAttached()) {
-            getElement().callJsFunction("$connector.setSorterDirections",
+            this.pendingSorterUpdate = getElement().executeJs(
+                    "if (this.$connector) { this.$connector.setSorterDirections($0) }",
                     directions);
         }
     }
@@ -3615,8 +4262,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         if (autoCreateColumns) {
             propertySet.getProperties()
                     .filter(property -> !property.isSubProperty())
-                    .sorted((prop1, prop2) -> prop1.getName()
-                            .compareTo(prop2.getName()))
                     .forEach(this::addColumn);
         }
 
@@ -3764,7 +4409,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @throws NullPointerException
      *             if {@code classNameGenerator} is {@code null}
      * @see Column#setClassNameGenerator(SerializableFunction)
+     * @deprecated {@link #setPartNameGenerator} should be used instead.
      */
+    @Deprecated
     public void setClassNameGenerator(
             SerializableFunction<T, String> classNameGenerator) {
         Objects.requireNonNull(classNameGenerator,
@@ -3837,8 +4484,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     private void generateTooltipTextData(T item, JsonObject jsonObject) {
         JsonObject tooltips = Json.createObject();
 
+        String rowTooltip = tooltipGenerator.apply(item);
+        if (rowTooltip != null) {
+            tooltips.put("row", rowTooltip);
+        }
+
         idToColumnMap.forEach((id, column) -> {
-            String cellTooltip = column.getTooltipGenerator().apply(item);
+            String cellTooltip = column.tooltipGenerator.apply(item);
             if (cellTooltip != null) {
                 tooltips.put(id, cellTooltip);
             }
@@ -3907,6 +4559,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         if (dragData.keys().length > 0) {
             jsonObject.put("dragData", dragData);
+        }
+    }
+
+    private void generateSelectableData(T item, JsonObject jsonObject) {
+        if (selectableProvider != null) {
+            boolean selectable = selectableProvider.test(item);
+            jsonObject.put("selectable", selectable);
         }
     }
 
@@ -4032,7 +4691,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         dataProviderChangeRegistration = dataProvider
-                .addDataProviderListener(event -> onDataProviderChange());
+                .addDataProviderListener(this::handleDataChange);
     }
 
     /**
@@ -4109,13 +4768,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @see GridDropEvent#getDropLocation()
      */
     public void setDropMode(GridDropMode dropMode) {
-        // We need to add DnD mobile polyfill here by invoking
-        // DndUtil.addMobileDndPolyfillIfNeeded. But, since DndUtil is in a Flow
-        // internal package, DropTarget.create is called to invoke
-        // addMobileDndPolyfillIfNeeded indirectly.
-        DropTarget.create(this).setActive(false);
         getElement().setProperty("dropMode",
                 dropMode == null ? null : dropMode.getClientName());
+
+        // Do not reset the data communicator if no filters are applied in order
+        // to avoid unnecessary scroll position reset. This can be removed when
+        // Flow will provide a way to request refresh for only items that
+        // are in the viewport.
+        if (dragFilter != defaultDragFilter
+                || dropFilter != defaultDropFilter) {
+            getDataCommunicator().reset();
+        }
     }
 
     /**
@@ -4139,12 +4802,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            {@code false} if not
      */
     public void setRowsDraggable(boolean rowsDraggable) {
-        // We need to add DnD mobile polyfill here by invoking
-        // DndUtil.addMobileDndPolyfillIfNeeded. But, since DndUtil is in a Flow
-        // internal package, DragSource.create is called to invoke
-        // addMobileDndPolyfillIfNeeded indirectly.
-        DragSource.create(this).setDraggable(false);
         getElement().setProperty("rowsDraggable", rowsDraggable);
+
+        // Do not reset the data communicator if no filters are applied in order
+        // to avoid unnecessary scroll position reset. This can be removed when
+        // Flow will provide a way to request refresh for only items that
+        // are in the viewport.
+        if (dragFilter != defaultDragFilter
+                || dropFilter != defaultDropFilter) {
+            getDataCommunicator().reset();
+        }
     }
 
     /**
@@ -4248,6 +4915,78 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                 .forEach(t -> types.set(types.length(), t));
         this.getElement().setPropertyJson("__dragDataTypes", types);
         getDataCommunicator().reset();
+    }
+
+    /**
+     * Sets the function that is used for generating tooltip text for all cells
+     * in this grid. Tooltip generators set to individual columns have priority
+     * over the generator set with this method. Returning {@code null} from the
+     * generator results in no tooltip being set.
+     *
+     * @param tooltipGenerator
+     *            the tooltip generator to set, not {@code null}
+     * @throws NullPointerException
+     *             if {@code tooltipGenerator} is {@code null}
+     *
+     * @since 24.1
+     */
+    public void setTooltipGenerator(
+            SerializableFunction<T, String> tooltipGenerator) {
+        this.tooltipGenerator = Objects.requireNonNull(tooltipGenerator,
+                "Tooltip generator cannot be null");
+        addTooltipElementToTooltipSlot();
+        this.dataCommunicator.reset();
+    }
+
+    /**
+     * Gets the tooltip position relative to the cell that is being hovered or
+     * focused. The default position is {@link TooltipPosition#BOTTOM}.
+     *
+     * @return the position of the tooltip
+     */
+    public TooltipPosition getTooltipPosition() {
+        String position = getTooltipElement()
+                .map(tooltipElement -> tooltipElement.getAttribute("position"))
+                .orElse(null);
+        return TooltipPosition.fromPosition(position);
+    }
+
+    /**
+     * Sets the tooltip position relative to the cell that is being hovered or
+     * focused. The default position is {@link TooltipPosition#BOTTOM}.
+     *
+     * @param position
+     *            the position to set
+     */
+    public void setTooltipPosition(TooltipPosition position) {
+        Objects.requireNonNull(position, "Position cannot be null");
+
+        addTooltipElementToTooltipSlot();
+
+        getTooltipElement().ifPresent(tooltipElement -> tooltipElement
+                .setAttribute("position", position.getPosition()));
+    }
+
+    private void addTooltipElementToTooltipSlot() {
+        if (getTooltipElement().isPresent()) {
+            // the grid's tooltip slot has already been filled
+            return;
+        }
+        // No <vaadin-tooltip> yet added to the grid, add one
+        Element tooltipElement = new Element("vaadin-tooltip");
+
+        tooltipElement.addAttachListener(e ->
+        // Assigns a generator that returns a column-specific
+        // tooltip text from the item
+        tooltipElement.executeJs(
+                "this.generator = ({item, column}) => { return (item && item.gridtooltips && column) ? item.gridtooltips[column._flowId] ?? item.gridtooltips['row'] : ''; }"));
+        SlotUtils.addToSlot(this, "tooltip", tooltipElement);
+    }
+
+    private Optional<Element> getTooltipElement() {
+        return this.getElement().getChildren().filter(
+                child -> Objects.equals(child.getAttribute("slot"), "tooltip"))
+                .findFirst();
     }
 
     /**
@@ -4375,7 +5114,61 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            zero based index of the item to scroll to in the current view.
      */
     public void scrollToIndex(int rowIndex) {
+        // Grid's page size
+        int pageSize = getPageSize();
+        // A rough approximation of the viewport size in rows. This affects the
+        // count of preloaded rows.
+        int viewportSizeEstimate = 40;
+
+        // Get the index of the first item on the page that contains the
+        // requested index
+        int targetPageStartIndex = rowIndex - rowIndex % pageSize;
+
+        // The last index we want to include in the preloaded range
+        int lastIndex = rowIndex + viewportSizeEstimate;
+
+        // Get the index of the last item on the page that contains the last
+        // index we want to preload
+        int lastIndexPageStartIndex = lastIndex - lastIndex % pageSize;
+        int lastIndexPageEndIndex = lastIndexPageStartIndex + pageSize - 1;
+
+        // Preloaded items count
+        int preloadedItemsCount = lastIndexPageEndIndex - targetPageStartIndex
+                + 1;
+        // Preload the items
+        setRequestedRange(targetPageStartIndex, preloadedItemsCount);
+
+        // Scroll to the requested index
         getElement().callJsFunction("scrollToIndex", rowIndex);
+    }
+
+    /**
+     * Scrolls to the row presenting the given item.
+     * <p>
+     * Note that the item index provider should be explicitly set using
+     * {@link GridLazyDataView#setItemIndexProvider(ItemIndexProvider)} for lazy
+     * loading data providers. Otherwise, an
+     * {@link UnsupportedOperationException} will be thrown.
+     *
+     * @param item
+     *            the item to scroll to, not {@code null}.
+     * @throws NullPointerException
+     *             if the {@code item} parameter is {@code null}.
+     * @throws NoSuchElementException
+     *             if the {@code item} cannot be found.
+     * @throws UnsupportedOperationException
+     *             if {@link ItemIndexProvider} is missing for grid with a lazy
+     *             loading data provider.
+     */
+    public void scrollToItem(T item) {
+        Objects.requireNonNull(item, "Item to scroll to cannot be null.");
+        AbstractDataView<T> dataView = getDataProvider().isInMemory()
+                ? getListDataView()
+                : getLazyDataView();
+        int itemIndex = dataView.getItemIndex(item)
+                .orElseThrow(() -> new NoSuchElementException(
+                        "Item to scroll to cannot be found: " + item));
+        scrollToIndex(itemIndex);
     }
 
     /**
@@ -4391,7 +5184,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     public void scrollToEnd() {
         getUI().ifPresent(
                 ui -> ui.beforeClientResponse(this, ctx -> getElement()
-                        .executeJs("this.scrollToIndex(this._effectiveSize)")));
+                        .executeJs("this.scrollToIndex(this._flatSize)")));
     }
 
     private void onDragStart(GridDragStartEvent<T> event) {
@@ -4427,13 +5220,78 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return nestedNullBehavior;
     }
 
+    /**
+     * Sets the mode for rendering columns in the grid.
+     *
+     * <p>
+     * <b>eager</b> (default): All columns are rendered upfront, regardless of
+     * their visibility within the viewport. This mode should generally be
+     * preferred, as it avoids the limitations imposed by the "lazy" mode. Use
+     * this mode unless the grid has a large number of columns and performance
+     * outweighs the limitations in priority.
+     * </p>
+     * <p>
+     * <b>lazy</b>: Optimizes the rendering of cells when there are multiple
+     * columns in the grid by virtualizing horizontal scrolling. In this mode,
+     * body cells are rendered only when their corresponding columns are inside
+     * the visible viewport.
+     * </p>
+     * <p>
+     * Using "lazy" rendering should be used only if you're dealing with a large
+     * number of columns and performance is your highest priority. For most use
+     * cases, the default "eager" mode is recommended due to the limitations
+     * imposed by the "lazy" mode.
+     * </p>
+     * <p>
+     * When using the "lazy" mode, keep the following limitations in mind:
+     * </p>
+     * <ul>
+     * <li>Row Height: When only a number of columns are visible at once, the
+     * height of a row can only be that of the highest cell currently visible on
+     * that row. Make sure each cell on a single row has the same height as all
+     * other cells on that row. If row cells have different heights, users may
+     * experience jumpiness when scrolling the grid horizontally as lazily
+     * rendered cells with different heights are scrolled into view.</li>
+     * <li>Auto-width Columns: For the columns that are initially outside the
+     * visible viewport but still use auto-width, only the header content is
+     * taken into account when calculating the column width because the body
+     * cells of the columns outside the viewport are not initially
+     * rendered.</li>
+     * <li>Screen Reader Compatibility: Screen readers may not be able to
+     * associate the focused cells with the correct headers when only a subset
+     * of the body cells on a row is rendered.</li>
+     * <li>Keyboard Navigation: Tabbing through focusable elements inside the
+     * grid body may not work as expected because some of the columns that would
+     * include focusable elements in the body cells may be outside the visible
+     * viewport and thus not rendered.</li>
+     * </ul>
+     *
+     * @param columnRendering
+     *            the column rendering mode to use
+     * @see ColumnRendering
+     */
+    public void setColumnRendering(ColumnRendering columnRendering) {
+        getElement().setProperty("columnRendering",
+                columnRendering == null
+                        ? ColumnRendering.EAGER.getPropertyValue()
+                        : columnRendering.getPropertyValue());
+    }
+
+    /**
+     * Gets the current column rendering mode.
+     *
+     * @return the current column rendering mode
+     */
+    public ColumnRendering getColumnRendering() {
+        return ColumnRendering
+                .fromPropertyValue(getElement().getProperty("columnRendering"));
+    }
+
     private void onInMemoryFilterOrSortingChange(
             SerializablePredicate<T> filter,
             SerializableComparator<T> sortComparator) {
         updateInMemorySorting(sortComparator);
         updateInMemoryFiltering(filter);
-
-        dataCommunicator.reset();
     }
 
     private void updateInMemoryFiltering(
@@ -4490,5 +5348,67 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         return Optional.ofNullable(getUniqueKeyProvider())
                 .map(provider -> provider.apply(item))
                 .orElse(getDataCommunicator().getKeyMapper().key(item));
+    }
+
+    /**
+     * Sets the component to be displayed when the grid is empty.
+     * <p>
+     * Note: This will also override any empty state content set with
+     * {@link #setEmptyStateText(String)}.
+     *
+     * @param emptyStateComponent
+     *            the component to be displayed when the grid is empty, or null
+     *            to clear the empty state content
+     */
+    public void setEmptyStateComponent(Component emptyStateComponent) {
+        this.emptyStateText = null;
+        this.emptyStateComponent = emptyStateComponent;
+        updateEmptyStateContent();
+    }
+
+    /**
+     * Sets the text to be displayed when the grid is empty.
+     * <p>
+     * Note: This will also override any empty state content set with
+     * {@link #setEmptyStateComponent(Component)}.
+     *
+     * @param emptyStateText
+     *            the text to be displayed when the grid is empty, or null to
+     *            clear the empty state content
+     */
+    public void setEmptyStateText(String emptyStateText) {
+        this.emptyStateComponent = null;
+        this.emptyStateText = emptyStateText;
+        updateEmptyStateContent();
+    }
+
+    /**
+     * Returns the component that is displayed when the grid is empty.
+     *
+     * @return the component that is displayed when the grid is empty or null if
+     *         no empty state component is set
+     */
+    public Component getEmptyStateComponent() {
+        return emptyStateComponent;
+    }
+
+    /**
+     * Returns the text that is displayed when the grid is empty.
+     *
+     * @return the text that is displayed when the grid is empty or null if no
+     *         empty state text is set
+     */
+    public String getEmptyStateText() {
+        return emptyStateText;
+    }
+
+    private void updateEmptyStateContent() {
+        if (emptyStateComponent != null) {
+            SlotUtils.setSlot(this, EMPTY_STATE_SLOT, emptyStateComponent);
+        } else if (emptyStateText != null) {
+            SlotUtils.setSlot(this, EMPTY_STATE_SLOT, new Span(emptyStateText));
+        } else {
+            SlotUtils.clearSlot(this, EMPTY_STATE_SLOT);
+        }
     }
 }

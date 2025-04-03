@@ -1,9 +1,14 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.crud.tests;
 
-import com.vaadin.flow.component.crud.CrudFilter;
-import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
-import com.vaadin.flow.data.provider.Query;
-import com.vaadin.flow.data.provider.SortDirection;
+import static java.util.Comparator.naturalOrder;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -15,7 +20,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Comparator.naturalOrder;
+import com.vaadin.flow.component.crud.CrudFilter;
+import com.vaadin.flow.data.provider.AbstractBackEndDataProvider;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.SortDirection;
 
 /**
  * A dummy data provider. DO NOT DO THIS IN A PRODUCTION APP!

@@ -1,12 +1,16 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.export;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +27,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.charts.model.AnnotationItemLabel;
+import com.vaadin.flow.component.charts.model.AnnotationItemLabelPoint;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -38,10 +44,6 @@ import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.themes.LumoDarkTheme;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class SVGGeneratorTest {
 
@@ -214,6 +216,18 @@ public class SVGGeneratorTest {
         svgGenerator.generate(configuration);
     }
 
+    @Test
+    public void exportWithLabel() throws IOException, InterruptedException {
+        var conf = createPieChartConfiguration();
+        var label = new AnnotationItemLabel("Blue");
+        label.setPoint(new AnnotationItemLabelPoint(350, 170));
+        conf.addLabel(label);
+        var svg = svgGenerator.generate(conf);
+        var pieChartPath = Paths.get("src", "test", "resources", "label.svg");
+        var expectedSVG = readUtf8File(pieChartPath);
+        assertEquals(replaceIds(expectedSVG), replaceIds(svg));
+    }
+
     private Configuration createPieChartConfiguration() {
         Configuration conf = new Configuration();
         conf.setTitle("Browser market shares in January, 2018");
@@ -261,8 +275,9 @@ public class SVGGeneratorTest {
 
         XAxis x = new XAxis();
         x.setCategories("January is a long month", "February is rather boring",
-                "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
-                "Dec");
+                "Mar", "Apr", "May", "Jun",
+                "Jul is a month to enjoy really nice weather", "Aug", "Sep",
+                "Oct", "Nov", "Dec");
         configuration.addxAxis(x);
 
         YAxis y = new YAxis();

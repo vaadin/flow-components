@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
+import static com.vaadin.flow.component.dialog.tests.DialogTestPageIT.DIALOG_OVERLAY_TAG;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,8 +27,6 @@ import com.vaadin.flow.component.dialog.testbench.DialogElement;
 import com.vaadin.flow.component.html.testbench.NativeButtonElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
-
-import static com.vaadin.flow.component.dialog.tests.DialogTestPageIT.DIALOG_OVERLAY_TAG;
 
 @TestPath("vaadin-dialog/dialog-class-names-test")
 public class DialogWithClassNamesIT extends AbstractComponentIT {
@@ -45,8 +45,8 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
 
         WebElement overlay = $(DIALOG_OVERLAY_TAG).first();
 
-        String overlayClassNames = overlay.getAttribute("class");
-        String dialogClassNames = dialog.getAttribute("class");
+        String overlayClassNames = overlay.getDomAttribute("class");
+        String dialogClassNames = dialog.getDomAttribute("class");
 
         Assert.assertEquals("custom", dialogClassNames);
         Assert.assertEquals("custom", overlayClassNames);
@@ -63,8 +63,8 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         DialogElement dialog = $(DialogElement.class).first();
         WebElement overlay = $(DIALOG_OVERLAY_TAG).first();
 
-        String overlayClassNames = overlay.getAttribute("class");
-        String dialogClassNames = dialog.getAttribute("class");
+        String overlayClassNames = overlay.getDomAttribute("class");
+        String dialogClassNames = dialog.getDomAttribute("class");
 
         Assert.assertEquals("custom added", dialogClassNames);
         Assert.assertEquals("custom added", overlayClassNames);
@@ -81,8 +81,8 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         DialogElement dialog = $(DialogElement.class).first();
         WebElement overlay = $(DIALOG_OVERLAY_TAG).first();
 
-        String overlayClassNames = overlay.getAttribute("class");
-        String dialogClassNames = dialog.getAttribute("class");
+        String overlayClassNames = overlay.getDomAttribute("class");
+        String dialogClassNames = dialog.getDomAttribute("class");
 
         Assert.assertEquals("", dialogClassNames);
         Assert.assertEquals("", overlayClassNames);
@@ -105,8 +105,8 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         DialogElement dialog = $(DialogElement.class).first();
         WebElement overlay = $(DIALOG_OVERLAY_TAG).first();
 
-        String overlayClassNames = overlay.getAttribute("class");
-        String dialogClassNames = dialog.getAttribute("class");
+        String overlayClassNames = overlay.getDomAttribute("class");
+        String dialogClassNames = dialog.getDomAttribute("class");
 
         Assert.assertEquals("added", dialogClassNames);
         Assert.assertEquals("added", overlayClassNames);

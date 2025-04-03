@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,31 +15,33 @@
  */
 package com.vaadin.flow.component.datetimepicker;
 
-import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
-import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.di.Instantiator;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
-import net.jcip.annotations.NotThreadSafe;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
 
-import org.junit.Assert;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class DateTimePickerTest {
@@ -212,6 +214,42 @@ public class DateTimePickerTest {
     }
 
     @Test
+    public void setAriaLabel() {
+        final DateTimePicker picker = new DateTimePicker();
+        Assert.assertTrue(picker.getAriaLabel().isEmpty());
+        picker.setAriaLabel("aria-label");
+        Assert.assertTrue(picker.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", picker.getAriaLabel().get());
+
+        picker.setAriaLabel(null);
+        Assert.assertTrue(picker.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setDateAriaLabel() {
+        final DateTimePicker picker = new DateTimePicker();
+        Assert.assertTrue(picker.getDateAriaLabel().isEmpty());
+        picker.setDateAriaLabel("date-aria-label");
+        Assert.assertTrue(picker.getDateAriaLabel().isPresent());
+        Assert.assertEquals("date-aria-label", picker.getDateAriaLabel().get());
+
+        picker.setDateAriaLabel(null);
+        Assert.assertTrue(picker.getDateAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setTimeAriaLabel() {
+        final DateTimePicker picker = new DateTimePicker();
+        Assert.assertTrue(picker.getTimeAriaLabel().isEmpty());
+        picker.setTimeAriaLabel("time-aria-label");
+        Assert.assertTrue(picker.getTimeAriaLabel().isPresent());
+        Assert.assertEquals("time-aria-label", picker.getTimeAriaLabel().get());
+
+        picker.setTimeAriaLabel(null);
+        Assert.assertTrue(picker.getTimeAriaLabel().isEmpty());
+    }
+
+    @Test
     public void implementsHasOverlayClassName() {
         Assert.assertTrue("DateTimePicker should support overlay class name",
                 HasOverlayClassName.class
@@ -222,5 +260,12 @@ public class DateTimePickerTest {
     public void implementsHasTooltip() {
         DateTimePicker picker = new DateTimePicker();
         Assert.assertTrue(picker instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementsInputField() {
+        DateTimePicker field = new DateTimePicker();
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<DateTimePicker, LocalDateTime>, LocalDateTime>);
     }
 }

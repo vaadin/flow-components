@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet.testbench;
@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import com.vaadin.testbench.elementsbase.Element;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.NoSuchElementException;
@@ -21,6 +20,7 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 /**
  * This is the base element class for accessing a Vaadin Spreadsheet component
@@ -312,7 +312,8 @@ public class SpreadsheetElement extends TestBenchElement {
     private boolean isNonCoherentlySelected(WebElement element) {
         // an element is non-coherently selected if the class attribute
         // contains "cell-range"
-        return element.getAttribute("class").contains("cell-range")
+        return Optional.ofNullable(element.getDomAttribute("class")).orElse("")
+                .contains("cell-range")
                 || "solid".equals(element.getCssValue("outline-style"));
     }
 

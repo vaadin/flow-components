@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,22 +12,21 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
-
 package com.vaadin.flow.component.progressbar.tests;
 
-import com.vaadin.flow.component.progressbar.ProgressBarVariant;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import com.vaadin.flow.component.progressbar.ProgressBarVariant;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the {@link ProgressBarView}.
@@ -60,13 +59,13 @@ public class ProgressBarIT extends AbstractComponentIT {
         scrollToElement(progressBar);
 
         Assert.assertEquals(ProgressBarVariant.LUMO_ERROR.getVariantName(),
-                progressBar.getAttribute("theme"));
+                progressBar.getDomAttribute("theme"));
 
         findElement(By.id("remove-theme-variant-button")).click();
-        Assert.assertNull(progressBar.getAttribute("theme"));
+        Assert.assertNull(progressBar.getDomAttribute("theme"));
     }
 
     private String valueOf(WebElement progressBar) {
-        return progressBar.getAttribute("value");
+        return progressBar.getDomProperty("value");
     }
 }

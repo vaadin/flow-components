@@ -1,6 +1,6 @@
 # GridPro component for Vaadin Flow
 
-This project is the Component wrapper implementation of [`<vaadin-grid-pro>`](https://github.com/vaadin/vaadin-grid-pro)
+This project is the Component wrapper implementation of [`<vaadin-grid-pro>`](https://github.com/vaadin/web-components/tree/main/packages/grid-pro)
 element for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Using the component in a Flow application

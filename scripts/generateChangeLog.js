@@ -52,7 +52,7 @@ async function getPlatformVersions(branch) {
 
 function computeVersion() {
   if (to == 'HEAD') {
-    const r = /^(.*)(\d+)$/.exec(from);
+    const r = /^(.*?)(\d+)$/.exec(from);
     if (r) {
       version = r[1] + (parseInt(r[2]) + 1);
     }
@@ -265,7 +265,7 @@ function parseLinks(message) {
 function getComponents(c) {
   if (c.components[0]) {
     const component = `Component${c.components[1] ? 's' : ''}`;
-    return `**${component}: **${c.components.map(k => '[' + k + '](' + createGHLink('vaadin-' + k) +')').join(', ')}`;
+    return `**${component}:** ${c.components.map(k => '[' + k + '](' + createGHLink('vaadin-' + k) +')').join(', ')}`;
   }
 }
 // return ticket links for this commit

@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests;
 
 import com.vaadin.flow.component.ClickEvent;
@@ -65,6 +73,8 @@ public class SizingPage extends Div {
                         e -> layout.setHeight(null))));
 
         layoutList.add(new ListItem(new Span("Display: "),
+                getButton("none", "layoutDisplayNone",
+                        e -> layout.getStyle().set("display", "none")),
                 getButton("flex", "layoutDisplayFlex",
                         e -> layout.getStyle().set("display", "flex")),
                 getButton("Default (block)", "layoutDisplayDefault",
@@ -81,7 +91,27 @@ public class SizingPage extends Div {
 
         add(layoutList);
 
+        add(new H2("Logs"));
+
+        var logList = new UnorderedList();
+        var messageLog = new Span();
+        messageLog.setId("messageLog");
+        logList.add(new ListItem(new Span("Message: "), messageLog));
+
+        logList.add(new ListItem(new Span("Panel"),
+                getButton("Panel position", "logPanelPosition", e -> {
+                    spreadsheet.getElement().executeJs(
+                            "return this.shadowRoot.querySelector('.bottom-right-pane').style.top")
+                            .then(message -> {
+                                var stringMessage = message.asString();
+                                messageLog.setText(stringMessage);
+                            });
+                })));
+
+        add(logList);
+
         add(layout);
+
     }
 
     private NativeButton getButton(String title, String id,

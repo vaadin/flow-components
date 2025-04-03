@@ -3,46 +3,28 @@ import { html } from '@polymer/polymer/lib/utils/html-tag.js';
 import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
 import { idlePeriod } from '@polymer/polymer/lib/utils/async.js';
 import { PolymerElement } from '@polymer/polymer/polymer-element.js';
-import { until } from 'lit/directives/until.js';
-
-/**
- * Returns the requested node from the Flow client.
- * @param {string} appid 
- * @param {number} nodeid 
- * @returns {Element | null} The element if found, null otherwise.
- */
-function getNodeInternal(appid, nodeid) {
-  return window.Vaadin.Flow.clients[appid].getByNodeId(nodeid);
-}
+import { flowComponentDirective } from './flow-component-directive.js';
+import { render, html as litHtml } from 'lit';
 
 /**
  * Returns the requested node in a form suitable for Lit template interpolation.
- * @param {string} appid 
- * @param {number} nodeid 
- * @returns {any} The element if found, null otherwise.
+ * @param {string} appid
+ * @param {number} nodeid
+ * @returns {any} a Lit directive
  */
 function getNode(appid, nodeid) {
-  // Theoretically, this method could just return the node as-is.
-  // The `until` directive is used for now to work around sizing issues
-  // with ComponentRenderer. The previously used <flow-component-renderer> was
-  // asynchronous by nature and thus worked out of the box.
-  //
-  // Test in ComponentColumnWithHeightIT::shouldPositionItemsCorrectlyAfterScrollingToEnd
-  // makes sure the sizing works correctly. The sizing issue should eventually
-  // be fixed in the Virtualizer.
-  return until(new Promise((resolve) => resolve(getNodeInternal(appid, nodeid))));
+  return flowComponentDirective(appid, nodeid);
 }
 
 /**
  * Sets the nodes defined by the given node ids as the child nodes of the
  * given root element.
- * @param {string} appid 
+ * @param {string} appid
  * @param {number[]} nodeIds
- * @param {Element} root 
+ * @param {Element} root
  */
 function setChildNodes(appid, nodeIds, root) {
-  root.textContent = '';
-  root.append(...nodeIds.map(id => getNodeInternal(appid, id)));
+  render(litHtml`${nodeIds.map((id) => flowComponentDirective(appid, id))}`, root);
 }
 
 /**
@@ -50,13 +32,13 @@ function setChildNodes(appid, nodeIds, root) {
  * elements to the container. When the children are manually placed under
  * another element, the call to insertBefore can occasionally fail due to
  * an invalid reference node.
- * 
+ *
  * This is a temporary workaround which patches the container's native API
  * to not fail when called with invalid arguments.
  */
 function patchVirtualContainer(container) {
   const originalInsertBefore = container.insertBefore;
-  
+
   container.insertBefore = function (newNode, referenceNode) {
     if (referenceNode && referenceNode.parentNode === this) {
       return originalInsertBefore.call(this, newNode, referenceNode);
@@ -93,7 +75,7 @@ class FlowComponentRenderer extends PolymerElement {
   static get properties() {
     return {
       nodeid: Number,
-      appid: String,
+      appid: String
     };
   }
   static get observers() {
@@ -103,11 +85,7 @@ class FlowComponentRenderer extends PolymerElement {
   ready() {
     super.ready();
     this.addEventListener('click', function (event) {
-      if (
-        this.firstChild &&
-        typeof this.firstChild.click === 'function' &&
-        event.target === this
-      ) {
+      if (this.firstChild && typeof this.firstChild.click === 'function' && event.target === this) {
         event.stopPropagation();
         this.firstChild.click();
       }
@@ -116,13 +94,17 @@ class FlowComponentRenderer extends PolymerElement {
   }
 
   _asyncAttachRenderedComponentIfAble() {
-    this._debouncer = Debouncer.debounce(this._debouncer, idlePeriod, () =>
-      this._attachRenderedComponentIfAble()
-    );
+    this._debouncer = Debouncer.debounce(this._debouncer, idlePeriod, () => this._attachRenderedComponentIfAble());
   }
 
   _attachRenderedComponentIfAble() {
-    if (!this.nodeid || !this.appid) {
+    if (this.appid == null) {
+      return;
+    }
+    if (this.nodeid == null) {
+      if (this.firstChild) {
+        this.removeChild(this.firstChild);
+      }
       return;
     }
     const renderedComponent = this._getRenderedComponent();
@@ -152,11 +134,7 @@ class FlowComponentRenderer extends PolymerElement {
     try {
       return window.Vaadin.Flow.clients[this.appid].getByNodeId(this.nodeid);
     } catch (error) {
-      console.error(
-        'Could not get node %s from app %s',
-        this.nodeid,
-        this.appid
-      );
+      console.error('Could not get node %s from app %s', this.nodeid, this.appid);
       console.error(error);
     }
     return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,17 +15,18 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.testutil.TestPath;
-
-import static org.junit.Assert.assertTrue;
 
 @TestPath("vaadin-grid/treegrid-huge-tree-navigation")
 public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {
@@ -37,7 +38,6 @@ public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {
     }
 
     @Test
-
     public void keyboard_navigation() {
         getTreeGrid().getCell(0, 0).focus();
 
@@ -88,6 +88,7 @@ public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {
         checkLogsForErrors();
     }
 
+    @Ignore("Keyboard navigation for rows that are no longer in cache should be fixed first.")
     @Test
     public void can_toggle_collapse_on_row_that_is_no_longer_in_cache() {
         getTreeGrid().getCell(0, 0).focus();

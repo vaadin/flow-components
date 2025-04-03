@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,13 +15,14 @@
  */
 package com.vaadin.flow.component.button.tests;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-button/detach-reattach-disable-on-click-button")
 public class DetachReattachDisableOnClickButtonIT extends AbstractComponentIT {
@@ -49,10 +50,11 @@ public class DetachReattachDisableOnClickButtonIT extends AbstractComponentIT {
         disableOnClickButton.click();
 
         // Check 'Disable on click' button is disabled
-        assertDisableOnClickButtonDisabled(disableOnClickButton);
+        waitUntil(driver -> !$(ButtonElement.class).id("disable-on-click")
+                .isEnabled(), 2);
 
         waitUntil(ExpectedConditions.elementToBeClickable(
-                $(ButtonElement.class).id("disable-on-click")), 2000);
+                $(ButtonElement.class).id("disable-on-click")), 2);
 
         // Check 'Disable on click' button is enabled again
         assertDisableOnClickButtonEnabled(disableOnClickButton);
@@ -75,7 +77,7 @@ public class DetachReattachDisableOnClickButtonIT extends AbstractComponentIT {
         removeFromViewButton.click();
 
         waitUntil(ExpectedConditions
-                .numberOfElementsToBe(By.id("disable-on-click"), 0), 2000);
+                .numberOfElementsToBe(By.id("disable-on-click"), 0), 2);
 
         // Re-attach 'Disable on click" button
         ButtonElement addToViewButton = $(ButtonElement.class)
@@ -83,7 +85,7 @@ public class DetachReattachDisableOnClickButtonIT extends AbstractComponentIT {
         addToViewButton.click();
 
         waitUntil(ExpectedConditions
-                .numberOfElementsToBe(By.id("disable-on-click"), 1), 2000);
+                .numberOfElementsToBe(By.id("disable-on-click"), 1), 2);
 
         disableOnClickButton = getDisableOnClickButton();
 

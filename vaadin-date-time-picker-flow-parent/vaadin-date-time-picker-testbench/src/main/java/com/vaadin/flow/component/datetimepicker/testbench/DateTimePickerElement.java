@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -221,7 +221,8 @@ public class DateTimePickerElement extends TestBenchElement
      * @return the presentation value of the inner date picker
      */
     public String getDatePresentation() {
-        return getDatePicker().getPropertyString("_inputValue");
+        return getDatePicker().getPropertyString("inputElement",
+                VALUE_PROPERTY);
     }
 
     /**
@@ -247,11 +248,13 @@ public class DateTimePickerElement extends TestBenchElement
     }
 
     private TestBenchElement getDatePicker() {
-        return $("vaadin-date-picker").attribute("slot", "date-picker").first();
+        return $("vaadin-date-picker").withAttribute("slot", "date-picker")
+                .first();
     }
 
     private TestBenchElement getTimePicker() {
-        return $("vaadin-time-picker").attribute("slot", "time-picker").first();
+        return $("vaadin-time-picker").withAttribute("slot", "time-picker")
+                .first();
     }
 
     /**
@@ -262,7 +265,7 @@ public class DateTimePickerElement extends TestBenchElement
     @Override
     public TestBenchElement getHelperComponent() {
         final ElementQuery<TestBenchElement> query = $(TestBenchElement.class)
-                .attribute("slot", "helper");
+                .withAttribute("slot", "helper");
         if (query.exists()) {
             TestBenchElement last = query.last();
             // To avoid getting the "slot" element, for components with slotted

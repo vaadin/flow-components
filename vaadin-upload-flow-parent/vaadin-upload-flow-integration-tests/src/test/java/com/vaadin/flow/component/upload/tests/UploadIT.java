@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,22 +15,24 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
+import static org.junit.Assert.assertThat;
+
 import java.io.File;
 import java.util.List;
 import java.util.logging.Level;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.devtools.HasDevTools;
 import org.openqa.selenium.logging.LogEntry;
 
 import com.vaadin.flow.component.upload.testbench.UploadElement;
 import com.vaadin.flow.testutil.TestPath;
-
-import static org.junit.Assert.assertThat;
 
 /**
  * Upload component test class.
@@ -38,10 +40,16 @@ import static org.junit.Assert.assertThat;
 @TestPath("vaadin-upload")
 public class UploadIT extends AbstractUploadIT {
 
+    private WebElement uploadOutput;
+
+    private WebElement eventsOutput;
+
     @Before
     public void init() {
         open();
         waitUntil(driver -> getUpload().isDisplayed());
+        uploadOutput = getDriver().findElement(By.id("test-output"));
+        eventsOutput = getDriver().findElement(By.id("test-events-output"));
     }
 
     @Test
@@ -49,14 +57,12 @@ public class UploadIT extends AbstractUploadIT {
         File tempFile = createTempFile("txt");
         getUpload().upload(tempFile);
 
-        WebElement uploadOutput = getDriver().findElement(By.id("test-output"));
-
         String content = uploadOutput.getText();
 
-        String expectedContent = tempFile.getName() + getTempFileContents();
-
-        Assert.assertEquals("Upload content does not match expected",
-                expectedContent, content);
+        Assert.assertTrue("Upload content does not contain file details",
+                content.contains(tempFile.getName() + getTempFileContents()));
+        Assert.assertTrue("Progress update event was not fired properly",
+                content.contains("PROGRESS:" + tempFile.getName()));
     }
 
     @Test
@@ -67,16 +73,16 @@ public class UploadIT extends AbstractUploadIT {
         getUpload().upload(tempFile);
         getUpload().upload(tempFile);
 
-        $("button").id("print-file-list").click();
+        $("button").id("print-file-count").click();
 
-        Assert.assertNotEquals("File list should contain files", "[]",
-                $("div").id("file-list").getText());
+        Assert.assertEquals("File list should contain 3 files", 3,
+                getFileCount());
 
         $("button").id("clear-file-list").click();
-        $("button").id("print-file-list").click();
+        $("button").id("print-file-count").click();
 
-        Assert.assertEquals("File list should not contain files", "[]",
-                $("div").id("file-list").getText());
+        Assert.assertEquals("File list should not contain files", 0,
+                getFileCount());
     }
 
     @Test
@@ -84,9 +90,6 @@ public class UploadIT extends AbstractUploadIT {
         File tempFile = createTempFile("txt");
 
         getUpload().uploadMultiple(List.of(tempFile, tempFile, tempFile), 10);
-
-        WebElement eventsOutput = getDriver()
-                .findElement(By.id("test-events-output"));
 
         Assert.assertEquals("Upload event order does not match expected",
                 "-succeeded-succeeded-succeeded-finished",
@@ -98,9 +101,6 @@ public class UploadIT extends AbstractUploadIT {
         File tempFile = createTempFile("txt");
 
         getUpload().upload(tempFile);
-
-        WebElement eventsOutput = getDriver()
-                .findElement(By.id("test-events-output"));
 
         Assert.assertEquals("Upload event order does not match expected",
                 "-succeeded-finished", eventsOutput.getText());
@@ -114,9 +114,37 @@ public class UploadIT extends AbstractUploadIT {
 
         WebElement eventsOutput = getDriver()
                 .findElement(By.id("test-events-output"));
-
         Assert.assertEquals("Invalid file was not rejected", "-rejected",
                 eventsOutput.getText());
+
+        WebElement uploadOutput = getDriver().findElement(By.id("test-output"));
+        Assert.assertTrue("Rejected file name was incorrect", uploadOutput
+                .getText().contains("REJECTED:" + invalidFile.getName()));
+    }
+
+    @Test
+    public void uploadFile_removeFile_fileIsRemoved() throws Exception {
+        File tempFile = createTempFile("txt");
+
+        getUpload().upload(tempFile);
+
+        $("button").id("print-file-count").click();
+
+        Assert.assertEquals("File list should contain one file", 1,
+                getFileCount());
+
+        getUpload().removeFile(0);
+
+        $("button").id("print-file-count").click();
+
+        Assert.assertEquals("File list should not contain files", 0,
+                getFileCount());
+
+        Assert.assertEquals("File was not properly removed",
+                "-succeeded-finished-removed", eventsOutput.getText());
+
+        Assert.assertTrue("Removed file name was incorrect", uploadOutput
+                .getText().contains("REMOVED:" + tempFile.getName()));
     }
 
     @Test
@@ -133,6 +161,38 @@ public class UploadIT extends AbstractUploadIT {
         List<LogEntry> logList2 = getLogEntries(Level.SEVERE);
         assertThat("There should have no severe message in the console",
                 logList2.size(), CoreMatchers.is(0));
+    }
+
+    @Test
+    public void slowUpload_waitForUpload_pollsUntilUploadFinishes()
+            throws Exception {
+        Assume.assumeTrue("Current driver does not support Dev Tools",
+                driver instanceof HasDevTools);
+
+        // Fake slow upload to test whether UploadElement.waitForUploads
+        // actually waits for the specified time. UploadElement.waitForUploads
+        // checks whether all files are uploaded. To simulate slow upload, first
+        // add a file without waiting and then mark it as uploading. Then
+        // schedule a script to clear the uploading state after some time to
+        // make waitForUploads resolve. Finally upload another file that waits
+        // for upload to finish.
+        getUpload().setProperty("noAuto", true);
+        getUpload().upload(createTempFile("txt"));
+        executeScript("arguments[0].files[0].uploading = true", getUpload());
+        executeScript(
+                "setTimeout(() => arguments[0].files.forEach(file => { file.uploading = false }), 8000)",
+                getUpload());
+
+        getUpload().upload(createTempFile("txt"), 10);
+
+        $("button").id("print-file-count").click();
+
+        Assert.assertEquals("File list should contain two files", 2,
+                getFileCount());
+    }
+
+    private int getFileCount() {
+        return Integer.parseInt($("div").id("file-count").getText());
     }
 
     private UploadElement getUpload() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.formlayout.tests;
 
 import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,6 +24,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.formlayout.testbench.FormItemElement;
+import com.vaadin.flow.component.formlayout.testbench.FormLayoutElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -46,9 +50,9 @@ public class FormLayoutIT extends AbstractComponentIT {
      * you resize the browser window
      */
     public void custom_responsive_layouting() {
-        WebElement firstLayout = findElement(By.tagName("vaadin-form-layout"));
-        List<WebElement> textFields = firstLayout
-                .findElements(By.tagName("vaadin-text-field"));
+        FormLayoutElement firstLayout = $(FormLayoutElement.class).first();
+        List<TextFieldElement> textFields = firstLayout
+                .$(TextFieldElement.class).all();
         Assert.assertEquals(3, textFields.size());
 
         // 3 columns, all should be horizontally aligned (tolerance of some
@@ -91,15 +95,21 @@ public class FormLayoutIT extends AbstractComponentIT {
                         .equals(info.getText()));
 
         // Fill form: there shouldn't be an error
-        setValue("binder-first-name", "foo");
-        setValue("binder-last-name", "bar");
-        setValue("binder-phone", "123-456-789");
-        setValue("binder-email", "example@foo.bar");
+        FormLayoutElement formLayout = $(FormLayoutElement.class)
+                .id("binder-form-layout");
+
+        formLayout.getFormItemByLabel("First name").getField().sendKeys("foo");
+        formLayout.getFormItemByLabel("Last name").getField().sendKeys("bar");
+        formLayout.$(FormItemElement.class).id("phone-item")
+                .$(TextFieldElement.class).first().setValue("123-456-789");
+        formLayout.getFormItemByLabel("E-mail").getField()
+                .sendKeys("example@foo.bar");
+
         setValue("binder-birth-date", "2003-01-02");
         setChecked("binder-do-not-call", true);
         forceClick(save);
 
-        // waitUntil(driver -> info.getText().startsWith("Saved bean values"));
+        waitUntil(driver -> info.getText().startsWith("Saved bean values"));
 
         Assert.assertTrue(info.getText().contains("foo bar"));
         Assert.assertTrue(info.getText()
@@ -108,7 +118,8 @@ public class FormLayoutIT extends AbstractComponentIT {
         Assert.assertTrue(info.getText().contains(", born on 2003-01-02"));
 
         // Make email address incorrect
-        setValue("binder-email", "abc");
+        setValue("binder-email", "");
+        $("vaadin-text-field").id("binder-email").sendKeys("abc");
         forceClick(save);
 
         waitUntil(driver -> info.getText().startsWith("There are errors"));

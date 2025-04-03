@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,18 +17,18 @@ package com.vaadin.flow.component.radiobutton.tests;
 
 import java.util.List;
 
-import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonElement;
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-radio-button-group-test-demo")
 public class RadioButtonGroupIT extends AbstractComponentIT {
@@ -75,7 +75,7 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
         WebElement group = findElement(By.id("button-group-disabled"));
 
         Assert.assertEquals(Boolean.TRUE.toString(),
-                group.getAttribute("disabled"));
+                group.getDomAttribute("disabled"));
     }
 
     @Test
@@ -90,7 +90,7 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
         WebElement anchor = buttons.get(0).findElement(By.tagName("a"));
 
         Assert.assertEquals("http://example.com/1",
-                anchor.getAttribute("href"));
+                anchor.getDomAttribute("href"));
 
         Assert.assertEquals("Joe", anchor.getText());
 
@@ -109,7 +109,7 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
         WebElement anchor = buttons.get(2).findElement(By.tagName("img"));
 
         Assert.assertEquals("https://vaadin.com/images/vaadin-logo.svg",
-                anchor.getAttribute("src"));
+                anchor.getDomAttribute("src"));
 
         Assert.assertEquals("Bill", buttons.get(2).getText());
     }
@@ -122,7 +122,7 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
                 .findElements(By.tagName("vaadin-radio-button"));
 
         Assert.assertEquals(Boolean.TRUE.toString(),
-                buttons.get(1).getAttribute("disabled"));
+                buttons.get(1).getDomAttribute("disabled"));
 
         scrollToElement(group);
         getCommandExecutor().executeScript("window.scrollBy(0,50);");
@@ -152,9 +152,9 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
                 .findElements(By.tagName("vaadin-radio-button"));
 
         Assert.assertEquals(Boolean.TRUE.toString(),
-                buttons.get(1).getAttribute("disabled"));
+                buttons.get(1).getDomAttribute("disabled"));
         Assert.assertEquals(Boolean.TRUE.toString(),
-                group.getAttribute("readonly"));
+                group.getDomAttribute("readonly"));
 
         scrollToElement(group);
         getCommandExecutor().executeScript("window.scrollBy(0,50);");
@@ -218,10 +218,10 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
         WebElement group = findElement(By.id("button-group-theme-variant"));
         scrollToElement(group);
         Assert.assertEquals(RadioGroupVariant.LUMO_VERTICAL.getVariantName(),
-                group.getAttribute("theme"));
+                group.getDomAttribute("theme"));
 
         findElement(By.id("remove-theme-variant-button")).click();
-        Assert.assertNull(group.getAttribute("theme"));
+        Assert.assertNull(group.getDomAttribute("theme"));
     }
 
     @Test
@@ -237,7 +237,7 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
                 .getHelperComponent();
         Assert.assertEquals("helperComponent", helperComponent.getText());
         Assert.assertEquals("helper-component",
-                helperComponent.getAttribute("id"));
+                helperComponent.getDomAttribute("id"));
     }
 
     @Test
@@ -255,7 +255,7 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
         WebElement helperComponent = groupWithHelperComponent
                 .getHelperComponent();
         Assert.assertEquals("helper-component",
-                helperComponent.getAttribute("id"));
+                helperComponent.getDomAttribute("id"));
 
         $(TestBenchElement.class).id("clear-helper-component-button").click();
         Assert.assertNull(groupWithHelperComponent.getHelperComponent());

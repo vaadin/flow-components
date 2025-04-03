@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,21 +18,28 @@ package com.vaadin.flow.component.datepicker;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
-import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasOverlayClassName;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.data.binder.Result;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
@@ -42,6 +49,11 @@ import net.jcip.annotations.NotThreadSafe;
 public class DatePickerTest {
 
     private static final String OPENED_PROPERTY_NOT_UPDATED = "The server-side \"opened\"-property was not updated synchronously";
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
 
     @Test
     public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
@@ -80,6 +92,18 @@ public class DatePickerTest {
         Assert.assertEquals(LocalDate.of(2018, 4, 25), picker.getValue());
         Assert.assertEquals("2018-04-25",
                 picker.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void emptyValueIsNull() {
+        DatePicker picker = new DatePicker();
+        Assert.assertNull(picker.getEmptyValue());
+    }
+
+    @Test
+    public void setInitialValue_emptyValueIsNull() {
+        DatePicker picker = new DatePicker(LocalDate.of(2018, 4, 25));
+        Assert.assertNull(picker.getEmptyValue());
     }
 
     @Test
@@ -283,6 +307,38 @@ public class DatePickerTest {
     }
 
     @Test
+    public void implementHasAriaLabel() {
+        Assert.assertTrue(
+                "Date picker should support aria-label and aria-labelledby",
+                HasAriaLabel.class.isAssignableFrom(DatePicker.class));
+    }
+
+    @Test
+    public void setAriaLabel() {
+        DatePicker datePicker = new DatePicker();
+
+        datePicker.setAriaLabel("aria-label");
+        Assert.assertTrue(datePicker.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", datePicker.getAriaLabel().get());
+
+        datePicker.setAriaLabel(null);
+        Assert.assertTrue(datePicker.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        DatePicker datePicker = new DatePicker();
+
+        datePicker.setAriaLabelledBy("aria-labelledby");
+        Assert.assertTrue(datePicker.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby",
+                datePicker.getAriaLabelledBy().get());
+
+        datePicker.setAriaLabelledBy(null);
+        Assert.assertTrue(datePicker.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
     public void setPrefix_hasPrefix() {
         DatePicker picker = new DatePicker();
         TestPrefix prefix = new TestPrefix();
@@ -296,6 +352,66 @@ public class DatePickerTest {
     public void setTextAsPrefix_throws() {
         DatePicker picker = new DatePicker();
         picker.setPrefixComponent(new Text("Prefix"));
+    }
+
+    @Test
+    public void unregisterOpenedChangeListenerOnEvent() {
+        var picker = new DatePicker();
+
+        var listenerInvokedCount = new AtomicInteger(0);
+        picker.addOpenedChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+
+        picker.open();
+        picker.close();
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void unregisterInvalidChangeListenerOnEvent() {
+        var picker = new DatePicker();
+
+        var listenerInvokedCount = new AtomicInteger(0);
+        picker.addInvalidChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+
+        picker.setInvalid(true);
+        picker.setInvalid(false);
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void implementsInputField() {
+        var field = new DatePicker();
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<DatePicker, LocalDate>, LocalDate>);
+    }
+
+    @Test
+    public void setFallbackParser_getFallbackParser() {
+        DatePicker datePicker = new DatePicker();
+        Assert.assertNull(datePicker.getFallbackParser());
+
+        SerializableFunction<String, Result<LocalDate>> fallbackParser = (
+                s) -> {
+            if (s.equals("tomorrow")) {
+                return Result.ok(LocalDate.now().plusDays(1));
+            } else {
+                return Result.error("Invalid date format");
+            }
+        };
+
+        datePicker.setFallbackParser(fallbackParser);
+        Assert.assertEquals(fallbackParser, datePicker.getFallbackParser());
+
+        datePicker.setFallbackParser(null);
+        Assert.assertNull(datePicker.getFallbackParser());
     }
 
     @Tag("div")

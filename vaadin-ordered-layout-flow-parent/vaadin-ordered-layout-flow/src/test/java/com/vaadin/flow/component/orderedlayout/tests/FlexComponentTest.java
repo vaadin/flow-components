@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,12 +15,13 @@
  */
 package com.vaadin.flow.component.orderedlayout.tests;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class FlexComponentTest {
 
@@ -51,6 +52,21 @@ public class FlexComponentTest {
         Div div = new Div();
         component.add(div);
         component.setFlexShrink(-1, div);
+    }
+
+    @Test
+    public void setFlexGrow() {
+        TestComponent component = new TestComponent();
+        Div div = new Div();
+        component.add(div);
+
+        component.setFlexGrow(2, div);
+        Assert.assertEquals(2, component.getFlexGrow(div), 0);
+        Assert.assertEquals("2.0", div.getStyle().get("flex-grow"));
+
+        component.setFlexGrow(0, div);
+        Assert.assertEquals(0, component.getFlexGrow(div), 0);
+        Assert.assertEquals("0.0", div.getStyle().get("flex-grow"));
     }
 
     @Tag("test")

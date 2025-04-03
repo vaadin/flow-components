@@ -1,18 +1,34 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.select.tests;
 
 import java.util.List;
 import java.util.function.IntSupplier;
 
-import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
-import com.vaadin.flow.component.select.testbench.SelectElement;
-import com.vaadin.flow.function.SerializablePredicate;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
+
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
+import com.vaadin.flow.component.select.testbench.SelectElement;
+import com.vaadin.flow.function.SerializablePredicate;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 public abstract class AbstractSelectIT extends AbstractComponentIT {
 
@@ -55,7 +71,7 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
         }
 
         private void clear(TestBenchElement input) {
-            String value = input.getAttribute("value");
+            String value = input.getDomProperty("value");
             if (value.length() > 0) {
                 CharSequence[] clearSequence = new CharSequence[value.length()];
                 for (int i = 0; i < clearSequence.length; i++) {
@@ -136,6 +152,17 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
             selectElement.closePopup();
         }
 
+        void placeholderSelected(String expectedItemText) {
+            SelectElement.ItemElement selectedItem = selectElement
+                    .getSelectedItem();
+            Assert.assertEquals("Invalid placeholder text", expectedItemText,
+                    selectedItem.getText());
+            TestBenchElement valueButton = selectElement
+                    .$(TestBenchElement.class).withAttribute("slot", "value")
+                    .first();
+            Assert.assertTrue(valueButton.hasAttribute("placeholder"));
+        }
+
         void noItemSelected() {
             try {
                 SelectElement.ItemElement selectedItem = selectElement
@@ -154,7 +181,7 @@ public abstract class AbstractSelectIT extends AbstractComponentIT {
 
             Assert.assertEquals(
                     "EmptySelectionItem not selected based on value attribute",
-                    "", selectedItem.getAttribute("value"));
+                    "", selectedItem.getDomProperty("value"));
         }
 
         void valueChangeEvent(String value, String oldValue, boolean fromClient,

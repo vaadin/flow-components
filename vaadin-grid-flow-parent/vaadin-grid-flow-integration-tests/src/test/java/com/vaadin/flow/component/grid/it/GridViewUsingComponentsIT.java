@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,16 +15,16 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
-
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -123,7 +123,8 @@ public class GridViewUsingComponentsIT extends AbstractComponentIT {
         return cells.stream()
                 .map(cell -> cell.findElements(By.tagName(componentTag)))
                 .filter(list -> !list.isEmpty()).map(list -> list.get(0))
-                .anyMatch(cell -> text.equals(cell.getAttribute("innerHTML")));
+                .anyMatch(
+                        cell -> text.equals(cell.getDomProperty("innerHTML")));
     }
 
     private void assertComponentRendereredDetails(WebElement grid, int rowIndex,
@@ -144,7 +145,7 @@ public class GridViewUsingComponentsIT extends AbstractComponentIT {
 
         Pattern pattern = Pattern.compile("<span>Name:\\s?([\\w\\s]*)</span>");
         Matcher innerHTML = pattern
-                .matcher(layouts.get(0).getAttribute("innerHTML"));
+                .matcher(layouts.get(0).getDomProperty("innerHTML"));
         Assert.assertTrue(
                 "No result found for " + pattern.toString()
                         + " when searching for name: " + personName,

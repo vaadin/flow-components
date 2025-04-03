@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,12 +15,13 @@
  */
 package com.vaadin.flow.component.login.testbench;
 
+import org.openqa.selenium.StaleElementReferenceException;
+
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
-import org.openqa.selenium.StaleElementReferenceException;
 
 /**
  * TestBench element for the <code>&lt;vaadin-login-overlay&gt;</code> element
@@ -93,7 +94,7 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
             return getTitleComponent().getText();
         }
         return getLoginOverlayWrapper().$(TestBenchElement.class)
-                .attribute("part", "brand").first().$("h1").first()
+                .withAttribute("part", "title").first()
                 // Using textContent, since getText() works unpredictable in
                 // Edge
                 .getPropertyString("textContent");
@@ -104,7 +105,8 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
      */
     public String getDescription() {
         return getLoginOverlayWrapper().$(TestBenchElement.class)
-                .attribute("part", "brand").first().$("p").first().getText();
+                .withAttribute("part", "brand").first().$("p").first()
+                .getText();
     }
 
     /**
@@ -112,7 +114,7 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
      */
     public boolean hasTitleComponent() {
         return getLoginOverlayWrapper().$(TestBenchElement.class)
-                .attribute("slot", "title").exists();
+                .withAttribute("slot", "title").exists();
     }
 
     /**
@@ -124,7 +126,7 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
             return null;
         }
         return getLoginOverlayWrapper().$(TestBenchElement.class)
-                .attribute("slot", "title").first();
+                .withAttribute("slot", "title").first();
     }
 
     @Override

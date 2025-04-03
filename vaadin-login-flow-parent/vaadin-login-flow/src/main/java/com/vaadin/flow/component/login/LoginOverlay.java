@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,20 +15,21 @@
  */
 package com.vaadin.flow.component.login;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
+import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
-import com.vaadin.flow.internal.StateTree;
-import com.vaadin.flow.router.NavigationTrigger;
-import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code <vaadin-login-overlay>} component.
@@ -43,34 +44,28 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-rc1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/login", version = "24.0.0-rc1")
+@NpmPackage(value = "@vaadin/login", version = "24.8.0-alpha8")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
 public class LoginOverlay extends AbstractLogin implements HasStyle {
 
     private Component title;
-
-    private boolean autoAddedToTheUi;
-
-    private Registration afterProgrammaticNavigationListenerRegistration;
+    private LoginOverlayFooter footer;
+    private LoginOverlayCustomFormArea customFormArea;
 
     public LoginOverlay() {
-        initEnsureDetachListener();
+        init();
     }
 
     public LoginOverlay(LoginI18n i18n) {
         super(i18n);
-        initEnsureDetachListener();
+        init();
     }
 
-    private void initEnsureDetachListener() {
-        getElement().addPropertyChangeListener("opened", event -> {
-            if (autoAddedToTheUi && !isOpened()) {
-                getElement().removeFromParent();
-                autoAddedToTheUi = false;
-            }
-        });
+    private void init() {
+        // Initialize auto-add behavior
+        new OverlayAutoAddController<>(this);
     }
 
     /**
@@ -101,48 +96,9 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
      */
     public void setOpened(boolean opened) {
         if (opened) {
-            ensureAttached();
             setEnabled(true);
         }
         getElement().setProperty("opened", opened);
-    }
-
-    private UI getCurrentUI() {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        return ui;
-    }
-
-    private void ensureAttached() {
-        if (getElement().getNode().getParent() == null) {
-            UI ui = getCurrentUI();
-            StateTree.ExecutionRegistration addToUiRegistration = ui
-                    .beforeClientResponse(ui, context -> {
-                        ui.addToModalComponent(this);
-                        autoAddedToTheUi = true;
-                        if (afterProgrammaticNavigationListenerRegistration != null) {
-                            afterProgrammaticNavigationListenerRegistration
-                                    .remove();
-                        }
-                    });
-            if (ui.getSession() != null) {
-                afterProgrammaticNavigationListenerRegistration = ui
-                        .addAfterNavigationListener(event -> {
-                            if (event.getLocationChangeEvent()
-                                    .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
-                                addToUiRegistration.remove();
-                                afterProgrammaticNavigationListenerRegistration
-                                        .remove();
-                            }
-                        });
-            }
-        }
     }
 
     /**
@@ -229,6 +185,146 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     @Synchronize(property = "description", value = "description-changed")
     public String getDescription() {
         return getElement().getProperty("description");
+    }
+
+    /**
+     * Gets the object from which components can be added or removed from the
+     * overlay custom form area. This area is displayed only if there's at least
+     * one component added with {@link LoginOverlayContent#add(Component...)}.
+     *
+     * Fields that are part of custom form area are not automatically submitted
+     * as part of the {@link LoginForm.LoginEvent}, and are not supported when
+     * setting {@code action} as their values will not be part of the login
+     * request.
+     *
+     * @since 24.2
+     * @return the custom form area object
+     */
+    public LoginOverlayCustomFormArea getCustomFormArea() {
+        if (this.customFormArea == null) {
+            this.customFormArea = new LoginOverlayCustomFormArea(this);
+        }
+        return this.customFormArea;
+    }
+
+    /**
+     * Gets the object from which components can be added or removed from the
+     * overlay footer area. This area is displayed only if there's at least one
+     * component added with {@link LoginOverlayContent#add(Component...)}.
+     *
+     * @since 24.2
+     * @return the footer object
+     */
+    public LoginOverlayFooter getFooter() {
+        if (this.footer == null) {
+            this.footer = new LoginOverlayFooter(this);
+        }
+        return this.footer;
+    }
+
+    /**
+     * Class for adding and removing components to the custom form area of the
+     * overlay.
+     */
+    final public static class LoginOverlayCustomFormArea
+            extends LoginOverlayContent {
+        private LoginOverlayCustomFormArea(LoginOverlay overlay) {
+            super("custom-form-area", overlay);
+        }
+    }
+
+    /**
+     * Class for adding and removing components to the footer area of the
+     * overlay.
+     */
+    final public static class LoginOverlayFooter extends LoginOverlayContent {
+        private LoginOverlayFooter(LoginOverlay overlay) {
+            super("footer", overlay);
+        }
+    }
+
+    /**
+     * This class defines the common behavior for adding/removing components to
+     * the custom form area and footer parts.
+     */
+    abstract static class LoginOverlayContent implements Serializable {
+        private final LoginOverlay overlay;
+        private final String slot;
+
+        protected LoginOverlayContent(String slot, LoginOverlay overlay) {
+            this.slot = slot;
+            this.overlay = overlay;
+        }
+
+        /**
+         * Adds the given components to the container. Note: components have to
+         * be added when the overlay is closed.
+         *
+         * @param components
+         *            the components to be added.
+         *
+         * @throws UnsupportedOperationException
+         *             when using this method while overlay is opened
+         */
+        public void add(Component... components) {
+            if (overlay.isOpened()) {
+                throw new UnsupportedOperationException(
+                        "LoginOverlay does not support adding content when opened");
+            }
+
+            Objects.requireNonNull(components, "Components should not be null");
+            for (Component component : components) {
+                Objects.requireNonNull(component,
+                        "Component to add cannot be null");
+                SlotUtils.addToSlot(overlay, slot, component);
+            }
+        }
+
+        /**
+         * Removes the given components from the container. Note: components
+         * have to be removed when the overlay is closed.
+         *
+         * @param components
+         *            the components to be removed.
+         *
+         * @throws UnsupportedOperationException
+         *             when using this method while overlay is opened
+         */
+        public void remove(Component... components) {
+            if (overlay.isOpened()) {
+                throw new UnsupportedOperationException(
+                        "LoginOverlay does not support removing content when opened");
+            }
+
+            Objects.requireNonNull(components, "Components should not be null");
+            for (Component component : components) {
+                Objects.requireNonNull(component,
+                        "Component to remove cannot be null");
+                Element element = component.getElement();
+
+                if (overlay.getElement().equals(element.getParent())
+                        && Objects.equals(element.getAttribute("slot"), slot)) {
+                    element.removeAttribute("slot");
+                    overlay.getElement().removeChild(element);
+                }
+            }
+        }
+
+        /**
+         * Removes all components from the container. Note: components have to
+         * be removed when the overlay is closed.
+         *
+         * @throws UnsupportedOperationException
+         *             when using this method while overlay is opened
+         */
+        public void removeAll() {
+            if (overlay.isOpened()) {
+                throw new UnsupportedOperationException(
+                        "LoginOverlay does not support removing content when opened");
+            }
+
+            SlotUtils.clearSlot(overlay, slot);
+        }
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,18 +22,23 @@ import static org.junit.Assert.assertTrue;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
@@ -42,6 +47,11 @@ import com.vaadin.flow.server.VaadinSession;
 
 public class TimePickerTest {
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
 
     @Test
     public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
@@ -73,6 +83,18 @@ public class TimePickerTest {
 
         picker.getElement().setProperty("value", "07:40");
         assertEquals(LocalTime.of(7, 40), picker.getValue());
+    }
+
+    @Test
+    public void emptyValueIsNull() {
+        TimePicker picker = new TimePicker();
+        Assert.assertNull(picker.getEmptyValue());
+    }
+
+    @Test
+    public void setInitialValue_emptyValueIsNull() {
+        TimePicker picker = new TimePicker(LocalTime.of(5, 30));
+        Assert.assertNull(picker.getEmptyValue());
     }
 
     @Test
@@ -173,7 +195,8 @@ public class TimePickerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testSetStep_lessThan0Ms_throwsException() {
-        TimePicker timePicker=new TimePicker();timePicker.setStep(Duration.ofNanos(500_000));
+        TimePicker timePicker = new TimePicker();
+        timePicker.setStep(Duration.ofNanos(500_000));
     }
 
     @Test
@@ -278,6 +301,61 @@ public class TimePickerTest {
     public void setTextAsPrefix_throws() {
         TimePicker picker = new TimePicker();
         picker.setPrefixComponent(new Text("Prefix"));
+    }
+
+    @Test
+    public void implementHasAriaLabel() {
+        Assert.assertTrue(
+                "Time picker should support aria-label and aria-labelledby",
+                HasAriaLabel.class.isAssignableFrom(TimePicker.class));
+    }
+
+    @Test
+    public void setAriaLabel() {
+        TimePicker timePicker = new TimePicker();
+
+        timePicker.setAriaLabel("aria-label");
+        Assert.assertTrue(timePicker.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", timePicker.getAriaLabel().get());
+
+        timePicker.setAriaLabel(null);
+        Assert.assertTrue(timePicker.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        TimePicker timePicker = new TimePicker();
+
+        timePicker.setAriaLabelledBy("aria-labelledby");
+        Assert.assertTrue(timePicker.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby",
+                timePicker.getAriaLabelledBy().get());
+
+        timePicker.setAriaLabelledBy(null);
+        Assert.assertTrue(timePicker.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void unregisterInvalidChangeListenerOnEvent() {
+        var timePicker = new TimePicker();
+
+        var listenerInvokedCount = new AtomicInteger(0);
+        timePicker.addInvalidChangeListener(e -> {
+            listenerInvokedCount.incrementAndGet();
+            e.unregisterListener();
+        });
+
+        timePicker.setInvalid(true);
+        timePicker.setInvalid(false);
+
+        Assert.assertEquals(1, listenerInvokedCount.get());
+    }
+
+    @Test
+    public void implementsInputField() {
+        TimePicker field = new TimePicker();
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<TimePicker, LocalTime>, LocalTime>);
     }
 
     @Tag("div")

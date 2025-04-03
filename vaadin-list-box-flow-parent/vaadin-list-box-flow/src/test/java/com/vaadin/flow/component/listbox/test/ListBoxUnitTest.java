@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.listbox.test;
 
 import java.util.ArrayList;
@@ -10,6 +25,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.component.shared.HasTooltip;
@@ -177,6 +193,36 @@ public class ListBoxUnitTest {
     @Test
     public void implementsHasTooltip() {
         Assert.assertTrue(listBox instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementsHasAriaLabel() {
+        Assert.assertTrue(listBox instanceof HasAriaLabel);
+    }
+
+    @Test
+    public void setAriaLabel() {
+        listBox.setAriaLabel("aria-label");
+
+        Assert.assertTrue(listBox.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", listBox.getAriaLabel().get());
+
+        listBox.setAriaLabel(null);
+
+        Assert.assertTrue(listBox.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        listBox.setAriaLabelledBy("aria-labelledby");
+
+        Assert.assertTrue(listBox.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby",
+                listBox.getAriaLabelledBy().get());
+
+        listBox.setAriaLabelledBy(null);
+
+        Assert.assertTrue(listBox.getAriaLabelledBy().isEmpty());
     }
 
     private void assertDisabledItem(int index, boolean disabled) {

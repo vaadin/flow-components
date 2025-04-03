@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,23 +15,19 @@
  */
 package com.vaadin.flow.component.button.tests;
 
-import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.internal.StateNode;
-import com.vaadin.flow.internal.nodefeature.ElementAttributeMap;
 
 public class ButtonTest {
 
@@ -228,6 +224,20 @@ public class ButtonTest {
     }
 
     @Test
+    public void testFireClickDisabled() {
+        button = new Button();
+        button.setEnabled(false);
+        AtomicBoolean clicked = new AtomicBoolean(false);
+        button.addClickListener(e -> {
+            clicked.set(true);
+        });
+
+        Assert.assertFalse(clicked.get());
+        button.click();
+        Assert.assertFalse(clicked.get());
+    }
+
+    @Test
     public void addThemeVariant_themeNamesContainsThemeVariant() {
         button = new Button();
         button.addThemeVariants(ButtonVariant.LUMO_SMALL);
@@ -285,7 +295,7 @@ public class ButtonTest {
     }
 
     @Test
-    public void disableOnClick_click_disablesComponent() {
+    public void disableOnClick_click_componentIsDisabled() {
         AtomicBoolean buttonIsEnabled = new AtomicBoolean(true);
 
         button = new Button("foo",
@@ -299,26 +309,10 @@ public class ButtonTest {
     }
 
     @Test
-    public void disableOnClick_serverRevertsDisabled_stateChangesAdded() {
-        button = new Button();
+    public void disableOnClick_clickRevertsDisabled_componentIsEnabled() {
+        button = new Button("foo", event -> event.getSource().setEnabled(true));
         button.setDisableOnClick(true);
-
         button.click();
-
-        StateNode node = button.getElement().getNode();
-        HashMap<String, Serializable> changeTracker = node.getChangeTracker(
-                node.getFeature(ElementAttributeMap.class), () -> null);
-        Assert.assertEquals(
-                "Change should have been set for disabled attribute", "true",
-                changeTracker.get("disabled"));
-        Assert.assertFalse("Button should be disabled", button.isEnabled());
-
-        changeTracker.clear();
-
-        button.addClickListener(event -> event.getSource().setEnabled(true));
-
-        button.click();
-
         Assert.assertTrue("Button should be enabled", button.isEnabled());
     }
 
@@ -326,6 +320,21 @@ public class ButtonTest {
     public void implementsHasTooltip() {
         button = new Button();
         Assert.assertTrue(button instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementHasAriaLabel() {
+        button = new Button();
+        Assert.assertTrue(button instanceof HasAriaLabel);
+    }
+
+    @Test
+    public void setAriaLabel() {
+        button = new Button();
+        button.setAriaLabel("Aria label");
+
+        Assert.assertTrue(button.getAriaLabel().isPresent());
+        Assert.assertEquals("Aria label", button.getAriaLabel().get());
     }
 
     private void assertButtonHasThemeAttribute(String theme) {
@@ -352,9 +361,4 @@ public class ButtonTest {
         Assert.assertTrue(button.isIconAfterText());
         Assert.assertEquals("suffix", icon.getElement().getAttribute("slot"));
     }
-
-    private Element getButtonChild(int index) {
-        return button.getElement().getChild(index);
-    }
-
 }

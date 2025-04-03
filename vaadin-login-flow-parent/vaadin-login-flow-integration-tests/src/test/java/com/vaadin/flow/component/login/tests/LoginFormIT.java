@@ -1,24 +1,38 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.login.tests;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.parallel.BrowserUtil;
 
-public class LoginFormIT extends BasicIT {
+@TestPath("vaadin-login")
+public class LoginFormIT extends AbstractLoginIT {
 
-    @Override
+    @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-login");
-        getDriver().get(url);
+        open();
     }
 
-    @Override
-    public LoginFormElement getLoginForm() {
+    private LoginFormElement getLoginForm() {
         return $(LoginFormElement.class).waitForFirst();
     }
 
@@ -29,10 +43,10 @@ public class LoginFormIT extends BasicIT {
                 () -> login.submit());
     }
 
-    @Override
+    @Test
     public void testDefaults() {
-        super.testDefaults();
         LoginFormElement login = getLoginForm();
+        checkLoginFormDefaults(login);
         checkLoginForm(login.getUsernameField(), login.getPasswordField(),
                 login.getSubmitButton());
     }
@@ -50,8 +64,7 @@ public class LoginFormIT extends BasicIT {
 
     @Test
     public void disabledLogin() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-login") + "/disable-login";
+        String url = getRootURL() + getTestPath() + "/disable-login";
         getDriver().get(url);
         LoginFormElement login = getLoginForm();
         login.getUsernameField().setValue("username");
@@ -61,7 +74,7 @@ public class LoginFormIT extends BasicIT {
         Assert.assertTrue("Login notification was shown",
                 $("div").id("info").getText().isEmpty());
 
-        sendKeys(login.getPasswordField(), Keys.ENTER);
+        login.getPasswordField().sendKeys(Keys.ENTER);
         Assert.assertTrue("Login notification was shown",
                 $("div").id("info").getText().isEmpty());
 
@@ -71,21 +84,12 @@ public class LoginFormIT extends BasicIT {
         checkForgotPassword(login);
     }
 
-    private void sendKeys(TestBenchElement textField, CharSequence... keys) {
-        if (BrowserUtil.isEdge(getDesiredCapabilities())
-                || BrowserUtil.isFirefox(getDesiredCapabilities())) {
-            // Firefox and Edge don't send keys to the slotted input
-            textField = textField.$("input").attribute("slot", "input").first();
-        }
-        textField.sendKeys(keys);
-    }
-
     @Test
     public void passwordEnterKeyLogin() {
         LoginFormElement login = getLoginForm();
         checkSuccessfulLogin(login.getUsernameField(), login.getPasswordField(),
                 () -> {
-                    sendKeys(login.getPasswordField(), Keys.ENTER);
+                    login.getPasswordField().sendKeys(Keys.ENTER);
                 });
     }
 
@@ -94,7 +98,7 @@ public class LoginFormIT extends BasicIT {
         LoginFormElement login = getLoginForm();
         checkSuccessfulLogin(login.getUsernameField(), login.getPasswordField(),
                 () -> {
-                    sendKeys(login.getUsernameField(), Keys.ENTER);
+                    login.getUsernameField().sendKeys(Keys.ENTER);
                 });
     }
 
@@ -131,8 +135,7 @@ public class LoginFormIT extends BasicIT {
 
     @Test
     public void actionLogin() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-login") + "/action";
+        String url = getRootURL() + getTestPath() + "/action";
         getDriver().get(url);
         LoginFormElement login = getLoginForm();
 
@@ -141,5 +144,15 @@ public class LoginFormIT extends BasicIT {
         login.submit();
         Assert.assertTrue("Redirect didn't happened on login",
                 getDriver().getCurrentUrl().endsWith("process-login-here"));
+    }
+
+    @Test
+    public void testNoForgotPasswordButton() {
+        String url = getRootURL() + getTestPath() + "/no-forgot-password";
+        getDriver().get(url);
+
+        LoginFormElement login = getLoginForm();
+        Assert.assertTrue(
+                login.getForgotPasswordButton().hasAttribute("hidden"));
     }
 }

@@ -1,12 +1,14 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.map.configuration;
+
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
@@ -16,8 +18,7 @@ import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.geometry.Point;
 import com.vaadin.flow.component.map.configuration.geometry.SimpleGeometry;
 import com.vaadin.flow.component.map.configuration.style.Style;
-
-import java.util.Objects;
+import com.vaadin.flow.component.map.configuration.style.TextStyle;
 
 /**
  * A geographic feature to be displayed on a map. A feature represents a point
@@ -27,7 +28,7 @@ public abstract class Feature extends AbstractConfigurationObject {
 
     private SimpleGeometry geometry;
     private Style style;
-    private String label;
+    private String text;
     private boolean draggable;
 
     @Override
@@ -85,24 +86,62 @@ public abstract class Feature extends AbstractConfigurationObject {
     }
 
     /**
-     * The label that should be displayed next to the feature.
+     * The text that should be displayed next to the feature.
      *
-     * @return the label string
+     * @return the text string
      */
-    public String getLabel() {
-        return label;
+    public String getText() {
+        return text;
     }
 
     /**
-     * Sets the label that should be displayed next to the feature. Set to
-     * {@code null} to remove the label.
+     * Sets the text that should be displayed next to the feature. Set to
+     * {@code null} to remove the text.
      *
-     * @param label
-     *            the new label string, or {@code null} to remove the label
+     * @param text
+     *            the new text string, or {@code null} to remove the text
      */
-    public void setLabel(String label) {
-        this.label = label;
+    public void setText(String text) {
+        this.text = text;
         markAsDirty();
+    }
+
+    /**
+     * Returns the custom text style for rendering this feature's
+     * {@link #getText()}. Returns {@code null} by default, which means the text
+     * is rendered with a default text style.
+     *
+     * @return the custom text style, or {@code null} if no custom text style
+     *         has been set
+     */
+    public TextStyle getTextStyle() {
+        return style != null ? style.getTextStyle() : null;
+    }
+
+    /**
+     * Sets a custom text style for rendering this feature's {@link #getText()}.
+     * By default, a feature has no custom text style, which means the text is
+     * rendered with a default text style. Can be set to {@code null} to remove
+     * the custom text style.
+     * <p>
+     * This is a convenience method for {@link Style#setTextStyle(TextStyle)}.
+     * If this feature does not have a style instance yet, an empty one is
+     * created.
+     *
+     * @param textStyle
+     *            the new custom text style, or {@code null} to remove the
+     *            custom text style
+     */
+    public void setTextStyle(TextStyle textStyle) {
+        if (style == null && textStyle == null) {
+            return;
+        }
+
+        if (style == null) {
+            setStyle(new Style());
+        }
+
+        style.setTextStyle(textStyle);
     }
 
     /**

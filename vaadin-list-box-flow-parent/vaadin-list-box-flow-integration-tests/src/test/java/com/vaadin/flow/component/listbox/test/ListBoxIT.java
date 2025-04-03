@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,12 +15,11 @@
  */
 package com.vaadin.flow.component.listbox.test;
 
+import static org.hamcrest.CoreMatchers.containsString;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
-
-import com.vaadin.flow.component.listbox.testbench.ListBoxElement;
-import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,9 +27,9 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.listbox.testbench.ListBoxElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
-
-import static org.hamcrest.CoreMatchers.containsString;
 
 /**
  * Integration tests for the {@link ListBoxViewDemoPage}.
@@ -130,8 +129,8 @@ public class ListBoxIT extends AbstractComponentIT {
     }
 
     private void assertItem(WebElement item, String itemName) {
-        Assert.assertEquals("Items should be enabled in the beginning", null,
-                item.getAttribute("disabled"));
+        Assert.assertNull("Items should be enabled in the beginning",
+                item.getDomAttribute("disabled"));
 
         List<WebElement> labels = item.findElements(By.tagName("label"));
         String nameText = labels.get(0).getText();
@@ -157,7 +156,7 @@ public class ListBoxIT extends AbstractComponentIT {
 
         Assert.assertEquals(
                 "Item should be disabled after clicking the button enough times",
-                "true", item.getAttribute("disabled"));
+                "true", item.getDomAttribute("disabled"));
     }
 
     @Test

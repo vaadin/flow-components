@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.menubar.tests;
 
 import java.util.List;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -24,9 +25,9 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-menu-bar/menu-bar-test")
 public class MenuBarPageIT extends AbstractComponentIT {
@@ -56,14 +57,16 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void clickRootButton_subMenuRenders() {
         menuBar.getButtons().get(0).click();
         verifyOpened();
-        assertOverlayContents("sub item 1", "<p>sub item 2</p>");
+        assertOverlayContents("sub item 1", "<p>sub item 2</p>",
+                "<p>sub item 3</p>");
     }
 
     @Test
     public void clickRootItem_subMenuRenders() {
         menuBar.getButtons().get(0).$("vaadin-menu-bar-item").first().click();
         verifyOpened();
-        assertOverlayContents("sub item 1", "<p>sub item 2</p>");
+        assertOverlayContents("sub item 1", "<p>sub item 2</p>",
+                "<p>sub item 3</p>");
     }
 
     @Test
@@ -381,12 +384,12 @@ public class MenuBarPageIT extends AbstractComponentIT {
         TestBenchElement overflowButton = menuBar.getOverflowButton();
 
         Assert.assertEquals("More options",
-                overflowButton.getAttribute("aria-label"));
+                overflowButton.getDomAttribute("aria-label"));
 
         click("set-i18n");
 
         Assert.assertEquals("more-options",
-                overflowButton.getAttribute("aria-label"));
+                overflowButton.getDomAttribute("aria-label"));
     }
 
     @Test
@@ -398,7 +401,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         TestBenchElement overflowButton = menuBar.getOverflowButton();
 
         Assert.assertEquals("more-options",
-                overflowButton.getAttribute("aria-label"));
+                overflowButton.getDomAttribute("aria-label"));
 
         click("toggle-attached");
         click("toggle-attached");
@@ -407,7 +410,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         overflowButton = menuBar.getOverflowButton();
 
         Assert.assertEquals("more-options",
-                overflowButton.getAttribute("aria-label"));
+                overflowButton.getDomAttribute("aria-label"));
     }
 
     @Test
@@ -422,7 +425,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void toggleMenuBarTheme_themeIsToggled() {
         Assert.assertFalse(menuBar.hasAttribute("theme"));
         click("toggle-theme");
-        Assert.assertEquals(menuBar.getAttribute("theme"),
+        Assert.assertEquals(menuBar.getDomAttribute("theme"),
                 MenuBarTestPage.MENU_BAR_THEME);
         click("toggle-theme");
         Assert.assertFalse(menuBar.hasAttribute("theme"));
@@ -434,11 +437,168 @@ public class MenuBarPageIT extends AbstractComponentIT {
         Assert.assertFalse(menuButton1.hasAttribute("theme"));
         click("toggle-item-1-theme");
         menuButton1 = menuBar.getButtons().get(0);
-        Assert.assertEquals(menuButton1.getAttribute("theme"),
+        Assert.assertEquals(menuButton1.getDomAttribute("theme"),
                 MenuBarTestPage.MENU_ITEM_THEME);
         click("toggle-item-1-theme");
         menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("theme"));
+    }
+
+    @Test
+    public void toggleMenuItemClassName_classNameIsToggled() {
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("class"));
+        click("toggle-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(Set.of(MenuBarTestPage.MENU_ITEM_FIRST_CLASS_NAME),
+                menuButton1.getClassNames());
+        click("toggle-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(Set.of(), menuButton1.getClassNames());
+    }
+
+    @Test
+    public void setMenuItemClassName_classNameIsSet() {
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("class"));
+        click("toggle-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(Set.of(MenuBarTestPage.MENU_ITEM_FIRST_CLASS_NAME),
+                menuButton1.getClassNames());
+        click("set-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(Set.of(MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME),
+                menuButton1.getClassNames());
+    }
+
+    @Test
+    public void toggleMenuItemClassNameWithSetClassName_classNameIsToggled() {
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("class"));
+        click("set-unset-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(Set.of(MenuBarTestPage.MENU_ITEM_FIRST_CLASS_NAME),
+                menuButton1.getClassNames());
+        click("set-unset-item1-class-name");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(Set.of(), menuButton1.getClassNames());
+    }
+
+    @Test
+    public void toggleMultipleItemClassName_classNamesAreToggled() {
+        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertFalse(menuButton1.hasAttribute("class"));
+        click("add-remove-multiple-classes");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(
+                Set.of(MenuBarTestPage.MENU_ITEM_FIRST_CLASS_NAME,
+                        MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME),
+                menuButton1.getClassNames());
+        click("add-remove-multiple-classes");
+        menuButton1 = menuBar.getButtons().get(0);
+        Assert.assertEquals(Set.of(), menuButton1.getClassNames());
+    }
+
+    @Test
+    public void subMenuHasClassName_callRemoveClassName_classNameIsRemoved() {
+        verifySubMenuItemClassNames(true,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+
+        click("remove-sub-item-class-name");
+        verifyClosed();
+        verifySubMenuItemClassNames(false,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+    }
+
+    @Test
+    public void subMenuItem_toggleMultipleClassNames_classNamesAreToggled() {
+        click("add-second-sub-item-class-name");
+        verifyClosed();
+        verifySubMenuItemClassNames(true,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME,
+                MenuBarTestPage.SUB_ITEM_SECOND_CLASS_NAME);
+
+        click("add-remove-multiple-sub-item-classes");
+        verifyClosed();
+        verifySubMenuItemClassNames(false,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME,
+                MenuBarTestPage.SUB_ITEM_SECOND_CLASS_NAME);
+
+        click("add-remove-multiple-sub-item-classes");
+        verifyClosed();
+        verifySubMenuItemClassNames(true,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME,
+                MenuBarTestPage.SUB_ITEM_SECOND_CLASS_NAME);
+    }
+
+    @Test
+    public void subMenuItem_toggleSingleClassName_classNameIsToggled() {
+        click("toggle-sub-item-class-name");
+        verifyClosed();
+        verifySubMenuItemClassNames(false,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+
+        click("toggle-sub-item-class-name");
+        verifyClosed();
+        verifySubMenuItemClassNames(true,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+    }
+
+    @Test
+    public void subMenuItem_classNamesAreToggleWithSet_classNamesAreToggled() {
+        click("set-unset-sub-item-class-name");
+        verifyClosed();
+        verifySubMenuItemClassNames(false,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+
+        click("set-unset-sub-item-class-name");
+        verifyClosed();
+        verifySubMenuItemClassNames(true,
+                MenuBarTestPage.SUB_ITEM_FIRST_CLASS_NAME);
+    }
+
+    @Test
+    public void menuItemWithClassNameInOverflow_changeClassName_classNameIsChanged() {
+        click("set-width");
+        click("set-item2-class-name");
+        waitForResizeObserver();
+        menuBar.getOverflowButton().click();
+        click("change-item2-class-name");
+        menuBar.getOverflowButton().click();
+        TestBenchElement menuItem = menuBar.getSubMenuItems().get(0);
+        Assert.assertEquals(Set.of(MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME),
+                menuItem.getClassNames());
+    }
+
+    @Test
+    public void menuItemWithClassNameInOverflow_removeClassName_classNameIsRemoved() {
+        click("set-width");
+        click("set-item2-class-name");
+        waitForResizeObserver();
+        menuBar.getOverflowButton().click();
+        click("remove-item2-class-name");
+        menuBar.getOverflowButton().click();
+        TestBenchElement menuItem = menuBar.getSubMenuItems().get(0);
+
+        Assert.assertEquals(Set.of(), menuItem.getClassNames());
+    }
+
+    @Test
+    public void menuItemWithClassNameInOverflow_menuItemLeavesOverflow_classNameCanBeChanged() {
+        click("set-width");
+        click("set-item2-class-name");
+        waitForResizeObserver();
+        menuBar.getOverflowButton().click();
+        click("reset-width");
+        waitForResizeObserver();
+        click("change-item2-class-name");
+        TestBenchElement menuItem = menuBar.getButtons().get(1);
+        Assert.assertEquals(Set.of(MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME),
+                menuItem.getClassNames());
+
+        click("remove-item2-class-name");
+        menuItem = menuBar.getButtons().get(1);
+        Assert.assertEquals(Set.of(), menuItem.getClassNames());
     }
 
     @Test
@@ -447,7 +607,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("toggle-item-1-visibility");
         click("toggle-item-1-visibility");
         TestBenchElement menuButton1 = menuBar.getButtons().get(0);
-        Assert.assertEquals(menuButton1.getAttribute("theme"),
+        Assert.assertEquals(menuButton1.getDomAttribute("theme"),
                 MenuBarTestPage.MENU_ITEM_THEME);
     }
 
@@ -472,7 +632,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
         menuBar.getButtons().get(0).click();
         Assert.assertEquals(
-                menuBar.getSubMenuItems().get(1).getAttribute("theme"),
+                menuBar.getSubMenuItems().get(1).getDomAttribute("theme"),
                 MenuBarTestPage.SUB_ITEM_THEME);
 
         click("toggle-sub-theme");
@@ -490,7 +650,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
         TestBenchElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertEquals(MenuBarTestPage.MENU_ITEM_THEME,
-                menuButton1.getAttribute("theme"));
+                menuButton1.getDomAttribute("theme"));
     }
 
     @After
@@ -510,7 +670,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
     private void assertButtonContents(String... expectedInnerHTML) {
         String[] contents = menuBar.getButtons().stream().map(button -> button
-                .$("vaadin-menu-bar-item").first().getAttribute("innerHTML"))
+                .$("vaadin-menu-bar-item").first().getDomProperty("innerHTML"))
                 .toArray(String[]::new);
         Assert.assertArrayEquals(expectedInnerHTML, contents);
     }
@@ -552,7 +712,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
     private String[] getOverlayMenuItemContents(
             List<TestBenchElement> menuItems) {
-        return menuItems.stream().map(item -> item.getAttribute("innerHTML"))
+        return menuItems.stream().map(item -> item.getDomProperty("innerHTML"))
                 .toArray(String[]::new);
     }
 
@@ -575,5 +735,20 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
     public void verifyOpened() {
         waitForElementPresent(By.tagName(OVERLAY_TAG));
+    }
+
+    private void verifySubMenuItemClassNames(boolean containsClassNames,
+            String... classNames) {
+        openSubSubMenu();
+        verifyOpened();
+        TestBenchElement subMenuItem = menuBar.getSubMenuItems().get(2);
+        var subMenuItemClassNames = subMenuItem.getClassNames();
+        for (String className : classNames) {
+            if (containsClassNames) {
+                Assert.assertTrue(subMenuItemClassNames.contains(className));
+            } else {
+                Assert.assertFalse(subMenuItemClassNames.contains(className));
+            }
+        }
     }
 }

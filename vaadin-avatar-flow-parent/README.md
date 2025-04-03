@@ -1,6 +1,6 @@
 # Avatar component for Vaadin Flow
 
-This project is the Component wrapper implementation of [`<vaadin-avatar>`](https://github.com/vaadin/vaadin-avatar)
+This project is the Component wrapper implementation of [`<vaadin-avatar>`](https://github.com/vaadin/web-components/tree/main/packages/avatar)
 element for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Using the component in a Flow application

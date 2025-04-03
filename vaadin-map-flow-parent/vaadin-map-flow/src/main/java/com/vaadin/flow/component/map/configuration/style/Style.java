@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.map.configuration.style;
@@ -68,7 +68,7 @@ public class Style extends AbstractConfigurationObject {
     }
 
     /**
-     * The text style used for rendering texts, such as feature labels. This is
+     * The text style used for rendering texts, such as feature texts. This is
      * {@code null} by default, which means that a default text style will be
      * used instead.
      *
@@ -82,7 +82,7 @@ public class Style extends AbstractConfigurationObject {
     }
 
     /**
-     * Sets the text style to use for rendering texts, such as feature labels.
+     * Sets the text style to use for rendering texts, such as feature texts.
      * Set this to {@code null} to clear the text style and use a default text
      * style instead.
      *

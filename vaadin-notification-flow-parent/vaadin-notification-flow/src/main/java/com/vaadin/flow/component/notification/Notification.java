@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -37,14 +37,13 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
-import com.vaadin.flow.internal.HtmlUtils;
-import com.vaadin.flow.internal.StateTree;
-import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -54,9 +53,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-notification")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-rc1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/notification", version = "24.0.0-rc1")
+@NpmPackage(value = "@vaadin/notification", version = "24.8.0-alpha8")
 @JsModule("@vaadin/notification/src/vaadin-notification.js")
 @JsModule("./flow-component-renderer.js")
 public class Notification extends Component implements HasComponents, HasStyle,
@@ -64,16 +63,21 @@ public class Notification extends Component implements HasComponents, HasStyle,
 
     private static final int DEFAULT_DURATION = 5000;
     private static final Position DEFAULT_POSITION = Position.BOTTOM_START;
-
-    private boolean autoAddedToTheUi = false;
-
-    private Registration afterProgrammaticNavigationListenerRegistration;
+    private static final String OPENED_PROPERTY = "opened";
 
     /**
      * Enumeration of all available positions for notification component
      */
     public enum Position {
-        TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE, BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH;
+        TOP_STRETCH,
+        TOP_START,
+        TOP_CENTER,
+        TOP_END,
+        MIDDLE,
+        BOTTOM_START,
+        BOTTOM_CENTER,
+        BOTTOM_END,
+        BOTTOM_STRETCH;
 
         private final String clientName;
 
@@ -197,6 +201,31 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     /**
+     * Creates a Notification with given text String, duration, position and
+     * assertive state.
+     * <P>
+     * Set to {@code 0} or a negative number to disable the notification
+     * auto-closing.
+     *
+     * @param text
+     *            the text of the notification
+     * @param duration
+     *            the duration in milliseconds to show the notification
+     * @param position
+     *            the position of the notification. Valid enumerate values are
+     *            TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE,
+     *            BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH
+     * @param assertive
+     *            whether the notification should have {@code aria-live}
+     *            attribute set to {@code assertive} or {@code polite}
+     */
+    public Notification(String text, int duration, Position position,
+            boolean assertive) {
+        this(text, duration, position);
+        setAssertive(assertive);
+    }
+
+    /**
      * Creates a notification with given components inside.
      * <p>
      * Note: To mix text and child components in a component that also supports
@@ -212,18 +241,37 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     private void initBaseElementsAndListeners() {
-        getElement().addEventListener("opened-changed",
-                event -> removeAutoAdded());
+        getElement().addPropertyChangeListener(OPENED_PROPERTY,
+                event -> fireEvent(
+                        new OpenedChangeEvent(this, event.isUserOriginated())));
+
+        // Initialize auto add behavior
+        new OverlayAutoAddController<>(this);
     }
 
     /**
-     * Removes the notification from its parent if it was added automatically.
+     * Shows a notification in the current page with given text, duration,
+     * position and assertive state.
+     *
+     * @param text
+     *            the text of the Notification
+     * @param duration
+     *            the duration in milliseconds to show the notification
+     * @param position
+     *            the position of the notification. Valid enumerate values are
+     *            TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE,
+     *            BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH
+     * @param assertive
+     *            whether the notification should have {@code aria-live}
+     *            attribute set to {@code assertive} or {@code polite}
+     * @return the notification
      */
-    private void removeAutoAdded() {
-        if (autoAddedToTheUi && !isOpened()) {
-            autoAddedToTheUi = false;
-            getElement().removeFromParent();
-        }
+    public static Notification show(String text, int duration,
+            Position position, boolean assertive) {
+        Notification notification = new Notification(text, duration, position,
+                assertive);
+        notification.open();
+        return notification;
     }
 
     /**
@@ -242,9 +290,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     public static Notification show(String text, int duration,
             Position position) {
-        Notification notification = new Notification(text, duration, position);
-        notification.open();
-        return notification;
+        return show(text, duration, position, false);
     }
 
     /**
@@ -275,8 +321,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     public void setText(String text) {
         removeAll();
-        this.getElement().setProperty("text",
-                text != null ? HtmlUtils.escape(text) : null);
+        this.getElement().setProperty("text", text);
         this.getElement().callJsFunction("requestContentUpdate");
     }
 
@@ -393,38 +438,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      *            it
      */
     public void setOpened(boolean opened) {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        StateTree.ExecutionRegistration addToUiRegistration = ui
-                .beforeClientResponse(ui, context -> {
-                    if (isOpened()
-                            && getElement().getNode().getParent() == null) {
-                        ui.addToModalComponent(this);
-                        autoAddedToTheUi = true;
-                    }
-                    if (afterProgrammaticNavigationListenerRegistration != null) {
-                        afterProgrammaticNavigationListenerRegistration
-                                .remove();
-                    }
-                });
-        if (ui.getSession() != null) {
-            afterProgrammaticNavigationListenerRegistration = ui
-                    .addAfterNavigationListener(event -> {
-                        if (event.getLocationChangeEvent()
-                                .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
-                            addToUiRegistration.remove();
-                            afterProgrammaticNavigationListenerRegistration
-                                    .remove();
-                        }
-                    });
-        }
-        getElement().setProperty("opened", opened);
+        getElement().setProperty(OPENED_PROPERTY, opened);
     }
 
     /**
@@ -435,9 +449,9 @@ public class Notification extends Component implements HasComponents, HasStyle,
      *
      * @return the {@code opened} property from the webcomponent
      */
-    @Synchronize(property = "opened", value = "opened-changed")
+    @Synchronize(property = "opened", value = "opened-changed", allowInert = true)
     public boolean isOpened() {
-        return getElement().getProperty("opened", false);
+        return getElement().getProperty(OPENED_PROPERTY, false);
     }
 
     /**
@@ -467,9 +481,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
-        return getElement().addPropertyChangeListener("opened",
-                event -> listener.onComponentEvent(
-                        new OpenedChangeEvent(this, event.isUserOriginated())));
+        return addListener(OpenedChangeEvent.class, listener);
     }
 
     /**
@@ -496,6 +508,29 @@ public class Notification extends Component implements HasComponents, HasStyle,
      */
     public int getDuration() {
         return getElement().getProperty("duration", 0);
+    }
+
+    /**
+     * When true, the notification card has {@code aria-live} attribute set to
+     * {@code assertive} instead of {@code polite}. This makes screen readers
+     * announce the notification content immediately when it appears.
+     *
+     * @param assertive
+     *            the value to set
+     */
+    public void setAssertive(boolean assertive) {
+        getElement().setProperty("assertive", assertive);
+    }
+
+    /**
+     * When true, the notification card has {@code aria-live} attribute set to
+     * {@code assertive} instead of {@code polite}. This makes screen readers
+     * announce the notification content immediately when it appears.
+     *
+     * @return the {@code assertive} property from the webcomponent
+     */
+    public boolean isAssertive() {
+        return getElement().getProperty("assertive", false);
     }
 
     /**
@@ -529,19 +564,25 @@ public class Notification extends Component implements HasComponents, HasStyle,
     }
 
     private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
-    private ElementDetachListener childDetachListener = e -> {
-        var child = e.getSource();
-        var childDetachedFromContainer = !getElement().getChildren().anyMatch(
-                containerChild -> Objects.equals(child, containerChild));
+    // Must not use lambda here as that would break serialization. See
+    // https://github.com/vaadin/flow-components/issues/5597
+    private ElementDetachListener childDetachListener = new ElementDetachListener() {
+        @Override
+        public void onDetach(ElementDetachEvent e) {
+            var child = e.getSource();
+            var childDetachedFromContainer = !getElement().getChildren()
+                    .anyMatch(containerChild -> Objects.equals(child,
+                            containerChild));
 
-        if (childDetachedFromContainer) {
-            // The child was removed from the notification
+            if (childDetachedFromContainer) {
+                // The child was removed from the notification
 
-            // Remove the registration for the child detach listener
-            childDetachListenerMap.get(child).remove();
-            childDetachListenerMap.remove(child);
+                // Remove the registration for the child detach listener
+                childDetachListenerMap.get(child).remove();
+                childDetachListenerMap.remove(child);
 
-            this.configureComponentRenderer();
+                configureComponentRenderer();
+            }
         }
     };
 
@@ -594,7 +635,6 @@ public class Notification extends Component implements HasComponents, HasStyle,
             // itself when its parent, for example a dialog, gets attached
             // again.
             setOpened(false);
-            removeAutoAdded();
         });
     }
 

@@ -1,6 +1,5 @@
-
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import com.vaadin.flow.component.UI;
@@ -35,12 +35,14 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelMap;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
+import elemental.json.JsonObject;
 
 /**
  * LitRenderer is a {@link Renderer} that uses a Lit-based template literal to
@@ -79,17 +81,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     private LitRenderer(String templateExpression) {
         this.templateExpression = templateExpression;
 
-        int litRendererCount = 0;
-        if (UI.getCurrent() != null) {
-            // Generate a unique (in scope of the UI) namespace for the renderer
-            // properties.
-            litRendererCount = UI.getCurrent().getElement()
-                    .getProperty("__litRendererCount", 0);
-            UI.getCurrent().getElement().setProperty("__litRendererCount",
-                    litRendererCount + 1);
-
-        }
-        propertyNamespace = "lr_" + litRendererCount + "_";
+        propertyNamespace = String.format("lr_%s_",
+                UUID.randomUUID().toString().replace("-", "").substring(0, 16));
     }
 
     LitRenderer() {
@@ -118,7 +111,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * {@code
      * // Prints the `name` property of a person
      * LitRenderer.<Person> of("<div>Name: ${item.name}</div>")
-     *          .withProperty("name", Person::getName);
+     *         .withProperty("name", Person::getName);
      *
      * // Prints the index of the item inside a repeating list
      * LitRenderer.of("${index}");
@@ -160,13 +153,21 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         };
     }
 
+    private UI getElementUI(Element element) {
+        return ((StateTree) element.getNode().getOwner()).getUI();
+    }
+
     private void setElementRenderer(Element container, String rendererName,
             String templateExpression, ReturnChannelRegistration returnChannel,
             JsonArray clientCallablesArray, String propertyNamespace) {
+        assert container.getNode().isAttached() : "Container must be attached";
+
+        String appId = getElementUI(container).getInternals().getAppId();
+
         container.executeJs(
-                "window.Vaadin.setLitRenderer(this, $0, $1, $2, $3, $4)",
+                "window.Vaadin.setLitRenderer(this, $0, $1, $2, $3, $4, $5)",
                 rendererName, templateExpression, returnChannel,
-                clientCallablesArray, propertyNamespace);
+                clientCallablesArray, propertyNamespace, appId);
     }
 
     /**
@@ -201,8 +202,9 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                     SerializableBiConsumer<SOURCE, JsonArray> handler = clientCallables
                             .get(handlerName);
                     SOURCE item = keyMapper.get(itemKey);
-
-                    handler.accept(item, args);
+                    if (item != null) {
+                        handler.accept(item, args);
+                    }
                 });
 
         JsonArray clientCallablesArray = JsonUtils
@@ -223,8 +225,10 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                     returnChannel, clientCallablesArray, propertyNamespace);
         }));
         // Call once initially
-        setElementRenderer(container, rendererName, getTemplateExpression(),
-                returnChannel, clientCallablesArray, propertyNamespace);
+        if (container.getNode().isAttached()) {
+            setElementRenderer(container, rendererName, getTemplateExpression(),
+                    returnChannel, clientCallablesArray, propertyNamespace);
+        }
 
         // Get the renderer function cleared when the LitRenderer is
         // unregistered
@@ -236,17 +240,23 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     }
 
     private DataGenerator<SOURCE> createDataGenerator() {
-        return (item, jsonObject) -> {
-            valueProviders.forEach((key, provider) -> {
-                jsonObject.put(
-                        // Prefix the property name with a LitRenderer
-                        // instance specific namespace to avoid property
-                        // name clashes.
-                        // Fixes https://github.com/vaadin/flow/issues/8629
-                        // in LitRenderer
-                        propertyNamespace + key,
-                        JsonSerializer.toJson(provider.apply(item)));
-            });
+        // Use an anonymous class instead of Lambda to prevent potential
+        // deserialization issues when used with Grid
+        // see https://github.com/vaadin/flow-components/issues/6256
+        return new DataGenerator<SOURCE>() {
+            @Override
+            public void generateData(SOURCE item, JsonObject jsonObject) {
+                valueProviders.forEach((key, provider) -> {
+                    jsonObject.put(
+                            // Prefix the property name with a LitRenderer
+                            // instance specific namespace to avoid property
+                            // name clashes.
+                            // Fixes https://github.com/vaadin/flow/issues/8629
+                            // in LitRenderer
+                            propertyNamespace + key,
+                            JsonSerializer.toJson(provider.apply(item)));
+                });
+            }
         };
     }
 
@@ -261,17 +271,20 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * {@code
      * // Regular property
      * LitRenderer.<Person> of("<div>Name: ${item.name}</div>")
-     *          .withProperty("name", Person::getName);
+     *         .withProperty("name", Person::getName);
      *
-     * // Property that uses a bean. Note that in this case the entire "Address" object will be sent to the template.
-     * // Note that even properties of the bean which are not used in the template are sent to the client, so use
+     * // Property that uses a bean. Note that in this case the entire "Address"
+     * // object will be sent to the template.
+     * // Note that even properties of the bean which are not used in the
+     * // template are sent to the client, so use
      * // this feature with caution.
      * LitRenderer.<Person> of("<span>Street: ${item.address.street}</span>")
-     *          .withProperty("address", Person::getAddress);
+     *         .withProperty("address", Person::getAddress);
      *
      * // In this case only the street field inside the Address object is sent
      * LitRenderer.<Person> of("<span>Street: ${item.street}</span>")
-     *          .withProperty("street", person -> person.getAddress().getStreet());
+     *         .withProperty("street",
+     *                 person -> person.getAddress().getStreet());
      * }
      * </pre>
      *
@@ -304,7 +317,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * {@code
      * // Standard event
      * LitRenderer.of("<button @click=${handleClick}>Click me</button>")
-     *          .withFunction("handleClick", object -> doSomething());
+     *         .withFunction("handleClick", object -> doSomething());
      * }
      * </pre>
      *
@@ -341,13 +354,13 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * {@code
      * // Standard event
      * LitRenderer.of("<button @click=${handleClick}>Click me</button>")
-     *          .withFunction("handleClick", item -> doSomething());
+     *         .withFunction("handleClick", item -> doSomething());
      *
      * // Function invocation with arguments
      * LitRenderer.of("<input @keypress=${(e) => handleKeyPress(e.key)}>")
-     *          .withFunction("handleKeyPress", (item, args) -> {
-     *              System.out.println("Pressed key: " + args.getString(0));
-     *          });
+     *         .withFunction("handleKeyPress", (item, args) -> {
+     *             System.out.println("Pressed key: " + args.getString(0));
+     *         });
      * }
      * </pre>
      *

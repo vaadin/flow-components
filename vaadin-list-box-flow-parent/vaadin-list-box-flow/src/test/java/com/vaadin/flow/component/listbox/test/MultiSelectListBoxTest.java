@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -31,11 +31,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
@@ -330,6 +332,103 @@ public class MultiSelectListBoxTest {
     @Test
     public void implementsHasTooltip() {
         Assert.assertTrue(listBox instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementsHasAriaLabel() {
+        Assert.assertTrue(listBox instanceof HasAriaLabel);
+    }
+
+    @Test
+    public void setAriaLabel() {
+        listBox.setAriaLabel("aria-label");
+
+        Assert.assertTrue(listBox.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", listBox.getAriaLabel().get());
+
+        listBox.setAriaLabel(null);
+
+        Assert.assertTrue(listBox.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        listBox.setAriaLabelledBy("aria-labelledby");
+
+        Assert.assertTrue(listBox.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby",
+                listBox.getAriaLabelledBy().get());
+
+        listBox.setAriaLabelledBy(null);
+
+        Assert.assertTrue(listBox.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void discardSelectionOnDataChange_noExtraChangeEventsFired() {
+        listBox.setSelectionPreservationMode(SelectionPreservationMode.DISCARD);
+
+        Item selectedItem = items.get(0);
+        listBox.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNotNull(selectionEvent);
+        selectionEvent = null;
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assert.assertNotNull(selectionEvent);
+    }
+
+    @Test
+    public void preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
+        listBox.setSelectionPreservationMode(
+                SelectionPreservationMode.PRESERVE_EXISTING);
+
+        Item selectedItem = items.get(0);
+        listBox.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNotNull(selectionEvent);
+        selectionEvent = null;
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(items.get(1));
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(selectedItem);
+        listBox.getDataProvider().refreshAll();
+        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assert.assertNotNull(selectionEvent);
+    }
+
+    @Test
+    public void preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
+        listBox.setSelectionPreservationMode(
+                SelectionPreservationMode.PRESERVE_ALL);
+
+        Item selectedItem = items.get(0);
+        listBox.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNotNull(selectionEvent);
+        selectionEvent = null;
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(items.get(1));
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(selectedItem);
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
     }
 
     private void assertValueChangeEvents(Set<Item>... expectedValues) {

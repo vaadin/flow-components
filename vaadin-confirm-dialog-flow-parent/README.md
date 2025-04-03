@@ -1,6 +1,6 @@
 # ConfirmDialog component for Vaadin Flow
 
-This project is the Component wrapper implementation of [`<vaadin-confirm-dialog>`](https://github.com/vaadin/vaadin-confirm-dialog)
+This project is the Component wrapper implementation of [`<vaadin-confirm-dialog>`](https://github.com/vaadin/web-components/tree/main/packages/confirm-dialog)
 element for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Using the component in a Flow application

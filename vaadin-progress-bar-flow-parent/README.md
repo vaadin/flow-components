@@ -1,6 +1,6 @@
 # ProgressBar сomponent for Vaadin Flow
 
-This project is the Component wrapper implementation of [`<vaadin-progress-bar>`](https://github.com/vaadin/vaadin-progress-bar)
+This project is the Component wrapper implementation of [`<vaadin-progress-bar>`](https://github.com/vaadin/web-components/tree/main/packages/progress-bar)
 element for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Using the component in a Flow application

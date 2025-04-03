@@ -1,6 +1,16 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests;
 
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -26,6 +36,11 @@ public class FormulasTest {
                 "[1, 1, 1, 1]");
     }
 
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
+
     @Test
     public void createFormulaCell_createsMissingRowsAndCols() {
         Assert.assertNull(spreadsheet.getActiveSheet().getRow(300));
@@ -43,7 +58,11 @@ public class FormulasTest {
 
         spreadsheet.createFormulaCell(0, 0, "1+1");
 
-        Assert.assertNotEquals("foo", cell.getStringCellValue());
+        spreadsheet.refreshCells(cell);
+
+        Assert.assertThrows(IllegalStateException.class,
+                cell::getStringCellValue);
+        Assert.assertEquals(2, cell.getNumericCellValue(), 0);
         Assert.assertEquals("1+1", cell.getCellFormula());
     }
 

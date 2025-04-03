@@ -1,11 +1,19 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.treegrid.it;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
@@ -27,15 +35,9 @@ public class TreeGridExpandAllPage extends Div {
 
         add(grid);
 
-        TreeData<String> data = new TreeData<>();
-
-        Map<String, String> parentPathMap = new HashMap<>();
-
-        TreeGridHugeTreePage.addRootItems("Granddad", 1, data, parentPathMap)
-                .forEach(granddad -> TreeGridHugeTreePage
-                        .addItems("Dad", 1, granddad, data, parentPathMap)
-                        .forEach(dad -> TreeGridHugeTreePage.addItems("Son", 3,
-                                dad, data, parentPathMap)));
+        TreeData<String> data = new TreeGridStringDataBuilder()
+                .addLevel("Granddad", 1).addLevel("Dad", 1).addLevel("Son", 3)
+                .build();
 
         TreeDataProvider<String> dataprovider = new TreeDataProvider<>(data);
         grid.setDataProvider(dataprovider);
@@ -76,40 +78,11 @@ public class TreeGridExpandAllPage extends Div {
     }
 
     private void initializeDataProvider() {
-        TreeData<String> data = new TreeData<>();
-
-        final Map<String, String> parentPathMap = new HashMap<>();
-
-        addRootItems("Granddad", 3, data, parentPathMap)
-                .forEach(granddad -> addItems("Dad is very long and large", 3,
-                        granddad, data, parentPathMap)
-                        .forEach(dad -> addItems("Son", 300, dad, data,
-                                parentPathMap)));
+        TreeData<String> data = new TreeGridStringDataBuilder()
+                .addLevel("Granddad", 3)
+                .addLevel("Dad is very long and large", 3).addLevel("Son", 300)
+                .build();
 
         inMemoryDataProvider = new TreeDataProvider<>(data);
-    }
-
-    static List<String> addRootItems(String name, int numberOfItems,
-            TreeData<String> data, Map<String, String> parentPathMap) {
-        return addItems(name, numberOfItems, null, data, parentPathMap);
-    }
-
-    static List<String> addItems(String name, int numberOfItems, String parent,
-            TreeData<String> data, Map<String, String> parentPathMap) {
-        List<String> items = new ArrayList<>();
-        IntStream.range(0, numberOfItems).forEach(index -> {
-            String parentPath = parentPathMap.get(parent);
-            String thisPath = Optional.ofNullable(parentPath)
-                    .map(path -> path + "/" + index).orElse("" + index);
-            String item = addItem(name, thisPath);
-            parentPathMap.put(item, thisPath);
-            data.addItem(parent, item);
-            items.add(item);
-        });
-        return items;
-    }
-
-    private static String addItem(String name, String path) {
-        return (name + " " + path).trim();
     }
 }

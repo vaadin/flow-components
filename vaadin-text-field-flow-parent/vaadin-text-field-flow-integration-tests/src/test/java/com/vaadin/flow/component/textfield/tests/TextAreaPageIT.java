@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,12 +15,10 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
-import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
+import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
+
+import java.util.stream.IntStream;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,9 +26,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
-import java.util.stream.IntStream;
-
-import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
+import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for {@link TextArea}.
@@ -52,7 +53,7 @@ public class TextAreaPageIT extends AbstractComponentIT {
         blur();
 
         WebElement clearButton = field.$("*")
-                .attributeContains("part", "clear-button").first();
+                .withAttributeContainingWord("part", "clear-button").first();
         clearButton.click();
 
         String value = findElement(By.id("clear-message")).getText();
@@ -63,15 +64,14 @@ public class TextAreaPageIT extends AbstractComponentIT {
     public void assertFocusShortcut() {
         TextAreaElement shortcutField = $(TextAreaElement.class)
                 .id("shortcut-field");
-        Assert.assertNull(
+        Assert.assertFalse(
                 "TextArea should not be focused before the shortcut event is triggered.",
-                shortcutField.getAttribute("focused"));
+                shortcutField.hasAttribute("focused"));
 
         SendKeysHelper.sendKeys(driver, Keys.ALT, "1");
         Assert.assertTrue(
                 "TextArea should be focused after the shortcut event is triggered.",
-                shortcutField.getAttribute("focused").equals("true")
-                        || shortcutField.getAttribute("focused").equals(""));
+                shortcutField.hasAttribute("focused"));
     }
 
     @Test
@@ -124,7 +124,7 @@ public class TextAreaPageIT extends AbstractComponentIT {
     public void textAreaHasPlaceholder() {
         WebElement textField = findElement(
                 By.id("text-area-with-value-change-listener"));
-        Assert.assertEquals(textField.getAttribute("placeholder"),
+        Assert.assertEquals(textField.getDomAttribute("placeholder"),
                 "placeholder text");
     }
 
@@ -173,7 +173,7 @@ public class TextAreaPageIT extends AbstractComponentIT {
         TextAreaElement textAreaElement = $(TextAreaElement.class)
                 .id("helper-component-field");
         Assert.assertEquals("helper-component",
-                textAreaElement.getHelperComponent().getAttribute("id"));
+                textAreaElement.getHelperComponent().getDomAttribute("id"));
     }
 
     @Test
@@ -181,10 +181,43 @@ public class TextAreaPageIT extends AbstractComponentIT {
         TextAreaElement textAreaElement = $(TextAreaElement.class)
                 .id("helper-component-field");
         Assert.assertEquals("helper-component",
-                textAreaElement.getHelperComponent().getAttribute("id"));
+                textAreaElement.getHelperComponent().getDomAttribute("id"));
 
         $(TestBenchElement.class).id("clear-helper-component-button").click();
         Assert.assertNull(textAreaElement.getHelperComponent());
     }
 
+    @Test
+    public void scrollToEnd() {
+        TextAreaElement textArea = $(TextAreaElement.class)
+                .id("text-area-with-max-height");
+        textArea.setValue("LONGTEXT".repeat(30));
+
+        TestBenchElement inputContainer = textArea.$("vaadin-input-container")
+                .first();
+        inputContainer.setProperty("scrollTop", 0);
+
+        $("button").id("scroll-to-end").click();
+
+        int scrollTop = inputContainer.getPropertyInteger("scrollTop");
+        int scrollHeight = inputContainer.getPropertyInteger("scrollHeight");
+        int clientHeight = inputContainer.getPropertyInteger("clientHeight");
+        Assert.assertEquals(scrollHeight - clientHeight, scrollTop);
+    }
+
+    @Test
+    public void scrollToStart() {
+        TextAreaElement textArea = $(TextAreaElement.class)
+                .id("text-area-with-max-height");
+        textArea.setValue("LONGTEXT".repeat(30));
+
+        TestBenchElement inputContainer = textArea.$("vaadin-input-container")
+                .first();
+        inputContainer.setProperty("scrollTop", 100);
+
+        $("button").id("scroll-to-start").click();
+
+        int scrollTop = inputContainer.getPropertyInteger("scrollTop");
+        Assert.assertEquals(0, scrollTop);
+    }
 }

@@ -1,6 +1,6 @@
 # CookieConsent component for Vaadin Flow
 
-This project is the Component wrapper implementation of [`<vaadin-cookie-consent>`](https://github.com/vaadin/vaadin-cookie-consent)
+This project is the Component wrapper implementation of [`<vaadin-cookie-consent>`](https://github.com/vaadin/web-components/tree/main/packages/cookie-consent)
 element for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Using the component in a Flow application

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.treegrid.it;
 
 import org.junit.Assert;
@@ -13,7 +28,7 @@ public abstract class AbstractTreeGridIT extends AbstractComponentIT {
     private TreeGridElement grid;
 
     public void setupTreeGrid() {
-        waitUntil(e -> $(TreeGridElement.class).exists(), 500);
+        waitUntil(e -> $(TreeGridElement.class).exists(), 2);
         grid = $(TreeGridElement.class).first();
     }
 
@@ -102,14 +117,14 @@ public abstract class AbstractTreeGridIT extends AbstractComponentIT {
             String expectedText) {
         if (!((grid.getFirstVisibleRowIndex() <= rowIndex
                 && rowIndex <= grid.getLastVisibleRowIndex()))) {
-            grid.scrollToRowAndWait(rowIndex);
+            grid.scrollToFlatRowAndWait(rowIndex);
         }
         GridColumnElement column = grid.getVisibleColumns().get(cellIndex);
         try {
             waitUntil(
                     test -> grid.hasRow(rowIndex) && expectedText.equals(
                             grid.getRow(rowIndex).getCell(column).getText()),
-                    500);
+                    2);
         } catch (Exception e) {
             Assert.fail(String.format(
                     "Expected cell text [%s] but got %s in row %s cell %s",

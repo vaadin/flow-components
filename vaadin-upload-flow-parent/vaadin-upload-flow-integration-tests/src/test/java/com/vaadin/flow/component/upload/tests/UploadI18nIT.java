@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,26 +12,26 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
-
 package com.vaadin.flow.component.upload.tests;
 
-import com.vaadin.flow.component.upload.UploadI18N;
-import com.vaadin.flow.component.upload.testbench.UploadElement;
-import com.vaadin.flow.internal.JsonSerializer;
-import com.vaadin.flow.testutil.TestPath;
-import elemental.json.Json;
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
-import elemental.json.JsonValue;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.vaadin.flow.component.upload.UploadI18N;
+import com.vaadin.flow.component.upload.testbench.UploadElement;
+import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.testutil.TestPath;
+
+import elemental.json.Json;
+import elemental.json.JsonObject;
+import elemental.json.JsonType;
+import elemental.json.JsonValue;
 
 @TestPath("vaadin-upload/i18n")
 public class UploadI18nIT extends AbstractUploadIT {
@@ -40,9 +40,9 @@ public class UploadI18nIT extends AbstractUploadIT {
         open();
 
         UploadElement upload = $(UploadElement.class).id("upload-full-i18n");
-        WebElement addButton = upload.$("*").attribute("slot", "add-button")
+        WebElement addButton = upload.$("*").withAttribute("slot", "add-button")
                 .first();
-        WebElement dropLabel = upload.$("*").attribute("slot", "drop-label")
+        WebElement dropLabel = upload.$("*").withAttribute("slot", "drop-label")
                 .first();
 
         Assert.assertEquals(UploadTestsI18N.RUSSIAN_FULL.getAddFiles().getOne(),
@@ -69,6 +69,7 @@ public class UploadI18nIT extends AbstractUploadIT {
 
         UploadI18N expected = UploadTestsI18N.RUSSIAN_FULL;
         JsonObject expectedJson = (JsonObject) JsonSerializer.toJson(expected);
+        deeplyRemoveNullValuesFromJsonObject(expectedJson);
         Map<String, String> expectedMap = jsonToMap(expectedJson);
 
         assertTranslationMapsAreEqual(expectedMap, translationMap);
@@ -79,9 +80,9 @@ public class UploadI18nIT extends AbstractUploadIT {
         open();
 
         UploadElement upload = $(UploadElement.class).id("upload-partial-i18n");
-        WebElement addButton = upload.$("*").attribute("slot", "add-button")
+        WebElement addButton = upload.$("*").withAttribute("slot", "add-button")
                 .first();
-        WebElement dropLabel = upload.$("*").attribute("slot", "drop-label")
+        WebElement dropLabel = upload.$("*").withAttribute("slot", "drop-label")
                 .first();
 
         // This label should still be the default one
@@ -111,7 +112,9 @@ public class UploadI18nIT extends AbstractUploadIT {
         UploadI18N fullTranslation = UploadTestsI18N.RUSSIAN_FULL;
         JsonObject fullTranslationJson = (JsonObject) JsonSerializer
                 .toJson(fullTranslation);
+        deeplyRemoveNullValuesFromJsonObject(fullTranslationJson);
         Map<String, String> fullTranslationMap = jsonToMap(fullTranslationJson);
+        UploadTestsI18N.OPTIONAL_KEYS.forEach(fullTranslationMap::remove);
 
         assertTranslationMapsHaveSameKeys(fullTranslationMap, translationMap);
         assertTranslationMapHasNoMissingTranslations(translationMap);
@@ -133,7 +136,7 @@ public class UploadI18nIT extends AbstractUploadIT {
         UploadElement upload = $(UploadElement.class)
                 .id("upload-detach-reattach-i18n");
 
-        WebElement dropLabel = upload.$("*").attribute("slot", "drop-label")
+        WebElement dropLabel = upload.$("*").withAttribute("slot", "drop-label")
                 .first();
 
         Assert.assertEquals(
@@ -213,5 +216,15 @@ public class UploadI18nIT extends AbstractUploadIT {
                 .executeScript("return JSON.stringify(arguments[0].i18n)",
                         upload);
         return Json.parse(i18nJsonString);
+    }
+
+    private void deeplyRemoveNullValuesFromJsonObject(JsonObject jsonObject) {
+        for (String key : jsonObject.keys()) {
+            if (jsonObject.get(key).getType() == JsonType.OBJECT) {
+                deeplyRemoveNullValuesFromJsonObject(jsonObject.get(key));
+            } else if (jsonObject.get(key).getType() == JsonType.NULL) {
+                jsonObject.remove(key);
+            }
+        }
     }
 }

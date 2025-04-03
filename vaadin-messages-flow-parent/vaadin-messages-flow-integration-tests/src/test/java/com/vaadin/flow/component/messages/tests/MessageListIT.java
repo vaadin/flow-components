@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,6 +18,7 @@ package com.vaadin.flow.component.messages.tests;
 import static org.hamcrest.CoreMatchers.startsWith;
 
 import java.util.List;
+import java.util.Set;
 
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
@@ -100,6 +101,15 @@ public class MessageListIT extends AbstractComponentIT {
         clickElementWithJs("removeThemeNames");
         Assert.assertEquals("Unexpected theme prop after removing theme names",
                 null, getFirstMessage(messageList).getTheme());
+
+        clickElementWithJs("addClassNames");
+        Assert.assertEquals("Unexpected class name after adding class names",
+                Set.of("urgent", "pinned"),
+                getFirstMessage(messageList).getClassNames());
+
+        clickElementWithJs("removeClassNames");
+        Assert.assertEquals("Unexpected class name after removing class names",
+                Set.of("pinned"), getFirstMessage(messageList).getClassNames());
     }
 
     @Test

@@ -1,14 +1,20 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.map.configuration;
+
+import java.beans.PropertyChangeListener;
+import java.util.function.Consumer;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-
-import java.beans.PropertyChangeListener;
-import java.lang.reflect.Field;
-import java.util.Set;
-import java.util.function.Consumer;
 
 public class AbstractConfigurationObjectTest {
 
@@ -253,7 +259,8 @@ public class AbstractConfigurationObjectTest {
     public void addNullableChild_ignoresNull() throws Exception {
         testConfiguration = new TestConfiguration();
         testConfiguration.addNullableChild(null);
-        Assert.assertEquals(0, testConfiguration.getChildren().size());
+        Assert.assertEquals(0,
+                ConfigurationTestUtil.getChildren(testConfiguration).size());
     }
 
     private static class TestConfiguration extends AbstractConfigurationObject {
@@ -289,17 +296,6 @@ public class AbstractConfigurationObjectTest {
         @Override
         protected void deepMarkAsDirty() {
             super.deepMarkAsDirty();
-        }
-
-        // Expose children for testing
-        @SuppressWarnings("unchecked")
-        public Set<AbstractConfigurationObject> getChildren()
-                throws IllegalArgumentException, IllegalAccessException,
-                NoSuchFieldException, SecurityException {
-            Field f = AbstractConfigurationObject.class
-                    .getDeclaredField("children");
-            f.setAccessible(true);
-            return (Set<AbstractConfigurationObject>) f.get(this);
         }
     }
 }

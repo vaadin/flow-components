@@ -1,6 +1,13 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.crud.tests;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -14,14 +21,15 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class EditorButtonsIT extends AbstractParallelTest {
+@TestPath("vaadin-crud/editorbuttons")
+public class EditorButtonsIT extends AbstractComponentIT {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-crud") + "/editorbuttons";
-        getDriver().get(url);
+        open();
     }
 
     @Test
@@ -38,8 +46,8 @@ public class EditorButtonsIT extends AbstractParallelTest {
         CrudElement crud = getCrud();
         crud.openRowForEditing(0);
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
 
         Assert.assertFalse(crud.getEditorSaveButton().isEnabled());
@@ -53,8 +61,8 @@ public class EditorButtonsIT extends AbstractParallelTest {
         assertTrue(crud.isEditorOpen());
 
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
 
         ButtonElement saveButton = crud.getEditorSaveButton();
@@ -72,8 +80,8 @@ public class EditorButtonsIT extends AbstractParallelTest {
         assertFalse(saveButton.isEnabled());
 
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
 
         assertTrue(saveButton.isEnabled());
@@ -91,8 +99,8 @@ public class EditorButtonsIT extends AbstractParallelTest {
         assertFalse("Save button should be disabled", saveButton.isEnabled());
 
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
 
         assertFalse("Save button should remain disabled",
@@ -115,8 +123,8 @@ public class EditorButtonsIT extends AbstractParallelTest {
                 cancelButton.isEnabled());
 
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
 
         assertFalse("Cancel button should remain disabled",
@@ -139,8 +147,8 @@ public class EditorButtonsIT extends AbstractParallelTest {
                 deleteButton.isEnabled());
 
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
 
         assertFalse("Delete button should remain disabled",
@@ -160,8 +168,8 @@ public class EditorButtonsIT extends AbstractParallelTest {
         getTestButton("add-enter-shortcut-button").click();
 
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue(lastNameExpected);
 
         // invoke shortcut
@@ -171,7 +179,8 @@ public class EditorButtonsIT extends AbstractParallelTest {
         String lastNameActual = crud.getGrid().getCell(0, 2).getText();
 
         assertFalse("Editor is closed", crud.isEditorOpen());
-        assertEquals("Last name is updated", lastNameExpected, lastNameActual);
+        Assert.assertEquals("Last name is updated", lastNameExpected,
+                lastNameActual);
     }
 
     private CrudElement getCrud() {

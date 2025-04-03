@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -27,9 +30,6 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.testutil.TestPath;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 @TestPath("vaadin-grid/treegrid-basic-features")
 public class TreeGridBasicFeaturesIT extends AbstractTreeGridIT {
@@ -182,6 +182,24 @@ public class TreeGridBasicFeaturesIT extends AbstractTreeGridIT {
         assertCellTexts(0, 0, new String[] { "0 | 0", "0 | 1", "0 | 2" });
 
         checkLogsForErrors();
+    }
+
+    @Test
+    public void keyboard_navigation_row_focus_expand_collapse() {
+        getTreeGrid().getCell(0, 0).focus();
+
+        // Enter row focus mode
+        new Actions(getDriver()).sendKeys(Keys.LEFT).perform();
+
+        // Should expand "0 | 0" on right arrow
+        new Actions(getDriver()).sendKeys(Keys.RIGHT).perform();
+        Assert.assertEquals(6, getTreeGrid().getRowCount());
+        assertCellTexts(1, 0, new String[] { "1 | 0", "1 | 1", "1 | 2" });
+
+        // Should collapse "0 | 0" on left arrow
+        new Actions(getDriver()).sendKeys(Keys.LEFT).perform();
+        Assert.assertEquals(3, getTreeGrid().getRowCount());
+        assertCellTexts(0, 0, new String[] { "0 | 0", "0 | 1", "0 | 2" });
     }
 
     @Test

@@ -84,7 +84,7 @@ async function getVersionsJson() {
 }
 
 async function getAnnotations(){
-  const cmd = 'grep -r @NpmPackage ./vaadin*parent/*/src/*/java';
+  const cmd = 'grep -r @NpmPackage\\( ./vaadin*parent/*/src/*/java';
   const output = await run(cmd);
   const lines = output.split('\n').filter(Boolean);
   return lines.map(line => {

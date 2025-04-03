@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.testutil.TestPath;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,6 +22,9 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
+import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-combo-box/lazy-loading")
 public class LazyLoadingIT extends AbstractComboBoxIT {
@@ -123,6 +124,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 "The selected value should be displayed in the ComboBox's TextField",
                 "Item 10", getTextFieldValue(stringBox));
         stringBox.openPopup();
+        // Make sure the item is in the viewport / rendered
+        scrollToItem(stringBox, 10);
         assertItemSelected("Item 10");
     }
 
@@ -345,7 +348,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertLoadedItemsCount(
                 "After opening the ComboBox, the first 50 items should be loaded",
                 50, callbackBox);
-        assertRendered("Item 10");
+        assertRendered("Item 0");
 
         // Now backend request should take place to init the data communicator
         Assert.assertEquals("1", lazySizeRequestCountSpan.getText());
@@ -356,7 +359,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertLoadedItemsCount(
                 "There should be 100 items after loading two pages", 100,
                 callbackBox);
-        assertRendered("Item 58");
+        assertRendered("Item 60");
     }
 
     @Test
@@ -377,7 +380,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertLoadedItemsCount(
                 "There should be 100 items after loading two pages", 100,
                 templateBox);
-        assertRendered("Item 52");
+        assertRendered("Item 50");
     }
 
     @Test // https://github.com/vaadin/vaadin-combo-box-flow/issues/216

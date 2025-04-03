@@ -1,16 +1,26 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests;
 
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.spreadsheet.Spreadsheet;
+import java.time.LocalDateTime;
+import java.util.Locale;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormat;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.time.LocalDateTime;
-import java.util.Locale;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 public class BuiltinFormatsTest {
 
@@ -21,8 +31,12 @@ public class BuiltinFormatsTest {
 
     @Before
     public void init() {
+        setupWithLocale(Locale.US);
+    }
+
+    private void setupWithLocale(Locale locale) {
         var ui = new UI();
-        ui.setLocale(Locale.US);
+        ui.setLocale(locale);
         UI.setCurrent(ui);
 
         spreadsheet = new Spreadsheet();
@@ -32,6 +46,11 @@ public class BuiltinFormatsTest {
 
         cell = spreadsheet.createCell(0, 0, null);
         cell.setCellStyle(cellStyle);
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test
@@ -120,6 +139,40 @@ public class BuiltinFormatsTest {
 
         cellStyle.setDataFormat(dataFormat.getFormat("mmm-yy"));
         Assert.assertEquals("Oct-22", spreadsheet.getCellValue(cell));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("h:mm AM/PM"));
+        Assert.assertEquals("12:00 PM", spreadsheet.getCellValue(cell));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("h:mm:ss AM/PM"));
+        Assert.assertEquals("12:00:00 PM", spreadsheet.getCellValue(cell));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("h:mm"));
+        Assert.assertEquals("12:00", spreadsheet.getCellValue(cell));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("h:mm:ss"));
+        Assert.assertEquals("12:00:00", spreadsheet.getCellValue(cell));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("m/d/yy h:mm"));
+        Assert.assertEquals("10/31/22 12:00", spreadsheet.getCellValue(cell));
+    }
+
+    @Test
+    public void cellWithDateValue_withGermanLocale_testDateFormats() {
+        setupWithLocale(Locale.GERMAN);
+
+        cell.setCellValue(LocalDateTime.of(2022, 10, 31, 12, 0));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("m/d/yy"));
+        Assert.assertEquals("10/31/22", spreadsheet.getCellValue(cell));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("d-mmm-yy"));
+        Assert.assertEquals("31-Okt.-22", spreadsheet.getCellValue(cell));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("d-mmm"));
+        Assert.assertEquals("31-Okt.", spreadsheet.getCellValue(cell));
+
+        cellStyle.setDataFormat(dataFormat.getFormat("mmm-yy"));
+        Assert.assertEquals("Okt.-22", spreadsheet.getCellValue(cell));
 
         cellStyle.setDataFormat(dataFormat.getFormat("h:mm AM/PM"));
         Assert.assertEquals("12:00 PM", spreadsheet.getCellValue(cell));

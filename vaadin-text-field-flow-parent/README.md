@@ -1,6 +1,6 @@
 # TextField component for Vaadin Flow
 
-This project is the Component wrapper implementation of [`<vaadin-text-field>`](https://github.com/vaadin/vaadin-text-field) element
+This project is the Component wrapper implementation of [`<vaadin-text-field>`](https://github.com/vaadin/web-components/tree/main/packages/text-field) element
 for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Using the component in a Flow application

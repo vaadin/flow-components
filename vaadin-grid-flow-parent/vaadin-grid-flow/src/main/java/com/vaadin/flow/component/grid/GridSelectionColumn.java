@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -29,13 +29,14 @@ import com.vaadin.flow.function.SerializableRunnable;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-grid-flow-selection-column")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.0.0-rc1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-grid-flow-selection-column.js")
 public class GridSelectionColumn extends Component {
 
     private final SerializableRunnable selectAllCallback;
     private final SerializableRunnable deselectAllCallback;
+    private boolean shiftKeyDown = false;
 
     /**
      * Constructs a new grid selection column configured to use the given
@@ -71,7 +72,7 @@ public class GridSelectionColumn extends Component {
      *            the new indeterminate state of the select all checkbox
      */
     public void setSelectAllCheckboxIndeterminateState(boolean indeterminate) {
-        getElement().setProperty("indeterminate", indeterminate);
+        getElement().setProperty("_indeterminate", indeterminate);
     }
 
     /**
@@ -81,7 +82,7 @@ public class GridSelectionColumn extends Component {
      *            whether to display the select all checkbox or hide it
      */
     public void setSelectAllCheckBoxVisibility(boolean visible) {
-        getElement().setProperty("selectAllHidden", !visible);
+        getElement().setProperty("_selectAllHidden", !visible);
     }
 
     /**
@@ -102,6 +103,38 @@ public class GridSelectionColumn extends Component {
     @Synchronize("frozen-changed")
     public boolean isFrozen() {
         return getElement().getProperty("frozen", false);
+    }
+
+    /**
+     * If <code>true</code>, grid rows can be selected or deselected by dragging
+     * the mouse cursor over grid's selection column.
+     *
+     * @param dragSelect
+     *            <code>true</code> to enable drag select feature,
+     *            <code>false</code> for disabling it
+     */
+    public void setDragSelect(boolean dragSelect) {
+        getElement().setProperty("dragSelect", dragSelect);
+    }
+
+    /**
+     * Gets whether grid drag select is enabled or not.
+     *
+     * @return <code>true</code> if drag select feature is enabled,
+     *         <code>false</code> otherwise
+     */
+    @Synchronize("drag-select-changed")
+    public boolean isDragSelect() {
+        return getElement().getProperty("dragSelect", false);
+    }
+
+    @ClientCallable
+    private void setShiftKeyDown(boolean shiftKeyDown) {
+        this.shiftKeyDown = shiftKeyDown;
+    }
+
+    boolean isShiftKeyDown() {
+        return shiftKeyDown;
     }
 
     @ClientCallable

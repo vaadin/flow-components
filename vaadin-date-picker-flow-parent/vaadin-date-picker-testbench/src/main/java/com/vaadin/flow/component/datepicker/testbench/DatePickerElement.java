@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,18 +15,18 @@
  */
 package com.vaadin.flow.component.datepicker.testbench;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.testbench.HasHelper;
-import com.vaadin.testbench.HasLabel;
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.elementsbase.Element;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.testbench.HasHelper;
+import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-date-picker&gt;</code>
@@ -56,8 +56,8 @@ public class DatePickerElement extends TestBenchElement
          * @return
          */
         public ButtonElement getTodayButton() {
-            return this.$(ButtonElement.class).attribute("slot", "today-button")
-                    .first();
+            return this.$(ButtonElement.class)
+                    .withAttribute("slot", "today-button").first();
         }
 
         /**
@@ -67,7 +67,7 @@ public class DatePickerElement extends TestBenchElement
          */
         public ButtonElement getCancelButton() {
             return this.$(ButtonElement.class)
-                    .attribute("slot", "cancel-button").first();
+                    .withAttribute("slot", "cancel-button").first();
         }
     }
 
@@ -79,7 +79,7 @@ public class DatePickerElement extends TestBenchElement
          */
         public String getHeaderText() {
             return this.$(TestBenchElement.class)
-                    .attribute("part", "month-header").first().getText();
+                    .withAttribute("part", "month-header").first().getText();
         }
 
         /**
@@ -88,7 +88,7 @@ public class DatePickerElement extends TestBenchElement
          * @return
          */
         public List<WeekdayElement> getWeekdays() {
-            return this.$(WeekdayElement.class).attribute("part", "weekday")
+            return this.$(WeekdayElement.class).withAttribute("part", "weekday")
                     .all();
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.login.tests;
 
 import org.junit.Assert;
@@ -97,11 +96,11 @@ public class OverlayClassNameIT extends AbstractComponentIT {
 
     private void assertClassAttribute(LoginOverlayElement overlay,
             String expected) {
-        String className = overlay.getAttribute("class");
+        String className = overlay.getDomAttribute("class");
         Assert.assertEquals(expected, className);
 
         WebElement wrappedElement = overlay.getLoginOverlayWrapper();
-        String cardClassName = wrappedElement.getAttribute("class");
+        String cardClassName = wrappedElement.getDomAttribute("class");
         Assert.assertEquals(expected, cardClassName);
     }
 }

@@ -1,6 +1,6 @@
 # ListBox component for Vaadin Flow
 
-This project is the Component wrapper implementation of [`<vaadin-list-box>`](https://github.com/vaadin/vaadin-list-box) element
+This project is the Component wrapper implementation of [`<vaadin-list-box>`](https://github.com/vaadin/web-components/tree/main/packages/list-box) element
 for use from the server side with [Vaadin Flow](https://github.com/vaadin/flow).
 
 ## Using the component in a Flow application

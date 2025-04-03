@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,13 +15,15 @@
  */
 package com.vaadin.flow.component.combobox.testbench;
 
-import com.vaadin.testbench.HasHelper;
-import com.vaadin.testbench.HasLabel;
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.elementsbase.Element;
+import java.util.List;
+
 import org.openqa.selenium.By;
 
-import java.util.List;
+import com.vaadin.testbench.HasHelper;
+import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.HasPlaceholder;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 /**
  * A TestBench element representing a
@@ -29,7 +31,7 @@ import java.util.List;
  */
 @Element("vaadin-multi-select-combo-box")
 public class MultiSelectComboBoxElement extends TestBenchElement
-        implements HasLabel, HasHelper {
+        implements HasLabel, HasPlaceholder, HasHelper {
 
     public String getInputElementValue() {
         return this.getPropertyString("_inputElementValue");

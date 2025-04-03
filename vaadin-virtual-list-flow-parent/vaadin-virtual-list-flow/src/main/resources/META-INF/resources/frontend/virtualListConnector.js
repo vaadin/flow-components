@@ -15,6 +15,8 @@ window.Vaadin.Flow.virtualListConnector = {
     list.$connector = {};
     list.$connector.placeholderItem = { __placeholder: true };
 
+    list.itemAccessibleNameGenerator = (item) => item && item.accessibleName;
+
     const updateRequestedItem = function () {
       /*
        * TODO virtual list seems to do a small index adjustment after scrolling

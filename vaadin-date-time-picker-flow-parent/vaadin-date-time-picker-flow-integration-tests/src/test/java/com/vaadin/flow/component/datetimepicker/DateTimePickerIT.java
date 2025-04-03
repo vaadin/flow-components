@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,10 +27,10 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.datetimepicker.testbench.DateTimePickerElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.commands.TestBenchCommandExecutor;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the {@link DateTimePickerPage}.
@@ -183,6 +183,6 @@ public class DateTimePickerIT extends AbstractComponentIT {
         DateTimePickerElement picker = $(DateTimePickerElement.class)
                 .id("date-time-picker-variant");
 
-        Assert.assertEquals("small", picker.getAttribute("theme"));
+        Assert.assertEquals("small", picker.getDomAttribute("theme"));
     }
 }

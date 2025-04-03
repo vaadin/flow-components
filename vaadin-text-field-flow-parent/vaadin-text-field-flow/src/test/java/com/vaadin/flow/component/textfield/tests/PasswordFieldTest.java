@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,17 +15,29 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.component.textfield.TextFieldVariant;
-import com.vaadin.flow.dom.ThemeList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
+import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
 
 /**
  * Tests for the {@link PasswordField}.
@@ -34,6 +46,11 @@ public class PasswordFieldTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
 
     @Test
     public void setValueNull() {
@@ -48,9 +65,42 @@ public class PasswordFieldTest {
     }
 
     @Test
-    public void initialValuePropertyValue() {
+    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
         PasswordField passwordField = new PasswordField();
-        assertEquals(passwordField.getEmptyValue(),
+        Assert.assertEquals("", passwordField.getValue());
+        Assert.assertEquals("",
+                passwordField.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void initialValueIsNull_valuePropertyHasEmptyString() {
+        PasswordField passwordField = new PasswordField((String) null);
+        Assert.assertEquals("", passwordField.getValue());
+        Assert.assertEquals("",
+                passwordField.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
+        Element element = new Element("vaadin-password-field");
+        element.setProperty("value", "test");
+        UI ui = new UI();
+        UI.setCurrent(ui);
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui.getInternals().setSession(session);
+        VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(session.getService()).thenReturn(service);
+
+        Instantiator instantiator = Mockito.mock(Instantiator.class);
+
+        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+
+        Mockito.when(instantiator.createComponent(PasswordField.class))
+                .thenAnswer(invocation -> new PasswordField());
+
+        PasswordField passwordField = Component.from(element,
+                PasswordField.class);
+        Assert.assertEquals("test",
                 passwordField.getElement().getProperty("value"));
     }
 
@@ -119,5 +169,42 @@ public class PasswordFieldTest {
         assertTrue("PasswordField should support char pattern",
                 HasAllowedCharPattern.class
                         .isAssignableFrom(new PasswordField().getClass()));
+    }
+
+    @Test
+    public void implementHasAriaLabel() {
+        PasswordField field = new PasswordField();
+        Assert.assertTrue(field instanceof HasAriaLabel);
+    }
+
+    @Test
+    public void setAriaLabel() {
+        PasswordField field = new PasswordField();
+
+        field.setAriaLabel("aria-label");
+        Assert.assertTrue(field.getAriaLabel().isPresent());
+        Assert.assertEquals("aria-label", field.getAriaLabel().get());
+
+        field.setAriaLabel(null);
+        Assert.assertTrue(field.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        PasswordField field = new PasswordField();
+
+        field.setAriaLabelledBy("aria-labelledby");
+        Assert.assertTrue(field.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby", field.getAriaLabelledBy().get());
+
+        field.setAriaLabelledBy(null);
+        Assert.assertTrue(field.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void implementsInputField() {
+        PasswordField field = new PasswordField();
+        Assert.assertTrue(
+                field instanceof InputField<AbstractField.ComponentValueChangeEvent<PasswordField, String>, String>);
     }
 }

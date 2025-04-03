@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,8 +26,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/grid-header-row-with-components")
 public class GridHeaderRowWithComponentsIT extends AbstractComponentIT {
@@ -51,13 +51,13 @@ public class GridHeaderRowWithComponentsIT extends AbstractComponentIT {
         Assert.assertThat(
                 "The first header cell should contain the component "
                         + "of the first appended header row",
-                headerCells.get(0).getAttribute("innerHTML"),
+                headerCells.get(0).getDomProperty("innerHTML"),
                 CoreMatchers.containsString("<label>foo</label>"));
 
         Assert.assertThat(
                 "The second header cell should contain the component "
                         + "of the second appended header row",
-                headerCells.get(1).getAttribute("innerHTML"),
+                headerCells.get(1).getDomProperty("innerHTML"),
                 CoreMatchers.containsString("<label>bar</label>"));
     }
 
@@ -65,7 +65,7 @@ public class GridHeaderRowWithComponentsIT extends AbstractComponentIT {
     public void prependHeader_setText_setComponent_componentOverridesText() {
         findElement(By.id("set-both-text-and-component")).click();
         String headerContent = getHeaderCells().get(0)
-                .getAttribute("innerHTML");
+                .getDomProperty("innerHTML");
 
         Assert.assertThat(
                 "The header cell should not contain the text after "
@@ -83,7 +83,7 @@ public class GridHeaderRowWithComponentsIT extends AbstractComponentIT {
         List<WebElement> headers = thead.findElements(By.tagName("th"));
 
         List<String> cellNames = headers.stream().map(header -> header
-                .findElement(By.tagName("slot")).getAttribute("name"))
+                .findElement(By.tagName("slot")).getDomAttribute("name"))
                 .collect(Collectors.toList());
 
         List<WebElement> headerCells = cellNames.stream()

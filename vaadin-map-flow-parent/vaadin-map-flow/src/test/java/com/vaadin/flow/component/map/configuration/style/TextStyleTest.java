@@ -1,8 +1,21 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.map.configuration.style;
+
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
+import com.vaadin.flow.component.map.configuration.ConfigurationTestUtil;
 
 public class TextStyleTest {
     private TextStyle textStyle;
@@ -10,6 +23,15 @@ public class TextStyleTest {
     @Before
     public void setup() {
         textStyle = new TextStyle();
+    }
+
+    @Test
+    public void defaults() throws NoSuchFieldException, IllegalAccessException {
+        // Verify initial fill and stroke are added as children
+        Set<AbstractConfigurationObject> children = ConfigurationTestUtil
+                .getChildren(textStyle);
+        Assert.assertTrue(children.contains(textStyle.getFill()));
+        Assert.assertTrue(children.contains(textStyle.getStroke()));
     }
 
     @Test

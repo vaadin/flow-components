@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -170,7 +170,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
                 checkableItem.getTagName().toLowerCase(Locale.ENGLISH));
         Assert.assertEquals("checkable", checkableItem.getText());
         Assert.assertEquals("",
-                checkableItem.getAttribute("menu-item-checked"));
+                checkableItem.getDomAttribute("menu-item-checked"));
 
         // uncheck the item
         checkableItem.click();
@@ -192,12 +192,12 @@ public class SubMenuIT extends AbstractContextMenuIT {
         checkableItem = subMenuOverlay.$("vaadin-context-menu-list-box").first()
                 .findElements(By.xpath("./*")).get(1);
 
-        Assert.assertNull(checkableItem.getAttribute("menu-item-checked"));
+        Assert.assertNull(checkableItem.getDomAttribute("menu-item-checked"));
     }
 
     private void assertHasPopup(TestBenchElement item, boolean isParent) {
         boolean hasPopup = Boolean
-                .parseBoolean(item.getAttribute("aria-haspopup"));
+                .parseBoolean(item.getDomAttribute("aria-haspopup"));
         if (isParent) {
             Assert.assertTrue("Item should have aria-haspopup set to true",
                     hasPopup);

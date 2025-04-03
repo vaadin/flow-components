@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,16 +13,17 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.tabs.tests;
-
-import org.junit.Test;
-
-import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.component.tabs.Tab;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.tabs.Tab;
 
 /**
  * @author Vaadin Ltd.
@@ -58,5 +59,32 @@ public class TabTest {
     @Test
     public void implementsHasTooltip() {
         assertTrue(tab instanceof HasTooltip);
+    }
+
+    @Test
+    public void implementHasAriaLabel() {
+        assertTrue(tab instanceof HasAriaLabel);
+    }
+
+    @Test
+    public void setAriaLabel() {
+        tab.setAriaLabel("aria label");
+
+        Assert.assertTrue(tab.getAriaLabel().isPresent());
+        Assert.assertEquals("aria label", tab.getAriaLabel().get());
+
+        tab.setAriaLabel(null);
+        Assert.assertTrue(tab.getAriaLabel().isEmpty());
+    }
+
+    @Test
+    public void setAriaLabelledBy() {
+        tab.setAriaLabelledBy("aria-labelledby");
+
+        Assert.assertTrue(tab.getAriaLabelledBy().isPresent());
+        Assert.assertEquals("aria-labelledby", tab.getAriaLabelledBy().get());
+
+        tab.setAriaLabelledBy(null);
+        Assert.assertTrue(tab.getAriaLabelledBy().isEmpty());
     }
 }

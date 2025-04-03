@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -31,10 +31,10 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.component.virtuallist.testbench.VirtualListElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -63,6 +63,27 @@ public class VirtualListIT extends AbstractComponentIT {
         clickToSet3Items_listIsUpdated(listId, "list-with-strings-3-items",
                 "Item ");
         clickToSet0Items_listIsUpdated(listId, "list-with-strings-0-items");
+    }
+
+    @Test
+    public void accessibleName() {
+        String listId = "list-with-strings";
+
+        var virtualList = $(VirtualListElement.class).id(listId);
+
+        var firstChildElement = virtualList
+                .findElement(By.xpath("//*[text()='Item 1']"));
+
+        Assert.assertFalse(firstChildElement.hasAttribute("aria-label"));
+
+        clickElementWithJs("list-with-strings-accessible-name");
+
+        Assert.assertEquals("Accessible Item 1",
+                firstChildElement.getDomAttribute("aria-label"));
+
+        var secondChildElement = virtualList
+                .findElement(By.xpath("//*[text()='Item 2']"));
+        Assert.assertFalse(secondChildElement.hasAttribute("aria-label"));
     }
 
     @Test
@@ -243,7 +264,7 @@ public class VirtualListIT extends AbstractComponentIT {
 
         assertListContainsMaxItems(items.size(), 25);
 
-        MatcherAssert.assertThat(list.getAttribute("innerText"), CoreMatchers
+        MatcherAssert.assertThat(list.getDomProperty("innerText"), CoreMatchers
                 .not(CoreMatchers.containsString("the-placeholder")));
 
         // Scroll to bottom and set an attribute when a placeholder becomes
@@ -268,14 +289,14 @@ public class VirtualListIT extends AbstractComponentIT {
                 list);
 
         waitUntil(driver -> "true"
-                .equals(list.getAttribute("placeholderWasHere")));
+                .equals(list.getDomAttribute("placeholderWasHere")));
 
-        waitUntil(driver -> list.getAttribute("innerText")
+        waitUntil(driver -> list.getDomProperty("innerText")
                 .contains("Person 100"));
 
         MatcherAssert.assertThat(
                 "The VirtualList shouldn't display any placeholders after the data is loaded",
-                list.getAttribute("innerText"), CoreMatchers
+                list.getDomProperty("innerText"), CoreMatchers
                         .not(CoreMatchers.containsString("the-placeholder")));
 
         assertListContainsMaxItems(items.size(), 25);
@@ -358,9 +379,9 @@ public class VirtualListIT extends AbstractComponentIT {
                 list);
 
         invisible.click();
-        waitUntil(driver -> "true".equals(list.getAttribute("hidden")));
+        waitUntil(driver -> "true".equals(list.getDomAttribute("hidden")));
         visible.click();
-        waitUntil(driver -> list.getAttribute("hidden") == null);
+        waitUntil(driver -> list.getDomAttribute("hidden") == null);
         assertItemsArePresent(list, 20);
         Assert.assertTrue("The $connector instance should be preserved",
                 (Boolean) executeScript(

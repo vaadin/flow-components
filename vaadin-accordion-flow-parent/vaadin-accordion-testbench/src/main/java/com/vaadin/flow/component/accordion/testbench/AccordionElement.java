@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,12 +15,12 @@
  */
 package com.vaadin.flow.component.accordion.testbench;
 
+import java.util.Optional;
+import java.util.OptionalInt;
+
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
-
-import java.util.Optional;
-import java.util.OptionalInt;
 
 /**
  * TestBench element for the vaadin-accordion element
@@ -53,9 +53,9 @@ public class AccordionElement extends TestBenchElement {
      * @return the index of the opened panel or null if closed.
      */
     public OptionalInt getOpenedIndex() {
-        final String openedAttribute = getAttribute(OPENED_PROPERTY);
-        return openedAttribute == null ? OptionalInt.empty()
-                : OptionalInt.of(Integer.valueOf(openedAttribute));
+        Integer openedIndex = getPropertyInteger(OPENED_PROPERTY);
+        return openedIndex == null ? OptionalInt.empty()
+                : OptionalInt.of(openedIndex);
     }
 
     /**
@@ -65,7 +65,7 @@ public class AccordionElement extends TestBenchElement {
      */
     public Optional<AccordionPanelElement> getOpenedPanel() {
         final ElementQuery<AccordionPanelElement> openedPanels = $(
-                AccordionPanelElement.class).attribute(OPENED_PROPERTY, "");
+                AccordionPanelElement.class).withAttribute(OPENED_PROPERTY);
 
         return !openedPanels.exists() ? Optional.empty()
                 : Optional.of(openedPanels.first());

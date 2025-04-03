@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,8 +28,8 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResource;
@@ -64,8 +64,9 @@ public class NotificationView extends Div {
     private void createNotificationWithPosition() {
         NativeButton button = new NativeButton(BUTTON_CAPTION);
         Notification notification = new Notification(
-                "This notification is located on Top-Left", 3000,
-                Position.TOP_START);
+                new Span("This notification is located on Top-Left"));
+        notification.setDuration(3000);
+        notification.setPosition(Position.TOP_START);
         button.addClickListener(event -> notification.open());
         button.setId("position-notification-button");
         notification.setId("position-notification");
@@ -133,6 +134,7 @@ public class NotificationView extends Div {
         createContrast();
         createSuccess();
         createError();
+        createWarning();
     }
 
     private void createDefault() {
@@ -249,6 +251,29 @@ public class NotificationView extends Div {
         label.getStyle().set("margin-right", "0.5rem");
         thisIsFineButton.getStyle().set("margin-right", "0.5rem");
         addCard("Theme Variants", "Error", openButton);
+    }
+
+    private void createWarning() {
+        Notification notification = new Notification();
+        notification.addThemeVariants(NotificationVariant.LUMO_WARNING);
+
+        Span label = new Span("Warning about something!");
+
+        Button thisIsFineButton = new Button("This is fine",
+                e -> notification.close());
+
+        Button investigateButton = new Button("Investigate",
+                e -> notification.close());
+        investigateButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        notification.add(label, thisIsFineButton, investigateButton);
+
+        Button openButton = new Button("Warning notification",
+                e -> notification.open());
+
+        label.getStyle().set("margin-right", "0.5rem");
+        thisIsFineButton.getStyle().set("margin-right", "0.5rem");
+        addCard("Theme Variants", "Warning", openButton);
     }
 
     private void addCard(String title, Component... components) {

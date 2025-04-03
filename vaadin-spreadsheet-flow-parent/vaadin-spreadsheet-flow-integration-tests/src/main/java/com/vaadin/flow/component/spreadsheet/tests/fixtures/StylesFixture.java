@@ -1,7 +1,13 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests.fixtures;
 
-import com.vaadin.flow.component.spreadsheet.Spreadsheet;
-import com.vaadin.flow.component.spreadsheet.SpreadsheetStyleFactory;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -9,6 +15,9 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Workbook;
+
+import com.vaadin.flow.component.spreadsheet.Spreadsheet;
+import com.vaadin.flow.component.spreadsheet.SpreadsheetStyleFactory;
 
 public class StylesFixture implements SpreadsheetFixture {
     @Override

@@ -1,14 +1,23 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.test;
 
-import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.component.html.testbench.DivElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.component.html.testbench.DivElement;
+import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-spreadsheet/sizing")
 public class SizingIT extends AbstractComponentIT {
@@ -115,6 +124,26 @@ public class SizingIT extends AbstractComponentIT {
 
         // New rows should have been added on resize
         waitUntil(e -> spreadsheet.getCellAt("A20") != null);
+    }
+
+    @Test
+    public void containerInitiallyHidden_containerIsShown_panelsPositionsAreCorrect() {
+        // Detach spreadsheet
+        findElement(By.id("spreadsheetAttachedToggle")).click();
+        // Hide layout
+        findElement(By.id("layoutDisplayNone")).click();
+        // Attach spreadsheet
+        findElement(By.id("spreadsheetAttachedToggle")).click();
+        // Get reference to the new spreadsheet
+        var spreadsheet = $(SpreadsheetElement.class).first();
+        // Show layout
+        findElement(By.id("layoutDisplayDefault")).click();
+
+        // Print panel position
+        findElement(By.id("logPanelPosition")).click();
+
+        var messageLog = findElement(By.id("messageLog")).getText();
+        Assert.assertNotEquals("0px", messageLog);
     }
 
     private void assertSpreadsheetHeight(int height) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,9 +25,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the {@link ContextMenuView}.
@@ -53,8 +53,8 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
                 "Second menu item", "Disabled menu item" },
                 getMenuItemCaptions());
 
-        Assert.assertEquals("The last item is supposed to be disabled", "true",
-                getMenuItems().get(2).getAttribute("disabled"));
+        Assert.assertFalse("The last item is supposed to be disabled",
+                getMenuItems().get(2).isEnabled());
 
         $("body").first().click();
         verifyClosed();
@@ -147,6 +147,14 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
         items = getMenuItems();
         ContextMenuPageIT.assertCheckedInClientSide(items.get(0), true);
         ContextMenuPageIT.assertCheckedInClientSide(items.get(1), false);
+
+        items.get(2).click();
+        verifyOpened();
+        ContextMenuPageIT.assertCheckedInClientSide(items.get(2), false);
+
+        items.get(2).click();
+        verifyOpened();
+        ContextMenuPageIT.assertCheckedInClientSide(items.get(2), true);
     }
 
     @Test

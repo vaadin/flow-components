@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.crud.tests;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,16 +18,18 @@ import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.orderedlayout.testbench.VerticalLayoutElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class EventHandlingIT extends AbstractParallelTest {
+@TestPath("vaadin-crud")
+public class EventHandlingIT extends AbstractComponentIT {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-crud");
-        getDriver().get(url);
+        open();
     }
 
     @After
@@ -79,10 +89,10 @@ public class EventHandlingIT extends AbstractParallelTest {
                 getLastEvent());
 
         Assert.assertEquals("Guille", crud.getEditor().$(TextFieldElement.class)
-                .attribute("editor-role", "first-name").first().getValue());
+                .withAttribute("editor-role", "first-name").first().getValue());
 
         Assert.assertEquals("Guille", crud.getEditor().$(TextFieldElement.class)
-                .attribute("editor-role", "last-name").first().getValue());
+                .withAttribute("editor-role", "last-name").first().getValue());
     }
 
     @Test
@@ -102,7 +112,7 @@ public class EventHandlingIT extends AbstractParallelTest {
         // Ensure editor is marked dirty on edit
         getTestButton("editServerItem").click();
         crud.getEditor().$(TextFieldElement.class)
-                .attribute("editor-role", "first-name").first()
+                .withAttribute("editor-role", "first-name").first()
                 .setValue("Vaadin");
 
         dismissDialog();
@@ -141,8 +151,8 @@ public class EventHandlingIT extends AbstractParallelTest {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         crud.openRowForEditing(0);
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         Assert.assertTrue(lastNameField.hasAttribute("invalid"));
 
         // Invalid input
@@ -171,14 +181,14 @@ public class EventHandlingIT extends AbstractParallelTest {
 
         TextFieldElement firstNameField = crud.getEditor()
                 .$(TextFieldElement.class)
-                .attribute("editor-role", "first-name").first();
+                .withAttribute("editor-role", "first-name").first();
 
         Assert.assertFalse(firstNameField.hasAttribute("invalid"));
 
         // To avoid editor being dirty
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Oladeji");
 
         crud.getEditorSaveButton().click();
@@ -192,8 +202,8 @@ public class EventHandlingIT extends AbstractParallelTest {
         crud.openRowForEditing(1);
 
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
 
         Assert.assertFalse(lastNameField.hasAttribute("invalid"));
 
@@ -212,9 +222,9 @@ public class EventHandlingIT extends AbstractParallelTest {
 
         TestBenchElement editor = crud.getEditor();
         TextFieldElement firstNameField = editor.$(TextFieldElement.class)
-                .attribute("editor-role", "first-name").first();
+                .withAttribute("editor-role", "first-name").first();
         TextFieldElement lastNameField = editor.$(TextFieldElement.class)
-                .attribute("editor-role", "last-name").first();
+                .withAttribute("editor-role", "last-name").first();
 
         Assert.assertEquals("firstName", firstNameField.getValue());
         Assert.assertEquals("lastName", lastNameField.getValue());
@@ -227,6 +237,10 @@ public class EventHandlingIT extends AbstractParallelTest {
 
     private ButtonElement getTestButton(String id) {
         return $(ButtonElement.class).onPage().id(id);
+    }
+
+    private String getLastEvent() {
+        return $(VerticalLayoutElement.class).last().$("span").last().getText();
     }
 
     private boolean isConfirmDialogOpen(CrudElement crud,

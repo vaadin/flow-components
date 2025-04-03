@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.richtexteditor;
@@ -15,11 +15,14 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * component.
  */
 public enum RichTextEditorVariant implements ThemeVariant {
-    //@formatter:off
     LUMO_NO_BORDER("no-border"),
     LUMO_COMPACT("compact"),
+    /**
+     * @deprecated Since 24.7, the Material theme is deprecated and will be
+     *             removed in Vaadin 25.
+     */
+    @Deprecated
     MATERIAL_NO_BORDER("no-border");
-    //@formatter:on
 
     private final String variant;
 
