@@ -52,7 +52,7 @@ public class ContextMenuElement extends TestBenchElement {
      */
     public boolean isOpen() {
         try {
-            return getAttribute("opened").equals("true");
+            return hasAttribute("opened");
         } catch (StaleElementReferenceException e) {
             return false;
         }
