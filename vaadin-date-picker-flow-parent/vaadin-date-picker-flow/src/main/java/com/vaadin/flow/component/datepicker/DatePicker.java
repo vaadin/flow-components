@@ -169,12 +169,9 @@ public class DatePicker
     private Validator<LocalDate> defaultValidator = (value, context) -> {
         boolean fromComponent = context == null;
 
-        if (unparsableInput != null) {
-            if (fallbackParserErrorMessage != null) {
-                return ValidationResult.error(getI18nErrorMessage(
-                        DatePickerI18n::getBadInputErrorMessage));
-            }
-
+        if (unparsableInput != null && fallbackParserErrorMessage != null) {
+            return ValidationResult.error(fallbackParserErrorMessage);
+        } else if (unparsableInput != null) {
             return ValidationResult.error(getI18nErrorMessage(
                     DatePickerI18n::getBadInputErrorMessage));
         }
