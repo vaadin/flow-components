@@ -75,7 +75,8 @@ public class SubMenuIT extends AbstractContextMenuIT {
         verifyNumOfOverlays(2);
 
         List<ContextMenuOverlayElement> overlays = getAllOverlays();
-        List<ContextMenuItemElement> subMenuItems = getMenuItems(overlays.get(1));
+        List<ContextMenuItemElement> subMenuItems = getMenuItems(
+                overlays.get(1));
         String[] menuItemCaptions = getMenuItemCaptions(subMenuItems);
         Assert.assertArrayEquals(new String[] { "bar", "0", "1" },
                 menuItemCaptions);
@@ -102,7 +103,8 @@ public class SubMenuIT extends AbstractContextMenuIT {
         verifyNumOfOverlays(3);
 
         List<ContextMenuOverlayElement> overlays = getAllOverlays();
-        List<ContextMenuItemElement> subMenuItems = getMenuItems(overlays.get(2));
+        List<ContextMenuItemElement> subMenuItems = getMenuItems(
+                overlays.get(2));
         String[] menuItemCaptions = getMenuItemCaptions(subMenuItems);
         Assert.assertArrayEquals(new String[] { "0" }, menuItemCaptions);
 
