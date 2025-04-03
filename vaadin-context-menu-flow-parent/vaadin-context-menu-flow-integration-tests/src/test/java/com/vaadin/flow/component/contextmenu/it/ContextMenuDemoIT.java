@@ -194,8 +194,8 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
         action.contextClick(element).perform();
     }
 
-    private TestBenchElement getOverlay() {
-        return $(OVERLAY_TAG).first();
+    private ContextMenuOverlayElement getOverlay() {
+        return $(ContextMenuOverlayElement.class).first();
     }
 
     private void verifyClosed() {
