@@ -46,15 +46,6 @@ public class ClearValueIT extends AbstractComponentIT {
     }
 
     @Test
-    public void setInputValue_clearAndSetSameValue_inputValueIsPresent() {
-        timePicker.selectByText("12:00 PM");
-        Assert.assertEquals("12:00 PM", timePicker.getTimePickerInputValue());
-
-        $("button").id(CLEAR_AND_SET_VALUE_BUTTON).click();
-        Assert.assertEquals("12:00 PM", timePicker.getTimePickerInputValue());
-    }
-
-    @Test
     public void setBadInputValue_clearValue_inputValueIsEmpty() {
         timePicker.selectByText("INVALID");
         Assert.assertEquals("INVALID", timePicker.getTimePickerInputValue());

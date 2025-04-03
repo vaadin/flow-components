@@ -673,7 +673,7 @@ public class DatePicker
      *         <code>false</code> otherwise
      */
     protected boolean isInputValuePresent() {
-        return !isEmpty() || unparsableInput != null;
+        return !getInputElementValue().isEmpty();
     }
 
     /**
@@ -783,16 +783,16 @@ public class DatePicker
             return;
         }
 
+        LocalDate oldModelValue = getValue();
+
         // Synchronize unparsable input value
         String oldUnparsableInput = this.unparsableInput;
-
         if (fromClient && newModelValue == null
                 && !getInputElementValue().isEmpty()) {
             this.unparsableInput = getInputElementValue();
         } else {
             this.unparsableInput = null;
         }
-
         String newUnparsableInput = this.unparsableInput;
 
         // Try to parse unparsable input using the fallback parser
@@ -815,8 +815,6 @@ public class DatePicker
         } finally {
             isFallbackParserRunning = false;
         }
-
-        LocalDate oldModelValue = getValue();
 
         super.setModelValue(newModelValue, fromClient);
 
