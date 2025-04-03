@@ -268,10 +268,14 @@ public class DatePicker
         addValueChangeListener(e -> validate());
 
         getElement().addEventListener("unparsable-change", event -> {
-            // Handles the following cases:
-            // 1. The user enters an unparsable input into a field that already contained unparsable input
-            // 2. The user enters an unparsable input into a previously empty field
+            // The unparsable-change event is fired in the following situations:
+            // 1. The user modifies the input but it still remains unparsable
+            // 2. The user enters an unparsable input into empty field
             // 3. The user clears an unparsable input
+            //
+            // In all these cases, ValueChangeEvent isn't fired, so
+            // we call setModelValue manually to trigger validation
+            // and the fallback parser.
             setModelValue(getEmptyValue(), true);
         });
 
@@ -753,7 +757,9 @@ public class DatePicker
     @Override
     public void setValue(LocalDate newValue) {
         if (getValue() == null && newValue == null && unparsableInputValue != null) {
-            // Handles the case when the bad input is cleared programmatically.
+            // When the value is programmatically cleared while the field contains
+            // an unparsable input, ValueChangeEvent isn't fired, so we need to call
+            // setModelValue manually to clear the bad input and trigger validation.
             setModelValue(newValue, false);
             return;
         }
