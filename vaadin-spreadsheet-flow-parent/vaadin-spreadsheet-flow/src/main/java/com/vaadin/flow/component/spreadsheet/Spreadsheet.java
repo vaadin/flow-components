@@ -237,6 +237,13 @@ public class Spreadsheet extends Component
 
     private Locale locale;
 
+    /**
+     * Used for disabling style recalculation during repeated calls to certain
+     * methods as an optimization. See
+     * {@link #setActiveStyleRecalculation(boolean)}.
+     */
+    private boolean activeStyleRecalculation = true;
+
     int getCols() {
         return cols;
     }
@@ -3268,31 +3275,19 @@ public class Spreadsheet extends Component
      *            True to hide the target column, false to show it.
      */
     public void setColumnHidden(int columnIndex, boolean hidden) {
+        final boolean shouldShow = !hidden && isColumnHidden(columnIndex);
+
         getActiveSheet().setColumnHidden(columnIndex, hidden);
-        ArrayList<Integer> _hiddenColumnIndexes = new ArrayList<>(
-                getHiddenColumnIndexes());
-        int[] _colW = Arrays.copyOf(getColW(), getColW().length);
-        if (hidden && !_hiddenColumnIndexes.contains(columnIndex + 1)) {
-            _hiddenColumnIndexes.add(columnIndex + 1);
-            _colW[columnIndex] = 0;
-        } else if (!hidden && _hiddenColumnIndexes.contains(columnIndex + 1)) {
-            _hiddenColumnIndexes
-                    .remove(_hiddenColumnIndexes.indexOf(columnIndex + 1));
-            _colW[columnIndex] = (int) getActiveSheet()
-                    .getColumnWidthInPixels(columnIndex);
+
+        if (shouldShow) {
             getCellValueManager().clearCacheForColumn(columnIndex + 1);
             getCellValueManager().loadCellData(firstRow, columnIndex + 1,
                     lastRow, columnIndex + 1);
         }
-        setHiddenColumnIndexes(_hiddenColumnIndexes);
-        setColW(_colW);
 
-        if (hasSheetOverlays()) {
-            reloadImageSizesFromPOI = true;
-            loadOrUpdateOverlays();
+        if (activeStyleRecalculation) {
+            recalculateSheetStyles();
         }
-
-        getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
     }
 
     /**
@@ -3305,6 +3300,43 @@ public class Spreadsheet extends Component
      */
     public boolean isColumnHidden(int columnIndex) {
         return getActiveSheet().isColumnHidden(columnIndex);
+    }
+
+    /**
+     * Disable full-document size recalculations during repeated row/column size
+     * and visibility changes. Intended for use with long operations making
+     * repeated alterations to the document. Recalculates document sizes and
+     * styles after runnable has finished running.
+     * 
+     * @param until
+     *            Runnable/lambda that executes document modification operations
+     */
+    void deferSizeCalculations(Runnable until) {
+        activeStyleRecalculation = false;
+        try {
+            until.run();
+        } finally {
+            activeStyleRecalculation = true;
+        }
+        recalculateSheetStyles();
+    }
+
+    /**
+     * Performs sheet size recalculation and updates styles if necessary. Should
+     * be called if full document size recalculations have been disabled by
+     * toggling {@link #activeStyleRecalculation} to false, performing
+     * row/column resizing/hiding/unhiding and then back to true.
+     * {@link #deferSizeCalculations(Runnable)} handles this automatically.
+     */
+    void recalculateSheetStyles() {
+        SpreadsheetFactory.calculateSheetSizes(this, getActiveSheet());
+
+        if (hasSheetOverlays()) {
+            reloadImageSizesFromPOI = true;
+            loadOrUpdateOverlays();
+        }
+
+        getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
     }
 
     /**
@@ -3321,19 +3353,18 @@ public class Spreadsheet extends Component
         if (row == null) {
             row = activeSheet.createRow(rowIndex);
         }
-        row.setZeroHeight(hidden);
 
-        // can't assume the state already had room for the row in its
-        // arrays, it may have been created above. This avoids
-        // ArrayIndexOutOfBoundsException
-        SpreadsheetFactory.calculateSheetSizes(this, getActiveSheet());
-
-        if (hasSheetOverlays()) {
-            reloadImageSizesFromPOI = true;
-            loadOrUpdateOverlays();
+        // Do not recalculate anything unnecessarily
+        if (row.getZeroHeight() == hidden) {
+            return;
         }
 
-        getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
+        row.setZeroHeight(hidden);
+
+        // Only recalculate styles if it is not actively disabled
+        if (activeStyleRecalculation) {
+            recalculateSheetStyles();
+        }
     }
 
     /**
@@ -3967,27 +3998,26 @@ public class Spreadsheet extends Component
      *            New row height in points
      */
     public void setRowHeight(int index, float height) {
-        if (height == 0.0F) {
-            setRowHidden(index, true);
+        Row row = getActiveSheet().getRow(index);
+        if (row == null) {
+            row = getActiveSheet().createRow(index);
+        }
+
+        final boolean hide = (height == 0.0f);
+        if (row.getZeroHeight() && hide) {
+            // Row is already hidden, no need to do anything else
+            return;
+        }
+
+        if (hide) {
+            row.setZeroHeight(true);
         } else {
-            Row row = getActiveSheet().getRow(index);
-            ArrayList<Integer> _hiddenRowIndexes = new ArrayList<>(
-                    getHiddenRowIndexes());
-            if (_hiddenRowIndexes.contains(Integer.valueOf(index + 1))) {
-                _hiddenRowIndexes.remove(Integer.valueOf(index + 1));
-                if (row != null && row.getZeroHeight()) {
-                    row.setZeroHeight(false);
-                }
-            }
-            if (row == null) {
-                row = getActiveSheet().createRow(index);
-            }
+            row.setZeroHeight(false);
             row.setHeightInPoints(height);
-            setHiddenRowIndexes(_hiddenRowIndexes);
-            // can't assume the state already had room for the row in its
-            // arrays, it may have been created above. This avoids
-            // ArrayIndexOutOfBoundsException
-            SpreadsheetFactory.calculateSheetSizes(this, getActiveSheet());
+        }
+
+        if (activeStyleRecalculation) {
+            recalculateSheetStyles();
         }
     }
 
