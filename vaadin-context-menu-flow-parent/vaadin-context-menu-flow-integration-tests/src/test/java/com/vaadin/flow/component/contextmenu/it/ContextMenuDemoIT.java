@@ -99,8 +99,8 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
 
         waitUntil(
                 driver -> $(ContextMenuOverlayElement.class).all().size() == 2);
-        List<ContextMenuOverlayElement> overlays =
-                $(ContextMenuOverlayElement.class).all();
+        List<ContextMenuOverlayElement> overlays = $(
+                ContextMenuOverlayElement.class).all();
 
         openSubMenu(getMenuItems(overlays.get(1)).get(1));
 
