@@ -25,7 +25,6 @@ import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.contextmenu.testbench.ContextMenuItemElement;
 import com.vaadin.flow.component.contextmenu.testbench.ContextMenuOverlayElement;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 public abstract class AbstractContextMenuIT extends AbstractComponentIT {
