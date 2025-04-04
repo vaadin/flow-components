@@ -760,17 +760,18 @@ public class DatePicker
     }
 
     @Override
-    public void setValue(LocalDate newValue) {
-        if (getValue() == null && newValue == null && unparsableValue != null) {
+    public void setValue(LocalDate value) {
+        LocalDate oldValue = getValue();
+        if (oldValue == null && value == null && unparsableValue != null) {
             // When the value is programmatically cleared while the field
             // contains an unparsable input, ValueChangeEvent isn't fired,
             // so we need to call setModelValue manually to clear the bad
             // input and trigger validation.
-            setModelValue(newValue, false);
+            setModelValue(value, false);
             return;
         }
 
-        super.setValue(newValue);
+        super.setValue(value);
     }
 
     @Override
