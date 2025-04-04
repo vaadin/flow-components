@@ -87,31 +87,14 @@ public class MergeIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void mergeCells_subcellsShouldHaveDisplayNone() {
-        for (var row = 1; row <= 2; row++) {
-            for (var col = 1; col <= 2; col++) {
-                assertCellHasDisplayNone(row, col, false);
-            }
-        }
-        selectRegion("A1", "B2");
+    public void mergeCellsWithText_firstSubCellShouldNotHaveZIndex() {
+        setCellValue("A1", "A1 text");
+        selectRegion("A1", "B1");
         loadTestFixture(TestFixtures.MergeCells);
-        for (var row = 1; row <= 2; row++) {
-            for (var col = 1; col <= 2; col++) {
-                assertCellHasDisplayNone(row, col, true);
-            }
-        }
-    }
-
-    private void assertCellHasDisplayNone(int row, int col,
-            boolean hasDisplayNone) {
-        var cellSelector = String.format(".cell.row%d.col%d:not(merged-cell)",
-                row, col);
+        var cellSelector = ".cell.row1.col1:not(merged-cell)";
         var element = findElementInShadowRoot(By.cssSelector(cellSelector));
-        var display = element.getCssValue("display");
-        if (hasDisplayNone) {
-            Assert.assertEquals("none", display);
-        } else {
-            Assert.assertNotEquals("none", display);
-        }
+        var style = element.getDomAttribute("style");
+        var hasZIndex = style != null && style.contains("z-index");
+        Assert.assertFalse(hasZIndex);
     }
 }
