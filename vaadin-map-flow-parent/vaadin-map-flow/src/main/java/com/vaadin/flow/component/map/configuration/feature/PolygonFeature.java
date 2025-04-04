@@ -15,7 +15,6 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.geometry.Polygon;
@@ -25,7 +24,7 @@ import com.vaadin.flow.component.map.configuration.style.Stroke;
 import com.vaadin.flow.component.map.configuration.style.Style;
 
 /**
- * Class for features that are represented by a single polygon.
+ * A convenience class for displaying a polygon on the map.
  * <p>
  * Technically this is a {@link Feature} that uses a {@link Polygon} geometry
  * for representation.
@@ -48,12 +47,14 @@ public class PolygonFeature extends Feature {
     }
 
     /**
-     * Creates a new polygon-based feature with the default style using the
-     * provided coordinates. The polygon is defined in the map's user
-     * projection, which defaults to {@code EPSG:4326}. The provided coordinate
-     * list defines a linear ring, where the first coordinate and the last
-     * should be equivalent to ensure a closed ring. This ring specifies the
-     * outer boundary or surface of the polygon without any holes.
+     * Creates a new polygon feature with the default style using the provided
+     * coordinates. The provided coordinate list defines a linear ring, where
+     * the first coordinate and the last should be equivalent to ensure a closed
+     * ring. This ring specifies the outer boundary or surface of the polygon
+     * without any holes.
+     * <p>
+     * Coordinates must be specified in the map's user projection, which by
+     * default is {@code EPSG:4326}, also referred to as GPS coordinates.
      *
      * @param coordinates
      *            the list of coordinates that define the vertices of the
@@ -66,11 +67,12 @@ public class PolygonFeature extends Feature {
     }
 
     /**
-     * The coordinates that define where the feature is located on the map.
-     * Coordinates are returned in the map's user projection, which by default
-     * is {@code EPSG:4326}, also referred to as GPS coordinates. If the user
-     * projection has been changed using {@link Map#setUserProjection(String)},
-     * then coordinates must be specified in that projection instead.
+     * The coordinates where the polygon is located, as a two-dimensional array.
+     * The first array represents the outer boundary of the polygon as a linear
+     * ring of coordinates. Each subsequent array represents a linear ring
+     * defining a hole in the polygon's surface. A linear ring is defined as an
+     * array of coordinates where the first and the last coordinates are
+     * identical.
      *
      * @return the current coordinates
      */
@@ -80,7 +82,16 @@ public class PolygonFeature extends Feature {
     }
 
     /**
-     * @see #setCoordinates(Coordinate[][])
+     * Sets the coordinates that define the polygon. The provided coordinate
+     * list defines a linear ring, where the first coordinate and the last
+     * should be equivalent to ensure a closed ring. This ring specifies the
+     * outer boundary or surface of the polygon without any holes.
+     * <p>
+     * Coordinates must be specified in the map's user projection, which by
+     * default is {@code EPSG:4326}, also referred to as GPS coordinates.
+     *
+     * @param coordinates
+     *            the new coordinates
      */
     public void setCoordinates(List<Coordinate> coordinates) {
         Objects.requireNonNull(coordinates);
@@ -88,12 +99,15 @@ public class PolygonFeature extends Feature {
     }
 
     /**
-     * Sets the coordinates that define where the feature is located on the map.
+     * Sets the coordinates that define the polygon as a two-dimensional array.
+     * The first array represents the outer boundary of the polygon as a linear
+     * ring of coordinates. Each subsequent array represents a linear ring
+     * defining a hole in the polygon's surface. A linear ring is defined as an
+     * array of coordinates where the first and the last coordinates are
+     * identical.
+     * <p>
      * Coordinates must be specified in the map's user projection, which by
-     * default is {@code EPSG:4326}, also referred to as GPS coordinates. If the
-     * user projection has been changed using
-     * {@link Map#setUserProjection(String)}, then coordinates must be specified
-     * in that projection instead.
+     * default is {@code EPSG:4326}, also referred to as GPS coordinates.
      *
      * @param coordinates
      *            the new coordinates
