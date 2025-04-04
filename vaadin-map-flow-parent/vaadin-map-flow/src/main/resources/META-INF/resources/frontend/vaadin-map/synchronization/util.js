@@ -26,11 +26,12 @@ export function convertToCoordinateArray(coordinate) {
  * @returns {*[[]]}
  */
 export function convertToGeoJSONCoordinateArray(coordinates) {
-  return coordinates
-    // The first linear ring of the array defines the outer-boundary or surface of the polygon
-    // Each subsequent linear ring defines a hole in the surface of the polygon
-    .map(linearRing => linearRing
-    .map(coordinate => convertToCoordinateArray(coordinate)));
+  return (
+    coordinates
+      // The first linear ring of the array defines the outer-boundary or surface of the polygon
+      // Each subsequent linear ring defines a hole in the surface of the polygon
+      .map((linearRing) => linearRing.map((coordinate) => convertToCoordinateArray(coordinate)))
+  );
 }
 
 /**

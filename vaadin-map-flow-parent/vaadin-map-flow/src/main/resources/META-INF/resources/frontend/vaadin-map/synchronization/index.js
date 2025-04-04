@@ -23,11 +23,7 @@ import {
   synchronizeXYZSource
 } from './sources.js';
 import { synchronizeIcon, synchronizeFill, synchronizeStroke, synchronizeText, synchronizeStyle } from './styles.js';
-import {
-  convertToCoordinateArray,
-  convertToGeoJSONCoordinateArray,
-  synchronizeCollection
-} from './util.js';
+import { convertToCoordinateArray, convertToGeoJSONCoordinateArray, synchronizeCollection } from './util.js';
 
 /**
  * Fallback text style to use for features that don't have a custom one
