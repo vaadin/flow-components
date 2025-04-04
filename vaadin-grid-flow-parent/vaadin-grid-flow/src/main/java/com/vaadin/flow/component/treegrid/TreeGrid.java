@@ -52,8 +52,10 @@ import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
 
+import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 /**
@@ -76,6 +78,21 @@ public class TreeGrid<T> extends Grid<T>
      */
     public TreeGrid() {
         this(50, new TreeDataCommunicatorBuilder<T>());
+
+        getElement().addEventListener("scroll-to-index-again", (event) -> {
+            JsonArray jsonIndexes = event.getEventData()
+                    .getArray("event.detail.indexes");
+            int[] indexes = JsonUtils.numberStream(jsonIndexes)
+                    .mapToInt((i) -> (int) i).toArray();
+
+            getUI().ifPresent(ui -> ui.beforeClientResponse(this, ctx -> {
+                var flatIndex = getDataCommunicator().getFlatIndexByPath(indexes);
+                if (!getDataCommunicator().getRequestedRange()
+                        .contains(flatIndex)) {
+                    scrollToIndex(indexes);
+                }
+            }));
+        }).addEventData("event.detail.indexes");
     }
 
     /**
@@ -174,6 +191,8 @@ public class TreeGrid<T> extends Grid<T>
 
         setUniqueKeyProperty("key");
         addItemHasChildrenPathGenerator();
+
+        System.out.println("TreeGrid constructor");
     }
 
     /**
@@ -951,18 +970,28 @@ public class TreeGrid<T> extends Grid<T>
      * @see TreeGrid#scrollToIndex(int)
      */
     public void scrollToIndex(int... indexes) {
-        if (indexes.length == 0) {
-            throw new IllegalArgumentException(
-                    "At least one index should be provided.");
-        }
-        int pageSize = getPageSize();
-        int firstRootIndex = indexes[0] - indexes[0] % pageSize;
-        getDataCommunicator().setRequestedRange(firstRootIndex, pageSize);
-        String joinedIndexes = Arrays.stream(indexes).mapToObj(String::valueOf)
-                .collect(Collectors.joining(","));
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
-                ctx -> getElement().executeJs(
-                        "this.scrollToIndex(" + joinedIndexes + ");")));
+        var flatIndex = getDataCommunicator().getFlatIndexByPath(indexes);
+
+        // if (indexes.length == 0) {
+        // throw new IllegalArgumentException(
+        // "At least one index should be provided.");
+        // }
+        // int pageSize = getPageSize();
+        // int firstRootIndex = indexes[0] - indexes[0] % pageSize;
+        // getDataCommunicator().setRequestedRange(firstRootIndex, pageSize);
+        // String joinedIndexes =
+        // Arrays.stream(indexes).mapToObj(String::valueOf)
+        // .collect(Collectors.joining(","));
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this, ctx -> {
+            JsonArray indexesJson = JsonUtils.listToJson(Arrays.stream(indexes).boxed().collect(Collectors.toList()));
+
+            getElement().executeJs(
+                    """
+                            this.__scrollToIndexes = $1;
+                            this._scrollToFlatIndex($0);
+                            """,
+                    flatIndex, indexesJson);
+        }));
     }
 
     @Override

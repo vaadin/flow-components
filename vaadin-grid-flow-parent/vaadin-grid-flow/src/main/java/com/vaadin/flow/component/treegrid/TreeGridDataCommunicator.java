@@ -117,11 +117,20 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
         requestFlush();
     }
 
+    public int getFlatIndexByPath(int... indexes) {
+        int flatIndex = rootCache.getFlatIndexByPath(0, indexes);
+        return flatIndex;
+    }
+
     /** @see DataCommunicator#setRequestedRange(int, int) */
     @Override
     public void setRequestedRange(int start, int length) {
         requestedRange = Range.withLength(start, length);
         requestFlush();
+    }
+
+    public Range getRequestedRange() {
+        return requestedRange;
     }
 
     /** @see DataCommunicator#confirmUpdate() */
@@ -152,8 +161,9 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
 
             if (!cache.hasItem(index)) {
                 List<T> childItems = fetchDataProviderChildren(
-                        cache.getParentItem(), Range.between(index, Math.min(end, cache.getSize())))
-                                .toList();
+                        cache.getParentItem(),
+                        Range.between(index, Math.min(end, cache.getSize())))
+                        .toList();
                 cache.setItems(index, childItems);
             }
 
@@ -259,7 +269,7 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
             reset();
         } else {
             rootCache.removeDescendantCacheIf(
-                (cache) -> !isExpanded(cache.getParentItem()));
+                    (cache) -> !isExpanded(cache.getParentItem()));
             requestFlush();
         }
 

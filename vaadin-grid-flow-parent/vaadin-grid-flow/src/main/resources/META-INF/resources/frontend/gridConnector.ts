@@ -37,6 +37,12 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   grid.$connector = {};
 
+  grid.$connector.flushRootRequestDebouncer = () => {
+    if (rootRequestDebouncer) {
+      rootRequestDebouncer.flush();
+    }
+  };
+
   grid.$connector.hasRootRequestQueue = () => {
     const { pendingRequests } = dataProviderController.rootCache;
     return Object.keys(pendingRequests).length > 0 || !!rootRequestDebouncer?.isActive();
@@ -149,7 +155,17 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     const delay = grid._hasData ? rootRequestDelay : 0;
 
     rootRequestDebouncer = Debouncer.debounce(rootRequestDebouncer, timeOut.after(delay), () => {
-      grid.$connector.fetchPage((firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size), page);
+      grid.$connector.fetchPage((firstIndex, size) => {
+        grid.$server.setRequestedRange(firstIndex, size);
+        const indexes = grid.__scrollToIndexes;
+        if (indexes) {
+          delete grid.__scrollToIndexes;
+
+          grid.dispatchEvent(new CustomEvent('scroll-to-index-again', {
+            detail: { indexes }
+          }));
+        }
+      }, page);
     });
   };
 
