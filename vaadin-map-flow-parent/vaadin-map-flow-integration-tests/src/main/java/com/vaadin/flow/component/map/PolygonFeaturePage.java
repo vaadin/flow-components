@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.map;
 
-import java.util.Arrays;
 import java.util.List;
 
 import com.vaadin.flow.component.html.Div;
@@ -26,98 +25,73 @@ public class PolygonFeaturePage extends Div {
 
     public PolygonFeaturePage() {
         Map map = new Map();
-        map.setCenter(new Coordinate(10.4515, 51.1657));
-        map.setZoom(4);
         map.getFeatureLayer().setId("feature-layer");
 
-        //
-        // ----
         NativeButton addSimplePolygonFeature = new NativeButton(
                 "Add simple polygon feature", e -> {
-
-                    final List<Coordinate> coordinates = createOuterBoundaries();
-
-                    final PolygonFeature polygon = new PolygonFeature(
-                            coordinates);
+                    List<Coordinate> coordinates = createOuterBoundaries();
+                    PolygonFeature polygon = new PolygonFeature(coordinates);
 
                     map.getFeatureLayer().addFeature(polygon);
-
-                    map.addFeatureClickListener(event -> {
-                        if (event
-                                .getFeature() instanceof PolygonFeature feature) {
-                            System.out.println(Arrays
-                                    .deepToString(feature.getCoordinates()));
-                        }
-                    });
-
                 });
         addSimplePolygonFeature.setId("add-simple-polygon-feature");
 
-        //
-        // ----
-        NativeButton addPolygonWithHoleFeature = new NativeButton(
+        NativeButton addPolygonFeatureWithHole = new NativeButton(
                 "Add polygon feature with a hole", e -> {
-
-                    final List<Coordinate> outerBoundary = createOuterBoundaries();
-                    final List<Coordinate> hole = List.of(new Coordinate(6, 48), // SW
+                    List<Coordinate> outerBoundary = createOuterBoundaries();
+                    List<Coordinate> hole = List.of(new Coordinate(6, 48), // SW
                             new Coordinate(6, 54), // NW
                             new Coordinate(14, 54), // NE
                             new Coordinate(14, 48), // SE
                             new Coordinate(6, 48) // SW
                     );
 
-                    final Coordinate[][] coordinates = new Coordinate[][] {
+                    Coordinate[][] coordinates = new Coordinate[][] {
                             outerBoundary.toArray(new Coordinate[0]),
                             hole.toArray(new Coordinate[0]) };
-                    final PolygonFeature polygon = new PolygonFeature();
+                    PolygonFeature polygon = new PolygonFeature();
                     polygon.setCoordinates(coordinates);
 
                     map.getFeatureLayer().addFeature(polygon);
 
-                    map.addFeatureClickListener(event -> {
-                        if (event
-                                .getFeature() instanceof PolygonFeature feature) {
-                            System.out.println(Arrays
-                                    .deepToString(feature.getCoordinates()));
-                        }
-                    });
-
                 });
-        addSimplePolygonFeature.setId("add-polygon-with-hole-feature");
+        addPolygonFeatureWithHole.setId("add-polygon-feature-with-hole");
 
-        //
-        // ----
-        NativeButton updatePolygonCoordinates = new NativeButton(
+        NativeButton movePolygonFeature = new NativeButton(
+                "Move polygon feature", e -> {
+                    if (!map.getFeatureLayer().getFeatures().isEmpty()) {
+                        Feature feature = map.getFeatureLayer().getFeatures()
+                                .get(0);
+                        if (feature instanceof PolygonFeature polygonFeature) {
+                            polygonFeature.getGeometry().translate(5.0, -3.0);
+                        }
+                    }
+                });
+        movePolygonFeature.setId("move-polygon-feature");
+
+        NativeButton activateDragAndDrop = new NativeButton(
                 "Activate Drag & Drop", e -> map.getFeatureLayer().getFeatures()
                         .forEach(feature -> feature.setDraggable(true)));
-        updatePolygonCoordinates.setId("activate-drag-drop");
 
-        //
-        // ----
         NativeButton updatePolygonStyle = new NativeButton(
                 "Update polygon style", e -> {
-                    if (map.getFeatureLayer().getFeatures().size() > 0) {
-                        final Feature feature = map.getFeatureLayer()
-                                .getFeatures().get(0);
-                        final Style style = new Style();
+                    if (!map.getFeatureLayer().getFeatures().isEmpty()) {
+                        Feature feature = map.getFeatureLayer().getFeatures()
+                                .get(0);
+                        Style style = new Style();
                         style.setStroke(new Stroke("red", 3));
                         style.setFill(new Fill("rgba(255, 0, 0, 0.1)"));
                         feature.setStyle(style);
                     }
                 });
-        updatePolygonStyle.setId("update-polygon-style");
 
-        //
-        // ----
-        NativeButton deletePolygonsCoordinates = new NativeButton(
-                "Delete polygons",
+        NativeButton removePolygons = new NativeButton("Remove polygons",
                 e -> map.getFeatureLayer().removeAllFeatures());
-        deletePolygonsCoordinates.setId("delete-polygons");
 
         add(map);
-        add(new Div(addSimplePolygonFeature, addPolygonWithHoleFeature,
-                updatePolygonCoordinates, updatePolygonStyle,
-                deletePolygonsCoordinates));
+        add(new Div(addSimplePolygonFeature, addPolygonFeatureWithHole,
+                movePolygonFeature, activateDragAndDrop, updatePolygonStyle,
+                removePolygons));
     }
 
     private static List<Coordinate> createOuterBoundaries() {

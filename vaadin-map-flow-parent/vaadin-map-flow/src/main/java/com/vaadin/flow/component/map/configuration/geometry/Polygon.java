@@ -128,9 +128,10 @@ public class Polygon extends SimpleGeometry {
 
     @Override
     public void translate(double deltaX, double deltaY) {
-        this.coordinates = Arrays.stream(coordinates).map(
+        Coordinate[][] nextCoordinates = Arrays.stream(coordinates).map(
                 linearRing -> translateLinearRing(deltaX, deltaY, linearRing))
                 .toArray(Coordinate[][]::new);
+        setCoordinates(nextCoordinates);
     }
 
     private static Coordinate[] translateLinearRing(double deltaX,
