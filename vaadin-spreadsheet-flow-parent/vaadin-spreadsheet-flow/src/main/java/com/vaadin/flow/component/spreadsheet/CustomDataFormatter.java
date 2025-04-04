@@ -8,16 +8,18 @@
  */
 package com.vaadin.flow.component.spreadsheet;
 
+import java.awt.Color;
 import java.io.Serializable;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import org.apache.poi.ss.format.CellFormat;
+import org.apache.poi.ss.format.CellFormatResult;
+import org.apache.poi.ss.format.VCellFormat;
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.VDataFormatter;
 
 /**
  * POI library has two classes {@link org.apache.poi.ss.format.CellFormat} and
@@ -42,7 +44,8 @@ import org.apache.poi.ss.usermodel.FormulaEvaluator;
  * case to one parser or another and changing the format string to be compatible
  * with the parser.
  */
-class CustomDataFormatter extends DataFormatter implements Serializable {
+class CustomDataFormatter extends VDataFormatter implements Serializable {
+    // TODO: return parent class to DataFormatter once POI is fixed
 
     private static final Pattern NUMBER_PATTERN = Pattern.compile("[0#]+");
 
@@ -127,15 +130,63 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
 
         if (isOnlyLiteralFormat(format)) {
             // CellFormat can format literals correctly
-            return formatTextUsingCellFormat(cell, format);
+            return formatTextUsingCellFormat(cell, format).text;
         } else {
             // DataFormatter can format numbers correctly
             return super.formatCellValue(cell, evaluator, cfEvaluator);
         }
     }
 
-    private String formatTextUsingCellFormat(Cell cell, String format) {
-        return CellFormat.getInstance(locale, format).apply(cell).text;
+    private CellFormatResult formatTextUsingCellFormat(Cell cell,
+            String format) {
+        // TODO: replace this with a reference to CellFormat when moving back
+        // to mainline Apache POI.
+        return VCellFormat.getInstance(locale, format).apply(cell);
+    }
+
+    /**
+     * Get the applicable text color for the cell. This uses Apache POI's
+     * CellFormat logic, which parses and evaluates the cell's format string
+     * against the cell's current value.
+     * 
+     * @param cell
+     *            The cell to get the applicable custom formatting text color
+     *            for.
+     * @return a CSS color value string, or null if no text color should be
+     *         applied.
+     */
+    public String getCellTextColor(Cell cell) {
+        try {
+            final String format = cell.getCellStyle().getDataFormatString();
+            if (format == null || format.isEmpty() || isGeneralFormat(format)) {
+                return null;
+            }
+
+            CellFormatResult result = formatTextUsingCellFormat(cell, format);
+
+            if (result.textColor == null) {
+                return null;
+            }
+
+            Color color = result.textColor; // AWT color value returned by POI
+
+            // Convert calculated color value to simplest parseable hex string
+            // @formatter:off
+            final int cval = (color.getRed() << 16) | 
+                (color.getGreen() << 8) | color.getBlue();
+            final String hex = Integer.toHexString(cval);
+            switch (hex.length()) {
+                case 1: return "00000" + hex;
+                case 2: return "0000" + hex;
+                case 3: return "000" + hex;
+                case 4: return "00" + hex;
+                case 5: return "0" + hex;
+                default: return hex;
+            }
+            // @formatter:on
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private String getNumericFormat(double value, String[] formatParts) {
@@ -181,6 +232,6 @@ class CustomDataFormatter extends DataFormatter implements Serializable {
             return "";
         }
 
-        return formatTextUsingCellFormat(cell, formatString);
+        return formatTextUsingCellFormat(cell, formatString).text;
     }
 }
