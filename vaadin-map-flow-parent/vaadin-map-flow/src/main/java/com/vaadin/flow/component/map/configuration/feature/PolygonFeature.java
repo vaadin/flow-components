@@ -34,8 +34,8 @@ public class PolygonFeature extends Feature {
     private static final Style DEFAULT_STYLE;
     static {
         final Style style = new Style();
-        style.setStroke(new Stroke("blue", 3));
-        style.setFill(new Fill("rgba(0, 0, 255, 0.1)"));
+        style.setStroke(new Stroke("hsl(214, 100%, 48%)", 2));
+        style.setFill(new Fill("hsla(214, 100%, 60%, 0.13)"));
         DEFAULT_STYLE = style;
     }
 
