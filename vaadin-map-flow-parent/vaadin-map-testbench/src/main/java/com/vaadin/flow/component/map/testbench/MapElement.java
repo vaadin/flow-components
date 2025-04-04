@@ -529,6 +529,39 @@ public class MapElement extends TestBenchElement {
             return new Coordinate(getDouble("getCoordinates()[0]"),
                     getDouble("getCoordinates()[1]"));
         }
+
+        public Coordinate[][] getPolygonCoordinates() {
+            // Get the coordinates array from OpenLayers
+            Object coordinatesObj = get("getCoordinates()");
+            if (coordinatesObj == null) {
+                return null;
+            }
+
+            // Cast to List of lists (OpenLayers returns polygon as array of
+            // arrays)
+            @SuppressWarnings("unchecked")
+            List<List<List<Number>>> rings = (List<List<List<Number>>>) coordinatesObj;
+
+            // Create result array with the size matching the number of rings
+            Coordinate[][] result = new Coordinate[rings.size()][];
+
+            // Process each ring
+            for (int ringIndex = 0; ringIndex < rings.size(); ringIndex++) {
+                List<List<Number>> ring = rings.get(ringIndex);
+                result[ringIndex] = new Coordinate[ring.size()];
+
+                // Process each coordinate in the ring
+                for (int coordIndex = 0; coordIndex < ring
+                        .size(); coordIndex++) {
+                    List<Number> coord = ring.get(coordIndex);
+                    double x = coord.get(0).doubleValue();
+                    double y = coord.get(1).doubleValue();
+                    result[ringIndex][coordIndex] = new Coordinate(x, y);
+                }
+            }
+
+            return result;
+        }
     }
 
     public static class IconReference extends ConfigurationObjectReference {
