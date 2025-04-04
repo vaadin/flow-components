@@ -827,7 +827,7 @@ public class DatePicker
             // 4. The value is programmatically cleared while the field contains
             // an unparsable input
 
-            if (oldUnparsableValue != null && unparsableValue == null) {
+            if (oldUnparsableValue != null) {
                 // Ensure bad input is cleared when the value is cleared
                 // programmatically (see case 4)
                 setInputElementValue("");
