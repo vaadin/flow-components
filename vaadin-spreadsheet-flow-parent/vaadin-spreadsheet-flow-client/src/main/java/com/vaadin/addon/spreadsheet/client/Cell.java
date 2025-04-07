@@ -91,7 +91,12 @@ public class Cell {
             element.setInnerText("");
             element.getStyle().clearZIndex();
         } else {
-            element.getStyle().setZIndex(ZINDEXVALUE);
+            if (sheetWidget.isMergedCell(SheetWidget.toKey(col, row))
+                    && !(this instanceof MergedCell)) {
+                element.getStyle().clearZIndex();
+            } else {
+                element.getStyle().setZIndex(ZINDEXVALUE);
+            }
             if (needsMeasure && getCellWidth() > 0 && sheetWidget
                     .measureValueWidth(cellStyle, value) > getCellWidth()) {
                 element.setInnerText("###");
