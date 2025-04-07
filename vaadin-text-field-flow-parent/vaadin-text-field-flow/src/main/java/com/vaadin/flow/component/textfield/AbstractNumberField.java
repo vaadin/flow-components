@@ -172,10 +172,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
                 || ValueChangeMode.TIMEOUT.equals(valueChangeMode)) {
             inputListenerRegistration = getElement().addEventListener("input",
                     event -> {
-                        if (valueEquals(getValue(), getEmptyValue())) {
-                            validate();
-                            fireValidationStatusChangeEvent();
-                        }
+                        setModelValue(getValue(), true);
                     });
         }
 
@@ -240,7 +237,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             // contains an unparsable input, ValueChangeEvent isn't fired,
             // so we need to call setModelValue manually to clear the bad
             // input and trigger validation.
-            setModelValue(value, false);
+            setModelValue(getEmptyValue(), false);
             return;
         }
 
@@ -262,21 +259,22 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         boolean isModelValueRemainedEmpty = newModelValue == null
                 && oldModelValue == null;
 
-        // Case: setValue(null) is called on a field with unparsable input
-        if (isModelValueRemainedEmpty && oldUnparsableValue != null) {
-            setInputElementValue("");
-            validate();
-            fireValidationStatusChangeEvent();
-            return;
-        }
-
         // Cases:
         // - User modifies input but it remains unparsable
         // - User enters unparsable input in empty field
         // - User clears unparsable input
         // - User enters input that is parsable in JavaScript but unparsable in
         // Java (e.g., integer overflow)
-        if (isModelValueRemainedEmpty && unparsableValue != null) {
+        if (fromClient && isModelValueRemainedEmpty) {
+            validate();
+            fireValidationStatusChangeEvent();
+            return;
+        }
+
+        // Case: setValue(null) is called on a field with unparsable input
+        if (!fromClient && isModelValueRemainedEmpty
+                && oldUnparsableValue != null) {
+            setInputElementValue("");
             validate();
             fireValidationStatusChangeEvent();
             return;

@@ -767,7 +767,7 @@ public class DatePicker
             // contains an unparsable input, ValueChangeEvent isn't fired,
             // so we need to call setModelValue manually to clear the bad
             // input and trigger validation.
-            setModelValue(value, false);
+            setModelValue(getEmptyValue(), false);
             return;
         }
 
@@ -817,19 +817,20 @@ public class DatePicker
         boolean isModelValueRemainedEmpty = newModelValue == null
                 && oldModelValue == null;
 
-        // Case: setValue(null) is called on a field with unparsable input
-        if (isModelValueRemainedEmpty && oldUnparsableValue != null) {
-            setInputElementValue("");
+        // Cases:
+        // - User modifies input but it remains unparsable
+        // - User enters unparsable input in empty field
+        // - User clears unparsable input
+        if (fromClient && isModelValueRemainedEmpty) {
             validate();
             fireValidationStatusChangeEvent();
             return;
         }
 
-        // Cases:
-        // - User modifies input but it remains unparsable
-        // - User enters unparsable input in empty field
-        // - User clears unparsable input
-        if (isModelValueRemainedEmpty && unparsableValue != null) {
+        // Case: setValue(null) is called on a field with unparsable input
+        if (!fromClient && isModelValueRemainedEmpty
+                && oldUnparsableValue != null) {
+            setInputElementValue("");
             validate();
             fireValidationStatusChangeEvent();
             return;
