@@ -266,13 +266,13 @@ public class DatePicker
 
         getElement().addEventListener("unparsable-change", event -> {
             // The unparsable-change event is fired in the following situations:
-            // 1. The user modifies the input but it still remains unparsable
-            // 2. The user enters an unparsable input into empty field
-            // 3. The user clears an unparsable input
+            // 1. User modifies input but it remains unparsable
+            // 2. User enters unparsable input in empty field
+            // 3. User clears unparsable input
             //
             // In all these cases, ValueChangeEvent isn't fired, so
-            // we call setModelValue manually to trigger validation
-            // and the fallback parser.
+            // we call setModelValue manually to run fallback parser
+            // and trigger validation.
             setModelValue(getEmptyValue(), true);
         });
 
@@ -814,33 +814,28 @@ public class DatePicker
             isFallbackParserRunning = false;
         }
 
-        super.setModelValue(newModelValue, fromClient);
+        boolean isModelValueRemainedEmpty = newModelValue == null
+                && oldModelValue == null;
 
-        if (newModelValue == null && oldModelValue == null) {
-            // This branch handles cases where `setModelValue` is called
-            // despite no model value change. This can happen in the following
-            // situations:
-            //
-            // 1. The user modifies the input but it still remains unparsable
-            // 2. The user enters an unparsable input into empty field
-            // 3. The user clears an unparsable input
-            // 4. The value is programmatically cleared while the field contains
-            // an unparsable input
-
-            if (oldUnparsableValue != null) {
-                // Ensure bad input is cleared when the value is cleared
-                // programmatically (see case 4)
-                setInputElementValue("");
-            }
-
-            if (oldUnparsableValue != null || unparsableValue != null) {
-                // Trigger validation when there was a change that didn't fire a
-                // ValueChangeEvent, but the field still needs to be revalidated
-                // (see cases 1, 2, 3, 4).
-                validate();
-                fireValidationStatusChangeEvent();
-            }
+        // Case: setValue(null) is called on a field with unparsable input
+        if (isModelValueRemainedEmpty && oldUnparsableValue != null) {
+            setInputElementValue("");
+            validate();
+            fireValidationStatusChangeEvent();
+            return;
         }
+
+        // Cases:
+        // - User modifies input but it remains unparsable
+        // - User enters unparsable input in empty field
+        // - User clears unparsable input
+        if (isModelValueRemainedEmpty && unparsableValue != null) {
+            validate();
+            fireValidationStatusChangeEvent();
+            return;
+        }
+
+        super.setModelValue(newModelValue, fromClient);
     }
 
     /**
