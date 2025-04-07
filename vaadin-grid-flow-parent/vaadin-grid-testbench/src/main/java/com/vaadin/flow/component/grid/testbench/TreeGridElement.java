@@ -293,14 +293,25 @@ public class TreeGridElement extends GridElement {
         return super.isLoading() || isLoadingExpandedRows();
     }
 
-    @Override
-    public int getRowCount() {
-        var current = getFirstVisibleRowIndex();
-        // Due to new TreeGrid loading mechanism we need to scroll to bottom so that
-        // _flatSize is getting updated
-        executeScript("arguments[0].scrollToIndex(...Array(10).fill(Infinity));", this);
-        var count = super.getRowCount();
-        scrollToRow(current);
-        return count;
+    /**
+     * Gets the total number of rows.
+     *
+     * @param scroll if true, scroll to the end first
+     * @return the number of rows
+     */
+    public int getRowCount(boolean scroll) {
+        if (scroll) {
+            var current = getFirstVisibleRowIndex();
+            executeScript(
+                    "arguments[0].scrollToIndex(...Array(10).fill(Infinity));",
+                    this);
+            var count = super.getRowCount();
+            if (current != -1) {
+                scrollToRow(current);
+            }
+            return count;
+        } else {
+            return super.getRowCount();
+        }
     }
 }
