@@ -18,6 +18,7 @@ package com.vaadin.flow.component.sidenav;
 import java.io.Serializable;
 import java.util.Objects;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
@@ -37,9 +38,10 @@ import com.vaadin.flow.internal.JsonSerializer;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav")
-@NpmPackage(value = "@vaadin/side-nav", version = "24.8.0-alpha5")
+@NpmPackage(value = "@vaadin/side-nav", version = "24.8.0-alpha8")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
-public class SideNav extends SideNavItemContainer implements HasSize, HasStyle {
+public class SideNav extends Component
+        implements HasSideNavItems, HasSize, HasStyle {
 
     private Element labelElement;
 

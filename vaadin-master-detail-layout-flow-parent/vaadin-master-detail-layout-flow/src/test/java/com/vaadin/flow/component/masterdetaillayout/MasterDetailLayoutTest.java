@@ -18,18 +18,32 @@ package com.vaadin.flow.component.masterdetaillayout;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
 
 public class MasterDetailLayoutTest {
+    private UI ui;
     private MasterDetailLayout layout;
 
     @Before
     public void init() {
+        ui = new UI();
+        UI.setCurrent(ui);
+        var session = Mockito.mock(VaadinSession.class);
+        Mockito.when(session.hasLock()).thenReturn(true);
+        ui.getInternals().setSession(session);
+        var service = Mockito.mock(VaadinService.class);
+        Mockito.when(session.getService()).thenReturn(service);
+
         layout = new MasterDetailLayout();
+        ui.add(layout);
     }
 
     @Test
@@ -72,23 +86,12 @@ public class MasterDetailLayoutTest {
     }
 
     @Test
-    public void setMaster_preservesDetail() {
-        var detail = new Div();
-        layout.setDetail(detail);
-        var master = new Div();
-        layout.setMaster(master);
-
-        Assert.assertEquals(2, layout.getElement().getChildCount());
-        assertMasterContent(master);
-        assertDetailContent(detail);
-    }
-
-    @Test
     public void setDetail() {
         var detail = new Div();
         layout.setDetail(detail);
 
         assertDetailContent(detail);
+        assertSetDetailCall(detail, true);
     }
 
     @Test
@@ -108,25 +111,9 @@ public class MasterDetailLayoutTest {
         layout.setDetail(newDetail);
 
         assertDetailContent(newDetail);
+        assertSetDetailCall(newDetail, true);
+        Assert.assertEquals(newDetail, layout.getDetail());
         Assert.assertNull(detail.getElement().getParent());
-        Assert.assertNull(detail.getElement().getAttribute("slot"));
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void setDetailText_throws() {
-        layout.setDetail(new Text("detail"));
-    }
-
-    @Test
-    public void setDetail_preservesMaster() {
-        var master = new Div();
-        layout.setMaster(master);
-        var detail = new Div();
-        layout.setDetail(detail);
-
-        Assert.assertEquals(2, layout.getElement().getChildCount());
-        assertMasterContent(master);
-        assertDetailContent(detail);
     }
 
     @Test
@@ -136,9 +123,44 @@ public class MasterDetailLayoutTest {
 
         layout.setDetail(null);
 
-        Assert.assertEquals(0, layout.getElement().getChildCount());
+        assertSetDetailCall(null, true);
+        Assert.assertNull(layout.getDetail());
         Assert.assertNull(detail.getElement().getParent());
-        Assert.assertNull(detail.getElement().getAttribute("slot"));
+    }
+
+    @Test
+    public void setDetail_detach_attach() {
+        var detail = new Div();
+        layout.setDetail(detail);
+        assertSetDetailCall(detail, true);
+
+        ui.remove(layout);
+        ui.add(layout);
+
+        assertSetDetailCall(detail, true);
+    }
+
+    @Test
+    public void setDetail_usesViewTransitionAfterFirstRoundtrip() {
+        // No transition if component is attached in first roundtrip
+        var detail = new Div();
+        layout.setDetail(detail);
+        assertSetDetailCall(detail, true);
+
+        // Use transition when updating details in second roundtrip
+        var newDetail = new Div();
+        layout.setDetail(newDetail);
+        assertSetDetailCall(newDetail, false);
+
+        // No transition when detaching and reattaching the component
+        ui.remove(layout);
+        ui.add(layout);
+        assertSetDetailCall(newDetail, true);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setDetailText_throws() {
+        layout.setDetail(new Text("detail"));
     }
 
     @Test
@@ -147,6 +169,7 @@ public class MasterDetailLayoutTest {
         layout.showRouterLayoutContent(detail);
 
         assertDetailContent(detail);
+        assertSetDetailCall(detail, true);
         Assert.assertEquals(detail, layout.getDetail());
     }
 
@@ -160,8 +183,15 @@ public class MasterDetailLayoutTest {
         layout.showRouterLayoutContent(newDetail);
 
         assertDetailContent(newDetail);
+        assertSetDetailCall(newDetail, true);
+        Assert.assertEquals(newDetail, layout.getDetail());
         Assert.assertNull(detail.getElement().getParent());
-        Assert.assertNull(detail.getElement().getAttribute("slot"));
+
+        layout.removeRouterLayoutContent(newDetail);
+
+        assertSetDetailCall(null, false);
+        Assert.assertNull(layout.getDetail());
+        Assert.assertNull(newDetail.getElement().getParent());
     }
 
     @Test
@@ -232,6 +262,85 @@ public class MasterDetailLayoutTest {
                 layout.getElement().getProperty("detailMinSize"));
     }
 
+    @Test
+    public void setOrientation_getOrientation() {
+        Assert.assertEquals(MasterDetailLayout.Orientation.HORIZONTAL,
+                layout.getOrientation());
+
+        layout.setOrientation(MasterDetailLayout.Orientation.VERTICAL);
+
+        Assert.assertEquals(MasterDetailLayout.Orientation.VERTICAL,
+                layout.getOrientation());
+        Assert.assertEquals("vertical",
+                layout.getElement().getProperty("orientation"));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setOrientationNull_throws() {
+        layout.setOrientation(null);
+    }
+
+    @Test
+    public void setContainment_getContainment() {
+        Assert.assertEquals(MasterDetailLayout.Containment.LAYOUT,
+                layout.getContainment());
+
+        layout.setContainment(MasterDetailLayout.Containment.VIEWPORT);
+
+        Assert.assertEquals(MasterDetailLayout.Containment.VIEWPORT,
+                layout.getContainment());
+        Assert.assertEquals("viewport",
+                layout.getElement().getProperty("containment"));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setContainmentNull_throws() {
+        layout.setContainment(null);
+    }
+
+    @Test
+    public void setForceOverlay_isForceOverlay() {
+        Assert.assertFalse(layout.isForceOverlay());
+        Assert.assertFalse(
+                layout.getElement().getProperty("forceOverlay", false));
+
+        layout.setForceOverlay(true);
+
+        Assert.assertTrue(layout.isForceOverlay());
+        Assert.assertTrue(
+                layout.getElement().getProperty("forceOverlay", false));
+    }
+
+    @Test
+    public void setAnimationEnabled_isAnimationEnabled() {
+        Assert.assertTrue(layout.isAnimationEnabled());
+        Assert.assertFalse(
+                layout.getElement().getProperty("noAnimation", false));
+
+        layout.setAnimationEnabled(false);
+
+        Assert.assertFalse(layout.isAnimationEnabled());
+        Assert.assertTrue(
+                layout.getElement().getProperty("noAnimation", false));
+    }
+
+    @Test
+    public void setStackThreshold_getStackThreshold() {
+        String threshold = "600px";
+        layout.setStackThreshold(threshold);
+        Assert.assertEquals(threshold, layout.getStackThreshold());
+        Assert.assertEquals(threshold,
+                layout.getElement().getProperty("stackThreshold"));
+    }
+
+    @Test
+    public void setStackThresholdWithUnit_getStackThreshold() {
+        layout.setStackThreshold(30, Unit.EM);
+        Assert.assertEquals("30.0em", layout.getStackThreshold());
+        Assert.assertEquals("30.0em",
+                layout.getElement().getProperty("stackThreshold"));
+    }
+
     private void assertMasterContent(Component component) {
         Assert.assertEquals("", component.getElement().getAttribute("slot"));
         Assert.assertEquals(layout.getElement(),
@@ -239,9 +348,34 @@ public class MasterDetailLayoutTest {
     }
 
     private void assertDetailContent(Component component) {
-        Assert.assertEquals("detail",
-                component.getElement().getAttribute("slot"));
         Assert.assertEquals(layout.getElement(),
                 component.getElement().getParent());
+        Assert.assertTrue(component.getElement().isVirtualChild());
+    }
+
+    private void assertSetDetailCall(Component component,
+            boolean skipTransition) {
+        fakeClientCommunication();
+        var pendingJavaScriptInvocations = ui.getInternals()
+                .dumpPendingJavaScriptInvocations();
+
+        Assert.assertEquals(1, pendingJavaScriptInvocations.size());
+
+        var pendingJavaScriptInvocation = pendingJavaScriptInvocations.get(0);
+        var parameters = pendingJavaScriptInvocation.getInvocation()
+                .getParameters();
+        var element = component != null ? component.getElement() : null;
+
+        Assert.assertEquals(
+                "return (async function() { this._setDetail($0, $1)}).apply($2)",
+                pendingJavaScriptInvocation.getInvocation().getExpression());
+        Assert.assertEquals(element, parameters.get(0));
+        Assert.assertEquals(skipTransition, parameters.get(1));
+    }
+
+    protected void fakeClientCommunication() {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
     }
 }

@@ -69,12 +69,12 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <jetty.version>12.0.17</jetty.version>
+        <jetty.version>12.0.18</jetty.version>
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
         <karaf-maven-plugin.version>4.4.7</karaf-maven-plugin.version>
-        <maven.surefire.plugin.version>3.5.2</maven.surefire.plugin.version>
-        <maven.failsafe.plugin.version>3.5.2</maven.failsafe.plugin.version>
+        <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
+        <maven.failsafe.plugin.version>3.5.3</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
         <spotless.plugin.version>2.44.3</spotless.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
@@ -90,7 +90,7 @@
         <cvdlName/>
         <jakarta.servlet.api.version>5.0.0</jakarta.servlet.api.version>
         <jakarta.web.api.version>10.0.0</jakarta.web.api.version>
-        <spring-data-commons.version>3.4.3</spring-data-commons.version>
+        <spring-data-commons.version>3.4.4</spring-data-commons.version>
 
         <!-- spreadsheet -->
         <poi.version>5.4.0</poi.version>

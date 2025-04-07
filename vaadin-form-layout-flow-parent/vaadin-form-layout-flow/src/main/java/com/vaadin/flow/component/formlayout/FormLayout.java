@@ -86,7 +86,7 @@ import elemental.json.JsonValue;
  * FormLayout formLayout = new FormLayout();
  * formLayout.setAutoResponsive(true);
  * formLayout.add(new TextField("First name"), new TextField("Last name"));
- * formLayout.add(new TextArea("Address"), 2);
+ * formLayout.add(new TextArea("Address"), 2); // colspan 2
  * </pre>
  *
  * <p>
@@ -114,11 +114,14 @@ import elemental.json.JsonValue;
  * <pre>
  * FormLayout formLayout = new FormLayout();
  * formLayout.setAutoResponsive(true);
- * formLayout.addFormRow(new TextField("First name"),
- *         new TextField("Last name"));
- * TextArea addressField = new TextArea("Address");
- * formLayout.setColspan(addressField, 2);
- * formLayout.addFormRow(addressField);
+ *
+ * FormRow firstRow = new FormRow();
+ * firstRow.add(new TextField("First name"), new TextField("Last name"));
+ *
+ * FormRow secondRow = new FormRow();
+ * secondRow.add(new TextArea("Address"), 2); // colspan 2
+ *
+ * formLayout.add(firstRow, secondRow);
  * </pre>
  *
  * <h3>Expanding Columns and Fields</h3>
@@ -144,13 +147,15 @@ import elemental.json.JsonValue;
  * formLayout.setAutoResponsive(true);
  * formLayout.setLabelsAside(true);
  *
- * FormRow firstRow = formLayout.addFormRow();
+ * FormRow firstRow = new FormRow();
  * firstRow.addFormItem(new TextField(), "First Name");
  * firstRow.addFormItem(new TextField(), "Last Name");
  *
- * FormRow secondRow = formLayout.addFormRow();
+ * FormRow secondRow = new FormRow();
  * FormItem addressField = secondRow.addFormItem(new TextArea(), "Address");
- * formLayout.setColspan(addressField, 2);
+ * secondRow.setColspan(addressField, 2);
+ *
+ * formLayout.add(firstRow, secondRow);
  * </pre>
  * <p>
  * With this, FormLayout will display labels beside fields, falling back to the
@@ -159,9 +164,9 @@ import elemental.json.JsonValue;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-form-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha8")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/form-layout", version = "24.8.0-alpha5")
+@NpmPackage(value = "@vaadin/form-layout", version = "24.8.0-alpha8")
 @JsModule("@vaadin/form-layout/src/vaadin-form-layout.js")
 public class FormLayout extends Component
         implements HasSize, HasStyle, HasComponents, ClickNotifier<FormLayout> {
@@ -290,9 +295,9 @@ public class FormLayout extends Component
      * @author Vaadin Ltd
      */
     @Tag("vaadin-form-item")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha5")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha8")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-    @NpmPackage(value = "@vaadin/form-layout", version = "24.8.0-alpha5")
+    @NpmPackage(value = "@vaadin/form-layout", version = "24.8.0-alpha8")
     @JsModule("@vaadin/form-layout/src/vaadin-form-item.js")
     public static class FormItem extends Component
             implements HasComponents, HasStyle, ClickNotifier<FormItem> {
@@ -385,20 +390,22 @@ public class FormLayout extends Component
      * <pre>
      * FormLayout formLayout = new FormLayout();
      * formLayout.setAutoResponsive(true);
-     * formLayout.addFormRow(new TextField("First name"),
-     *         new TextField("Last name"));
      *
-     * TextArea addressField = new TextArea("Address");
-     * formLayout.setColspan(addressField, 2);
-     * formLayout.addFormRow(addressField);
+     * FormRow firstRow = new FormRow();
+     * firstRow.add(new TextField("First name"), new TextField("Last name"));
+     *
+     * FormRow secondRow = new FormRow();
+     * secondRow.add(new TextArea("Address"), 2); // colspan 2
+     *
+     * formLayout.add(firstRow, secondRow);
      * </pre>
      *
      * @author Vaadin Ltd
      */
     @Tag("vaadin-form-row")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha5")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha8")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-    @NpmPackage(value = "@vaadin/form-layout", version = "24.8.0-alpha5")
+    @NpmPackage(value = "@vaadin/form-layout", version = "24.8.0-alpha8")
     @JsModule("@vaadin/form-layout/src/vaadin-form-row.js")
     public static class FormRow extends Component implements HasComponents {
 
@@ -411,6 +418,53 @@ public class FormLayout extends Component
          * @see HasComponents#add(Component...)
          */
         public FormRow() {
+        }
+
+        /**
+         * Adds a component with the desired colspan. This method is a shorthand
+         * for calling {@link #add(Component...)} and
+         * {@link #setColspan(Component, int)}
+         *
+         * @param component
+         *            the component to add
+         * @param colspan
+         *            the desired colspan for the component
+         */
+        public void add(Component component, int colspan) {
+            add(component);
+            setColspan(component, colspan);
+        }
+
+        /**
+         * Sets the colspan of the given component's element. Will default to 1
+         * if an integer lower than 1 is supplied. You can directly add
+         * components with the wanted colspan with {@link #add(Component, int)}.
+         *
+         * @param component
+         *            the component to set the colspan for, not {@code null}
+         * @param colspan
+         *            the desired colspan for the component
+         */
+        public void setColspan(Component component, int colspan) {
+            Objects.requireNonNull(component, "component cannot be null");
+            component.getElement().setAttribute("colspan",
+                    String.valueOf(Math.max(1, colspan)));
+        }
+
+        /**
+         * Gets the colspan of the given component. If none is set, returns 1.
+         *
+         * @param component
+         *            the component whose colspan is retrieved
+         * @return the colspan of the given component or 1 if none is set
+         */
+        public int getColspan(Component component) {
+            String colspan = component.getElement().getAttribute("colspan");
+            if (colspan != null && colspan.matches("\\d+")) {
+                return Integer.parseInt(colspan);
+            } else {
+                return 1;
+            }
         }
 
         /**
@@ -482,13 +536,8 @@ public class FormLayout extends Component
      */
     public void setColspan(Component component, int colspan) {
         Objects.requireNonNull(component, "component cannot be null");
-        String strColspan = "";
-        if (colspan < 1) {
-            strColspan = "1";
-        } else {
-            strColspan = String.valueOf(colspan);
-        }
-        component.getElement().setAttribute("colspan", strColspan);
+        component.getElement().setAttribute("colspan",
+                String.valueOf(Math.max(1, colspan)));
     }
 
     /**
@@ -517,13 +566,9 @@ public class FormLayout extends Component
      * @return the colspan of the given component or 1 if none is set
      */
     public int getColspan(Component component) {
-        String strColspan = component.getElement().getAttribute("colspan");
-        if (strColspan == null) {
-            return 1;
-            // need this in case the colspan is modified outside the API to an
-            // incorrect format somehow.
-        } else if (strColspan.matches("\\d+")) {
-            return Integer.parseInt(strColspan);
+        String colspan = component.getElement().getAttribute("colspan");
+        if (colspan != null && colspan.matches("\\d+")) {
+            return Integer.parseInt(colspan);
         } else {
             return 1;
         }
@@ -882,20 +927,17 @@ public class FormLayout extends Component
      * {@link #setAutoResponsive(boolean)} is enabled. The value must be
      * provided in CSS length units, e.g. {@code 100px}.
      * <p>
-     * By default, the web component uses a width of {@code 13em}.
+     * When the column width is {@code null}, the web component defaults to
+     * {@code 12em} or uses the value of {@code --vaadin-field-default-width} if
+     * that CSS custom property is defined.
      * <p>
      * This setting only applies when {@link #setAutoResponsive(boolean)} is
      * enabled.
      *
      * @param columnWidth
-     *            the width of columns
+     *            the width of columns or {@code null} to use the default
      */
     public void setColumnWidth(String columnWidth) {
-        Objects.requireNonNull(columnWidth, "Column width cannot be null");
-        if (columnWidth.isBlank()) {
-            throw new IllegalArgumentException("Column width cannot be empty");
-        }
-
         getElement().setProperty("columnWidth", columnWidth);
     }
 
@@ -904,7 +946,9 @@ public class FormLayout extends Component
      * {@link #setAutoResponsive(boolean)} is enabled. The value must be
      * provided with a {@link Unit}, e.g. {@code 100} and {@link Unit#PIXELS}.
      * <p>
-     * By default, the web component uses a width of {@code 13em}.
+     * When the column width is {@code null}, the web component defaults to
+     * {@code 12em} or uses the value of {@code --vaadin-field-default-width} if
+     * that CSS custom property is defined.
      * <p>
      * This setting only applies when {@link #setAutoResponsive(boolean)} is
      * enabled.
@@ -922,9 +966,13 @@ public class FormLayout extends Component
     /**
      * Gets the width of columns that is used when
      * {@link #setAutoResponsive(boolean)} is enabled.
+     * <p>
+     * When the column width is {@code null}, the web component defaults to
+     * {@code 12em} or uses the value of {@code --vaadin-field-default-width} if
+     * that CSS custom property is defined.
      *
-     * @return the value and CSS unit as a string, or {@code null} if not
-     *         explicitly set
+     * @return the value and CSS unit as a string, or {@code null} if not set,
+     *         in which case the web component uses its default value
      * @see #setColumnWidth(String)
      * @see #setColumnWidth(float, Unit)
      */
