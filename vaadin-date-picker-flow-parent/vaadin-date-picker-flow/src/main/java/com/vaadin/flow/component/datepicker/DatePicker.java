@@ -158,7 +158,7 @@ public class DatePicker
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
 
-    private String unparsableValue = null;
+    private String unparsableValue;
 
     private SerializableFunction<String, Result<LocalDate>> fallbackParser;
     private String fallbackParserErrorMessage = null;

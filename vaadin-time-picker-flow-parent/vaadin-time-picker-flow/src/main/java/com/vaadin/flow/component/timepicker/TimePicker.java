@@ -141,14 +141,14 @@ public class TimePicker
     private LocalTime min;
     private StateTree.ExecutionRegistration pendingLocaleUpdate;
 
+    private String unparsableValue;
+
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalTime>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
     private Validator<LocalTime> defaultValidator = (value, context) -> {
         boolean fromComponent = context == null;
 
-        boolean hasBadInput = Objects.equals(value, getEmptyValue())
-                && isInputValuePresent();
-        if (hasBadInput) {
+        if (unparsableValue != null) {
             return ValidationResult.error(getI18nErrorMessage(
                     TimePickerI18n::getBadInputErrorMessage));
         }
@@ -234,8 +234,15 @@ public class TimePicker
         addValueChangeListener(e -> validate());
 
         getElement().addEventListener("unparsable-change", event -> {
-            validate();
-            fireValidationStatusChangeEvent();
+            // The unparsable-change event is fired in the following situations:
+            // 1. The user modifies the input but it still remains unparsable
+            // 2. The user enters an unparsable input into empty field
+            // 3. The user clears an unparsable input
+            //
+            // In all these cases, ValueChangeEvent isn't fired, so
+            // we call setModelValue manually to trigger validation
+            // and the fallback parser.
+            setModelValue(getEmptyValue(), true);
         });
 
         getElement().addPropertyChangeListener("invalid", event -> fireEvent(
@@ -357,32 +364,63 @@ public class TimePicker
      */
     @Override
     public void setValue(LocalTime value) {
+        LocalTime oldValue = getValue();
+        if (oldValue == null && value == null && unparsableValue != null) {
+            // When the value is programmatically cleared while the field
+            // contains an unparsable input, ValueChangeEvent isn't fired,
+            // so we need to call setModelValue manually to clear the bad
+            // input and trigger validation.
+            setModelValue(value, false);
+            return;
+        }
+
         // Truncate the value to millisecond precision, as the is the maximum
         // that the time picker web component supports.
         if (value != null) {
             value = value.truncatedTo(ChronoUnit.MILLIS);
         }
 
-        LocalTime oldValue = getValue();
-        boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
-        boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
-        boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
-        String oldInputElementValue = getInputElementValue();
+        super.setValue(value);
+    }
 
-        // When the value is cleared programmatically, there is no change event
-        // that would synchronize _inputElementValue, so we reset it ourselves
-        // to prevent the following validation from treating this as bad input.
-        if (isNewValueEmpty) {
-            setInputElementValue("");
+    @Override
+    protected void setModelValue(LocalTime newModelValue, boolean fromClient) {
+        LocalTime oldModelValue = getValue();
+        String oldUnparsableValue = unparsableValue;
+
+        if (fromClient && newModelValue == null
+                && !getInputElementValue().isEmpty()) {
+            unparsableValue = getInputElementValue();
+        } else {
+            unparsableValue = null;
         }
 
-        super.setValue(value);
+        super.setModelValue(newModelValue, fromClient);
 
-        // Revalidate if setValue(null) didn't result in a value change but
-        // cleared bad input
-        if (isValueRemainedEmpty && !oldInputElementValue.isEmpty()) {
-            validate();
-            fireValidationStatusChangeEvent();
+        if (newModelValue == null && oldModelValue == null) {
+            // This branch handles cases where `setModelValue` is called
+            // despite no model value change. This can happen in the following
+            // situations:
+            //
+            // 1. The user modifies the input but it still remains unparsable
+            // 2. The user enters an unparsable input into empty field
+            // 3. The user clears an unparsable input
+            // 4. The value is programmatically cleared while the field contains
+            // an unparsable input
+
+            if (oldUnparsableValue != null) {
+                // Ensure bad input is cleared when the value is cleared
+                // programmatically (see case 4)
+                setInputElementValue("");
+            }
+
+            if (oldUnparsableValue != null || unparsableValue != null) {
+                // Trigger validation when there was a change that didn't fire a
+                // ValueChangeEvent, but the field still needs to be revalidated
+                // (see cases 1, 2, 3, 4).
+                validate();
+                fireValidationStatusChangeEvent();
+            }
         }
     }
 
