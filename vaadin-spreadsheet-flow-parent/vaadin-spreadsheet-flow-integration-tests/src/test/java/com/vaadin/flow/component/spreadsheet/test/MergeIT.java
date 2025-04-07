@@ -93,7 +93,7 @@ public class MergeIT extends AbstractSpreadsheetIT {
         loadTestFixture(TestFixtures.MergeCells);
         var cellSelector = ".cell.row1.col1:not(merged-cell)";
         var element = findElementInShadowRoot(By.cssSelector(cellSelector));
-        var style = element.getDomAttribute("style");
+        var style = element.getAttribute("style");
         var hasZIndex = style != null && style.contains("z-index");
         Assert.assertFalse(hasZIndex);
     }
