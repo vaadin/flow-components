@@ -307,33 +307,43 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     @Override
     public void setValue(BigDecimal value) {
         BigDecimal oldValue = getValue();
-        boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
-        boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
-        boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
-        String oldInputElementValue = getInputElementValue();
+        if (oldValue == null && value == null && !getInputElementValue().isEmpty()) {
+            // When the value is programmatically cleared while the field
+            // contains an unparsable input, ValueChangeEvent isn't fired,
+            // so we need to call setModelValue manually to clear the bad
+            // input and trigger validation.
+            setModelValue(getEmptyValue(), false);
+            return;
+        }
 
         super.setValue(value);
-
-        // Revalidate and clear input element value if setValue(null) didn't
-        // result in a value change but there was bad input.
-        if (isValueRemainedEmpty && !oldInputElementValue.isEmpty()) {
-            setInputElementValue("");
-            validate();
-            fireValidationStatusChangeEvent();
-        }
     }
 
     @Override
     protected void setModelValue(BigDecimal newModelValue, boolean fromClient) {
         BigDecimal oldModelValue = getValue();
+        boolean isModelValueRemainedEmpty = oldModelValue == null
+                && newModelValue == null;
 
-        super.setModelValue(newModelValue, fromClient);
-
-        if (fromClient && valueEquals(oldModelValue, getEmptyValue())
-                && valueEquals(newModelValue, getEmptyValue())) {
+        // Cases:
+        // - User modifies input but it remains unparsable
+        // - User enters unparsable input in empty field
+        // - User clears unparsable input
+        if (fromClient && isModelValueRemainedEmpty) {
             validate();
             fireValidationStatusChangeEvent();
+            return;
         }
+
+        // Case: setValue(null) is called on a field with unparsable input
+        if (!fromClient && isModelValueRemainedEmpty && !getInputElementValue().isEmpty()) {
+            setInputElementValue("");
+            validate();
+            fireValidationStatusChangeEvent();
+            return;
+        }
+
+        super.setModelValue(newModelValue, fromClient);
     }
 
     /**
