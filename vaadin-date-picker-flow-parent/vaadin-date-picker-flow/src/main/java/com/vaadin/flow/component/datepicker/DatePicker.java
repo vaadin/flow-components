@@ -159,6 +159,8 @@ public class DatePicker
 
     private StateTree.ExecutionRegistration pendingI18nUpdate;
 
+    private String unparsableValue;
+
     private SerializableFunction<String, Result<LocalDate>> fallbackParser;
     private String fallbackParserErrorMessage = null;
     private boolean isFallbackParserRunning = false;
@@ -168,11 +170,9 @@ public class DatePicker
     private Validator<LocalDate> defaultValidator = (value, context) -> {
         boolean fromComponent = context == null;
 
-        boolean hasBadInput = valueEquals(value, getEmptyValue())
-                && isInputValuePresent();
-        if (hasBadInput && fallbackParserErrorMessage != null) {
+        if (unparsableValue != null && fallbackParserErrorMessage != null) {
             return ValidationResult.error(fallbackParserErrorMessage);
-        } else if (hasBadInput) {
+        } else if (unparsableValue != null) {
             return ValidationResult.error(getI18nErrorMessage(
                     DatePickerI18n::getBadInputErrorMessage));
         }
@@ -264,9 +264,15 @@ public class DatePicker
         addValueChangeListener(e -> validate());
 
         getElement().addEventListener("unparsable-change", event -> {
+            // The unparsable-change event is fired in the following situations:
+            // 1. User modifies input but it remains unparsable
+            // 2. User enters unparsable input in empty field
+            // 3. User clears unparsable input
+            //
+            // In all these cases, ValueChangeEvent isn't fired, so
+            // we call setModelValue manually to run fallback parser
+            // and trigger validation.
             setModelValue(getEmptyValue(), true);
-            validate();
-            fireValidationStatusChangeEvent();
         });
 
         getElement().addPropertyChangeListener("opened", event -> fireEvent(
@@ -756,26 +762,16 @@ public class DatePicker
     @Override
     public void setValue(LocalDate value) {
         LocalDate oldValue = getValue();
-        boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
-        boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
-        boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
-        String oldInputElementValue = getInputElementValue();
-
-        // When the value is cleared programmatically, there is no change event
-        // that would synchronize _inputElementValue, so we reset it ourselves
-        // to prevent the following validation from treating this as bad input.
-        if (isNewValueEmpty) {
-            setInputElementValue("");
+        if (oldValue == null && value == null && unparsableValue != null) {
+            // When the value is programmatically cleared while the field
+            // contains an unparsable input, ValueChangeEvent isn't fired,
+            // so we need to call setModelValue manually to clear the bad
+            // input and trigger validation.
+            setModelValue(getEmptyValue(), false);
+            return;
         }
 
         super.setValue(value);
-
-        // Revalidate if setValue(null) didn't result in a value change but
-        // cleared bad input
-        if (isValueRemainedEmpty && !oldInputElementValue.isEmpty()) {
-            validate();
-            fireValidationStatusChangeEvent();
-        }
     }
 
     @Override
@@ -788,19 +784,26 @@ public class DatePicker
             return;
         }
 
+        LocalDate oldModelValue = getValue();
+        String oldUnparsableValue = unparsableValue;
+
+        if (fromClient && newModelValue == null
+                && !getInputElementValue().isEmpty()) {
+            unparsableValue = getInputElementValue();
+        } else {
+            unparsableValue = null;
+        }
+
         try {
             isFallbackParserRunning = true;
 
-            boolean isInputUnparsable = fromClient && newModelValue == null
-                    && isInputValuePresent();
-
-            if (fallbackParser != null && isInputUnparsable) {
-                Result<LocalDate> result = runFallbackParser(
-                        getInputElementValue());
+            if (fallbackParser != null && unparsableValue != null) {
+                Result<LocalDate> result = runFallbackParser(unparsableValue);
                 if (result.isError()) {
                     fallbackParserErrorMessage = result.getMessage()
                             .orElse(null);
                 } else {
+                    unparsableValue = null;
                     fallbackParserErrorMessage = null;
                     newModelValue = result
                             .getOrThrow(IllegalStateException::new);
@@ -809,6 +812,28 @@ public class DatePicker
             }
         } finally {
             isFallbackParserRunning = false;
+        }
+
+        boolean isModelValueRemainedEmpty = newModelValue == null
+                && oldModelValue == null;
+
+        // Cases:
+        // - User modifies input but it remains unparsable
+        // - User enters unparsable input in empty field
+        // - User clears unparsable input
+        if (fromClient && isModelValueRemainedEmpty) {
+            validate();
+            fireValidationStatusChangeEvent();
+            return;
+        }
+
+        // Case: setValue(null) is called on a field with unparsable input
+        if (!fromClient && isModelValueRemainedEmpty
+                && oldUnparsableValue != null) {
+            setInputElementValue("");
+            validate();
+            fireValidationStatusChangeEvent();
+            return;
         }
 
         super.setModelValue(newModelValue, fromClient);
