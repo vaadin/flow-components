@@ -307,7 +307,8 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
     @Override
     public void setValue(BigDecimal value) {
         BigDecimal oldValue = getValue();
-        if (oldValue == null && value == null && !getInputElementValue().isEmpty()) {
+        if (oldValue == null && value == null
+                && !getInputElementValue().isEmpty()) {
             // When the value is programmatically cleared while the field
             // contains an unparsable input, ValueChangeEvent isn't fired,
             // so we need to call setModelValue manually to clear the bad
@@ -336,7 +337,8 @@ public class BigDecimalField extends TextFieldBase<BigDecimalField, BigDecimal>
         }
 
         // Case: setValue(null) is called on a field with unparsable input
-        if (!fromClient && isModelValueRemainedEmpty && !getInputElementValue().isEmpty()) {
+        if (!fromClient && isModelValueRemainedEmpty
+                && !getInputElementValue().isEmpty()) {
             setInputElementValue("");
             validate();
             fireValidationStatusChangeEvent();
