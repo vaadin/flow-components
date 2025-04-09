@@ -52,9 +52,9 @@ import elemental.json.JsonObject;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha9")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/context-menu", version = "24.8.0-alpha8")
+@NpmPackage(value = "@vaadin/context-menu", version = "24.8.0-alpha9")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")
@@ -71,6 +71,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     private String openOnEventName = "vaadin-contextmenu";
     private Registration targetBeforeOpenRegistration;
     private Registration targetAttachRegistration;
+    private Registration targetDetachRegistration;
     private PendingJavaScriptResult targetJsRegistration;
 
     private boolean autoAddedToTheUi;
@@ -120,12 +121,10 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         if (getTarget() != null) {
             targetBeforeOpenRegistration.remove();
             targetAttachRegistration.remove();
+            targetDetachRegistration.remove();
             getTarget().getElement().executeJs(
                     "if (this.$contextMenuTargetConnector) { this.$contextMenuTargetConnector.removeConnector() }");
-            if (isTargetJsPending()) {
-                targetJsRegistration.cancelExecution();
-                targetJsRegistration = null;
-            }
+            cancelTargetJavascriptExecution();
         }
 
         this.target = target;
@@ -142,6 +141,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         target.getUI().ifPresent(this::onTargetAttach);
         targetAttachRegistration = target
                 .addAttachListener(e -> onTargetAttach(e.getUI()));
+        targetDetachRegistration = target
+                .addDetachListener(e -> cancelTargetJavascriptExecution());
 
         // Server round-trip before opening the overlay
         targetBeforeOpenRegistration = target.getElement()
@@ -424,9 +425,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      */
     private void requestTargetJsExecutions() {
         if (target != null) {
-            if (isTargetJsPending()) {
-                targetJsRegistration.cancelExecution();
-            }
+            cancelTargetJavascriptExecution();
             targetJsRegistration = target.getElement().executeJs(
                     "window.Vaadin.Flow.contextMenuTargetConnector.init(this);"
                             + "this.$contextMenuTargetConnector.updateOpenOn($0);",
@@ -434,9 +433,12 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         }
     }
 
-    private boolean isTargetJsPending() {
-        return targetJsRegistration != null
-                && !targetJsRegistration.isSentToBrowser();
+    private void cancelTargetJavascriptExecution() {
+        if (targetJsRegistration != null
+                && !targetJsRegistration.isSentToBrowser()) {
+            targetJsRegistration.cancelExecution();
+        }
+        targetJsRegistration = null;
     }
 
     private void beforeOpenHandler(DomEvent event) {
