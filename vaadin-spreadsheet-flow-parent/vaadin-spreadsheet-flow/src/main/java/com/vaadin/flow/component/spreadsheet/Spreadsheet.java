@@ -4004,7 +4004,7 @@ public class Spreadsheet extends Component
     public void setRowHeight(int index, float height) {
         doSetRowHeight(index, height);
         var isRowHidden = height == 0.0F;
-        reloadSheetStyles(isRowHidden, isRowHidden);
+        reloadSheetStyles(true, isRowHidden);
     }
 
     /**
@@ -4024,7 +4024,7 @@ public class Spreadsheet extends Component
                 isAnyRowHidden.set(true);
             }
         });
-        reloadSheetStyles(isAnyRowHidden.get(), isAnyRowHidden.get());
+        reloadSheetStyles(true, isAnyRowHidden.get());
     }
 
     private void doSetRowHeight(int index, float height) {
