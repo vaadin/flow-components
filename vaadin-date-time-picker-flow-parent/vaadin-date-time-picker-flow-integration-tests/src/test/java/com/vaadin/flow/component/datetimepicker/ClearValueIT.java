@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.datetimepicker;
 
+import static com.vaadin.flow.component.datetimepicker.ClearValuePage.CLEAR_AND_SET_VALUE_BUTTON;
 import static com.vaadin.flow.component.datetimepicker.ClearValuePage.CLEAR_BUTTON;
 
 import org.junit.Assert;
@@ -69,6 +70,18 @@ public class ClearValueIT extends AbstractComponentIT {
         $("button").id(CLEAR_BUTTON).click();
         Assert.assertEquals("", dateInput.getPropertyString("value"));
         Assert.assertEquals("", timeInput.getPropertyString("value"));
+    }
+
+    @Test
+    public void setDateAndTimeInputValue_clearAndSetSameValue_inputValueIsPresent() {
+        dateInput.sendKeys("1/1/2022", Keys.ENTER);
+        timeInput.sendKeys("12:00 PM", Keys.ENTER);
+        Assert.assertEquals("1/1/2022", dateInput.getPropertyString("value"));
+        Assert.assertEquals("12:00 PM", timeInput.getPropertyString("value"));
+
+        $("button").id(CLEAR_AND_SET_VALUE_BUTTON).click();
+        Assert.assertEquals("1/1/2022", dateInput.getPropertyString("value"));
+        Assert.assertEquals("12:00 PM", timeInput.getPropertyString("value"));
     }
 
     @Test
