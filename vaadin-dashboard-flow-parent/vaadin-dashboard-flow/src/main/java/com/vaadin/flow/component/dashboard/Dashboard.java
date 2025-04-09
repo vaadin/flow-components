@@ -57,11 +57,11 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dashboard")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha9")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha10")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "24.8.0-alpha9")
+@NpmPackage(value = "@vaadin/dashboard", version = "24.8.0-alpha10")
 public class Dashboard extends Component implements HasWidgets, HasSize {
 
     private static final ThreadLocal<Boolean> suppressClientUpdates = ThreadLocal
@@ -517,6 +517,30 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     @Override
     public boolean isVisible() {
         return true;
+    }
+
+    /**
+     * Sets the root heading level used by sections and widgets, which controls
+     * their <code>aria-level</code> attributes on title elements. The nested
+     * widgets will have their {@code aria-level} one higher than the root
+     * heading level.
+     * <p>
+     * For example, if root heading level is set to {@code 1}:
+     * <ul>
+     * <li>Sections and non-nested widgets will have {@code aria-level="1"}</li>
+     * <li>Nested widgets will have {@code aria-level="2"}</li>
+     * </ul>
+     * Setting it {@code null} resets it to the default value of {@code 2}.
+     *
+     * @param rootHeadingLevel
+     *            the root heading level property, {@code null} to remove
+     */
+    public void setRootHeadingLevel(Integer rootHeadingLevel) {
+        if (rootHeadingLevel == null) {
+            getElement().removeProperty("rootHeadingLevel");
+        } else {
+            getElement().setProperty("rootHeadingLevel", rootHeadingLevel);
+        }
     }
 
     @Override
