@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.masterdetaillayout.testbench.MasterDetailLayoutElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
@@ -32,7 +33,7 @@ public class MasterDetailLayoutIT extends AbstractComponentIT {
 
     @Test
     public void basics() {
-        TestBenchElement layout = $("vaadin-master-detail-layout")
+        MasterDetailLayoutElement layout = $(MasterDetailLayoutElement.class)
                 .waitForFirst();
 
         boolean hasShadowRoot = (Boolean) executeScript(
@@ -44,8 +45,12 @@ public class MasterDetailLayoutIT extends AbstractComponentIT {
         Assert.assertTrue(hasShadowRoot);
         Assert.assertEquals("vaadin-master-detail-layout", componentName);
 
-        Assert.assertTrue(layout.$("div").withAttribute("slot", "").exists());
-        Assert.assertTrue(
-                layout.$("div").withAttribute("slot", "detail").exists());
+        TestBenchElement master = layout.getMaster();
+        TestBenchElement detail = layout.getDetail();
+
+        Assert.assertNotNull(master);
+        Assert.assertEquals("Master content", master.getText());
+        Assert.assertNotNull(detail);
+        Assert.assertEquals("Detail content", detail.getText());
     }
 }
