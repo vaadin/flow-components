@@ -15,26 +15,17 @@
  */
 package com.vaadin.flow.component.confirmdialog.tests;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.openqa.selenium.By;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.Route;
 
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
+@Route("vaadin-confirm-dialog/confirm-dialog-opened-after-forwarding-source")
+public class ConfirmDialogOpenedAfterForwardingSourcePage extends Div
+        implements BeforeEnterObserver {
 
-@TestPath("vaadin-confirm-dialog/overlay-remains-in-dom-after-detach-view")
-public class OverlayForwardingIT extends AbstractComponentIT {
-
-    @Before
-    public void init() {
-        open();
-    }
-
-    @Test
-    public void forwardPageInBeforeEnter_newPageDoesNotContainVaadinConfirmDialogOverlay() {
-        waitForElementPresent(By.id("forwarded-view"));
-        Assert.assertFalse(
-                isElementPresent(By.tagName("vaadin-confirm-dialog-overlay")));
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        event.forwardTo(ConfirmDialogOpenedAfterForwardingTargetPage.class);
     }
 }
