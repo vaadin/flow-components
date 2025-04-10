@@ -15,14 +15,22 @@
  */
 package com.vaadin.flow.component.notification.tests;
 
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-notification/forwarding-target")
-public class ContainerForwardingTargetPage extends Div {
-    public ContainerForwardingTargetPage() {
-        setId("forwarded-view");
-        add(new Text("Forwarded"));
+@Route("vaadin-notification/notification-opened-before-forwarding-source")
+public class NotificationOpenedBeforeForwardingSourcePage extends Div
+        implements BeforeEnterObserver {
+
+    public NotificationOpenedBeforeForwardingSourcePage() {
+        new Notification().open();
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        event.forwardTo(NotificationOpenedBeforeForwardingTargetPage.class);
     }
 }

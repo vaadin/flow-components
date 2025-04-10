@@ -23,8 +23,8 @@ import org.openqa.selenium.By;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-notification/container-remains-in-dom-after-detach-view")
-public class ContainerForwardingIT extends AbstractComponentIT {
+@TestPath("vaadin-notification/notification-opened-before-forwarding-source")
+public class NotificationOpenedBeforeForwardingIT extends AbstractComponentIT {
 
     @Before
     public void init() {
@@ -32,7 +32,7 @@ public class ContainerForwardingIT extends AbstractComponentIT {
     }
 
     @Test
-    public void forwardPageInBeforeEnter_newPageDoesNotContainVaadinNotificationContainer() {
+    public void openNotification_forward_noNotificationPresent() {
         waitForElementPresent(By.id("forwarded-view"));
         Assert.assertFalse(
                 isElementPresent(By.tagName("vaadin-notification-container")));
