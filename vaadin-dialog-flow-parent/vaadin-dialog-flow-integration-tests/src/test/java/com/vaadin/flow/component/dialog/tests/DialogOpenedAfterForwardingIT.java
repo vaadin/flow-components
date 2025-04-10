@@ -15,12 +15,13 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-dialog/dialog-opened-after-forwarding-source")
 public class DialogOpenedAfterForwardingIT extends AbstractComponentIT {

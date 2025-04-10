@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
