@@ -15,14 +15,22 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
-import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-dialog/forwarding-target")
-public class OverlayForwardingTargetPage extends Div {
-    public OverlayForwardingTargetPage() {
-        setId("forwarded-view");
-        add(new Text("Forwarded"));
+@Route("vaadin-dialog/dialog-opened-before-forwarding-source")
+public class DialogOpenedBeforeForwardingSourcePage extends Div
+        implements BeforeEnterObserver {
+
+    public DialogOpenedBeforeForwardingSourcePage() {
+        new Dialog().open();
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        event.forwardTo(DialogOpenedBeforeForwardingTargetPage.class);
     }
 }

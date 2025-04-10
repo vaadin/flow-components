@@ -15,21 +15,26 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
-import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.Route;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.openqa.selenium.By;
 
-@Route("vaadin-dialog/overlay-remains-in-dom-after-detach-view")
-public class OverlayForwardingSourcePage extends Dialog
-        implements BeforeEnterObserver {
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        event.forwardTo(OverlayForwardingTargetPage.class);
+@TestPath("vaadin-dialog/dialog-opened-before-forwarding-source")
+public class DialogOpenedBeforeForwardingIT extends AbstractComponentIT {
+
+    @Before
+    public void init() {
+        open();
     }
 
-    public OverlayForwardingSourcePage() {
-        setOpened(true);
+    @Test
+    public void openDialog_forward_noDialogPresent() {
+        waitForElementPresent(By.id("forwarded-view"));
+        Assert.assertFalse(
+                isElementPresent(By.tagName("vaadin-dialog-overlay")));
     }
 }
