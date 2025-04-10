@@ -23,8 +23,8 @@ import org.openqa.selenium.By;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-login/overlay-remains-in-dom-after-detach-view")
-public class OverlayForwardingIT extends AbstractComponentIT {
+@TestPath("vaadin-login/login-overlay-opened-before-forwarding-source")
+public class LoginOverlayOpenedBeforeForwardingIT extends AbstractComponentIT {
 
     @Before
     public void init() {
@@ -32,7 +32,7 @@ public class OverlayForwardingIT extends AbstractComponentIT {
     }
 
     @Test
-    public void forwardPageInBeforeEnter_newPageDoesNotContainVaadinLoginOverlay() {
+    public void openOverlay_forward_noOverlayPresent() {
         waitForElementPresent(By.id("forwarded-view"));
         Assert.assertFalse(
                 isElementPresent(By.tagName("vaadin-login-overlay")));
