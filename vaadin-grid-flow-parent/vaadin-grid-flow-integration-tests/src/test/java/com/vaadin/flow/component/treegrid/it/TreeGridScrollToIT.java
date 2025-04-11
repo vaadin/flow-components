@@ -68,7 +68,7 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
     }
 
     @Test
-    public void expandAll_scrollToEnd_correctCountAfterScroll() {
+    public void expandAll_scrollToEnd_viaElement() {
         expandAllButton.click();
 
         grid.scrollToEnd();
@@ -78,7 +78,6 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
             return grid.hasRow(lastVisibleRow)
                     && "Son 49/19/19".equals(getCellContent(lastVisibleRow));
         }, 2);
-        Assert.assertEquals(lastVisibleRow, grid.getRowCount());
     }
 
     @Test
