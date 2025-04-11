@@ -320,9 +320,7 @@ public class TreeGridElement extends GridElement {
     }
 
     /**
-     * Scrolls the TreeGrid to the end. After this the row count is correct.
-     *
-     * @see #getRowCount()
+     * Scrolls the TreeGrid to the end.
      */
     public void scrollToEnd() {
         executeScript(
