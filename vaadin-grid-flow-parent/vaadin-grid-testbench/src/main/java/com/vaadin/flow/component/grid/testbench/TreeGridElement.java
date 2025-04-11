@@ -318,4 +318,13 @@ public class TreeGridElement extends GridElement {
     public int getRowCount() {
         return super.getRowCount();
     }
+
+    /**
+     * Scrolls the TreeGrid to the end.
+     */
+    public void scrollToEnd() {
+        executeScript(
+                "arguments[0].scrollToIndex(...Array(10).fill(Infinity));",
+                this);
+    }
 }
