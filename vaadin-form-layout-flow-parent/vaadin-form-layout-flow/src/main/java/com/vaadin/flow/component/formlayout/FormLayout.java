@@ -73,10 +73,17 @@ import elemental.json.JsonValue;
  * <p>
  * To avoid manually dealing with responsive breakpoints, Form Layout provides
  * an auto-responsive mode that automatically creates and adjusts fixed-width
- * columns based on the container's available space. The
- * {@link #setColumnWidth(String) columnWidth} and {@link #setMaxColumns(int)
- * maxColumns} properties control the column width (13em by default) and the
- * maximum number of columns (10 by default) that the Form Layout can create.
+ * columns based on the container's available space.
+ * <p>
+ * The property
+ * <ul>
+ * <li>{@link #setColumnWidth(String) columnWidth} controls the column width
+ * (13em by default).</li>
+ * <li>{@link #setMaxColumns(int) maxColumns} controls the maximum number of
+ * columns (10 by default) that the Form Layout can create.</li>
+ * <li>{@link #setMinColumns(int) minColumns} controls the minimum number of
+ * columns (1 by default) that the Form Layout will create.</li>
+ * </ul>
  * <p>
  * The auto-responsive mode is disabled by default. To enable it for an
  * individual instance, set the {@link #setAutoResponsive(boolean)
@@ -857,11 +864,12 @@ public class FormLayout extends Component
     /**
      * When set to {@code true}, the component automatically creates and adjusts
      * columns based on the container's width. Columns have a fixed width
-     * defined by {@link #setColumnWidth(String)} and their number increases up
-     * to the limit set by {@link #setMaxColumns(int)}. The component
-     * dynamically adjusts the number of columns as the container size changes.
-     * When this mode is enabled, {@link ResponsiveStep Responsive steps} are
-     * ignored.
+     * defined by {@link #setColumnWidth(String)}. The number of columns
+     * increases up to the limit set by {@link #setMaxColumns(int)}. The minimum
+     * number of columns will be created is set by {@link #setMinColumns(int)}.
+     * The component dynamically adjusts the number of columns as the container
+     * size changes. When this mode is enabled, {@link ResponsiveStep Responsive
+     * steps} are ignored.
      * <p>
      * By default, each field is placed on a new row. To organize fields into
      * rows, there are two options:
@@ -1006,6 +1014,33 @@ public class FormLayout extends Component
      */
     public int getMaxColumns() {
         return getElement().getProperty("maxColumns", 0);
+    }
+
+    /**
+     * Sets the minimum number of columns that the component will create.
+     * Determines the least number of columns this component will create.
+     * <p>
+     * By default, the web component uses a minimum of 1 column.
+     * <p>
+     * This setting only applies when {@link #setAutoResponsive(boolean)} is
+     * enabled.
+     *
+     * @param minColumns
+     *            the minimum number of columns
+     */
+    public void setMinColumns(int minColumns) {
+        getElement().setProperty("minColumns", minColumns);
+    }
+
+    /**
+     * Gets the minimum number of columns that the component can create when
+     * {@code #setAutoResponsive(boolean)} is enabled.
+     *
+     * @return the minimum number of columns or 0 if not explicitly set
+     * @see #setMinColumns(int)
+     */
+    public int getMinColumns() {
+        return getElement().getProperty("minColumns", 0);
     }
 
     /**
