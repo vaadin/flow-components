@@ -255,6 +255,23 @@ public class FormLayoutTest {
     }
 
     @Test
+    public void minColumnsPropertyIsEmptyByDefault() {
+        var formLayout = new FormLayout();
+        Assert.assertEquals(0, formLayout.getMinColumns());
+        Assert.assertFalse(formLayout.getElement().hasProperty("minColumns"));
+    }
+
+    @Test
+    public void setMinColumns_minColumnsIsCorrectlyUpdated() {
+        var formLayout = new FormLayout();
+        var minColumns = 4;
+        formLayout.setMinColumns(minColumns);
+        Assert.assertEquals(minColumns, formLayout.getMinColumns());
+        Assert.assertEquals(minColumns,
+                formLayout.getElement().getProperty("minColumns", 0));
+    }
+
+    @Test
     public void setExpandColumns_isExpandColumns() {
         FormLayout formLayout = new FormLayout();
         Assert.assertFalse(
