@@ -75,14 +75,15 @@ import elemental.json.JsonValue;
  * an auto-responsive mode that automatically creates and adjusts fixed-width
  * columns based on the container's available space.
  * <p>
- * The property
+ * To control the number of columns and their widths, you can use the following
+ * properties:
  * <ul>
- * <li>{@link #setColumnWidth(String) columnWidth} controls the column width
+ * <li>{@link #setColumnWidth(String) columnWidth} - controls the column width
  * (13em by default).</li>
- * <li>{@link #setMaxColumns(int) maxColumns} controls the maximum number of
- * columns (10 by default) that the Form Layout can create.</li>
- * <li>{@link #setMinColumns(int) minColumns} controls the minimum number of
- * columns (1 by default) that the Form Layout will create.</li>
+ * <li>{@link #setMaxColumns(int) maxColumns} - controls the maximum number of
+ * columns that the layout can create (10 by default).</li>
+ * <li>{@link #setMinColumns(int) minColumns} - controls the minimum number of
+ * columns that the layout will create (1 by default).</li>
  * </ul>
  * <p>
  * The auto-responsive mode is disabled by default. To enable it for an
