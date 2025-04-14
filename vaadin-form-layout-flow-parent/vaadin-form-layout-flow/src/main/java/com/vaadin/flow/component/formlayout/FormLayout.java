@@ -1019,7 +1019,6 @@ public class FormLayout extends Component
 
     /**
      * Sets the minimum number of columns that the component will create.
-     * Determines the least number of columns this component will create.
      * <p>
      * By default, the web component uses a minimum of 1 column.
      * <p>
