@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.notification.tests;
+package com.vaadin.flow.component.confirmdialog.tests;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,8 +23,8 @@ import org.openqa.selenium.By;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-notification/container-remains-in-dom-after-detach-view")
-public class ContainerForwardingIT extends AbstractComponentIT {
+@TestPath("vaadin-confirm-dialog/confirm-dialog-opened-before-forwarding-source")
+public class ConfirmDialogOpenedBeforeForwardingIT extends AbstractComponentIT {
 
     @Before
     public void init() {
@@ -32,9 +32,9 @@ public class ContainerForwardingIT extends AbstractComponentIT {
     }
 
     @Test
-    public void forwardPageInBeforeEnter_newPageDoesNotContainVaadinNotificationContainer() {
+    public void openDialog_forward_noDialogPresent() {
         waitForElementPresent(By.id("forwarded-view"));
         Assert.assertFalse(
-                isElementPresent(By.tagName("vaadin-notification-container")));
+                isElementPresent(By.tagName("vaadin-confirm-dialog-overlay")));
     }
 }

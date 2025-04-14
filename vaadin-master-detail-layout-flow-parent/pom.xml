@@ -12,6 +12,7 @@
     <description>Vaadin Master Detail Layout Parent</description>
     <modules>
         <module>vaadin-master-detail-layout-flow</module>
+        <module>vaadin-master-detail-layout-testbench</module>
     </modules>
     <dependencies/>
     <profiles>

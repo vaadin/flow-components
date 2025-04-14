@@ -15,21 +15,17 @@
  */
 package com.vaadin.flow.component.confirmdialog.tests;
 
-import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-confirm-dialog/overlay-remains-in-dom-after-detach-view")
-public class OverlayForwardingSourcePage extends ConfirmDialog
+@Route("vaadin-confirm-dialog/confirm-dialog-opened-after-forwarding-source")
+public class ConfirmDialogOpenedAfterForwardingSourcePage extends Div
         implements BeforeEnterObserver {
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        event.forwardTo(OverlayForwardingTargetPage.class);
-    }
-
-    public OverlayForwardingSourcePage() {
-        setOpened(true);
+        event.forwardTo(ConfirmDialogOpenedAfterForwardingTargetPage.class);
     }
 }
