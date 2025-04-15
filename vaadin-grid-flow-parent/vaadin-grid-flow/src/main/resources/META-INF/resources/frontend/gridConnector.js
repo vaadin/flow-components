@@ -358,9 +358,9 @@
 
         // Determine what to fetch based on scroll position and not only
         // what grid asked for
-		const visibleRows = grid.__getViewportRows();
-		let start = visibleRows.length > 0 ? visibleRows[0].index : 0;
-		let end = visibleRows.length > 0 ? visibleRows[visibleRows.length - 1].index : 0;
+        const visibleRows = grid.__getViewportRows();
+        let start = visibleRows.length > 0 ? visibleRows[0].index : 0;
+        let end = visibleRows.length > 0 ? visibleRows[visibleRows.length - 1].index : 0;
 
         // The buffer size could be multiplied by some constant defined by the user,
         // if he needs to reduce the number of items sent to the Grid to improve performance
@@ -370,11 +370,11 @@
         let firstNeededIndex = Math.max(0, start - buffer);
         let lastNeededIndex = Math.min(end + buffer, grid._effectiveSize);
  
-		let pageRange = [null, null];
+        let pageRange = [null, null];
         for(let idx = firstNeededIndex; idx <= lastNeededIndex; idx++) {
-	      let sameLevelPage = grid.$connector._getPageIfSameLevel(parentKey, idx, pageRange[0]);
+          let sameLevelPage = grid.$connector._getPageIfSameLevel(parentKey, idx, pageRange[0]);
           pageRange[0] = Math.min(pageRange[0] != null ? pageRange[0] : sameLevelPage, sameLevelPage);
-		  sameLevelPage = grid.$connector._getPageIfSameLevel(parentKey, idx, pageRange[1]);
+          sameLevelPage = grid.$connector._getPageIfSameLevel(parentKey, idx, pageRange[1]);
           pageRange[1] = Math.max(pageRange[1] != null ? pageRange[1] : sameLevelPage, sameLevelPage);
         }
 
