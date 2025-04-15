@@ -288,21 +288,6 @@
         }
       })
 
-      grid.$connector._getSameLevelPage = tryCatchWrapper(function (parentKey, currentCache, currentCacheItemIndex) {
-        const currentParentKey = currentCache.parentItem ? grid.getItemId(currentCache.parentItem) : root;
-        if (currentParentKey === parentKey) {
-          // Level match found, return the page number.
-          return Math.floor(currentCacheItemIndex / grid.pageSize);
-        }
-        const { parentCache, parentCacheIndex } = currentCache;
-        if (!parentCache) {
-          // There is no parent cache to match level
-          return null;
-        }
-        // Traverse the tree upwards until a match is found or the end is reached
-        return this._getSameLevelPage(parentKey, parentCache, parentCacheIndex);
-      });
-	  
       grid.$connector.getCacheByKey = tryCatchWrapper(function(key) {
         let cacheAndIndex = grid._cache.getCacheAndIndexByKey(key);
         if(cacheAndIndex) {
@@ -386,7 +371,7 @@
  
         let pageRange = [null, null];
         for(let idx = firstNeededIndex; idx <= lastNeededIndex; idx++) {
-          const sameLevelPage = grid.$connector._getSameLevelPage(parentKey, cache, idx);
+          const sameLevelPage = grid.$connector._getPageIfSameLevel(parentKey, idx, page);
           if (sameLevelPage === null) {
             continue;
           }
@@ -409,7 +394,7 @@
         if (lastRequestedRange[0] != pageRange[0] || lastRequestedRange[1] != pageRange[1]) {
           lastRequestedRanges[parentKey] = pageRange;
           let pageCount = pageRange[1] - pageRange[0] + 1;
-          let minCount = Math.floor(buffer / grid.pageSize) + 1;
+          let minCount = Math.floor(buffer / grid.pageSize) + 2;
           pageCount = Math.max(pageCount, minCount);
           fetch(pageRange[0] * grid.pageSize, pageCount * grid.pageSize);
         }
