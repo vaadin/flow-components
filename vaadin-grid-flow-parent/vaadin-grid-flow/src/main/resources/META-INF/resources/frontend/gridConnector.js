@@ -350,8 +350,8 @@
       })
 
       grid.$connector.fetchPage = tryCatchWrapper(function(fetch, page, parentKey) {
-		// Adjust the requested page to be within the valid range in case
-		// the grid size has changed while fetchPage was debounced.
+        // Adjust the requested page to be within the valid range in case
+        // the grid size has changed while fetchPage was debounced.
         if (parentKey === root) {
           page = Math.min(page, Math.floor((grid.size - 1) / grid.pageSize));
         }
