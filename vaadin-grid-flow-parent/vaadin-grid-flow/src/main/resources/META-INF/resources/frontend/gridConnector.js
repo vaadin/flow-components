@@ -394,7 +394,12 @@
         if (lastRequestedRange[0] != pageRange[0] || lastRequestedRange[1] != pageRange[1]) {
           lastRequestedRanges[parentKey] = pageRange;
           let pageCount = pageRange[1] - pageRange[0] + 1;
-          let minCount = Math.floor(buffer / grid.pageSize) + 2;
+          // Ensure that enough pages are fetched if pageSize is too small
+          let minCount = Math.floor(buffer / grid.pageSize) + 1;
+          if (parentKey != root) {
+            // Without this adjustment large TreeGrid scrolling fails
+            minCount++;
+          }
           pageCount = Math.max(pageCount, minCount);
           fetch(pageRange[0] * grid.pageSize, pageCount * grid.pageSize);
         }
