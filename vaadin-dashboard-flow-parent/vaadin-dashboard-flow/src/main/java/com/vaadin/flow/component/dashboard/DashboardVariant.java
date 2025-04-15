@@ -19,7 +19,8 @@ package com.vaadin.flow.component.dashboard;
 public enum DashboardVariant {
     
     LUMO_SHADED_BACKGROUND("shaded-background"),
-    LUMO_ELEVATED_WIDGETS("elvated-widgets");
+    LUMO_ELEVATED_WIDGETS("elvated-widgets"),
+    LUMO_FLAT_WIDGETS("flat-widgets");
 
     private final String variant;
 
