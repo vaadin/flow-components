@@ -350,37 +350,51 @@
       })
 
       grid.$connector.fetchPage = tryCatchWrapper(function(fetch, page, parentKey) {
+		// Adjust the requested page to be within the valid range in case
+		// the grid size has changed while fetchPage was debounced.
+        if (parentKey === root) {
+          page = Math.min(page, Math.floor((grid.size - 1) / grid.pageSize));
+        }
+
         // Determine what to fetch based on scroll position and not only
         // what grid asked for
+		const visibleRows = grid.__getViewportRows();
+		let start = visibleRows.length > 0 ? visibleRows[0].index : 0;
+		let end = visibleRows.length > 0 ? visibleRows[visibleRows.length - 1].index : 0;
 
         // The buffer size could be multiplied by some constant defined by the user,
         // if he needs to reduce the number of items sent to the Grid to improve performance
         // or to increase it to make Grid smoother when scrolling
-        let start = grid._virtualStart;
-        let end = grid._virtualEnd;
         let buffer = end - start;
 
-        let firstNeededIndex = Math.max(0, start + grid._vidxOffset - buffer);
-        let lastNeededIndex = Math.min(end + grid._vidxOffset + buffer, grid._effectiveSize);
-
-        let firstNeededPage = page;
-        let lastNeededPage = page;
+        let firstNeededIndex = Math.max(0, start - buffer);
+        let lastNeededIndex = Math.min(end + buffer, grid._effectiveSize);
+ 
+		let pageRange = [null, null];
         for(let idx = firstNeededIndex; idx <= lastNeededIndex; idx++) {
-          firstNeededPage = Math.min(firstNeededPage, grid.$connector._getPageIfSameLevel(parentKey, idx, firstNeededPage));
-          lastNeededPage = Math.max(lastNeededPage, grid.$connector._getPageIfSameLevel(parentKey, idx, lastNeededPage));
+	      let sameLevelPage = grid.$connector._getPageIfSameLevel(parentKey, idx, pageRange[0]);
+          pageRange[0] = Math.min(pageRange[0] != null ? pageRange[0] : sameLevelPage, sameLevelPage);
+		  sameLevelPage = grid.$connector._getPageIfSameLevel(parentKey, idx, pageRange[1]);
+          pageRange[1] = Math.max(pageRange[1] != null ? pageRange[1] : sameLevelPage, sameLevelPage);
         }
 
-        let firstPage = Math.max(0,  firstNeededPage);
-        let lastPage = (parentKey !== root) ? lastNeededPage: Math.min(lastNeededPage, Math.floor(grid.size / grid.pageSize));
-        let lastRequestedRange = lastRequestedRanges[parentKey];
-        if(!lastRequestedRange) {
-          lastRequestedRange = [-1, -1];
-        }
-        if (lastRequestedRange[0] != firstPage || lastRequestedRange[1] != lastPage) {
-          lastRequestedRange = [firstPage, lastPage];
+        // When the viewport doesn't contain the requested page or it doesn't contain any items from
+        // the requested level at all, it means that the scroll position has changed while fetchPage
+        // was debounced. For example, it can happen if the user scrolls the grid to the bottom and
+        // then immediately back to the top. In this case, the request for the last page will be left
+        // hanging. To avoid this, as a workaround, we reset the range to only include the requested page
+        // to make sure all hanging requests are resolved. After that, the grid requests the first page
+        // or whatever in the viewport again.
+        if (pageRange.some((p) => p === null) || page < pageRange[0] || page > pageRange[1]) {
+          pageRange = [page, page];
+        }		
+
+        let lastRequestedRange = lastRequestedRanges[parentKey] || [-1, -1];
+        if (lastRequestedRange[0] != pageRange[0] || lastRequestedRange[1] != pageRange[1]) {
+          lastRequestedRange = pageRange;
           lastRequestedRanges[parentKey] = lastRequestedRange;
-          let count = lastPage - firstPage + 1;
-          fetch(firstPage * grid.pageSize, count * grid.pageSize);
+          let pageCount = pageRange[1] - pageRange[0] + 1;
+          fetch(pageRange[0] * grid.pageSize, pageCount * grid.pageSize);
         }
       })
 
