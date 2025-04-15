@@ -288,6 +288,21 @@
         }
       })
 
+      grid.$connector._getSameLevelPage = tryCatchWrapper(function (parentKey, currentCache, currentCacheItemIndex) {
+        const currentParentKey = currentCache.parentItem ? grid.getItemId(currentCache.parentItem) : root;
+        if (currentParentKey === parentKey) {
+          // Level match found, return the page number.
+          return Math.floor(currentCacheItemIndex / grid.pageSize);
+        }
+        const { parentCache, parentCacheIndex } = currentCache;
+        if (!parentCache) {
+          // There is no parent cache to match level
+          return null;
+        }
+        // Traverse the tree upwards until a match is found or the end is reached
+        return this._getSameLevelPage(parentKey, parentCache, parentCacheIndex);
+      });
+	  
       grid.$connector.getCacheByKey = tryCatchWrapper(function(key) {
         let cacheAndIndex = grid._cache.getCacheAndIndexByKey(key);
         if(cacheAndIndex) {
@@ -350,32 +365,33 @@
       })
 
       grid.$connector.fetchPage = tryCatchWrapper(function(fetch, page, parentKey) {
-        // Adjust the requested page to be within the valid range in case
-        // the grid size has changed while fetchPage was debounced.
+		// Adjust the requested page to be within the valid range in case
+		// the grid size has changed while fetchPage was debounced.
         if (parentKey === root) {
           page = Math.min(page, Math.floor((grid.size - 1) / grid.pageSize));
         }
 
         // Determine what to fetch based on scroll position and not only
         // what grid asked for
-        const visibleRows = grid.__getViewportRows();
-        let start = visibleRows.length > 0 ? visibleRows[0].index : 0;
-        let end = visibleRows.length > 0 ? visibleRows[visibleRows.length - 1].index : 0;
+		let start = grid._virtualStart;
+		let end = grid._virtualEnd;
 
         // The buffer size could be multiplied by some constant defined by the user,
         // if he needs to reduce the number of items sent to the Grid to improve performance
         // or to increase it to make Grid smoother when scrolling
         let buffer = end - start;
 
-        let firstNeededIndex = Math.max(0, start - buffer);
-        let lastNeededIndex = Math.min(end + buffer, grid._effectiveSize);
+        let firstNeededIndex = Math.max(0, start + grid._vidxOffset - buffer);
+        let lastNeededIndex = Math.min(end + grid._vidxOffset + buffer, grid._effectiveSize);
  
-        let pageRange = [null, null];
+		let pageRange = [null, null];
         for(let idx = firstNeededIndex; idx <= lastNeededIndex; idx++) {
-          let sameLevelPage = grid.$connector._getPageIfSameLevel(parentKey, idx, pageRange[0]);
-          pageRange[0] = Math.min(pageRange[0] != null ? pageRange[0] : sameLevelPage, sameLevelPage);
-          sameLevelPage = grid.$connector._getPageIfSameLevel(parentKey, idx, pageRange[1]);
-          pageRange[1] = Math.max(pageRange[1] != null ? pageRange[1] : sameLevelPage, sameLevelPage);
+		  const sameLevelPage = grid.$connector._getSameLevelPage(parentKey, cache, idx);
+          if (sameLevelPage === null) {
+            continue;
+          }
+		  pageRange[0] = Math.min(pageRange[0] ? pageRange[0] : sameLevelPage, sameLevelPage);
+          pageRange[1] = Math.max(pageRange[1] ? pageRange[1] : sameLevelPage, sameLevelPage);
         }
 
         // When the viewport doesn't contain the requested page or it doesn't contain any items from
@@ -391,12 +407,13 @@
 
         let lastRequestedRange = lastRequestedRanges[parentKey] || [-1, -1];
         if (lastRequestedRange[0] != pageRange[0] || lastRequestedRange[1] != pageRange[1]) {
-          lastRequestedRange = pageRange;
-          lastRequestedRanges[parentKey] = lastRequestedRange;
+          lastRequestedRanges[parentKey] = pageRange;
           let pageCount = pageRange[1] - pageRange[0] + 1;
+		  let minCount = Math.floor(buffer / grid.pageSize) + 1;
+		  pageCount = Math.max(pageCount, minCount);
           fetch(pageRange[0] * grid.pageSize, pageCount * grid.pageSize);
         }
-      })
+      });
 
       grid.dataProvider = tryCatchWrapper(function(params, callback) {
         if (params.pageSize != grid.pageSize) {
