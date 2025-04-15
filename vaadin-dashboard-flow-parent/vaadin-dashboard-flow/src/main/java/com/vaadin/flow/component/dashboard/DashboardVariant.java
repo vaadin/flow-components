@@ -16,7 +16,13 @@
 
 package com.vaadin.flow.component.dashboard;
 
-public enum DashboardVariant {
+import com.vaadin.flow.component.shared.ThemeVariant;
+
+/**
+ * The set of theme variants applicable to the {@code vaadin-dashboard} and
+ * {@code vaadin-dashboard-layout} components.
+ */
+public enum DashboardVariant implements ThemeVariant {
     
     LUMO_SHADED_BACKGROUND("shaded-background"),
     LUMO_ELEVATED_WIDGETS("elvated-widgets"),
