@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.login.tests;
+package com.vaadin.flow.component.notification.tests;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,8 +23,8 @@ import org.openqa.selenium.By;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-login/overlay-remains-in-dom-after-detach-view")
-public class OverlayForwardingIT extends AbstractComponentIT {
+@TestPath("vaadin-notification/notification-opened-before-forwarding-source")
+public class NotificationOpenedBeforeForwardingIT extends AbstractComponentIT {
 
     @Before
     public void init() {
@@ -32,9 +32,9 @@ public class OverlayForwardingIT extends AbstractComponentIT {
     }
 
     @Test
-    public void forwardPageInBeforeEnter_newPageDoesNotContainVaadinLoginOverlay() {
+    public void openNotification_forward_noNotificationPresent() {
         waitForElementPresent(By.id("forwarded-view"));
         Assert.assertFalse(
-                isElementPresent(By.tagName("vaadin-login-overlay")));
+                isElementPresent(By.tagName("vaadin-notification-container")));
     }
 }

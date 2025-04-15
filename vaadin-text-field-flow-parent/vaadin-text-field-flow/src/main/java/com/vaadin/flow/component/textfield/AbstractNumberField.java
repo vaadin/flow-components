@@ -57,14 +57,14 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
     private DomListenerRegistration inputListenerRegistration;
 
+    private String unparsableValue;
+
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<T>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
     private Validator<T> defaultValidator = (value, context) -> {
         boolean fromComponent = context == null;
 
-        boolean hasBadInput = valueEquals(value, getEmptyValue())
-                && !getInputElementValue().isEmpty();
-        if (hasBadInput) {
+        if (unparsableValue != null) {
             return ValidationResult.error(getI18nErrorMessage(
                     AbstractNumberFieldI18n::getBadInputErrorMessage));
         }
@@ -149,8 +149,14 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         addValueChangeListener(e -> validate());
 
         getElement().addEventListener("unparsable-change", e -> {
-            validate();
-            fireValidationStatusChangeEvent();
+            // The unparsable-change event is fired in the following situations:
+            // 1. User modifies input but it remains unparsable
+            // 2. User enters unparsable input in empty field
+            // 3. User clears unparsable input
+            //
+            // In all these cases, ValueChangeEvent isn't fired, so
+            // we call setModelValue manually to trigger validation.
+            setModelValue(getEmptyValue(), true);
         }).synchronizeProperty("_inputElementValue");
     }
 
@@ -166,10 +172,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
                 || ValueChangeMode.TIMEOUT.equals(valueChangeMode)) {
             inputListenerRegistration = getElement().addEventListener("input",
                     event -> {
-                        if (valueEquals(getValue(), getEmptyValue())) {
-                            validate();
-                            fireValidationStatusChangeEvent();
-                        }
+                        setModelValue(getValue(), true);
                     });
         }
 
@@ -229,44 +232,55 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     public void setValue(T value) {
         T oldValue = getValue();
-        boolean isOldValueEmpty = valueEquals(oldValue, getEmptyValue());
-        boolean isNewValueEmpty = valueEquals(value, getEmptyValue());
-        boolean isValueRemainedEmpty = isOldValueEmpty && isNewValueEmpty;
-        String oldInputElementValue = getInputElementValue();
-
-        // When the value is cleared programmatically, there is no change event
-        // that would synchronize _inputElementValue, so we reset it ourselves
-        // to prevent the following validation from treating this as bad input.
-        if (isNewValueEmpty) {
-            setInputElementValue("");
+        if (oldValue == null && value == null && unparsableValue != null) {
+            // When the value is programmatically cleared while the field
+            // contains an unparsable input, ValueChangeEvent isn't fired,
+            // so we need to call setModelValue manually to clear the bad
+            // input and trigger validation.
+            setModelValue(getEmptyValue(), false);
+            return;
         }
 
         super.setValue(value);
-
-        // Revalidate if setValue(null) didn't result in a value change but
-        // cleared bad input
-        if (isValueRemainedEmpty && !oldInputElementValue.isEmpty()) {
-            validate();
-            fireValidationStatusChangeEvent();
-        }
     }
 
     @Override
     protected void setModelValue(T newModelValue, boolean fromClient) {
         T oldModelValue = getValue();
+        String oldUnparsableValue = unparsableValue;
 
-        super.setModelValue(newModelValue, fromClient);
+        if (fromClient && newModelValue == null
+                && !getInputElementValue().isEmpty()) {
+            unparsableValue = getInputElementValue();
+        } else {
+            unparsableValue = null;
+        }
 
-        // Triggers validation when an unparsable or empty value changes to a
-        // value that is parsable on the client but still unparsable on the
-        // server, which can happen for example due to the difference in Integer
-        // limit in Java and JavaScript. In this case, there is no
-        // ValueChangeEvent and no unparsable-change event.
-        if (fromClient && valueEquals(oldModelValue, getEmptyValue())
-                && valueEquals(newModelValue, getEmptyValue())) {
+        boolean isModelValueRemainedEmpty = newModelValue == null
+                && oldModelValue == null;
+
+        // Cases:
+        // - User modifies input but it remains unparsable
+        // - User enters unparsable input in empty field
+        // - User clears unparsable input
+        // - User enters input that is parsable in JavaScript but unparsable in
+        // Java (e.g., integer overflow)
+        if (fromClient && isModelValueRemainedEmpty) {
             validate();
             fireValidationStatusChangeEvent();
+            return;
         }
+
+        // Case: setValue(null) is called on a field with unparsable input
+        if (!fromClient && isModelValueRemainedEmpty
+                && oldUnparsableValue != null) {
+            setInputElementValue("");
+            validate();
+            fireValidationStatusChangeEvent();
+            return;
+        }
+
+        super.setModelValue(newModelValue, fromClient);
     }
 
     /**

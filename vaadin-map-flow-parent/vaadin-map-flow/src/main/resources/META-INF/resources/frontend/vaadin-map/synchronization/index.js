@@ -9,6 +9,7 @@
  */
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
+import Polygon from 'ol/geom/Polygon';
 import Fill from 'ol/style/Fill';
 import Stroke from 'ol/style/Stroke';
 import Text from 'ol/style/Text';
@@ -22,7 +23,7 @@ import {
   synchronizeXYZSource
 } from './sources.js';
 import { synchronizeIcon, synchronizeFill, synchronizeStroke, synchronizeText, synchronizeStyle } from './styles.js';
-import { convertToCoordinateArray, synchronizeCollection } from './util.js';
+import { convertToCoordinateArray, convertToGeoJSONCoordinateArray, synchronizeCollection } from './util.js';
 
 /**
  * Fallback text style to use for features that don't have a custom one
@@ -65,6 +66,16 @@ function synchronizePoint(target, source, _context) {
   }
 
   target.setCoordinates(convertToCoordinateArray(source.coordinates));
+
+  return target;
+}
+
+function synchronizePolygon(target, source, _context) {
+  if (!target) {
+    target = new Polygon(convertToGeoJSONCoordinateArray(source.coordinates));
+  }
+
+  target.setCoordinates(convertToGeoJSONCoordinateArray(source.coordinates));
 
   return target;
 }
@@ -121,6 +132,7 @@ const synchronizerLookup = {
   'ol/source/XYZ': synchronizeXYZSource,
   // Geometry
   'ol/geom/Point': synchronizePoint,
+  'ol/geom/Polygon': synchronizePolygon,
   // Styles
   'ol/style/Icon': synchronizeIcon,
   'ol/style/Fill': synchronizeFill,

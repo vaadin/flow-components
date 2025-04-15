@@ -13,6 +13,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -148,11 +151,11 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
             popupButtonToClearButtonMap.get(popupButton).setEnabled(false);
             popupButton.markActive(false);
         }
-        Spreadsheet spreadsheet = getSpreadsheet();
-        for (int r = filteringRegion.getFirstRow(); r <= filteringRegion
-                .getLastRow(); r++) {
-            spreadsheet.setRowHidden(r, false);
-        }
+        getSpreadsheet().setRowsHidden(IntStream
+                .range(filteringRegion.getFirstRow(),
+                        filteringRegion.getLastRow() + 1)
+                .boxed().collect(
+                        Collectors.toMap(Function.identity(), index -> false)));
     }
 
     /**
@@ -252,11 +255,11 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
             popupButton.markActive(!temp.isEmpty());
             filteredRows.addAll(temp);
         }
-        Spreadsheet spreadsheet = getSpreadsheet();
-        for (int r = filteringRegion.getFirstRow(); r <= filteringRegion
-                .getLastRow(); r++) {
-            spreadsheet.setRowHidden(r, filteredRows.contains(r));
-        }
+        getSpreadsheet().setRowsHidden(IntStream
+                .range(filteringRegion.getFirstRow(),
+                        filteringRegion.getLastRow() + 1)
+                .boxed().collect(Collectors.toMap(Function.identity(),
+                        filteredRows::contains)));
     }
 
     /**

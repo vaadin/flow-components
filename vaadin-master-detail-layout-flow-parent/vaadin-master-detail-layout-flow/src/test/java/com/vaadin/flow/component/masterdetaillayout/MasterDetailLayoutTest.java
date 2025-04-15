@@ -15,35 +15,54 @@
  */
 package com.vaadin.flow.component.masterdetaillayout;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
 public class MasterDetailLayoutTest {
-    private UI ui;
-    private MasterDetailLayout layout;
+    private final UI ui = new UI();
+    private final MasterDetailLayout layout = new MasterDetailLayout();
+
+    private final FeatureFlags mockFeatureFlags = Mockito
+            .mock(FeatureFlags.class);
+    private final MockedStatic<FeatureFlags> mockFeatureFlagsStatic = Mockito
+            .mockStatic(FeatureFlags.class);
 
     @Before
-    public void init() {
-        ui = new UI();
-        UI.setCurrent(ui);
-        var session = Mockito.mock(VaadinSession.class);
-        Mockito.when(session.hasLock()).thenReturn(true);
-        ui.getInternals().setSession(session);
-        var service = Mockito.mock(VaadinService.class);
-        Mockito.when(session.getService()).thenReturn(service);
+    public void setup() {
+        VaadinSession mockSession = Mockito.mock(VaadinSession.class);
+        VaadinService mockService = Mockito.mock(VaadinService.class);
+        VaadinContext mockContext = Mockito.mock(VaadinContext.class);
 
-        layout = new MasterDetailLayout();
+        Mockito.when(mockSession.getService()).thenReturn(mockService);
+        Mockito.when(mockService.getContext()).thenReturn(mockContext);
+        mockFeatureFlagsStatic.when(() -> FeatureFlags.get(mockContext))
+                .thenReturn(mockFeatureFlags);
+
+        Mockito.when(mockFeatureFlags
+                .isEnabled(FeatureFlags.MASTER_DETAIL_LAYOUT_COMPONENT))
+                .thenReturn(true);
+
+        ui.getInternals().setSession(mockSession);
         ui.add(layout);
+    }
+
+    @After
+    public void tearDown() {
+        mockFeatureFlagsStatic.close();
     }
 
     @Test

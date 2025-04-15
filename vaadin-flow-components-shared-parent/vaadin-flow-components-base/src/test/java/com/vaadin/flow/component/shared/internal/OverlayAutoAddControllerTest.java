@@ -28,10 +28,8 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.function.SerializableSupplier;
-import com.vaadin.flow.router.AfterNavigationEvent;
-import com.vaadin.flow.router.AfterNavigationListener;
-import com.vaadin.flow.router.LocationChangeEvent;
-import com.vaadin.flow.router.NavigationTrigger;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterListener;
 import com.vaadin.flow.server.VaadinSession;
 
 @NotThreadSafe
@@ -107,26 +105,19 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void open_programmaticNavigationBeforeClientResponse_notAutoAdded() {
+    public void open_beforeEnterListenerFiresBeforeClientResponse_notAutoAdded() {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
 
-        ArgumentCaptor<AfterNavigationListener> captor = ArgumentCaptor
-                .forClass(AfterNavigationListener.class);
-        Mockito.verify(ui).addAfterNavigationListener(captor.capture());
+        ArgumentCaptor<BeforeEnterListener> captor = ArgumentCaptor
+                .forClass(BeforeEnterListener.class);
+        Mockito.verify(ui).addBeforeEnterListener(captor.capture());
 
-        LocationChangeEvent locationChangeEvent = Mockito
-                .mock(LocationChangeEvent.class);
-        Mockito.when(locationChangeEvent.getTrigger())
-                .thenReturn(NavigationTrigger.PROGRAMMATIC);
+        BeforeEnterEvent beforeEnterEvent = Mockito
+                .mock(BeforeEnterEvent.class);
 
-        AfterNavigationEvent afterNavigationEvent = Mockito
-                .mock(AfterNavigationEvent.class);
-        Mockito.when(afterNavigationEvent.getLocationChangeEvent())
-                .thenReturn(locationChangeEvent);
-
-        captor.getValue().afterNavigation(afterNavigationEvent);
+        captor.getValue().beforeEnter(beforeEnterEvent);
         fakeClientResponse();
 
         Assert.assertNull(component.getElement().getParent());

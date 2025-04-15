@@ -15,14 +15,26 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
-import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.router.Route;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.openqa.selenium.By;
 
-@Route("vaadin-dialog/forwarding-target")
-public class OverlayForwardingTargetPage extends Div {
-    public OverlayForwardingTargetPage() {
-        setId("forwarded-view");
-        add(new Text("Forwarded"));
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
+
+@TestPath("vaadin-dialog/dialog-opened-before-forwarding-source")
+public class DialogOpenedBeforeForwardingIT extends AbstractComponentIT {
+
+    @Before
+    public void init() {
+        open();
+    }
+
+    @Test
+    public void openDialog_forward_noDialogPresent() {
+        waitForElementPresent(By.id("forwarded-view"));
+        Assert.assertFalse(
+                isElementPresent(By.tagName("vaadin-dialog-overlay")));
     }
 }

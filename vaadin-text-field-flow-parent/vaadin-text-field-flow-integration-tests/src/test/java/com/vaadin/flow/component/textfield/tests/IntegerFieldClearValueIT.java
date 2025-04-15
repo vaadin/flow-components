@@ -51,6 +51,15 @@ public class IntegerFieldClearValueIT extends AbstractComponentIT {
     }
 
     @Test
+    public void setInputValue_clearAndSetSameValue_inputValueIsPresent() {
+        integerField.sendKeys("1234", Keys.ENTER);
+        Assert.assertEquals("1234", input.getPropertyString("value"));
+
+        $("button").id(CLEAR_AND_SET_VALUE_BUTTON).click();
+        Assert.assertEquals("1234", input.getPropertyString("value"));
+    }
+
+    @Test
     public void badInput_setInputValue_clearValue_inputValueIsEmpty() {
         // Native [type=number] inputs don't update their value
         // when you are entering input that the browser is unable to parse,

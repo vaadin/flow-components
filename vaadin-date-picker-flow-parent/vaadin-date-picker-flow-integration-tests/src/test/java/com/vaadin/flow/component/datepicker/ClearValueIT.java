@@ -47,6 +47,15 @@ public class ClearValueIT extends AbstractComponentIT {
     }
 
     @Test
+    public void setInputValue_clearAndSetSameValue_inputValueIsPresent() {
+        datePicker.sendKeys("1/1/2022", Keys.ENTER);
+        Assert.assertEquals("1/1/2022", datePicker.getInputValue());
+
+        $("button").id(CLEAR_AND_SET_VALUE_BUTTON).click();
+        Assert.assertEquals("1/1/2022", datePicker.getInputValue());
+    }
+
+    @Test
     public void setBadInputValue_clearValue_inputValueIsEmpty() {
         datePicker.sendKeys("INVALID", Keys.ENTER);
         Assert.assertEquals("INVALID", datePicker.getInputValue());

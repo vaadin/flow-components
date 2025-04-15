@@ -15,14 +15,22 @@
  */
 package com.vaadin.flow.component.confirmdialog.tests;
 
-import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-confirm-dialog/forwarding-target")
-public class OverlayForwardingTargetPage extends Div {
-    public OverlayForwardingTargetPage() {
-        setId("forwarded-view");
-        add(new Text("Forwarded"));
+@Route("vaadin-confirm-dialog/confirm-dialog-opened-before-forwarding-source")
+public class ConfirmDialogOpenedBeforeForwardingSourcePage extends Div
+        implements BeforeEnterObserver {
+
+    public ConfirmDialogOpenedBeforeForwardingSourcePage() {
+        new ConfirmDialog().open();
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        event.forwardTo(ConfirmDialogOpenedBeforeForwardingTargetPage.class);
     }
 }
