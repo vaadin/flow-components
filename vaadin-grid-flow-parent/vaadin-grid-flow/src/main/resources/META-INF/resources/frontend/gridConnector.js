@@ -365,16 +365,16 @@
       })
 
       grid.$connector.fetchPage = tryCatchWrapper(function(fetch, page, parentKey) {
-		// Adjust the requested page to be within the valid range in case
-		// the grid size has changed while fetchPage was debounced.
+        // Adjust the requested page to be within the valid range in case
+        // the grid size has changed while fetchPage was debounced.
         if (parentKey === root) {
           page = Math.min(page, Math.floor((grid.size - 1) / grid.pageSize));
         }
 
         // Determine what to fetch based on scroll position and not only
         // what grid asked for
-		let start = grid._virtualStart;
-		let end = grid._virtualEnd;
+        let start = grid._virtualStart;
+        let end = grid._virtualEnd;
 
         // The buffer size could be multiplied by some constant defined by the user,
         // if he needs to reduce the number of items sent to the Grid to improve performance
@@ -384,13 +384,13 @@
         let firstNeededIndex = Math.max(0, start + grid._vidxOffset - buffer);
         let lastNeededIndex = Math.min(end + grid._vidxOffset + buffer, grid._effectiveSize);
  
-		let pageRange = [null, null];
+        let pageRange = [null, null];
         for(let idx = firstNeededIndex; idx <= lastNeededIndex; idx++) {
-		  const sameLevelPage = grid.$connector._getSameLevelPage(parentKey, cache, idx);
+          const sameLevelPage = grid.$connector._getSameLevelPage(parentKey, cache, idx);
           if (sameLevelPage === null) {
             continue;
           }
-		  pageRange[0] = Math.min(pageRange[0] ? pageRange[0] : sameLevelPage, sameLevelPage);
+          pageRange[0] = Math.min(pageRange[0] ? pageRange[0] : sameLevelPage, sameLevelPage);
           pageRange[1] = Math.max(pageRange[1] ? pageRange[1] : sameLevelPage, sameLevelPage);
         }
 
@@ -409,8 +409,8 @@
         if (lastRequestedRange[0] != pageRange[0] || lastRequestedRange[1] != pageRange[1]) {
           lastRequestedRanges[parentKey] = pageRange;
           let pageCount = pageRange[1] - pageRange[0] + 1;
-		  let minCount = Math.floor(buffer / grid.pageSize) + 1;
-		  pageCount = Math.max(pageCount, minCount);
+          let minCount = Math.floor(buffer / grid.pageSize) + 1;
+          pageCount = Math.max(pageCount, minCount);
           fetch(pageRange[0] * grid.pageSize, pageCount * grid.pageSize);
         }
       });
