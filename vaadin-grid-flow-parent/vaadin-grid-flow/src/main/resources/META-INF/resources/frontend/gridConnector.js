@@ -395,7 +395,7 @@
           lastRequestedRanges[parentKey] = pageRange;
           let pageCount = pageRange[1] - pageRange[0] + 1;
           // Ensure that enough pages are fetched if pageSize is too small
-          let minCount = Math.floor(buffer / grid.pageSize) + 1;
+          let minCount = Math.floor(((buffer+1)*2) / grid.pageSize) + 1;
           if (parentKey != root) {
             // Without this adjustment large TreeGrid scrolling fails
             minCount++;
