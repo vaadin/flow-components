@@ -207,7 +207,7 @@
             grid.activeItem = item;
           }
         });
-        
+
         grid.selectedItems = Object.values(selectedKeys);
       });
 
@@ -277,16 +277,23 @@
         detailsVisibleOnClick = visibleOnClick;
       });
 
-      grid.$connector._getPageIfSameLevel = tryCatchWrapper(function(parentKey, index, defaultPage) {
-        let cacheAndIndex = grid._cache.getCacheAndIndex(index);
-        let parentItem = cacheAndIndex.cache.parentItem;
-        let parentKeyOfIndex = (parentItem) ? grid.getItemId(parentItem) : root;
-        if(parentKey !== parentKeyOfIndex) {
-          return defaultPage;
-        } else {
-          return grid._getPageForIndex(cacheAndIndex.scaledIndex);
+      grid.$connector._getSameLevelPage = tryCatchWrapper(function (parentKey, currentCache, currentCacheItemIndex) {
+        const currentParentKey = currentCache.parentItem ? grid.getItemId(currentCache.parentItem) : root;
+        if (currentParentKey === parentKey) {
+          // Level match found
+          return grid._getPageForIndex(currentCacheItemIndex);
         }
-      })
+        const { parentCache } = currentCache;
+        if (!parentCache) {
+          // There is no parent cache to match level
+          return null;
+        }
+        const parentCacheItemIndex = Object.entries(parentCache.itemCaches).find(
+          ([index, cache]) => cache === currentCache
+        )[0];
+        // Traverse the tree upwards until a match is found or the end is reached
+        return this._getSameLevelPage(parentKey, parentCache, parentCacheItemIndex);
+      });
 
       grid.$connector.getCacheByKey = tryCatchWrapper(function(key) {
         let cacheAndIndex = grid._cache.getCacheAndIndexByKey(key);
@@ -368,15 +375,18 @@
 
         let firstNeededIndex = Math.max(0, start + grid._vidxOffset - buffer);
         let lastNeededIndex = Math.min(end + grid._vidxOffset + buffer, grid._effectiveSize);
- 
+
         let pageRange = [null, null];
         for(let idx = firstNeededIndex; idx <= lastNeededIndex; idx++) {
-          const sameLevelPage = grid.$connector._getPageIfSameLevel(parentKey, idx, page);
+          const { cache, scaledIndex } = grid._cache.getCacheAndIndex(idx);
+
+          const sameLevelPage = grid.$connector._getSameLevelPage(parentKey, cache, scaledIndex);
           if (sameLevelPage === null) {
             continue;
           }
-          pageRange[0] = Math.min(pageRange[0] ? pageRange[0] : sameLevelPage, sameLevelPage);
-          pageRange[1] = Math.max(pageRange[1] ? pageRange[1] : sameLevelPage, sameLevelPage);
+
+          pageRange[0] = Math.min(pageRange[0] !== null ? pageRange[0] : sameLevelPage, sameLevelPage);
+          pageRange[1] = Math.max(pageRange[1] !== null ? pageRange[1] : sameLevelPage, sameLevelPage);
         }
 
         // When the viewport doesn't contain the requested page or it doesn't contain any items from
@@ -388,19 +398,12 @@
         // or whatever in the viewport again.
         if (pageRange.some((p) => p === null) || page < pageRange[0] || page > pageRange[1]) {
           pageRange = [page, page];
-        }		
+        }
 
         let lastRequestedRange = lastRequestedRanges[parentKey] || [-1, -1];
         if (lastRequestedRange[0] != pageRange[0] || lastRequestedRange[1] != pageRange[1]) {
           lastRequestedRanges[parentKey] = pageRange;
           let pageCount = pageRange[1] - pageRange[0] + 1;
-          // Ensure that enough pages are fetched if pageSize is too small
-          let minCount = Math.floor(((buffer+1)*2) / grid.pageSize) + 1;
-          if (parentKey != root) {
-            // Without this adjustment large TreeGrid scrolling fails
-            minCount++;
-          }
-          pageCount = Math.max(pageCount, minCount);
           fetch(pageRange[0] * grid.pageSize, pageCount * grid.pageSize);
         }
       });
@@ -927,7 +930,7 @@
           const callback = rootPageCallbacks[page];
           if ((cache[root] && cache[root][page]) || page < lastRequestedRange[0] || +page > lastRequestedRangeEnd) {
             delete rootPageCallbacks[page];
-            
+
             if (cache[root][page]) {
               // Cached data is available, resolve the callback
               callback(cache[root][page]);
