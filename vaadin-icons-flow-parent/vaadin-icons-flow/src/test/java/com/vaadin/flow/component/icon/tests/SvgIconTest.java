@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.icon.tests;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.After;
@@ -24,6 +25,8 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.icon.SvgIcon;
+import com.vaadin.flow.server.DownloadEvent;
+import com.vaadin.flow.server.DownloadHandler;
 import com.vaadin.flow.server.StreamResource;
 
 public class SvgIconTest {
@@ -76,6 +79,63 @@ public class SvgIconTest {
         var resource = new StreamResource("image.svg",
                 () -> new ByteArrayInputStream(
                         "<svg></svg>".getBytes(StandardCharsets.UTF_8)));
+        var symbol = "symbol";
+        var icon = new SvgIcon(resource, symbol);
+        Assert.assertTrue(icon.getSrc().contains("image.svg"));
+        Assert.assertTrue(
+                icon.getElement().getAttribute("src").contains("image.svg"));
+        Assert.assertEquals(symbol, icon.getSymbol());
+        Assert.assertEquals(symbol, icon.getElement().getProperty("symbol"));
+    }
+
+    @Test
+    public void downloadHandlerConstructor_hasSrc() {
+        UI.setCurrent(new UI());
+        var resource = new DownloadHandler() {
+            @Override
+            public void handleDownloadRequest(DownloadEvent event) {
+                event.getOutputStream().ifPresent(output -> {
+                    try {
+                        output.write(
+                                "<svg></svg>".getBytes(StandardCharsets.UTF_8));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+
+            @Override
+            public String getUrlPostfix() {
+                return "image.svg";
+            }
+        };
+        var icon = new SvgIcon(resource);
+        Assert.assertTrue(icon.getSrc().contains("image.svg"));
+        Assert.assertTrue(
+                icon.getElement().getAttribute("src").contains("image.svg"));
+    }
+
+    @Test
+    public void downloadHandlerConstructorWithSymbol_hasSrcAndSymbol() {
+        UI.setCurrent(new UI());
+        var resource = new DownloadHandler() {
+            @Override
+            public void handleDownloadRequest(DownloadEvent event) {
+                event.getOutputStream().ifPresent(output -> {
+                    try {
+                        output.write(
+                                "<svg></svg>".getBytes(StandardCharsets.UTF_8));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+
+            @Override
+            public String getUrlPostfix() {
+                return "image.svg";
+            }
+        };
         var symbol = "symbol";
         var icon = new SvgIcon(resource, symbol);
         Assert.assertTrue(icon.getSrc().contains("image.svg"));

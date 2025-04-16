@@ -34,6 +34,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
@@ -43,6 +44,7 @@ import com.vaadin.flow.internal.NodeOwner;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.DownloadHandler;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
@@ -217,6 +219,28 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
             if (getHost() != null) {
                 getHost().setClientItems();
             }
+        }
+
+        /**
+         * Sets the image for the avatar.
+         * <p>
+         * Setting the image as a resource with this method resets the image URL
+         * that was set with {@link AvatarGroupItem#setImage(String)}
+         *
+         * @see AvatarGroupItem#setImage(String)
+         * @param downloadHandler
+         *            the download resource or {@code null} to remove the
+         *            resource
+         */
+        public void setImageHandler(DownloadHandler downloadHandler) {
+            if (downloadHandler == null) {
+                unsetResource();
+                return;
+            }
+
+            setImageResource(new StreamResourceRegistry.ElementStreamResource(
+                    downloadHandler, getHost() != null ? getHost().getElement()
+                            : UI.getCurrent().getElement()));
         }
 
         /**
