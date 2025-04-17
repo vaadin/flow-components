@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.contextmenu.testbench;
 
-import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.testbench.TestBenchElement;
@@ -28,32 +28,21 @@ import com.vaadin.testbench.elementsbase.Element;
  * @author Vaadin Ltd
  *
  */
-@Element("vaadin-context-menu")
-public class ContextMenuElement extends TestBenchElement {
+@Element("vaadin-context-menu-item")
+public class ContextMenuItemElement extends TestBenchElement {
 
     /**
-     * This is an utility method, which will produce context click on the target
-     * element. If the target had ContextMenu, after opening the last
-     * ContextMenuOverlayElement can be used to find its menu items.
-     *
-     * @param target
-     *            The element to which the ContextMenu has been hooked to.
+     * Open the potential sub menu of the this item by hovering. If there was a
+     * submenu, after opening the last ContextMenuOverlayElement can be used to
+     * find its menu items.
      */
-    public static void openByRightClick(TestBenchElement target) {
-        Actions action = new Actions(target.getDriver());
-        action.contextClick(target).perform();
+    public void openSubMenu() {
+        hoverOn(this);
     }
 
-    /**
-     * Check if the ContextMenu is open.
-     *
-     * @return boolean True if menu is open.
-     */
-    public boolean isOpen() {
-        try {
-            return hasAttribute("opened");
-        } catch (StaleElementReferenceException e) {
-            return false;
-        }
+    protected void hoverOn(WebElement element) {
+        Actions action = new Actions(getDriver());
+        action.moveToElement(element).perform();
     }
+
 }
