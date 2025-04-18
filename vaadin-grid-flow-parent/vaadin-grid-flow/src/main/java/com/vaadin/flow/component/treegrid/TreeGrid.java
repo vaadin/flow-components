@@ -29,6 +29,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.GridArrayUpdater;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
@@ -956,19 +957,21 @@ public class TreeGrid<T> extends Grid<T>
      *            zero based row indexes to scroll to
      * @see TreeGrid#scrollToIndex(int)
      */
-    public void scrollToIndex(int... indexes) {
-        if (indexes.length == 0) {
+    public void scrollToIndex(int... path) {
+        if (path.length == 0) {
             throw new IllegalArgumentException(
                     "At least one index should be provided.");
         }
-        int pageSize = getPageSize();
-        int firstRootIndex = indexes[0] - indexes[0] % pageSize;
-        getDataCommunicator().setRequestedRange(firstRootIndex, pageSize);
-        String joinedIndexes = Arrays.stream(indexes).mapToObj(String::valueOf)
-                .collect(Collectors.joining(","));
-        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
-                ctx -> getElement().executeJs(
-                        "this.scrollToIndex(" + joinedIndexes + ");")));
+
+        getElement().executeJs("""
+                    const range = this.$connector.getViewportRange();
+                    return range[1] - range[0];
+                """).then(result -> {
+            int rangeSize = (int) result.asNumber();
+            int flatIndex = getDataCommunicator().preloadPath(path, rangeSize);
+            getElement().executeJs("this._scrollToFlatIndex($0)", flatIndex);
+        });
+
     }
 
     @Override

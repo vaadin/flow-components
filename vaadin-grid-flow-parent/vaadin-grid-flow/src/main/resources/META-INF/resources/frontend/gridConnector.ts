@@ -153,11 +153,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     });
   };
 
-  grid.$connector.fetchPage = function (fetch, page) {
-    // Adjust the requested page to be within the valid range in case
-    // the grid size has changed while fetchPage was debounced.
-    page = Math.min(page, Math.floor((grid.size - 1) / grid.pageSize));
-
+  grid.$connector.getViewportRange = () => {
     // Determine what to fetch based on scroll position and not only
     // what grid asked for
     const visibleRows = grid._getRenderedRows();
@@ -167,16 +163,26 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // The buffer size could be multiplied by some constant defined by the user,
     // if he needs to reduce the number of items sent to the Grid to improve performance
     // or to increase it to make Grid smoother when scrolling
-    let buffer = end - start;
-    let firstNeededIndex = Math.max(0, start - buffer);
-    let lastNeededIndex = Math.min(end + buffer, grid._flatSize);
+    // let buffer = end - start;
+    let firstNeededIndex = Math.max(0, start);
+    let lastNeededIndex = Math.min(end, grid._flatSize);
 
-    let pageRange = [null, null];
+    let range = [null, null];
     for (let idx = firstNeededIndex; idx <= lastNeededIndex; idx++) {
       const page = Math.floor(idx / grid.pageSize);
-      pageRange[0] = Math.min(pageRange[0] ?? page, page);
-      pageRange[1] = Math.max(pageRange[1] ?? page, page);
+      range[0] = Math.min(range[0] ?? page, page);
+      range[1] = Math.max(range[1] ?? page, page);
     }
+
+    return [range[0] * grid.pageSize, (range[1] + 1) * grid.pageSize];
+  };
+
+  grid.$connector.fetchPage = function (fetch, page) {
+    // Adjust the requested page to be within the valid range in case
+    // the grid size has changed while fetchPage was debounced.
+    page = Math.min(page, Math.floor((grid.size - 1) / grid.pageSize));
+
+    const viewportRange = grid.$connector.getViewportRange();
 
     // When the viewport doesn't contain the requested page or it doesn't contain any items from
     // the requested level at all, it means that the scroll position has changed while fetchPage
@@ -185,15 +191,14 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // hanging. To avoid this, as a workaround, we reset the range to only include the requested page
     // to make sure all hanging requests are resolved. After that, the grid requests the first page
     // or whatever in the viewport again.
-    if (pageRange.some((p) => p === null) || page < pageRange[0] || page > pageRange[1]) {
-      pageRange = [page, page];
-    }
+    // if (viewportRange.some((p) => p === null) || page < pageRange[0] || page > pageRange[1]) {
+    //   pageRange = [page, page];
+    // }
 
     let lastRequestedRange = lastRequestedRanges[root] || [-1, -1];
-    if (lastRequestedRange[0] != pageRange[0] || lastRequestedRange[1] != pageRange[1]) {
-      lastRequestedRanges[root] = pageRange;
-      let pageCount = pageRange[1] - pageRange[0] + 1;
-      fetch(pageRange[0] * grid.pageSize, pageCount * grid.pageSize);
+    if (lastRequestedRange[0] != viewportRange[0] || lastRequestedRange[1] != viewportRange[1]) {
+      lastRequestedRanges[root] = viewportRange;
+      fetch(viewportRange[0], viewportRange[1] - viewportRange[0]);
     }
   };
 
@@ -534,22 +539,20 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // callbacks
     const { pendingRequests } = dataProviderController.rootCache;
     Object.entries(pendingRequests).forEach(([page, callback]) => {
-      const lastRequestedRange = lastRequestedRanges[root] || [0, 0];
-      const lastAvailablePage = grid.size ? Math.ceil(grid.size / grid.pageSize) - 1 : 0;
-      // It's possible that the lastRequestedRange includes a page that's beyond lastAvailablePage if the grid's size got reduced during an ongoing data request
-      const lastRequestedRangeEnd = Math.min(lastRequestedRange[1], lastAvailablePage);
+      // const lastRequestedRange = lastRequestedRanges[root] || [0, 0];
+      // const lastAvailablePage = grid.size ? Math.ceil(grid.size / grid.pageSize) - 1 : 0;
+      // // It's possible that the lastRequestedRange includes a page that's beyond lastAvailablePage if the grid's size got reduced during an ongoing data request
+      // const lastRequestedRangeEnd = Math.min(lastRequestedRange[1], lastAvailablePage);
       // Resolve if we have data or if we don't expect to get data
       if (cache[root]?.[page]) {
         // Cached data is available, resolve the callback
         callback(cache[root][page]);
-      } else if (page < lastRequestedRange[0] || +page > lastRequestedRangeEnd) {
-        // No cached data, resolve the callback with an empty array
-        callback(new Array(grid.pageSize));
-        // Request grid for content update
-        grid.requestContentUpdate();
       } else if (callback && grid.size === 0) {
         // The grid has 0 items => resolve the callback with an empty array
         callback([]);
+      } else {
+        callback(new Array(grid.pageSize));
+        grid.requestContentUpdate();
       }
     });
 

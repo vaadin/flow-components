@@ -21,9 +21,11 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.treegrid.TreeGrid;
+import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/treegrid-scroll-to")
@@ -33,11 +35,12 @@ public class TreeGridScrollToPage extends Div {
         TreeGrid<String> grid = new TreeGrid<>();
         grid.setPageSize(10);
         grid.addHierarchyColumn(String::toString).setHeader("Item");
+        grid.setHeight("700px");
 
         add(grid);
 
         TreeData<String> data = new TreeGridStringDataBuilder()
-                .addLevel("Granddad", 50).addLevel("Dad", 20)
+                .addLevel("Granddad", 100).addLevel("Dad", 20)
                 .addLevel("Son", 20).build();
 
         grid.setDataProvider(new TreeDataProvider<>(data));
@@ -64,6 +67,25 @@ public class TreeGridScrollToPage extends Div {
         });
         scrollToIndex.setId("scroll-to-index");
 
-        add(grid, expandAll, scrollToStart, scrollToEnd, scrollToIndex);
+        Input expandIndex = new Input(ValueChangeMode.ON_BLUR);
+        expandIndex.setPlaceholder("Expand index (format: 30-1-1)");
+        expandIndex.setWidth("200px");
+        expandIndex.addValueChangeListener(event -> {
+            int[] path = Arrays.stream(event.getValue().split("-"))
+                    .mapToInt(Integer::parseInt).toArray();
+
+            String item = null;
+            for (int i = 0; i < path.length; i++) {
+                var index = path[i];
+                item = grid.getDataProvider().fetchChildren(
+                        new HierarchicalQuery<String, SerializablePredicate<String>>(
+                                index, index + 1, null, null, null, item))
+                        .findFirst().orElse(null);
+                grid.expand(item);
+            }
+        });
+
+        add(grid, expandAll, scrollToStart, scrollToEnd, scrollToIndex,
+                expandIndex);
     }
 }
