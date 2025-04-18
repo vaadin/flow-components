@@ -130,45 +130,119 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
         // NO-OP
     }
 
-    /** @see DataCommunicator#flush() */
-    @Override
-    protected void flush() {
-        int start = requestedRange.getStart();
-        int end = requestedRange.getEnd();
+    public int preloadPath(int... path) {
+        return preloadPath(path, 0);
+    }
 
+    public int preloadPath(int[] path, int buffer) {
+        preloadPath(rootCache, path);
+
+        if (buffer > 0) {
+            preloadRange(rootCache.getFlatIndexByPath(path), -buffer);
+            preloadRange(rootCache.getFlatIndexByPath(path), +buffer);
+        }
+
+        flush();
+
+        return rootCache.getFlatIndexByPath(path);
+    }
+
+    private void preloadPath(Cache<T> cache, int... path) {
+        var index = path[0];
+
+        if (!cache.hasItem(index)) {
+            cache.setItems(index,
+                    fetchDataProviderChildren(cache.getParentItem(),
+                            Range.withOnly(index)).toList());
+        }
+
+        if (!cache.hasItem(index)) {
+            return;
+        }
+
+        var item = cache.getItem(index);
+
+        if (isExpanded(item)) {
+            if (!cache.hasCache(index)) {
+                cache.createCache(index, getDataProviderChildCount(item));
+            }
+
+            var subCache = cache.getCache(index);
+            var restPath = Arrays.copyOfRange(path, 1, path.length);
+            if (restPath.length > 0) {
+                preloadPath(subCache, restPath);
+            }
+        }
+    }
+
+    private List<T> preloadRange(int start, int length) {
         if (rootCache == null) {
             rootCache = createRootCache(getDataProviderChildCount(null));
         }
 
+        // +1 = forward
+        // -1 = backward
+        var direction = Math.signum(length);
+        var absLength = Math.abs(length);
+
         List<T> result = new ArrayList<>();
-        for (int i = start; i < end; i++) {
-            var context = rootCache.getFlatIndexContext(i);
+
+        while (result.size() < absLength) {
+            var context = rootCache.getFlatIndexContext(start);
             if (context == null) {
-                end = i;
                 break;
             }
             var cache = context.cache();
             var index = context.index();
 
             if (!cache.hasItem(index)) {
-                List<T> childItems = fetchDataProviderChildren(
-                        cache.getParentItem(), Range.between(index, Math.min(end, cache.getSize())))
-                                .toList();
-                cache.setItems(index, childItems);
+                var remainingLength = absLength - result.size();
+
+                var range = direction > 0
+                        ? Range.between(index, index + remainingLength)
+                        : Range.between(index + 1 - remainingLength, index + 1);
+                range = range.restrictTo(Range.withLength(0, cache.getSize()));
+
+                var items = fetchDataProviderChildren(cache.getParentItem(),
+                        range).toList();
+                cache.setItems(range.getStart(), items);
             }
 
-            T item = cache.getItem(index);
-            if (!isFlatHierarchy() && isExpanded(item)
-                    && !cache.hasCache(index)) {
-                int childCount = getDataProviderChildCount(item);
-                cache.createCache(index, childCount);
+            var item = cache.getItem(index);
+
+            if (!isFlatHierarchy() && isExpanded(item) && !cache.hasCache(index)
+                    && (direction > 0 || result.size() > 0)) {
+                var subCache = cache.createCache(index,
+                        getDataProviderChildCount(item));
+
+                if (direction < 0) {
+                    start += subCache.getSize();
+                    continue;
+                }
             }
 
-            result.add(item);
+            if (direction > 0) {
+                start++;
+                result.add(item);
+            } else {
+                start--;
+                result.add(0, item);
+            }
         }
 
-        int flatSize = rootCache.getFlatSize();
+        return result;
+    }
 
+    /** @see DataCommunicator#flush() */
+    @Override
+    protected void flush() {
+        int start = requestedRange.getStart();
+        int end = requestedRange.getEnd();
+        int length = end - start;
+
+        List<T> result = preloadRange(start, length);
+
+        int flatSize = rootCache.getFlatSize();
         Update update = arrayUpdater.startUpdate(flatSize);
         update.clear(0, start);
         update.clear(end, flatSize - end);
@@ -183,19 +257,6 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
     /** @see HierarchicalDataCommunicator#hasChildren(T) */
     public boolean hasChildren(T item) {
         return getDataProvider().hasChildren(item);
-    }
-
-    /** @see HierarchicalDataCommunicator#getParentItem(T) */
-    public T getParentItem(T item) {
-        if (isFlatHierarchy()) {
-            return getDataProvider().getParentItem(item);
-        }
-
-        var itemContext = rootCache.getItemContext(item);
-        if (itemContext == null) {
-            return null;
-        }
-        return itemContext.cache().getParentItem();
     }
 
     /** @see HierarchicalDataCommunicator#getDepth(T) */
@@ -259,7 +320,7 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
             reset();
         } else {
             rootCache.removeDescendantCacheIf(
-                (cache) -> !isExpanded(cache.getParentItem()));
+                    (cache) -> !isExpanded(cache.getParentItem()));
             requestFlush();
         }
 
