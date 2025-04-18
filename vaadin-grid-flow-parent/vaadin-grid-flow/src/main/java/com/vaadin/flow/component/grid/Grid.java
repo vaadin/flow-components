@@ -4776,8 +4776,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             ((TreeGridDataCommunicator<T>) getDataCommunicator())
                     .refreshAllVisible();
         } else {
-            // Do not reset the data communicator if no filters are applied in order
-            // to avoid unnecessary scroll position reset. This can be removed when
+            // Do not reset the data communicator if no filters are applied in
+            // order
+            // to avoid unnecessary scroll position reset. This can be removed
+            // when
             // Flow will provide a way to request refresh for only items that
             // are in the viewport.
             if (dragFilter != defaultDragFilter
