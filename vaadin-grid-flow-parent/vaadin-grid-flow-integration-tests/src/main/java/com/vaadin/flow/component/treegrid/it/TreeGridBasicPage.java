@@ -57,11 +57,6 @@ public class TreeGridBasicPage extends Div {
         }
 
         @Override
-        public Item getParentItem(Item item) {
-            return item.getParentItem();
-        }
-
-        @Override
         public int getDepth(Item item) {
             return item.getDepth();
         }
@@ -116,10 +111,6 @@ public class TreeGridBasicPage extends Div {
 
         public int getDepth() {
             return parentItem == null ? 0 : parentItem.getDepth() + 1;
-        }
-
-        public Item getParentItem() {
-            return parentItem;
         }
 
         public void setChildItems(List<Item> childItems) {

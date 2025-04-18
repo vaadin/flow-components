@@ -1,5 +1,21 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.treegrid;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -23,8 +39,7 @@ class RootCache<T> extends Cache<T> {
             int flatIndex) {
         int index = flatIndex;
 
-        for (Entry<Integer, Cache<T>> entry : cache.indexToCache
-                .entrySet()) {
+        for (Entry<Integer, Cache<T>> entry : cache.indexToCache.entrySet()) {
             var subCacheIndex = entry.getKey();
             var subCache = entry.getValue();
 
@@ -32,8 +47,7 @@ class RootCache<T> extends Cache<T> {
                 break;
             }
             if (index <= subCacheIndex + subCache.getFlatSize()) {
-                return getFlatIndexContext(subCache,
-                        index - subCacheIndex - 1);
+                return getFlatIndexContext(subCache, index - subCacheIndex - 1);
             }
             index -= subCache.getFlatSize();
         }
@@ -45,6 +59,25 @@ class RootCache<T> extends Cache<T> {
         return new FlatIndexContext<>(cache, index);
     }
 
+    public int getFlatIndexByPath(int... path) {
+        return getFlatIndexByPath(this, path);
+    }
+
+    private int getFlatIndexByPath(Cache<T> cache, int... path) {
+        var index = path[0];
+        var restPath = Arrays.copyOfRange(path, 1, path.length);
+
+        var flatIndex = cache.getFlatIndex(index);
+        var subCache = cache.indexToCache.get(index);
+
+        if (subCache != null && subCache.getFlatSize() > 0
+                && restPath.length > 0) {
+            return flatIndex + 1 + getFlatIndexByPath(subCache, restPath);
+        }
+
+        return flatIndex;
+    }
+
     public ItemContext<T> getItemContext(T item) {
         Object itemId = getItemId(item);
         return itemIdToContext.get(itemId);
@@ -52,8 +85,7 @@ class RootCache<T> extends Cache<T> {
 
     void addItemContext(T item, Cache<T> cache, int index) {
         Object itemId = getItemId(item);
-        itemIdToContext.put(itemId,
-                new ItemContext<>(itemId, cache, index));
+        itemIdToContext.put(itemId, new ItemContext<>(itemId, cache, index));
     }
 
     void removeItemContext(T item) {

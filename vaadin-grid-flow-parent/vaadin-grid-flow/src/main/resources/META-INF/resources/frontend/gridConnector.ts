@@ -171,6 +171,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     let firstNeededIndex = Math.max(0, start - buffer);
     let lastNeededIndex = Math.min(end + buffer, grid._flatSize);
 
+    console.warn(`fetchPage: ${start} - ${end}`);
     let pageRange = [null, null];
     for (let idx = firstNeededIndex; idx <= lastNeededIndex; idx++) {
       const page = Math.floor(idx / grid.pageSize);
