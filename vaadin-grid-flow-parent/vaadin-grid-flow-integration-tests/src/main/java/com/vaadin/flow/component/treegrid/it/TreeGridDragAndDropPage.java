@@ -17,11 +17,9 @@ package com.vaadin.flow.component.treegrid.it;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.grid.dnd.GridDropMode;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.bean.PeopleGenerator;
 import com.vaadin.flow.data.bean.PersonWithLevel;
