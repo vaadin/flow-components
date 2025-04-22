@@ -22,6 +22,7 @@ import org.openqa.selenium.By;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -31,7 +32,7 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-multi-select-combo-box")
 public class MultiSelectComboBoxElement extends TestBenchElement
-        implements HasLabel, HasPlaceholder, HasHelper {
+        implements HasLabel, HasPlaceholder, HasHelper, HasValidation {
 
     public String getInputElementValue() {
         return this.getPropertyString("_inputElementValue");

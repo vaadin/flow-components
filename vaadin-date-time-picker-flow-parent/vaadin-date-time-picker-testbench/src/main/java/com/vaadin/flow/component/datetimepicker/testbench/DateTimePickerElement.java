@@ -23,6 +23,7 @@ import java.time.temporal.ChronoUnit;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -32,7 +33,7 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-date-time-picker")
 public class DateTimePickerElement extends TestBenchElement
-        implements HasLabel, HasHelper {
+        implements HasLabel, HasHelper, HasValidation {
 
     private static final String VALUE_PROPERTY = "value";
 
