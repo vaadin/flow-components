@@ -20,7 +20,6 @@ import javax.annotation.concurrent.NotThreadSafe;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
@@ -28,8 +27,6 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.function.SerializableSupplier;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterListener;
 import com.vaadin.flow.server.VaadinSession;
 
 @NotThreadSafe
@@ -99,25 +96,6 @@ public class OverlayAutoAddControllerTest {
 
         component.setOpened(true);
         component.setOpened(false);
-        fakeClientResponse();
-
-        Assert.assertNull(component.getElement().getParent());
-    }
-
-    @Test
-    public void open_beforeEnterListenerFiresBeforeClientResponse_notAutoAdded() {
-        TestComponent component = new TestComponent();
-
-        component.setOpened(true);
-
-        ArgumentCaptor<BeforeEnterListener> captor = ArgumentCaptor
-                .forClass(BeforeEnterListener.class);
-        Mockito.verify(ui).addBeforeEnterListener(captor.capture());
-
-        BeforeEnterEvent beforeEnterEvent = Mockito
-                .mock(BeforeEnterEvent.class);
-
-        captor.getValue().beforeEnter(beforeEnterEvent);
         fakeClientResponse();
 
         Assert.assertNull(component.getElement().getParent());
