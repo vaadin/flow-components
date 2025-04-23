@@ -46,72 +46,72 @@ public class ClearValueIT extends AbstractComponentIT {
     @Test
     public void setDateInputValue_clearValue_inputValueIsEmpty() {
         dateInput.sendKeys("1/1/2022", Keys.ENTER);
-        Assert.assertEquals("1/1/2022", dateInput.getValue());
+        Assert.assertEquals("1/1/2022", dateInput.getInputValue());
 
         $("button").id(CLEAR_BUTTON).click();
-        Assert.assertEquals("", dateInput.getValue());
+        Assert.assertEquals("", dateInput.getInputValue());
     }
 
     @Test
     public void setTimeInputValue_clearValue_inputValueIsEmpty() {
         timeInput.sendKeys("12:00 PM", Keys.ENTER);
-        Assert.assertEquals("12:00 PM", timeInput.getValue());
+        Assert.assertEquals("12:00 PM", timeInput.getTimePickerInputValue());
 
         $("button").id(CLEAR_BUTTON).click();
-        Assert.assertEquals("", timeInput.getValue());
+        Assert.assertEquals("", timeInput.getTimePickerInputValue());
     }
 
     @Test
     public void setDateAndTimeInputValue_clearValue_inputValueIsEmpty() {
         dateInput.sendKeys("1/1/2022", Keys.ENTER);
         timeInput.sendKeys("12:00 PM", Keys.ENTER);
-        Assert.assertEquals("1/1/2022", dateInput.getValue());
-        Assert.assertEquals("12:00 PM", timeInput.getValue());
+        Assert.assertEquals("1/1/2022", dateInput.getInputValue());
+        Assert.assertEquals("12:00 PM", timeInput.getTimePickerInputValue());
 
         $("button").id(CLEAR_BUTTON).click();
-        Assert.assertEquals("", dateInput.getValue());
-        Assert.assertEquals("", timeInput.getValue());
+        Assert.assertEquals("", dateInput.getInputValue());
+        Assert.assertEquals("", timeInput.getTimePickerInputValue());
     }
 
     @Test
     public void setDateAndTimeInputValue_clearAndSetSameValue_inputValueIsPresent() {
         dateInput.sendKeys("1/1/2022", Keys.ENTER);
         timeInput.sendKeys("12:00 PM", Keys.ENTER);
-        Assert.assertEquals("1/1/2022", dateInput.getValue());
-        Assert.assertEquals("12:00 PM", timeInput.getValue());
+        Assert.assertEquals("1/1/2022", dateInput.getInputValue());
+        Assert.assertEquals("12:00 PM", timeInput.getTimePickerInputValue());
 
         $("button").id(CLEAR_AND_SET_VALUE_BUTTON).click();
         Assert.assertEquals("1/1/2022", dateInput.getValue());
-        Assert.assertEquals("12:00 PM", timeInput.getValue());
+        Assert.assertEquals("12:00 PM", timeInput.getTimePickerInputValue());
     }
 
     @Test
     public void badInput_setDateInputValue_clearValue_inputValueIsEmpty() {
         dateInput.sendKeys("INVALID", Keys.ENTER);
-        Assert.assertEquals("INVALID", dateInput.getValue());
+        Assert.assertEquals("INVALID", dateInput.getInputValue());
 
         $("button").id(CLEAR_BUTTON).click();
-        Assert.assertEquals("", dateInput.getValue());
+        Assert.assertEquals("", dateInput.getInputValue());
     }
 
     @Test
     public void badInput_setTimeInputValue_clearValue_inputValueIsEmpty() {
         timeInput.sendKeys("INVALID", Keys.ENTER);
-        Assert.assertEquals("INVALID", timeInput.getValue());
+        Assert.assertEquals("INVALID", timeInput.getTimePickerInputValue());
 
         $("button").id(CLEAR_BUTTON).click();
-        Assert.assertEquals("", timeInput.getValue());
+        Assert.assertEquals("", timeInput.getTimePickerInputValue());
     }
 
     @Test
     public void badInput_setDateAndTimeInputValue_clearValue_inputValueIsEmpty() {
         dateInput.sendKeys("INVALID", Keys.ENTER);
         timeInput.sendKeys("INVALID", Keys.ENTER);
-        Assert.assertEquals("INVALID", dateInput.getValue());
-        Assert.assertEquals("INVALID", timeInput.getValue());
+        Assert.assertEquals("INVALID", dateInput.getInputValue());
+        Assert.assertEquals("INVALID", timeInput.getTimePickerInputValue());
 
         $("button").id(CLEAR_BUTTON).click();
-        Assert.assertEquals("", dateInput.getValue());
-        Assert.assertEquals("", timeInput.getValue());
+        Assert.assertEquals("", dateInput.getInputValue());
+        Assert.assertEquals("", timeInput.getTimePickerInputValue());
     }
 }
