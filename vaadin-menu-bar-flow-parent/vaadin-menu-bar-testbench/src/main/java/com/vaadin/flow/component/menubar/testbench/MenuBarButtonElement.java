@@ -20,6 +20,10 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
+/**
+ * A TestBench element representing a
+ * <code>&lt;vaadin-menu-bar-button&gt;</code> element.
+ */
 @Element("vaadin-menu-bar-button")
 public class MenuBarButtonElement extends TestBenchElement {
 
