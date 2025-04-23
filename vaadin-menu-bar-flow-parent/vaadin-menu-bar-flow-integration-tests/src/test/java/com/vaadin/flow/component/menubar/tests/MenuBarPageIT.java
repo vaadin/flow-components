@@ -24,7 +24,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
+import com.vaadin.flow.component.menubar.testbench.MenuBarButtonElement;
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
+import com.vaadin.flow.component.menubar.testbench.MenuBarItemElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
@@ -102,7 +104,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         waitUntil(driver -> menuBar.getAllSubMenus().size() == 2);
         TestBenchElement checkableItem = menuBar
                 .getSubMenuItems(menuBar.getAllSubMenus().get(1)).get(1);
-        Assert.assertTrue(checkableItem.hasAttribute("menu-item-checked"));
+        Assert.assertTrue(checkableItem.isChecked());
 
         checkableItem.click();
         verifyClosed();
@@ -118,7 +120,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void setCheckedExternally_openSubMenu_itemChecked() {
         click("toggle-checked");
         openSubSubMenu();
-        TestBenchElement checkableItem = menuBar
+        MenuBarItemElement checkableItem = menuBar
                 .getSubMenuItems(menuBar.getAllSubMenus().get(1)).get(1);
         Assert.assertTrue(checkableItem.hasAttribute("menu-item-checked"));
     }
@@ -161,7 +163,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("set-width");
         waitForResizeObserver();
         click("add-root-item");
-        TestBenchElement overflowButton = menuBar.getOverflowButton();
+        MenuBarButtonElement overflowButton = menuBar.getOverflowButton();
         Assert.assertNotNull("Expected the overflow button to be rendered",
                 overflowButton);
         assertButtonContents("item 1");
@@ -433,7 +435,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
     @Test
     public void toggleMenuItemTheme_themeIsToggled() {
-        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        MenuBarButtonElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("theme"));
         click("toggle-item-1-theme");
         menuButton1 = menuBar.getButtons().get(0);
@@ -446,7 +448,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
     @Test
     public void toggleMenuItemClassName_classNameIsToggled() {
-        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        MenuBarButtonElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("class"));
         click("toggle-item1-class-name");
         menuButton1 = menuBar.getButtons().get(0);
@@ -459,7 +461,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
     @Test
     public void setMenuItemClassName_classNameIsSet() {
-        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        MenuBarButtonElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("class"));
         click("toggle-item1-class-name");
         menuButton1 = menuBar.getButtons().get(0);
@@ -473,7 +475,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
     @Test
     public void toggleMenuItemClassNameWithSetClassName_classNameIsToggled() {
-        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        MenuBarButtonElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("class"));
         click("set-unset-item1-class-name");
         menuButton1 = menuBar.getButtons().get(0);
@@ -565,7 +567,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         menuBar.getOverflowButton().click();
         click("change-item2-class-name");
         menuBar.getOverflowButton().click();
-        TestBenchElement menuItem = menuBar.getSubMenuItems().get(0);
+        MenuBarItemElement menuItem = menuBar.getSubMenuItems().get(0);
         Assert.assertEquals(Set.of(MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME),
                 menuItem.getClassNames());
     }
@@ -606,7 +608,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("toggle-item-1-theme");
         click("toggle-item-1-visibility");
         click("toggle-item-1-visibility");
-        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        MenuBarButtonElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertEquals(menuButton1.getDomAttribute("theme"),
                 MenuBarTestPage.MENU_ITEM_THEME);
     }
@@ -741,7 +743,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
             String... classNames) {
         openSubSubMenu();
         verifyOpened();
-        TestBenchElement subMenuItem = menuBar.getSubMenuItems().get(2);
+        MenuBarItemElement subMenuItem = menuBar.getSubMenuItems().get(2);
         var subMenuItemClassNames = subMenuItem.getClassNames();
         for (String className : classNames) {
             if (containsClassNames) {
