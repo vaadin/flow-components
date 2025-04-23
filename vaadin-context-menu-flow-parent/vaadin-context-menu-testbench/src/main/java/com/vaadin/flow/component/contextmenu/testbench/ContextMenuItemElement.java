@@ -40,6 +40,15 @@ public class ContextMenuItemElement extends TestBenchElement {
         hoverOn(this);
     }
 
+    /**
+     * Check if the item is checked.
+     *
+     * @return True if there is checkmark
+     */
+    public boolean isChecked() {
+        return hasAttribute("menu-item-checked");
+    }
+
     protected void hoverOn(WebElement element) {
         Actions action = new Actions(getDriver());
         action.moveToElement(element).perform();
