@@ -236,9 +236,9 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
         verifyClosed();
     }
 
-    public static void assertCheckedInClientSide(TestBenchElement item,
+    public static void assertCheckedInClientSide(ContextMenuItemElement item,
             boolean shouldBeChecked) {
-        boolean isChecked = item.hasAttribute("menu-item-checked");
+        boolean isChecked = item.isChecked();
         if (shouldBeChecked) {
             Assert.assertTrue(
                     "Expected menu item to be marked as checked in client-side",
