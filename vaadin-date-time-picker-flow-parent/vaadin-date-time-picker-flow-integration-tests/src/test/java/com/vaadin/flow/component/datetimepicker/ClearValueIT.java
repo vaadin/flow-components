@@ -27,7 +27,6 @@ import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
 import com.vaadin.flow.component.datetimepicker.testbench.DateTimePickerElement;
 import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-date-time-picker/clear-value")
