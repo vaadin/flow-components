@@ -221,26 +221,4 @@ public class DatePickerElement extends TestBenchElement
     public void sendKeys(CharSequence... keysToSend) {
         findElement(By.tagName("input")).sendKeys(keysToSend);
     }
-        
-    /**
-     * Get the DatePickerElement for date picker part.
-     *
-     * @return DatePickerElement
-     */
-    public DatePickerElement getDatePicker() {
-        return this.$("vaadin-date-time-picker-date-picker")
-                .withAttribute("slot", "date-picker").first()
-                .wrap(DatePickerElement.class);
-    }
-
-    /**
-     * Get the TimePickerElement for time picker part.
-     *
-     * @return TimePickerElement
-     */
-    public TimePickerElement getTimePicker() {
-        return this.$("vaadin-date-time-picker-time-picker")
-                .withAttribute("slot", "time-picker").first()
-                .wrap(TimePickerElement.class);
-    }        
 }
