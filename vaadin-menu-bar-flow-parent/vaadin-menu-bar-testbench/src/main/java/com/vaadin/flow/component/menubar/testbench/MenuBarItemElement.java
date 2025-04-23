@@ -43,6 +43,15 @@ public class MenuBarItemElement extends TestBenchElement {
         return hasAttribute("expanded");
     }
 
+    /**
+     * Check if the item is checked.
+     *
+     * @return True if there is checkmark
+     */
+    public boolean isChecked() {
+        return hasAttribute("menu-item-checked");
+    }
+
     private void waitForSubMenu() {
         waitUntil(ExpectedConditions.attributeToBe(this, "aria-expanded",
                 "true"));
