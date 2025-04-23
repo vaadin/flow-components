@@ -102,7 +102,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         hoverOn(menuBar.getSubMenuItems().get(1));
 
         waitUntil(driver -> menuBar.getAllSubMenus().size() == 2);
-        TestBenchElement checkableItem = menuBar
+        MenuBarItemElement checkableItem = menuBar
                 .getSubMenuItems(menuBar.getAllSubMenus().get(1)).get(1);
         Assert.assertTrue(checkableItem.isChecked());
 
@@ -246,7 +246,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void disableButton_removeDisabledAttribute_click_listenerNotCalled() {
         click("toggle-disable");
-        TestBenchElement button2 = menuBar.getButtons().get(1);
+        MenuBarButtonElement button2 = menuBar.getButtons().get(1);
         executeScript("arguments[0].disabled=false;"
                 + "arguments[0].querySelector('vaadin-menu-bar-item').disabled=false;",
                 button2);
@@ -383,7 +383,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("set-width");
         waitForResizeObserver();
         click("add-root-item");
-        TestBenchElement overflowButton = menuBar.getOverflowButton();
+        MenuBarButtonElement overflowButton = menuBar.getOverflowButton();
 
         Assert.assertEquals("More options",
                 overflowButton.getDomAttribute("aria-label"));
@@ -400,7 +400,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         waitForResizeObserver();
         click("add-root-item");
         click("set-i18n");
-        TestBenchElement overflowButton = menuBar.getOverflowButton();
+        MenuBarButtonElement overflowButton = menuBar.getOverflowButton();
 
         Assert.assertEquals("more-options",
                 overflowButton.getDomAttribute("aria-label"));
@@ -488,7 +488,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
 
     @Test
     public void toggleMultipleItemClassName_classNamesAreToggled() {
-        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        MenuBarButtonElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("class"));
         click("add-remove-multiple-classes");
         menuButton1 = menuBar.getButtons().get(0);
@@ -580,7 +580,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         menuBar.getOverflowButton().click();
         click("remove-item2-class-name");
         menuBar.getOverflowButton().click();
-        TestBenchElement menuItem = menuBar.getSubMenuItems().get(0);
+        MenuBarItemeElement menuItem = menuBar.getSubMenuItems().get(0);
 
         Assert.assertEquals(Set.of(), menuItem.getClassNames());
     }
@@ -594,7 +594,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("reset-width");
         waitForResizeObserver();
         click("change-item2-class-name");
-        TestBenchElement menuItem = menuBar.getButtons().get(1);
+        MenuBarButtonElement menuItem = menuBar.getButtons().get(1);
         Assert.assertEquals(Set.of(MenuBarTestPage.MENU_ITEM_SECOND_CLASS_NAME),
                 menuItem.getClassNames());
 
@@ -619,7 +619,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("toggle-item-1-visibility");
         click("toggle-item-1-theme");
         click("toggle-item-1-visibility");
-        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        MenuBarButtonElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("theme"));
     }
 
@@ -650,7 +650,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("toggle-theme");
         click("toggle-item-1-theme");
 
-        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        MenuBarButtonElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertEquals(MenuBarTestPage.MENU_ITEM_THEME,
                 menuButton1.getDomAttribute("theme"));
     }
@@ -713,7 +713,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     private String[] getOverlayMenuItemContents(
-            List<TestBenchElement> menuItems) {
+            List<MenuBarItemElement> menuItems) {
         return menuItems.stream().map(item -> item.getDomProperty("innerHTML"))
                 .toArray(String[]::new);
     }
