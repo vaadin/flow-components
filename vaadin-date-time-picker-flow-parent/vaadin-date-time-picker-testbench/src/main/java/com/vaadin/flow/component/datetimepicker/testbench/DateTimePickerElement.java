@@ -20,6 +20,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 
+import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
+import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
@@ -247,14 +249,26 @@ public class DateTimePickerElement extends TestBenchElement
         return !getPropertyBoolean("autoOpenDisabled");
     }
 
-    private TestBenchElement getDatePicker() {
-        return $("vaadin-date-picker").withAttribute("slot", "date-picker")
-                .first();
+    /**
+     * Get the DatePickerElement for date picker part.
+     *
+     * @return DatePickerElement
+     */
+    public DatePickerElement getDatePicker() {
+        return this.$("vaadin-date-time-picker-date-picker")
+                .withAttribute("slot", "date-picker").first()
+                .wrap(DatePickerElement.class);
     }
 
-    private TestBenchElement getTimePicker() {
-        return $("vaadin-time-picker").withAttribute("slot", "time-picker")
-                .first();
+    /**
+     * Get the TimePickerElement for time picker part.
+     *
+     * @return TimePickerElement
+     */
+    public TimePickerElement getTimePicker() {
+        return this.$("vaadin-date-time-picker-time-picker")
+                .withAttribute("slot", "time-picker").first()
+                .wrap(TimePickerElement.class);
     }
 
     /**
