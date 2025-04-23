@@ -580,7 +580,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         menuBar.getOverflowButton().click();
         click("remove-item2-class-name");
         menuBar.getOverflowButton().click();
-        MenuBarItemeElement menuItem = menuBar.getSubMenuItems().get(0);
+        MenuBarItemElement menuItem = menuBar.getSubMenuItems().get(0);
 
         Assert.assertEquals(Set.of(), menuItem.getClassNames());
     }
