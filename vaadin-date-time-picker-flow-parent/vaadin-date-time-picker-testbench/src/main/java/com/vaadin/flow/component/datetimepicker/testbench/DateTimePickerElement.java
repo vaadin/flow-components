@@ -255,9 +255,8 @@ public class DateTimePickerElement extends TestBenchElement
      * @return DatePickerElement
      */
     public DatePickerElement getDatePicker() {
-        return this.$("vaadin-date-time-picker-date-picker")
-                .withAttribute("slot", "date-picker").first()
-                .wrap(DatePickerElement.class);
+        return this.$("vaadin-date-picker").withAttribute("slot", "date-picker")
+                .first().wrap(DatePickerElement.class);
     }
 
     /**
@@ -266,9 +265,8 @@ public class DateTimePickerElement extends TestBenchElement
      * @return TimePickerElement
      */
     public TimePickerElement getTimePicker() {
-        return this.$("vaadin-date-time-picker-time-picker")
-                .withAttribute("slot", "time-picker").first()
-                .wrap(TimePickerElement.class);
+        return this.$("vaadin-time-picker").withAttribute("slot", "time-picker")
+                .first().wrap(TimePickerElement.class);
     }
 
     /**
