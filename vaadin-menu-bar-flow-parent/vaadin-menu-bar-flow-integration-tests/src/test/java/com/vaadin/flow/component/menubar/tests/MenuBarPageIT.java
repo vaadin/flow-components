@@ -204,7 +204,8 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("set-width");
         waitForResizeObserver();
         var overflowButton = menuBar.getOverflowButton().click();
-        getSubMenuItems(overflowButton.getSubMenu()).get(0).click();
+        Assert.assertNotNull(menuBar.getSubMenu());
+        menuBar.getSubMenuItems(overflowButton.getSubMenu()).get(0).click();
         assertMessage("clicked item 2");
     }
 
