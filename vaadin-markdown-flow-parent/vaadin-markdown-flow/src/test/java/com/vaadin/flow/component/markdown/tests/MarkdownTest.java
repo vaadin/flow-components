@@ -13,26 +13,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-window.Vaadin.Flow.messageListConnector = {
-  setItems(list, items, locale) {
-    const formatter = new Intl.DateTimeFormat(locale, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric'
-    });
-    list.items = items.map((item) =>
-      item.time
-        ? Object.assign(item, {
-            time: formatter.format(new Date(item.time))
-          })
-        : item
-    );
-  },
+package com.vaadin.flow.component.markdown.tests;
 
-  appendItemContent(list, appendedContent, index) {
-    list.items[index].text += appendedContent;
-    list.items = [...list.items];
-  }
-};
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.vaadin.flow.component.markdown.Markdown;
+
+public class MarkdownTest {
+
+    private Markdown markdown;
+
+    @Test
+    public void testMarkdown() {
+        markdown = new Markdown();
+        markdown.setMarkdown("**Hello** _World_");
+        Assert.assertEquals("**Hello** _World_", markdown.getMarkdown());
+    }
+
+}

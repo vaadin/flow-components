@@ -36,6 +36,7 @@
         <module>vaadin-virtual-list-flow-parent</module>
         <module>vaadin-list-box-flow-parent</module>
         <module>vaadin-login-flow-parent</module>
+        <module>vaadin-markdown-flow-parent</module>
         <module>vaadin-menu-bar-flow-parent</module>
         <module>vaadin-messages-flow-parent</module>
         <module>vaadin-notification-flow-parent</module>

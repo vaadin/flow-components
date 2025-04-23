@@ -13,26 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-window.Vaadin.Flow.messageListConnector = {
-  setItems(list, items, locale) {
-    const formatter = new Intl.DateTimeFormat(locale, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric'
-    });
-    list.items = items.map((item) =>
-      item.time
-        ? Object.assign(item, {
-            time: formatter.format(new Date(item.time))
-          })
-        : item
-    );
-  },
+package com.vaadin.flow.component.markdown.testbench;
 
-  appendItemContent(list, appendedContent, index) {
-    list.items[index].text += appendedContent;
-    list.items = [...list.items];
-  }
-};
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
+
+/**
+ * A TestBench element representing a <code>&lt;vaadin-button&gt;</code>
+ * element.
+ */
+@Element("vaadin-markdown")
+public class MarkdownElement extends TestBenchElement {
+
+}

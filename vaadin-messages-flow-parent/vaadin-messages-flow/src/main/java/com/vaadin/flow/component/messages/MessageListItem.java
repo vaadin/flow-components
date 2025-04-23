@@ -153,8 +153,14 @@ public class MessageListItem implements Serializable {
      *            the content
      */
     public void setText(String text) {
+        if (text != null && text.startsWith(this.text)) {
+            var appendedContent = text.substring(this.text.length());
+            getHost().scheduleAppendItemContent(this, appendedContent);
+        } else {
+            propsChanged();
+        }
+
         this.text = text;
-        propsChanged();
     }
 
     /**

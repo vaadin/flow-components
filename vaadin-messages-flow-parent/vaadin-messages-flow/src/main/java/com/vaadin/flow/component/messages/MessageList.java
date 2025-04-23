@@ -19,7 +19,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -53,6 +55,7 @@ public class MessageList extends Component
 
     private List<MessageListItem> items = Collections.emptyList();
     private boolean pendingUpdate = false;
+    private Map<MessageListItem, String> pendingItemContentUpdates = new HashMap<>();
 
     /**
      * Creates a new message list component. To populate the content of the
@@ -125,6 +128,26 @@ public class MessageList extends Component
         return Collections.unmodifiableList(items);
     }
 
+    void scheduleAppendItemContent(MessageListItem item,
+            String appendedContent) {
+        if (pendingItemContentUpdates.containsKey(item)) {
+            pendingItemContentUpdates.put(item,
+                    pendingItemContentUpdates.get(item) + appendedContent);
+            return;
+        }
+        pendingItemContentUpdates.put(item, appendedContent);
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(this, ctx -> {
+                    getElement().executeJs(
+                            "window.Vaadin.Flow.messageListConnector"
+                                    + ".appendItemContent(this, $0, $1)",
+                            pendingItemContentUpdates.get(item),
+                            items.indexOf(item));
+                    pendingItemContentUpdates.remove(item);
+                }));
+
+    }
+
     void scheduleItemsUpdate() {
         if (!pendingUpdate) {
             pendingUpdate = true;
@@ -143,5 +166,9 @@ public class MessageList extends Component
     @Override
     public void localeChange(LocaleChangeEvent event) {
         scheduleItemsUpdate();
+    }
+
+    public void setMarkdown(boolean markdown) {
+        getElement().setProperty("markdown", markdown);
     }
 }
