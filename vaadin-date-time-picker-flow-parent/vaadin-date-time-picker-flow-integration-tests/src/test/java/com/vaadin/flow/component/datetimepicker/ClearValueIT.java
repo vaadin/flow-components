@@ -81,7 +81,7 @@ public class ClearValueIT extends AbstractComponentIT {
         Assert.assertEquals("12:00 PM", timeInput.getTimePickerInputValue());
 
         $("button").id(CLEAR_AND_SET_VALUE_BUTTON).click();
-        Assert.assertEquals("1/1/2022", dateInput.getValue());
+        Assert.assertEquals("1/1/2022", dateInput.getInputValue());
         Assert.assertEquals("12:00 PM", timeInput.getTimePickerInputValue());
     }
 
