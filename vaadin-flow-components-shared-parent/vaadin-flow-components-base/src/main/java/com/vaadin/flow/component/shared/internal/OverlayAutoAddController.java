@@ -20,6 +20,8 @@ import java.io.Serializable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.function.SerializableSupplier;
+import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * An internal controller for automatically adding a component to the UI when
@@ -33,7 +35,9 @@ public class OverlayAutoAddController<C extends Component>
     private final C component;
     private final SerializableSupplier<Boolean> isModalSupplier;
 
+    private boolean skipOnNavigation;
     private boolean autoAdded;
+    private Registration beforeLeaveRegistration;
 
     public OverlayAutoAddController(C component) {
         this(component, () -> false);
@@ -53,15 +57,42 @@ public class OverlayAutoAddController<C extends Component>
         });
     }
 
+    /**
+     * Sets whether to skip auto-adding when the UI navigates to a new view
+     * before the component is opened.
+     *
+     * @param skipOnNavigation
+     *            whether to skip auto-adding on navigation
+     */
+    public void setSkipOnNavigation(boolean skipOnNavigation) {
+        this.skipOnNavigation = skipOnNavigation;
+    }
+
     private void handleOpen() {
         UI ui = getUI();
-        ui.beforeClientResponse(ui, context -> {
-            if (isOpened() && !isAttached()) {
-                ui.addToModalComponent(component);
-                ui.setChildComponentModal(component, isModalSupplier.get());
-                autoAdded = true;
-            }
-        });
+        StateTree.ExecutionRegistration addToUiRegistration = ui
+                .beforeClientResponse(ui, context -> {
+                    if (isOpened() && !isAttached()) {
+                        ui.addToModalComponent(component);
+                        ui.setChildComponentModal(component,
+                                isModalSupplier.get());
+                        autoAdded = true;
+                    }
+                    if (beforeLeaveRegistration != null) {
+                        beforeLeaveRegistration.remove();
+                        beforeLeaveRegistration = null;
+                    }
+                });
+
+        if (skipOnNavigation && ui.getSession() != null) {
+            // Cancel auto-adding if the current view is navigated away from
+            // before the component is added to the UI.
+            beforeLeaveRegistration = ui.addBeforeLeaveListener(event -> {
+                addToUiRegistration.remove();
+                beforeLeaveRegistration.remove();
+                beforeLeaveRegistration = null;
+            });
+        }
     }
 
     private void handleClose() {

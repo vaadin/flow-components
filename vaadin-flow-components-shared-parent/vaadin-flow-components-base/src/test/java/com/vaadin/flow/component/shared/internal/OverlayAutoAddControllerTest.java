@@ -27,6 +27,8 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.function.SerializableSupplier;
+import com.vaadin.flow.router.BeforeLeaveEvent;
+import com.vaadin.flow.router.internal.BeforeLeaveHandler;
 import com.vaadin.flow.server.VaadinSession;
 
 @NotThreadSafe
@@ -96,6 +98,36 @@ public class OverlayAutoAddControllerTest {
 
         component.setOpened(true);
         component.setOpened(false);
+        fakeClientResponse();
+
+        Assert.assertNull(component.getElement().getParent());
+    }
+
+    @Test
+    public void open_beforeLeaveEventFiresBeforeClientResponse_autoAdded() {
+        TestComponent component = new TestComponent();
+        component.setOpened(true);
+
+        BeforeLeaveEvent beforeLeaveEvent = Mockito
+                .mock(BeforeLeaveEvent.class);
+        ui.getInternals().getListeners(BeforeLeaveHandler.class)
+                .forEach(handler -> handler.beforeLeave(beforeLeaveEvent));
+        fakeClientResponse();
+
+        Assert.assertEquals(ui.getElement(),
+                component.getElement().getParent());
+    }
+
+    @Test
+    public void setSkipOnNavigation_open_beforeLeaveEventFiresBeforeClientResponse_notAutoAdded() {
+        TestComponent component = new TestComponent();
+        component.controller.setSkipOnNavigation(true);
+        component.setOpened(true);
+
+        BeforeLeaveEvent beforeLeaveEvent = Mockito
+                .mock(BeforeLeaveEvent.class);
+        ui.getInternals().getListeners(BeforeLeaveHandler.class)
+                .forEach(handler -> handler.beforeLeave(beforeLeaveEvent));
         fakeClientResponse();
 
         Assert.assertNull(component.getElement().getParent());
@@ -184,12 +216,14 @@ public class OverlayAutoAddControllerTest {
 
     @Tag("test")
     private static class TestComponent extends Component {
+        private final OverlayAutoAddController<TestComponent> controller;
+
         public TestComponent() {
-            new OverlayAutoAddController<>(this);
+            controller = new OverlayAutoAddController<>(this);
         }
 
         public TestComponent(SerializableSupplier<Boolean> isModalSupplier) {
-            new OverlayAutoAddController<>(this, isModalSupplier);
+            controller = new OverlayAutoAddController<>(this, isModalSupplier);
         }
 
         public void setOpened(boolean opened) {

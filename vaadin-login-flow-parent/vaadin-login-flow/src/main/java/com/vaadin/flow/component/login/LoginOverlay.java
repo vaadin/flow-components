@@ -66,7 +66,13 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
 
     private void init() {
         // Initialize auto-add behavior
-        new OverlayAutoAddController<>(this);
+        OverlayAutoAddController<LoginOverlay> autoAddController = new OverlayAutoAddController<>(
+                this);
+        // Skip auto-adding when navigating to a new view before opening.
+        // Handles cases where LoginOverlay is used in a login view, in which
+        // case it should not be auto-added if the view redirects to a different
+        // view if the user is already authenticated
+        autoAddController.setSkipOnNavigation(true);
     }
 
     /**
