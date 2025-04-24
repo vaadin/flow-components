@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.messages.tests;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -123,9 +122,7 @@ public class MessageListChatPage extends Div {
                     Instant.now(), "User");
             newUserItem.setUserColorIndex(1);
 
-            var items = new ArrayList<>(list.getItems());
-            items.add(newUserItem);
-            list.setItems(items);
+            list.addItem(newUserItem);
 
             input.setEnabled(false);
 
@@ -141,9 +138,7 @@ public class MessageListChatPage extends Div {
                 if (token != null) {
                     ui.access(() -> {
                         if (!list.getItems().contains(newAssistantItem)) {
-                            var items2 = new ArrayList<>(list.getItems());
-                            items2.add(newAssistantItem);
-                            list.setItems(items2);
+                            list.addItem(newAssistantItem);
                         }
                         newAssistantItem
                                 .setText(newAssistantItem.getText() + token);
@@ -184,51 +179,4 @@ public class MessageListChatPage extends Div {
 
         getElement().appendChild(style);
     }
-
-    // private void addAssistantResponse() {
-    // input.setEnabled(false);
-    // var ui = getUI().get();
-    // ui.setPollInterval(100);
-
-    // new Thread(() -> {
-
-    // // Simulate a delay for the assistant response
-    // try {
-    // Thread.sleep(2000);
-    // } catch (InterruptedException e) {
-    // e.printStackTrace();
-    // }
-
-    // var newAssistantItem = new MessageListItem("", Instant.now(),
-    // "Assistant");
-    // newAssistantItem.setUserAbbreviation("A");
-    // newAssistantItem.setUserColorIndex(2);
-
-    // var items = new ArrayList<>(list.getItems());
-    // items.add(newAssistantItem);
-    // ui.access(() -> {
-    // list.setItems(items);
-    // });
-
-    // for (int i = 0; i < 40; i++) {
-    // try {
-    // Thread.sleep(50);
-    // } catch (InterruptedException e) {
-    // e.printStackTrace();
-    // }
-
-    // ui.access(() -> {
-    // newAssistantItem.setText(newAssistantItem.getText() + "foo ");
-    // });
-
-    // }
-
-    // ui.access(() -> {
-    // ui.setPollInterval(-1);
-    // input.setEnabled(true);
-    // });
-
-    // }).start();
-
-    // }
 }

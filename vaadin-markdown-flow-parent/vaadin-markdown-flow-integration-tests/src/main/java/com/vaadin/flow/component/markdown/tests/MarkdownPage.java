@@ -20,7 +20,7 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.markdown.Markdown;
 import com.vaadin.flow.router.Route;
 
-@Route("vaadin-markdown")
+@Route("markdown")
 public class MarkdownPage extends Div {
 
     public MarkdownPage() {

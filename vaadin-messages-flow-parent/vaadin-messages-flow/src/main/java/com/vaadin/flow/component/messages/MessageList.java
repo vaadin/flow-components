@@ -53,7 +53,7 @@ import elemental.json.JsonArray;
 public class MessageList extends Component
         implements HasStyle, HasSize, LocaleChangeObserver {
 
-    private List<MessageListItem> items = Collections.emptyList();
+    private List<MessageListItem> items = new ArrayList<>();
     private boolean pendingUpdate = false;
     private Map<MessageListItem, String> pendingItemContentUpdates = new HashMap<>();
 
@@ -116,6 +116,20 @@ public class MessageList extends Component
      */
     public void setItems(MessageListItem... items) {
         setItems(Arrays.asList(items));
+    }
+
+    /**
+     * Adds a single item to be rendered as a message at the end of this message list.
+     *
+     * @param item
+     *            the item to add, not {@code null}
+     */
+    public void addItem(MessageListItem item) {
+        Objects.requireNonNull(item, "Can't add null item to MessageList.");
+        
+        item.setHost(this);
+        items.add(item);
+        scheduleItemsUpdate();
     }
 
     /**
