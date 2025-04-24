@@ -687,7 +687,7 @@ public class DatePicker
      */
     @Synchronize(property = "_inputElementValue", value = { "change",
             "unparsable-change" })
-    private String getInputElementValue() {
+    protected String getInputElementValue() {
         return getElement().getProperty("_inputElementValue", "");
     }
 

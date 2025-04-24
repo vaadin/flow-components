@@ -18,6 +18,7 @@ package com.vaadin.flow.component.datetimepicker.validation;
 import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.BAD_INPUT_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.CLEAR_VALUE_BUTTON;
 import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.EXPECTED_VALUE_INPUT;
+import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.INCOMPLETE_INPUT_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.MAX_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.MAX_INPUT;
 import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.MIN_ERROR_MESSAGE;
@@ -58,17 +59,17 @@ public class BinderValidationIT
     public void required_triggerDateInputBlur_assertValidity() {
         dateInput.sendKeys(Keys.TAB);
         timeInput.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertServerValid();
+        assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
     public void required_triggerTimeInputBlur_assertValidity() {
         timeInput.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertServerValid();
+        assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -84,7 +85,7 @@ public class BinderValidationIT
         setInputValue(dateInput, "");
         assertServerInvalid();
         assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertErrorMessage(INCOMPLETE_INPUT_ERROR_MESSAGE);
 
         setInputValue(timeInput, "");
         assertServerInvalid();

@@ -17,17 +17,21 @@ package com.vaadin.flow.component.datetimepicker;
 
 import java.io.Serializable;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -65,6 +69,24 @@ class DateTimePickerDatePicker
     protected boolean isInputValuePresent() {
         return super.isInputValuePresent();
     }
+
+    // Synchronizes on "date-picker-value-programmatically-set" in addition to
+    // the original events
+    @Synchronize(property = "_inputElementValue", value = { "change",
+            "unparsable-change", "date-picker-value-programmatically-set" })
+    @Override
+    public String getInputElementValue() {
+        return super.getInputElementValue();
+    }
+
+    @Override
+    public void setValue(LocalDate date) {
+        super.setValue(date);
+        // Synchronizes the input element value back to the server when value is
+        // set programmatically
+        getElement().executeJs(
+                "this.dispatchEvent(new CustomEvent('date-picker-value-programmatically-set'));");
+    }
 }
 
 @Tag("vaadin-time-picker")
@@ -78,6 +100,24 @@ class DateTimePickerTimePicker
     @Override
     protected boolean isInputValuePresent() {
         return super.isInputValuePresent();
+    }
+
+    // Synchronizes on "time-picker-value-programmatically-set" in addition to
+    // the original events
+    @Synchronize(property = "_inputElementValue", value = { "change",
+            "unparsable-change", "time-picker-value-programmatically-set" })
+    @Override
+    public String getInputElementValue() {
+        return super.getInputElementValue();
+    }
+
+    @Override
+    public void setValue(LocalTime time) {
+        super.setValue(time);
+        // Synchronizes the input element value back to the server when value is
+        // set programmatically
+        getElement().executeJs(
+                "this.dispatchEvent(new CustomEvent('time-picker-value-programmatically-set'));");
     }
 }
 
@@ -123,16 +163,53 @@ public class DateTimePicker
     private LocalDateTime max;
     private LocalDateTime min;
 
-    private Validator<LocalDateTime> defaultValidator = (value, context) -> {
-        boolean fromComponent = context == null;
+    private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDateTime>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
-        boolean hasBadDatePickerInput = Objects.equals(datePicker.getValue(),
-                datePicker.getEmptyValue()) && datePicker.isInputValuePresent();
-        boolean hasBadTimePickerInput = Objects.equals(timePicker.getValue(),
-                timePicker.getEmptyValue()) && timePicker.isInputValuePresent();
+    private boolean programmaticallySettingValue;
+
+    private final Validator<LocalDateTime> defaultValidator = (value,
+            context) -> {
+        var fromComponent = context == null;
+        var isEmpty = Objects.equals(value, getEmptyValue());
+        var isDatePickerEmpty = datePicker.isEmpty();
+        var isTimePickerEmpty = timePicker.isEmpty();
+
+        // Report error if any of the pickers has bad input
+        var hasBadDatePickerInput = isDatePickerEmpty
+                && datePicker.isInputValuePresent();
+        var hasBadTimePickerInput = isTimePickerEmpty
+                && timePicker.isInputValuePresent();
+
         if (hasBadDatePickerInput || hasBadTimePickerInput) {
             return ValidationResult.error(getI18nErrorMessage(
                     DateTimePickerI18n::getBadInputErrorMessage));
+        }
+
+        // Report error if only date picker has a value, and it's outside the
+        // range.
+        if (isEmpty && !isDatePickerEmpty) {
+            var maxDate = max != null ? max.toLocalDate() : null;
+            var minDate = min != null ? min.toLocalDate() : null;
+
+            var maxResult = ValidationUtil.validateMaxConstraint(
+                    getI18nErrorMessage(DateTimePickerI18n::getMaxErrorMessage),
+                    datePicker.getValue(), maxDate);
+            if (maxResult.isError()) {
+                return maxResult;
+            }
+
+            var minResult = ValidationUtil.validateMinConstraint(
+                    getI18nErrorMessage(DateTimePickerI18n::getMinErrorMessage),
+                    datePicker.getValue(), minDate);
+            if (minResult.isError()) {
+                return minResult;
+            }
+        }
+
+        // Report error if only one of the pickers has a value
+        if (isEmpty && (!isDatePickerEmpty || !isTimePickerEmpty)) {
+            return ValidationResult.error(getI18nErrorMessage(
+                    DateTimePickerI18n::getIncompleteInputErrorMessage));
         }
 
         // Do the required check only if the validator is called from the
@@ -149,14 +226,14 @@ public class DateTimePicker
             }
         }
 
-        ValidationResult maxResult = ValidationUtil.validateMaxConstraint(
+        var maxResult = ValidationUtil.validateMaxConstraint(
                 getI18nErrorMessage(DateTimePickerI18n::getMaxErrorMessage),
                 value, max);
         if (maxResult.isError()) {
             return maxResult;
         }
 
-        ValidationResult minResult = ValidationUtil.validateMinConstraint(
+        var minResult = ValidationUtil.validateMinConstraint(
                 getI18nErrorMessage(DateTimePickerI18n::getMinErrorMessage),
                 value, min);
         if (minResult.isError()) {
@@ -237,9 +314,7 @@ public class DateTimePicker
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
-        addValueChangeListener(e -> validate());
-
-        addClientValidatedEventListener(e -> validate());
+        addValidationListeners();
     }
 
     /**
@@ -327,6 +402,27 @@ public class DateTimePicker
         setLocale(locale);
     }
 
+    private void addValidationListeners() {
+        getElement().addEventListener("change", e -> {
+            // No need to validate since it will be validated once the
+            // programmatically set value is updated on the client
+            if (!programmaticallySettingValue) {
+                validate(true);
+            }
+        });
+        getElement().addEventListener("unparsable-change", e -> {
+            // No need to validate since it will be validated once the
+            // programmatically set value is updated on the client
+            if (!programmaticallySettingValue) {
+                validate(true);
+            }
+        });
+        getElement().addEventListener("value-programmatically-set", e -> {
+            validate(true);
+            programmaticallySettingValue = false;
+        });
+    }
+
     /**
      * Sets the selected date and time value of the component. The value can be
      * cleared by setting null.
@@ -343,23 +439,13 @@ public class DateTimePicker
      */
     @Override
     public void setValue(LocalDateTime value) {
-        LocalDateTime oldValue = getValue();
-
         value = sanitizeValue(value);
+        synchronizeChildComponentValues(value);
         super.setValue(value);
-
-        boolean isInputValuePresent = timePicker.isInputValuePresent()
-                || datePicker.isInputValuePresent();
-        boolean isValueRemainedEmpty = valueEquals(oldValue, getEmptyValue())
-                && valueEquals(value, getEmptyValue());
-        if (isValueRemainedEmpty && isInputValuePresent) {
-            // Clear the input elements from possible bad input.
-            synchronizeChildComponentValues(value);
-            fireEvent(new ClientValidatedEvent(this, false));
-        } else {
-            synchronizeChildComponentValues(value);
-        }
-
+        // Notify the server in order to use the formatted values in validation
+        programmaticallySettingValue = true;
+        getElement().executeJs(
+                "this.dispatchEvent(new CustomEvent('value-programmatically-set'));");
     }
 
     /**
@@ -749,6 +835,11 @@ public class DateTimePicker
         synchronizeTheme();
     }
 
+    private boolean isInputValuePresent() {
+        return datePicker.isInputValuePresent()
+                || timePicker.isInputValuePresent();
+    }
+
     @Override
     public Validator<LocalDateTime> getDefaultValidator() {
         return defaultValidator;
@@ -757,9 +848,8 @@ public class DateTimePicker
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<LocalDateTime> listener) {
-        return addClientValidatedEventListener(event -> listener
-                .validationStatusChanged(new ValidationStatusChangeEvent<>(this,
-                        event.isValid())));
+        return Registration.addAndRemove(validationStatusChangeListeners,
+                listener);
     }
 
     @Override
@@ -778,6 +868,26 @@ public class DateTimePicker
      */
     protected void validate() {
         validationController.validate(getValue());
+    }
+
+    /**
+     * Delegates the call to {@link #validate()} and additionally fires
+     * {@link ValidationStatusChangeEvent} to notify Binder that it needs to
+     * revalidate since the component's own validity state may have changed.
+     * <p>
+     * NOTE: There is no need to notify Binder separately when running
+     * validation on {@link ValueChangeEvent}, as Binder already listens to this
+     * event and revalidates automatically.
+     */
+    private void validate(boolean shouldFireValidationStatusChangeEvent) {
+        validate();
+
+        if (shouldFireValidationStatusChangeEvent) {
+            ValidationStatusChangeEvent<LocalDateTime> event = new ValidationStatusChangeEvent<>(
+                    this, !isInvalid());
+            validationStatusChangeListeners.forEach(
+                    listener -> listener.validationStatusChanged(event));
+        }
     }
 
     /**
@@ -929,6 +1039,7 @@ public class DateTimePicker
         private String dateLabel;
         private String timeLabel;
         private String badInputErrorMessage;
+        private String incompleteInputErrorMessage;
         private String requiredErrorMessage;
         private String minErrorMessage;
         private String maxErrorMessage;
@@ -936,7 +1047,7 @@ public class DateTimePicker
         /**
          * Gets the aria-label suffix for the date picker.
          * <p>
-         * The date picker's final aria-label is a concatanation of the
+         * The date picker's final aria-label is a concatenation of the
          * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()}
          * methods and this suffix.
          *
@@ -949,7 +1060,7 @@ public class DateTimePicker
         /**
          * Sets the aria-label suffix for the date picker.
          * <p>
-         * The date picker's final aria-label is a concatanation of the
+         * The date picker's final aria-label is a concatenation of the
          * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()}
          * methods and this suffix.
          *
@@ -966,7 +1077,7 @@ public class DateTimePicker
         /**
          * Gets the aria-label suffix for the time picker.
          * <p>
-         * The time picker's aria-label is a concatanation of the
+         * The time picker's aria-label is a concatenation of the
          * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()}
          * methods and this suffix.
          *
@@ -979,7 +1090,7 @@ public class DateTimePicker
         /**
          * Sets the aria-label suffix for the time picker.
          * <p>
-         * The time picker's aria-label is a concatanation of the
+         * The time picker's aria-label is a concatenation of the
          * DateTimePicker's {@link #getAriaLabel()} or {@link #getLabel()}
          * methods and this suffix.
          *
@@ -1017,6 +1128,34 @@ public class DateTimePicker
          */
         public DateTimePickerI18n setBadInputErrorMessage(String errorMessage) {
             badInputErrorMessage = errorMessage;
+            return this;
+        }
+
+        /**
+         * Gets the error message displayed when either the date or time is
+         * empty.
+         *
+         * @return the error message or {@code null} if not set
+         */
+        public String getIncompleteInputErrorMessage() {
+            return incompleteInputErrorMessage;
+        }
+
+        /**
+         * Sets the error message to display when either the date or time is
+         * empty.
+         * <p>
+         * Note, custom error messages set with
+         * {@link DateTimePicker#setErrorMessage(String)} take priority over
+         * i18n error messages.
+         *
+         * @param errorMessage
+         *            the error message to set, or {@code null} to clear
+         * @return this instance for method chaining
+         */
+        public DateTimePickerI18n setIncompleteInputErrorMessage(
+                String errorMessage) {
+            incompleteInputErrorMessage = errorMessage;
             return this;
         }
 
