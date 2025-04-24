@@ -22,7 +22,6 @@ import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.contextmenu.testbench.ContextMenuItemElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 
 /**
  * @author Vaadin Ltd
