@@ -15,7 +15,9 @@
  */
 package com.vaadin.flow.component.datetimepicker.validation;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -32,21 +34,86 @@ import elemental.json.Json;
 
 public class BasicValidationTest
         extends AbstractBasicValidationTest<DateTimePicker, LocalDateTime> {
+
     @Test
-    public void badInput_validate_emptyErrorMessageDisplayed() {
+    public void badInputOnDatePicker_validate_emptyErrorMessageDisplayed() {
         getDatePicker().getElement().setProperty("_inputElementValue", "foo");
-        fireValidatedDomEvent();
+        fireUnparsableChangeDomEvent();
         Assert.assertEquals("", testField.getErrorMessage());
     }
 
     @Test
-    public void badInput_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+    public void badInputOnTimePicker_validate_emptyErrorMessageDisplayed() {
+        getTimePicker().getElement().setProperty("_inputElementValue", "foo");
+        fireUnparsableChangeDomEvent();
+        Assert.assertEquals("", testField.getErrorMessage());
+    }
+
+    @Test
+    public void badInputOnDatePicker_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        var errorMessage = "Value has invalid format";
         testField.setI18n(new DateTimePicker.DateTimePickerI18n()
-                .setBadInputErrorMessage("Value has invalid format"));
+                .setBadInputErrorMessage(errorMessage));
         getDatePicker().getElement().setProperty("_inputElementValue", "foo");
-        fireValidatedDomEvent();
-        Assert.assertEquals("Value has invalid format",
-                testField.getErrorMessage());
+        fireUnparsableChangeDomEvent();
+        Assert.assertEquals(errorMessage, testField.getErrorMessage());
+    }
+
+    @Test
+    public void badInputOnTimePicker_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        var errorMessage = "Value has invalid format";
+        testField.setI18n(new DateTimePicker.DateTimePickerI18n()
+                .setBadInputErrorMessage(errorMessage));
+        getTimePicker().getElement().setProperty("_inputElementValue", "foo");
+        fireUnparsableChangeDomEvent();
+        Assert.assertEquals(errorMessage, testField.getErrorMessage());
+    }
+
+    @Test
+    public void incompleteInputOnDatePicker_validate_emptyErrorMessageDisplayed() {
+        var picker = getDatePicker();
+        picker.setValue(LocalDate.now());
+        fireUnparsableChangeDomEvent();
+        Assert.assertEquals("", testField.getErrorMessage());
+    }
+
+    @Test
+    public void incompleteInputOnTimePicker_validate_emptyErrorMessageDisplayed() {
+        var picker = getTimePicker();
+        picker.setValue(LocalTime.now());
+        fireUnparsableChangeDomEvent();
+        Assert.assertEquals("", testField.getErrorMessage());
+    }
+
+    @Test
+    public void incompleteInputOnDatePicker_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        var errorMessage = "Value is incomplete";
+        testField.setI18n(new DateTimePicker.DateTimePickerI18n()
+                .setIncompleteInputErrorMessage(errorMessage));
+        var picker = getDatePicker();
+        picker.setValue(LocalDate.now());
+        fireUnparsableChangeDomEvent();
+        Assert.assertEquals(errorMessage, testField.getErrorMessage());
+    }
+
+    @Test
+    public void incompleteInputOnTimePicker_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        var errorMessage = "Value is incomplete";
+        testField.setI18n(new DateTimePicker.DateTimePickerI18n()
+                .setIncompleteInputErrorMessage(errorMessage));
+        var picker = getTimePicker();
+        picker.setValue(LocalTime.now());
+        fireUnparsableChangeDomEvent();
+        Assert.assertEquals(errorMessage, testField.getErrorMessage());
+    }
+
+    @Test
+    public void setIncompleteInputErrorMessage_errorMessageIsSet() {
+        var errorMessage = "Value is incomplete";
+        testField.setI18n(new DateTimePicker.DateTimePickerI18n()
+                .setIncompleteInputErrorMessage(errorMessage));
+        Assert.assertEquals(errorMessage,
+                testField.getI18n().getIncompleteInputErrorMessage());
     }
 
     @Test
@@ -54,6 +121,7 @@ public class BasicValidationTest
         testField.setRequiredIndicatorVisible(true);
         testField.setValue(LocalDateTime.now());
         testField.setValue(null);
+        fireValueProgrammaticallySetDomEvent();
         Assert.assertEquals("", testField.getErrorMessage());
     }
 
@@ -64,6 +132,7 @@ public class BasicValidationTest
                 .setRequiredErrorMessage("Field is required"));
         testField.setValue(LocalDateTime.now());
         testField.setValue(null);
+        fireValueProgrammaticallySetDomEvent();
         Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
@@ -71,6 +140,7 @@ public class BasicValidationTest
     public void min_validate_emptyErrorMessageDisplayed() {
         testField.setMin(LocalDateTime.now());
         testField.setValue(LocalDateTime.now().minusDays(1));
+        fireValueProgrammaticallySetDomEvent();
         Assert.assertEquals("", testField.getErrorMessage());
     }
 
@@ -80,6 +150,7 @@ public class BasicValidationTest
         testField.setI18n(new DateTimePicker.DateTimePickerI18n()
                 .setMinErrorMessage("Value is too small"));
         testField.setValue(LocalDateTime.now().minusDays(1));
+        fireValueProgrammaticallySetDomEvent();
         Assert.assertEquals("Value is too small", testField.getErrorMessage());
     }
 
@@ -87,6 +158,7 @@ public class BasicValidationTest
     public void max_validate_emptyErrorMessageDisplayed() {
         testField.setMax(LocalDateTime.now());
         testField.setValue(LocalDateTime.now().plusDays(1));
+        fireValueProgrammaticallySetDomEvent();
         Assert.assertEquals("", testField.getErrorMessage());
     }
 
@@ -96,6 +168,7 @@ public class BasicValidationTest
         testField.setI18n(new DateTimePicker.DateTimePickerI18n()
                 .setMaxErrorMessage("Value is too big"));
         testField.setValue(LocalDateTime.now().plusDays(1));
+        fireValueProgrammaticallySetDomEvent();
         Assert.assertEquals("Value is too big", testField.getErrorMessage());
     }
 
@@ -107,6 +180,7 @@ public class BasicValidationTest
         testField.setErrorMessage("Custom error message");
         testField.setValue(LocalDateTime.now());
         testField.setValue(null);
+        fireValueProgrammaticallySetDomEvent();
         Assert.assertEquals("Custom error message",
                 testField.getErrorMessage());
     }
@@ -122,6 +196,7 @@ public class BasicValidationTest
         testField.setErrorMessage("");
         testField.setValue(LocalDateTime.now());
         testField.setValue(null);
+        fireValueProgrammaticallySetDomEvent();
         Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
@@ -145,10 +220,19 @@ public class BasicValidationTest
         return (TimePicker) SlotUtils.getChildInSlot(testField, "time-picker");
     }
 
-    private void fireValidatedDomEvent() {
-        DomEvent validatedDomEvent = new DomEvent(testField.getElement(),
-                "validated", Json.createObject());
-        testField.getElement().getNode().getFeature(ElementListenerMap.class)
-                .fireEvent(validatedDomEvent);
+    private void fireUnparsableChangeDomEvent() {
+        fireDomEvent("unparsable-change");
     }
+
+    private void fireValueProgrammaticallySetDomEvent() {
+        fireDomEvent("value-programmatically-set");
+    }
+
+    private void fireDomEvent(String eventType) {
+        var domEvent = new DomEvent(testField.getElement(), eventType,
+                Json.createObject());
+        testField.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(domEvent);
+    }
+
 }
