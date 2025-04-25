@@ -28,6 +28,8 @@ public class BasicValidationPage
     public static final String MIN_INPUT = "min-input";
     public static final String MAX_INPUT = "max-input";
     public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
+    public static final String SET_VALUE_PROGRAMMATICALLY = "set-value-programmatically";
+    public static final String CLEAR_AND_SET_VALUE_PROGRAMMATICALLY = "clear-and-set-value-programmatically";
 
     public static final String REQUIRED_ERROR_MESSAGE = "Field is required";
     public static final String BAD_INPUT_ERROR_MESSAGE = "Invalid date format";
@@ -62,6 +64,16 @@ public class BasicValidationPage
         add(createButton(CLEAR_VALUE_BUTTON, "Clear value", event -> {
             testField.clear();
         }));
+
+        add(createButton(SET_VALUE_PROGRAMMATICALLY,
+                "Set value programmatically",
+                event -> testField.setValue(LocalDateTime.now())));
+
+        add(createButton(CLEAR_AND_SET_VALUE_PROGRAMMATICALLY,
+                "Clear and set value programmatically", event -> {
+                    testField.clear();
+                    testField.setValue(LocalDateTime.now());
+                }));
     }
 
     protected DateTimePicker createTestField() {

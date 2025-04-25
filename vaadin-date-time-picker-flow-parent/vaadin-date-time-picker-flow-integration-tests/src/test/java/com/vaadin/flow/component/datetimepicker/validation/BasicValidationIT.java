@@ -16,6 +16,7 @@
 package com.vaadin.flow.component.datetimepicker.validation;
 
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.BAD_INPUT_ERROR_MESSAGE;
+import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.CLEAR_AND_SET_VALUE_PROGRAMMATICALLY;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.CLEAR_VALUE_BUTTON;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.INCOMPLETE_INPUT_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.MAX_ERROR_MESSAGE;
@@ -24,6 +25,7 @@ import static com.vaadin.flow.component.datetimepicker.validation.BasicValidatio
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.MIN_INPUT;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.REQUIRED_BUTTON;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.SET_VALUE_PROGRAMMATICALLY;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -75,6 +77,17 @@ public class BasicValidationIT
     }
 
     @Test
+    public void required_changeInputTemporarily_triggerBlur_assertValidity() {
+        $("button").id(REQUIRED_BUTTON).click();
+        dateInput.sendKeys("1", Keys.BACK_SPACE, Keys.ENTER);
+        dateInput.sendKeys(Keys.TAB);
+        timeInput.sendKeys(Keys.TAB);
+        assertServerValid();
+        assertClientValid();
+        assertErrorMessage(null);
+    }
+
+    @Test
     public void required_changeValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
@@ -100,7 +113,7 @@ public class BasicValidationIT
         assertClientInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
 
-        setFieldIInvalid();
+        setFieldInvalid();
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
@@ -153,7 +166,6 @@ public class BasicValidationIT
         $("input").id(MAX_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
 
         setInputValue(dateInput, "3/3/2000");
-        setInputValue(timeInput, "13:00");
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(MAX_ERROR_MESSAGE);
@@ -199,7 +211,7 @@ public class BasicValidationIT
 
     @Test
     public void badInput_changeValue_assertValidity() {
-        setFieldIInvalid();
+        setFieldInvalid();
         setInputValue(timeInput, "INVALID");
         assertServerInvalid();
         assertClientInvalid();
@@ -211,7 +223,7 @@ public class BasicValidationIT
         assertClientValid();
         assertErrorMessage("");
 
-        setFieldIInvalid();
+        setFieldInvalid();
         setInputValue(timeInput, "INVALID");
         assertServerInvalid();
         assertClientInvalid();
@@ -220,7 +232,7 @@ public class BasicValidationIT
 
     @Test
     public void badInput_setDateInputValue_blur_assertValidity() {
-        setFieldIInvalid();
+        setFieldInvalid();
         dateInput.sendKeys(Keys.TAB);
         timeInput.sendKeys(Keys.TAB);
         assertServerInvalid();
@@ -239,7 +251,7 @@ public class BasicValidationIT
 
     @Test
     public void badInput_setValue_clearValue_assertValidity() {
-        setFieldIInvalid();
+        setFieldInvalid();
         setInputValue(timeInput, "INVALID");
         assertServerInvalid();
         assertClientInvalid();
@@ -253,7 +265,7 @@ public class BasicValidationIT
 
     @Test
     public void badInput_setDateInputValue_blur_clearValue_assertValidity() {
-        setFieldIInvalid();
+        setFieldInvalid();
         dateInput.sendKeys(Keys.TAB);
         timeInput.sendKeys(Keys.TAB);
         assertServerInvalid();
@@ -378,7 +390,7 @@ public class BasicValidationIT
 
     @Test
     public void detach_attach_preservesInvalidState() {
-        setFieldIInvalid();
+        setFieldInvalid();
 
         detachAndReattachField();
 
@@ -408,14 +420,116 @@ public class BasicValidationIT
 
     @Test
     public void clientSideInvalidStateIsNotPropagatedToServer() {
-        setFieldIInvalid();
+        setFieldInvalid();
 
         executeScript("arguments[0].invalid = false", testField);
 
         assertServerInvalid();
     }
 
-    private void setFieldIInvalid() {
+    @Test
+    public void triggerBlurWithNoChange_fieldNotValidated() {
+        dateInput.sendKeys(Keys.TAB);
+        timeInput.sendKeys(Keys.TAB);
+        assertValidationCount(0);
+    }
+
+    @Test
+    public void initiallyEmpty_setValidValue_fieldValidatedOnce() {
+        dateInput.sendKeys("1/1/2000");
+        dateInput.sendKeys(Keys.ENTER);
+        dateInput.sendKeys(Keys.TAB);
+        timeInput.sendKeys("10:00");
+        timeInput.sendKeys(Keys.ENTER);
+        assertValidationCount(1);
+    }
+
+    @Test
+    public void initiallyEmpty_setInvalidValue_fieldNotValidatedOnce() {
+        dateInput.sendKeys("Invalid");
+        dateInput.sendKeys(Keys.ENTER);
+        assertValidationCount(1);
+    }
+
+    @Test
+    public void initiallyValidValue_clearValue_fieldValidatedOnce() {
+        dateInput.sendKeys("1/1/2000");
+        dateInput.sendKeys(Keys.ENTER);
+        dateInput.sendKeys(Keys.TAB);
+        timeInput.sendKeys("10:00");
+        timeInput.sendKeys(Keys.ENTER);
+        assertValidationCount(1);
+        clearInputValue();
+        assertValidationCount(1);
+    }
+
+    @Test
+    public void initiallyValidValue_changeValue_fieldValidatedOnce() {
+        dateInput.sendKeys("1/1/2000");
+        dateInput.sendKeys(Keys.ENTER);
+        dateInput.sendKeys(Keys.TAB);
+        timeInput.sendKeys("10:00");
+        timeInput.sendKeys(Keys.ENTER);
+        assertValidationCount(1);
+        dateInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
+        dateInput.sendKeys("1/1/2001");
+        dateInput.sendKeys(Keys.ENTER);
+        assertValidationCount(1);
+    }
+
+    @Test
+    public void initiallyInvalidValue_changeInvalidValue_fieldValidatedOnce() {
+        dateInput.sendKeys("Invalid");
+        dateInput.sendKeys(Keys.ENTER);
+        assertValidationCount(1);
+        dateInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
+        dateInput.sendKeys("Not a date");
+        dateInput.sendKeys(Keys.ENTER);
+        assertValidationCount(1);
+    }
+
+    @Test
+    public void initiallyInvalidValue_setValidValue_fieldValidatedOnce() {
+        dateInput.sendKeys("Invalid");
+        dateInput.sendKeys(Keys.ENTER);
+        assertValidationCount(1);
+        dateInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
+        dateInput.sendKeys("1/1/2000");
+        timeInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
+        timeInput.sendKeys("10:00");
+        timeInput.sendKeys(Keys.ENTER);
+        assertValidationCount(1);
+    }
+
+    @Test
+    public void initiallyInvalidValue_clearValue_fieldValidatedOnce() {
+        dateInput.sendKeys("Invalid");
+        dateInput.sendKeys(Keys.ENTER);
+        assertValidationCount(1);
+        clearInputValue();
+        assertValidationCount(1);
+    }
+
+    @Test
+    public void max_setDateOutOfRange_fieldValidatedOnce() {
+        $("input").id(MAX_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
+        setInputValue(dateInput, "3/3/2000");
+        assertValidationCount(1);
+    }
+
+    @Test
+    public void setValueProgrammatically_fieldValidatedOnce() {
+        clickElementWithJs(SET_VALUE_PROGRAMMATICALLY);
+        assertValidationCount(1);
+    }
+
+    @Test
+    public void clearAndSetValueProgrammatically_fieldValidatedOnce() {
+        clickElementWithJs(CLEAR_AND_SET_VALUE_PROGRAMMATICALLY);
+        assertValidationCount(1);
+    }
+
+    private void setFieldInvalid() {
         setInputValue(dateInput, "INVALID");
         setInputValue(timeInput, "INVALID");
     }
@@ -427,5 +541,11 @@ public class BasicValidationIT
     private void setInputValue(TestBenchElement input, String value) {
         input.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
         input.sendKeys(value, Keys.ENTER);
+    }
+
+    private void clearInputValue() {
+        dateInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
+        timeInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
+        timeInput.sendKeys(Keys.ENTER);
     }
 }
