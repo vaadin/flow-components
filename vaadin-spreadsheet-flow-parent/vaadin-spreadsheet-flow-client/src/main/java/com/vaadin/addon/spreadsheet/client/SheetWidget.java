@@ -46,6 +46,7 @@ import com.google.gwt.dom.client.StyleElement;
 import com.google.gwt.dom.client.Touch;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.TouchCancelEvent;
 import com.google.gwt.event.dom.client.TouchEndEvent;
 import com.google.gwt.event.dom.client.TouchMoveEvent;
@@ -1226,8 +1227,12 @@ public class SheetWidget extends Panel {
                                 + className);
             }
 
-            event.stopPropagation();
-            event.preventDefault();
+            if (!getSheetHandler().getCustomEditorFactory()
+                    .hasCustomEditor(getSelectedCellKey())) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+
             if (BrowserEvents.CONTEXTMENU.equals(event.getType())) {
                 Event.releaseCapture(sheet);
                 actionHandler.onCellRightClick(event, targetCol, targetRow);
@@ -5081,24 +5086,52 @@ public class SheetWidget extends Panel {
         jsniUtil.replaceSelector(editedCellFreezeColumnStyle,
                 ".notusedselector", 0);
         this.customEditorWidget = customEditorWidget;
-        cell.setValue(null);
+        // cell.setValue(null);
 
         Widget parent = customEditorWidget.getParent();
         if (parent != null && !equals(parent)) {
             customEditorWidget.removeFromParent();
         }
+
         DivElement element = cell.getElement();
         element.addClassName(CUSTOM_EDITOR_CELL_CLASSNAME);
         element.appendChild(customEditorWidget.getElement());
         if (parent == null || (parent != null && !equals(parent))) {
             adopt(customEditorWidget);
         }
+        CustomEditorListener listener = GWT.create(CustomEditorListener.class);
+        listener.setSheetWidget(this);
         if (customEditorWidget instanceof Slot) {
             Slot slot = (Slot) customEditorWidget;
-            var elems = slot.getAssignedElements();
-            if (elems.length > 0) {
-                // elems[0].focus();
-            }
+            var assignedElement = slot.getAssignedElement();
+            // Event.setEventListener(assignedElement, listener);
+            debugConsole.log(Level.INFO,
+                    "ELEMS: " + assignedElement.getTagName());
+            Event.setEventListener(assignedElement, event -> {
+                int type = event.getTypeInt();
+                debugConsole.log(Level.INFO, "Custom editor event: " + type
+                        + " | keydown: " + Event.ONKEYDOWN);
+
+                if (type == Event.ONKEYDOWN) {
+                    int keyCode = event.getKeyCode();
+                    debugConsole.log(Level.INFO, "Key code: " + keyCode);
+
+                    switch (keyCode) {
+                    case KeyCodes.KEY_TAB: // setFocused(true);
+                        event.preventDefault();
+                        focusSheet();
+                        SheetWidget.this.getSheetHandler()
+                                .onSheetKeyPress(event, "");
+                        break;
+                    case KeyCodes.KEY_ESCAPE: // Handle escape
+                        focusSheet();
+                        break;
+                    }
+                }
+            });
+
+            // Also register DOM event handlers to ensure events are captured
+            DOM.sinkEvents(assignedElement, Event.ONKEYDOWN); // elems[0].focus();
         }
         // focusSheet();
     }
@@ -5109,6 +5142,29 @@ public class SheetWidget extends Panel {
             return;
         }
         displayCustomCellEditor(customEditorWidget, selectedCell);
+    }
+
+    public static class CustomEditorListener implements EventListener {
+        private SheetWidget sheetWidget;
+
+        public void setSheetWidget(SheetWidget sheetWidget) {
+            this.sheetWidget = sheetWidget;
+        }
+
+        @Override
+        public void onBrowserEvent(Event event) {
+            Logger.getLogger(CustomEditorListener.class.getName())
+                    .info("EVENT KEYDOWN TAB");
+            if (event.getKeyCode() == KeyCodes.KEY_TAB) {
+                // event.preventDefault();
+                // event.stopPropagation();
+                // sheetWidget.getSheetHandler().onCellInputTab(
+                // sheetWidget.customEditorWidget.getElement()
+                // .getInnerText(), event.isShiftKeyDown());
+            } else if (event.getKeyCode() == KeyCodes.KEY_ESCAPE) {
+                // sheetWidget.removeCustomCellEditor();
+            }
+        }
     }
 
     public void removeCustomCellEditor() {

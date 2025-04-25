@@ -26,8 +26,6 @@ import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseUpHandler;
 import com.google.gwt.user.client.ui.TextBox;
 
-import java.util.logging.Logger;
-
 //TODO merge with FormulaBarWidget? or parts of it?
 public class SheetInputEventListener
         implements FocusHandler, KeyPressHandler, KeyDownHandler, ClickHandler,
@@ -102,7 +100,6 @@ public class SheetInputEventListener
                 formulaBarWidget.clearFormulaSelection();
                 break;
             case KeyCodes.KEY_TAB:
-                Logger.getLogger(SheetInputEventListener.class.getName()).info("TAB pressed inside cell");
                 handler.onCellInputTab(widget.getInlineEditor().getValue(),
                         event.isShiftKeyDown());
                 formulaBarWidget.clearFormulaSelection();

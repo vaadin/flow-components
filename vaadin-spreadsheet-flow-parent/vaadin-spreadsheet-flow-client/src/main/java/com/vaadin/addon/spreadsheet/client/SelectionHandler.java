@@ -179,7 +179,7 @@ public class SelectionHandler {
             if (customEditor != null) {
                 spreadsheet.customCellEditorDisplayed = true;
                 spreadsheet.formulaBarWidget.setFormulaFieldEnabled(false);
-                sheetWidget.displayCustomCellEditor(customEditor);
+                // sheetWidget.displayCustomCellEditor(customEditor);
             }
         }
     }

@@ -14,6 +14,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class Slot extends Widget {
 
+    private final Element assignedElement;
+
     public Slot(String name, Element assignedElement, Element host) {
         // Create the slot element with the given name
         var slotElement = Document.get().createElement("slot");
@@ -22,6 +24,7 @@ public class Slot extends Widget {
 
         // Use the given name as the slot attribute of the assigned element
         assignedElement.setAttribute("slot", name);
+        this.assignedElement = assignedElement;
 
         // Keep the assigned element in the DOM while the slot is attached
         addAttachHandler(e -> {
@@ -31,6 +34,10 @@ public class Slot extends Widget {
                 assignedElement.removeFromParent();
             }
         });
+    }
+
+    public Element getAssignedElement() {
+        return assignedElement;
     }
 
     public Element[] getAssignedElements() {
