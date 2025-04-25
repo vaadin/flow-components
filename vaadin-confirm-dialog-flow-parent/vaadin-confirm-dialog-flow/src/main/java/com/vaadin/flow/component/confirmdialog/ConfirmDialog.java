@@ -29,6 +29,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
@@ -621,9 +622,14 @@ public class ConfirmDialog extends Component
     /**
      * Opens the dialog.
      * <p>
-     * Note: You don't need to add the dialog component before opening it, cause
-     * opening a dialog will automatically add it to the {@code <body>} if it's
-     * not yet attached anywhere.
+     * If a dialog was not added manually to a parent component, it will be
+     * automatically added to the {@link UI} when opened, and automatically
+     * removed from the UI when closed. Note that the dialog is then scoped to
+     * the UI, and not the current view. As such, when navigating away from a
+     * view, the dialog will still be opened or stay open. In order to close the
+     * dialog when navigating away from a view, it should either be explicitly
+     * added as a child to the view, or it should be explicitly closed when
+     * leaving the view.
      */
     public void open() {
         setOpened(true);
@@ -632,8 +638,8 @@ public class ConfirmDialog extends Component
     /**
      * Closes the dialog.
      * <p>
-     * Note: This method also removes the dialog component from the DOM after
-     * closing it, unless you have added the component manually.
+     * This automatically removes the dialog from the {@link UI}, unless it was
+     * manually added to a parent component.
      */
     public void close() {
         setOpened(false);
@@ -646,8 +652,14 @@ public class ConfirmDialog extends Component
     /**
      * Opens or closes the dialog.
      * <p>
-     * Note: Confirm-dialog will be attached or detached from the DOM
-     * automatically, if it was not added manually.
+     * If a dialog was not added manually to a parent component, it will be
+     * automatically added to the {@link UI} when opened, and automatically
+     * removed from the UI when closed. Note that the dialog is then scoped to
+     * the UI, and not the current view. As such, when navigating away from a
+     * view, the dialog will still be opened or stay open. In order to close the
+     * dialog when navigating away from a view, it should either be explicitly
+     * added as a child to the view, or it should be explicitly closed when
+     * leaving the view.
      *
      * @param opened
      *            {@code true} to open the confirm-dialog, {@code false} to
