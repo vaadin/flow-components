@@ -120,6 +120,7 @@ public class BasicValidationTest
     public void required_validate_emptyErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setValue(LocalDateTime.now());
+        fireValueProgrammaticallySetDomEvent();
         testField.setValue(null);
         fireValueProgrammaticallySetDomEvent();
         Assert.assertEquals("", testField.getErrorMessage());
@@ -131,6 +132,7 @@ public class BasicValidationTest
         testField.setI18n(new DateTimePicker.DateTimePickerI18n()
                 .setRequiredErrorMessage("Field is required"));
         testField.setValue(LocalDateTime.now());
+        fireValueProgrammaticallySetDomEvent();
         testField.setValue(null);
         fireValueProgrammaticallySetDomEvent();
         Assert.assertEquals("Field is required", testField.getErrorMessage());
@@ -179,6 +181,7 @@ public class BasicValidationTest
                 .setRequiredErrorMessage("Field is required"));
         testField.setErrorMessage("Custom error message");
         testField.setValue(LocalDateTime.now());
+        fireValueProgrammaticallySetDomEvent();
         testField.setValue(null);
         fireValueProgrammaticallySetDomEvent();
         Assert.assertEquals("Custom error message",
@@ -192,9 +195,12 @@ public class BasicValidationTest
                 .setRequiredErrorMessage("Field is required"));
         testField.setErrorMessage("Custom error message");
         testField.setValue(LocalDateTime.now());
+        fireValueProgrammaticallySetDomEvent();
         testField.setValue(null);
+        fireValueProgrammaticallySetDomEvent();
         testField.setErrorMessage("");
         testField.setValue(LocalDateTime.now());
+        fireValueProgrammaticallySetDomEvent();
         testField.setValue(null);
         fireValueProgrammaticallySetDomEvent();
         Assert.assertEquals("Field is required", testField.getErrorMessage());
@@ -234,5 +240,4 @@ public class BasicValidationTest
         testField.getElement().getNode().getFeature(ElementListenerMap.class)
                 .fireEvent(domEvent);
     }
-
 }

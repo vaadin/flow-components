@@ -165,7 +165,7 @@ public class DateTimePicker
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDateTime>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
-    private boolean programmaticallySettingValue;
+    private int pendingInputElementValueSyncs = 0;
 
     private final Validator<LocalDateTime> defaultValidator = (value,
             context) -> {
@@ -406,20 +406,24 @@ public class DateTimePicker
         getElement().addEventListener("change", e -> {
             // No need to validate since it will be validated once the
             // programmatically set value is updated on the client
-            if (!programmaticallySettingValue) {
+            if (pendingInputElementValueSyncs == 0) {
                 validate(true);
             }
         });
         getElement().addEventListener("unparsable-change", e -> {
             // No need to validate since it will be validated once the
             // programmatically set value is updated on the client
-            if (!programmaticallySettingValue) {
+            if (pendingInputElementValueSyncs == 0) {
                 validate(true);
             }
         });
+
         getElement().addEventListener("value-programmatically-set", e -> {
-            validate(true);
-            programmaticallySettingValue = false;
+            // Validate only for the final input element value sync caused by
+            // programmatically setting values
+            if (--pendingInputElementValueSyncs == 0) {
+                validate(true);
+            }
         });
     }
 
@@ -443,7 +447,7 @@ public class DateTimePicker
         synchronizeChildComponentValues(value);
         super.setValue(value);
         // Notify the server in order to use the formatted values in validation
-        programmaticallySettingValue = true;
+        pendingInputElementValueSyncs++;
         getElement().executeJs(
                 "this.dispatchEvent(new CustomEvent('value-programmatically-set'));");
     }
