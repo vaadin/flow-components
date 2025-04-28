@@ -61,6 +61,12 @@ public class MarkdownTest {
     }
 
     @Test
+    public void overloadedConstructor_testGetMarkdown() {
+        markdown = new Markdown("**Hello** _World_");
+        Assert.assertEquals("**Hello** _World_", markdown.getMarkdown());
+    }
+
+    @Test
     public void testAppendMarkdown() {
         markdown.setMarkdown("**Hello**");
         assertUpdateMarkdownCall(markdown, "**Hello**", false);

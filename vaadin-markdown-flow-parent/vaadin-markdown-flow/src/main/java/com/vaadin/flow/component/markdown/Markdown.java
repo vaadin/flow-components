@@ -24,7 +24,9 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
- *
+ * Markdown is a component for rendering Markdown content.
+ * It takes Markdown source as input and renders the corresponding HTML.
+ * 
  * @author Vaadin Ltd
  */
 @Tag("vaadin-markdown")
