@@ -18,27 +18,48 @@ package com.vaadin.flow.component.markdown.tests;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.markdown.testbench.MarkdownElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("markdown")
 public class MarkdownIT extends AbstractComponentIT {
 
+
+    private MarkdownElement markdownElement;
+
     @Before
     public void init() {
         open();
-
-        waitForElementPresent(By.tagName("vaadin-markdown"));
+        markdownElement = $(MarkdownElement.class).waitForFirst();
     }
 
     @Test
+    public void sizeMatches() {
+        Assert.assertEquals(300, markdownElement.getSize().getHeight());
+        Assert.assertEquals(400, markdownElement.getSize().getWidth());
+    }
+
+
+    @Test
     public void markdownMatches() {
-        WebElement element = findElement(By.tagName("vaadin-markdown"));
-        String text = element.getText();
-        Assert.assertEquals("**Hello** _World_", text);
+        String markdown = markdownElement.getMarkdown();
+        Assert.assertEquals("**Hello** _World_", markdown);
+    }
+
+    @Test
+    public void appendMarkdown_markdownMatches() {
+        clickElementWithJs("append-button");
+        String markdown = markdownElement.getMarkdown();
+        Assert.assertEquals("**Hello** _World_!", markdown);
+    }
+
+    @Test
+    public void setMarkdown_markdownMatches() {
+        clickElementWithJs("set-button");
+        String markdown = markdownElement.getMarkdown();
+        Assert.assertEquals("**Updated** _Markdown_", markdown);
     }
 
 }

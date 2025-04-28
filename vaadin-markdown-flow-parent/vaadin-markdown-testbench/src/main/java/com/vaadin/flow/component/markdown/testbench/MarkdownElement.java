@@ -19,10 +19,17 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 /**
- * A TestBench element representing a <code>&lt;vaadin-button&gt;</code>
+ * A TestBench element representing a <code>&lt;vaadin-markdown&gt;</code>
  * element.
  */
 @Element("vaadin-markdown")
 public class MarkdownElement extends TestBenchElement {
+
+    /**
+     * Gets the markdown content of the element.
+     */
+    public String getMarkdown() {
+        return getPropertyString("markdown");
+    }
 
 }

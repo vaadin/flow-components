@@ -28,7 +28,7 @@ public class MarkdownPage extends Div {
 
         // Ensure the component can be resized
         markdown.setHeight("300px");
-        markdown.setWidth("300px");
+        markdown.setWidth("400px");
 
         add(markdown);
 
