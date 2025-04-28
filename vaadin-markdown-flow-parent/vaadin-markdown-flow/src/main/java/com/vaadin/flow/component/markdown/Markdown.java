@@ -35,8 +35,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 public class Markdown extends Component implements HasSize {
 
     private String serverMarkdown;
-    private String clientMarkdown = "";
-    private boolean pendingUpdate = false;
+    private String clientMarkdown;
 
     /**
      * Default constructor. Creates an empty Markdown.
@@ -56,38 +55,48 @@ public class Markdown extends Component implements HasSize {
     }
 
     /**
+     * Sets the markdown content.
+     * 
+     * @param markdown
+     *            the markdown content
      */
     public void setMarkdown(String markdown) {
         serverMarkdown = markdown;
         scheduleMarkdownUpdate();
     }
 
+    /**
+     * Gets the markdown content.
+     * 
+     * @return the markdown content
+     */
     public String getMarkdown() {
         return serverMarkdown;
     }
 
     private void scheduleMarkdownUpdate() {
-        if (!pendingUpdate) {
-            pendingUpdate = true;
-            getElement().getNode().runWhenAttached(
-                    ui -> ui.beforeClientResponse(this, ctx -> {
-                        pendingUpdate = false;
-                        if (Objects.equals(clientMarkdown, serverMarkdown)) {
-                            return;
-                        }
+        getElement().getNode().runWhenAttached(
+            ui -> ui.beforeClientResponse(this, ctx -> {
+                if (Objects.equals(clientMarkdown, serverMarkdown)) {
+                    return;
+                }
+        
+                if (serverMarkdown != null && clientMarkdown != null
+                        && serverMarkdown.startsWith(clientMarkdown)) {
+                    // This is a simple optimization to a common case where new content
+                    // is streamed at the end of the existing content.
+                    // If the updated serverMarkdown starts with the clientMarkdown, we can
+                    // just send the difference to the client.
+                    getElement().executeJs("this.markdown += $0",
+                            serverMarkdown.substring(
+                                    clientMarkdown.length()));
+                } else {
+                    // In all other cases, we need to send the whole updated content.
+                    getElement().executeJs("this.markdown = $0",
+                            serverMarkdown);
+                }
 
-                        if (serverMarkdown != null && clientMarkdown != null
-                                && serverMarkdown.startsWith(clientMarkdown)) {
-                            getElement().executeJs("this.markdown += $0",
-                                    serverMarkdown.substring(
-                                            clientMarkdown.length()));
-                        } else {
-                            getElement().executeJs("this.markdown = $0",
-                                    serverMarkdown);
-                        }
-
-                        clientMarkdown = serverMarkdown;
-                    }));
-        }
+                clientMarkdown = serverMarkdown;
+            }));
     }
 }

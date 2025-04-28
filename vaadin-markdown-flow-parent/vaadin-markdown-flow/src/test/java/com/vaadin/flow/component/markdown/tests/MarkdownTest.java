@@ -15,20 +15,128 @@
  */
 package com.vaadin.flow.component.markdown.tests;
 
-import org.junit.Assert;
-import org.junit.Test;
+import java.util.List;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.markdown.Markdown;
+import com.vaadin.flow.server.VaadinSession;
 
 public class MarkdownTest {
 
+    private final UI ui = new UI();
     private Markdown markdown;
 
-    @Test
-    public void testMarkdown() {
+
+    @Before
+    public void setup() {
         markdown = new Markdown();
+
+        var mockSession = Mockito.mock(VaadinSession.class);
+        ui.getInternals().setSession(mockSession);
+        ui.add(markdown);
+    }
+
+    @Test
+    public void testInitialMarkdownValue() {
+        Assert.assertNull(markdown.getMarkdown());
+    }
+
+    @Test
+    public void testSetMarkdown() {
+        markdown.setMarkdown("**Hello** _World_");
+        assertUpdateMarkdownCall(markdown, "**Hello** _World_", false);
+    }
+
+    @Test
+    public void testGetMarkdown() {
         markdown.setMarkdown("**Hello** _World_");
         Assert.assertEquals("**Hello** _World_", markdown.getMarkdown());
+    }
+
+    @Test
+    public void testAppendMarkdown() {
+        markdown.setMarkdown("**Hello**");
+        assertUpdateMarkdownCall(markdown, "**Hello**", false);
+
+        markdown.setMarkdown("**Hello** _World_");
+        assertUpdateMarkdownCall(markdown, " _World_", true);
+    }
+
+    @Test
+    public void testReplaceMarkdown() {
+        markdown.setMarkdown("**Hello**");
+        assertUpdateMarkdownCall(markdown, "**Hello**", false);
+
+        markdown.setMarkdown("**Foobar**");
+        assertUpdateMarkdownCall(markdown, "**Foobar**", false);
+    }
+
+    @Test
+    public void testSetSameMarkdown() {
+        markdown.setMarkdown("**Hello** _World_");
+        assertUpdateMarkdownCall(markdown, "**Hello** _World_", false);
+
+        markdown.setMarkdown("**Hello** _World_");
+        Assert.assertEquals(0, getPendingJavaScriptInvocations().size());
+    }
+
+    @Test
+    public void testSetMarkdownTwice() {
+        markdown.setMarkdown("**Foobar**");
+        markdown.setMarkdown("**Hello** _World_");
+        assertUpdateMarkdownCall(markdown, "**Hello** _World_", false);
+    }
+
+    @Test
+    public void testRemoveMarkdown() {
+        markdown.setMarkdown("**Hello** _World_");
+        assertUpdateMarkdownCall(markdown, "**Hello** _World_", false);
+
+        markdown.setMarkdown(null);
+        assertUpdateMarkdownCall(markdown, null, false);
+    }
+
+    private void assertUpdateMarkdownCall(Component component, String markdown, boolean isAppend) {
+        var pendingJavaScriptInvocations = getPendingJavaScriptInvocations();
+
+        Assert.assertEquals(1, pendingJavaScriptInvocations.size());
+
+        var pendingJavaScriptInvocation = pendingJavaScriptInvocations.get(0);
+        var parameters = pendingJavaScriptInvocation.getInvocation()
+                .getParameters();
+        var element = component != null ? component.getElement() : null;
+
+        if (isAppend) {
+            Assert.assertEquals(
+                "return (async function() { this.markdown += $0}).apply($1)",
+                pendingJavaScriptInvocation.getInvocation()
+                        .getExpression());
+        } else {
+            Assert.assertEquals(
+                    "return (async function() { this.markdown = $0}).apply($1)",
+                    pendingJavaScriptInvocation.getInvocation()
+                            .getExpression());
+        }
+        Assert.assertEquals(markdown, parameters.get(0));
+        Assert.assertEquals(element, parameters.get(1));
+    }
+
+    private List<PendingJavaScriptInvocation> getPendingJavaScriptInvocations() {
+        fakeClientCommunication();
+        return ui.getInternals().dumpPendingJavaScriptInvocations();
+    }
+
+    private void fakeClientCommunication() {
+        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
+        ui.getInternals().getStateTree().collectChanges(ignore -> {
+        });
     }
 
 }
