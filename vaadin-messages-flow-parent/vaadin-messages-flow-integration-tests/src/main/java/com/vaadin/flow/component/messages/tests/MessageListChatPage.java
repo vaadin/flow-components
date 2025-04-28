@@ -154,28 +154,27 @@ public class MessageListChatPage extends Div {
 
         add(list, input);
 
-
         // Styles
         var style = new Element("style");
         style.setText("""
-            #chat {
-                display: flex;
-                flex-direction: column;
-                height: 100%;
-            }
+                    #chat {
+                        display: flex;
+                        flex-direction: column;
+                        height: 100%;
+                    }
 
-            vaadin-message-list {
-                flex: 1;
-                scroll-snap-type: y proximity;
-            }
+                    vaadin-message-list {
+                        flex: 1;
+                        scroll-snap-type: y proximity;
+                    }
 
-            vaadin-message-list::after {
-                display: block;
-                content: '';
-                scroll-snap-align: end;
-                min-height: 1px;
-            }
-        """);
+                    vaadin-message-list::after {
+                        display: block;
+                        content: '';
+                        scroll-snap-align: end;
+                        min-height: 1px;
+                    }
+                """);
 
         getElement().appendChild(style);
     }

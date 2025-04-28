@@ -26,7 +26,6 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("markdown")
 public class MarkdownIT extends AbstractComponentIT {
 
-
     private MarkdownElement markdownElement;
 
     @Before
@@ -40,7 +39,6 @@ public class MarkdownIT extends AbstractComponentIT {
         Assert.assertEquals(300, markdownElement.getSize().getHeight());
         Assert.assertEquals(400, markdownElement.getSize().getWidth());
     }
-
 
     @Test
     public void markdownMatches() {

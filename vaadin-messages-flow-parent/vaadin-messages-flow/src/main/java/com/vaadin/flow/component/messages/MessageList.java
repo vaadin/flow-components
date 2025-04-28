@@ -119,14 +119,15 @@ public class MessageList extends Component
     }
 
     /**
-     * Adds a single item to be rendered as a message at the end of this message list.
+     * Adds a single item to be rendered as a message at the end of this message
+     * list.
      *
      * @param item
      *            the item to add, not {@code null}
      */
     public void addItem(MessageListItem item) {
         Objects.requireNonNull(item, "Can't add null item to MessageList.");
-        
+
         item.setHost(this);
         items.add(item);
         scheduleItemsUpdate();

@@ -33,7 +33,6 @@ public class MarkdownTest {
     private final UI ui = new UI();
     private Markdown markdown;
 
-
     @Before
     public void setup() {
         markdown = new Markdown();
@@ -118,7 +117,8 @@ public class MarkdownTest {
         assertUpdateMarkdownCall(markdown, null, false);
     }
 
-    private void assertUpdateMarkdownCall(Component component, String markdown, boolean isAppend) {
+    private void assertUpdateMarkdownCall(Component component, String markdown,
+            boolean isAppend) {
         var pendingJavaScriptInvocations = getPendingJavaScriptInvocations();
 
         Assert.assertEquals(1, pendingJavaScriptInvocations.size());
@@ -130,9 +130,9 @@ public class MarkdownTest {
 
         if (isAppend) {
             Assert.assertEquals(
-                "return (async function() { this.markdown += $0}).apply($1)",
-                pendingJavaScriptInvocation.getInvocation()
-                        .getExpression());
+                    "return (async function() { this.markdown += $0}).apply($1)",
+                    pendingJavaScriptInvocation.getInvocation()
+                            .getExpression());
         } else {
             Assert.assertEquals(
                     "return (async function() { this.markdown = $0}).apply($1)",

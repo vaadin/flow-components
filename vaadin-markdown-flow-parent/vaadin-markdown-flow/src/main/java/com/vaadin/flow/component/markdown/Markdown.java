@@ -24,8 +24,8 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 
 /**
- * Markdown is a component for rendering Markdown content.
- * It takes Markdown source as input and renders the corresponding HTML.
+ * Markdown is a component for rendering Markdown content. It takes Markdown
+ * source as input and renders the corresponding HTML.
  * 
  * @author Vaadin Ltd
  */
@@ -71,7 +71,7 @@ public class Markdown extends Component implements HasSize {
      * Appends the markdown content.
      * 
      * @param markdown
-     *           the markdown content to append
+     *            the markdown content to append
      */
     public void appendMarkdown(String markdown) {
         if (serverMarkdown == null) {
@@ -90,28 +90,31 @@ public class Markdown extends Component implements HasSize {
     }
 
     private void scheduleMarkdownUpdate() {
-        getElement().getNode().runWhenAttached(
-            ui -> ui.beforeClientResponse(this, ctx -> {
-                if (Objects.equals(clientMarkdown, serverMarkdown)) {
-                    return;
-                }
-        
-                if (serverMarkdown != null && clientMarkdown != null
-                        && serverMarkdown.startsWith(clientMarkdown)) {
-                    // This is a simple optimization to a common case where new content
-                    // is streamed at the end of the existing content.
-                    // If the updated serverMarkdown starts with the clientMarkdown, we can
-                    // just send the difference to the client.
-                    getElement().executeJs("this.markdown += $0",
-                            serverMarkdown.substring(
-                                    clientMarkdown.length()));
-                } else {
-                    // In all other cases, we need to send the whole updated content.
-                    getElement().executeJs("this.markdown = $0",
-                            serverMarkdown);
-                }
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(this, ctx -> {
+                    if (Objects.equals(clientMarkdown, serverMarkdown)) {
+                        return;
+                    }
 
-                clientMarkdown = serverMarkdown;
-            }));
+                    if (serverMarkdown != null && clientMarkdown != null
+                            && serverMarkdown.startsWith(clientMarkdown)) {
+                        // This is a simple optimization to a common case where
+                        // new content is streamed at the end of the existing
+                        // content.
+                        // If the updated serverMarkdown starts with the
+                        // clientMarkdown, we can just send the difference to
+                        // the client.
+                        getElement().executeJs("this.markdown += $0",
+                                serverMarkdown
+                                        .substring(clientMarkdown.length()));
+                    } else {
+                        // In all other cases, we need to send the whole updated
+                        // content.
+                        getElement().executeJs("this.markdown = $0",
+                                serverMarkdown);
+                    }
+
+                    clientMarkdown = serverMarkdown;
+                }));
     }
 }
