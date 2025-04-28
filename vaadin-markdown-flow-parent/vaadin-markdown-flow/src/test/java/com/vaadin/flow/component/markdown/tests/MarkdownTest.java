@@ -68,6 +68,15 @@ public class MarkdownTest {
 
     @Test
     public void testAppendMarkdown() {
+        markdown.appendMarkdown("**Hello**");
+        assertUpdateMarkdownCall(markdown, "**Hello**", false);
+
+        markdown.appendMarkdown(" _World_");
+        assertUpdateMarkdownCall(markdown, " _World_", true);
+    }
+
+    @Test
+    public void testAppendMarkdownWithSetMarkdown() {
         markdown.setMarkdown("**Hello**");
         assertUpdateMarkdownCall(markdown, "**Hello**", false);
 

@@ -26,19 +26,22 @@ public class MarkdownPage extends Div {
     public MarkdownPage() {
         var markdown = new Markdown("**Hello** _World_");
 
+        // Ensure the component can be resized
         markdown.setHeight("300px");
-        markdown.setWidth("100px");
+        markdown.setWidth("300px");
 
         add(markdown);
 
         var appendButton = new NativeButton("Append markdown", event -> {
-            markdown.setMarkdown(markdown.getMarkdown() + "!");
+            markdown.appendMarkdown("!");
         });
+        appendButton.setId("append-button");
         add(appendButton);
 
         var setButton = new NativeButton("Set markdown", event -> {
             markdown.setMarkdown("**Updated** _Markdown_");
         });
+        setButton.setId("set-button");
         add(setButton);
     }
 

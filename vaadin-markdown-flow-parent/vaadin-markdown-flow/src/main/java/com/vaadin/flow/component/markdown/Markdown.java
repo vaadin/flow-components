@@ -68,6 +68,19 @@ public class Markdown extends Component implements HasSize {
     }
 
     /**
+     * Appends the markdown content.
+     * 
+     * @param markdown
+     *           the markdown content to append
+     */
+    public void appendMarkdown(String markdown) {
+        if (serverMarkdown == null) {
+            serverMarkdown = "";
+        }
+        setMarkdown(serverMarkdown + markdown);
+    }
+
+    /**
      * Gets the markdown content.
      * 
      * @return the markdown content

@@ -24,7 +24,7 @@ import org.openqa.selenium.WebElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-markdown")
+@TestPath("markdown")
 public class MarkdownIT extends AbstractComponentIT {
 
     @Before
