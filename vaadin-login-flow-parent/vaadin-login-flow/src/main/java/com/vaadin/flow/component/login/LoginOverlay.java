@@ -22,6 +22,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
@@ -44,9 +45,9 @@ import com.vaadin.flow.dom.Style;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.7.4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/login", version = "24.7.3")
+@NpmPackage(value = "@vaadin/login", version = "24.7.4")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
 public class LoginOverlay extends AbstractLogin implements HasStyle {
 
@@ -65,14 +66,20 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
 
     private void init() {
         // Initialize auto-add behavior
-        new OverlayAutoAddController<>(this);
+        OverlayAutoAddController<LoginOverlay> autoAddController = new OverlayAutoAddController<>(
+                this);
+        // Skip auto-adding when navigating to a new view before opening.
+        // Handles cases where LoginOverlay is used in a login view, in which
+        // case it should not be auto-added if the view redirects to a different
+        // view if the user is already authenticated
+        autoAddController.setSkipOnNavigation(true);
     }
 
     /**
      * Closes the login overlay.
      * <p>
-     * Note: This method also removes the overlay component from the DOM after
-     * closing it, unless you have added the component manually.
+     * This automatically removes the overlay from the {@link UI}, unless it was
+     * manually added to a parent component.
      */
     public void close() {
         setOpened(false);
@@ -84,11 +91,17 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     }
 
     /**
-     * Opens or closes the login overlay. On open component becomes enabled
-     * {@link #setEnabled(boolean)}
+     * Opens or closes the login overlay. Opening the overlay automatically
+     * enables it in case it was disabled.
      * <p>
-     * Note: Overlay will be attached or detached from the DOM automatically, if
-     * it was not added manually.
+     * If an overlay was not added manually to a parent component, it will be
+     * automatically added to the {@link UI} when opened, and automatically
+     * removed from the UI when closed. Note that the overlay is then scoped to
+     * the UI, and not the current view. As such, when navigating away from a
+     * view, the overlay will still be opened or stay open. In order to close
+     * the overlay when navigating away from a view, it should either be
+     * explicitly added as a child to the view, or it should be explicitly
+     * closed when leaving the view.
      *
      * @param opened
      *            {@code true} to open the login overlay, {@code false} to close
