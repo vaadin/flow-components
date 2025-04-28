@@ -8,9 +8,7 @@
  */
 package com.vaadin.flow.component.gridpro;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -65,8 +63,6 @@ import elemental.json.JsonObject;
  */
 public class GridPro<E> extends Grid<E> {
 
-    private Map<String, Column<E>> idToColumnMap = new HashMap<>();
-
     /**
      * Instantiates a new CrudGrid for the supplied bean type.
      *
@@ -114,8 +110,8 @@ public class GridPro<E> extends Grid<E> {
             if (e.getItem() == null) {
                 return;
             }
-            EditColumn<E> column = (EditColumn<E>) this.idToColumnMap
-                    .get(e.getPath());
+            EditColumn<E> column = (EditColumn<E>) getColumnByInternalId(
+                    e.getPath());
 
             Object idBeforeUpdate = getItemId(e.getItem());
             if (column.getEditorType().equals("custom")) {
@@ -138,8 +134,8 @@ public class GridPro<E> extends Grid<E> {
         });
 
         addCellEditStartedListener(e -> {
-            EditColumn<E> column = (EditColumn<E>) this.idToColumnMap
-                    .get(e.getPath());
+            EditColumn<E> column = (EditColumn<E>) getColumnByInternalId(
+                    e.getPath());
 
             if (column.getEditorType().equals("custom")) {
                 column.getEditorField()
@@ -350,7 +346,6 @@ public class GridPro<E> extends Grid<E> {
                         return "";
                     }
                 }, renderer)), this::createEditColumn);
-        idToColumnMap.put(columnId, column);
 
         return new EditColumnConfigurator<>(column, valueProvider);
     }
@@ -499,7 +494,6 @@ public class GridPro<E> extends Grid<E> {
     protected EditColumn<E> createEditColumn(Renderer<E> renderer,
             String columnId) {
         EditColumn<E> column = new EditColumn<>(this, columnId, renderer);
-        idToColumnMap.put(columnId, column);
         return column;
     }
 
