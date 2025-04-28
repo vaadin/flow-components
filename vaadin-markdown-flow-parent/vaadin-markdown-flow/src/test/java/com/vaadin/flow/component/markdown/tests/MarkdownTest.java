@@ -117,6 +117,17 @@ public class MarkdownTest {
         assertUpdateMarkdownCall(markdown, null, false);
     }
 
+    @Test
+    public void testDetach_setMarkdown_attach() {
+        markdown.removeFromParent();
+
+        markdown.setMarkdown("**Hello** _World_");
+        Assert.assertEquals(0, getPendingJavaScriptInvocations().size());
+
+        ui.add(markdown);
+        assertUpdateMarkdownCall(markdown, "**Hello** _World_", false);
+    }
+
     private void assertUpdateMarkdownCall(Component component, String markdown,
             boolean isAppend) {
         var pendingJavaScriptInvocations = getPendingJavaScriptInvocations();
