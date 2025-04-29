@@ -255,8 +255,7 @@ public class DateTimePickerElement extends TestBenchElement
      * @return DatePickerElement
      */
     public DatePickerElement getDatePicker() {
-        return this.$("vaadin-date-picker").withAttribute("slot", "date-picker")
-                .first().wrap(DatePickerElement.class);
+        return this.$(DatePickerElement.class).first();
     }
 
     /**
