@@ -19,9 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -55,7 +53,7 @@ public class MessageList extends Component
 
     private List<MessageListItem> items = new ArrayList<>();
     private boolean pendingUpdate = false;
-    private Map<MessageListItem, String> pendingItemContentUpdates = new HashMap<>();
+    private boolean pendingTextUpdate = false;
 
     /**
      * Creates a new message list component. To populate the content of the
@@ -130,6 +128,7 @@ public class MessageList extends Component
 
         item.setHost(this);
         items.add(item);
+        // TODO: Only update the new item
         scheduleItemsUpdate();
     }
 
@@ -143,39 +142,65 @@ public class MessageList extends Component
         return Collections.unmodifiableList(items);
     }
 
-    void scheduleAppendItemContent(MessageListItem item,
-            String appendedContent) {
-        if (pendingItemContentUpdates.containsKey(item)) {
-            pendingItemContentUpdates.put(item,
-                    pendingItemContentUpdates.get(item) + appendedContent);
-            return;
-        }
-        pendingItemContentUpdates.put(item, appendedContent);
-        getElement().getNode()
-                .runWhenAttached(ui -> ui.beforeClientResponse(this, ctx -> {
-                    getElement().executeJs(
-                            "window.Vaadin.Flow.messageListConnector"
-                                    + ".appendItemContent(this, $0, $1)",
-                            pendingItemContentUpdates.get(item),
-                            items.indexOf(item));
-                    pendingItemContentUpdates.remove(item);
-                }));
-
+    void scheduleItemsTextUpdate() {
+        scheduleUpdate();
+        pendingTextUpdate = true;
     }
 
     void scheduleItemsUpdate() {
-        if (!pendingUpdate) {
-            pendingUpdate = true;
-            getElement().getNode().runWhenAttached(
-                    ui -> ui.beforeClientResponse(this, ctx -> {
+        scheduleUpdate();
+        pendingUpdate = true;
+    }
+
+    private void scheduleUpdate() {
+        if (pendingUpdate || pendingTextUpdate) {
+            // Already scheduled
+            return;
+        }
+
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(this, ctx -> {
+                    if (pendingUpdate) {
+                        // Do a full update
                         JsonArray itemsJson = JsonUtils.listToJson(items);
                         getElement().executeJs(
                                 "window.Vaadin.Flow.messageListConnector"
                                         + ".setItems(this, $0, $1)",
                                 itemsJson, ui.getLocale().toLanguageTag());
-                        pendingUpdate = false;
-                    }));
-        }
+                    }
+
+                    items.forEach(item -> {
+                        // Only update text if not a full update and the item
+                        // text has changed
+                        if (!pendingUpdate && !Objects.equals(item.getText(),
+                                item.clientText)) {
+                            if (item.getText() != null
+                                    && item.clientText != null && item.getText()
+                                            .startsWith(item.clientText)) {
+                                // Only send the diff
+                                var diff = item.getText()
+                                        .substring(item.clientText.length());
+                                getElement().executeJs(
+                                        "window.Vaadin.Flow.messageListConnector"
+                                                + ".appendItemText(this, $0, $1)",
+                                        diff, items.indexOf(item));
+                            } else {
+                                // Full text update
+                                getElement().executeJs(
+                                        "window.Vaadin.Flow.messageListConnector"
+                                                + ".setItemText(this, $0, $1)",
+                                        item.getText(), items.indexOf(item));
+                            }
+                        }
+
+                        // Synchronize the client-side text with the server-side
+                        // text
+                        item.clientText = item.getText();
+                    });
+
+                    pendingTextUpdate = false;
+                    pendingUpdate = false;
+                }));
     }
 
     @Override

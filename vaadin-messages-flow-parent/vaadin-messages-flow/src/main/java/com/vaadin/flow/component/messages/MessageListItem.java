@@ -50,6 +50,8 @@ public class MessageListItem implements Serializable {
     private MessageList host;
 
     private String text;
+    // Value of the text property in the client
+    String clientText;
     private Instant time;
 
     private String userName;
@@ -153,14 +155,10 @@ public class MessageListItem implements Serializable {
      *            the content
      */
     public void setText(String text) {
-        if (text != null && text.startsWith(this.text)) {
-            var appendedContent = text.substring(this.text.length());
-            getHost().scheduleAppendItemContent(this, appendedContent);
-        } else {
-            propsChanged();
-        }
-
         this.text = text;
+        if (getHost() != null) {
+            getHost().scheduleItemsTextUpdate();
+        }
     }
 
     public void appendText(String text) {
@@ -170,7 +168,7 @@ public class MessageListItem implements Serializable {
         if (this.text == null) {
             this.text = "";
         }
-       setText(this.text + text);
+        setText(this.text + text);
     }
 
     /**
