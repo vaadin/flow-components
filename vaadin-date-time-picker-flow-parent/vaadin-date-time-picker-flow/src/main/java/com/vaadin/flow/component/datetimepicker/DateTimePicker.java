@@ -66,26 +66,8 @@ class DateTimePickerDatePicker
     }
 
     @Override
-    protected boolean isInputValuePresent() {
-        return super.isInputValuePresent();
-    }
-
-    // Synchronizes on "date-picker-value-programmatically-set" in addition to
-    // the original events
-    @Synchronize(property = "_inputElementValue", value = { "change",
-            "unparsable-change", "date-picker-value-programmatically-set" })
-    @Override
-    public String getInputElementValue() {
-        return super.getInputElementValue();
-    }
-
-    @Override
-    public void setValue(LocalDate date) {
-        super.setValue(date);
-        // Synchronizes the input element value back to the server when value is
-        // set programmatically
-        getElement().executeJs(
-                "this.dispatchEvent(new CustomEvent('date-picker-value-programmatically-set'));");
+    protected boolean isInputUnparsable() {
+        return super.isInputUnparsable();
     }
 }
 
@@ -98,26 +80,8 @@ class DateTimePickerTimePicker
     }
 
     @Override
-    protected boolean isInputValuePresent() {
-        return super.isInputValuePresent();
-    }
-
-    // Synchronizes on "time-picker-value-programmatically-set" in addition to
-    // the original events
-    @Synchronize(property = "_inputElementValue", value = { "change",
-            "unparsable-change", "time-picker-value-programmatically-set" })
-    @Override
-    public String getInputElementValue() {
-        return super.getInputElementValue();
-    }
-
-    @Override
-    public void setValue(LocalTime time) {
-        super.setValue(time);
-        // Synchronizes the input element value back to the server when value is
-        // set programmatically
-        getElement().executeJs(
-                "this.dispatchEvent(new CustomEvent('time-picker-value-programmatically-set'));");
+    protected boolean isInputUnparsable() {
+        return super.isInputUnparsable();
     }
 }
 
@@ -165,29 +129,19 @@ public class DateTimePicker
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDateTime>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
 
-    private int pendingInputElementValueSyncs = 0;
-
     private final Validator<LocalDateTime> defaultValidator = (value,
             context) -> {
         var fromComponent = context == null;
-        var isEmpty = Objects.equals(value, getEmptyValue());
-        var isDatePickerEmpty = datePicker.isEmpty();
-        var isTimePickerEmpty = timePicker.isEmpty();
 
         // Report error if any of the pickers has bad input
-        var hasBadDatePickerInput = isDatePickerEmpty
-                && datePicker.isInputValuePresent();
-        var hasBadTimePickerInput = isTimePickerEmpty
-                && timePicker.isInputValuePresent();
-
-        if (hasBadDatePickerInput || hasBadTimePickerInput) {
+        if (isInputUnparsable()) {
             return ValidationResult.error(getI18nErrorMessage(
                     DateTimePickerI18n::getBadInputErrorMessage));
         }
 
         // Report error if only date picker has a value, and it's outside the
         // range.
-        if (isEmpty && !isDatePickerEmpty) {
+        if (Objects.equals(value, getEmptyValue()) && !datePicker.isEmpty()) {
             var maxDate = max != null ? max.toLocalDate() : null;
             var minDate = min != null ? min.toLocalDate() : null;
 
@@ -207,7 +161,7 @@ public class DateTimePicker
         }
 
         // Report error if only one of the pickers has a value
-        if (isEmpty && (!isDatePickerEmpty || !isTimePickerEmpty)) {
+        if (isInputIncomplete()) {
             return ValidationResult.error(getI18nErrorMessage(
                     DateTimePickerI18n::getIncompleteInputErrorMessage));
         }
@@ -404,26 +358,10 @@ public class DateTimePicker
 
     private void addValidationListeners() {
         getElement().addEventListener("change", e -> {
-            // No need to validate since it will be validated once the
-            // programmatically set value is updated on the client
-            if (pendingInputElementValueSyncs == 0) {
-                validate(true);
-            }
+            validate(true);
         });
         getElement().addEventListener("unparsable-change", e -> {
-            // No need to validate since it will be validated once the
-            // programmatically set value is updated on the client
-            if (pendingInputElementValueSyncs == 0) {
-                validate(true);
-            }
-        });
-
-        getElement().addEventListener("value-programmatically-set", e -> {
-            // Validate only for the final input element value sync caused by
-            // programmatically setting values
-            if (--pendingInputElementValueSyncs == 0) {
-                validate(true);
-            }
+            validate(true);
         });
     }
 
@@ -443,13 +381,17 @@ public class DateTimePicker
      */
     @Override
     public void setValue(LocalDateTime value) {
+        LocalDateTime oldValue = getValue();
+
         value = sanitizeValue(value);
-        synchronizeChildComponentValues(value);
         super.setValue(value);
-        // Notify the server in order to use the formatted values in validation
-        pendingInputElementValueSyncs++;
-        getElement().executeJs(
-                "this.dispatchEvent(new CustomEvent('value-programmatically-set'));");
+
+        if (oldValue == null && value == null && (isInputUnparsable() || isInputIncomplete())) {
+            synchronizeChildComponentValues(value);
+            validate(true);
+        } else {
+            synchronizeChildComponentValues(value);
+        }
     }
 
     /**
@@ -839,9 +781,13 @@ public class DateTimePicker
         synchronizeTheme();
     }
 
-    private boolean isInputValuePresent() {
-        return datePicker.isInputValuePresent()
-                || timePicker.isInputValuePresent();
+    private boolean isInputUnparsable() {
+        return datePicker.isInputUnparsable()
+                || timePicker.isInputUnparsable();
+    }
+
+    private boolean isInputIncomplete() {
+        return datePicker.isEmpty() != timePicker.isEmpty();
     }
 
     @Override

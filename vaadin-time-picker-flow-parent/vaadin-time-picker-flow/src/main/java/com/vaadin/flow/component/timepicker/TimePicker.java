@@ -148,7 +148,7 @@ public class TimePicker
     private Validator<LocalTime> defaultValidator = (value, context) -> {
         boolean fromComponent = context == null;
 
-        if (unparsableValue != null) {
+        if (isInputUnparsable()) {
             return ValidationResult.error(getI18nErrorMessage(
                     TimePickerI18n::getBadInputErrorMessage));
         }
@@ -480,8 +480,8 @@ public class TimePicker
      * @return <code>true</code> if the input element's value is populated,
      *         <code>false</code> otherwise
      */
-    protected boolean isInputValuePresent() {
-        return !getInputElementValue().isEmpty();
+    protected boolean isInputUnparsable() {
+        return unparsableValue != null;
     }
 
     /**
@@ -495,7 +495,7 @@ public class TimePicker
      */
     @Synchronize(property = "_inputElementValue", value = { "change",
             "unparsable-change" })
-    protected String getInputElementValue() {
+    private String getInputElementValue() {
         return getElement().getProperty("_inputElementValue", "");
     }
 

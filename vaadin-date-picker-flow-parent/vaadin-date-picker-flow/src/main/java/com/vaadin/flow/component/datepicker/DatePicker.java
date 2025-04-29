@@ -169,9 +169,9 @@ public class DatePicker
     private Validator<LocalDate> defaultValidator = (value, context) -> {
         boolean fromComponent = context == null;
 
-        if (unparsableValue != null && fallbackParserErrorMessage != null) {
+        if (isInputUnparsable() && fallbackParserErrorMessage != null) {
             return ValidationResult.error(fallbackParserErrorMessage);
-        } else if (unparsableValue != null) {
+        } else if (isInputUnparsable()) {
             return ValidationResult.error(getI18nErrorMessage(
                     DatePickerI18n::getBadInputErrorMessage));
         }
@@ -672,8 +672,8 @@ public class DatePicker
      * @return <code>true</code> if the input element's value is populated,
      *         <code>false</code> otherwise
      */
-    protected boolean isInputValuePresent() {
-        return !getInputElementValue().isEmpty();
+    protected boolean isInputUnparsable() {
+        return unparsableValue != null;
     }
 
     /**
@@ -687,7 +687,7 @@ public class DatePicker
      */
     @Synchronize(property = "_inputElementValue", value = { "change",
             "unparsable-change" })
-    protected String getInputElementValue() {
+    private String getInputElementValue() {
         return getElement().getProperty("_inputElementValue", "");
     }
 
@@ -762,7 +762,7 @@ public class DatePicker
     @Override
     public void setValue(LocalDate value) {
         LocalDate oldValue = getValue();
-        if (oldValue == null && value == null && unparsableValue != null) {
+        if (oldValue == null && value == null && isInputUnparsable()) {
             // When the value is programmatically cleared while the field
             // contains an unparsable input, ValueChangeEvent isn't fired,
             // so we need to call setModelValue manually to clear the bad
