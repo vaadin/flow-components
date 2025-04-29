@@ -8,9 +8,7 @@
  */
 package com.vaadin.flow.component.gridpro;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,9 +46,9 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha13")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha15")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid-pro", version = "24.8.0-alpha13")
+@NpmPackage(value = "@vaadin/grid-pro", version = "24.8.0-alpha15")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -65,8 +63,6 @@ import elemental.json.JsonObject;
  *
  */
 public class GridPro<E> extends Grid<E> {
-
-    private Map<String, Column<E>> idToColumnMap = new HashMap<>();
 
     /**
      * Instantiates a new CrudGrid for the supplied bean type.
@@ -117,8 +113,8 @@ public class GridPro<E> extends Grid<E> {
             if (e.getItem() == null) {
                 return;
             }
-            EditColumn<E> column = (EditColumn<E>) this.idToColumnMap
-                    .get(e.getPath());
+            EditColumn<E> column = (EditColumn<E>) getColumnByInternalId(
+                    e.getPath());
 
             Object idBeforeUpdate = getItemId(e.getItem());
             if (column.getEditorType().equals("custom")) {
@@ -146,8 +142,8 @@ public class GridPro<E> extends Grid<E> {
         });
 
         addCellEditStartedListener(e -> {
-            EditColumn<E> column = (EditColumn<E>) this.idToColumnMap
-                    .get(e.getPath());
+            EditColumn<E> column = (EditColumn<E>) getColumnByInternalId(
+                    e.getPath());
 
             if (column.getEditorType().equals("custom")) {
                 column.getEditorField()
@@ -200,7 +196,7 @@ public class GridPro<E> extends Grid<E> {
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-pro-edit-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha13")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha15")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class EditColumn<T> extends Column<T> {
 
@@ -389,7 +385,6 @@ public class GridPro<E> extends Grid<E> {
                         return "";
                     }
                 }, renderer)), this::createEditColumn);
-        idToColumnMap.put(columnId, column);
 
         return new EditColumnConfigurator<>(column, valueProvider);
     }
@@ -538,7 +533,6 @@ public class GridPro<E> extends Grid<E> {
     protected EditColumn<E> createEditColumn(Renderer<E> renderer,
             String columnId) {
         EditColumn<E> column = new EditColumn<>(this, columnId, renderer);
-        idToColumnMap.put(columnId, column);
         return column;
     }
 
@@ -713,8 +707,8 @@ public class GridPro<E> extends Grid<E> {
         // Wrap the listener to filter out events for cells that are not
         // editable
         ComponentEventListener<ItemPropertyChangedEvent<E>> wrapper = event -> {
-            EditColumn<E> column = (EditColumn<E>) this.idToColumnMap
-                    .get(event.getPath());
+            EditColumn<E> column = (EditColumn<E>) getColumnByInternalId(
+                    event.getPath());
 
             if (column.cellEditableProvider == null
                     || column.cellEditableProvider.test(event.getItem())) {
