@@ -265,8 +265,7 @@ public class DateTimePickerElement extends TestBenchElement
      * @return TimePickerElement
      */
     public TimePickerElement getTimePicker() {
-        return this.$("vaadin-time-picker").withAttribute("slot", "time-picker")
-                .first().wrap(TimePickerElement.class);
+        return this.$(TimePickerElement.class).first();
     }
 
     /**
