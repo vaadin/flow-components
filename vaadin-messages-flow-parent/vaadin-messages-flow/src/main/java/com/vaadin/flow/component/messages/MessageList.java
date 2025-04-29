@@ -19,7 +19,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
@@ -51,8 +53,9 @@ import elemental.json.JsonArray;
 public class MessageList extends Component
         implements HasStyle, HasSize, LocaleChangeObserver {
 
-    private List<MessageListItem> items = Collections.emptyList();
+    private List<MessageListItem> items = new ArrayList<>();
     private boolean pendingUpdate = false;
+    private Map<MessageListItem, String> pendingItemContentUpdates = new HashMap<>();
 
     /**
      * Creates a new message list component. To populate the content of the
@@ -116,6 +119,21 @@ public class MessageList extends Component
     }
 
     /**
+     * Adds a single item to be rendered as a message at the end of this message
+     * list.
+     *
+     * @param item
+     *            the item to add, not {@code null}
+     */
+    public void addItem(MessageListItem item) {
+        Objects.requireNonNull(item, "Can't add null item to MessageList.");
+
+        item.setHost(this);
+        items.add(item);
+        scheduleItemsUpdate();
+    }
+
+    /**
      * Gets the items that are rendered as message components in this message
      * list.
      *
@@ -123,6 +141,26 @@ public class MessageList extends Component
      */
     public List<MessageListItem> getItems() {
         return Collections.unmodifiableList(items);
+    }
+
+    void scheduleAppendItemContent(MessageListItem item,
+            String appendedContent) {
+        if (pendingItemContentUpdates.containsKey(item)) {
+            pendingItemContentUpdates.put(item,
+                    pendingItemContentUpdates.get(item) + appendedContent);
+            return;
+        }
+        pendingItemContentUpdates.put(item, appendedContent);
+        getElement().getNode()
+                .runWhenAttached(ui -> ui.beforeClientResponse(this, ctx -> {
+                    getElement().executeJs(
+                            "window.Vaadin.Flow.messageListConnector"
+                                    + ".appendItemContent(this, $0, $1)",
+                            pendingItemContentUpdates.get(item),
+                            items.indexOf(item));
+                    pendingItemContentUpdates.remove(item);
+                }));
+
     }
 
     void scheduleItemsUpdate() {
@@ -143,5 +181,13 @@ public class MessageList extends Component
     @Override
     public void localeChange(LocaleChangeEvent event) {
         scheduleItemsUpdate();
+    }
+
+    public void setMarkdown(boolean markdown) {
+        getElement().setProperty("markdown", markdown);
+    }
+
+    public boolean isMarkdown() {
+        return getElement().getProperty("markdown", false);
     }
 }

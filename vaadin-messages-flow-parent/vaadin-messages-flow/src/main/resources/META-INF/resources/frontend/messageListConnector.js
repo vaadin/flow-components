@@ -29,5 +29,10 @@ window.Vaadin.Flow.messageListConnector = {
           })
         : item
     );
+  },
+
+  appendItemContent(list, appendedContent, index) {
+    list.items[index].text += appendedContent;
+    list.items = [...list.items];
   }
 };
