@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -201,17 +202,10 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     /**
      * Adds a new item component with the given text content to the context menu
      * overlay.
-     * <p>
-     * This is a convenience method for the use case where you have a list of
-     * highlightable {@link MenuItem}s inside the overlay. If you want to
-     * configure the contents of the overlay without wrapping them inside
-     * {@link MenuItem}s, or if you just want to add some non-highlightable
-     * components between the items, use the {@link #add(Component...)} method.
      *
      * @param text
      *            the text content for the created menu item
      * @return the created menu item
-     * @see #add(Component...)
      */
     public I addItem(String text) {
         return getMenuManager().addItem(text);
@@ -220,17 +214,10 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     /**
      * Adds a new item component with the given component to the context menu
      * overlay.
-     * <p>
-     * This is a convenience method for the use case where you have a list of
-     * highlightable {@link MenuItem}s inside the overlay. If you want to
-     * configure the contents of the overlay without wrapping them inside
-     * {@link MenuItem}s, or if you just want to add some non-highlightable
-     * components between the items, use the {@link #add(Component...)} method.
      *
      * @param component
      *            the component to add to the created menu item
      * @return the created menu item
-     * @see #add(Component...)
      */
     public I addItem(Component component) {
         return getMenuManager().addItem(component);
@@ -238,10 +225,6 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     /**
      * Adds the given components into the context menu overlay.
-     * <p>
-     * For the common use case of having a list of high-lightable items inside
-     * the overlay, you can use the {@link #addItem(String)} convenience methods
-     * instead.
      * <p>
      * The added elements in the DOM will not be children of the
      * {@code <vaadin-context-menu>} element, but will be inserted into an
@@ -251,23 +234,98 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      *            the components to add
      * @see HasMenuItems#addItem(String, ComponentEventListener)
      * @see HasMenuItems#addItem(Component, ComponentEventListener)
+     *
+     * @deprecated Since 24.8, use {@link #addItem(Component)} instead
      */
+    @Deprecated(since = "24.8")
     @Override
     public void add(Component... components) {
         getMenuManager().add(components);
     }
 
+    /**
+     * @inheritDoc
+     *
+     * @deprecated Since 24.8, use {@link #addItem(Component)} instead
+     */
+    @Deprecated(since = "24.8")
+    @Override
+    public void add(Collection<Component> components) {
+        HasComponents.super.add(components);
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * @deprecated Since 24.8, use {@link #addItem(String)} instead
+     */
+    @Deprecated(since = "24.8")
+    @Override
+    public void add(String text) {
+        HasComponents.super.add(text);
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * @deprecated Since 24.8, use {@link #addItem(Component)} instead
+     */
+    @Deprecated(since = "24.8")
+    @Override
+    public void addComponentAsFirst(Component component) {
+        HasComponents.super.addComponentAsFirst(component);
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * @deprecated Since 24.8, use {@link #removeItem(Component...)} instead
+     */
+    @Deprecated(since = "24.8")
     @Override
     public void remove(Component... components) {
+        removeItem(components);
+    }
+
+    /**
+     * Removes the provided components from the context menu overlay.
+     *
+     * @param components
+     *            the components to remove
+     */
+    public void removeItem(Component... components) {
         getMenuManager().remove(components);
     }
 
     /**
-     * Removes all of the child components. This also removes all the items
-     * added with {@link #addItem(String)} and its overload methods.
+     * @inheritDoc
+     *
+     * @deprecated Since 24.8, use {@link #removeItem(Component...)} instead
      */
+    @Deprecated(since = "24.8")
+    @Override
+    public void remove(Collection<Component> components) {
+        removeItem(components == null ? null
+                : components.toArray(new Component[0]));
+    }
+
+    /**
+     * Removes all the child components. This also removes all the items added
+     * with {@link #addItem(String)} and its overload methods.
+     *
+     * @deprecated Since 24.8, use {@link #removeAllItems()} instead
+     */
+    @Deprecated(since = "24.8")
     @Override
     public void removeAll() {
+        removeAllItems();
+    }
+
+    /**
+     * Removes all the child components. This also removes all the items added
+     * with {@link #addItem(String)} and its overload methods.
+     */
+    public void removeAllItems() {
         getMenuManager().removeAll();
     }
 
@@ -282,10 +340,29 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      *            the index, where the component will be added
      * @param component
      *            the component to add
-     * @see #add(Component...)
+     *
+     * @deprecated Since 24.8, use {@link #addItemAtIndex(int, Component)}
+     *             instead
      */
+    @Deprecated(since = "24.8")
     @Override
     public void addComponentAtIndex(int index, Component component) {
+        addItemAtIndex(index, component);
+    }
+
+    /**
+     * Adds the given component into this context menu at the given index.
+     * <p>
+     * The added elements in the DOM will not be children of the
+     * {@code <vaadin-context-menu>} element, but will be inserted into an
+     * overlay that is attached into the {@code <body>}.
+     *
+     * @param index
+     *            the index, where the component will be added
+     * @param component
+     *            the component to add
+     */
+    public void addItemAtIndex(int index, Component component) {
         getMenuManager().addComponentAtIndex(index, component);
     }
 
