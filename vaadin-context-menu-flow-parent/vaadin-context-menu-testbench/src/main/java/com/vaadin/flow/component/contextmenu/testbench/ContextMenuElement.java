@@ -45,9 +45,9 @@ public class ContextMenuElement extends TestBenchElement {
     }
 
     /**
-     * Check if the ContextMenu is open.
+     * Check if the context menu is open.
      *
-     * @return boolean True if menu is open.
+     * @return {@code true} if menu is open.
      */
     public boolean isOpen() {
         try {

@@ -42,9 +42,9 @@ public class ContextMenuOverlayElement extends TestBenchElement {
     }
 
     /**
-     * Get the MenuItems of this ContextMenuOverlayElement.
+     * Get the items of this context menu overlay.
      *
-     * @return List of ContextMenuItemElement.
+     * @return List of menu items.
      */
     public List<ContextMenuItemElement> getMenuItems() {
         return $(ContextMenuItemElement.class).all();

@@ -29,9 +29,9 @@ import com.vaadin.testbench.elementsbase.Element;
 public class ContextMenuItemElement extends TestBenchElement {
 
     /**
-     * Open the potential sub menu of the this item by hovering. If there was a
-     * submenu, after opening the last ContextMenuOverlayElement can be used to
-     * find its menu items.
+     * Open the potential sub menu of this item by hovering. If there is a sub
+     * menu, it can be used to access the sub menu items after opening the last
+     * {@code ContextMenuOverlayElement}.
      */
     public void openSubMenu() {
         hover();
@@ -40,7 +40,7 @@ public class ContextMenuItemElement extends TestBenchElement {
     /**
      * Check if the item is checked.
      *
-     * @return True if there is checkmark
+     * @return {@code true} if the item is checked.
      */
     public boolean isChecked() {
         return hasAttribute("menu-item-checked");
