@@ -46,7 +46,7 @@ window.Vaadin.Flow.messageListConnector = {
    * Appends the given text to the text of the item at the given index.
    */
   appendItemText(list, appendedText, index) {
-    list.items[index].text += appendedText;
-    list.items = [...list.items];
+    const currentText = list.items[index].text || '';
+    this.setItemText(list, currentText + appendedText, index);
   }
 };
