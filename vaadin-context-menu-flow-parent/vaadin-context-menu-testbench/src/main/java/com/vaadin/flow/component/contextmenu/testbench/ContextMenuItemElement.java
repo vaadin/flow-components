@@ -15,9 +15,6 @@
  */
 package com.vaadin.flow.component.contextmenu.testbench;
 
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
-
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -37,7 +34,7 @@ public class ContextMenuItemElement extends TestBenchElement {
      * find its menu items.
      */
     public void openSubMenu() {
-        hoverOn(this);
+        hover();
     }
 
     /**
@@ -48,10 +45,4 @@ public class ContextMenuItemElement extends TestBenchElement {
     public boolean isChecked() {
         return hasAttribute("menu-item-checked");
     }
-
-    protected void hoverOn(WebElement element) {
-        Actions action = new Actions(getDriver());
-        action.moveToElement(element).perform();
-    }
-
 }
