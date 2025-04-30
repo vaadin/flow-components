@@ -34,8 +34,7 @@ public class MenuBarItemElement extends TestBenchElement {
      */
     public TestBenchElement getSubMenu() {
         waitForSubMenu();
-        return (TestBenchElement) executeScript(
-                "return arguments[0].__overlay;", this);
+        return getPropertyElement("__overlay");
     }
 
     /**
