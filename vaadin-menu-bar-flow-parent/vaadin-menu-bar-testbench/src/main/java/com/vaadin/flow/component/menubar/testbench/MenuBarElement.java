@@ -99,15 +99,11 @@ public class MenuBarElement extends TestBenchElement {
      * @return TestBenchElement for the first open sub menu in this menu bar
      */
     public TestBenchElement getSubMenu() {
-        var buttons = $(MenuBarButtonElement.class).all().stream()
-                .filter(element -> isVisible(element))
-                .collect(Collectors.toList());
-        var openedButton = buttons.stream()
-                .filter(button -> button.hasAttribute("expanded")).findFirst();
-        if (!openedButton.isPresent()) {
-            return null;
+        var button = $(MenuBarButtonElement.class).withAttribute("expanded").withCondition(this::isVisible).first();
+        if (button == null) {
+          return;
         }
-        return openedButton.get().getSubMenu();
+        return button.getSubMenu();
     }
 
     /**
