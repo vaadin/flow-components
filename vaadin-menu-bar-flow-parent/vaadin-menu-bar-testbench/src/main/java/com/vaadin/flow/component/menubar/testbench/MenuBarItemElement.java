@@ -42,7 +42,7 @@ public class MenuBarItemElement extends TestBenchElement {
      *
      * @return True if there is sub menu open
      */
-    public boolean isExpended() {
+    public boolean isExpanded() {
         return hasAttribute("expanded");
     }
 
