@@ -13,22 +13,28 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
+function mapItems(items, locale) {
+  const formatter = new Intl.DateTimeFormat(locale, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric'
+  });
+
+  return items.map((item) =>
+    item.time
+      ? Object.assign(item, {
+          time: formatter.format(new Date(item.time))
+        })
+      : item
+  );
+}
+
 window.Vaadin.Flow.messageListConnector = {
   setItems(list, items, locale) {
-    const formatter = new Intl.DateTimeFormat(locale, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric'
-    });
-    list.items = items.map((item) =>
-      item.time
-        ? Object.assign(item, {
-            time: formatter.format(new Date(item.time))
-          })
-        : item
-    );
+    list.items = mapItems(items, locale);
   },
 
   setItemText(list, text, index) {
@@ -39,5 +45,10 @@ window.Vaadin.Flow.messageListConnector = {
   appendItemText(list, appendedText, index) {
     list.items[index].text += appendedText;
     list.items = [...list.items];
+  },
+
+  addItems(list, newItems, locale) {
+    const formattedNewItems = mapItems(newItems, locale);
+    list.items = [...list.items, ...formattedNewItems];
   }
 };

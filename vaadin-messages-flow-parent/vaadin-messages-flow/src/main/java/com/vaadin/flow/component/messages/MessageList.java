@@ -54,6 +54,7 @@ public class MessageList extends Component
     private List<MessageListItem> items = new ArrayList<>();
     private boolean pendingUpdate = false;
     private boolean pendingTextUpdate = false;
+    private Integer pendingAddItemsIndex;
 
     /**
      * Creates a new message list component. To populate the content of the
@@ -128,8 +129,7 @@ public class MessageList extends Component
 
         item.setHost(this);
         items.add(item);
-        // TODO: Only update the new item
-        scheduleItemsUpdate();
+        scheduleAddItemsUpdate();
     }
 
     /**
@@ -152,54 +152,88 @@ public class MessageList extends Component
         pendingUpdate = true;
     }
 
+    void scheduleAddItemsUpdate() {
+        scheduleUpdate();
+        if (pendingAddItemsIndex == null) {
+            pendingAddItemsIndex = items.size() - 1;
+        }
+    }
+
     private void scheduleUpdate() {
-        if (pendingUpdate || pendingTextUpdate) {
+        if (pendingUpdate || pendingTextUpdate || pendingAddItemsIndex != null) {
             // Already scheduled
             return;
         }
 
         getElement().getNode()
                 .runWhenAttached(ui -> ui.beforeClientResponse(this, ctx -> {
+                    var connectorObject = "window.Vaadin.Flow.messageListConnector";
+
                     if (pendingUpdate) {
-                        // Do a full update
+                        // Full update handles everything (items, text)
                         JsonArray itemsJson = JsonUtils.listToJson(items);
                         getElement().executeJs(
-                                "window.Vaadin.Flow.messageListConnector"
+                            connectorObject
                                         + ".setItems(this, $0, $1)",
                                 itemsJson, ui.getLocale().toLanguageTag());
-                    }
+                        // Sync clientText for all items after full update
+                        items.forEach(item -> item.clientText = item.getText());
+                    } else {
+                        // Incremental updates: handle additions first, then text changes
 
-                    items.forEach(item -> {
-                        // Only update text if not a full update and the item
-                        // text has changed
-                        if (!pendingUpdate && !Objects.equals(item.getText(),
-                                item.clientText)) {
-                            if (item.getText() != null
-                                    && item.clientText != null && item.getText()
-                                            .startsWith(item.clientText)) {
-                                // Only send the diff
-                                var diff = item.getText()
-                                        .substring(item.clientText.length());
-                                getElement().executeJs(
-                                        "window.Vaadin.Flow.messageListConnector"
-                                                + ".appendItemText(this, $0, $1)",
-                                        diff, items.indexOf(item));
-                            } else {
-                                // Full text update
-                                getElement().executeJs(
-                                        "window.Vaadin.Flow.messageListConnector"
-                                                + ".setItemText(this, $0, $1)",
-                                        item.getText(), items.indexOf(item));
-                            }
+                        if (pendingAddItemsIndex != null) {
+                            // Add new items incrementally
+                            var newItems = items.subList(pendingAddItemsIndex, items.size());
+                            // Sync clientText for new items, so their text doesn't get unnecessarily sent again by the item text update logic
+                            newItems.forEach(item -> item.clientText = item.getText());
+
+                            var newItemsJson = JsonUtils.listToJson(newItems);
+                            // Call the new connector function to add items
+                            getElement().executeJs(
+                                connectorObject
+                                            + ".addItems(this, $0, $1)",
+                                    newItemsJson, ui.getLocale().toLanguageTag());
+                            
                         }
 
-                        // Synchronize the client-side text with the server-side
-                        // text
-                        item.clientText = item.getText();
-                    });
+                        // Handle text updates for potentially changed items (existing or new)
+                        // This loop runs if it wasn't a full update.
+                        items.forEach(item -> {
+                            // Check if text needs updating for this item
+                            var textChanged = !Objects.equals(item.getText(), item.clientText);
 
+                            if (textChanged) {
+                                if (item.getText() != null
+                                        && item.clientText != null && item.getText()
+                                                .startsWith(item.clientText)) {
+                                    // Append optimization
+                                    var diff = item.getText()
+                                            .substring(item.clientText.length());
+                                    getElement().executeJs(
+                                        connectorObject
+                                                    + ".appendItemText(this, $0, $1)",
+                                            diff, items.indexOf(item));
+                                } else {
+                                    // Full text update for this item (also handles initial text for new items)
+                                    getElement().executeJs(
+                                        connectorObject
+                                                    + ".setItemText(this, $0, $1)",
+                                            item.getText(), items.indexOf(item));
+                                }
+                            }
+
+                            // Sync clientText if it changed OR if the item is new
+                            // (clientText is null for new items added via addItems)
+                            if (textChanged || item.clientText == null) {
+                                item.clientText = item.getText();
+                            }
+                        });
+                    }
+
+                    // Reset flags for the next update cycle
                     pendingTextUpdate = false;
                     pendingUpdate = false;
+                    pendingAddItemsIndex = null; // Reset the new flag as well
                 }));
     }
 
