@@ -55,6 +55,8 @@ public class MessageList extends Component
     private boolean pendingTextUpdate = false;
     private Integer pendingAddItemsIndex;
 
+    private final String CONNECTOR_OBJECT = "window.Vaadin.Flow.messageListConnector";
+
     /**
      * Creates a new message list component. To populate the content of the
      * list, use {@link #setItems(Collection)}.
@@ -171,69 +173,67 @@ public class MessageList extends Component
     }
 
     private void updateClient(UI ui) {
-        var connectorObject = "window.Vaadin.Flow.messageListConnector";
-
         if (pendingUpdate) {
-            // Full update handles everything (items, text)
-            var itemsJson = JsonUtils.listToJson(items);
-            getElement().executeJs(connectorObject + ".setItems(this, $0, $1)",
-                    itemsJson, ui.getLocale().toLanguageTag());
-            // Sync clientText for all items after full update
-            items.forEach(item -> item.clientText = item.getText());
+            handleFullUpdate(ui);
         } else {
-            // Incremental updates: handle additions first, then text changes
-
+            // Incremental updates
             if (pendingAddItemsIndex != null) {
-                // Add new items incrementally
-                var newItems = items.subList(pendingAddItemsIndex,
-                        items.size());
-                // Sync clientText for new items, so their text doesn't get
-                // unnecessarily sent again by the item text update logic
-                newItems.forEach(item -> item.clientText = item.getText());
-
-                var newItemsJson = JsonUtils.listToJson(newItems);
-                // Call the new connector function to add items
-                getElement().executeJs(
-                        connectorObject + ".addItems(this, $0, $1)",
-                        newItemsJson, ui.getLocale().toLanguageTag());
-
+                handleAddItemsUpdate(ui);
             }
-
-            // Handle text updates for potentially changed items (existing or
-            // new)
-            items.forEach(item -> {
-                // Check if text needs updating for this item
-                var textChanged = !Objects.equals(item.getText(),
-                        item.clientText);
-
-                if (textChanged) {
-                    if (item.getText() != null && item.clientText != null
-                            && item.getText().startsWith(item.clientText)) {
-                        // Append optimization
-                        var diff = item.getText()
-                                .substring(item.clientText.length());
-                        getElement().executeJs(
-                                connectorObject
-                                        + ".appendItemText(this, $0, $1)",
-                                diff, items.indexOf(item));
-                    } else {
-                        // Full text update for this item (also handles initial
-                        // text for new items)
-                        getElement().executeJs(
-                                connectorObject + ".setItemText(this, $0, $1)",
-                                item.getText(), items.indexOf(item));
-                    }
-                }
-
-                // Sync clientText for the item
-                item.clientText = item.getText();
-            });
+            // Always check for text updates if not a full update
+            handleTextUpdates();
         }
 
         // Reset flags for the next update cycle
         pendingTextUpdate = false;
         pendingUpdate = false;
         pendingAddItemsIndex = null;
+    }
+
+    private void handleFullUpdate(UI ui) {
+        // Sync clientText for items
+        items.forEach(item -> item.clientText = item.getText());
+
+        var itemsJson = JsonUtils.listToJson(items);
+        getElement().executeJs(CONNECTOR_OBJECT + ".setItems(this, $0, $1)",
+                itemsJson, ui.getLocale().toLanguageTag());
+    }
+
+    private void handleAddItemsUpdate(UI ui) {
+        var newItems = items.subList(pendingAddItemsIndex, items.size());
+        // Sync clientText for new items
+        newItems.forEach(item -> item.clientText = item.getText());
+
+        var newItemsJson = JsonUtils.listToJson(newItems);
+        // Call the connector function to add items
+        getElement().executeJs(CONNECTOR_OBJECT + ".addItems(this, $0, $1)",
+                newItemsJson, ui.getLocale().toLanguageTag());
+    }
+
+    private void handleTextUpdates() {
+        items.forEach(item -> {
+            // Check if text needs updating for this item
+            var textChanged = !Objects.equals(item.getText(), item.clientText);
+
+            if (textChanged) {
+                if (item.getText() != null && item.clientText != null
+                        && item.getText().startsWith(item.clientText)) {
+                    // Append optimization
+                    var diff = item.getText()
+                            .substring(item.clientText.length());
+                    getElement().executeJs(
+                            CONNECTOR_OBJECT + ".appendItemText(this, $0, $1)",
+                            diff, items.indexOf(item));
+                } else {
+                    // Full text update for this item
+                    getElement().executeJs(
+                            CONNECTOR_OBJECT + ".setItemText(this, $0, $1)",
+                            item.getText(), items.indexOf(item));
+                }
+                // Sync clientText *after* sending the update
+                item.clientText = item.getText();
+            }
+        });
     }
 
     @Override
