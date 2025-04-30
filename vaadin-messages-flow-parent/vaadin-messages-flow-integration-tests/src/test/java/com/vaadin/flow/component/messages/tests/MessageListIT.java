@@ -71,7 +71,7 @@ public class MessageListIT extends AbstractComponentIT {
          */
 
         clickElementWithJs("setText");
-        Assert.assertEquals("Unexpected text content", "foo2",
+        Assert.assertEquals("Unexpected text content", "newfoo",
                 getFirstMessage(messageList).getText());
 
         clickElementWithJs("setTime");
@@ -110,6 +110,21 @@ public class MessageListIT extends AbstractComponentIT {
         clickElementWithJs("removeClassNames");
         Assert.assertEquals("Unexpected class name after removing class names",
                 Set.of("pinned"), getFirstMessage(messageList).getClassNames());
+    }
+
+    @Test
+    public void appendText_messagesUpdated() {
+        clickElementWithJs("appendText");
+        Assert.assertEquals("Unexpected text content", "foo2",
+                getFirstMessage(messageList).getText());
+    }
+
+    @Test
+    public void setText_appendText_messagesUpdated() {
+        clickElementWithJs("setText");
+        clickElementWithJs("appendText");
+        Assert.assertEquals("Unexpected text content", "newfoo2",
+                getFirstMessage(messageList).getText());
     }
 
     @Test
@@ -153,7 +168,8 @@ public class MessageListIT extends AbstractComponentIT {
         clickElementWithJs("setImageAsStreamResource");
         String imageUrl = messageList.getMessageElements().get(0).getUserImg();
         MatcherAssert.assertThat(imageUrl, startsWith("VAADIN/dynamic"));
-        checkLogsForErrors(message -> message.contains("test.jpg")); // would fail if the avatar.png image wasn't hosted
+        // would fail if the avatar.png image wasn't hosted
+        checkLogsForErrors(message -> message.contains("test.jpg"));
     }
 
     private MessageElement getFirstMessage(MessageListElement list) {

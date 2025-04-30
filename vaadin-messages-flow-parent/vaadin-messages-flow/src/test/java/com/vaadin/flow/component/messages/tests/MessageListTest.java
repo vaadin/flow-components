@@ -149,6 +149,11 @@ public class MessageListTest {
         Assert.assertTrue(item1.hasThemeName("foo"));
     }
 
+    @Test
+    public void unattachedItem_setText_doesNotThrow() {
+        item1.setText("foo");
+    }
+
     private String getSerializedThemeProperty(MessageListItem item) {
         JsonValue theme = JsonUtils.beanToJson(item).get("theme");
         if (theme.getType() == JsonType.NULL) {

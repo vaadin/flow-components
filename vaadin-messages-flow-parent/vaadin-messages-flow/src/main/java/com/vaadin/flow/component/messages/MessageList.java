@@ -132,6 +132,8 @@ public class MessageList extends Component
      */
     void scheduleItemsTextUpdate() {
         scheduleUpdate();
+        // Avoid multiple updateClient() calls even though all but the first one
+        // are NOPs (untestable flag)
         pendingTextUpdate = true;
     }
 
