@@ -1,0 +1,6 @@
+:host([opening]),
+:host([closing]),
+:host([opening]) [part='overlay'],
+:host([closing]) [part='overlay'] {
+  animation: none !important;
+}
