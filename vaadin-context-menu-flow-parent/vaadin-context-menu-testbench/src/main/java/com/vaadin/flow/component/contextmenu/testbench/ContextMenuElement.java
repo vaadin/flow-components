@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.contextmenu.testbench;
 
 import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -32,16 +31,17 @@ import com.vaadin.testbench.elementsbase.Element;
 public class ContextMenuElement extends TestBenchElement {
 
     /**
-     * This is an utility method, which will produce context click on the target
-     * element. If the target had ContextMenu, after opening the last
-     * ContextMenuOverlayElement can be used to find its menu items.
+     * This is a utility method equivalent to calling
+     * {@link TestBenchElement#contextClick()} on the target. If the target has
+     * a {@code ContextMenu}, it can be used to access the menu items.
      *
      * @param target
-     *            The element to which the ContextMenu has been hooked to.
+     *            The element to which the {@code ContextMenu} has been hooked
+     *            to.
+     * @see TestBenchElement#contextClick()
      */
     public static void openByRightClick(TestBenchElement target) {
-        Actions action = new Actions(target.getDriver());
-        action.contextClick(target).perform();
+        target.contextClick();
     }
 
     /**
