@@ -14,6 +14,9 @@
  * the License.
  */
 window.Vaadin.Flow.messageListConnector = {
+  /**
+   * Fully replaces the items in the list with the given items.
+   */
   setItems(list, items, locale) {
     const formatter = new Intl.DateTimeFormat(locale, {
       year: 'numeric',
@@ -29,5 +32,21 @@ window.Vaadin.Flow.messageListConnector = {
           })
         : item
     );
+  },
+
+  /**
+   * Sets the text of the item at the given index to the given text.
+   */
+  setItemText(list, text, index) {
+    list.items[index].text = text;
+    list.items = [...list.items];
+  },
+
+  /**
+   * Appends the given text to the text of the item at the given index.
+   */
+  appendItemText(list, appendedText, index) {
+    list.items[index].text += appendedText;
+    list.items = [...list.items];
   }
 };

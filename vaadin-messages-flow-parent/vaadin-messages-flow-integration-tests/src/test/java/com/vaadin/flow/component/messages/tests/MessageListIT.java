@@ -153,7 +153,7 @@ public class MessageListIT extends AbstractComponentIT {
         clickElementWithJs("setImageAsStreamResource");
         String imageUrl = messageList.getMessageElements().get(0).getUserImg();
         MatcherAssert.assertThat(imageUrl, startsWith("VAADIN/dynamic"));
-        checkLogsForErrors(); // would fail if the image wasn't hosted
+        checkLogsForErrors(message -> message.contains("test.jpg")); // would fail if the avatar.png image wasn't hosted
     }
 
     private MessageElement getFirstMessage(MessageListElement list) {

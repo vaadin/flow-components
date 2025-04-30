@@ -50,6 +50,8 @@ public class MessageListItem implements Serializable {
     private MessageList host;
 
     private String text;
+    // Value of the text property in the client
+    String clientText;
     private Instant time;
 
     private String userName;
@@ -154,7 +156,9 @@ public class MessageListItem implements Serializable {
      */
     public void setText(String text) {
         this.text = text;
-        propsChanged();
+        if (getHost() != null) {
+            getHost().scheduleItemsTextUpdate();
+        }
     }
 
     /**

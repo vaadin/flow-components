@@ -26,13 +26,12 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.internal.JsonUtils;
-
-import elemental.json.JsonArray;
 
 /**
  * Message List allows you to show a list of messages, for example, a chat log.
@@ -53,6 +52,9 @@ public class MessageList extends Component
 
     private List<MessageListItem> items = Collections.emptyList();
     private boolean pendingUpdate = false;
+    private boolean pendingTextUpdate = false;
+
+    private final String CONNECTOR_OBJECT = "window.Vaadin.Flow.messageListConnector";
 
     /**
      * Creates a new message list component. To populate the content of the
@@ -125,19 +127,101 @@ public class MessageList extends Component
         return Collections.unmodifiableList(items);
     }
 
+    /**
+     * Schedules an incremental update of the message list items' text content.
+     */
+    void scheduleItemsTextUpdate() {
+        scheduleUpdate();
+        pendingTextUpdate = true;
+    }
+
+    /**
+     * Schedules a full update of the message list items.
+     */
     void scheduleItemsUpdate() {
-        if (!pendingUpdate) {
-            pendingUpdate = true;
-            getElement().getNode().runWhenAttached(
-                    ui -> ui.beforeClientResponse(this, ctx -> {
-                        JsonArray itemsJson = JsonUtils.listToJson(items);
-                        getElement().executeJs(
-                                "window.Vaadin.Flow.messageListConnector"
-                                        + ".setItems(this, $0, $1)",
-                                itemsJson, ui.getLocale().toLanguageTag());
-                        pendingUpdate = false;
-                    }));
+        scheduleUpdate();
+        pendingUpdate = true;
+    }
+
+    /**
+     * Schedules a client sync of the message list items to be run before the
+     * next client response.
+     */
+    private void scheduleUpdate() {
+        if (pendingUpdate || pendingTextUpdate) {
+            // Already scheduled
+            return;
         }
+
+        // Schedule update before the next client response
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, ctx -> updateClient(ui)));
+    }
+
+    /**
+     * Updates the client with the current state of the message list items.
+     * 
+     * @param ui
+     *            the UI the component is attached to
+     */
+    private void updateClient(UI ui) {
+        if (pendingUpdate) {
+            handleFullUpdate(ui);
+        } else {
+            // Incremental updates
+
+            // Check for text updates if not a full update
+            handleTextUpdates();
+        }
+
+        // Reset flags for the next update cycle
+        pendingTextUpdate = false;
+        pendingUpdate = false;
+    }
+
+    /**
+     * Handles a full update of the message list items.
+     * 
+     * @param ui
+     *            the UI the component is attached to
+     */
+    private void handleFullUpdate(UI ui) {
+        // Sync clientText for items
+        items.forEach(item -> item.clientText = item.getText());
+
+        var itemsJson = JsonUtils.listToJson(items);
+        getElement().executeJs(CONNECTOR_OBJECT + ".setItems(this, $0, $1)",
+                itemsJson, ui.getLocale().toLanguageTag());
+    }
+
+    /**
+     * Handles incremental updates of the message list items' text content. This
+     * may involve appending text to existing text or replacing it entirely.
+     */
+    private void handleTextUpdates() {
+        items.forEach(item -> {
+            // Check if text needs updating for this item
+            var textChanged = !Objects.equals(item.getText(), item.clientText);
+
+            if (textChanged) {
+                if (item.getText() != null && item.clientText != null
+                        && item.getText().startsWith(item.clientText)) {
+                    // Append optimization
+                    var diff = item.getText()
+                            .substring(item.clientText.length());
+                    getElement().executeJs(
+                            CONNECTOR_OBJECT + ".appendItemText(this, $0, $1)",
+                            diff, items.indexOf(item));
+                } else {
+                    // Full text update for this item
+                    getElement().executeJs(
+                            CONNECTOR_OBJECT + ".setItemText(this, $0, $1)",
+                            item.getText(), items.indexOf(item));
+                }
+                // Sync clientText *after* sending the update
+                item.clientText = item.getText();
+            }
+        });
     }
 
     @Override
