@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -1264,7 +1265,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     private class DetailsManager extends AbstractGridExtension<T> {
 
-        private final HashSet<T> detailsVisible = new HashSet<>();
+        private final HashMap<Object, T> detailsVisible = new LinkedHashMap<>();
 
         /**
          * Constructs a new details manager for the given grid.
@@ -1286,17 +1287,19 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          *            {@code false} if it should be hidden
          */
         public void setDetailsVisible(T item, boolean visible) {
+            Object itemId = getItemId(item);
+
             boolean refresh = false;
             if (!visible) {
-                refresh = detailsVisible.remove(item);
+                refresh = detailsVisible.remove(itemId) != null;
             } else {
-                detailsVisible.add(item);
+                detailsVisible.put(itemId, item);
                 refresh = true;
             }
 
             if (itemDetailsDataGenerator != null && refresh) {
                 refresh(item);
-                if (!detailsVisible.contains(item)) {
+                if (!detailsVisible.containsKey(itemId)) {
                     itemDetailsDataGenerator.destroyData(item);
                 }
             }
@@ -1313,7 +1316,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         public boolean isDetailsVisible(T item) {
             return itemDetailsDataGenerator != null
-                    && detailsVisible.contains(item);
+                    && detailsVisible.containsKey(getItemId(item));
         }
 
         @Override
@@ -1332,7 +1335,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
          */
         @Override
         public void destroyData(T item) {
-            detailsVisible.remove(item);
+            detailsVisible.remove(getItemId(item));
             if (itemDetailsDataGenerator != null) {
                 itemDetailsDataGenerator.destroyData(item);
             }
@@ -1361,16 +1364,23 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         private void setDetailsVisibleFromClient(Set<T> items) {
             Set<T> toRefresh = new HashSet<>();
-            toRefresh.addAll(detailsVisible);
+            toRefresh.addAll(detailsVisible.values());
             toRefresh.addAll(items);
 
             detailsVisible.clear();
-            detailsVisible.addAll(items);
+            for (T item : items) {
+                detailsVisible.put(getItemId(item), item);
+            }
+
             if (itemDetailsDataGenerator != null) {
                 for (T item : toRefresh) {
                     refresh(item);
                 }
             }
+        }
+
+        private Object getItemId(T item) {
+            return getDataProvider().getId(item);
         }
     }
 
