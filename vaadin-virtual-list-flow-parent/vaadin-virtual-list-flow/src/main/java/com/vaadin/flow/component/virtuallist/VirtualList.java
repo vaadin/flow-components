@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
@@ -323,5 +324,18 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      */
     public void scrollToEnd() {
         scrollToIndex(Integer.MAX_VALUE);
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        // When the component is detached and reattached in the same roundtrip,
+        // data communicator will clear all data generators, which will also
+        // remove all components rendered by component renderers. Thus reset the
+        // data communicator to re-render components. This also fixes the case
+        // where the virtual list is used in Popover or manually attached
+        // Dialog, see https://github.com/vaadin/web-components/issues/8630
+        getDataCommunicator().reset();
     }
 }
