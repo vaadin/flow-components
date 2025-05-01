@@ -22,9 +22,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
+import com.vaadin.flow.component.menubar.testbench.MenuBarButtonElement;
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
 import com.vaadin.flow.component.menubar.testbench.MenuBarItemElement;
-import com.vaadin.flow.component.menubar.testbench.MenuBarButtonElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 

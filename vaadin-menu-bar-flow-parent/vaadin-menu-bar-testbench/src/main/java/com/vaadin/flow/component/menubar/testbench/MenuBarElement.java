@@ -26,8 +26,7 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 /**
- * A TestBench element representing a <code>&lt;vaadin-menu-bar&gt;</code>
- * element.
+ * A TestBench element representing a {@code <vaadin-menu-bar>} element.
  */
 @Element("vaadin-menu-bar")
 public class MenuBarElement extends TestBenchElement {
@@ -99,9 +98,10 @@ public class MenuBarElement extends TestBenchElement {
      * @return TestBenchElement for the first open sub menu in this menu bar
      */
     public TestBenchElement getSubMenu() {
-        var button = $(MenuBarButtonElement.class).withAttribute("expanded").withCondition(this::isVisible).first();
+        var button = $(MenuBarButtonElement.class).withAttribute("expanded")
+                .withCondition(this::isVisible).first();
         if (button == null) {
-          return;
+            return null;
         }
         return button.getSubMenu();
     }

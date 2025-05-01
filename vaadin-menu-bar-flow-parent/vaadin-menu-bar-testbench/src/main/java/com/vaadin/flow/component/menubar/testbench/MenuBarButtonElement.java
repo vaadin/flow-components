@@ -21,8 +21,7 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 /**
- * A TestBench element representing a
- * <code>&lt;vaadin-menu-bar-button&gt;</code> element.
+ * A TestBench element representing a {@code <vaadin-menu-bar-button>} element.
  */
 @Element("vaadin-menu-bar-button")
 public class MenuBarButtonElement extends TestBenchElement {
@@ -34,8 +33,7 @@ public class MenuBarButtonElement extends TestBenchElement {
      */
     public TestBenchElement getSubMenu() {
         waitForSubMenu();
-        return (TestBenchElement) executeScript(
-                "return arguments[0].__overlay;", this);
+        return getPropertyElement("__overlay");
     }
 
     /**
@@ -43,7 +41,7 @@ public class MenuBarButtonElement extends TestBenchElement {
      *
      * @return True if there is sub menu open
      */
-    public boolean isExpended() {
+    public boolean isExpanded() {
         return hasAttribute("expanded");
     }
 
