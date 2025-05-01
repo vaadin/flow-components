@@ -76,9 +76,9 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha13")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha15")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/dialog", version = "24.8.0-alpha13")
+@NpmPackage(value = "@vaadin/dialog", version = "24.8.0-alpha15")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
@@ -573,10 +573,14 @@ public class Dialog extends Component implements HasComponents, HasSize,
     /**
      * Opens the dialog.
      * <p>
-     * Note: You don't need to add the dialog component anywhere before opening
-     * it. Since {@code <vaadin-dialog>}'s location in the DOM doesn't really
-     * matter, opening a dialog will automatically add it to the {@code <body>}
-     * if necessary.
+     * If a dialog was not added manually to a parent component, it will be
+     * automatically added to the {@link UI} when opened, and automatically
+     * removed from the UI when closed. Note that the dialog is then scoped to
+     * the UI, and not the current view. As such, when navigating away from a
+     * view, the dialog will still be opened or stay open. In order to close the
+     * dialog when navigating away from a view, it should either be explicitly
+     * added as a child to the view, or it should be explicitly closed when
+     * leaving the view.
      */
     public void open() {
         setOpened(true);
@@ -585,8 +589,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
     /**
      * Closes the dialog.
      * <p>
-     * Note: This method also removes the dialog component from the DOM after
-     * closing it, unless you have added the component manually.
+     * This automatically removes the dialog from the {@link UI}, unless it was
+     * manually added to a parent component.
      */
     public void close() {
         setOpened(false);
@@ -926,10 +930,14 @@ public class Dialog extends Component implements HasComponents, HasSize,
     /**
      * Opens or closes the dialog.
      * <p>
-     * Note: You don't need to add the dialog component anywhere before opening
-     * it. Since {@code <vaadin-dialog>}'s location in the DOM doesn't really
-     * matter, opening a dialog will automatically add it to the {@code <body>}
-     * if necessary.
+     * If a dialog was not added manually to a parent component, it will be
+     * automatically added to the {@link UI} when opened, and automatically
+     * removed from the UI when closed. Note that the dialog is then scoped to
+     * the UI, and not the current view. As such, when navigating away from a
+     * view, the dialog will still be opened or stay open. In order to close the
+     * dialog when navigating away from a view, it should either be explicitly
+     * added as a child to the view, or it should be explicitly closed when
+     * leaving the view.
      *
      * @param opened
      *            {@code true} to open the dialog, {@code false} to close it
