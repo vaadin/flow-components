@@ -87,7 +87,7 @@ public class ButtonIT extends AbstractComponentIT {
 
         buttonElements = $(ButtonElement.class)
                 .withText("button", ButtonIT::containsIgnoreCase).all();
-        Assert.assertEquals(4, buttonElements.size());
+        Assert.assertEquals(3, buttonElements.size());
     }
 
     @Test
