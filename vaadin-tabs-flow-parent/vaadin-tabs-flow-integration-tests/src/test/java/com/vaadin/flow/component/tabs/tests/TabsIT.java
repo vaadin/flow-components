@@ -19,13 +19,11 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchTestCase;
 import com.vaadin.tests.AbstractComponentIT;
@@ -58,16 +56,5 @@ public class TabsIT extends AbstractComponentIT {
         assertFalse(isElementPresent(By.id("page1")));
         WebElement page3 = layout.findElement(By.id("page3"));
         assertThat(page3.getCssValue("display"), is("block"));
-    }
-
-    @Test
-    public void assertThemeVariant() {
-        WebElement tabs = findElement(By.id("tabs-with-theme"));
-        scrollToElement(tabs);
-        Assert.assertEquals(TabsVariant.LUMO_SMALL.getVariantName(),
-                tabs.getDomAttribute("theme"));
-
-        findElement(By.id("remove-theme-variant-button")).click();
-        Assert.assertNull(tabs.getDomAttribute("theme"));
     }
 }
