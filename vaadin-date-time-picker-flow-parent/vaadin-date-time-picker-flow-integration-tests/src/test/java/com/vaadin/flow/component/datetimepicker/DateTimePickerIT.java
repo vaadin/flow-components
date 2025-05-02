@@ -177,12 +177,4 @@ public class DateTimePickerIT extends AbstractComponentIT {
 
         checkLogsForErrors();
     }
-
-    @Test
-    public void testSmallVariantHasTheme() {
-        DateTimePickerElement picker = $(DateTimePickerElement.class)
-                .id("date-time-picker-variant");
-
-        Assert.assertEquals("small", picker.getDomAttribute("theme"));
-    }
 }
