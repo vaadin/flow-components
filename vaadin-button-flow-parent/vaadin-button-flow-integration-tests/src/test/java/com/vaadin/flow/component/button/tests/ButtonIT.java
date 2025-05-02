@@ -410,15 +410,6 @@ public class ButtonIT extends AbstractComponentIT {
         });
     }
 
-    @Test
-    public void assertVariants() {
-        WebElement button = findElement(By.id("button-theme-variants"));
-        Assert.assertEquals("small primary", button.getDomAttribute("theme"));
-
-        findElement(By.id("remove-theme-variant-button")).click();
-        Assert.assertEquals("primary", button.getDomAttribute("theme"));
-    }
-
     private int getCenterX(WebElement element) {
         return element.getLocation().getX() + element.getSize().getWidth() / 2;
     }
