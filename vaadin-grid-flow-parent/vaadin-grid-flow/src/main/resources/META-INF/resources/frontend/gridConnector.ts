@@ -460,26 +460,31 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     Grid.prototype.collapseItem.call(grid, item);
   };
 
-  const itemsUpdated = function (items) {
+  function syncDetailsOpenedItems(items) {
     if (!items || !Array.isArray(items)) {
-      throw 'Attempted to call itemsUpdated with an invalid value: ' + JSON.stringify(items);
+      throw 'Attempted to call syncDetailsOpenedItems with an invalid value: ' + JSON.stringify(items);
     }
-    let detailsOpenedItems = Array.from(grid.detailsOpenedItems);
-    for (let i = 0; i < items.length; ++i) {
-      const item = items[i];
-      if (!item) {
-        continue;
+
+    const itemsToAdd = new Set();
+    const itemsToRemove = new Set();
+
+    items.forEach((item) => {
+      const isDetailsOpened = grid._isDetailsOpened(item);
+
+      if (item.detailsOpened && !isDetailsOpened) {
+        itemsToAdd.add(item);
       }
-      if (item.detailsOpened) {
-        if (grid._getItemIndexInArray(item, detailsOpenedItems) < 0) {
-          detailsOpenedItems.push(item);
-        }
-      } else if (grid._getItemIndexInArray(item, detailsOpenedItems) >= 0) {
-        detailsOpenedItems.splice(grid._getItemIndexInArray(item, detailsOpenedItems), 1);
+
+      if (!item.detailsOpened && isDetailsOpened) {
+        itemsToRemove.add(grid.getItemId(item));
       }
-    }
-    grid.detailsOpenedItems = detailsOpenedItems;
-  };
+    });
+
+    grid.detailsOpenedItems = [
+      ...grid.detailsOpenedItems.filter((item) => !itemsToRemove.has(grid.getItemId(item))),
+      ...itemsToAdd
+    ];
+  }
 
   /**
    * Updates the cache for the given page for grid or tree-grid.
@@ -571,7 +576,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       grid.$connector.doDeselection(slice.filter((item) => !item.selected && selectedKeys[item.key]));
 
       updateGridCache(page, slice, pkey);
-      itemsUpdated(slice);
+      syncDetailsOpenedItems(slice);
       updateGridItemsInDomBasedOnCache(slice);
     }
   };
@@ -618,7 +623,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       let pageToUpdate = pagesToUpdate[keys[i]];
       let updatedItems = cache[parentKey][page];
       updateGridCache(pageToUpdate.page, updatedItems, pageToUpdate.parentKey);
-      itemsUpdated(updatedItems);
+      syncDetailsOpenedItems(updatedItems);
       updateGridItemsInDomBasedOnCache(updatedItems);
     }
   };
@@ -644,7 +649,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
         }
       }
     }
-    itemsUpdated(updatedItems);
+    syncDetailsOpenedItems(updatedItems);
 
     updateGridItemsInDomBasedOnCache(updatedItems);
   };
