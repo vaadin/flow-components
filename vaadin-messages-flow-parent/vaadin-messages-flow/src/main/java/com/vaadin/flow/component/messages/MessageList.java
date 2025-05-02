@@ -230,4 +230,24 @@ public class MessageList extends Component
     public void localeChange(LocaleChangeEvent event) {
         scheduleItemsUpdate();
     }
+
+    /**
+     * Sets whether the messages should be parsed as markdown. By default, this
+     * is set to {@code false}.
+     *
+     * @param markdown
+     *            {@code true} if the message text is parsed as Markdown.
+     */
+    public void setMarkdown(boolean markdown) {
+        getElement().setProperty("markdown", markdown);
+    }
+
+    /**
+     * Returns whether the messages are parsed as markdown.
+     *
+     * @return {@code true} if the message text is parsed as Markdown.
+     */
+    public boolean isMarkdown() {
+        return getElement().getProperty("markdown", false);
+    }
 }
