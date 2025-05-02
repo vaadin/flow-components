@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -951,21 +952,17 @@ public class TreeGrid<T> extends Grid<T>
      *            zero based row indexes to scroll to
      * @see TreeGrid#scrollToIndex(int)
      */
-    public void scrollToIndex(int... path) {
-        if (path.length == 0) {
+    public void scrollToIndex(int... indexes) {
+        if (indexes.length == 0) {
             throw new IllegalArgumentException(
                     "At least one index should be provided.");
         }
 
-        getElement().executeJs("""
-                    const range = this.$connector.getViewportRange();
-                    return range[1] - range[0];
-                """).then(result -> {
-            int rangeSize = (int) result.asNumber();
-            int flatIndex = getDataCommunicator().preloadPath(path, rangeSize);
-            getElement().executeJs("this._scrollToFlatIndex($0)", flatIndex);
-        });
-
+        String joinedIndexes = Arrays.stream(indexes).mapToObj(String::valueOf)
+                .collect(Collectors.joining(","));
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.scrollToIndex(" + joinedIndexes + ");")));
     }
 
     @Override
@@ -973,6 +970,20 @@ public class TreeGrid<T> extends Grid<T>
         getUI().ifPresent(ui -> ui.beforeClientResponse(this,
                 ctx -> getElement().executeJs(
                         "this.scrollToIndex(...Array(10).fill(Infinity))")));
+    }
+
+    @ClientCallable
+    private int preloadPath(int[] path, int buffer) {
+        int flatIndex = getDataCommunicator().preloadPath(path, buffer);
+        int pageSize = getPageSize();
+
+        int startPage = Math.max(0,
+                (int) Math.ceil((flatIndex - buffer) / (float) pageSize));
+        int endPage = (int) Math.floor((flatIndex + buffer) / (float) pageSize);
+        getDataCommunicator().setRequestedRange(startPage * pageSize,
+                endPage * pageSize);
+
+        return flatIndex;
     }
 
     /**
