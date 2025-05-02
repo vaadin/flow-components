@@ -142,7 +142,7 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
             preloadRange(rootCache.getFlatIndexByPath(path), +buffer);
         }
 
-        flush();
+        requestFlush();
 
         return rootCache.getFlatIndexByPath(path);
     }
@@ -203,9 +203,9 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
                         : Range.between(index + 1 - remainingLength, index + 1);
                 range = range.restrictTo(Range.withLength(0, cache.getSize()));
 
-                var items = fetchDataProviderChildren(cache.getParentItem(),
-                        range).toList();
-                cache.setItems(range.getStart(), items);
+                cache.setItems(range.getStart(),
+                        fetchDataProviderChildren(cache.getParentItem(), range)
+                                .toList());
             }
 
             var item = cache.getItem(index);
