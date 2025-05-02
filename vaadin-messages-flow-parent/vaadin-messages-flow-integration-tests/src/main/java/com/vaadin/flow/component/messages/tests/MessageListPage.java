@@ -44,7 +44,8 @@ public class MessageListPage extends Div {
         MessageList messageList = new MessageList(foo, bar);
         add(messageList);
 
-        addButton("setText", () -> foo.setText("foo2"));
+        addButton("setText", () -> foo.setText("newfoo"));
+        addButton("appendText", () -> foo.setText(foo.getText() + "2"));
         addButton("setTime",
                 () -> foo.setTime(Instant.parse("2000-02-02T12:00:00.00Z")));
         addButton("setUserName", () -> foo.setUserName("sender2"));
