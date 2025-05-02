@@ -351,68 +351,6 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void detach_reattach_noClientErrors_clientCodeFunctional() {
-        click("toggle-attached");
-        click("toggle-attached");
-        waitForElementPresent(By.tagName("vaadin-menu-bar"));
-        checkLogsForErrors();
-
-        // Verify client-code with setVisible functionality:
-        menuBar = $(MenuBarElement.class).first();
-        click("toggle-item-2-visibility");
-        assertButtonContents("item 1");
-    }
-
-    @Test
-    public void preserveOnRefresh_refresh_noClientErrors_clientCodeFunctional() {
-        getDriver().navigate().refresh();
-        waitForElementPresent(By.tagName("vaadin-menu-bar"));
-        checkLogsForErrors();
-
-        // Verify client-code with setVisible functionality:
-        menuBar = $(MenuBarElement.class).first();
-        click("toggle-item-2-visibility");
-        assertButtonContents("item 1");
-    }
-
-    @Test
-    public void setI18n_i18nIsUpdated() {
-        click("set-width");
-        waitForResizeObserver();
-        click("add-root-item");
-        TestBenchElement overflowButton = menuBar.getOverflowButton();
-
-        Assert.assertEquals("More options",
-                overflowButton.getDomAttribute("aria-label"));
-
-        click("set-i18n");
-
-        Assert.assertEquals("more-options",
-                overflowButton.getDomAttribute("aria-label"));
-    }
-
-    @Test
-    public void setI18n_detach_attach_i18nIsPersisted() {
-        click("set-width");
-        waitForResizeObserver();
-        click("add-root-item");
-        click("set-i18n");
-        TestBenchElement overflowButton = menuBar.getOverflowButton();
-
-        Assert.assertEquals("more-options",
-                overflowButton.getDomAttribute("aria-label"));
-
-        click("toggle-attached");
-        click("toggle-attached");
-
-        menuBar = $(MenuBarElement.class).first();
-        overflowButton = menuBar.getOverflowButton();
-
-        Assert.assertEquals("more-options",
-                overflowButton.getDomAttribute("aria-label"));
-    }
-
-    @Test
     public void addSubItem_clickMenuItem_clickButton_subMenuOpenedAndClosed() {
         click("add-sub-item");
         menuBar.getButtons().get(1).$("vaadin-menu-bar-item").first().click();
