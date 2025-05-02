@@ -24,7 +24,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.router.Route;
 
-@CssImport(value = "./not-animated-styles.css", themeFor = "vaadin-menu-bar-overlay")
+@CssImport("./menu-bar-not-animated-styles.css")
 @Route("vaadin-menu-bar/menu-bar-class-names")
 public class MenuBarClassNamesPage extends Div {
 
