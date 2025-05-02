@@ -37,7 +37,6 @@ public class CheckboxDemoPage extends Div {
         addDisabledCheckbox();
         addIndeterminateCheckbox();
         addValueChangeCheckbox();
-        addAccessibleCheckbox();
         addCheckboxImgComponentLabel();
     }
 
@@ -92,13 +91,6 @@ public class CheckboxDemoPage extends Div {
                 message);
         valueChangeCheckbox.setId("value-change-checkbox");
         message.setId("value-change-checkbox-message");
-    }
-
-    private void addAccessibleCheckbox() {
-        Checkbox accessibleCheckbox = new Checkbox("Accessible Checkbox");
-        accessibleCheckbox.setAriaLabel("Click me");
-        addCard("Checkbox with Custom Accessible Label", accessibleCheckbox);
-        accessibleCheckbox.setId("accessible-checkbox");
     }
 
     private void addCheckboxImgComponentLabel() {
