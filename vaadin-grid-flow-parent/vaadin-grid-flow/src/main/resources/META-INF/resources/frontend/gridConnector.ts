@@ -153,6 +153,18 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     });
   };
 
+  grid.scrollToIndex = async function (...indexes) {
+    if (!grid.clientHeight || !grid._columnTree) {
+      grid.__pendingScrollToIndexes = indexes;
+      return;
+    }
+
+    const viewportRange = grid.$connector.getViewportRange();
+    const flatIndex = await grid.$server.preloadPath(indexes, viewportRange[1] - viewportRange[0]);
+    grid._scrollToFlatIndex(flatIndex);
+    rootRequestDebouncer?.cancel();
+  };
+
   grid.$connector.getViewportRange = () => {
     // Determine what to fetch based on scroll position and not only
     // what grid asked for
@@ -539,20 +551,22 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // callbacks
     const { pendingRequests } = dataProviderController.rootCache;
     Object.entries(pendingRequests).forEach(([page, callback]) => {
-      // const lastRequestedRange = lastRequestedRanges[root] || [0, 0];
-      // const lastAvailablePage = grid.size ? Math.ceil(grid.size / grid.pageSize) - 1 : 0;
-      // // It's possible that the lastRequestedRange includes a page that's beyond lastAvailablePage if the grid's size got reduced during an ongoing data request
-      // const lastRequestedRangeEnd = Math.min(lastRequestedRange[1], lastAvailablePage);
+      const lastRequestedRange = lastRequestedRanges[root] || [0, 0];
+      const lastAvailablePage = grid.size ? Math.ceil(grid.size / grid.pageSize) - 1 : 0;
+      // It's possible that the lastRequestedRange includes a page that's beyond lastAvailablePage if the grid's size got reduced during an ongoing data request
+      const lastRequestedRangeEnd = Math.min(lastRequestedRange[1], lastAvailablePage);
       // Resolve if we have data or if we don't expect to get data
       if (cache[root]?.[page]) {
         // Cached data is available, resolve the callback
         callback(cache[root][page]);
+      } else if (page < lastRequestedRange[0] || +page > lastRequestedRangeEnd) {
+        // No cached data, resolve the callback with an empty array
+        callback(new Array(grid.pageSize));
+        // Request grid for content update
+        grid.requestContentUpdate();
       } else if (callback && grid.size === 0) {
         // The grid has 0 items => resolve the callback with an empty array
         callback([]);
-      } else {
-        callback(new Array(grid.pageSize));
-        grid.requestContentUpdate();
       }
     });
 
