@@ -85,6 +85,8 @@ public class TreeGridScrollToPage extends Div {
             }
         });
 
+        grid.scrollToIndex(100);
+
         add(grid, expandAll, scrollToStart, scrollToEnd, scrollToIndex,
                 expandIndex);
     }
