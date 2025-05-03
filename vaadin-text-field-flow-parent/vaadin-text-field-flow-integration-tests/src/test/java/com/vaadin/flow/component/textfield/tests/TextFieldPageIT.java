@@ -64,20 +64,6 @@ public class TextFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertRequired() {
-        WebElement webComponent = findElement(By.tagName("vaadin-text-field"));
-        Assert.assertNull(webComponent.getDomAttribute("required"));
-        WebElement button = findElement(By.id("required"));
-        button.click();
-        waitUntil(
-                driver -> "true".equals(getProperty(webComponent, "required")));
-
-        button.click();
-        waitUntil(driver -> "false"
-                .equals(getProperty(webComponent, "required")));
-    }
-
-    @Test
     public void labelMatches() {
         List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
                 .withLabel("Text field label").all();

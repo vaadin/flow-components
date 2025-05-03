@@ -44,13 +44,6 @@ public class IntegerFieldPage extends Div {
                 event -> integerField.setReadOnly(!integerField.isReadOnly()));
         add(toggleReadOnly);
 
-        NativeButton required = new NativeButton("Toggle required");
-        required.setId("toggle-required");
-        required.addClickListener(
-                event -> integerField.setRequiredIndicatorVisible(
-                        !integerField.isRequiredIndicatorVisible()));
-        add(required);
-
         NativeButton toggleEnabled = new NativeButton("Toggle enabled");
         toggleEnabled.setId("toggle-enabled");
         toggleEnabled.addClickListener(

@@ -46,14 +46,6 @@ public class NumberFieldPage extends Div {
                 event -> numberField.setReadOnly(!numberField.isReadOnly()));
         add(button);
 
-        NativeButton required = new NativeButton(
-                "Set/unset field required property");
-        required.setId("required");
-        required.addClickListener(
-                event -> numberField.setRequiredIndicatorVisible(
-                        !numberField.isRequiredIndicatorVisible()));
-        add(required);
-
         NativeButton enabled = new NativeButton(
                 "Set/unset field enabled property");
         enabled.setId("disabled");

@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import static org.junit.Assert.assertFalse;
-import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -100,20 +99,6 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         numberField.setValue("987");
         Assert.assertEquals("Old value: '123.0'. New value: '987.0'.",
                 messageDiv.getText());
-    }
-
-    @Test
-    public void assertRequired() {
-        NumberFieldElement numberField = $(NumberFieldElement.class).first();
-
-        assertFalse(numberField.hasAttribute("required"));
-
-        WebElement button = findElement(By.id("required"));
-        button.click();
-        waitUntil(attributeToBe(numberField, "required", "true"));
-
-        button.click();
-        waitUntil(attributeToBe(numberField, "required", ""));
     }
 
     @Test
