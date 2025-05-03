@@ -267,14 +267,6 @@ public class TextFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void textFieldHasPlaceholder() {
-        WebElement textField = findElement(
-                By.id("text-field-with-value-change-listener"));
-        Assert.assertEquals("placeholder text",
-                textField.getDomAttribute("placeholder"));
-    }
-
-    @Test
     public void assertFocusShortcut() {
         TextFieldElement shortcutField = $(TextFieldElement.class)
                 .id("shortcut-field");

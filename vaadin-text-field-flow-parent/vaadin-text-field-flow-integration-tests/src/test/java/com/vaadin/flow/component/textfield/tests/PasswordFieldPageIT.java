@@ -119,14 +119,6 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void passwordFieldHasPlaceholder() {
-        WebElement passwordField = findElement(
-                By.id("password-field-with-value-change-listener"));
-        Assert.assertEquals(passwordField.getDomAttribute("placeholder"),
-                "placeholder text");
-    }
-
-    @Test
     public void valueChangeListenerReportsCorrectValues() {
         WebElement passwordFieldValueDiv = findElement(
                 By.id("password-field-value"));

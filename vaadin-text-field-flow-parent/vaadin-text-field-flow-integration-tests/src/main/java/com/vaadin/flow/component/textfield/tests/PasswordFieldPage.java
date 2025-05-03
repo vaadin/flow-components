@@ -82,7 +82,6 @@ public class PasswordFieldPage extends Div {
 
         PasswordField passwordField = new PasswordField();
         passwordField.setLabel("Password field label");
-        passwordField.setPlaceholder("placeholder text");
         passwordField.addValueChangeListener(event -> message.setText(
                 String.format("Password field value changed from '%s' to '%s'",
                         event.getOldValue(), event.getValue())));
