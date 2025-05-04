@@ -499,7 +499,13 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       // Update the items in the grid cache or set an array of undefined items
       // to remove the page from the grid cache if there are no corresponding items
       // in the connector cache.
-      gridCache.setPage(page, items || Array.from({ length: grid.pageSize }));
+      gridCache.setPage(page, items);
+
+      items.forEach((item, i) => {
+        if (!item) {
+          gridCache.removeSubCache(page * grid.pageSize + i);
+        }
+      });
     }
   };
 
@@ -611,9 +617,9 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // IE11 doesn't work with the transpiled version of the forEach.
     let keys = Object.keys(pagesToUpdate);
     for (let i = 0; i < keys.length; i++) {
-      let pageToUpdate = pagesToUpdate[keys[i]];
-      const updatedItems = cache[pageToUpdate.parentKey][pageToUpdate.page];
-      updateGridCache(pageToUpdate.page, pageToUpdate.parentKey, updatedItems);
+      const { parentKey, page } = pagesToUpdate[keys[i]];
+      const updatedItems = cache[parentKey][page];
+      updateGridCache(page, parentKey, updatedItems || Array.from({ length: grid.pageSize }));
       if (updatedItems) {
         itemsUpdated(updatedItems);
         updateGridItemsInDomBasedOnCache(updatedItems);
@@ -714,18 +720,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       grid.$connector.doDeselection(items.filter((item) => selectedKeys[item.key]));
       items.forEach((item) => grid.closeItemDetails(item));
       delete cache[pkey][page];
-      updateGridCache(page, pkey, cache[pkey][page]);
+      updateGridCache(page, pkey, Array.from({ length: grid.pageSize }));
       updateGridItemsInDomBasedOnCache(items);
-    }
-    let cacheToClear = dataProviderController.rootCache;
-    if (parentKey) {
-      const parentItem = createEmptyItemFromKey(pkey);
-      cacheToClear = dataProviderController.getItemSubCache(parentItem);
-    }
-    const endIndex = index + updatedPageCount * grid.pageSize;
-    for (let itemIndex = index; itemIndex < endIndex; itemIndex++) {
-      delete cacheToClear.items[itemIndex];
-      cacheToClear.removeSubCache(itemIndex);
     }
     updateGridFlatSize();
   };
