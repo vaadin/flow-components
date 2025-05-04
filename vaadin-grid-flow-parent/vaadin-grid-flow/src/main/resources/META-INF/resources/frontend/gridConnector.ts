@@ -598,7 +598,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
    * @param updatedItems the updated items array
    */
   grid.$connector.updateHierarchicalData = function (updatedItems) {
-    let pagesToUpdate = [];
+    let pagesToUpdate = {};
     // locate and update the items in cache
     // find pages that need updating
     for (let i = 0; i < updatedItems.length; i++) {
@@ -619,8 +619,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     for (let i = 0; i < keys.length; i++) {
       const { parentKey, page } = pagesToUpdate[keys[i]];
       const updatedItems = cache[parentKey][page];
-      updateGridCache(page, parentKey, updatedItems || Array.from({ length: grid.pageSize }));
       if (updatedItems) {
+        updateGridCache(page, parentKey, updatedItems);
         itemsUpdated(updatedItems);
         updateGridItemsInDomBasedOnCache(updatedItems);
       }
