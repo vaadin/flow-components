@@ -488,8 +488,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
    * @param parentKey the key of the parent item for the page
    * @returns an array of the updated items for the page, or undefined if no items were cached for the page
    */
-  const updateGridCache = function (page, parentKey = root) {
-    const items = cache[parentKey][page];
+  const updateGridCache = function (page, parentKey, items = cache[parentKey][page]) {
     const parentItem = createEmptyItemFromKey(parentKey);
 
     let gridCache =
@@ -567,10 +566,10 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       grid.$connector.doSelection(slice.filter((item) => item.selected));
       grid.$connector.doDeselection(slice.filter((item) => !item.selected && selectedKeys[item.key]));
 
-      const updatedItems = updateGridCache(page, pkey);
-      if (updatedItems) {
-        itemsUpdated(updatedItems);
-        updateGridItemsInDomBasedOnCache(updatedItems);
+      updateGridCache(page, pkey, slice);
+      if (slice) {
+        itemsUpdated(slice);
+        updateGridItemsInDomBasedOnCache(slice);
       }
     }
   };
