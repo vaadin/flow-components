@@ -488,7 +488,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
    * @param parentKey the key of the parent item for the page
    * @returns an array of the updated items for the page, or undefined if no items were cached for the page
    */
-  const updateGridCache = function (page, parentKey, items = cache[parentKey][page]) {
+  const updateGridCache = function (page, parentKey, items) {
     const parentItem = createEmptyItemFromKey(parentKey);
 
     let gridCache =
@@ -501,8 +501,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       // in the connector cache.
       gridCache.setPage(page, items || Array.from({ length: grid.pageSize }));
     }
-
-    return items;
   };
 
   /**
@@ -614,10 +612,11 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     let keys = Object.keys(pagesToUpdate);
     for (let i = 0; i < keys.length; i++) {
       let pageToUpdate = pagesToUpdate[keys[i]];
-      const affectedUpdatedItems = updateGridCache(pageToUpdate.page, pageToUpdate.parentKey);
-      if (affectedUpdatedItems) {
-        itemsUpdated(affectedUpdatedItems);
-        updateGridItemsInDomBasedOnCache(affectedUpdatedItems);
+      const updatedItems = cache[pageToUpdate.parentKey][pageToUpdate.page];
+      updateGridCache(pageToUpdate.page, pageToUpdate.parentKey, updatedItems);
+      if (updatedItems) {
+        itemsUpdated(updatedItems);
+        updateGridItemsInDomBasedOnCache(updatedItems);
       }
     }
   };
@@ -715,7 +714,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       grid.$connector.doDeselection(items.filter((item) => selectedKeys[item.key]));
       items.forEach((item) => grid.closeItemDetails(item));
       delete cache[pkey][page];
-      updateGridCache(page, parentKey);
+      updateGridCache(page, pkey, cache[pkey][page]);
       updateGridItemsInDomBasedOnCache(items);
     }
     let cacheToClear = dataProviderController.rootCache;
