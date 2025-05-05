@@ -477,6 +477,7 @@ public class TimePicker
      *
      * @return <code>true</code> if the input element's value is populated,
      *         <code>false</code> otherwise
+     * @deprecated Since v24.8
      */
     @Deprecated(since = "24.8")
     protected boolean isInputValuePresent() {
