@@ -1265,7 +1265,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     private class DetailsManager extends AbstractGridExtension<T> {
 
-        private final HashMap<Object, T> detailsVisible = new LinkedHashMap<>();
+        private final HashMap<Object, T> detailsVisible = new HashMap<>();
 
         /**
          * Constructs a new details manager for the given grid.
