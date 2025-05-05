@@ -27,6 +27,7 @@ import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
 
@@ -55,6 +56,7 @@ public class BasicValidationTest
         testField.setI18n(new DateTimePicker.DateTimePickerI18n()
                 .setBadInputErrorMessage(errorMessage));
         getDatePicker().getElement().setProperty("_inputElementValue", "foo");
+        fireDomEvent("unparsable-change", getDatePicker().getElement());
         fireUnparsableChangeDomEvent();
         Assert.assertEquals(errorMessage, testField.getErrorMessage());
     }
@@ -65,6 +67,7 @@ public class BasicValidationTest
         testField.setI18n(new DateTimePicker.DateTimePickerI18n()
                 .setBadInputErrorMessage(errorMessage));
         getTimePicker().getElement().setProperty("_inputElementValue", "foo");
+        fireDomEvent("unparsable-change", getTimePicker().getElement());
         fireUnparsableChangeDomEvent();
         Assert.assertEquals(errorMessage, testField.getErrorMessage());
     }
@@ -120,9 +123,9 @@ public class BasicValidationTest
     public void required_validate_emptyErrorMessageDisplayed() {
         testField.setRequiredIndicatorVisible(true);
         testField.setValue(LocalDateTime.now());
-        fireValueProgrammaticallySetDomEvent();
+        fireChangeDomEvent();
         testField.setValue(null);
-        fireValueProgrammaticallySetDomEvent();
+        fireChangeDomEvent();
         Assert.assertEquals("", testField.getErrorMessage());
     }
 
@@ -132,9 +135,9 @@ public class BasicValidationTest
         testField.setI18n(new DateTimePicker.DateTimePickerI18n()
                 .setRequiredErrorMessage("Field is required"));
         testField.setValue(LocalDateTime.now());
-        fireValueProgrammaticallySetDomEvent();
+        fireChangeDomEvent();
         testField.setValue(null);
-        fireValueProgrammaticallySetDomEvent();
+        fireChangeDomEvent();
         Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
@@ -142,7 +145,7 @@ public class BasicValidationTest
     public void min_validate_emptyErrorMessageDisplayed() {
         testField.setMin(LocalDateTime.now());
         testField.setValue(LocalDateTime.now().minusDays(1));
-        fireValueProgrammaticallySetDomEvent();
+        fireChangeDomEvent();
         Assert.assertEquals("", testField.getErrorMessage());
     }
 
@@ -152,7 +155,7 @@ public class BasicValidationTest
         testField.setI18n(new DateTimePicker.DateTimePickerI18n()
                 .setMinErrorMessage("Value is too small"));
         testField.setValue(LocalDateTime.now().minusDays(1));
-        fireValueProgrammaticallySetDomEvent();
+        fireChangeDomEvent();
         Assert.assertEquals("Value is too small", testField.getErrorMessage());
     }
 
@@ -160,7 +163,7 @@ public class BasicValidationTest
     public void max_validate_emptyErrorMessageDisplayed() {
         testField.setMax(LocalDateTime.now());
         testField.setValue(LocalDateTime.now().plusDays(1));
-        fireValueProgrammaticallySetDomEvent();
+        fireChangeDomEvent();
         Assert.assertEquals("", testField.getErrorMessage());
     }
 
@@ -170,7 +173,7 @@ public class BasicValidationTest
         testField.setI18n(new DateTimePicker.DateTimePickerI18n()
                 .setMaxErrorMessage("Value is too big"));
         testField.setValue(LocalDateTime.now().plusDays(1));
-        fireValueProgrammaticallySetDomEvent();
+        fireChangeDomEvent();
         Assert.assertEquals("Value is too big", testField.getErrorMessage());
     }
 
@@ -181,9 +184,9 @@ public class BasicValidationTest
                 .setRequiredErrorMessage("Field is required"));
         testField.setErrorMessage("Custom error message");
         testField.setValue(LocalDateTime.now());
-        fireValueProgrammaticallySetDomEvent();
+        fireChangeDomEvent();
         testField.setValue(null);
-        fireValueProgrammaticallySetDomEvent();
+        fireChangeDomEvent();
         Assert.assertEquals("Custom error message",
                 testField.getErrorMessage());
     }
@@ -195,14 +198,14 @@ public class BasicValidationTest
                 .setRequiredErrorMessage("Field is required"));
         testField.setErrorMessage("Custom error message");
         testField.setValue(LocalDateTime.now());
-        fireValueProgrammaticallySetDomEvent();
+        fireChangeDomEvent();
         testField.setValue(null);
-        fireValueProgrammaticallySetDomEvent();
+        fireChangeDomEvent();
         testField.setErrorMessage("");
         testField.setValue(LocalDateTime.now());
-        fireValueProgrammaticallySetDomEvent();
+        fireChangeDomEvent();
         testField.setValue(null);
-        fireValueProgrammaticallySetDomEvent();
+        fireChangeDomEvent();
         Assert.assertEquals("Field is required", testField.getErrorMessage());
     }
 
@@ -226,18 +229,17 @@ public class BasicValidationTest
         return (TimePicker) SlotUtils.getChildInSlot(testField, "time-picker");
     }
 
+    private void fireChangeDomEvent() {
+        fireDomEvent("change", testField.getElement());
+    }
+
     private void fireUnparsableChangeDomEvent() {
-        fireDomEvent("unparsable-change");
+        fireDomEvent("unparsable-change", testField.getElement());
     }
 
-    private void fireValueProgrammaticallySetDomEvent() {
-        fireDomEvent("value-programmatically-set");
-    }
-
-    private void fireDomEvent(String eventType) {
-        var domEvent = new DomEvent(testField.getElement(), eventType,
-                Json.createObject());
-        testField.getElement().getNode().getFeature(ElementListenerMap.class)
+    private void fireDomEvent(String eventType, Element element) {
+        var domEvent = new DomEvent(element, eventType, Json.createObject());
+        element.getNode().getFeature(ElementListenerMap.class)
                 .fireEvent(domEvent);
     }
 }
