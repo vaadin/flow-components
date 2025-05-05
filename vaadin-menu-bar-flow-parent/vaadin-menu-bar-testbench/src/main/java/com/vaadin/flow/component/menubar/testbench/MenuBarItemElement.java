@@ -35,7 +35,7 @@ public class MenuBarItemElement extends TestBenchElement {
         waitForSubMenu();
         return getPropertyElement("__overlay");
     }
-    
+
     /**
      * Get TestBenchElements representing sub menu items under this item.
      *
