@@ -39,7 +39,7 @@ public class MenuBarButtonElement extends TestBenchElement {
     /**
      * Get TestBenchElements representing sub menu items under this button.
      *
-     * @return List of TestBenchElements representing sub menu items.
+     * @return List of MenuBarItemElement representing sub menu items.
      */
     public List<MenuBarItemElement> getSubMenuItems() {
         return getSubMenu().$(MenuBarItemElement.class).all();
