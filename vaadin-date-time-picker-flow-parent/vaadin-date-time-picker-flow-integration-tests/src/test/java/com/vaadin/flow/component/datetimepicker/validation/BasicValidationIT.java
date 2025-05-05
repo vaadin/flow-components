@@ -524,9 +524,9 @@ public class BasicValidationIT
     }
 
     @Test
-    public void clearAndSetValueProgrammatically_fieldValidatedOnce() {
+    public void clearAndSetValueProgrammatically_fieldValidatedTwice() {
         clickElementWithJs(CLEAR_AND_SET_VALUE_PROGRAMMATICALLY);
-        assertValidationCount(1);
+        assertValidationCount(2);
     }
 
     private void setFieldInvalid() {
@@ -545,6 +545,7 @@ public class BasicValidationIT
 
     private void clearInputValue() {
         dateInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
+        dateInput.sendKeys(Keys.TAB);
         timeInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
         timeInput.sendKeys(Keys.ENTER);
     }
