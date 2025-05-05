@@ -31,8 +31,6 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-date-picker/date-picker-test")
 public class DatePickerIT extends AbstractComponentIT {
 
-    private static final String DATEPICKER_OVERLAY = "vaadin-date-picker-overlay";
-
     @Before
     public void init() {
         open();
