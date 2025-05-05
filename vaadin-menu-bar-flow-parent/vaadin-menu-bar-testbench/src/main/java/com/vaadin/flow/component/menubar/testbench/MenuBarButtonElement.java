@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.menubar.testbench;
 
+import java.util.List;
+
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.vaadin.testbench.TestBenchElement;
