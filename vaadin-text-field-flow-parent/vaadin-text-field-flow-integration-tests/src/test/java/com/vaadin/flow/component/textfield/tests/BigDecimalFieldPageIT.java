@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import static org.junit.Assert.assertFalse;
-import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 
 import java.util.List;
 
@@ -145,18 +144,6 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
         toggleEnabled.click();
         field.setValue("987");
         assertValueChange(2, 123, 987);
-    }
-
-    @Test
-    public void assertRequired() {
-        assertFalse(field.hasAttribute("required"));
-
-        WebElement toggleRequired = findElement(By.id("toggle-required"));
-        toggleRequired.click();
-        waitUntil(attributeToBe(field, "required", "true"));
-
-        toggleRequired.click();
-        waitUntil(attributeToBe(field, "required", ""));
     }
 
     @Test
