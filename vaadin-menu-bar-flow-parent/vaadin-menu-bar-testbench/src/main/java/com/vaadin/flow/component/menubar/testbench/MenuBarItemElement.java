@@ -35,6 +35,15 @@ public class MenuBarItemElement extends TestBenchElement {
         waitForSubMenu();
         return getPropertyElement("__overlay");
     }
+    
+    /**
+     * Get TestBenchElements representing sub menu items under this item.
+     *
+     * @return List of MenuBarItemElement representing sub menu items.
+     */
+    public List<MenuBarItemElement> getSubMenuItems() {
+        return getSubMenu().$(MenuBarItemElement.class).all();
+    }
 
     /**
      * Check if the item has open sub menu.
