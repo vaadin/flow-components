@@ -74,7 +74,7 @@ public class MenuBarElement extends TestBenchElement {
      * Get TestBenchElements representing sub menu items under the first sub
      * menu.
      *
-     * @return List of TestBenchElements representing sub menu items.
+     * @return List of MenuBarItemElement representing sub menu items.
      */
     public List<MenuBarItemElement> getSubMenuItems() {
         return getSubMenuItems(getSubMenu());
@@ -86,7 +86,7 @@ public class MenuBarElement extends TestBenchElement {
      *
      * @param overlay
      *            The sub menu overlay from which items are being collected.
-     * @return List of TestBenchElements representing sub menu items.
+     * @return List of MenuBarItemElement representing sub menu items.
      */
     public List<MenuBarItemElement> getSubMenuItems(TestBenchElement overlay) {
         return overlay.$(MenuBarItemElement.class).all();
