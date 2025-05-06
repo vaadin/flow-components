@@ -100,10 +100,7 @@ public class MenuBarElement extends TestBenchElement {
     public TestBenchElement getSubMenu() {
         var button = $(MenuBarButtonElement.class).withAttribute("expanded")
                 .withCondition(this::isVisible).first();
-        if (button == null) {
-            return null;
-        }
-        return button.getSubMenu();
+        return button != null ? button.getSubMenu() : null;
     }
 
     /**
