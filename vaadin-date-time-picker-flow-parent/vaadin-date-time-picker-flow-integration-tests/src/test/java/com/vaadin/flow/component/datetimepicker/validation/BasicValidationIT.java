@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.datetimepicker.validation;
 
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.BAD_INPUT_ERROR_MESSAGE;
-import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.CLEAR_AND_SET_VALUE_PROGRAMMATICALLY;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.CLEAR_VALUE_BUTTON;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.INCOMPLETE_INPUT_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.MAX_ERROR_MESSAGE;
@@ -25,7 +24,6 @@ import static com.vaadin.flow.component.datetimepicker.validation.BasicValidatio
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.MIN_INPUT;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.REQUIRED_BUTTON;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.REQUIRED_ERROR_MESSAGE;
-import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.SET_VALUE_PROGRAMMATICALLY;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -515,18 +513,6 @@ public class BasicValidationIT
         $("input").id(MAX_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
         setInputValue(dateInput, "3/3/2000");
         assertValidationCount(1);
-    }
-
-    @Test
-    public void setValueProgrammatically_fieldValidatedOnce() {
-        clickElementWithJs(SET_VALUE_PROGRAMMATICALLY);
-        assertValidationCount(1);
-    }
-
-    @Test
-    public void clearAndSetValueProgrammatically_fieldValidatedTwice() {
-        clickElementWithJs(CLEAR_AND_SET_VALUE_PROGRAMMATICALLY);
-        assertValidationCount(2);
     }
 
     private void setFieldInvalid() {

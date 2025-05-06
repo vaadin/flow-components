@@ -18,6 +18,7 @@ package com.vaadin.flow.component.datetimepicker.validation;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -216,6 +217,23 @@ public class BasicValidationTest
         Assert.assertTrue(getTimePicker().isInvalid());
     }
 
+    @Test
+    public void setValueProgrammatically_fieldValidatedOnce() {
+        var dateTimePicker = new TestDateTimePicker();
+        dateTimePicker.setValue(LocalDateTime.now());
+        Assert.assertEquals(1, dateTimePicker.getValidationCount());
+    }
+
+    @Test
+    public void clearValueProgrammatically_fieldValidatedOnce() {
+        var dateTimePicker = new TestDateTimePicker();
+        dateTimePicker.setValue(LocalDateTime.now());
+        var validationCount = dateTimePicker.getValidationCount();
+        dateTimePicker.setValue(null);
+        Assert.assertEquals(validationCount + 1,
+                dateTimePicker.getValidationCount());
+    }
+
     @Override
     protected DateTimePicker createTestField() {
         return new DateTimePicker();
@@ -241,5 +259,19 @@ public class BasicValidationTest
         var domEvent = new DomEvent(element, eventType, Json.createObject());
         element.getNode().getFeature(ElementListenerMap.class)
                 .fireEvent(domEvent);
+    }
+
+    private class TestDateTimePicker extends DateTimePicker {
+        private final AtomicInteger validationCount = new AtomicInteger(0);
+
+        @Override
+        protected void validate() {
+            super.validate();
+            validationCount.incrementAndGet();
+        }
+
+        public int getValidationCount() {
+            return validationCount.get();
+        }
     }
 }
