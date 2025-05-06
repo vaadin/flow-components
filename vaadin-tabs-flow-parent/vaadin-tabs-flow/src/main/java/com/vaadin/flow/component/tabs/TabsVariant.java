@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,10 +19,13 @@ package com.vaadin.flow.component.tabs;
  * Set of theme variants applicable for {@code vaadin-tabs} component.
  */
 public enum TabsVariant {
-    LUMO_ICON_ON_TOP("icon-on-top"), LUMO_CENTERED("centered"), LUMO_SMALL(
-            "small"), LUMO_MINIMAL("minimal"), LUMO_HIDE_SCROLL_BUTTONS(
-                    "hide-scroll-buttons"), LUMO_EQUAL_WIDTH_TABS(
-                            "equal-width-tabs"), MATERIAL_FIXED("fixed");
+    LUMO_ICON_ON_TOP("icon-on-top"),
+    LUMO_CENTERED("centered"),
+    LUMO_SMALL("small"),
+    LUMO_MINIMAL("minimal"),
+    LUMO_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
+    LUMO_EQUAL_WIDTH_TABS("equal-width-tabs"),
+    MATERIAL_FIXED("fixed");
 
     private final String variant;
 

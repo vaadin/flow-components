@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,13 +15,6 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.flow.component.HasValue;
-import elemental.json.JsonArray;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -29,6 +22,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.component.HasValue;
+
+import elemental.json.JsonArray;
 
 public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
     @Override
@@ -261,4 +263,70 @@ public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
         Assert.assertEquals("Four", valueAsList.get(2));
     }
 
+    @Test
+    public void setSelectedItemsOnTop() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+
+        Assert.assertFalse(comboBox.isSelectedItemsOnTop());
+        Assert.assertFalse(
+                comboBox.getElement().getProperty("selectedItemsOnTop", false));
+
+        comboBox.setSelectedItemsOnTop(true);
+
+        Assert.assertTrue(comboBox.isSelectedItemsOnTop());
+        Assert.assertTrue(
+                comboBox.getElement().getProperty("selectedItemsOnTop", true));
+    }
+
+    @Test
+    public void setAutoExpand_propertiesAreSet() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+
+        // NONE
+        Assert.assertEquals(MultiSelectComboBox.AutoExpandMode.NONE,
+                comboBox.getAutoExpand());
+        Assert.assertFalse(comboBox.getElement()
+                .getProperty("autoExpandHorizontally", false));
+        Assert.assertFalse(comboBox.getElement()
+                .getProperty("autoExpandVertically", false));
+
+        // HORIZONTAL
+        comboBox.setAutoExpand(MultiSelectComboBox.AutoExpandMode.HORIZONTAL);
+
+        Assert.assertTrue(comboBox.getElement()
+                .getProperty("autoExpandHorizontally", true));
+        Assert.assertFalse(comboBox.getElement()
+                .getProperty("autoExpandVertically", false));
+
+        // VERTICAL
+        comboBox.setAutoExpand(MultiSelectComboBox.AutoExpandMode.VERTICAL);
+
+        Assert.assertFalse(comboBox.getElement()
+                .getProperty("autoExpandHorizontally", false));
+        Assert.assertTrue(comboBox.getElement()
+                .getProperty("autoExpandVertically", true));
+
+        // BOTH
+        comboBox.setAutoExpand(MultiSelectComboBox.AutoExpandMode.BOTH);
+
+        Assert.assertTrue(comboBox.getElement()
+                .getProperty("autoExpandHorizontally", true));
+        Assert.assertTrue(comboBox.getElement()
+                .getProperty("autoExpandVertically", true));
+    }
+
+    @Test
+    public void setKeepFilter() {
+        MultiSelectComboBox<String> comboBox = new MultiSelectComboBox<>();
+
+        Assert.assertFalse(comboBox.isKeepFilter());
+        Assert.assertFalse(
+                comboBox.getElement().getProperty("keepFilter", false));
+
+        comboBox.setKeepFilter(true);
+
+        Assert.assertTrue(comboBox.isKeepFilter());
+        Assert.assertTrue(
+                comboBox.getElement().getProperty("keepFilter", true));
+    }
 }

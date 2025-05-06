@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * license.
+ */
 package com.vaadin.flow.component.gridpro.tests;
 
 import java.util.ArrayList;
@@ -43,8 +51,10 @@ public class MainView extends VerticalLayout {
         mapLists(personList, cityList);
         grid.setItems(personList);
 
-        grid.addCellEditStartedListener(
-                e -> eventsPanel.add(e.getItem().toString()));
+        grid.addCellEditStartedListener(e -> eventsPanel
+                .add("CellEditStarted - " + e.getItem().toString()));
+        grid.addItemPropertyChangedListener(e -> eventsPanel
+                .add("ItemPropertyChanged - " + e.getItem().toString()));
 
         grid.addColumn(Person::getAge).setHeader("Age");
 

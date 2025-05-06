@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,13 +13,14 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.tabs;
 
 import java.io.Serializable;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Stream;
+
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
@@ -77,8 +78,19 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
      */
     public Tabs() {
         setSelectedIndex(-1);
-        getElement().addPropertyChangeListener(SELECTED,
-                event -> updateSelectedTab(event.isUserOriginated()));
+        getElement().addPropertyChangeListener(SELECTED, event -> {
+            int oldIndex = selectedTab != null ? indexOf(selectedTab) : -1;
+            int newIndex = getSelectedIndex();
+            if (newIndex >= getComponentCount()) {
+                LoggerFactory.getLogger(getClass()).warn(String.format(
+                        "The selected index is out of range: %d. Reverting to the previous index: %d.",
+                        newIndex, oldIndex));
+                setSelectedIndex(oldIndex);
+                return;
+            }
+
+            updateSelectedTab(event.isUserOriginated());
+        });
     }
 
     /**
@@ -484,7 +496,8 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
             return;
         }
 
-        if (currentlySelected == null || currentlySelected.isEnabled()) {
+        if (currentlySelected == null
+                || currentlySelected.getElement().getNode().isEnabledSelf()) {
             selectedTab = currentlySelected;
             getChildren().filter(Tab.class::isInstance).map(Tab.class::cast)
                     .forEach(tab -> tab.setSelected(false));
@@ -502,7 +515,7 @@ public class Tabs extends GeneratedVaadinTabs<Tabs>
     }
 
     private void updateEnabled(Tab tab) {
-        boolean enabled = tab.isEnabled();
+        boolean enabled = tab.getElement().getNode().isEnabledSelf();
         Serializable rawValue = tab.getElement().getPropertyRaw("disabled");
         if (rawValue instanceof Boolean) {
             // convert the boolean value to a String to force update the

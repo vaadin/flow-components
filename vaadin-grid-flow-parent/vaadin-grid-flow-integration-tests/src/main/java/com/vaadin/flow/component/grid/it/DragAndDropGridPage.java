@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -45,6 +45,7 @@ public class DragAndDropGridPage extends Div {
         grid.setItems(items);
         grid.setId("grid");
         grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setDropMode(GridDropMode.BETWEEN);
 
         grid.setRowsDraggable(true);
 
@@ -106,6 +107,11 @@ public class DragAndDropGridPage extends Div {
             button.setId(mode.toString());
             add(button);
         });
+
+        NativeButton noDropMode = new NativeButton("No drop mode",
+                e -> grid.setDropMode(null));
+        noDropMode.setId("no-drop-mode");
+        add(noDropMode);
 
         NativeButton setGeneratorsButton = new NativeButton("set generators",
                 e -> {

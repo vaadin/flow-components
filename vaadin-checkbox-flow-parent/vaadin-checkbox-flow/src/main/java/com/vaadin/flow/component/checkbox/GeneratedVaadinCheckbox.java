@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -120,10 +120,10 @@ import com.vaadin.flow.shared.Registration;
  */
 @Deprecated
 @Tag("vaadin-checkbox")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/checkbox", version = "23.3.8")
-@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "23.3.8")
+@NpmPackage(value = "@vaadin/checkbox", version = "23.5.12")
+@NpmPackage(value = "@vaadin/vaadin-checkbox", version = "23.5.12")
 @JsModule("@vaadin/checkbox/src/vaadin-checkbox.js")
 public abstract class GeneratedVaadinCheckbox<R extends GeneratedVaadinCheckbox<R, T>, T>
         extends AbstractSinglePropertyField<R, T>

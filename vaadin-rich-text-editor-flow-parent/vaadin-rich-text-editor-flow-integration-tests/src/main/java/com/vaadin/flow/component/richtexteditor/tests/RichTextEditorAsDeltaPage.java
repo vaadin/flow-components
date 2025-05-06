@@ -1,4 +1,16 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * license.
+ */
 package com.vaadin.flow.component.richtexteditor.tests;
+
+import java.io.Serializable;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
@@ -10,10 +22,6 @@ import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.router.Route;
-
-import java.io.Serializable;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Route(value = "vaadin-rich-text-editor/as-delta")
 public class RichTextEditorAsDeltaPage extends VerticalLayout {

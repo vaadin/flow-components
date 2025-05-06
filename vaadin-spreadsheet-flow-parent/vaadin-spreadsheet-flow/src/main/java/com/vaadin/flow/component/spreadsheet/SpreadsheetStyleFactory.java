@@ -1,14 +1,12 @@
-package com.vaadin.flow.component.spreadsheet;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
+package com.vaadin.flow.component.spreadsheet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -60,10 +58,14 @@ public class SpreadsheetStyleFactory implements Serializable {
      * @author Vaadin Ltd.
      */
     public enum BorderStyle {
-        SOLID_THIN("solid", 1, 1), DOTTED_THIN("dotted", 1, 1), DASHED_THIN(
-                "dashed", 1, 1), SOLID_MEDIUM("solid", 2, 2), DASHED_MEDIUM(
-                        "dashed", 2, 2), SOLID_THICK("solid", 3,
-                                4), DOUBLE("double", 3, 4), NONE("none", 0, 0);
+        SOLID_THIN("solid", 1, 1),
+        DOTTED_THIN("dotted", 1, 1),
+        DASHED_THIN("dashed", 1, 1),
+        SOLID_MEDIUM("solid", 2, 2),
+        DASHED_MEDIUM("dashed", 2, 2),
+        SOLID_THICK("solid", 3, 4),
+        DOUBLE("double", 3, 4),
+        NONE("none", 0, 0);
 
         private final int size;
         private final String borderStyle;

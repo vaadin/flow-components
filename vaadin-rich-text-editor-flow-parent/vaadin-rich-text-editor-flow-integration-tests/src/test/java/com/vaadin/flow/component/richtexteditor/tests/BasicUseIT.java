@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * license.
+ */
 package com.vaadin.flow.component.richtexteditor.tests;
 
 import org.junit.Assert;
@@ -174,6 +182,19 @@ public class BasicUseIT extends AbstractParallelTest {
             return getLastRteTemplateValue()
                     .equals("[{\"insert\":\"Bar\\n\"}]");
         });
+    }
+
+    @Test
+    public void eagerRichTextEditor_triggerValueChangeTwice_producesCorrectHtml() {
+        RichTextEditorElement eagerRte = $(RichTextEditorElement.class)
+                .id("eager-rte");
+        TestBenchElement valuePanel = $("div").id("eager-rte-value-panel");
+
+        eagerRte.getEditor().sendKeys("a");
+        waitUntil(driver -> "<p>a</p>".equals(valuePanel.getText()));
+
+        eagerRte.getEditor().sendKeys("b");
+        waitUntil(driver -> "<p>ab</p>".equals(valuePanel.getText()));
     }
 
     private ButtonElement getTestButton(String id) {

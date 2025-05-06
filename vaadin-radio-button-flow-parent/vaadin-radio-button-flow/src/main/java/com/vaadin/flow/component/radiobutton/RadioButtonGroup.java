@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,9 +35,9 @@ import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.data.binder.HasItemComponents;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.provider.DataChangeEvent;
@@ -68,8 +68,8 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @SuppressWarnings("deprecation")
-@NpmPackage(value = "@vaadin/radio-group", version = "23.3.8")
-@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.3.8")
+@NpmPackage(value = "@vaadin/radio-group", version = "23.5.12")
+@NpmPackage(value = "@vaadin/vaadin-radio-button", version = "23.5.12")
 public class RadioButtonGroup<T>
         extends GeneratedVaadinRadioGroup<RadioButtonGroup<T>, T>
         implements HasItemComponents<T>, SingleSelect<RadioButtonGroup<T>, T>,
@@ -573,9 +573,15 @@ public class RadioButtonGroup<T>
             // Ignore new size requests unless the last one has been executed
             // so as to avoid multiple beforeClientResponses.
             if (sizeRequest == null) {
-                sizeRequest = ui -> {
-                    fireSizeEvent();
-                    sizeRequest = null;
+                // Using anonymous class to fix serialization issue:
+                // https://github.com/vaadin/flow-components/issues/6555
+                // Do not replace with lambda
+                sizeRequest = new SerializableConsumer<>() {
+                    @Override
+                    public void accept(UI ui) {
+                        fireSizeEvent();
+                        sizeRequest = null;
+                    }
                 };
                 // Size event is fired before client response so as to avoid
                 // multiple size change events during server round trips

@@ -1,14 +1,12 @@
-package com.vaadin.flow.component.spreadsheet;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
+package com.vaadin.flow.component.spreadsheet;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,11 +18,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
+import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.spreadsheet.PopupButton.PopupCloseEvent;
 import com.vaadin.flow.component.spreadsheet.PopupButton.PopupCloseListener;

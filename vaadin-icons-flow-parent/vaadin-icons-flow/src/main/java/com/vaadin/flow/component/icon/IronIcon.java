@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,7 +35,7 @@ import com.vaadin.flow.dom.ElementConstants;
  */
 @Tag("iron-icon")
 @NpmPackage(value = "@polymer/iron-icon", version = "3.0.1")
-@NpmPackage(value = "@vaadin/vaadin-icons", version = "23.3.8")
+@NpmPackage(value = "@vaadin/vaadin-icons", version = "23.5.12")
 @JsModule("@polymer/iron-icon/iron-icon.js")
 @Deprecated
 public class IronIcon extends Component

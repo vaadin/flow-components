@@ -1,14 +1,12 @@
-package com.vaadin.flow.component.charts.model;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
+package com.vaadin.flow.component.charts.model;
 
 /**
  * Dash styles used to render lines.
@@ -21,12 +19,17 @@ package com.vaadin.flow.component.charts.model;
  */
 public enum DashStyle implements ChartEnum {
 
-    SOLID("Solid"), SHORTDASH("ShortDash"), SHORTDOT("ShortDot"), SHORTDASHDOT(
-            "ShortDashDot"), SHORTDASHDOTDOT("ShortDashDotDot"), DOT(
-                    "Dot"), DASH("Dash"), LONGDASH("LongDash"), DASHDOT(
-                            "DashDot"), LONGDASHDOT(
-                                    "LongDashDot"), LONGDASHDOTDOT(
-                                            "LongDashDotDot");
+    SOLID("Solid"),
+    SHORTDASH("ShortDash"),
+    SHORTDOT("ShortDot"),
+    SHORTDASHDOT("ShortDashDot"),
+    SHORTDASHDOTDOT("ShortDashDotDot"),
+    DOT("Dot"),
+    DASH("Dash"),
+    LONGDASH("LongDash"),
+    DASHDOT("DashDot"),
+    LONGDASHDOT("LongDashDot"),
+    LONGDASHDOTDOT("LongDashDotDot");
 
     private final String type;
 

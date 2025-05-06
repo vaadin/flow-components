@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.flow.function.SerializableFunction;
-
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+
+import com.vaadin.flow.function.SerializableFunction;
 
 /**
  * Selection model for the {@link MultiSelectComboBox}, which implements the

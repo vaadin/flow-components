@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,10 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.Arrays;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
@@ -25,9 +29,6 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.Route;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Arrays;
 
 @Route("vaadin-grid/item-click-listener")
 public class ItemClickListenerPage extends Div {

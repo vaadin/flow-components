@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.notification.tests;
 
+import javax.annotation.concurrent.NotThreadSafe;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -25,8 +27,6 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
-
-import javax.annotation.concurrent.NotThreadSafe;
 
 @NotThreadSafe
 public class NotificationTest {

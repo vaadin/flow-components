@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-tabs-flow-parent</artifactId>
-        <version>23.3-SNAPSHOT</version>
+        <version>23.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-tabs-flow</artifactId>
     <packaging>jar</packaging>
@@ -45,6 +45,16 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

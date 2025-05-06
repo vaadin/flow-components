@@ -1,28 +1,23 @@
+/*
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.applayout;
 
 import java.io.Serializable;
 import java.util.Locale;
 import java.util.Objects;
-
-/*
- * #%L
- * Vaadin App Layout
- * %%
- * Copyright 2000-2022 Vaadin Ltd.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -56,10 +51,10 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/app-layout", version = "23.3.8")
-@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "23.3.8")
+@NpmPackage(value = "@vaadin/app-layout", version = "23.5.12")
+@NpmPackage(value = "@vaadin/vaadin-app-layout", version = "23.5.12")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors

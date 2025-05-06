@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,13 +27,8 @@ import java.util.stream.Stream;
 
 import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
@@ -44,7 +39,11 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.ClientValidationUtil;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -55,6 +54,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
@@ -578,11 +578,19 @@ public class DatePicker extends GeneratedVaadinDatePicker<DatePicker, LocalDate>
 
         super.setValue(value);
 
+        // Clear the input element from possible bad input.
         if (Objects.equals(oldValue, getEmptyValue())
                 && Objects.equals(value, getEmptyValue())
                 && isInputValuePresent()) {
-            // Clear the input element from possible bad input.
-            getElement().executeJs("this.inputElement.value = ''");
+            // The check for value presence guarantees that a non-empty value
+            // won't get cleared when setValue(null) and setValue(...) are
+            // subsequently called within one round-trip.
+            // Flow only sends the final component value to the client
+            // when you update the value multiple times during a round-trip
+            // and the final value is sent in place of the first one, so
+            // `executeJs` can end up invoked after a non-empty value is set.
+            getElement()
+                    .executeJs("if (!this.value) this.inputElement.value = ''");
             getElement().setProperty("_hasInputValue", false);
             fireEvent(new ClientValidatedEvent(this, false, true));
         }

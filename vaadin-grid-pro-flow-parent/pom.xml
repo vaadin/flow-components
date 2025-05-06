@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-flow-components</artifactId>
-        <version>23.3-SNAPSHOT</version>
+        <version>23.5-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-grid-pro-flow-parent</artifactId>
     <packaging>pom</packaging>
@@ -19,6 +19,9 @@
         <module>vaadin-grid-pro-flow</module>
         <module>vaadin-grid-pro-testbench</module>
     </modules>
+    <properties>
+        <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/vaadin-commercial-license-header.txt</spotless.licence-header>
+    </properties>
     <profiles>
         <profile>
             <id>default</id>

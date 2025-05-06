@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,20 +13,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.tabs.tests;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * @author Vaadin Ltd.
@@ -101,6 +105,41 @@ public class TabsTest {
 
         assertThat("Selected tab is invalid", tabs.getSelectedTab(), is(tab3));
         assertThat("Selected index is invalid", tabs.getSelectedIndex(), is(2));
+    }
+
+    @Test
+    public void selectInvalidIndex_previousIndexIsReverted() {
+        Tab tab = new Tab("Tab");
+        Tabs tabs = new Tabs(tab);
+
+        // Select index out of range
+        tabs.setSelectedIndex(10);
+        Assert.assertEquals(0, tabs.getSelectedIndex());
+
+        // Deselect the active tab
+        tabs.setSelectedIndex(-1);
+        // Select index out of range
+        tabs.setSelectedIndex(10);
+        Assert.assertEquals(-1, tabs.getSelectedIndex());
+    }
+
+    @Test
+    public void selectInvalidIndex_warningIsShown() {
+        Tab tab = new Tab("Tab");
+        Tabs tabs = new Tabs(tab);
+
+        Logger mockedLogger = Mockito.mock(Logger.class);
+        try (MockedStatic<LoggerFactory> context = Mockito
+                .mockStatic(LoggerFactory.class)) {
+            context.when(() -> LoggerFactory.getLogger(Tabs.class))
+                    .thenReturn(mockedLogger);
+
+            // Select index out of range
+            tabs.setSelectedIndex(10);
+
+            Mockito.verify(mockedLogger, Mockito.times(1)).warn(
+                    "The selected index is out of range: 10. Reverting to the previous index: 0.");
+        }
     }
 
     @Test
@@ -192,5 +231,48 @@ public class TabsTest {
         tabs.remove(tab2);
         Assert.assertNull("should not select other tab if current tab removed",
                 tabs.getSelectedTab());
+    }
+
+    @Test
+    public void addTabsToDisabledContainer_reEnable_tabsShouldBeEnabled() {
+        var container = new Div();
+        var tabs = new Tabs();
+        container.add(tabs);
+        var tab1 = new Tab("Tab one");
+        var tab2 = new Tab("Tab two");
+
+        container.setEnabled(false);
+        tabs.add(tab1, tab2);
+        container.setEnabled(true);
+
+        Assert.assertTrue(tab1.isEnabled());
+        Assert.assertTrue(tab2.isEnabled());
+    }
+
+    @Test
+    public void addTabsToDisabledContainer_reEnable_shouldHaveSelectedTab() {
+        var container = new Div();
+        var tabs = new Tabs();
+        container.add(tabs);
+        var tab1 = new Tab("Tab one");
+        var tab2 = new Tab("Tab two");
+
+        container.setEnabled(false);
+        tabs.add(tab1, tab2);
+        container.setEnabled(true);
+
+        Assert.assertEquals(tab1, tabs.getSelectedTab());
+    }
+
+    @Test
+    public void addDisabledTab_shouldNotHaveSelectedTab() {
+        var tabs = new Tabs();
+        var tab1 = new Tab("Tab one");
+
+        tab1.setEnabled(false);
+        tabs.add(tab1);
+        tabs.setSelectedIndex(0);
+
+        Assert.assertEquals(null, tabs.getSelectedTab());
     }
 }

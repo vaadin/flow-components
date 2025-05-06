@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.tabs;
 
 import java.util.HashMap;
@@ -42,7 +41,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabsheet")
-@NpmPackage(value = "@vaadin/tabsheet", version = "23.3.8")
+@NpmPackage(value = "@vaadin/tabsheet", version = "23.5.12")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 public class TabSheet extends Component
         implements HasStyle, HasSize, HasThemeVariant<TabSheetVariant> {

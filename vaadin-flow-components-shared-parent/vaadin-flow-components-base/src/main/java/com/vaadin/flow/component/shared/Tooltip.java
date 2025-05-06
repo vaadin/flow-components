@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -31,7 +31,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  *
  * @author Vaadin Ltd
  */
-@NpmPackage(value = "@vaadin/tooltip", version = "23.3.8")
+@NpmPackage(value = "@vaadin/tooltip", version = "23.5.12")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
 public class Tooltip implements Serializable {
 
@@ -110,14 +110,19 @@ public class Tooltip implements Serializable {
     }
 
     /**
-     * Creates a tooltip to the given {@code Component}.
+     * Creates a tooltip to the given {@code Component} if one hasn't already been created.
      *
      * @param component
      *            the component to attach the tooltip to
      * @return the tooltip handle
      */
     public static Tooltip forComponent(Component component) {
-        return forElement(component.getElement());
+        var tooltip = getForElement(component.getElement());
+        if (tooltip == null) {
+            tooltip = forElement(component.getElement());
+            ComponentUtil.setData(component, TOOLTIP_DATA_KEY, tooltip);
+        }
+        return tooltip;
     }
 
     /**

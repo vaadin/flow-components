@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 
 import com.vaadin.experimental.Feature;
 import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
@@ -36,6 +35,7 @@ import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.component.timepicker.StepsUtil;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
@@ -46,7 +46,7 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
 
 @Tag("vaadin-date-time-picker-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerDatePicker
         extends com.vaadin.flow.component.datepicker.DatePicker {
@@ -73,7 +73,7 @@ class DateTimePickerDatePicker
 }
 
 @Tag("vaadin-date-time-picker-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 class DateTimePickerTimePicker
         extends com.vaadin.flow.component.timepicker.TimePicker {
@@ -109,10 +109,10 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "23.3.8")
-@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "23.3.8")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "23.5.12")
+@NpmPackage(value = "@vaadin/vaadin-date-time-picker", version = "23.5.12")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>

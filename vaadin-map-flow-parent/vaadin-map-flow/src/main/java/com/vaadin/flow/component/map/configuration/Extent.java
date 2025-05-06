@@ -1,18 +1,16 @@
-package com.vaadin.flow.component.map.configuration;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
-
-import com.vaadin.flow.component.map.Map;
+package com.vaadin.flow.component.map.configuration;
 
 import java.io.Serializable;
+
+import com.vaadin.flow.component.map.Map;
 
 /**
  * Defines an area within a map using min/max coordinates. Coordinates must be

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -71,6 +71,24 @@ public class GridViewClickListenersIT extends AbstractComponentIT {
 
         WebElement span = cell.getContext().findElement(By.tagName("span"));
         span.click();
+
+        WebElement clickInfo = findElement(By.id("clicked-item"));
+
+        Assert.assertEquals("", clickInfo.getText());
+    }
+
+    @Test
+    public void itemClickListener_singleClick_focusableElementClickIgnored() {
+        GridElement grid = $(GridElement.class).id("item-click-listener");
+        scrollToElement(grid);
+        waitUntil(driver -> grid.getRowCount() > 0);
+
+        GridTRElement row = grid.getRow(0);
+        GridTHTDElement cell = row.getCell(grid.getColumn("Button"));
+
+        WebElement icon = cell.getContext()
+                .findElement(By.tagName("vaadin-icon"));
+        icon.click();
 
         WebElement clickInfo = findElement(By.id("clicked-item"));
 

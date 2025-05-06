@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.textfield;
 
 import com.vaadin.flow.component.Tag;
@@ -27,10 +26,10 @@ import com.vaadin.flow.function.SerializableFunction;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-integer-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/integer-field", version = "23.3.8")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.3.8")
+@NpmPackage(value = "@vaadin/integer-field", version = "23.5.12")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.5.12")
 @JsModule("@vaadin/integer-field/src/vaadin-integer-field.js")
 public class IntegerField extends AbstractNumberField<IntegerField, Integer> {
 

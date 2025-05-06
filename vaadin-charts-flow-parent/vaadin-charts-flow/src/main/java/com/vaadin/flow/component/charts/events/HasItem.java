@@ -1,14 +1,12 @@
-package com.vaadin.flow.component.charts.events;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
+package com.vaadin.flow.component.charts.events;
 
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.charts.model.AbstractSeriesItem;
@@ -57,8 +55,7 @@ public interface HasItem extends HasSeries {
      * String id = this.getItemId();
      * NodeSeries series = (NodeSeries) this.getSeries();
      * Optional&lt;Node&gt; nodeForId = series.getNodes().stream()
-     *   .filter(node -> node.getId().equals(id))
-     *   .findFirst();
+     *         .filter(node -> node.getId().equals(id)).findFirst();
      * </pre>
      * <p>
      * Only {@link AbstractSeriesItem} and {@link Node} support setting an ID.

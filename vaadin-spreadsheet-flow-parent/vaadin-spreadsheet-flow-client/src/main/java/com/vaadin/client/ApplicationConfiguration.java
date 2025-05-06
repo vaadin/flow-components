@@ -1,17 +1,10 @@
-/*
- * Copyright (C) 2013 - 2022 Vaadin Ltd.
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * This program is available under Vaadin Commercial License and Service Terms.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * license.
  */
 package com.vaadin.client;
 
@@ -21,7 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Handler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -29,7 +21,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.core.client.JsonUtils;
-import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.dom.client.Element;
@@ -46,7 +37,6 @@ import com.vaadin.client.debug.internal.Section;
 import com.vaadin.client.debug.internal.TestBenchSection;
 import com.vaadin.client.debug.internal.VDebugWindow;
 import com.vaadin.client.debug.internal.theme.DebugWindowStyles;
-import com.vaadin.client.event.PointerEventSupport;
 import com.vaadin.client.metadata.NoDataException;
 import com.vaadin.client.metadata.TypeData;
 import com.vaadin.client.ui.UnknownComponentConnector;
@@ -460,17 +450,17 @@ public class ApplicationConfiguration implements EntryPoint {
         jsoConfiguration.getConfig = function(name) {
             return this[name];
         }
-
+    
         jsoConfiguration.rootElement = rootElement;
-
+    
         jsoConfiguration.versionInfo = {
             vaadinVersion: '8.0.0'
         };
-
+    
         jsoConfiguration.theme = 'valo';
-
+    
         $wnd.vaadin.clients = {};
-
+    
         $wnd.vaadin.gwtStatsEvents = false;
      }-*/;
 

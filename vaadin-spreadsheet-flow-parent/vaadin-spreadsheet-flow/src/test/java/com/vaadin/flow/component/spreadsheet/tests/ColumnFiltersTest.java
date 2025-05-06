@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests;
 
 import java.util.Iterator;
@@ -93,6 +101,19 @@ public class ColumnFiltersTest {
 
         Assert.assertTrue(table.getPopupButton(1).isActive());
         Assert.assertFalse(table.getPopupButton(2).isActive());
+    }
+
+    @Test
+    public void loadFile_switchSheets_tablesRegisteredOnce() {
+        Spreadsheet spreadsheet = TestHelper
+                .createSpreadsheet("tables_on_multiple_sheets.xlsx");
+
+        // Go to Sheet2 and back to Sheet1
+        spreadsheet.setActiveSheetIndex(1);
+        spreadsheet.setActiveSheetIndex(0);
+
+        // just 2 tables, one table per sheet
+        Assert.assertEquals(2, spreadsheet.getTables().size());
     }
 
 }

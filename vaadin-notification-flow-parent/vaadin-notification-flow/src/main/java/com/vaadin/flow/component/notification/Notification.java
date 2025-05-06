@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -88,7 +88,15 @@ public class Notification extends GeneratedVaadinNotification<Notification>
      * Enumeration of all available positions for notification component
      */
     public enum Position {
-        TOP_STRETCH, TOP_START, TOP_CENTER, TOP_END, MIDDLE, BOTTOM_START, BOTTOM_CENTER, BOTTOM_END, BOTTOM_STRETCH;
+        TOP_STRETCH,
+        TOP_START,
+        TOP_CENTER,
+        TOP_END,
+        MIDDLE,
+        BOTTOM_START,
+        BOTTOM_CENTER,
+        BOTTOM_END,
+        BOTTOM_STRETCH;
 
         private final String clientName;
 

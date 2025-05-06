@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,8 +22,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the GridPageSizePage view.
@@ -38,6 +38,17 @@ public class GridScrollToIT extends AbstractComponentIT {
         open();
         waitForElementPresent(By.tagName("vaadin-grid"));
         grid = $(GridElement.class).first();
+    }
+
+    @Test
+    public void scrollToIndexBeforeAttach_scrolledCorrectly() {
+        $("button").id("add-already-scrolled-grid-button").click();
+
+        GridElement grid = $(GridElement.class).id("already-scrolled-grid");
+
+        Assert.assertEquals(
+                "First visible index did not equal scrollToIndex parameter.",
+                300L, grid.getFirstVisibleRowIndex());
     }
 
     @Test

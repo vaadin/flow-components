@@ -1,15 +1,22 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests;
 
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.spreadsheet.Spreadsheet;
+import java.util.Locale;
+
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.DataFormat;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Locale;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 public class CustomDataFormatterTest {
     Spreadsheet spreadsheet;

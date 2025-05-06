@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -39,10 +39,10 @@ import com.vaadin.flow.function.SerializableFunction;
  */
 @Deprecated
 @Tag("vaadin-number-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/number-field", version = "23.3.8")
-@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.3.8")
+@NpmPackage(value = "@vaadin/number-field", version = "23.5.12")
+@NpmPackage(value = "@vaadin/vaadin-text-field", version = "23.5.12")
 @JsModule("@vaadin/number-field/src/vaadin-number-field.js")
 public abstract class GeneratedVaadinNumberField<R extends GeneratedVaadinNumberField<R, T>, T>
         extends GeneratedVaadinTextField<R, T> implements HasStyle {

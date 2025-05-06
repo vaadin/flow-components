@@ -1,19 +1,17 @@
-package com.vaadin.flow.component.map.configuration.source;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
-
-import com.vaadin.flow.component.map.configuration.Constants;
+package com.vaadin.flow.component.map.configuration.source;
 
 import java.util.Map;
 import java.util.Objects;
+
+import com.vaadin.flow.component.map.configuration.Constants;
 
 /**
  * Source for loading tile data from WMS (Web Map Service) servers

@@ -1,18 +1,16 @@
-package com.vaadin.flow.component.spreadsheet.client;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
-
-import com.fasterxml.jackson.annotation.JsonInclude;
+package com.vaadin.flow.component.spreadsheet.client;
 
 import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @SuppressWarnings("serial")
 public class CellData implements Serializable {

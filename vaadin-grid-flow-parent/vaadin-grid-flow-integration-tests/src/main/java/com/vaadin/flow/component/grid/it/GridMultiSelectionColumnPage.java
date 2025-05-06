@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -50,6 +50,9 @@ public class GridMultiSelectionColumnPage extends Div {
      * Constructor.
      */
     public GridMultiSelectionColumnPage() {
+        // Add a padding, so we can actually scroll past the grids
+        getStyle().set("padding", "20px");
+
         message = new Div();
         message.setId("selected-item-count");
 

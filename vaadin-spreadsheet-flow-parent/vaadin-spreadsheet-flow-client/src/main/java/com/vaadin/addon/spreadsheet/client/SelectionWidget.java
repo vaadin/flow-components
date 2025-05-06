@@ -1,14 +1,12 @@
-package com.vaadin.addon.spreadsheet.client;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
+package com.vaadin.addon.spreadsheet.client;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -219,7 +217,6 @@ public class SelectionWidget extends Composite {
                                 onPaintEvent(event);
                             }
                         }
-                        event.preventDefault();
                         event.stopPropagation();
                     }
                 }

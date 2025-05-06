@@ -1,14 +1,12 @@
-package com.vaadin.addon.spreadsheet.client;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
+package com.vaadin.addon.spreadsheet.client;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -38,12 +36,11 @@ public class SheetEventListener implements EventListener {
     }
 
     protected void listenToEventsOnPane(Element sheetElement) {
-        Event.sinkEvents(sheetElement,
-                Event.ONSCROLL | Event.ONMOUSEDOWN | Event.ONMOUSEMOVE
-                        | Event.ONMOUSEOVER | Event.ONMOUSEOUT | Event.ONMOUSEUP
-                        | Event.TOUCHEVENTS | Event.ONLOSECAPTURE
-                        | Event.ONCLICK | Event.ONDBLCLICK | Event.ONKEYPRESS
-                        | Event.ONKEYDOWN | Event.FOCUSEVENTS);
+        Event.sinkEvents(sheetElement, Event.ONSCROLL | Event.ONMOUSEDOWN
+                | Event.ONMOUSEMOVE | Event.ONMOUSEOVER | Event.ONMOUSEOUT
+                | Event.ONMOUSEUP | Event.TOUCHEVENTS | Event.ONLOSECAPTURE
+                | Event.ONCLICK | Event.ONDBLCLICK | Event.ONKEYPRESS
+                | Event.ONKEYDOWN | Event.FOCUSEVENTS | Event.ONCONTEXTMENU);
         Event.setEventListener(sheetElement, this);
     }
 
@@ -87,12 +84,8 @@ public class SheetEventListener implements EventListener {
                     widget.onSheetMouseDown(event);
                 }
                 break;
-            case Event.ONMOUSEUP:
-                if (event.getButton() == NativeEvent.BUTTON_RIGHT) {
-                    // Context menu is displayed on mouse up to prevent
-                    // contextmenu event on VContextMenu
-                    widget.onSheetMouseDown(event);
-                }
+            case Event.ONCONTEXTMENU:
+                widget.onSheetMouseDown(event);
                 break;
             case Event.ONDBLCLICK:
                 onSheetDoubleClick(event);

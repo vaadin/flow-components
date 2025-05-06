@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,9 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
+import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addItems;
+import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addRootItems;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,9 +26,6 @@ import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.router.Route;
-
-import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addItems;
-import static com.vaadin.flow.component.treegrid.it.TreeGridHugeTreePage.addRootItems;
 
 @Route("vaadin-grid/treegrid-huge-tree-navigation")
 public class TreeGridHugeTreeNavigationPage extends Div {

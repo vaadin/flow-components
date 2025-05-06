@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -117,10 +117,10 @@ import elemental.json.JsonObject;
  */
 @Deprecated
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/upload", version = "23.3.8")
-@NpmPackage(value = "@vaadin/vaadin-upload", version = "23.3.8")
+@NpmPackage(value = "@vaadin/upload", version = "23.5.12")
+@NpmPackage(value = "@vaadin/vaadin-upload", version = "23.5.12")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public abstract class GeneratedVaadinUpload<R extends GeneratedVaadinUpload<R>>
         extends Component implements HasStyle {

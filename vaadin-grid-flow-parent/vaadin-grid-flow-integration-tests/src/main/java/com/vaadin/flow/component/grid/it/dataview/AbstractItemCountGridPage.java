@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -125,7 +125,8 @@ public abstract class AbstractItemCountGridPage extends VerticalLayout
     private void initGrid() {
         grid = new Grid<>();
         grid.setItems(this::fakeFetch);
-        grid.setSizeFull();
+        grid.setWidthFull();
+        grid.setHeight("1000px");
 
         grid.addColumn(ValueProvider.identity()).setHeader("Name");
     }

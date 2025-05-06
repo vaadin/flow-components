@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.AbstractComponentDataGenerator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataKeyMapper;
@@ -164,7 +165,7 @@ public abstract class BasicRenderer<SOURCE, TARGET>
     public Component createComponent(SOURCE item) {
         Element span = ElementFactory
                 .createSpan(getFormattedValue(valueProvider.apply(item)));
-        return ComponentUtil.componentFromElement(span, Component.class, true);
+        return ComponentUtil.componentFromElement(span, Span.class, true);
     }
 
     /**

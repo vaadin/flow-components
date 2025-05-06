@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
@@ -347,10 +346,18 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
         super.setValue(value);
 
+        // Clear the input element from possible bad input.
         if (Objects.equals(oldValue, getEmptyValue())
                 && Objects.equals(value, getEmptyValue())) {
-            // Clear the input element from possible bad input.
-            getElement().executeJs("this.inputElement.value = ''");
+            // The check for value presence guarantees that a non-empty value
+            // won't get cleared when setValue(null) and setValue(...) are
+            // subsequently called within one round-trip.
+            // Flow only sends the final component value to the client
+            // when you update the value multiple times during a round-trip
+            // and the final value is sent in place of the first one, so
+            // `executeJs` can end up invoked after a non-empty value is set.
+            getElement()
+                    .executeJs("if (!this.value) this.inputElement.value = ''");
         }
     }
 

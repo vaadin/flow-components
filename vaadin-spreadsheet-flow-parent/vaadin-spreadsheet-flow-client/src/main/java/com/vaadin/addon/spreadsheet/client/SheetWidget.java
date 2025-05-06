@@ -1,14 +1,12 @@
-package com.vaadin.addon.spreadsheet.client;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
+package com.vaadin.addon.spreadsheet.client;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -30,6 +28,7 @@ import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -45,6 +44,10 @@ import com.google.gwt.dom.client.StyleElement;
 import com.google.gwt.dom.client.Touch;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.dom.client.TouchCancelEvent;
+import com.google.gwt.event.dom.client.TouchEndEvent;
+import com.google.gwt.event.dom.client.TouchMoveEvent;
+import com.google.gwt.event.dom.client.TouchStartEvent;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.DOM;
@@ -1132,9 +1135,14 @@ public class SheetWidget extends Panel {
             return; // event target is one of the panes or input
         }
 
-        if (isEventInCustomEditorCell(event)) {
+        boolean touchedOnSelectedCell = isTouchMode()
+                && ("s-top".equals(className) || "s-left".equals(className)
+                        || "s-bottom".equals(className)
+                        || "s-right".equals(className));
+
+        if (isEventInCustomEditorCell(event) || touchedOnSelectedCell) {
             // allow sheet context menu on top of custom editors
-            if (event.getButton() == NativeEvent.BUTTON_RIGHT) {
+            if (BrowserEvents.CONTEXTMENU.equals(event.getType())) {
                 actionHandler.onCellRightClick(event, selectedCellCol,
                         selectedCellRow);
             } else if (selectingCells) { // this is probably unnecessary
@@ -1178,7 +1186,7 @@ public class SheetWidget extends Panel {
 
             event.stopPropagation();
             event.preventDefault();
-            if (event.getButton() == NativeEvent.BUTTON_RIGHT) {
+            if (BrowserEvents.CONTEXTMENU.equals(event.getType())) {
                 Event.releaseCapture(sheet);
                 actionHandler.onCellRightClick(event, targetCol, targetRow);
             } else {
@@ -1504,6 +1512,16 @@ public class SheetWidget extends Panel {
         listener.setSheetWidget(this);
         listener.setSheetPaneElement(topLeftPane, topRightPane, bottomLeftPane,
                 sheet);
+
+        // Add the context-menu polyfill for iOS devices
+        if (isTouchMode() && BrowserInfo.get().isIOS()) {
+            final var longPressHandler = new SpreadsheetContextMenuPolyfill(
+                    this);
+            addDomHandler(longPressHandler, TouchStartEvent.getType());
+            addDomHandler(longPressHandler, TouchEndEvent.getType());
+            addDomHandler(longPressHandler, TouchMoveEvent.getType());
+            addDomHandler(longPressHandler, TouchCancelEvent.getType());
+        }
         // for some reason the click event is not fired normally for headers
         previewHandlerRegistration = Event
                 .addNativePreviewHandler(new NativePreviewHandler() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,12 +18,12 @@ package com.vaadin.flow.data.renderer;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import com.vaadin.flow.internal.UsageStatistics;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.UsageStatistics;
 
 /**
  * Helper class to create {@link Renderer} instances, with fluent API.
@@ -110,17 +110,21 @@ public final class TemplateRenderer<SOURCE> extends Renderer<SOURCE> {
      * {@code
      * // Regular property
      * TemplateRenderer.<Person> of("<div>Name: [[item.name]]</div>")
-     *          .withProperty("name", Person::getName);
+     *         .withProperty("name", Person::getName);
      *
-     * // Property that uses a bean. Note that in this case the entire "Address" object will be sent to the template.
-     * // Note that even properties of the bean which are not used in the template are sent to the client, so use
+     * // Property that uses a bean. Note that in this case the entire "Address"
+     * // object will be sent to the template.
+     * // Note that even properties of the bean which are not used in the
+     * // template are sent to the client, so use
      * // this feature with caution.
-     * TemplateRenderer.<Person> of("<span>Street: [[item.address.street]]</span>")
-     *          .withProperty("address", Person::getAddress);
+     * TemplateRenderer
+     *         .<Person> of("<span>Street: [[item.address.street]]</span>")
+     *         .withProperty("address", Person::getAddress);
      *
      * // In this case only the street field inside the Address object is sent
      * TemplateRenderer.<Person> of("<span>Street: [[item.street]]</span>")
-     *          .withProperty("street", person -> person.getAddress().getStreet());
+     *         .withProperty("street",
+     *                 person -> person.getAddress().getStreet());
      * }
      * </pre>
      *

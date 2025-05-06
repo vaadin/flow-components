@@ -1,17 +1,16 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * license.
+ */
 package com.vaadin.flow.component.richtexteditor;
 
 import java.io.Serializable;
 import java.util.Objects;
 
-/**
- * Copyright (C) 2000-2022 Vaadin Ltd
- *
- * This program is available under Vaadin Commercial License and Service Terms.
- *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
- * license.
- */
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.HasSize;
@@ -28,6 +27,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
+
 import elemental.json.JsonObject;
 
 /**
@@ -54,7 +54,7 @@ import elemental.json.JsonObject;
  */
 @SuppressWarnings("deprecation")
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 public class RichTextEditor
         extends GeneratedVaadinRichTextEditor<RichTextEditor, String>
@@ -114,6 +114,11 @@ public class RichTextEditor
     public RichTextEditor() {
         super("", "", false, true);
         setValueChangeMode(ValueChangeMode.ON_CHANGE);
+        addValueChangeListener(e -> {
+            if (this.asHtml != null) {
+                this.asHtml.value.clear();
+            }
+        });
     }
 
     /**
@@ -841,7 +846,6 @@ public class RichTextEditor
 
         AsHtml() {
             this.value = new HtmlValue();
-            RichTextEditor.this.addValueChangeListener(e -> this.value.clear());
         }
 
         /**

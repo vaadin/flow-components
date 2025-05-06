@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,22 +15,22 @@
  */
 package com.vaadin.flow.component.splitlayout.tests;
 
-import com.vaadin.flow.component.html.testbench.DivElement;
-import com.vaadin.flow.component.splitlayout.test.SplitLayoutView;
+import java.util.function.Consumer;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.vaadin.flow.component.html.testbench.NativeButtonElement;
-import com.vaadin.flow.component.html.testbench.SpanElement;
-import com.vaadin.flow.component.splitlayout.test.SplitterPositionView;
-import com.vaadin.flow.component.splitlayout.testbench.SplitLayoutElement;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import org.openqa.selenium.interactions.Actions;
 
-import java.util.function.Consumer;
+import com.vaadin.flow.component.html.testbench.DivElement;
+import com.vaadin.flow.component.html.testbench.NativeButtonElement;
+import com.vaadin.flow.component.html.testbench.SpanElement;
+import com.vaadin.flow.component.splitlayout.test.SplitLayoutView;
+import com.vaadin.flow.component.splitlayout.test.SplitterPositionView;
+import com.vaadin.flow.component.splitlayout.testbench.SplitLayoutElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for {@link SplitLayoutView}.
@@ -78,6 +78,35 @@ public class SplitterPositionIT extends AbstractComponentIT {
                 .id("mainContentInLayoutComponent")
                 .getPropertyString("style", "width");
         Assert.assertEquals("100%", width);
+    }
+
+    @Test
+    public void setSplitterPositionFromServer_moveOnClient_resetToOriginal() {
+        // Add split layout with 30% splitter position
+        $(NativeButtonElement.class).id("createLayoutJavaApi").click();
+        $(NativeButtonElement.class).id("setSplitPositionJavaApi").click();
+
+        var split = $(SplitLayoutElement.class).id("splitLayoutJavaApi");
+        var primaryComponent = split.getPrimaryComponent();
+
+        var flexBasisInitial = primaryComponent.getCssValue("flex-basis");
+
+        // Move splitter by 150px
+        var splitter = split.getSplitter();
+        Actions resizeAction = new Actions(getDriver());
+        resizeAction.dragAndDropBy(splitter, 150, 0);
+        resizeAction.perform();
+
+        // Check that the splitter position is not 30% anymore
+        var flexBasisAfterDrag = primaryComponent.getCssValue("flex-basis");
+        Assert.assertNotEquals(flexBasisInitial, flexBasisAfterDrag);
+
+        // Reset splitter position to 30%
+        $(NativeButtonElement.class).id("setSplitPositionJavaApi").click();
+
+        // Check that the splitter is at 30%
+        var flexBasisFinal = primaryComponent.getCssValue("flex-basis");
+        Assert.assertEquals(flexBasisInitial, flexBasisFinal);
     }
 
     private void testSplitterPosition(String testId) {

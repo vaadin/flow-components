@@ -1,14 +1,14 @@
-package com.vaadin.flow.component.map.configuration.feature;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
+package com.vaadin.flow.component.map.configuration.feature;
+
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.map.Assets;
@@ -18,8 +18,6 @@ import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.geometry.Point;
 import com.vaadin.flow.component.map.configuration.style.Icon;
 import com.vaadin.flow.component.map.configuration.style.Style;
-
-import java.util.Objects;
 
 /**
  * A convenience class for displaying icons or images, such as markers, at a

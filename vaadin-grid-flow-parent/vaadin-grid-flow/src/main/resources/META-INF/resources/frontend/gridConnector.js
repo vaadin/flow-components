@@ -92,6 +92,26 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
             return level;
           });
+
+          const recalculateColumnWidthsOriginal = Grid.prototype._recalculateColumnWidths;
+          Grid.prototype._recalculateColumnWidths = function(cols) {
+            // Flush until row count stabilizes
+            // Temporary fix for https://github.com/vaadin/flow-components/issues/5595
+            let previousRowCount;
+            while (previousRowCount !== this.$.items.childElementCount) {
+              previousRowCount = this.$.items.childElementCount;
+
+              // Flush the virtualizer
+              this.__virtualizer.flush();
+              if (ensureSubCacheDebouncer) {
+                // Flush pending ensureSubCache calls
+                ensureSubCacheDebouncer.flush();
+              }
+            }
+
+            recalculateColumnWidthsOriginal.call(this, cols);
+          };
+
         }
 
         const rootPageCallbacks = {};
@@ -133,7 +153,7 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
         grid.$connector.hasParentRequestQueue = tryCatchWrapper(() => parentRequestQueue.length > 0);
 
         grid.$connector.hasRootRequestQueue = tryCatchWrapper(() => {
-          return Object.keys(rootPageCallbacks).length > 0 || (rootRequestDebouncer && rootRequestDebouncer.isActive());
+          return Object.keys(rootPageCallbacks).length > 0 || (!!rootRequestDebouncer && rootRequestDebouncer.isActive());
         });
 
         grid.$connector.beforeEnsureSubCacheForScaledIndex = tryCatchWrapper(function (targetCache, scaledIndex) {
@@ -157,28 +177,27 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             return;
           }
           if (selectionMode === 'SINGLE') {
-            grid.selectedItems = [];
             selectedKeys = {};
           }
-
-          // For single selection mode, "deselect all" selects a single item `null`,
-          // which should not end up in the selected items
-          const sanitizedItems = items.filter((item) => item !== null);
-          grid.selectedItems = grid.selectedItems.concat(sanitizedItems);
 
           items.forEach((item) => {
             if (item) {
               selectedKeys[item.key] = item;
+              item.selected = true;
               if (userOriginated) {
-                item.selected = true;
                 grid.$server.select(item.key);
               }
             }
+
+            // FYI: In single selection mode, the server can send items = [null]
+            // which means a "Deselect All" command.
             const isSelectedItemDifferentOrNull = !grid.activeItem || !item || item.key != grid.activeItem.key;
             if (!userOriginated && selectionMode === 'SINGLE' && isSelectedItemDifferentOrNull) {
               grid.activeItem = item;
             }
           });
+
+          grid.selectedItems = Object.values(selectedKeys);
         });
 
         grid.$connector.doDeselection = tryCatchWrapper(function (items, userOriginated) {
@@ -198,8 +217,8 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             }
             if (itemToDeselect) {
               delete selectedKeys[itemToDeselect.key];
+              delete itemToDeselect.selected;
               if (userOriginated) {
-                delete itemToDeselect.selected;
                 grid.$server.deselect(itemToDeselect.key);
               }
             }
@@ -289,24 +308,40 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           return false;
         });
 
+        grid.$connector.debounceRootRequest = tryCatchWrapper(function (page) {
+          const delay = grid._hasData ? rootRequestDelay : 0;
+
+          rootRequestDebouncer = Debouncer.debounce(rootRequestDebouncer, timeOut.after(delay), () => {
+            grid.$connector.fetchPage(
+              (firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size),
+              page,
+              root
+            );
+          });
+        });
+
         grid.$connector.flushParentRequests = tryCatchWrapper(function () {
-          let pendingFetches = parentRequestQueue.splice(0, parentRequestBatchMaxSize);
+          const pendingFetches = [];
+
+          parentRequestQueue.splice(0, parentRequestBatchMaxSize).forEach(({ parentKey, page }) => {
+            grid.$connector.fetchPage(
+              (firstIndex, size) => pendingFetches.push({ parentKey, firstIndex, size }),
+              page,
+              parentKey
+            );
+          });
 
           if (pendingFetches.length) {
             grid.$server.setParentRequestedRanges(pendingFetches);
-            return true;
           }
-          return false;
         });
 
-        grid.$connector.beforeParentRequest = tryCatchWrapper(function (firstIndex, size, parentKey) {
-          // add request in queue
-          parentRequestQueue.push({
-            firstIndex: firstIndex,
-            size: size,
-            parentKey: parentKey
-          });
-
+        grid.$connector.debounceParentRequest = tryCatchWrapper(function (parentKey, page) {
+          // Remove any pending requests for the same parentKey.
+          parentRequestQueue = parentRequestQueue.filter((request) => request.parentKey !== parentKey);
+          // Add the new request to the queue.
+          parentRequestQueue.push({ parentKey, page });
+          // Debounce the request to avoid sending multiple requests for the same parentKey.
           parentRequestDebouncer = Debouncer.debounce(parentRequestDebouncer, timeOut.after(parentRequestDelay), () => {
             while (parentRequestQueue.length) {
               grid.$connector.flushParentRequests();
@@ -391,32 +426,30 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             } else {
               treePageCallbacks[parentUniqueKey][page] = callback;
 
-              grid.$connector.fetchPage(
-                (firstIndex, size) => grid.$connector.beforeParentRequest(firstIndex, size, params.parentItem.key),
-                page,
-                parentUniqueKey
-              );
+              grid.$connector.debounceParentRequest(parentUniqueKey, page);
             }
           } else {
             // workaround: sometimes grid-element gives page index that overflows
             page = Math.min(page, Math.floor(grid.size / grid.pageSize));
+
+            // size is controlled by the server (data communicator), so if the
+            // size is zero, we know that there is no data to fetch.
+            // This also prevents an empty grid getting stuck in a loading state.
+            // The connector does not cache empty pages, so if the grid requests
+            // data again, there would be no cache entry, causing a request to
+            // the server. However, the data communicator will never respond,
+            // as it assumes that the data is already cached.
+            if (grid.size === 0) {
+              callback([], 0);
+              return;
+            }
 
             if (cache[root] && cache[root][page]) {
               callback(cache[root][page]);
             } else {
               rootPageCallbacks[page] = callback;
 
-              rootRequestDebouncer = Debouncer.debounce(
-                rootRequestDebouncer,
-                timeOut.after(grid._hasData ? rootRequestDelay : 0),
-                () => {
-                  grid.$connector.fetchPage(
-                    (firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size),
-                    page,
-                    root
-                  );
-                }
-              );
+              grid.$connector.debounceRootRequest(page);
             }
           }
         });
@@ -1126,13 +1159,19 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
             return;
           }
 
-          const target = event.target;
-          const eventContext = grid.getEventContext(event);
-          const section = eventContext.section;
+          const path = event.composedPath();
+          const idx = path.findIndex((node) => node.localName === 'td' || node.localName === 'th');
+          const content = path.slice(0, idx);
 
-          if (isFocusable(target) || target instanceof HTMLLabelElement) {
+          // Do not fire item click event if cell content contains focusable elements.
+          // Use this instead of event.target to detect cases like icon inside button.
+          // See https://github.com/vaadin/flow-components/issues/4065
+          if (content.some((node) => isFocusable(node) || node instanceof HTMLLabelElement)) {
             return;
           }
+
+          const eventContext = grid.getEventContext(event);
+          const section = eventContext.section;
 
           if (eventContext.item && section !== 'details') {
             event.itemKey = eventContext.item.key;
@@ -1152,9 +1191,9 @@ import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
           return (style.row || '') + ' ' + ((column && style[column._flowId]) || '');
         });
 
-        grid.dropFilter = tryCatchWrapper((rowData) => !rowData.item.dropDisabled);
+        grid.dropFilter = tryCatchWrapper((rowData) => rowData.item && !rowData.item.dropDisabled);
 
-        grid.dragFilter = tryCatchWrapper((rowData) => !rowData.item.dragDisabled);
+        grid.dragFilter = tryCatchWrapper((rowData) => rowData.item && !rowData.item.dragDisabled);
 
         grid.addEventListener(
           'grid-dragstart',

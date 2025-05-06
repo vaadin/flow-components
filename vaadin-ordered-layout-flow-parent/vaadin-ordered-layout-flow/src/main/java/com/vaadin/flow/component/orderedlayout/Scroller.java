@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,16 +15,16 @@
  */
 package com.vaadin.flow.component.orderedlayout;
 
+import static java.util.Objects.requireNonNull;
+
+import java.util.Locale;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-
-import static java.util.Objects.requireNonNull;
-
-import java.util.Locale;
 
 /**
  * Scroller is a component container which enables scrolling overflowing
@@ -34,11 +34,11 @@ import java.util.Locale;
  * {@link #setScrollDirection(ScrollDirection)}
  */
 @Tag("vaadin-scroller")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/scroller", version = "23.3.8")
-@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "23.3.8")
-@JsModule("@vaadin/scroller/vaadin-scroller.js")
+@NpmPackage(value = "@vaadin/scroller", version = "23.5.12")
+@NpmPackage(value = "@vaadin/vaadin-ordered-layout", version = "23.5.12")
+@JsModule("@vaadin/scroller/src/vaadin-scroller.js")
 public class Scroller extends Component implements HasSize, HasStyle {
 
     private static final String SCROLL_DIRECTION_PROPERTY = "scrollDirection";

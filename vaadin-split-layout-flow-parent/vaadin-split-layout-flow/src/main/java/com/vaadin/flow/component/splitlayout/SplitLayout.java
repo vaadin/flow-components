@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -34,8 +34,8 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @SuppressWarnings("deprecation")
-@NpmPackage(value = "@vaadin/split-layout", version = "23.3.8")
-@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.3.8")
+@NpmPackage(value = "@vaadin/split-layout", version = "23.5.12")
+@NpmPackage(value = "@vaadin/vaadin-split-layout", version = "23.5.12")
 public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         implements HasSize {
 
@@ -151,14 +151,8 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      */
     @Override
     public void addToPrimary(Component... components) {
-        if (components.length == 1) {
-            primaryComponent = components[0];
-        } else {
-            Div container = new Div();
-            container.add(components);
-            primaryComponent = container;
-        }
-        setComponents();
+        primaryComponent = getComponentOrWrap(components);
+        setComponent(primaryComponent, "primary");
     }
 
     /**
@@ -182,14 +176,8 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
      */
     @Override
     public void addToSecondary(Component... components) {
-        if (components.length == 1) {
-            secondaryComponent = components[0];
-        } else {
-            Div container = new Div();
-            container.add(components);
-            secondaryComponent = container;
-        }
-        setComponents();
+        secondaryComponent = getComponentOrWrap(components);
+        setComponent(secondaryComponent, "secondary");
     }
 
     /**
@@ -268,18 +256,35 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         setInnerComponentStyle(styleName, value, false);
     }
 
-    private void setComponents() {
-        removeAll();
-        if (primaryComponent == null) {
-            super.addToPrimary(new Div());
-        } else {
-            super.addToPrimary(primaryComponent);
-        }
-        if (secondaryComponent == null) {
-            super.addToSecondary(new Div());
-        } else {
-            super.addToSecondary(secondaryComponent);
-        }
+    /**
+     * Returns the component if the given components array contains only one or
+     * a wrapper div with the given components if the array contains more.
+     *
+     * @param components
+     *            the components to wrap
+     * @return the component or a wrapper div
+     */
+    private Component getComponentOrWrap(Component... components) {
+        return components.length == 1 ? components[0] : new Div(components);
+    }
+
+    /**
+     * Sets the given component to the given slot.
+     *
+     * @param component
+     *            the component to set
+     * @param slot
+     *            the slot to set the component to
+     */
+    private void setComponent(Component component, String slot) {
+        getElement().getChildren()
+                .filter(node -> slot.equals(node.getAttribute("slot")))
+                .forEach(node -> {
+                    node.removeAttribute("slot");
+                    getElement().removeChild(node);
+                });
+        component.getElement().setAttribute("slot", slot);
+        getElement().appendChild(component.getElement());
     }
 
     @Override
@@ -314,7 +319,8 @@ public class SplitLayout extends GeneratedVaadinSplitLayout<SplitLayout>
         Component innerComponent = primary ? primaryComponent
                 : secondaryComponent;
         if (innerComponent != null) {
-            innerComponent.getElement().getStyle().set(styleName, value);
+            innerComponent.getElement().executeJs("this.style[$0]=$1",
+                    styleName, value);
         } else {
             getElement().executeJs(
                     "var element = this.children[$0]; if (element) { element.style[$1]=$2; }",

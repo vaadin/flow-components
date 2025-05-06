@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,13 +15,14 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/detach-reattach-page")
 public class DetachReattachIt extends AbstractComponentIT {
@@ -111,6 +112,33 @@ public class DetachReattachIt extends AbstractComponentIT {
 
         // Check that there are no new exceptions/errors thrown
         // after re-attaching the grid when sorting is reset
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void selectAndDetach_reAttach_noErrorIsThrown() {
+        open();
+
+        clickElementWithJs("select-and-detach-button");
+
+        clickElementWithJs("attach-button");
+
+        checkLogsForErrors();
+    }
+
+    @Test
+    public void hideGridAndChangeMode_detachAndReattach_noErrorIsThrown() {
+        open();
+
+        $("button").id("hide-grid-button").click();
+        $("button").id("selection-mode-none-button").click();
+        $("button").id("detach-and-reattach-button").click();
+        $("button").id("show-grid-button").click();
+
+        GridElement grid = $(GridElement.class).first();
+        // Click on the first cell on the first row
+        grid.getCell(0, 0).click();
+
         checkLogsForErrors();
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,23 +15,36 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.component.textfield.EmailField;
-import com.vaadin.flow.component.textfield.TextFieldVariant;
-import com.vaadin.flow.dom.ThemeList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
+import com.vaadin.flow.dom.ThemeList;
 
 /**
  * Tests for the {@link EmailField}.
  */
 public class EmailFieldTest {
+    private static final String[] VALID_EMAILS = { "email@example.com",
+            "firstname.lastname@example.com", "email@subdomain.example.com",
+            "firstname+lastname@example.com", "email@123.123.123.123",
+            "1234567890@example.com", "email@example-one.com",
+            "_______@example.com", "email@example.name", "email@example.museum",
+            "email@example.co.jp", "firstname-lastname@example.com", };
+
+    private static final String[] INVALID_EMAILS = { "plainaddress",
+            "#@%^%#$@#$@#.com", "@example.com", "Joe Smith <email@example.com>",
+            "email.example.com", "email@example@example.com",
+            "あいうえお@example.com", "email@example.com (Joe Smith)",
+            "email@example..com", "email@example", };
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -94,5 +107,25 @@ public class EmailFieldTest {
     public void implementsHasTooltip() {
         EmailField field = new EmailField();
         Assert.assertTrue(field instanceof HasTooltip);
+    }
+
+    @Test
+    public void setInvalidEmail_fieldIsInvalid() {
+        EmailField field = new EmailField();
+        for (String email : INVALID_EMAILS) {
+            field.setValue(email);
+            Assert.assertTrue("Should be invalid when setting " + email,
+                    field.isInvalid());
+        }
+    }
+
+    @Test
+    public void setValidEmail_fieldIsValid() {
+        EmailField field = new EmailField();
+        for (String email : VALID_EMAILS) {
+            field.setValue(email);
+            Assert.assertFalse("Should be valid when setting " + email,
+                    field.isInvalid());
+        }
     }
 }

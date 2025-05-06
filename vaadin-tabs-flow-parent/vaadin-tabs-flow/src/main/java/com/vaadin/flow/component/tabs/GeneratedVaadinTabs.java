@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -101,11 +101,11 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  */
 @Deprecated
 @Tag("vaadin-tabs")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/tabs/src/vaadin-tabs.js")
-@NpmPackage(value = "@vaadin/tabs", version = "23.3.8")
-@NpmPackage(value = "@vaadin/vaadin-tabs", version = "23.3.8")
+@NpmPackage(value = "@vaadin/tabs", version = "23.5.12")
+@NpmPackage(value = "@vaadin/vaadin-tabs", version = "23.5.12")
 public abstract class GeneratedVaadinTabs<R extends GeneratedVaadinTabs<R>>
         extends Component implements HasStyle, HasTheme {
 

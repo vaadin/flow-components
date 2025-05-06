@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -117,7 +117,7 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         setOpened(false);
 
-        getElement().addEventListener("opened-changed", event -> {
+        addOpenedChangeListener(event -> {
             if (!isOpened()) {
                 setModality(false);
             }
@@ -271,14 +271,14 @@ public class Dialog extends GeneratedVaadinDialog<Dialog>
         if (isOpened()) {
             ensureOnCloseConfigured();
         }
-        Registration openedRegistration = getElement()
-                .addPropertyChangeListener("opened", event -> {
-                    if (isOpened()) {
-                        ensureOnCloseConfigured();
-                    } else {
-                        onCloseConfigured = 0;
-                    }
-                });
+
+        Registration openedRegistration = addOpenedChangeListener(event -> {
+            if (event.isOpened()) {
+                ensureOnCloseConfigured();
+            } else {
+                onCloseConfigured = 0;
+            }
+        });
 
         Registration registration = addListener(DialogCloseActionEvent.class,
                 listener);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -39,7 +39,6 @@ import com.vaadin.flow.data.binder.PropertyDefinition;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
-import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -141,7 +140,7 @@ public class TreeGrid<T> extends Grid<T>
         private final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
         private int viewportRemaining = 0;
         private final List<JsonValue> queuedParents = new ArrayList<>();
-        private VaadinRequest previousRequest;
+        private transient VaadinRequest previousRequest;
 
         public TreeGridArrayUpdaterImpl(
                 SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {

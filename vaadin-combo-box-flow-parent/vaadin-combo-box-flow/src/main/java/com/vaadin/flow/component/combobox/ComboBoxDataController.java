@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,17 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
+
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxLazyDataView;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
@@ -31,6 +42,7 @@ import com.vaadin.flow.data.provider.HasDataView;
 import com.vaadin.flow.data.provider.HasLazyDataView;
 import com.vaadin.flow.data.provider.HasListDataView;
 import com.vaadin.flow.data.provider.InMemoryDataProvider;
+import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.dom.PropertyChangeEvent;
@@ -41,16 +53,8 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.shared.Registration;
-import elemental.json.JsonValue;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
+import elemental.json.JsonValue;
 
 /**
  * Internal class that encapsulates the data communication logic with the web
@@ -157,10 +161,15 @@ class ComboBoxDataController<TItem>
      * @param localeSupplier
      *            supplier for the current locale of the combo box
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     ComboBoxDataController(ComboBoxBase<?, TItem, ?> comboBox,
             SerializableSupplier<Locale> localeSupplier) {
         this.comboBox = comboBox;
         this.localeSupplier = localeSupplier;
+
+        // Update client side filtering when data provider size changes
+        ComponentUtil.addListener(comboBox, ItemCountChangeEvent.class,
+                (ComponentEventListener) (e -> updateClientSideFiltering()));
     }
 
     /**
@@ -195,7 +204,8 @@ class ComboBoxDataController<TItem>
         if (dataCommunicator != null) {
             dataCommunicator.setPageSize(pageSize);
         }
-        refreshAllData(shouldForceServerSideFiltering);
+        reset();
+        updateClientSideFiltering();
     }
 
     /**
@@ -546,8 +556,8 @@ class ComboBoxDataController<TItem>
 
         shouldForceServerSideFiltering = userProvidedFilter == UserProvidedFilter.YES;
         setupDataProviderListener(dataProvider);
-
-        refreshAllData(shouldForceServerSideFiltering);
+        reset();
+        updateClientSideFiltering();
 
         userProvidedFilter = UserProvidedFilter.UNDECIDED;
 
@@ -560,13 +570,12 @@ class ComboBoxDataController<TItem>
         }
     }
 
-    private void refreshAllData(boolean forceServerSideFiltering) {
+    private void updateClientSideFiltering() {
         if (dataCommunicator != null) {
-            setClientSideFilter(!forceServerSideFiltering && dataCommunicator
-                    .getItemCount() <= comboBox.getPageSize());
+            setClientSideFilter(
+                    !this.shouldForceServerSideFiltering && dataCommunicator
+                            .getItemCount() <= comboBox.getPageSize());
         }
-
-        reset();
     }
 
     private void setClientSideFilter(boolean clientSideFilter) {
@@ -632,7 +641,7 @@ class ComboBoxDataController<TItem>
                         .refresh(((DataChangeEvent.DataRefreshEvent<TItem>) e)
                                 .getItem());
             } else {
-                refreshAllData(shouldForceServerSideFiltering);
+                reset();
             }
         });
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,6 +14,13 @@
  * the License.
  */
 package com.vaadin.flow.component.combobox;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -30,18 +37,11 @@ import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
+
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonType;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * MultiSelectComboBox allows the user to select one or more values from a
@@ -71,9 +71,9 @@ import java.util.Set;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "23.3.8")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "23.5.12")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("@vaadin/polymer-legacy-adapter/template-renderer.js")
 @JsModule("./flow-component-renderer.js")
@@ -85,6 +85,7 @@ public class MultiSelectComboBox<TItem>
 
     private final MultiSelectComboBoxSelectionModel<TItem> selectionModel;
     private MultiSelectComboBoxI18n i18n;
+    private AutoExpandMode autoExpand;
 
     /**
      * Default constructor. Creates an empty combo box.
@@ -133,6 +134,8 @@ public class MultiSelectComboBox<TItem>
         // Initialize page size and data provider
         setPageSize(pageSize);
         setItems(new DataCommunicator.EmptyDataProvider<>());
+
+        setAutoExpand(AutoExpandMode.NONE);
     }
 
     /**
@@ -392,6 +395,140 @@ public class MultiSelectComboBox<TItem>
             // actually changed
             super.setValue(selectionModel.getSelectedItems());
         }
+    }
+
+    /**
+     * Gets whether selected items are grouped at the top of the overlay.
+     *
+     * @since 23.4
+     * @return {@code true} if enabled, {@code false} otherwise
+     */
+    public boolean isSelectedItemsOnTop() {
+        return getElement().getProperty("selectedItemsOnTop", false);
+    }
+
+    /**
+     * Enables or disables grouping of the selected items at the top of the
+     * overlay.
+     *
+     * @since 23.4
+     * @param selectedItemsOnTop
+     *            {@code true} to group selected items at the top
+     */
+    public void setSelectedItemsOnTop(boolean selectedItemsOnTop) {
+        getElement().setProperty("selectedItemsOnTop", selectedItemsOnTop);
+    }
+
+    /**
+     * Defines possible behavior of the component when not all selected items
+     * can be displayed as chips within the current field width.
+     */
+    public enum AutoExpandMode {
+        /**
+         * Field expands vertically and chips wrap.
+         */
+        VERTICAL(false, true),
+
+        /**
+         * Field expands horizontally until max-width is reached, then collapses
+         * to overflow chip.
+         */
+        HORIZONTAL(true, false),
+
+        /**
+         * Field expands horizontally until max-width is reached, then expands
+         * vertically and chips wrap.
+         */
+        BOTH(true, true),
+
+        /**
+         * Field does not expand and collapses to overflow chip.
+         */
+        NONE(false, false);
+
+        private final boolean expandHorizontally;
+        private final boolean expandVertically;
+
+        AutoExpandMode(boolean expandHorizontally, boolean expandVertically) {
+            this.expandHorizontally = expandHorizontally;
+            this.expandVertically = expandVertically;
+        }
+
+        /**
+         * Gets whether to expand horizontally.
+         *
+         * @return Whether to expand horizontally
+         */
+        public boolean getExpandHorizontally() {
+            return expandHorizontally;
+        }
+
+        /**
+         * Gets whether to expand vertically.
+         *
+         * @return Whether to expand vertically
+         */
+        public boolean getExpandVertically() {
+            return expandVertically;
+        }
+    }
+
+    /**
+     * Gets the behavior of the component when not all selected items can be
+     * displayed as chips within the current field width.
+     *
+     * @since 23.4
+     * @return The current {@link AutoExpandMode}
+     */
+    public AutoExpandMode getAutoExpand() {
+        return autoExpand;
+    }
+
+    /**
+     * Sets the behavior of the component when not all selected items can be
+     * displayed as chips within the current field width.
+     *
+     * Expansion only works with undefined size in the desired direction (i.e.
+     * setting `max-width` limits the component's width).
+     *
+     * @param {AutoExpandMode}
+     *            autoExpandMode
+     * @since 23.4
+     */
+    public void setAutoExpand(AutoExpandMode autoExpandMode) {
+        Objects.requireNonNull(autoExpandMode,
+                "The mode to be set cannot be null");
+        autoExpand = autoExpandMode;
+
+        getElement().setProperty("autoExpandHorizontally",
+                autoExpandMode.getExpandHorizontally());
+        getElement().setProperty("autoExpandVertically",
+                autoExpandMode.getExpandVertically());
+    }
+
+    /**
+     * Gets whether the filter is kept after selecting items. {@code false} by
+     * default.
+     *
+     * @since 23.4
+     * @return {@code true} if enabled, {@code false} otherwise
+     */
+    public boolean isKeepFilter() {
+        return getElement().getProperty("keepFilter", false);
+    }
+
+    /**
+     * Enables or disables keeping the filter after selecting items. By default,
+     * the filter is cleared after selecting an item and the overlay shows the
+     * unfiltered list of items again. Enabling this option will keep the
+     * filter, which allows to select multiple filtered items in succession.
+     *
+     * @since 23.4
+     * @param keepFilter
+     *            whether to keep the filter after selecting an item
+     */
+    public void setKeepFilter(boolean keepFilter) {
+        getElement().setProperty("keepFilter", keepFilter);
     }
 
     /**

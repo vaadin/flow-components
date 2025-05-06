@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,12 +21,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-import org.openqa.selenium.WebElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/sorting")
 public class SortingIT extends AbstractComponentIT {
@@ -61,10 +61,13 @@ public class SortingIT extends AbstractComponentIT {
     public void setInitialSortOrderGridHidden_showGrid_dataPresentAndSorted() {
         findElement(By.id("sort-hidden-by-age")).click();
         findElement(By.id("show-hidden-grid")).click();
-        Assert.assertEquals("B",
-                $(GridElement.class).id("hidden-grid").getCell(0, 0).getText());
-        Assert.assertEquals("A",
-                $(GridElement.class).id("hidden-grid").getCell(1, 0).getText());
+
+        GridElement hiddenGrid = $(GridElement.class).id("hidden-grid");
+
+        waitUntil(driver -> "false".equals(hiddenGrid.getAttribute("loading")));
+
+        Assert.assertEquals("B", hiddenGrid.getCell(0, 0).getText());
+        Assert.assertEquals("A", hiddenGrid.getCell(1, 0).getText());
     }
 
     @Test

@@ -1,20 +1,18 @@
-package com.vaadin.flow.component.charts.model.serializers;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
+package com.vaadin.flow.component.charts.model.serializers;
+
+import java.io.IOException;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.vaadin.flow.component.charts.model.AxisTitle;
-
-import java.io.IOException;
 
 /**
  * Serializer for {@link com.vaadin.flow.component.charts.model.AxisTitle}.

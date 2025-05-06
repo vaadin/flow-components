@@ -1,14 +1,12 @@
-package com.vaadin.flow.component.board;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
+package com.vaadin.flow.component.board;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasOrderedComponents;
@@ -29,11 +27,11 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * <p>
  */
 @Tag("vaadin-board")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/board", version = "23.3.8")
-@NpmPackage(value = "@vaadin/vaadin-board", version = "23.3.8")
-@JsModule("@vaadin/board/vaadin-board.js")
+@NpmPackage(value = "@vaadin/board", version = "23.5.12")
+@NpmPackage(value = "@vaadin/vaadin-board", version = "23.5.12")
+@JsModule("@vaadin/board/src/vaadin-board.js")
 public class Board extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
 

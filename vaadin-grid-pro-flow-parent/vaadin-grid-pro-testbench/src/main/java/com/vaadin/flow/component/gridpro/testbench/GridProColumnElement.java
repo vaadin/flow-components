@@ -1,18 +1,16 @@
-package com.vaadin.flow.component.gridpro.testbench;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
-
-import com.vaadin.testbench.TestBenchElement;
+package com.vaadin.flow.component.gridpro.testbench;
 
 import java.util.ArrayList;
+
+import com.vaadin.testbench.TestBenchElement;
 
 /**
  * A TestBench element representing a

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -34,6 +34,8 @@ import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
@@ -97,6 +99,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.data.renderer.TemplateRenderer;
@@ -121,7 +124,6 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.ReflectTools;
-import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -129,7 +131,6 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonType;
 import elemental.json.JsonValue;
-import org.slf4j.LoggerFactory;
 
 /**
  * Grid is a component for showing tabular data. A basic Grid uses plain text to
@@ -206,11 +207,11 @@ import org.slf4j.LoggerFactory;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "23.3.8")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.3.8")
-@NpmPackage(value = "@vaadin/tooltip", version = "23.3.8")
+@NpmPackage(value = "@vaadin/grid", version = "23.5.12")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.5.12")
+@NpmPackage(value = "@vaadin/tooltip", version = "23.5.12")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -447,7 +448,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -2861,13 +2862,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
         final SerializableRunnable jsFunctionCall = () -> getElement()
                 .callJsFunction("$connector." + function, jsonArray, false);
-        if (getElement().getNode().isAttached()) {
-            jsFunctionCall.run();
-        } else {
-            getElement().getNode()
-                    .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                            context -> jsFunctionCall.run()));
-        }
+
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> jsFunctionCall.run()));
     }
 
     private JsonObject generateJsonForSelection(T item) {
@@ -3434,6 +3431,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
         updateClientSideSorterIndicators(sortOrder);
+        updateSelectionModeOnClient();
         if (getDataProvider() != null) {
             handleDataProviderChange(getDataProvider());
         }
@@ -4486,7 +4484,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            zero based index of the item to scroll to in the current view.
      */
     public void scrollToIndex(int rowIndex) {
-        getElement().callJsFunction("scrollToIndex", rowIndex);
+        getElement().executeJs(
+                "queueMicrotask(() => this.scrollToIndex(" + rowIndex + "))");
     }
 
     /**
@@ -4500,9 +4499,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * Scrolls to the last data row of the grid.
      */
     public void scrollToEnd() {
-        getUI().ifPresent(
-                ui -> ui.beforeClientResponse(this, ctx -> getElement()
-                        .executeJs("this.scrollToIndex(this._effectiveSize)")));
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "queueMicrotask(() => this.scrollToIndex(this._effectiveSize))")));
     }
 
     private void onDragStart(GridDragStartEvent<T> event) {

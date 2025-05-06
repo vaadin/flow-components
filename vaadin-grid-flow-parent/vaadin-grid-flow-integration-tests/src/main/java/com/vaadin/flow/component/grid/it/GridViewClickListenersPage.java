@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,10 +15,12 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
@@ -45,6 +47,9 @@ public class GridViewClickListenersPage extends LegacyTestView {
                     "$0.addEventListener('click', e => e.preventDefault())");
             return span;
         })).setHeader("Action");
+        grid.addColumn(new ComponentRenderer<>(person -> {
+            return new Button(VaadinIcon.PENCIL.create());
+        })).setHeader("Button");
 
         // Disable selection: will receive only click events instead
         grid.setSelectionMode(SelectionMode.NONE);

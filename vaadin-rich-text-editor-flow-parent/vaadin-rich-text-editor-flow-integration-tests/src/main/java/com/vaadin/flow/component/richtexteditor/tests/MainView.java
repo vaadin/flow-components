@@ -1,10 +1,22 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * license.
+ */
 package com.vaadin.flow.component.richtexteditor.tests;
 
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.richtexteditor.RichTextEditor;
+import java.io.Serializable;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.richtexteditor.RichTextEditor;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.Binder.Binding;
 import com.vaadin.flow.data.binder.BinderValidationStatus;
@@ -12,10 +24,6 @@ import com.vaadin.flow.data.binder.BindingValidationStatus;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.router.Route;
-
-import java.io.Serializable;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Route(value = "vaadin-rich-text-editor")
 public class MainView extends VerticalLayout {
@@ -78,6 +86,8 @@ public class MainView extends VerticalLayout {
         createRichTextEditorInATemplate();
 
         createRichTextEditorWithHtmlBinder();
+
+        createEagerRichTextEditor();
     }
 
     private RichTextEditor.RichTextEditorI18n createCustomI18n() {
@@ -256,6 +266,20 @@ public class MainView extends VerticalLayout {
         reset.setId("html-binder-reset");
 
         add(actions, infoPanel, valuePanel);
+    }
+
+    private void createEagerRichTextEditor() {
+        Div eagerRteValuePanel = new Div();
+        eagerRteValuePanel.setId("eager-rte-value-panel");
+
+        RichTextEditor eagerRte = new RichTextEditor();
+        eagerRte.setValueChangeMode(ValueChangeMode.EAGER);
+        eagerRte.setId("eager-rte");
+        eagerRte.addValueChangeListener(event -> {
+            eagerRteValuePanel.setText(eagerRte.asHtml().getValue());
+        });
+
+        add(eagerRte, eagerRteValuePanel);
     }
 
     /**

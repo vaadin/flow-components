@@ -1,14 +1,12 @@
-package com.vaadin.flow.component.charts.model;
-
 /**
- * Copyright (C) 2000-2022 Vaadin Ltd
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
  * license.
  */
+package com.vaadin.flow.component.charts.model;
 
 /**
  * A predefined shape or symbol for the marker. When null, the symbol is pulled
@@ -18,8 +16,11 @@ package com.vaadin.flow.component.charts.model;
  *
  */
 public enum MarkerSymbolEnum implements MarkerSymbol, ChartEnum {
-    CIRCLE("circle"), SQUARE("square"), DIAMOND("diamond"), TRIANGLE(
-            "triangle"), TRIANGLE_DOWN("triangle-down");
+    CIRCLE("circle"),
+    SQUARE("square"),
+    DIAMOND("diamond"),
+    TRIANGLE("triangle"),
+    TRIANGLE_DOWN("triangle-down");
 
     private String symbol;
 

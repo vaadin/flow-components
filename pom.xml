@@ -2,18 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>vaadin-flow-components</artifactId>
-    <version>23.3-SNAPSHOT</version>
+    <version>23.5-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Flow Components Root Project</name>
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-parent</artifactId>
-        <version>2.0.5</version>
+        <version>2.2.1</version>
     </parent>
     <url>https://vaadin.com/components</url>
     <properties>
-        <flow.version>23.3-SNAPSHOT</flow.version>
-        <testbench.version>8.2.0</testbench.version>
+        <flow.version>23.5-SNAPSHOT</flow.version>
+        <testbench.version>8.2.7</testbench.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -27,6 +27,8 @@
         <maven.failsafe.plugin.version>2.22.2</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.3.0</maven.resources.plugin.version>
         <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
+        <spotless.plugin.version>2.43.0</spotless.plugin.version>
+        <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <failsafe.forkCount>4</failsafe.forkCount>
         <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
         <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
@@ -35,8 +37,9 @@
         <sauce-connect.version>2.1.25</sauce-connect.version>
         <ci-sauce.version>1.161</ci-sauce.version>
         <sauce.options>--tunnel-identifier ${maven.build.timestamp}</sauce.options>
-        <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
+        <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
         <osgi.export.package>default</osgi.export.package>
+        <currentYear>2024</currentYear>
         <cvdlName></cvdlName>
 
         <!-- spreadsheet -->
@@ -353,7 +356,6 @@
                         <reuseForks>false</reuseForks>
                         <trimStackTrace>false</trimStackTrace>
                         <systemPropertyVariables>
-                            <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
                             <com.vaadin.tests.SharedBrowser.reuseBrowser>${com.vaadin.tests.SharedBrowser.reuseBrowser}</com.vaadin.tests.SharedBrowser.reuseBrowser>
                             <com.vaadin.testbench.Parameters.testsInParallel>${com.vaadin.testbench.Parameters.testsInParallel}</com.vaadin.testbench.Parameters.testsInParallel>
                             <sauce.user>${sauce.user}</sauce.user>
@@ -487,17 +489,66 @@
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>3.1.0</version>
                 </plugin>
+                <plugin>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>2.6</version>
+                    <configuration>
+                        <header>src/license/vclst/header.txt</header>
+                        <quiet>false</quiet>
+                        <failIfMissing>true</failIfMissing>
+                        <aggregate>false</aggregate>
+                        <useDefaultExcludes>true</useDefaultExcludes>
+                        <useDefaultMapping>true</useDefaultMapping>
+                        <encoding>UTF-8</encoding>
+                        <properties>
+                            <year>${currentYear}</year>
+                        </properties>
+                        <excludes>
+                            <exclude>**/target/**</exclude>
+                            <exclude>**/*.xml</exclude>
+                            <exclude>**/*.css</exclude>
+                            <exclude>**/*.properties</exclude>
+                            <exclude>src/license/**/*</exclude>
+                            <exclude>**/*.txt</exclude>
+                            <exclude>scripts/**</exclude>
+                            <exclude>**/resources/META-INF/**</exclude>
+                            <exclude>**/demo/**</exclude>
+                            <exclude>**/tests/**</exclude>
+                            <exclude>**/test/**</exclude>
+                            <exclude>**/LICENSE/</exclude>
+                            <exclude>**/README.md/</exclude>
+                            <exclude>**/styles/**</exclude>
+                            <exclude>**/frontend/**</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
             <plugin>
-                <groupId>net.revelc.code.formatter</groupId>
-                <artifactId>formatter-maven-plugin</artifactId>
-                <version>2.20.0</version>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.plugin.version}</version>
                 <configuration>
-                    <configFile>https://raw.githubusercontent.com/vaadin/flow/master/eclipse/VaadinJavaConventions.xml</configFile>
-                    <skipHtmlFormatting>true</skipHtmlFormatting>
-                    <lineEnding>LF</lineEnding>
+                    <java>
+                        <eclipse>
+                            <file>${maven.multiModuleProjectDirectory}/eclipse/VaadinJavaConventions.xml</file>
+                        </eclipse>
+                        <excludes>
+                            <!-- Do not modify GWT sources / license headers -->
+                            <exclude>**/com/google/gwt/**/*.*</exclude>
+                        </excludes>
+                        <endWithNewline/>
+                        <removeUnusedImports />
+                        <importOrder>
+                            <wildcardsLast>true</wildcardsLast>
+                            <order>java|javax,org,com</order>
+                        </importOrder>
+                        <licenseHeader>
+                            <file>${spotless.licence-header}</file>
+                        </licenseHeader>
+                    </java>
                 </configuration>
             </plugin>
         </plugins>
@@ -598,6 +649,12 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
+                <version>4.8.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-inline</artifactId>
                 <version>4.8.0</version>
                 <scope>test</scope>
             </dependency>

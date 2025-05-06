@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,12 +23,9 @@ import java.util.Optional;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.CompositionNotifier;
-import com.vaadin.flow.component.shared.HasClearButton;
 import com.vaadin.flow.component.HasHelper;
 import com.vaadin.flow.component.HasLabel;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
@@ -36,6 +33,9 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasClearButton;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.ValidationUtil;
 import com.vaadin.flow.data.binder.HasValidator;
 import com.vaadin.flow.data.value.HasValueChangeMode;
@@ -55,7 +55,7 @@ import com.vaadin.flow.function.SerializableBiFunction;
  */
 @SuppressWarnings("deprecation")
 @Tag("vaadin-big-decimal-field")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.3.8")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-big-decimal-field.js")
 public class BigDecimalField
@@ -372,7 +372,15 @@ public class BigDecimalField
         if (Objects.equals(oldValue, getEmptyValue())
                 && Objects.equals(value, getEmptyValue())) {
             // Clear the input element from possible bad input.
-            getElement().executeJs("this.inputElement.value = ''");
+            getElement().executeJs(
+                    "if (this.inputElement) this.inputElement.value = ''");
+        } else {
+            // Restore the input element's value in case it was cleared
+            // in the above branch. That can happen when setValue(null)
+            // and setValue(...) are subsequently called within one round-trip
+            // and there was bad input.
+            getElement().executeJs(
+                    "if (this.inputElement) this.inputElement.value = this.value");
         }
     }
 

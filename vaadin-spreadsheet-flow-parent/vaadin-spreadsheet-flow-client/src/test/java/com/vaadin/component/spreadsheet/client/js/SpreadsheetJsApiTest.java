@@ -1,76 +1,36 @@
+/**
+ * Copyright 2000-2024 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See  {@literal <https://vaadin.com/commercial-license-and-service-terms>}  for the full
+ * license.
+ */
 package com.vaadin.component.spreadsheet.client.js;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.thirdparty.guava.common.collect.Lists;
 import com.vaadin.addon.spreadsheet.client.CellData;
-import com.vaadin.addon.spreadsheet.client.MergedRegion;
-import com.vaadin.addon.spreadsheet.client.OverlayInfo;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetActionDetails;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetClientRpc;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetConnector;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetServerRpc;
-import com.vaadin.addon.spreadsheet.shared.GroupingData;
 import com.vaadin.addon.spreadsheet.shared.SpreadsheetState;
-import com.vaadin.component.spreadsheet.client.js.SpreadsheetJsApi;
-import com.vaadin.component.spreadsheet.client.js.SpreadsheetServerRpcImpl;
-import com.vaadin.component.spreadsheet.client.js.callbacks.ActionOnColumnHeaderCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.ActionOnCurrentSelectionCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.CellAddedToSelectionAndSelectedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.CellRangePaintedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.CellRangeSelectedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.CellSelectedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.CellValueEditedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.CellsAddedToRangeSelectionCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.ClearSelectedCellsOnCutCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.ColumnAddedToSelectionCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.ColumnHeaderContextMenuOpenCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.ColumnResizedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.ColumnSelectedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.ContextMenuOpenOnSelectionCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.DeleteSelectedCellsCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.GroupingCollapsedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.LevelHeaderClickedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.LinkCellClickedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.OnColumnAutofitCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.OnConnectorInitCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.OnPasteCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.OnRedoCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.OnRowAutofitCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.OnSheetScrollCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.OnUndoCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.ProtectedCellWriteAttemptedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.RowAddedToRangeSelectionCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.RowHeaderContextMenuOpenCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.RowSelectedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.RowsResizedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.SelectionDecreasePaintedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.SelectionIncreasePaintedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.SetCellStyleWidthRatiosCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.SheetAddressChangedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.SheetCreatedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.SheetRenamedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.SheetSelectedCallback;
-import com.vaadin.component.spreadsheet.client.js.callbacks.UpdateCellCommentCallback;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class SpreadsheetJsApiTest {
 

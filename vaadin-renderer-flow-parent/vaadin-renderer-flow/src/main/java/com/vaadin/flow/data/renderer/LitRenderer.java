@@ -1,6 +1,5 @@
-
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -112,7 +111,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * {@code
      * // Prints the `name` property of a person
      * LitRenderer.<Person> of("<div>Name: ${item.name}</div>")
-     *          .withProperty("name", Person::getName);
+     *         .withProperty("name", Person::getName);
      *
      * // Prints the index of the item inside a repeating list
      * LitRenderer.of("${index}");
@@ -299,17 +298,20 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * {@code
      * // Regular property
      * LitRenderer.<Person> of("<div>Name: ${item.name}</div>")
-     *          .withProperty("name", Person::getName);
+     *         .withProperty("name", Person::getName);
      *
-     * // Property that uses a bean. Note that in this case the entire "Address" object will be sent to the template.
-     * // Note that even properties of the bean which are not used in the template are sent to the client, so use
+     * // Property that uses a bean. Note that in this case the entire "Address"
+     * // object will be sent to the template.
+     * // Note that even properties of the bean which are not used in the
+     * // template are sent to the client, so use
      * // this feature with caution.
      * LitRenderer.<Person> of("<span>Street: ${item.address.street}</span>")
-     *          .withProperty("address", Person::getAddress);
+     *         .withProperty("address", Person::getAddress);
      *
      * // In this case only the street field inside the Address object is sent
      * LitRenderer.<Person> of("<span>Street: ${item.street}</span>")
-     *          .withProperty("street", person -> person.getAddress().getStreet());
+     *         .withProperty("street",
+     *                 person -> person.getAddress().getStreet());
      * }
      * </pre>
      *
@@ -343,7 +345,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * {@code
      * // Standard event
      * LitRenderer.of("<button @click=${handleClick}>Click me</button>")
-     *          .withEventHandler("handleClick", object -> doSomething());
+     *         .withEventHandler("handleClick", object -> doSomething());
      * }
      * </pre>
      *
@@ -380,7 +382,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * {@code
      * // Standard event
      * LitRenderer.of("<button @click=${handleClick}>Click me</button>")
-     *          .withFunction("handleClick", object -> doSomething());
+     *         .withFunction("handleClick", object -> doSomething());
      * }
      * </pre>
      *
@@ -417,13 +419,13 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      * {@code
      * // Standard event
      * LitRenderer.of("<button @click=${handleClick}>Click me</button>")
-     *          .withFunction("handleClick", item -> doSomething());
+     *         .withFunction("handleClick", item -> doSomething());
      *
      * // Function invocation with arguments
      * LitRenderer.of("<input @keypress=${(e) => handleKeyPress(e.key)}>")
-     *          .withFunction("handleKeyPress", (item, args) -> {
-     *              System.out.println("Pressed key: " + args.getString(0));
-     *          });
+     *         .withFunction("handleKeyPress", (item, args) -> {
+     *             System.out.println("Pressed key: " + args.getString(0));
+     *         });
      * }
      * </pre>
      *

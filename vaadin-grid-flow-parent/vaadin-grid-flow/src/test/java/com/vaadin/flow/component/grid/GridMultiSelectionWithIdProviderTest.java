@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 Vaadin Ltd.
+ * Copyright 2000-2024 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,12 +21,12 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import com.vaadin.flow.data.selection.SelectionListener;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.vaadin.flow.data.provider.ListDataProvider;
-import org.mockito.Mockito;
+import com.vaadin.flow.data.selection.SelectionListener;
 
 public class GridMultiSelectionWithIdProviderTest {
 
