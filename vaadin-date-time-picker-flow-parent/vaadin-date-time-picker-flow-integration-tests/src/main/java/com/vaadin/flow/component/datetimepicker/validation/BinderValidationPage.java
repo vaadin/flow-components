@@ -90,6 +90,12 @@ public class BinderValidationPage
     }
 
     protected DateTimePicker createTestField() {
-        return new DateTimePicker();
+        return new DateTimePicker() {
+            @Override
+            protected void validate() {
+                super.validate();
+                incrementServerValidationCounter();
+            }
+        };
     }
 }
