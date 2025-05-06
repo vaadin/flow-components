@@ -62,7 +62,7 @@ public class MenuBarElement extends TestBenchElement {
     }
 
     private boolean isOverflowButton(TestBenchElement element) {
-        return element.getAttribute("slot").contains("overflow");
+        return "overflow".equals(element.getAttribute("slot"));
     }
 
     private boolean isVisible(TestBenchElement element) {
