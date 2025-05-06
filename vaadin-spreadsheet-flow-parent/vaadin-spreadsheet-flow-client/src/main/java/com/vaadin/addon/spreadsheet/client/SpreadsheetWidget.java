@@ -733,8 +733,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         if (!customCellEditorDisplayed) {
             formulaBarWidget.setFormulaFieldEnabled(!cellLocked);
         } else {
-//            sheetWidget.displayCustomCellEditor(customEditorFactory
-//                    .getCustomEditor(sheetWidget.getSelectedCellKey()), true);
+            // sheetWidget.displayCustomCellEditor(customEditorFactory
+            // .getCustomEditor(sheetWidget.getSelectedCellKey()), true);
         }
         if (name != null) {
             formulaBarWidget.setSelectedCellAddress(name);
@@ -1221,11 +1221,13 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                         formulaBarWidget.cacheFormulaFieldValue();
                     }
                     formulaBarWidget.setCellPlainValue(enteredCharacter);
-                } else if (getCustomEditorFactory().hasCustomEditor(sheetWidget.getSelectedCellKey())) {
-                    Widget customEditor = getCustomEditorFactory().getCustomEditor(
-                        sheetWidget.getSelectedCellKey());
+                } else if (getCustomEditorFactory()
+                        .hasCustomEditor(sheetWidget.getSelectedCellKey())) {
+                    Widget customEditor = getCustomEditorFactory()
+                            .getCustomEditor(sheetWidget.getSelectedCellKey());
                     if (customEditor instanceof Slot) {
-                        var assignedElement = ((Slot) customEditor).getAssignedElement();
+                        var assignedElement = ((Slot) customEditor)
+                                .getAssignedElement();
                         assignedElement.focus();
                         assignedElement.setNodeValue(enteredCharacter);
                     }

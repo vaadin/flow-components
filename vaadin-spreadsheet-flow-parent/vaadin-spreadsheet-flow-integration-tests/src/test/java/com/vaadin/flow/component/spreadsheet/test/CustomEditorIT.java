@@ -164,7 +164,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
     @Test
     public void editorFocused_shiftTabKeyPressed_previousCellFocused() {
         clickCell("B2");
-        getEditorElement("input").sendKeys( Keys.SHIFT, Keys.TAB);
+        getEditorElement("input").sendKeys(Keys.SHIFT, Keys.TAB);
         Assert.assertTrue(getSpreadsheet().getCellAt("A2").isCellSelected());
     }
 

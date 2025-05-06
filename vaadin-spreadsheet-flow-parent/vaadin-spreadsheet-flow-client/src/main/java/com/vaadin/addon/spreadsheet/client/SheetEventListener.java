@@ -8,17 +8,17 @@
  */
 package com.vaadin.addon.spreadsheet.client;
 
+import static com.vaadin.addon.spreadsheet.client.SheetJsniUtil.getComposedPath;
+
+import java.util.Arrays;
+import java.util.Objects;
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
-
-import java.util.Arrays;
-import java.util.Objects;
-
-import static com.vaadin.addon.spreadsheet.client.SheetJsniUtil.getComposedPath;
 
 public class SheetEventListener implements EventListener {
 
@@ -114,21 +114,22 @@ public class SheetEventListener implements EventListener {
         var composedPath = getComposedPath(event);
 
         var result = Arrays
-            .stream(composedPath).filter(
-                element -> element.getNodeType() == Node.ELEMENT_NODE
-                    && Objects.equals(element.getTagName(), "SLOT")
-                    && element.getAttribute("name")
-                    .startsWith("custom-editor-"))
-            .findFirst();
+                .stream(composedPath).filter(
+                        element -> element.getNodeType() == Node.ELEMENT_NODE
+                                && Objects.equals(element.getTagName(), "SLOT")
+                                && element.getAttribute("name")
+                                        .startsWith("custom-editor-"))
+                .findFirst();
 
         if (result.isPresent()) {
             return true;
         }
 
-        return Arrays.stream(composedPath).anyMatch(
-            element -> element.getNodeType() == Node.ELEMENT_NODE
-                && Objects.equals(element.getTagName(), "SLOT")
-                && element.getAttribute("name").startsWith("custom-editor-"));
+        return Arrays.stream(composedPath)
+                .anyMatch(element -> element.getNodeType() == Node.ELEMENT_NODE
+                        && Objects.equals(element.getTagName(), "SLOT")
+                        && element.getAttribute("name")
+                                .startsWith("custom-editor-"));
     }
 
     private void onSheetDoubleClick(Event event) {
@@ -170,7 +171,6 @@ public class SheetEventListener implements EventListener {
             break;
         }
     }
-
 
     private void onKeyDown(Event event) {
         if (!widget.isEditingCell()) {

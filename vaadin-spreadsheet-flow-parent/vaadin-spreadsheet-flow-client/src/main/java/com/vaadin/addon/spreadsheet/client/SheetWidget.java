@@ -8,6 +8,9 @@
  */
 package com.vaadin.addon.spreadsheet.client;
 
+import static com.vaadin.addon.spreadsheet.client.SheetJsniUtil.getAssignedElements;
+import static com.vaadin.addon.spreadsheet.client.SheetJsniUtil.getComposedPath;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,9 +77,6 @@ import com.vaadin.client.WidgetUtil;
 import com.vaadin.client.ui.VLabel;
 import com.vaadin.client.ui.VLazyExecutor;
 import com.vaadin.client.ui.VOverlay;
-
-import static com.vaadin.addon.spreadsheet.client.SheetJsniUtil.getAssignedElements;
-import static com.vaadin.addon.spreadsheet.client.SheetJsniUtil.getComposedPath;
 
 public class SheetWidget extends Panel {
 
@@ -388,7 +388,8 @@ public class SheetWidget extends Panel {
 
     public void focusCustomEditor() {
         var cell = getCell(selectedCellCol, selectedCellRow);
-        var assignedElements = getAssignedElements(cell.getElement().getFirstChildElement());
+        var assignedElements = getAssignedElements(
+                cell.getElement().getFirstChildElement());
         if (assignedElements != null && assignedElements.length == 1) {
             var assignedElement = assignedElements[0];
             if (assignedElement.getNodeType() == Node.ELEMENT_NODE) {
@@ -1147,8 +1148,10 @@ public class SheetWidget extends Panel {
 
         var customEditorCell = getCustomEditorCell(event);
         if (customEditorCell != null) {
-//            className = customEditorCell.getClassName();
-            debugConsole.info("[SheetWidget:onSheetMouseDown] customEditorCell: " + customEditorCell.getClassName());
+            // className = customEditorCell.getClassName();
+            debugConsole
+                    .info("[SheetWidget:onSheetMouseDown] customEditorCell: "
+                            + customEditorCell.getClassName());
         }
 
         if (cellCommentEditMode && !className.contains("comment-overlay")) {
@@ -1222,14 +1225,14 @@ public class SheetWidget extends Panel {
                 Event.releaseCapture(sheet);
                 actionHandler.onCellRightClick(event, targetCol, targetRow);
             } else {
-//                if (customEditorCell != null) {
-//                    var slot = customEditorCell.getFirstChildElement();
-//                    if (slot.getTagName().equals("SLOT")) {
-//                        Arrays.stream(getAssignedElements(slot)).findFirst().ifPresent(Element::focus);
-//                    }
-//                } else {
-                    sheet.focus();
-//                }
+                // if (customEditorCell != null) {
+                // var slot = customEditorCell.getFirstChildElement();
+                // if (slot.getTagName().equals("SLOT")) {
+                // Arrays.stream(getAssignedElements(slot)).findFirst().ifPresent(Element::focus);
+                // }
+                // } else {
+                sheet.focus();
+                // }
                 // quit input if active
                 if (editingCell && !input.getElement().isOrHasChild(target)) {
                     actionHandler.onCellInputBlur(input.getValue());
@@ -1279,17 +1282,17 @@ public class SheetWidget extends Panel {
     private Element getCustomEditorCell(Event event) {
         var composedPath = getComposedPath(event);
         var result = Arrays.stream(composedPath)
-            .filter(element -> Objects.equals(element.getTagName(), "SLOT")
-                && element.getAttribute("name")
-                .startsWith("custom-editor-"));
+                .filter(element -> Objects.equals(element.getTagName(), "SLOT")
+                        && element.getAttribute("name")
+                                .startsWith("custom-editor-"));
 
         if (result.count() == 0) {
             return null;
         }
 
         return Arrays.stream(composedPath)
-            .filter(element -> element.hasClassName("cell")).findFirst()
-            .orElse(null);
+                .filter(element -> element.hasClassName("cell")).findFirst()
+                .orElse(null);
     }
 
     protected void onMouseMoveWhenSelectingCells(Event event) {
@@ -5053,7 +5056,8 @@ public class SheetWidget extends Panel {
         return lastRowIndex;
     }
 
-    public void displayCustomCellEditor(Widget customEditorWidget, boolean focusEditor) {
+    public void displayCustomCellEditor(Widget customEditorWidget,
+            boolean focusEditor) {
         customCellEditorDisplayed = true;
         jsniUtil.replaceSelector(editedCellFreezeColumnStyle,
                 ".notusedselector", 0);

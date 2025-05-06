@@ -469,22 +469,25 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                         var editor = SheetJsniUtil.getVirtualChild(editorId,
                                 host.getPropertyString("appId"));
                         Slot slot = new Slot("custom-editor-" + editorId,
-                            editor, host);
-                        Event.setEventListener(slot.getAssignedElement(), event -> {
-                            var sheetWidget = getWidget().getSheetWidget();
-                            switch (event.getKeyCode()) {
-                            case KeyCodes.KEY_TAB:
-                                event.preventDefault();
-                                sheetWidget.focusSheet();
-                                sheetWidget.getSheetHandler()
-                                    .onSheetKeyPress(event, "");
-                                break;
-                            case KeyCodes.KEY_ESCAPE: // Handle escape
-                                sheetWidget.focusSheet();
-                                break;
-                            }
-                        });
-                        DOM.sinkEvents(slot.getAssignedElement(), Event.ONKEYDOWN);
+                                editor, host);
+                        Event.setEventListener(slot.getAssignedElement(),
+                                event -> {
+                                    var sheetWidget = getWidget()
+                                            .getSheetWidget();
+                                    switch (event.getKeyCode()) {
+                                    case KeyCodes.KEY_TAB:
+                                        event.preventDefault();
+                                        sheetWidget.focusSheet();
+                                        sheetWidget.getSheetHandler()
+                                                .onSheetKeyPress(event, "");
+                                        break;
+                                    case KeyCodes.KEY_ESCAPE: // Handle escape
+                                        sheetWidget.focusSheet();
+                                        break;
+                                    }
+                                });
+                        DOM.sinkEvents(slot.getAssignedElement(),
+                                Event.ONKEYDOWN);
                         return slot;
                     }
 
