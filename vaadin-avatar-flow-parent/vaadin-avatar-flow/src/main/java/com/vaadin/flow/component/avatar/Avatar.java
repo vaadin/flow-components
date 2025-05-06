@@ -27,6 +27,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.server.AbstractStreamResource;
+import com.vaadin.flow.server.DownloadHandler;
+import com.vaadin.flow.server.StreamResourceRegistry;
 
 import elemental.json.JsonObject;
 
@@ -261,6 +263,28 @@ public class Avatar extends Component
         }
 
         getElement().setAttribute("img", resource);
+    }
+
+    /**
+     * Sets the image for the avatar.
+     * <p>
+     * Setting the image as a resource with this method resets the image URL
+     * that was set with {@link Avatar#setImage(String)}
+     *
+     * @see Avatar#setImage(String)
+     * @param downloadHandler
+     *            the download resource or {@code null} to remove the resource
+     */
+    public void setImageHandler(DownloadHandler downloadHandler) {
+        if (downloadHandler == null) {
+            imageResource = null;
+            getElement().removeAttribute("img");
+            return;
+        }
+        imageResource = new StreamResourceRegistry.ElementStreamResource(
+                downloadHandler, getElement());
+
+        getElement().setAttribute("img", imageResource);
     }
 
     /**

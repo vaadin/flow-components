@@ -30,7 +30,9 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.server.DownloadHandler;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadResponse;
 
 import elemental.json.JsonType;
 import elemental.json.JsonValue;
@@ -107,6 +109,29 @@ public class MessageListTest {
         UI.setCurrent(new UI());
         item1.setUserImageResource(new StreamResource("message-list-img",
                 () -> getClass().getResourceAsStream("baz/qux")));
+        item1.setUserImage("foo/bar");
+        Assert.assertNull(item1.getUserImageResource());
+    }
+
+    @Test
+    public void setImageHandler_overridesImageUrl() {
+        UI.setCurrent(new UI());
+        item1.setUserImage("foo/bar");
+        item1.setUserImageHandler(
+                DownloadHandler.fromInputStream(data -> new DownloadResponse(
+                        getClass().getResourceAsStream("baz/qux"),
+                        "message-list-img", null, -1)));
+        MatcherAssert.assertThat(item1.getUserImage(),
+                startsWith("VAADIN/dynamic"));
+    }
+
+    @Test
+    public void setImageHandler_streamResourceBecomesNull() {
+        UI.setCurrent(new UI());
+        item1.setUserImageHandler(
+                DownloadHandler.fromInputStream(data -> new DownloadResponse(
+                        getClass().getResourceAsStream("baz/qux"),
+                        "message-list-img", null, -1)));
         item1.setUserImage("foo/bar");
         Assert.assertNull(item1.getUserImageResource());
     }
