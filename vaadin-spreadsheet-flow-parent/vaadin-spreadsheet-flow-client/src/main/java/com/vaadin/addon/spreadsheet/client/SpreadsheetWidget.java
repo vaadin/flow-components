@@ -460,7 +460,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             if (customEditor != null) {
                 customCellEditorDisplayed = true;
                 formulaBarWidget.setFormulaFieldEnabled(false);
-                sheetWidget.displayCustomCellEditor(customEditor);
+                sheetWidget.displayCustomCellEditor(customEditor, false);
             }
         }
     }
@@ -706,7 +706,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                     updateSelectedCellValues(column, row);
                 }
                 if (updateToActionHandler) {
-                    selectionHandler.newSelectedCellSet();
+                    selectionHandler.newSelectedCellSet(true);
                     spreadsheetHandler.cellSelected(row, column, true);
                     startDelayedSendingTimer();
                 }
@@ -733,8 +733,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         if (!customCellEditorDisplayed) {
             formulaBarWidget.setFormulaFieldEnabled(!cellLocked);
         } else {
-            sheetWidget.displayCustomCellEditor(customEditorFactory
-                    .getCustomEditor(sheetWidget.getSelectedCellKey()));
+//            sheetWidget.displayCustomCellEditor(customEditorFactory
+//                    .getCustomEditor(sheetWidget.getSelectedCellKey()), true);
         }
         if (name != null) {
             formulaBarWidget.setSelectedCellAddress(name);
@@ -1190,6 +1190,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                             formulaBarWidget.getFormulaFieldValue());
                     formulaBarWidget.setInFullFocus(true);
                     formulaBarWidget.startInlineEdit(true);
+                } else if (customCellEditorDisplayed) {
+                    sheetWidget.focusCustomEditor();
                 }
                 break;
             }
@@ -1219,6 +1221,14 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                         formulaBarWidget.cacheFormulaFieldValue();
                     }
                     formulaBarWidget.setCellPlainValue(enteredCharacter);
+                } else if (getCustomEditorFactory().hasCustomEditor(sheetWidget.getSelectedCellKey())) {
+                    Widget customEditor = getCustomEditorFactory().getCustomEditor(
+                        sheetWidget.getSelectedCellKey());
+                    if (customEditor instanceof Slot) {
+                        var assignedElement = ((Slot) customEditor).getAssignedElement();
+                        assignedElement.focus();
+                        assignedElement.setNodeValue(enteredCharacter);
+                    }
                 }
             }
         }

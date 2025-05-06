@@ -165,6 +165,10 @@ public class SelectionHandler {
     }
 
     public void newSelectedCellSet() {
+        newSelectedCellSet(false);
+    }
+
+    public void newSelectedCellSet(boolean focusEditor) {
         if (spreadsheet.customCellEditorDisplayed) {
             spreadsheet.customCellEditorDisplayed = false;
             sheetWidget.removeCustomCellEditor();
@@ -179,7 +183,7 @@ public class SelectionHandler {
             if (customEditor != null) {
                 spreadsheet.customCellEditorDisplayed = true;
                 spreadsheet.formulaBarWidget.setFormulaFieldEnabled(false);
-                sheetWidget.displayCustomCellEditor(customEditor);
+                sheetWidget.displayCustomCellEditor(customEditor, focusEditor);
             }
         }
     }
