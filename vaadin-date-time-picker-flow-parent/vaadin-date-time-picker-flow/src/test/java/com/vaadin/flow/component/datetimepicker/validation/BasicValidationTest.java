@@ -18,6 +18,7 @@ package com.vaadin.flow.component.datetimepicker.validation;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Assert;
@@ -232,6 +233,16 @@ public class BasicValidationTest
         dateTimePicker.setValue(null);
         Assert.assertEquals(validationCount + 1,
                 dateTimePicker.getValidationCount());
+    }
+
+    @Test
+    public void setValueProgrammatically_invalidStateIsUpdatedInValueChangeListener() {
+        var isInvalid = new AtomicBoolean();
+        testField.addValueChangeListener(
+                e -> isInvalid.set(e.getSource().isInvalid()));
+        testField.setMax(LocalDateTime.now());
+        testField.setValue(LocalDateTime.now().plusDays(1));
+        Assert.assertTrue(isInvalid.get());
     }
 
     @Override
