@@ -26,8 +26,8 @@ import com.vaadin.flow.component.contextmenu.testbench.ContextMenuOverlayElement
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
 import com.vaadin.flow.component.notification.testbench.NotificationElement;
 
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-context-menu/sub-menu-helpers-test")
 public class SubMenuHelpersIT extends AbstractComponentIT {
