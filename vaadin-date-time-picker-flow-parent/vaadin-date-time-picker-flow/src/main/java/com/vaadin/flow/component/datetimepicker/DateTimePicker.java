@@ -374,12 +374,12 @@ public class DateTimePicker
     public void setValue(LocalDateTime value) {
         var oldValue = getValue();
         value = sanitizeValue(value);
-        super.setValue(value);
         var shouldFireValidationStatusChangeEvent = oldValue == null
                 && value == null
                 && (isInputUnparsable() || isInputIncomplete());
         synchronizeChildComponentValues(value);
         validate(shouldFireValidationStatusChangeEvent);
+        super.setValue(value);
     }
 
     /**
