@@ -95,7 +95,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      */
     public SvgIcon(DownloadHandler src) {
         setSrc(new StreamResourceRegistry.ElementStreamResource(src,
-                this.getElement()));
+                getElement()));
     }
 
     /**

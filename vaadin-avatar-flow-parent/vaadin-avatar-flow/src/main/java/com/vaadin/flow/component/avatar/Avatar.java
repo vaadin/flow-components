@@ -282,7 +282,7 @@ public class Avatar extends Component
             return;
         }
         imageResource = new StreamResourceRegistry.ElementStreamResource(
-                downloadHandler, this.getElement());
+                downloadHandler, getElement());
 
         getElement().setAttribute("img", imageResource);
     }

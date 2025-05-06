@@ -61,8 +61,8 @@ public class AvatarGroupPage extends Div {
                 });
         setItemsWithResource.setId("set-items-with-resource");
 
-        NativeButton setItemsDownloadHandler = new NativeButton(
-                "Set new item with StreamResource image", e -> {
+        NativeButton setItemsWithDownloadHandler = new NativeButton(
+                "Set new item with download resource image", e -> {
                     DownloadHandler download = DownloadHandler.forClassResource(
                             getClass(),
                             "/META-INF/resources/frontend/images/user.png",
@@ -72,7 +72,7 @@ public class AvatarGroupPage extends Div {
 
                     avatarGroup.setItems(newItem);
                 });
-        setItemsDownloadHandler.setId("set-items-with-download-resource");
+        setItemsWithDownloadHandler.setId("set-items-with-download-resource");
 
         NativeButton addClassNames = new NativeButton("Add class name", e -> {
             items.get(0).addClassNames("red");
@@ -86,6 +86,6 @@ public class AvatarGroupPage extends Div {
         removeClassNames.setId("remove-class-names");
 
         add(avatarGroup, updateItems, setItemsWithResource, addClassNames,
-                removeClassNames, setItemsDownloadHandler);
+                removeClassNames, setItemsWithDownloadHandler);
     }
 }

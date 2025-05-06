@@ -419,15 +419,13 @@ public class MessageListItem implements Serializable {
      */
     public void setUserImageHandler(DownloadHandler downloadHandler) {
         if (downloadHandler == null) {
-            imageResource = null;
             unsetResource();
-        } else {
-            setUserImageResource(
-                    new StreamResourceRegistry.ElementStreamResource(
-                            downloadHandler,
-                            getHost() != null ? getHost().getElement()
-                                    : UI.getCurrent().getElement()));
+            return;
         }
+
+        setUserImageResource(new StreamResourceRegistry.ElementStreamResource(
+                downloadHandler, getHost() != null ? getHost().getElement()
+                        : UI.getCurrent().getElement()));
     }
 
     /**

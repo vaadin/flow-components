@@ -67,7 +67,7 @@ public class AvatarGroupIT extends AbstractComponentIT {
         clickElementWithJs("set-items-with-download-resource");
         String imageUrl = $(AvatarGroupElement.class).first()
                 .getAvatarElement(0).getPropertyString("img");
-        Assert.assertThat(imageUrl, startsWith("VAADIN/dynamic"));
+        Assert.assertTrue(imageUrl.startsWith("VAADIN/dynamic"));
         checkLogsForErrors(); // would fail if the image wasn't hosted
     }
 
