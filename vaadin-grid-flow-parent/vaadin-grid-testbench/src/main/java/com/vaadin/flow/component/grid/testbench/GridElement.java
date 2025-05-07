@@ -234,26 +234,32 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
-     * Gets the <code>tr</code> element for the given row index.
+     * Gets the {@code tr} element for the given row index.
      *
      * @param rowIndex
      *            the row index
-     * @return the tr element for the row
+     * @return the {@code tr} element for the row, or {@code null} if the row is
+     *         not in viewport
      * @throws IndexOutOfBoundsException
      *             if no row with given index exists
      */
     public GridTRElement getRow(int rowIndex) throws IndexOutOfBoundsException {
-        return getRow(rowIndex, true);
+        return getRow(rowIndex, false);
     }
 
     /**
-     * Gets the <code>tr</code> element for the given row index.
+     * Gets the {@code tr} element for the given row index.
+     * <p>
+     * Returns {@code null} if the row is not in viewport and the provided
+     * {@code scroll} parameter is {@code false}.
      *
      * @param rowIndex
      *            the row index
      * @param scroll
-     *            scroll to index to reveal the row
-     * @return the tr element for the row
+     *            whether to scroll to the row index
+     * @return the {@code tr} element for the row, or {@code null} if the row is
+     *         not in viewport and the provided {@code scroll} parameter is
+     *         {@code false}
      * @throws IndexOutOfBoundsException
      *             if no row with given index exists
      */
