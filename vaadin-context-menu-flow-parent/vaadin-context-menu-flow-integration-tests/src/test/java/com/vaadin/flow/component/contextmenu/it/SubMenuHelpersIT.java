@@ -25,7 +25,6 @@ import com.vaadin.flow.component.contextmenu.testbench.ContextMenuItemElement;
 import com.vaadin.flow.component.contextmenu.testbench.ContextMenuOverlayElement;
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
 import com.vaadin.flow.component.notification.testbench.NotificationElement;
-
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
