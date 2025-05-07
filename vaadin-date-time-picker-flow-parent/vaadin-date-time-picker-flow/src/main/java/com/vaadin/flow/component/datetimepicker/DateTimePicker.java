@@ -352,7 +352,7 @@ public class DateTimePicker
     }
 
     private void addValidationListeners() {
-        getElement().addEventListener("change", e -> validate(true));
+        addValueChangeListener(e -> validate());
         getElement().addEventListener("unparsable-change", e -> validate(true));
     }
 
@@ -377,9 +377,11 @@ public class DateTimePicker
         var shouldFireValidationStatusChangeEvent = oldValue == null
                 && value == null
                 && (isInputUnparsable() || isInputIncomplete());
-        synchronizeChildComponentValues(value);
-        validate(shouldFireValidationStatusChangeEvent);
         super.setValue(value);
+        synchronizeChildComponentValues(value);
+        if (shouldFireValidationStatusChangeEvent) {
+            validate(true);
+        }
     }
 
     /**
