@@ -51,4 +51,17 @@ public class ComponentColumnWithHeightIT extends AbstractComponentIT {
                         + grid.getRow(0).getSize().height,
                 grid.getRow(1).getLocation().y);
     }
+
+    @Test
+    public void shouldPositionItemsCorrectlyAfterScrollingToEnd() {
+        var initialLastRow = grid.getRowCount() - 1;
+        var row = grid.getRow(initialLastRow, true);
+        var expectedPosition = row.getLocation().y + row.getSize().height;
+
+        add.click();
+        // Expect the y position of the last row to equal the y position + the
+        // height of the previous row
+        Assert.assertEquals(expectedPosition,
+                grid.getRow(initialLastRow + 1).getLocation().y);
+    }
 }
