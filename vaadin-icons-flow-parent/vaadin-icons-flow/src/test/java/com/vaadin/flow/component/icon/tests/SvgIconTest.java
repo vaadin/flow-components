@@ -25,8 +25,8 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.icon.SvgIcon;
+import com.vaadin.flow.server.DownloadEvent;
 import com.vaadin.flow.server.DownloadHandler;
-import com.vaadin.flow.server.DownloadRequest;
 import com.vaadin.flow.server.StreamResource;
 
 public class SvgIconTest {
@@ -197,9 +197,9 @@ public class SvgIconTest {
     private static DownloadHandler getDownloadHandler() {
         return new DownloadHandler() {
             @Override
-            public void handleDownloadRequest(DownloadRequest downloadRequest) {
+            public void handleDownloadRequest(DownloadEvent downloadEvent) {
                 try {
-                    downloadRequest.getOutputStream().write(
+                    downloadEvent.getOutputStream().write(
                             "<svg></svg>".getBytes(StandardCharsets.UTF_8));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
