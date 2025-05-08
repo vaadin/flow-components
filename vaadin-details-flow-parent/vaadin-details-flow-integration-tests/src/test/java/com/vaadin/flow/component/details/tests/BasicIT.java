@@ -15,16 +15,12 @@
  */
 package com.vaadin.flow.component.details.tests;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.details.testbench.DetailsElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
@@ -39,22 +35,13 @@ public class BasicIT extends AbstractComponentIT {
         open();
         detailsElements = $(DetailsElement.class).all();
 
-        Assert.assertEquals(3, detailsElements.size());
+        Assert.assertEquals(2, detailsElements.size());
     }
 
     @Test
     public void testSummary() {
         DetailsElement detail1 = detailsElements.get(0);
         Assert.assertEquals("Some summary", detail1.getSummaryText());
-
-        DetailsElement detailsThemed = detailsElements.get(2);
-        List<String> themes = Arrays
-                .asList(detailsThemed.getDomAttribute("theme").split(" "));
-        Assert.assertTrue(themes.containsAll(Stream.of(DetailsVariant.values())
-                .map(DetailsVariant::getVariantName)
-                .collect(Collectors.toList())));
-        Assert.assertEquals("Small Reversed Filled Summary",
-                detailsThemed.getSummaryText());
     }
 
     @Test

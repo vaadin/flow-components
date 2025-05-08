@@ -45,11 +45,6 @@ public class BigDecimalFieldPage extends Div {
                 e -> field.setReadOnly(!field.isReadOnly()));
         toggleReadOnly.setId("toggle-read-only");
 
-        NativeButton toggleRequired = new NativeButton("toggle required",
-                e -> field.setRequiredIndicatorVisible(
-                        !field.isRequiredIndicatorVisible()));
-        toggleRequired.setId("toggle-required");
-
         NativeButton toggleEnabled = new NativeButton("toggle enabled",
                 e -> field.setEnabled(!field.isEnabled()));
         toggleEnabled.setId("toggle-enabled");
@@ -63,8 +58,8 @@ public class BigDecimalFieldPage extends Div {
         fieldWithClearButton.setId("clear-big-decimal-field");
         fieldWithClearButton.addValueChangeListener(this::logValueChangeEvent);
 
-        Div buttons = new Div(setValueWithScale, toggleReadOnly, toggleRequired,
-                toggleEnabled, setFrenchLocale);
+        Div buttons = new Div(setValueWithScale, toggleReadOnly, toggleEnabled,
+                setFrenchLocale);
         add(field, buttons, fieldWithClearButton, messageContainer);
     }
 

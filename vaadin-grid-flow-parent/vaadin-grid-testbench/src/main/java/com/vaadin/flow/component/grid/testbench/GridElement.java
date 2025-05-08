@@ -234,15 +234,40 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
-     * Gets the <code>tr</code> element for the given row index.
+     * Gets the {@code tr} element for the given row index.
      *
      * @param rowIndex
      *            the row index
-     * @return the tr element for the row
+     * @return the {@code tr} element for the row, or {@code null} if the row is
+     *         not in viewport
      * @throws IndexOutOfBoundsException
      *             if no row with given index exists
      */
     public GridTRElement getRow(int rowIndex) throws IndexOutOfBoundsException {
+        return getRow(rowIndex, false);
+    }
+
+    /**
+     * Gets the {@code tr} element for the given row index.
+     * <p>
+     * Returns {@code null} if the row is not in viewport and the provided
+     * {@code scroll} parameter is {@code false}.
+     *
+     * @param rowIndex
+     *            the row index
+     * @param scroll
+     *            whether to scroll to the row index
+     * @return the {@code tr} element for the row, or {@code null} if the row is
+     *         not in viewport and the provided {@code scroll} parameter is
+     *         {@code false}
+     * @throws IndexOutOfBoundsException
+     *             if no row with given index exists
+     */
+    public GridTRElement getRow(int rowIndex, boolean scroll)
+            throws IndexOutOfBoundsException {
+        if (scroll && !isRowInView(rowIndex)) {
+            scrollToFlatRow(rowIndex);
+        }
         var rows = getRows(rowIndex, rowIndex);
         return rows.size() == 1 ? rows.get(0) : null;
     }

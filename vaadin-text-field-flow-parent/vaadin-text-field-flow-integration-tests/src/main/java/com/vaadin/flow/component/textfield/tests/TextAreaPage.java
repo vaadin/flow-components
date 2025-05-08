@@ -77,7 +77,6 @@ public class TextAreaPage extends Div {
         Div message = new Div();
         TextArea textArea = new TextArea();
         textArea.setLabel("Text area label");
-        textArea.setPlaceholder("placeholder text");
         textArea.addValueChangeListener(event -> message.setText(
                 String.format("Text area value changed from '%s' to '%s'",
                         event.getOldValue(), event.getValue())));

@@ -256,6 +256,42 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
         Assert.assertEquals(testDate, picker.getDate());
     }
 
+    @Test
+    public void setLocale_setDate_yearBefore1000_assertDisplayedValue() {
+        applyLocale(Locale.UK);
+
+        picker.setDate(LocalDate.of(900, Month.MARCH, 6));
+        Assert.assertEquals("06/03/0900", picker.getInputValue());
+
+        picker.setDate(LocalDate.of(87, Month.MARCH, 6));
+        Assert.assertEquals("06/03/0087", picker.getInputValue());
+
+        applyLocale(Locale.CHINA);
+
+        picker.setDate(LocalDate.of(900, Month.MARCH, 5));
+        Assert.assertEquals("0900/3/5", picker.getInputValue());
+
+        picker.setDate(LocalDate.of(87, Month.MARCH, 5));
+        Assert.assertEquals("0087/3/5", picker.getInputValue());
+    }
+
+    @Test
+    public void setLocale_setInputValue_yearBefore1000_assertDisplayedValue() {
+        applyLocale(Locale.UK);
+
+        picker.setInputValue("6/3/900");
+        Assert.assertEquals("06/03/0900", picker.getInputValue());
+        Assert.assertEquals(LocalDate.of(900, Month.MARCH, 6),
+                picker.getDate());
+
+        applyLocale(Locale.CHINA);
+
+        picker.setInputValue("900/3/6");
+        Assert.assertEquals("0900/3/6", picker.getInputValue());
+        Assert.assertEquals(LocalDate.of(900, Month.MARCH, 6),
+                picker.getDate());
+    }
+
     private void enterShortYearDate(LocalDate date) {
         String formattedDate = date
                 .format(DateTimeFormatter.ofPattern("MM/dd/yy"));

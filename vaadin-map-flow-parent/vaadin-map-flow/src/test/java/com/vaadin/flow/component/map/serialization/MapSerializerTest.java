@@ -22,6 +22,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.map.Assets;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
 import com.vaadin.flow.component.map.configuration.style.Icon;
+import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
@@ -47,7 +48,8 @@ public class MapSerializerTest {
         Mockito.when(ui.getSession()).thenReturn(mockSession);
         Mockito.when(mockSession.getResourceRegistry())
                 .thenReturn(streamResourceRegistryMock);
-        Mockito.when(streamResourceRegistryMock.registerResource(Mockito.any()))
+        Mockito.when(streamResourceRegistryMock
+                .registerResource((AbstractStreamResource) Mockito.any()))
                 .thenReturn(streamRegistrationMock);
         Mockito.when(streamRegistrationMock.getResourceUri())
                 .thenReturn(new URI("https://example.com"));

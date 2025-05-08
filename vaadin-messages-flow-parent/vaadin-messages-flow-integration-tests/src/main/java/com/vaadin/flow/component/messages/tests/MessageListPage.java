@@ -25,6 +25,7 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.DownloadHandler;
 import com.vaadin.flow.server.StreamResource;
 
 @Route("vaadin-messages/message-list-test")
@@ -44,7 +45,8 @@ public class MessageListPage extends Div {
         MessageList messageList = new MessageList(foo, bar);
         add(messageList);
 
-        addButton("setText", () -> foo.setText("foo2"));
+        addButton("setText", () -> foo.setText("newfoo"));
+        addButton("appendText", () -> foo.setText(foo.getText() + "2"));
         addButton("setTime",
                 () -> foo.setTime(Instant.parse("2000-02-02T12:00:00.00Z")));
         addButton("setUserName", () -> foo.setUserName("sender2"));
@@ -69,6 +71,14 @@ public class MessageListPage extends Div {
                     () -> getClass().getResourceAsStream(
                             "/META-INF/resources/frontend/images/avatar.png"));
             foo.setUserImageResource(resource);
+        });
+
+        addButton("setImageAsDownloadHandler", () -> {
+            DownloadHandler resource = DownloadHandler.forClassResource(
+                    getClass(),
+                    "/META-INF/resources/frontend/images/avatar.png",
+                    "message-list-img");
+            foo.setUserImageHandler(resource);
         });
 
     }

@@ -22,11 +22,9 @@ import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
-import com.vaadin.flow.component.splitlayout.SplitLayoutVariant;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -42,22 +40,6 @@ public class SplitLayoutView extends Div {
         addResizeNotificationLayout();
         addInitialSplitterPositionLayout();
         addMinMaxWidthLayout();
-        addComponentWithThemeVariant();
-    }
-
-    private void addComponentWithThemeVariant() {
-        SplitLayout layout = new SplitLayout(
-                new Label("First content component"),
-                new Label("Second content component"));
-        layout.addThemeVariants(SplitLayoutVariant.LUMO_SMALL);
-        layout.setId("split-layout-theme-variant");
-
-        NativeButton removeVariantButton = new NativeButton(
-                "Remove theme variant",
-                e -> layout.removeThemeVariants(SplitLayoutVariant.LUMO_SMALL));
-        removeVariantButton.setId("remove-variant-button");
-
-        addCard("Split Layout theme variant", layout, removeVariantButton);
     }
 
     private void addLayoutCombination() {

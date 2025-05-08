@@ -18,6 +18,7 @@ package com.vaadin.flow.component.contextmenu;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.function.SerializableRunnable;
 
@@ -80,6 +81,13 @@ public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
     public MenuItem addItem(Component component,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
         return getMenuManager().addItem(component, clickListener);
+    }
+
+    /**
+     * Adds a separator between items.
+     */
+    public void addSeparator() {
+        getMenuManager().add(new Hr());
     }
 
     @Override

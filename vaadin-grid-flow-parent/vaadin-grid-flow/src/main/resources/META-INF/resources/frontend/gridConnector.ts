@@ -1103,7 +1103,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     if (
       content.some((node) => {
         // Ignore focus buttons that the component renders into cells in focus button mode on MacOS
-        const focusable = cell._focusButton !== node && isFocusable(node);
+        const focusable = cell?._focusButton !== node && isFocusable(node);
         return focusable || node instanceof HTMLLabelElement;
       })
     ) {

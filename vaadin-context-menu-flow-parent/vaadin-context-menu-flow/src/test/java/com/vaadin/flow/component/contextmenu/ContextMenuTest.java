@@ -146,6 +146,23 @@ public class ContextMenuTest {
     }
 
     @Test
+    public void addItemsAndSeparator_separatorOnlyIncludedInChildren() {
+        var contextMenu = new ContextMenu();
+        var item1 = contextMenu.addItem("foo", null);
+        contextMenu.addSeparator();
+        var item2 = contextMenu.addItem("bar", null);
+
+        var children = contextMenu.getChildren().toList();
+        var items = contextMenu.getItems();
+        Assert.assertEquals(3, children.size());
+        Assert.assertEquals(2, items.size());
+        Assert.assertEquals(item1, children.get(0));
+        Assert.assertEquals(item2, children.get(2));
+        Assert.assertEquals(item1, items.get(0));
+        Assert.assertEquals(item2, items.get(1));
+    }
+
+    @Test
     public void addItemsAndComponents_getItemsReturnsItemsOnly() {
         ContextMenu contextMenu = new ContextMenu();
 

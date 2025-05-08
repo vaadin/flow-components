@@ -63,6 +63,15 @@ public class AvatarGroupIT extends AbstractComponentIT {
     }
 
     @Test
+    public void avatarGroupAttached_setItemsWithDownloadHandler_imageLoaded() {
+        clickElementWithJs("set-items-with-download-resource");
+        String imageUrl = $(AvatarGroupElement.class).first()
+                .getAvatarElement(0).getPropertyString("img");
+        Assert.assertTrue(imageUrl.startsWith("VAADIN/dynamic"));
+        checkLogsForErrors(); // would fail if the image wasn't hosted
+    }
+
+    @Test
     public void addClassNames_removeClassNames_avatarsUpdated() {
         findElement(By.id("add-class-names")).click();
         Assert.assertEquals("red", getAvatarClassName(0));

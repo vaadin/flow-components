@@ -24,7 +24,6 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
@@ -90,7 +89,6 @@ public class VirtualListPage extends Div {
         createTemplateWithEventHandlers();
         createListWithComponentRenderer();
         createListWithComponentRendererWithBeansAndPlaceholder();
-        createDetachableList();
         createListsWithBasicRenderers();
         createListInsideFlexContainer();
     }
@@ -306,39 +304,6 @@ public class VirtualListPage extends Div {
         list.setPlaceholderItem(placeholder);
 
         add(list);
-    }
-
-    private void createDetachableList() {
-        Div container1 = new Div(new Text("Container 1"));
-        container1.setId("detachable-list-container-1");
-        Div container2 = new Div(new Text("Container 2"));
-        container2.setId("detachable-list-container-2");
-
-        VirtualList<Person> list = new VirtualList<>();
-        list.setId("detachable-list");
-
-        list.setItems(createPeople(20));
-        list.setRenderer(Person::getName);
-        container1.add(list);
-        add(container1);
-        NativeButton detach = new NativeButton("Detach list",
-                e -> list.getParent().ifPresent(
-                        parent -> ((HasComponents) parent).remove(list)));
-        detach.setId("detachable-list-detach");
-        NativeButton attach1 = new NativeButton("Attach list to container 1",
-                e -> container1.add(list));
-        attach1.setId("detachable-list-attach-1");
-        NativeButton attach2 = new NativeButton("Attach list to container 2",
-                e -> container2.add(list));
-        attach2.setId("detachable-list-attach-2");
-        NativeButton invisible = new NativeButton("Set list invisble",
-                e -> list.setVisible(false));
-        invisible.setId("detachable-list-invisible");
-        NativeButton visible = new NativeButton("Set list visible",
-                e -> list.setVisible(true));
-        visible.setId("detachable-list-visible");
-        add(container1, container2, detach, attach1, attach2, invisible,
-                visible);
     }
 
     private void createListsWithBasicRenderers() {

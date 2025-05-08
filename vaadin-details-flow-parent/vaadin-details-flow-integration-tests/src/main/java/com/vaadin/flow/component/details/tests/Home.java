@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.details.tests;
 
 import com.vaadin.flow.component.details.Details;
-import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
@@ -40,10 +39,6 @@ public class Home extends Div {
         detailsDisabled.add(new H3("Disabled content"));
         detailsDisabled.add(new Span("Always visible content"));
 
-        Details detailsThemed = new Details("Small Reversed Filled Summary",
-                new Span("Themed Content"));
-        detailsThemed.addThemeVariants(DetailsVariant.values());
-
-        add(details, detailsDisabled, detailsThemed, info);
+        add(details, detailsDisabled, info);
     }
 }

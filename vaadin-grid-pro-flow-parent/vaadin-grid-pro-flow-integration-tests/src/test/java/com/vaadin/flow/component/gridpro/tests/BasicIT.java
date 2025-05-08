@@ -394,7 +394,7 @@ public class BasicIT extends AbstractComponentIT {
                 .first();
 
         textField.setProperty("value", "Updated Person 1");
-        executeScript("arguments[0].blur();", textField);
+        textField.sendKeys(Keys.ENTER);
 
         Assert.assertEquals("Updated Person 1",
                 grid.getCell(0, 1).getInnerHTML());
