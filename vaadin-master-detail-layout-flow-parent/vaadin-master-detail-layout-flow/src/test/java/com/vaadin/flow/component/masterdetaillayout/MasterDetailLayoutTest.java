@@ -344,20 +344,21 @@ public class MasterDetailLayoutTest {
     }
 
     @Test
-    public void setStackThreshold_getStackThreshold() {
-        String threshold = "600px";
-        layout.setStackThreshold(threshold);
-        Assert.assertEquals(threshold, layout.getStackThreshold());
-        Assert.assertEquals(threshold,
-                layout.getElement().getProperty("stackThreshold"));
-    }
+    public void setOverlayMode_getOverlayMode() {
+        Assert.assertEquals(MasterDetailLayout.OverlayMode.DRAWER,
+                layout.getOverlayMode());
 
-    @Test
-    public void setStackThresholdWithUnit_getStackThreshold() {
-        layout.setStackThreshold(30, Unit.EM);
-        Assert.assertEquals("30.0em", layout.getStackThreshold());
-        Assert.assertEquals("30.0em",
-                layout.getElement().getProperty("stackThreshold"));
+        layout.setOverlayMode(MasterDetailLayout.OverlayMode.STACK);
+        Assert.assertEquals(MasterDetailLayout.OverlayMode.STACK,
+                layout.getOverlayMode());
+        Assert.assertTrue(
+                layout.getElement().getProperty("stackOverlay", false));
+
+        layout.setOverlayMode(MasterDetailLayout.OverlayMode.DRAWER);
+        Assert.assertEquals(MasterDetailLayout.OverlayMode.DRAWER,
+                layout.getOverlayMode());
+        Assert.assertFalse(
+                layout.getElement().getProperty("stackOverlay", false));
     }
 
     private void assertMasterContent(Component component) {

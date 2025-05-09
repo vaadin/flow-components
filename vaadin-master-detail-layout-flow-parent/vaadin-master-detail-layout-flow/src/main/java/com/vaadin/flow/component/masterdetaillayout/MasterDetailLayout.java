@@ -56,6 +56,7 @@ public class MasterDetailLayout extends Component
     private HasElement detail;
     private PendingJavaScriptResult pendingDetailsUpdate;
     private boolean hasInitialized = false;
+    private OverlayMode overlayMode;
 
     /**
      * Supported orientation values for {@link MasterDetailLayout}.
@@ -69,6 +70,20 @@ public class MasterDetailLayout extends Component
      */
     public enum Containment {
         LAYOUT, VIEWPORT
+    }
+
+    /**
+     * Supported overlay mode values for {@link MasterDetailLayout}.
+     */
+    public enum OverlayMode {
+        DRAWER, STACK
+    }
+
+    /**
+     * Creates an empty Master Detail Layout.
+     */
+    public MasterDetailLayout() {
+        setOverlayMode(OverlayMode.DRAWER);
     }
 
     /**
@@ -173,7 +188,8 @@ public class MasterDetailLayout extends Component
      * Sets the size of the master area in CSS length units. When specified, it
      * prevents the master area from growing or shrinking. If there is not
      * enough space to show master and detail areas next to each other, the
-     * layout switches to the overlay mode.
+     * layout switches to the overlay, using the mode defined by
+     * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param size
      *            the size of the master area in CSS length units
@@ -186,7 +202,8 @@ public class MasterDetailLayout extends Component
      * Sets the size of the master area in CSS length units. When specified, it
      * prevents the master area from growing or shrinking. If there is not
      * enough space to show master and detail areas next to each other, the
-     * layout switches to the overlay mode.
+     * layout switches to the overlay, using the mode defined by
+     * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param size
      *            the size of the master area
@@ -212,7 +229,8 @@ public class MasterDetailLayout extends Component
      * Sets the minimum size of the master area in CSS length units. When
      * specified, it prevents the master area from shrinking below this size. If
      * there is not enough space to show master and detail areas next to each
-     * other, the layout switches to the overlay mode.
+     * other, the layout switches to the overlay, using the mode defined by
+     * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param minSize
      *            the minimum size of the master area in CSS length units
@@ -225,7 +243,8 @@ public class MasterDetailLayout extends Component
      * Sets the minimum size of the master area in CSS length units. When
      * specified, it prevents the master area from shrinking below this size. If
      * there is not enough space to show master and detail areas next to each
-     * other, the layout switches to the overlay mode.
+     * other, the layout switches to the overlay, using the mode defined by
+     * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param minSize
      *            the minimum size of the master area
@@ -252,7 +271,8 @@ public class MasterDetailLayout extends Component
      * Sets the size of the detail area in CSS length units. When specified, it
      * prevents the detail area from growing or shrinking. If there is not
      * enough space to show master and detail areas next to each other, the
-     * layout switches to the overlay mode.
+     * layout switches to the overlay, using the mode defined by
+     * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param size
      *            the size of the detail area in CSS length units
@@ -265,7 +285,8 @@ public class MasterDetailLayout extends Component
      * Sets the size of the detail area in CSS length units. When specified, it
      * prevents the detail area from growing or shrinking. If there is not
      * enough space to show master and detail areas next to each other, the
-     * layout switches to the overlay mode.
+     * layout switches to the overlay, using the mode defined by
+     * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param size
      *            the size of the detail area
@@ -291,7 +312,8 @@ public class MasterDetailLayout extends Component
      * Sets the minimum size of the detail area in CSS length units. When
      * specified, it prevents the detail area from shrinking below this size. If
      * there is not enough space to show master and detail areas next to each
-     * other, the layout switches to the overlay mode.
+     * other, the layout switches to the overlay, using the mode defined by
+     * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param minSize
      *            the minimum size of the detail area in CSS length units
@@ -304,7 +326,8 @@ public class MasterDetailLayout extends Component
      * Sets the minimum size of the detail area in CSS length units. When
      * specified, it prevents the detail area from shrinking below this size. If
      * there is not enough space to show master and detail areas next to each
-     * other, the layout switches to the overlay mode.
+     * other, the layout switches to the overlay, using the mode defined by
+     * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param minSize
      *            the minimum size of the detail area
@@ -375,7 +398,34 @@ public class MasterDetailLayout extends Component
     }
 
     /**
-     * Gets whether the layout overlay mode is enforced.
+     * Gets the overlay mode of the layout. Defaults to
+     * {@link OverlayMode#DRAWER}.
+     *
+     * @return the overlay mode
+     */
+    public OverlayMode getOverlayMode() {
+        return overlayMode;
+    }
+
+    /**
+     * Sets the overlay mode of the layout. When set to
+     * {@link OverlayMode#DRAWER}, the detail area is positioned on top of
+     * master area and there is a backdrop that covers the remaining part of the
+     * master area. When set to {@link OverlayMode#STACK}, the detail area fully
+     * covers the master area.
+     *
+     * @param mode
+     *            the overlay mode
+     */
+    public void setOverlayMode(OverlayMode mode) {
+        Objects.requireNonNull(mode, "OverlayMode cannot be null");
+        overlayMode = mode;
+        getElement().setProperty("stackOverlay", mode == OverlayMode.STACK);
+    }
+
+    /**
+     * Gets whether the layout overlay mode is enforced. The way how the overlay
+     * is rendered is defined by {@link #setOverlayMode(OverlayMode)}.
      *
      * @return {@code true} if the overlay mode is enforced, {@code false}
      *         otherwise
@@ -385,7 +435,8 @@ public class MasterDetailLayout extends Component
     }
 
     /**
-     * Sets whether the layout overlay mode is enforced.
+     * Sets whether the layout overlay mode is enforced. The way how the overlay
+     * is rendered is defined by {@link #setOverlayMode(OverlayMode)}.
      *
      * @param forceOverlay
      *            {@code true} if the overlay mode is enforced, {@code false}
@@ -413,43 +464,6 @@ public class MasterDetailLayout extends Component
      */
     public void setAnimationEnabled(boolean enabled) {
         getElement().setProperty("noAnimation", !enabled);
-    }
-
-    /**
-     * Gets the threshold (in CSS length units) at which the layout switches to
-     * the "stack" mode, making detail area fully cover the master area.
-     *
-     * @return the stack threshold in CSS length units, or {@code null} if the
-     *         threshold is not set
-     */
-    public String getStackThreshold() {
-        return getElement().getProperty("stackThreshold");
-    }
-
-    /**
-     * Sets the threshold (in CSS length units) at which the layout switches to
-     * the "stack" mode, making detail area fully cover the master area.
-     *
-     * @param threshold
-     *            the stack threshold in CSS length units
-     */
-    public void setStackThreshold(String threshold) {
-        getElement().setProperty("stackThreshold", threshold);
-    }
-
-    /**
-     * Sets the threshold (in CSS length units) at which the layout switches to
-     * the "stack" mode, making detail area fully cover the master area.
-     *
-     * @param threshold
-     *            the stack threshold
-     * @param unit
-     *            the unit
-     */
-    public void setStackThreshold(float threshold, Unit unit) {
-        Objects.requireNonNull(unit, "Unit cannot be null");
-        getElement().setProperty("stackThreshold",
-                HasSize.getCssSize(threshold, unit));
     }
 
     @Override
