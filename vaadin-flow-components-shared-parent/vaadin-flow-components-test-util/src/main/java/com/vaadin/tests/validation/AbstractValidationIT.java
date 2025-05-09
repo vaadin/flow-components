@@ -30,10 +30,9 @@ import org.junit.Before;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.vaadin.testbench.HasValidation;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
-public abstract class AbstractValidationIT<T extends TestBenchElement>
+public abstract class AbstractValidationIT<T extends HasValidation>
         extends AbstractComponentIT {
     protected T testField;
 
@@ -58,8 +57,7 @@ public abstract class AbstractValidationIT<T extends TestBenchElement>
     }
 
     protected void assertErrorMessage(String expected) {
-        Assert.assertEquals(expected,
-                ((HasValidation) testField).getErrorMessage());
+        Assert.assertEquals(expected, testField.getErrorMessage());
     }
 
     protected void assertClientValid() {
@@ -90,7 +88,7 @@ public abstract class AbstractValidationIT<T extends TestBenchElement>
     }
 
     private boolean isClientValid() {
-        return !((HasValidation) testField).isInvalid();
+        return !testField.isInvalid();
     }
 
     protected void detachAndReattachField() {
