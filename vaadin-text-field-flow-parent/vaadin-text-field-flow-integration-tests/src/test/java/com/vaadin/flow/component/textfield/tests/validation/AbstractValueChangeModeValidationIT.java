@@ -23,16 +23,17 @@ import java.util.List;
 
 import org.junit.Assert;
 
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.validation.AbstractValidationIT;
 
-public abstract class AbstractValueChangeModeValidationIT<T extends TestBenchElement>
+public abstract class AbstractValueChangeModeValidationIT<T extends HasValidation>
         extends AbstractValidationIT<T> {
     private long validationTimeoutStart;
 
     protected List<String> getValidationResults() {
         return $("div").id(VALIDATION_LOG).$("div").all().stream()
-                .map(record -> record.getText()).toList();
+                .map(TestBenchElement::getText).toList();
     }
 
     protected void startValidationTimeout() {
