@@ -16,37 +16,23 @@
 package com.vaadin.flow.component.datepicker;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Locale;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
-/**
- * View for {@link DatePicker} demo.
- *
- * @author Vaadin Ltd
- */
-@Route("vaadin-date-picker-test-demo")
-public class DatePickerViewDemoPage extends Div {
+@Route("vaadin-date-picker/date-picker-test")
+public class DatePickerPage extends Div {
 
-    public DatePickerViewDemoPage() {
+    public DatePickerPage() {
         createSimpleDatePicker();
         createMinAndMaxDatePicker();
         createDisabledDatePicker();
-        createFinnishDatePicker();
-        createWithClearButton();
         createStartAndEndDatePickers();
-        createLocaleChangeDatePicker();
-        createDatePickerInsideDisabledParent();
         createDatePickerWithOpenedChangeListener();
-        addCard("Additional code used in the demo",
-                new Label("These methods are used in the demo."));
     }
 
     private void createSimpleDatePicker() {
@@ -96,56 +82,6 @@ public class DatePickerViewDemoPage extends Div {
 
         datePicker.setId("disabled-picker");
         addCard("Disabled date picker", datePicker, message);
-    }
-
-    private void createWithClearButton() {
-        DatePicker datePicker = new DatePicker();
-        datePicker.setValue(LocalDate.now());
-
-        // Display an icon which can be clicked to clear the value:
-        datePicker.setClearButtonVisible(true);
-
-        addCard("Clear button", datePicker);
-    }
-
-    private void createFinnishDatePicker() {
-        Div message = createMessageDiv("finnish-picker-message");
-
-        DatePicker datePicker = new DatePicker();
-        datePicker.setLabel("Finnish date picker");
-        datePicker.setPlaceholder("Syntymäpäivä");
-        datePicker.setLocale(new Locale("fi"));
-
-        datePicker.setI18n(new DatePicker.DatePickerI18n().setToday("tänään")
-                .setCancel("peruuta").setFirstDayOfWeek(1)
-                .setMonthNames(Arrays.asList("tammiku", "helmikuu", "maaliskuu",
-                        "huhtikuu", "toukokuu", "kesäkuu", "heinäkuu", "elokuu",
-                        "syyskuu", "lokakuu", "marraskuu", "joulukuu"))
-                .setWeekdays(Arrays.asList("sunnuntai", "maanantai", "tiistai",
-                        "keskiviikko", "torstai", "perjantai", "lauantai"))
-                .setWeekdaysShort(Arrays.asList("su", "ma", "ti", "ke", "to",
-                        "pe", "la")));
-
-        datePicker.addValueChangeListener(event -> {
-            LocalDate selectedDate = event.getValue();
-            if (selectedDate != null) {
-                int weekday = selectedDate.getDayOfWeek().getValue() % 7;
-                String weekdayName = datePicker.getI18n().getWeekdays()
-                        .get(weekday);
-
-                int month = selectedDate.getMonthValue() - 1;
-                String monthName = datePicker.getI18n().getMonthNames()
-                        .get(month);
-
-                message.setText("Day of week: " + weekdayName + "\nMonth: "
-                        + monthName);
-            } else {
-                message.setText("No date is selected");
-            }
-        });
-
-        datePicker.setId("finnish-picker");
-        addCard("Internationalized date picker", datePicker, message);
     }
 
     private void createStartAndEndDatePickers() {
@@ -202,56 +138,6 @@ public class DatePickerViewDemoPage extends Div {
         addCard("Two linked date pickers", startDatePicker, endDatePicker,
                 message);
 
-    }
-
-    private void createLocaleChangeDatePicker() {
-        Div message = createMessageDiv("Customize-locale-picker-message");
-        // By default, the datePicker uses the current UI locale
-        DatePicker datePicker = new DatePicker();
-        NativeButton locale1 = new NativeButton("Locale: US");
-        NativeButton locale2 = new NativeButton("Locale: UK");
-        NativeButton locale3 = new NativeButton("Locale: CHINA");
-
-        locale1.addClickListener(e -> {
-            datePicker.setLocale(Locale.US);
-            updateMessage(message, datePicker);
-        });
-        locale2.addClickListener(e -> {
-            datePicker.setLocale(Locale.UK);
-            updateMessage(message, datePicker);
-        });
-        locale3.addClickListener(e -> {
-            datePicker.setLocale(Locale.CHINA);
-            updateMessage(message, datePicker);
-        });
-
-        datePicker.addValueChangeListener(
-                event -> updateMessage(message, datePicker));
-        DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
-        i18n.setReferenceDate(LocalDate.of(1980, 2, 2));
-        datePicker.setI18n(i18n);
-        locale1.setId("Locale-US");
-        locale2.setId("Locale-UK");
-        locale3.setId("Locale-CHINA");
-        datePicker.setId("locale-change-picker");
-        addCard("Date picker with customize locales", datePicker, locale1,
-                locale2, locale3, message);
-    }
-
-    private void createDatePickerInsideDisabledParent() {
-        Div parent = new Div();
-        DatePicker datePicker = new DatePicker();
-        datePicker.setId("picker-inside-disabled-parent");
-
-        parent.add(datePicker);
-        parent.setEnabled(false);
-
-        NativeButton enableParent = new NativeButton("Enable parent");
-        enableParent.setId("enable-parent");
-        enableParent.addClickListener(event -> parent.setEnabled(true));
-
-        addCard("DatePicker inside a disabled parent div", parent,
-                enableParent);
     }
 
     private void createDatePickerWithOpenedChangeListener() {

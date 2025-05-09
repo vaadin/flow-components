@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonElement;
 import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -211,17 +210,6 @@ public class RadioButtonGroupIT extends AbstractComponentIT {
 
         Assert.assertEquals("Group should have the 'foo' item selected", "foo",
                 group.getSelectedText());
-    }
-
-    @Test
-    public void assertThemeVariant() {
-        WebElement group = findElement(By.id("button-group-theme-variant"));
-        scrollToElement(group);
-        Assert.assertEquals(RadioGroupVariant.LUMO_VERTICAL.getVariantName(),
-                group.getDomAttribute("theme"));
-
-        findElement(By.id("remove-theme-variant-button")).click();
-        Assert.assertNull(group.getDomAttribute("theme"));
     }
 
     @Test

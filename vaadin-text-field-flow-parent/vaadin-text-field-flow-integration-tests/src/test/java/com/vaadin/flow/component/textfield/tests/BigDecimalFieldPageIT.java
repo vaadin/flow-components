@@ -147,18 +147,6 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertRequired() {
-        assertFalse(field.isRequired());
-
-        WebElement toggleRequired = findElement(By.id("toggle-required"));
-        toggleRequired.click();
-        waitUntil(driver -> field.isRequired());
-
-        toggleRequired.click();
-        waitUntil(driver -> !field.isRequired());
-    }
-
-    @Test
     public void assertClearValue() {
         field = $(BigDecimalFieldElement.class).id("clear-big-decimal-field");
 

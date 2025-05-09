@@ -20,7 +20,6 @@ import javax.annotation.concurrent.NotThreadSafe;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
@@ -28,8 +27,8 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.function.SerializableSupplier;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterListener;
+import com.vaadin.flow.router.BeforeLeaveEvent;
+import com.vaadin.flow.router.internal.BeforeLeaveHandler;
 import com.vaadin.flow.server.VaadinSession;
 
 @NotThreadSafe
@@ -105,19 +104,30 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void open_beforeEnterListenerFiresBeforeClientResponse_notAutoAdded() {
+    public void open_beforeLeaveEventFiresBeforeClientResponse_autoAdded() {
         TestComponent component = new TestComponent();
-
         component.setOpened(true);
 
-        ArgumentCaptor<BeforeEnterListener> captor = ArgumentCaptor
-                .forClass(BeforeEnterListener.class);
-        Mockito.verify(ui).addBeforeEnterListener(captor.capture());
+        BeforeLeaveEvent beforeLeaveEvent = Mockito
+                .mock(BeforeLeaveEvent.class);
+        ui.getInternals().getListeners(BeforeLeaveHandler.class)
+                .forEach(handler -> handler.beforeLeave(beforeLeaveEvent));
+        fakeClientResponse();
 
-        BeforeEnterEvent beforeEnterEvent = Mockito
-                .mock(BeforeEnterEvent.class);
+        Assert.assertEquals(ui.getElement(),
+                component.getElement().getParent());
+    }
 
-        captor.getValue().beforeEnter(beforeEnterEvent);
+    @Test
+    public void setSkipOnNavigation_open_beforeLeaveEventFiresBeforeClientResponse_notAutoAdded() {
+        TestComponent component = new TestComponent();
+        component.controller.setSkipOnNavigation(true);
+        component.setOpened(true);
+
+        BeforeLeaveEvent beforeLeaveEvent = Mockito
+                .mock(BeforeLeaveEvent.class);
+        ui.getInternals().getListeners(BeforeLeaveHandler.class)
+                .forEach(handler -> handler.beforeLeave(beforeLeaveEvent));
         fakeClientResponse();
 
         Assert.assertNull(component.getElement().getParent());
@@ -206,12 +216,14 @@ public class OverlayAutoAddControllerTest {
 
     @Tag("test")
     private static class TestComponent extends Component {
+        private final OverlayAutoAddController<TestComponent> controller;
+
         public TestComponent() {
-            new OverlayAutoAddController<>(this);
+            controller = new OverlayAutoAddController<>(this);
         }
 
         public TestComponent(SerializableSupplier<Boolean> isModalSupplier) {
-            new OverlayAutoAddController<>(this, isModalSupplier);
+            controller = new OverlayAutoAddController<>(this, isModalSupplier);
         }
 
         public void setOpened(boolean opened) {

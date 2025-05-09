@@ -95,20 +95,6 @@ public class EmailFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertRequired() {
-        EmailFieldElement emailField = $(EmailFieldElement.class).first();
-
-        assertFalse(emailField.isRequired());
-
-        WebElement button = findElement(By.id("required"));
-        button.click();
-        waitUntil(driver -> emailField.isRequired());
-
-        button.click();
-        waitUntil(driver -> !emailField.isRequired());
-    }
-
-    @Test
     public void assertClearValue() {
         EmailFieldElement field = $(EmailFieldElement.class)
                 .id("clear-email-field");

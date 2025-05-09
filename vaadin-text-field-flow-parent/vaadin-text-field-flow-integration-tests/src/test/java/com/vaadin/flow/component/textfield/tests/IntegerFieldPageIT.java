@@ -104,18 +104,6 @@ public class IntegerFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertRequired() {
-        assertFalse(field.isRequired());
-
-        WebElement toggleRequired = findElement(By.id("toggle-required"));
-        toggleRequired.click();
-        waitUntil(driver -> field.isRequired());
-
-        toggleRequired.click();
-        waitUntil(driver -> !field.isRequired());
-    }
-
-    @Test
     public void assertClearValue() {
         field = $(IntegerFieldElement.class).id("clear-integer-field");
 

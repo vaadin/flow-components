@@ -64,18 +64,6 @@ public class TextFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertRequired() {
-        TextFieldElement webComponent = $(TextFieldElement.class).first();
-        Assert.assertFalse(webComponent.isRequired());
-        WebElement button = findElement(By.id("required"));
-        button.click();
-        waitUntil(driver -> webComponent.isRequired());
-
-        button.click();
-        waitUntil(driver -> !webComponent.isRequired());
-    }
-
-    @Test
     public void labelMatches() {
         List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
                 .withLabel("Text field label").all();
@@ -262,14 +250,6 @@ public class TextFieldPageIT extends AbstractComponentIT {
         updateValues(textFieldValueDiv, textField, true);
         $(RadioButtonGroupElement.class).first().selectByText(EAGER.toString());
         updateValues(textFieldValueDiv, textField, false);
-    }
-
-    @Test
-    public void textFieldHasPlaceholder() {
-        WebElement textField = findElement(
-                By.id("text-field-with-value-change-listener"));
-        Assert.assertEquals("placeholder text",
-                textField.getDomAttribute("placeholder"));
     }
 
     @Test

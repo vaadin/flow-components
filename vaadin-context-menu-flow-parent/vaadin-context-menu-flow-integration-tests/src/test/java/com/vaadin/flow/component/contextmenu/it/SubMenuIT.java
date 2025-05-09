@@ -24,6 +24,8 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.contextmenu.testbench.ContextMenuItemElement;
+import com.vaadin.flow.component.contextmenu.testbench.ContextMenuOverlayElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
@@ -47,8 +49,8 @@ public class SubMenuIT extends AbstractContextMenuIT {
         openSubMenu(getMenuItems().get(0));
         verifyNumOfOverlays(2);
 
-        List<TestBenchElement> overlays = getAllOverlays();
-        TestBenchElement subItem = getMenuItems(overlays.get(1)).get(0);
+        List<ContextMenuOverlayElement> overlays = getAllOverlays();
+        ContextMenuItemElement subItem = getMenuItems(overlays.get(1)).get(0);
         Assert.assertEquals("bar", subItem.getText());
 
         subItem.click();
@@ -72,8 +74,9 @@ public class SubMenuIT extends AbstractContextMenuIT {
         openSubMenu(getMenuItems().get(0));
         verifyNumOfOverlays(2);
 
-        List<TestBenchElement> overlays = getAllOverlays();
-        List<TestBenchElement> subMenuItems = getMenuItems(overlays.get(1));
+        List<ContextMenuOverlayElement> overlays = getAllOverlays();
+        List<ContextMenuItemElement> subMenuItems = getMenuItems(
+                overlays.get(1));
         String[] menuItemCaptions = getMenuItemCaptions(subMenuItems);
         Assert.assertArrayEquals(new String[] { "bar", "0", "1" },
                 menuItemCaptions);
@@ -99,8 +102,9 @@ public class SubMenuIT extends AbstractContextMenuIT {
         openSubMenu(getMenuItems(getAllOverlays().get(1)).get(0));
         verifyNumOfOverlays(3);
 
-        List<TestBenchElement> overlays = getAllOverlays();
-        List<TestBenchElement> subMenuItems = getMenuItems(overlays.get(2));
+        List<ContextMenuOverlayElement> overlays = getAllOverlays();
+        List<ContextMenuItemElement> subMenuItems = getMenuItems(
+                overlays.get(2));
         String[] menuItemCaptions = getMenuItemCaptions(subMenuItems);
         Assert.assertArrayEquals(new String[] { "0" }, menuItemCaptions);
 
@@ -112,7 +116,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
     @Test
     public void openAndCloseSubMenu_removeAll_noSubMenu_stylesUpdated() {
         rightClickOn("target");
-        TestBenchElement parent = getMenuItems().get(0);
+        ContextMenuItemElement parent = getMenuItems().get(0);
         assertHasPopup(parent, true);
 
         openSubMenu(parent);
@@ -140,7 +144,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
 
         verifyNumOfOverlays(2);
 
-        TestBenchElement subMenuOverlay = getAllOverlays().get(1);
+        ContextMenuOverlayElement subMenuOverlay = getAllOverlays().get(1);
 
         WebElement firstItem = subMenuOverlay.$("vaadin-context-menu-list-box")
                 .first().findElement(By.xpath("./*"));
@@ -159,7 +163,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
 
         verifyNumOfOverlays(2);
 
-        TestBenchElement subMenuOverlay = getAllOverlays().get(1);
+        ContextMenuOverlayElement subMenuOverlay = getAllOverlays().get(1);
 
         WebElement checkableItem = subMenuOverlay
                 .$("vaadin-context-menu-list-box").first()

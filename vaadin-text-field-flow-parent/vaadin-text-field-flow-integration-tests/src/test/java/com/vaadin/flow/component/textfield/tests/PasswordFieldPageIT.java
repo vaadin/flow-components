@@ -57,21 +57,6 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertRequired() {
-        PasswordFieldElement webComponent = $(PasswordFieldElement.class)
-                .first();
-
-        Assert.assertFalse(webComponent.isRequired());
-
-        WebElement button = findElement(By.id("required"));
-        button.click();
-        waitUntil(driver -> webComponent.isRequired());
-
-        button.click();
-        waitUntil(driver -> !webComponent.isRequired());
-    }
-
-    @Test
     public void assertClearValue() {
         PasswordFieldElement field = $(PasswordFieldElement.class)
                 .id("clear-password-field");
@@ -114,14 +99,6 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
         Assert.assertTrue(
                 "TextField should be focused after the shortcut event is triggered.",
                 shortcutField.hasAttribute("focused"));
-    }
-
-    @Test
-    public void passwordFieldHasPlaceholder() {
-        WebElement passwordField = findElement(
-                By.id("password-field-with-value-change-listener"));
-        Assert.assertEquals(passwordField.getDomAttribute("placeholder"),
-                "placeholder text");
     }
 
     @Test

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
@@ -68,9 +69,9 @@ import elemental.json.JsonValue;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha13")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha17")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/virtual-list", version = "24.8.0-alpha13")
+@NpmPackage(value = "@vaadin/virtual-list", version = "24.8.0-alpha17")
 @JsModule("@vaadin/virtual-list/src/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
@@ -363,5 +364,18 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
      */
     public SerializableFunction<T, String> getItemAccessibleNameGenerator() {
         return itemAccessibleNameGenerator;
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        // When the component is detached and reattached in the same roundtrip,
+        // data communicator will clear all data generators, which will also
+        // remove all components rendered by component renderers. Thus reset the
+        // data communicator to re-render components. This also fixes the case
+        // where the virtual list is used in Popover or manually attached
+        // Dialog, see https://github.com/vaadin/web-components/issues/8630
+        getDataCommunicator().reset();
     }
 }

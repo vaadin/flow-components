@@ -121,14 +121,6 @@ public class TextAreaPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void textAreaHasPlaceholder() {
-        WebElement textField = findElement(
-                By.id("text-area-with-value-change-listener"));
-        Assert.assertEquals(textField.getDomAttribute("placeholder"),
-                "placeholder text");
-    }
-
-    @Test
     public void maxHeight() {
         WebElement textArea = findElement(By.id("text-area-with-max-height"));
 

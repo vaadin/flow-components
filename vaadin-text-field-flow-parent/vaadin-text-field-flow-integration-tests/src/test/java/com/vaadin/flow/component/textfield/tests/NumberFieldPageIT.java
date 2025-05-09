@@ -102,20 +102,6 @@ public class NumberFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertRequired() {
-        NumberFieldElement numberField = $(NumberFieldElement.class).first();
-
-        assertFalse(numberField.isRequired());
-
-        WebElement button = findElement(By.id("required"));
-        button.click();
-        waitUntil(driver -> numberField.isRequired());
-
-        button.click();
-        waitUntil(driver -> !numberField.isRequired());
-    }
-
-    @Test
     public void assertClearValue() {
         NumberFieldElement field = $(NumberFieldElement.class)
                 .id("clear-number-field");
@@ -151,37 +137,5 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         field.setValue("123.0");
         String message = $("div").id("clear-message").getText();
         Assert.assertEquals("Old value: 'null'. New value: '123.0'.", message);
-    }
-
-    @Test
-    public void dollarFieldHasDollarPrefix() {
-        WebElement dollarField = findElement(By.id("dollar-field"));
-        WebElement span = dollarField.findElement(By.tagName("span"));
-
-        Assert.assertEquals("$", span.getText());
-
-        int spanX = span.getLocation().getX();
-        int middleX = dollarField.getLocation().getX()
-                + dollarField.getSize().getWidth() / 2;
-
-        Assert.assertTrue(
-                "The dollar sign should be located on the left side of the text field",
-                spanX < middleX);
-    }
-
-    @Test
-    public void euroFieldHasEuroSuffix() {
-        WebElement euroField = findElement(By.id("euro-field"));
-        WebElement span = euroField.findElement(By.tagName("span"));
-
-        Assert.assertEquals("€", span.getText());
-
-        int spanX = span.getLocation().getX();
-        int middleX = euroField.getLocation().getX()
-                + euroField.getSize().getWidth() / 2;
-
-        Assert.assertTrue(
-                "The euro sign should be located on the right side of the text field",
-                spanX > middleX);
     }
 }
