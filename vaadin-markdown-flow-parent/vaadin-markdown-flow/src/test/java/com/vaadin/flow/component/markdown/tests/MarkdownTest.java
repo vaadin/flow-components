@@ -69,36 +69,44 @@ public class MarkdownTest {
     public void testAppendContent() {
         markdown.appendContent("**Hello**");
         assertUpdateMarkdownCall(markdown, "**Hello**", false);
+        Assert.assertEquals("**Hello**", markdown.getContent());
 
         markdown.appendContent(" _World_");
         assertUpdateMarkdownCall(markdown, " _World_", true);
+        Assert.assertEquals("**Hello** _World_", markdown.getContent());
     }
 
     @Test
     public void testAppendContentWithSetContent() {
         markdown.setContent("**Hello**");
         assertUpdateMarkdownCall(markdown, "**Hello**", false);
+        Assert.assertEquals("**Hello**", markdown.getContent());
 
         markdown.setContent("**Hello** _World_");
         assertUpdateMarkdownCall(markdown, " _World_", true);
+        Assert.assertEquals("**Hello** _World_", markdown.getContent());
     }
 
     @Test
     public void testReplaceMarkdown() {
         markdown.setContent("**Hello**");
         assertUpdateMarkdownCall(markdown, "**Hello**", false);
+        Assert.assertEquals("**Hello**", markdown.getContent());
 
         markdown.setContent("**Foobar**");
         assertUpdateMarkdownCall(markdown, "**Foobar**", false);
+        Assert.assertEquals("**Foobar**", markdown.getContent());
     }
 
     @Test
     public void testSetSameMarkdown() {
         markdown.setContent("**Hello** _World_");
         assertUpdateMarkdownCall(markdown, "**Hello** _World_", false);
+        Assert.assertEquals("**Hello** _World_", markdown.getContent());
 
         markdown.setContent("**Hello** _World_");
         Assert.assertEquals(0, getPendingJavaScriptInvocations().size());
+        Assert.assertEquals("**Hello** _World_", markdown.getContent());
     }
 
     @Test
@@ -115,6 +123,7 @@ public class MarkdownTest {
 
         markdown.setContent(null);
         assertUpdateMarkdownCall(markdown, null, false);
+        Assert.assertEquals(null, markdown.getContent());
     }
 
     @Test
@@ -126,6 +135,7 @@ public class MarkdownTest {
 
         ui.add(markdown);
         assertUpdateMarkdownCall(markdown, "**Hello** _World_", false);
+        Assert.assertEquals("**Hello** _World_", markdown.getContent());
     }
 
     private void assertUpdateMarkdownCall(Component component, String content,

@@ -48,7 +48,7 @@ public class Markdown extends Component implements HasSize {
     /**
      * Creates a Markdown with content.
      *
-     * @param markdown
+     * @param content
      *            the markdown content
      * @see #setContent(String)
      */
@@ -59,7 +59,7 @@ public class Markdown extends Component implements HasSize {
     /**
      * Sets the markdown content.
      * 
-     * @param markdown
+     * @param content
      *            the markdown content
      */
     public void setContent(String content) {
@@ -70,7 +70,7 @@ public class Markdown extends Component implements HasSize {
     /**
      * Appends the markdown content.
      * 
-     * @param markdown
+     * @param content
      *            the markdown content to append
      */
     public void appendContent(String content) {

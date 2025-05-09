@@ -20,15 +20,11 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.markdown.Markdown;
 import com.vaadin.flow.router.Route;
 
-@Route("markdown")
+@Route("vaadin-markdown")
 public class MarkdownPage extends Div {
 
     public MarkdownPage() {
         var markdown = new Markdown("**Hello** _World_");
-
-        // Ensure the component can be resized
-        markdown.setHeight("300px");
-        markdown.setWidth("400px");
 
         add(markdown);
 

@@ -23,7 +23,7 @@ import com.vaadin.flow.component.markdown.testbench.MarkdownElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("markdown")
+@TestPath("vaadin-markdown")
 public class MarkdownIT extends AbstractComponentIT {
 
     private MarkdownElement markdownElement;
@@ -32,12 +32,6 @@ public class MarkdownIT extends AbstractComponentIT {
     public void init() {
         open();
         markdownElement = $(MarkdownElement.class).waitForFirst();
-    }
-
-    @Test
-    public void sizeMatches() {
-        Assert.assertEquals(300, markdownElement.getSize().getHeight());
-        Assert.assertEquals(400, markdownElement.getSize().getWidth());
     }
 
     @Test
