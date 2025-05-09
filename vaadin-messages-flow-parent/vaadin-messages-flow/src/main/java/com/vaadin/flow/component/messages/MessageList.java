@@ -50,9 +50,10 @@ import com.vaadin.flow.internal.JsonUtils;
 public class MessageList extends Component
         implements HasStyle, HasSize, LocaleChangeObserver {
 
-    private List<MessageListItem> items = Collections.emptyList();
+    private List<MessageListItem> items = new ArrayList<>();
     private boolean pendingUpdate = false;
     private boolean pendingTextUpdate = false;
+    private Integer pendingAddItemsIndex;
 
     private final String CONNECTOR_OBJECT = "window.Vaadin.Flow.messageListConnector";
 
@@ -118,6 +119,21 @@ public class MessageList extends Component
     }
 
     /**
+     * Adds a single item to be rendered as a message at the end of this message
+     * list.
+     *
+     * @param item
+     *            the item to add, not {@code null}
+     */
+    public void addItem(MessageListItem item) {
+        Objects.requireNonNull(item, "Can't add null item to MessageList.");
+
+        item.setHost(this);
+        items.add(item);
+        scheduleAddItemsUpdate();
+    }
+
+    /**
      * Gets the items that are rendered as message components in this message
      * list.
      *
@@ -137,6 +153,13 @@ public class MessageList extends Component
         pendingTextUpdate = true;
     }
 
+    void scheduleAddItemsUpdate() {
+        scheduleUpdate();
+        if (pendingAddItemsIndex == null) {
+            pendingAddItemsIndex = items.size() - 1;
+        }
+    }
+
     /**
      * Schedules a full update of the message list items.
      */
@@ -150,7 +173,8 @@ public class MessageList extends Component
      * next client response.
      */
     private void scheduleUpdate() {
-        if (pendingUpdate || pendingTextUpdate) {
+        if (pendingUpdate || pendingTextUpdate
+                || pendingAddItemsIndex != null) {
             // Already scheduled
             return;
         }
@@ -172,6 +196,9 @@ public class MessageList extends Component
         } else {
             // Incremental updates
 
+            // Check if we need to add new items
+            handleAddItemsUpdate(ui);
+
             // Check for text updates if not a full update
             handleTextUpdates();
         }
@@ -179,6 +206,7 @@ public class MessageList extends Component
         // Reset flags for the next update cycle
         pendingTextUpdate = false;
         pendingUpdate = false;
+        pendingAddItemsIndex = null;
     }
 
     /**
@@ -224,6 +252,21 @@ public class MessageList extends Component
                 item.clientText = item.getText();
             }
         });
+    }
+
+    private void handleAddItemsUpdate(UI ui) {
+        if (pendingAddItemsIndex == null) {
+            return;
+        }
+
+        var newItems = items.subList(pendingAddItemsIndex, items.size());
+        // Sync clientText for new items
+        newItems.forEach(item -> item.clientText = item.getText());
+
+        var newItemsJson = JsonUtils.listToJson(newItems);
+        // Call the connector function to add items
+        getElement().executeJs(CONNECTOR_OBJECT + ".addItems(this, $0, $1)",
+                newItemsJson, ui.getLocale().toLanguageTag());
     }
 
     @Override
