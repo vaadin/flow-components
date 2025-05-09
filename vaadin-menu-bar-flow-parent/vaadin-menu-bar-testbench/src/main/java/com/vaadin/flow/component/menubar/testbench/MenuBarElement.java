@@ -17,7 +17,6 @@ package com.vaadin.flow.component.menubar.testbench;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
@@ -27,8 +26,7 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 /**
- * A TestBench element representing a <code>&lt;vaadin-menu-bar&gt;</code>
- * element.
+ * A TestBench element representing a {@code <vaadin-menu-bar>} element.
  */
 @Element("vaadin-menu-bar")
 public class MenuBarElement extends TestBenchElement {
@@ -42,8 +40,8 @@ public class MenuBarElement extends TestBenchElement {
      *
      * @return the button elements in the menu bar
      */
-    public List<TestBenchElement> getButtons() {
-        return $("vaadin-menu-bar-button").all().stream().filter(
+    public List<MenuBarButtonElement> getButtons() {
+        return $(MenuBarButtonElement.class).all().stream().filter(
                 element -> !isOverflowButton(element) && isVisible(element))
                 .collect(Collectors.toList());
     }
@@ -54,8 +52,9 @@ public class MenuBarElement extends TestBenchElement {
      *
      * @return the button which opens the sub menu of overflowing items
      */
-    public TestBenchElement getOverflowButton() {
-        TestBenchElement overflowButton = $("[slot='overflow']").first();
+    public MenuBarButtonElement getOverflowButton() {
+        MenuBarButtonElement overflowButton = $(MenuBarButtonElement.class)
+                .withAttribute("slot", "overflow").first();
         if (overflowButton == null || overflowButton.hasAttribute("hidden")) {
             return null;
         }
@@ -63,7 +62,7 @@ public class MenuBarElement extends TestBenchElement {
     }
 
     private boolean isOverflowButton(TestBenchElement element) {
-        return Objects.equals("overflow", element.getDomAttribute("slot"));
+        return "overflow".equals(element.getAttribute("slot"));
     }
 
     private boolean isVisible(TestBenchElement element) {
@@ -75,9 +74,9 @@ public class MenuBarElement extends TestBenchElement {
      * Get TestBenchElements representing sub menu items under the first sub
      * menu.
      *
-     * @return List of TestBenchElements representing sub menu items.
+     * @return List of MenuBarItemElement representing sub menu items.
      */
-    public List<TestBenchElement> getSubMenuItems() {
+    public List<MenuBarItemElement> getSubMenuItems() {
         return getSubMenuItems(getSubMenu());
     }
 
@@ -87,21 +86,21 @@ public class MenuBarElement extends TestBenchElement {
      *
      * @param overlay
      *            The sub menu overlay from which items are being collected.
-     * @return List of TestBenchElements representing sub menu items.
+     * @return List of MenuBarItemElement representing sub menu items.
      */
-    public List<TestBenchElement> getSubMenuItems(TestBenchElement overlay) {
-        return overlay.$("vaadin-menu-bar-item").all();
+    public List<MenuBarItemElement> getSubMenuItems(TestBenchElement overlay) {
+        return overlay.$(MenuBarItemElement.class).all();
     }
 
     /**
      * Get the sub menu overlay element.
      *
-     * @return TestBenchElement for the first open sub menu.
+     * @return TestBenchElement for the first open sub menu in this menu bar
      */
     public TestBenchElement getSubMenu() {
-        waitForSubMenu();
-        return (TestBenchElement) getDriver()
-                .findElement(By.tagName(OVERLAY_TAG));
+        var button = $(MenuBarButtonElement.class).withAttribute("expanded")
+                .withCondition(this::isVisible).first();
+        return button != null ? button.getSubMenu() : null;
     }
 
     /**

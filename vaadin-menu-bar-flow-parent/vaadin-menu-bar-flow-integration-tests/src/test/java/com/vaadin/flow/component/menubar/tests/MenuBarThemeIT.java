@@ -20,9 +20,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
+import com.vaadin.flow.component.menubar.testbench.MenuBarButtonElement;
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-menu-bar/menu-bar-theme")
@@ -50,7 +50,7 @@ public class MenuBarThemeIT extends AbstractComponentIT {
 
     @Test
     public void toggleMenuItemTheme_themeIsToggled() {
-        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        MenuBarButtonElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("theme"));
         click("toggle-item-1-theme");
         menuButton1 = menuBar.getButtons().get(0);
@@ -66,7 +66,7 @@ public class MenuBarThemeIT extends AbstractComponentIT {
         click("toggle-item-1-theme");
         click("toggle-item-1-visibility");
         click("toggle-item-1-visibility");
-        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        MenuBarButtonElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertEquals(menuButton1.getDomAttribute("theme"),
                 MenuBarThemePage.MENU_ITEM_THEME);
     }
@@ -77,7 +77,7 @@ public class MenuBarThemeIT extends AbstractComponentIT {
         click("toggle-item-1-visibility");
         click("toggle-item-1-theme");
         click("toggle-item-1-visibility");
-        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        MenuBarButtonElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("theme"));
     }
 
@@ -112,7 +112,7 @@ public class MenuBarThemeIT extends AbstractComponentIT {
         click("toggle-theme");
         click("toggle-item-1-theme");
 
-        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        MenuBarButtonElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertEquals(MenuBarThemePage.MENU_ITEM_THEME,
                 menuButton1.getDomAttribute("theme"));
     }
