@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import static org.junit.Assert.assertFalse;
-import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -99,14 +98,14 @@ public class EmailFieldPageIT extends AbstractComponentIT {
     public void assertRequired() {
         EmailFieldElement emailField = $(EmailFieldElement.class).first();
 
-        assertFalse(emailField.hasAttribute("required"));
+        assertFalse(emailField.isRequired());
 
         WebElement button = findElement(By.id("required"));
         button.click();
-        waitUntil(attributeToBe(emailField, "required", "true"));
+        waitUntil(driver -> emailField.isRequired());
 
         button.click();
-        waitUntil(attributeToBe(emailField, "required", ""));
+        waitUntil(driver -> !emailField.isRequired());
     }
 
     @Test

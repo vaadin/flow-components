@@ -58,19 +58,17 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void assertRequired() {
-        WebElement webComponent = findElement(
-                By.tagName("vaadin-password-field"));
+        PasswordFieldElement webComponent = $(PasswordFieldElement.class)
+                .first();
 
-        Assert.assertNull(webComponent.getDomAttribute("required"));
+        Assert.assertFalse(webComponent.isRequired());
 
         WebElement button = findElement(By.id("required"));
         button.click();
-        waitUntil(
-                driver -> "true".equals(getProperty(webComponent, "required")));
+        waitUntil(driver -> webComponent.isRequired());
 
         button.click();
-        waitUntil(driver -> "false"
-                .equals(getProperty(webComponent, "required")));
+        waitUntil(driver -> !webComponent.isRequired());
     }
 
     @Test
