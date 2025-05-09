@@ -15,13 +15,28 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Optional;
+
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinResponse;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.InMemoryUploadHandler;
+import com.vaadin.flow.server.streams.TransferContext;
+import com.vaadin.flow.server.streams.UploadEvent;
 
 public class UploadTest {
 
@@ -48,5 +63,62 @@ public class UploadTest {
 
         upload.setReceiver(new MemoryBuffer());
         Assert.assertEquals(1, upload.getElement().getProperty("maxFiles", 0));
+    }
+
+    @Test
+    public void uploadWithHandler_doUpload_activeUploadsIsChanged_from0to1_from1to0()
+            throws IOException {
+        VaadinRequest request = Mockito.mock(VaadinRequest.class);
+        VaadinResponse response = Mockito.mock(VaadinResponse.class);
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+
+        UI ui = Mockito.mock(UI.class);
+        // run the command immediately
+        Mockito.doAnswer(invocation -> {
+            Command command = invocation.getArgument(0);
+            command.execute();
+            return null;
+        }).when(ui).access(Mockito.any(Command.class));
+
+        Element owner = Mockito.mock(Element.class);
+        Component componentOwner = Mockito.mock(Component.class);
+        Mockito.when(owner.getComponent())
+                .thenReturn(Optional.of(componentOwner));
+        Mockito.when(componentOwner.getUI()).thenReturn(Optional.of(ui));
+
+        Upload upload = new Upload();
+        Assert.assertFalse(upload.isUploading());
+
+        UploadEvent uploadEvent = Mockito.mock(UploadEvent.class);
+        InputStream inputStream = Mockito.mock(InputStream.class);
+        Mockito.when(inputStream.read(Mockito.any(byte[].class),
+                Mockito.anyInt(), Mockito.anyInt()))
+                .thenAnswer(invocationOnMock -> {
+                    Assert.assertTrue(upload.isUploading());
+                    return -1;
+                });
+        Mockito.when(uploadEvent.getInputStream()).thenReturn(inputStream);
+        Mockito.when(uploadEvent.getRequest()).thenReturn(request);
+        Mockito.when(uploadEvent.getResponse()).thenReturn(response);
+        Mockito.when(uploadEvent.getSession()).thenReturn(session);
+        Mockito.when(uploadEvent.getOwningElement()).thenReturn(owner);
+        Mockito.when(uploadEvent.getOwningComponent())
+                .thenReturn(componentOwner);
+
+        InMemoryUploadHandler handler = new InMemoryUploadHandler(
+                (metadata, data) -> Assert.assertFalse(upload.isUploading())) {
+            // TODO: remove when this implementation is fixed in flow
+            @Override
+            protected TransferContext getTransferContext(
+                    UploadEvent transferEvent) {
+                return new TransferContext(transferEvent.getRequest(),
+                        transferEvent.getResponse(), transferEvent.getSession(),
+                        transferEvent.getFileName(),
+                        transferEvent.getOwningElement(),
+                        transferEvent.getFileSize());
+            }
+        };
+        upload.setUploadHandler(handler);
+        handler.handleUploadRequest(uploadEvent);
     }
 }
