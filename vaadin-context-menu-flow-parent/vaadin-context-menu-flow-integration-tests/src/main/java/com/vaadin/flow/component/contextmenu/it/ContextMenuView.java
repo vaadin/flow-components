@@ -152,10 +152,12 @@ public class ContextMenuView extends Div {
         contextMenu.addItem(checkbox, e -> message.setText(
                 "Clicked on checkbox with value: " + checkbox.getValue()));
 
+        // Separators can be added between menu items
+        contextMenu.addSeparator();
+
         // Components can also be added to the overlay
         // without creating menu items with add()
-        Component separator = new Hr();
-        contextMenu.add(separator, new Label("This is not a menu item"));
+        contextMenu.add(new Label("This is not a menu item"));
 
         addCard("ContextMenu With Components", target, message);
         target.setId("context-menu-with-components-target");

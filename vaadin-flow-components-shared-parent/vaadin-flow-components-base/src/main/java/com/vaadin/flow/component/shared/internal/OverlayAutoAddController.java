@@ -35,8 +35,9 @@ public class OverlayAutoAddController<C extends Component>
     private final C component;
     private final SerializableSupplier<Boolean> isModalSupplier;
 
+    private boolean skipOnNavigation;
     private boolean autoAdded;
-    private Registration beforeEnterListenerRegistration;
+    private Registration beforeLeaveRegistration;
 
     public OverlayAutoAddController(C component) {
         this(component, () -> false);
@@ -56,6 +57,17 @@ public class OverlayAutoAddController<C extends Component>
         });
     }
 
+    /**
+     * Sets whether to skip auto-adding when the UI navigates to a new view
+     * before the component is opened.
+     *
+     * @param skipOnNavigation
+     *            whether to skip auto-adding on navigation
+     */
+    public void setSkipOnNavigation(boolean skipOnNavigation) {
+        this.skipOnNavigation = skipOnNavigation;
+    }
+
     private void handleOpen() {
         UI ui = getUI();
         StateTree.ExecutionRegistration addToUiRegistration = ui
@@ -66,31 +78,20 @@ public class OverlayAutoAddController<C extends Component>
                                 isModalSupplier.get());
                         autoAdded = true;
                     }
-                    if (beforeEnterListenerRegistration != null) {
-                        beforeEnterListenerRegistration.remove();
-                        beforeEnterListenerRegistration = null;
+                    if (beforeLeaveRegistration != null) {
+                        beforeLeaveRegistration.remove();
+                        beforeLeaveRegistration = null;
                     }
                 });
-        if (ui.getSession() != null) {
+
+        if (skipOnNavigation && ui.getSession() != null) {
             // Cancel auto-adding if the current view is navigated away from
-            // before the dialog is added to the UI. This can happen if an
-            // overlay component is opened in a view constructor, and the
-            // view implements a BeforeEnterObserver that forwards to a
-            // different view. However, auto-adding should not be canceled if
-            // the view that was navigated to opens the overlay component.
-            // beforeEnterListener seems to work for this:
-            // - The listener is registered when an overlay opens during view
-            // construction. At that point the before enter event for entering
-            // that view has already been fired on the UI, so it does not
-            // cancel auto-adding.
-            // - If another before enter event is fired, that means that the
-            // view that opened the overlay has forwarded to another view.
-            beforeEnterListenerRegistration = ui
-                    .addBeforeEnterListener(event -> {
-                        addToUiRegistration.remove();
-                        beforeEnterListenerRegistration.remove();
-                        beforeEnterListenerRegistration = null;
-                    });
+            // before the component is added to the UI.
+            beforeLeaveRegistration = ui.addBeforeLeaveListener(event -> {
+                addToUiRegistration.remove();
+                beforeLeaveRegistration.remove();
+                beforeLeaveRegistration = null;
+            });
         }
     }
 

@@ -22,7 +22,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.data.bean.Person;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
@@ -30,44 +30,49 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-grid/grid-details-row")
 public class GridDetailsRowPage extends Div {
 
-    private Grid<Person> grid = new Grid<>();
     private List<Person> items = new ArrayList<>();
+    private Grid<Person> grid = new Grid<>();
 
-    private int nbUpdates;
-    private Person person3 = new Person("Person 3", 2);
-    private Person person4 = new Person("Person 4", 1111);
+    private static record Person(int id, String name) {
+    }
 
     public GridDetailsRowPage() {
+        items.add(new Person(0, "Person 0"));
+        items.add(new Person(1, "Person 1"));
+        items.add(new Person(2, "Person 2"));
 
-        items.add(new Person("Person 1", 99));
-        items.add(new Person("Person 2", 1));
-        items.add(person3);
-        items.add(person4);
-
-        ListDataProvider<Person> ldp = new ListDataProvider<>(items);
-        grid.setItems(ldp);
+        ListDataProvider<Person> dataProvider = new ListDataProvider<>(items) {
+            @Override
+            public Object getId(Person person) {
+                return person.id();
+            };
+        };
+        grid.setItems(dataProvider);
         grid.setSelectionMode(SelectionMode.NONE);
-        grid.addColumn(Person::getFirstName).setHeader("name");
-        grid.setItemDetailsRenderer(new ComponentRenderer<>(
-                item -> new Button(item.getFirstName())));
+        grid.addColumn(person -> person.name()).setHeader("Name");
+        grid.setItemDetailsRenderer(
+                new ComponentRenderer<>(person -> new Button(person.name())));
 
-        add(grid, new Button("click to open details",
-                e -> setFirstAndSecondItemsVisible()));
-        Button updatePerson3 = new Button("update and refresh person 3", e -> {
-            nbUpdates++;
-            person3.setFirstName("Person 3 - updates " + nbUpdates);
-            grid.getDataProvider().refreshItem(person3);
+        NativeButton updatePerson2 = new NativeButton("Update person 2", e -> {
+            Person updatedPerson = new Person(2, "Updated Person 2");
+            items.set(2, updatedPerson);
+            grid.getDataProvider().refreshItem(updatedPerson);
         });
-        updatePerson3.setId("update-button");
-        add(updatePerson3);
+        updatePerson2.setId("update-person-2");
 
-        Button removeButton = new Button("remove person 4", e -> {
-            items.remove(person4);
+        NativeButton removePerson2 = new NativeButton("Remove person 2", e -> {
+            items.remove(2);
             grid.getDataProvider().refreshAll();
         });
-        removeButton.setId("remove-button");
-        add(removeButton);
+        removePerson2.setId("remove-person-2");
+
         setFirstAndSecondItemsVisible();
+
+        NativeButton openDetails = new NativeButton("Open details", e -> {
+            setFirstAndSecondItemsVisible();
+        });
+
+        add(grid, openDetails, updatePerson2, removePerson2);
     }
 
     public void setFirstAndSecondItemsVisible() {
