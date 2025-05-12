@@ -57,6 +57,7 @@ public abstract class AbstractValidationIT<T extends HasValidation>
     }
 
     protected void assertErrorMessage(String expected) {
+        expected = expected == null ? "" : expected;
         Assert.assertEquals(expected, testField.getErrorMessage());
     }
 
