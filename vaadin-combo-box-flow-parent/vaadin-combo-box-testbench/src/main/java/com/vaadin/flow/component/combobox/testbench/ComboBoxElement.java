@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.openqa.selenium.By;
 
+import com.vaadin.testbench.HasClearButton;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
@@ -33,7 +34,7 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-combo-box")
 public class ComboBoxElement extends TestBenchElement implements HasLabel,
-        HasSelectByText, HasPlaceholder, HasHelper, HasValidation {
+        HasSelectByText, HasPlaceholder, HasHelper, HasClearButton, HasValidation {
 
     /**
      * Clears the value of the combobox.

@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.openqa.selenium.By;
 
+import com.vaadin.testbench.HasClearButton;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
@@ -32,7 +33,7 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-multi-select-combo-box")
 public class MultiSelectComboBoxElement extends TestBenchElement
-        implements HasLabel, HasPlaceholder, HasHelper, HasValidation {
+        implements HasLabel, HasPlaceholder, HasHelper, HasClearButton, HasValidation {
 
     public String getInputElementValue() {
         return this.getPropertyString("_inputElementValue");
