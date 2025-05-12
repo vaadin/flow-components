@@ -17,6 +17,7 @@ package com.vaadin.flow.component.textfield.testbench;
 
 import org.openqa.selenium.By;
 
+import com.vaadin.testbench.HasClearButton;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
@@ -32,7 +33,7 @@ import com.vaadin.testbench.elementsbase.Element;
 @Element("vaadin-text-area")
 public class TextAreaElement extends TestBenchElement
         implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper,
-        HasValidation {
+        HasValidation, HasClearButton {
     /**
      * Emulates the user changing the value, which in practice means setting
      * {@code value} of the {@code textarea} element to the given value and then

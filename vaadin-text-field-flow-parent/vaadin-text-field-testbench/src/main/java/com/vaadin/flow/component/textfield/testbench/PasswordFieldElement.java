@@ -17,6 +17,7 @@ package com.vaadin.flow.component.textfield.testbench;
 
 import org.openqa.selenium.By;
 
+import com.vaadin.testbench.HasClearButton;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
@@ -32,7 +33,7 @@ import com.vaadin.testbench.elementsbase.Element;
 @Element("vaadin-password-field")
 public class PasswordFieldElement extends TestBenchElement
         implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper,
-        HasValidation {
+        HasValidation, HasClearButton {
 
     /**
      * Checks whether the password is shown in clear text or is hidden from
