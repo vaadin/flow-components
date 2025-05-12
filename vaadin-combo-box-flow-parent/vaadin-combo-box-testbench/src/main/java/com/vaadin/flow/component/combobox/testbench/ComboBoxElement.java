@@ -33,8 +33,9 @@ import com.vaadin.testbench.elementsbase.Element;
  * element.
  */
 @Element("vaadin-combo-box")
-public class ComboBoxElement extends TestBenchElement implements HasLabel,
-        HasSelectByText, HasPlaceholder, HasHelper, HasClearButton, HasValidation {
+public class ComboBoxElement extends TestBenchElement
+        implements HasLabel, HasSelectByText, HasPlaceholder, HasHelper,
+        HasClearButton, HasValidation {
 
     /**
      * Clears the value of the combobox.

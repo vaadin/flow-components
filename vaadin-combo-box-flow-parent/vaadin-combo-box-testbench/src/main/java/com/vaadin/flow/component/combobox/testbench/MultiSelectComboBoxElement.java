@@ -32,8 +32,8 @@ import com.vaadin.testbench.elementsbase.Element;
  * <code>&lt;vaadin-multi-select-combo-box&gt;</code> element.
  */
 @Element("vaadin-multi-select-combo-box")
-public class MultiSelectComboBoxElement extends TestBenchElement
-        implements HasLabel, HasPlaceholder, HasHelper, HasClearButton, HasValidation {
+public class MultiSelectComboBoxElement extends TestBenchElement implements
+        HasLabel, HasPlaceholder, HasHelper, HasClearButton, HasValidation {
 
     public String getInputElementValue() {
         return this.getPropertyString("_inputElementValue");

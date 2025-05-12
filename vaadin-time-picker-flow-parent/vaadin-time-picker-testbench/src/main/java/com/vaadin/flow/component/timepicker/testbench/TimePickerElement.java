@@ -33,8 +33,9 @@ import com.vaadin.testbench.elementsbase.Element;
  * element.
  */
 @Element("vaadin-time-picker")
-public class TimePickerElement extends TestBenchElement implements
-        HasStringValueProperty, HasSelectByText, HasHelper, HasClearButton, HasValidation {
+public class TimePickerElement extends TestBenchElement
+        implements HasStringValueProperty, HasSelectByText, HasHelper,
+        HasClearButton, HasValidation {
 
     /**
      * A TestBench element representing
