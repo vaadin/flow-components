@@ -49,6 +49,7 @@ export function useLitWebComponents(): PluginOption {
             'drawer-toggle',
             'avatar',
             'avatar-group',
+            'button',
             'checkbox',
             'combo-box',
             'context-menu',
