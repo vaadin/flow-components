@@ -19,8 +19,8 @@ import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.DownloadHandler;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 @Route("vaadin-avatar/avatar-test")
 public class AvatarPage extends Div {

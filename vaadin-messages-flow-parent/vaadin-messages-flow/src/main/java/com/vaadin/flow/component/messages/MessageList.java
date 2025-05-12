@@ -42,11 +42,11 @@ import com.vaadin.flow.internal.JsonUtils;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-message-list")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha17")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha18")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./messageListConnector.js")
 @JsModule("@vaadin/message-list/src/vaadin-message-list.js")
-@NpmPackage(value = "@vaadin/message-list", version = "24.8.0-alpha17")
+@NpmPackage(value = "@vaadin/message-list", version = "24.8.0-alpha18")
 public class MessageList extends Component
         implements HasStyle, HasSize, LocaleChangeObserver {
 
@@ -229,5 +229,25 @@ public class MessageList extends Component
     @Override
     public void localeChange(LocaleChangeEvent event) {
         scheduleItemsUpdate();
+    }
+
+    /**
+     * Sets whether the messages should be parsed as markdown. By default, this
+     * is set to {@code false}.
+     *
+     * @param markdown
+     *            {@code true} if the message text is parsed as Markdown.
+     */
+    public void setMarkdown(boolean markdown) {
+        getElement().setProperty("markdown", markdown);
+    }
+
+    /**
+     * Returns whether the messages are parsed as markdown.
+     *
+     * @return {@code true} if the message text is parsed as Markdown.
+     */
+    public boolean isMarkdown() {
+        return getElement().getProperty("markdown", false);
     }
 }
