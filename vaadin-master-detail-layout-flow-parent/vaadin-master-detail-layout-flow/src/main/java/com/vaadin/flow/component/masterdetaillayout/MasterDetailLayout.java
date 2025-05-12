@@ -188,7 +188,7 @@ public class MasterDetailLayout extends Component
      * Sets the size of the master area in CSS length units. When specified, it
      * prevents the master area from growing or shrinking. If there is not
      * enough space to show master and detail areas next to each other, the
-     * layout switches to the overlay, using the mode defined by
+     * details are shown in an overlay, using the mode defined by
      * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param size
@@ -202,7 +202,7 @@ public class MasterDetailLayout extends Component
      * Sets the size of the master area in CSS length units. When specified, it
      * prevents the master area from growing or shrinking. If there is not
      * enough space to show master and detail areas next to each other, the
-     * layout switches to the overlay, using the mode defined by
+     * details are shown in an overlay, using the mode defined by
      * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param size
@@ -229,7 +229,7 @@ public class MasterDetailLayout extends Component
      * Sets the minimum size of the master area in CSS length units. When
      * specified, it prevents the master area from shrinking below this size. If
      * there is not enough space to show master and detail areas next to each
-     * other, the layout switches to the overlay, using the mode defined by
+     * other, the details are shown in an overlay, using the mode defined by
      * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param minSize
@@ -243,7 +243,7 @@ public class MasterDetailLayout extends Component
      * Sets the minimum size of the master area in CSS length units. When
      * specified, it prevents the master area from shrinking below this size. If
      * there is not enough space to show master and detail areas next to each
-     * other, the layout switches to the overlay, using the mode defined by
+     * other, the details are shown in an overlay, using the mode defined by
      * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param minSize
@@ -271,7 +271,7 @@ public class MasterDetailLayout extends Component
      * Sets the size of the detail area in CSS length units. When specified, it
      * prevents the detail area from growing or shrinking. If there is not
      * enough space to show master and detail areas next to each other, the
-     * layout switches to the overlay, using the mode defined by
+     * details are shown in an overlay, using the mode defined by
      * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param size
@@ -285,7 +285,7 @@ public class MasterDetailLayout extends Component
      * Sets the size of the detail area in CSS length units. When specified, it
      * prevents the detail area from growing or shrinking. If there is not
      * enough space to show master and detail areas next to each other, the
-     * layout switches to the overlay, using the mode defined by
+     * details are shown in an overlay, using the mode defined by
      * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param size
@@ -312,7 +312,7 @@ public class MasterDetailLayout extends Component
      * Sets the minimum size of the detail area in CSS length units. When
      * specified, it prevents the detail area from shrinking below this size. If
      * there is not enough space to show master and detail areas next to each
-     * other, the layout switches to the overlay, using the mode defined by
+     * other, the details are shown in an overlay, using the mode defined by
      * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param minSize
@@ -326,7 +326,7 @@ public class MasterDetailLayout extends Component
      * Sets the minimum size of the detail area in CSS length units. When
      * specified, it prevents the detail area from shrinking below this size. If
      * there is not enough space to show master and detail areas next to each
-     * other, the layout switches to the overlay, using the mode defined by
+     * other, the details are shown in an overlay, using the mode defined by
      * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param minSize
