@@ -320,14 +320,7 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
         LogEntries logs = driver.manage().logs().get("browser");
         return logs.getAll().stream()
                 .filter(log -> log.getLevel().equals(Level.WARNING))
-                .filter(log -> !log.getMessage().contains("deprecated"))
                 .filter(log -> !log.getMessage().contains("Lit is in dev mode"))
-                .filter(log -> !log.getMessage()
-                        .contains("has been loaded twice"))
-                .filter(log -> !log.getMessage()
-                        .contains("scheduled an update"))
-                .filter(log -> !log.getMessage()
-                        .contains("React Router Future Flag Warning"))
                 .collect(Collectors.toList());
     }
 
