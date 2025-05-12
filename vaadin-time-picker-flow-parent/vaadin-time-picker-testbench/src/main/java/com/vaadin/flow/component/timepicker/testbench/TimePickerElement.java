@@ -20,6 +20,7 @@ import java.util.Objects;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
+import com.vaadin.testbench.HasClearButton;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasSelectByText;
 import com.vaadin.testbench.HasStringValueProperty;
@@ -31,8 +32,8 @@ import com.vaadin.testbench.elementsbase.Element;
  * element.
  */
 @Element("vaadin-time-picker")
-public class TimePickerElement extends TestBenchElement
-        implements HasStringValueProperty, HasSelectByText, HasHelper {
+public class TimePickerElement extends TestBenchElement implements
+        HasStringValueProperty, HasSelectByText, HasHelper, HasClearButton {
 
     /**
      * A TestBench element representing
