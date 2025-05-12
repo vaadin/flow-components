@@ -52,9 +52,7 @@ public class TextAreaPageIT extends AbstractComponentIT {
         input.sendKeys("foo");
         blur();
 
-        WebElement clearButton = field.$("*")
-                .withAttributeContainingWord("part", "clear-button").first();
-        clearButton.click();
+        field.clickClearButton();
 
         String value = findElement(By.id("clear-message")).getText();
         Assert.assertEquals("Old value: 'foo'. New value: ''.", value);
