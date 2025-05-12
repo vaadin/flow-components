@@ -108,7 +108,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     /**
      * Create a new instance of Upload.
      * <p>
-     * The receiver must be set before performing an upload.
+     * The upload handler must be set through
+     * {@link #setUploadHandler(UploadHandler)} before performing an upload.
      */
     public Upload() {
         final String eventDetailError = "event.detail.error";
@@ -131,6 +132,12 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         // If client aborts upload mark upload as interrupted on server also
         getElement().addEventListener("upload-abort",
                 event -> interruptUpload());
+
+        setUploadHandler(ignored -> {
+            throw new IllegalStateException(
+                    "Upload cannot be performed without a upload handler set. "
+                            + "Please firstly set the upload handler implementation with upload.setUploadHandler()");
+        });
 
         final String elementFiles = "element.files";
         DomEventListener allFinishedListener = e -> {
@@ -185,6 +192,12 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         setReceiver(receiver);
     }
 
+    /**
+     * Create a new instance of Upload with the given upload handler.
+     *
+     * @param handler
+     *            upload handler that handles the upload
+     */
     public Upload(UploadHandler handler) {
         this();
         setUploadHandler(handler);

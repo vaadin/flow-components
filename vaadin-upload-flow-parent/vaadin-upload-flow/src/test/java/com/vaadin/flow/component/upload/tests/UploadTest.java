@@ -35,8 +35,8 @@ import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinResponse;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.InMemoryUploadHandler;
-import com.vaadin.flow.server.streams.TransferContext;
 import com.vaadin.flow.server.streams.UploadEvent;
+import com.vaadin.flow.server.streams.UploadHandler;
 
 public class UploadTest {
 
@@ -106,19 +106,33 @@ public class UploadTest {
                 .thenReturn(componentOwner);
 
         InMemoryUploadHandler handler = new InMemoryUploadHandler(
-                (metadata, data) -> Assert.assertFalse(upload.isUploading())) {
-            // TODO: remove when this implementation is fixed in flow
-            @Override
-            protected TransferContext getTransferContext(
-                    UploadEvent transferEvent) {
-                return new TransferContext(transferEvent.getRequest(),
-                        transferEvent.getResponse(), transferEvent.getSession(),
-                        transferEvent.getFileName(),
-                        transferEvent.getOwningElement(),
-                        transferEvent.getFileSize());
-            }
-        };
+                (metadata, data) -> Assert.assertFalse(upload.isUploading()));
         upload.setUploadHandler(handler);
         handler.handleUploadRequest(uploadEvent);
+    }
+
+    @Test
+    public void uploadWithoutHandler_throwsWhenUploadStarts() {
+        class TestUpload extends Upload {
+            private UploadHandler handler;
+
+            @Override
+            public void setUploadHandler(UploadHandler handler) {
+                super.setUploadHandler(handler);
+                this.handler = handler;
+            }
+
+            public UploadHandler getHandler() {
+                return handler;
+            }
+        }
+        TestUpload testUpload = new TestUpload();
+        UploadHandler handler = testUpload.getHandler();
+
+        Assert.assertNotNull(handler);
+        Assert.assertThrows(
+                "Expected IllegalStateException for Upload with no handler",
+                IllegalStateException.class,
+                () -> handler.handleUploadRequest(null));
     }
 }
