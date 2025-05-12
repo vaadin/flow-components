@@ -193,7 +193,7 @@ public class EventHandlingIT extends AbstractComponentIT {
 
         crud.getEditorSaveButton().click();
 
-        Assert.assertTrue(lastNameField.isInvalid());
+        Assert.assertTrue(firstNameField.isInvalid());
     }
 
     @Test
