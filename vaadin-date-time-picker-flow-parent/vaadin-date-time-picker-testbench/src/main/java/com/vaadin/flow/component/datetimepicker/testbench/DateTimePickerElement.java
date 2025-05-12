@@ -23,7 +23,6 @@ import java.time.temporal.ChronoUnit;
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
 import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
 import com.vaadin.testbench.ElementQuery;
-import com.vaadin.testbench.HasClearButton;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.TestBenchElement;
