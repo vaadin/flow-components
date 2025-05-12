@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.upload;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -41,15 +40,11 @@ import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
-import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.NoInputStreamException;
 import com.vaadin.flow.server.NoOutputStreamException;
 import com.vaadin.flow.server.StreamReceiver;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.StreamVariable;
-import com.vaadin.flow.server.streams.TransferContext;
-import com.vaadin.flow.server.streams.TransferProgressAwareHandler;
-import com.vaadin.flow.server.streams.TransferProgressListener;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -693,17 +688,18 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      *            upload handler to use for file receptions
      */
     public void setUploadHandler(UploadHandler handler) {
-        AbstractStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
-                handler, this.getElement());
-
+        UploadHandler newUploadHandler = event -> {
+            try {
+                startUpload();
+                handler.handleUploadRequest(event);
+            } finally {
+                endUpload();
+            }
+        };
+        StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
+                newUploadHandler, this.getElement());
         runBeforeClientResponse(ui -> getElement().setAttribute("target",
                 elementStreamResource));
-
-        if (handler instanceof TransferProgressAwareHandler<?, ?> transferProgressAwareHandler) {
-            transferProgressAwareHandler.addTransferProgressListener(
-                    new UploadTransferProgressListener(this));
-        }
-
         receiver = null;
         removeMaxFiles();
     }
@@ -909,36 +905,6 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
                 upload.fireUploadFinish(event.getFileName(),
                         event.getMimeType(), event.getContentLength());
             }
-        }
-    }
-
-    /**
-     * An internal {@link TransferProgressListener} implementation to keep up to
-     * date state of the upload component according to upload progress. Doesn't
-     * need to be removed and re-added on attach/detach because this is checked
-     * on a low level in the framework.
-     */
-    private static final class UploadTransferProgressListener
-            implements TransferProgressListener {
-        private final Upload upload;
-
-        public UploadTransferProgressListener(Upload upload) {
-            this.upload = upload;
-        }
-
-        @Override
-        public void onStart(TransferContext context) {
-            upload.startUpload();
-        }
-
-        @Override
-        public void onError(TransferContext context, IOException reason) {
-            upload.endUpload();
-        }
-
-        @Override
-        public void onComplete(TransferContext context, long transferredBytes) {
-            upload.endUpload();
         }
     }
 }
