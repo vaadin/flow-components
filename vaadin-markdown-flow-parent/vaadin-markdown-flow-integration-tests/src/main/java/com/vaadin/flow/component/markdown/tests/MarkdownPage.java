@@ -28,15 +28,13 @@ public class MarkdownPage extends Div {
 
         add(markdown);
 
-        var appendButton = new NativeButton("Append content", event -> {
-            markdown.appendContent("!");
-        });
+        var appendButton = new NativeButton("Append content",
+                event -> markdown.appendContent("!"));
         appendButton.setId("append-button");
         add(appendButton);
 
-        var setButton = new NativeButton("Set content", event -> {
-            markdown.setContent("**Updated** _Markdown_");
-        });
+        var setButton = new NativeButton("Set content",
+                event -> markdown.setContent("**Updated** _Markdown_"));
         setButton.setId("set-button");
         add(setButton);
     }

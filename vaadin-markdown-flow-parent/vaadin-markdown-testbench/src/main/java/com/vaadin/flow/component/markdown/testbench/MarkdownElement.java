@@ -27,7 +27,7 @@ public class MarkdownElement extends TestBenchElement {
 
     /**
      * Gets the Markdown content of the element.
-     * 
+     * <p>
      * The DOM does not typically contain the Markdown content as such. Use the
      * regular TestBench APIs, such as {@link #$(String)}, to access the
      * effective DOM with the rendered Markdown content.
