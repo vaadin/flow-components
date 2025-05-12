@@ -70,56 +70,24 @@ public class UploadTest {
         Assert.assertEquals(1, upload.getElement().getProperty("maxFiles", 0));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void uploadWithStandardHandler_doUpload_activeUploadsIsChanged_from0to1_from1to0()
             throws IOException {
         VaadinRequest request = Mockito.mock(VaadinRequest.class);
         VaadinResponse response = Mockito.mock(VaadinResponse.class);
         VaadinSession session = Mockito.mock(VaadinSession.class);
-
-        UI ui = Mockito.mock(UI.class);
-        // run the command immediately
-        Mockito.doAnswer(invocation -> {
-            Command command = invocation.getArgument(0);
-            command.execute();
-            return null;
-        }).when(ui).access(Mockito.any(Command.class));
-
-        // run the command immediately
-        Mockito.when(ui.beforeClientResponse(Mockito.any(Component.class),
-                Mockito.any(SerializableConsumer.class)))
-                .thenAnswer(invocation -> {
-                    SerializableConsumer<ExecutionContext> callback = invocation
-                            .getArgument(1);
-                    callback.accept(Mockito.mock(ExecutionContext.class));
-                    return null;
-                });
+        UI ui = setupMockUI();
 
         ArgumentCaptor<StreamResourceRegistry.ElementStreamResource> captor = ArgumentCaptor
                 .forClass(StreamResourceRegistry.ElementStreamResource.class);
 
-        Element owner = Mockito.mock(Element.class);
-        Component componentOwner = Mockito.mock(Component.class);
-        Mockito.when(owner.getComponent())
-                .thenReturn(Optional.of(componentOwner));
-        Mockito.when(componentOwner.getUI()).thenReturn(Optional.of(ui));
+        Element owner = setupMockElement(ui);
+        Upload upload = setupMockUpload(owner);
 
-        StateNode stateNode = Mockito.mock(StateNode.class);
-        // run the command immediately
-        Mockito.doAnswer(invocation -> {
-            SerializableConsumer<UI> callback = invocation.getArgument(0);
-            callback.accept(ui);
-            return null;
-        }).when(stateNode)
-                .runWhenAttached(Mockito.any(SerializableConsumer.class));
-        Mockito.when(owner.getNode()).thenReturn(stateNode);
-
-        Upload upload = Mockito.spy(new Upload());
-        Mockito.when(upload.getElement()).thenReturn(owner);
         Assert.assertFalse(upload.isUploading());
 
-        UploadEvent uploadEvent = Mockito.mock(UploadEvent.class);
+        UploadEvent uploadEvent = setupMockUploadEvent(request, response,
+                session, owner);
         InputStream inputStream = Mockito.mock(InputStream.class);
         // when the first bytes are read
         Mockito.when(inputStream.read(Mockito.any(byte[].class),
@@ -130,19 +98,12 @@ public class UploadTest {
                     return -1;
                 });
         Mockito.when(uploadEvent.getInputStream()).thenReturn(inputStream);
-        Mockito.when(uploadEvent.getRequest()).thenReturn(request);
-        Mockito.when(uploadEvent.getResponse()).thenReturn(response);
-        Mockito.when(uploadEvent.getSession()).thenReturn(session);
-        Mockito.when(uploadEvent.getOwningElement()).thenReturn(owner);
-        Mockito.when(uploadEvent.getOwningComponent())
-                .thenReturn(componentOwner);
 
         InMemoryUploadHandler handler = new InMemoryUploadHandler(
                 (metadata, data) -> {
                 });
         upload.setUploadHandler(handler);
 
-        // verify that the handler is set and capture it
         Mockito.verify(owner).setAttribute(Mockito.anyString(),
                 captor.capture());
 
@@ -150,77 +111,34 @@ public class UploadTest {
                 .getValue();
         Assert.assertNotNull(elementStreamResource);
 
-        // when the upload handling ends
+        // when the upload handling is completed
         elementStreamResource.getElementRequestHandler().handleRequest(request,
                 response, session, owner);
-        // then the upload is finished
+        // then the upload is not in progress anymore
         Assert.assertFalse(upload.isUploading());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void uploadWithCustomHandler_doUpload_activeUploadsIsChanged_from0to1_from1to0() {
         VaadinRequest request = Mockito.mock(VaadinRequest.class);
         VaadinResponse response = Mockito.mock(VaadinResponse.class);
         VaadinSession session = Mockito.mock(VaadinSession.class);
-
-        UI ui = Mockito.mock(UI.class);
-        // run the command immediately
-        Mockito.doAnswer(invocation -> {
-            Command command = invocation.getArgument(0);
-            command.execute();
-            return null;
-        }).when(ui).access(Mockito.any(Command.class));
-
-        // run the command immediately
-        Mockito.when(ui.beforeClientResponse(Mockito.any(Component.class),
-                Mockito.any(SerializableConsumer.class)))
-                .thenAnswer(invocation -> {
-                    SerializableConsumer<ExecutionContext> callback = invocation
-                            .getArgument(1);
-                    callback.accept(Mockito.mock(ExecutionContext.class));
-                    return null;
-                });
+        UI ui = setupMockUI();
 
         ArgumentCaptor<StreamResourceRegistry.ElementStreamResource> captor = ArgumentCaptor
                 .forClass(StreamResourceRegistry.ElementStreamResource.class);
 
-        Element owner = Mockito.mock(Element.class);
-        Component componentOwner = Mockito.mock(Component.class);
-        Mockito.when(owner.getComponent())
-                .thenReturn(Optional.of(componentOwner));
-        Mockito.when(componentOwner.getUI()).thenReturn(Optional.of(ui));
+        Element owner = setupMockElement(ui);
+        Upload upload = setupMockUpload(owner);
 
-        StateNode stateNode = Mockito.mock(StateNode.class);
-        // run the command immediately
-        Mockito.doAnswer(invocation -> {
-            SerializableConsumer<UI> callback = invocation.getArgument(0);
-            callback.accept(ui);
-            return null;
-        }).when(stateNode)
-                .runWhenAttached(Mockito.any(SerializableConsumer.class));
-        Mockito.when(owner.getNode()).thenReturn(stateNode);
-
-        Upload upload = Mockito.spy(new Upload());
-        Mockito.when(upload.getElement()).thenReturn(owner);
         Assert.assertFalse(upload.isUploading());
 
-        UploadEvent uploadEvent = Mockito.mock(UploadEvent.class);
-        Mockito.when(uploadEvent.getRequest()).thenReturn(request);
-        Mockito.when(uploadEvent.getResponse()).thenReturn(response);
-        Mockito.when(uploadEvent.getSession()).thenReturn(session);
-        Mockito.when(uploadEvent.getOwningElement()).thenReturn(owner);
-        Mockito.when(uploadEvent.getOwningComponent())
-                .thenReturn(componentOwner);
-
-        UploadHandler handler = event -> {
-            // when the custom uploading callback starts,
-            // then the upload is in progress
-            Assert.assertTrue(upload.isUploading());
-        };
+        // when the upload starts
+        UploadHandler handler = event ->
+        // then the upload is in progress
+        Assert.assertTrue(upload.isUploading());
         upload.setUploadHandler(handler);
 
-        // verify that the handler is set and capture it
         Mockito.verify(owner).setAttribute(Mockito.anyString(),
                 captor.capture());
 
@@ -228,10 +146,10 @@ public class UploadTest {
                 .getValue();
         Assert.assertNotNull(elementStreamResource);
 
-        // when the upload handling ends
+        // when the upload handling is completed
         elementStreamResource.getElementRequestHandler().handleRequest(request,
                 response, session, owner);
-        // then the upload is finished
+        // then the upload is not in progress anymore
         Assert.assertFalse(upload.isUploading());
     }
 
@@ -258,5 +176,66 @@ public class UploadTest {
                 "Expected IllegalStateException for Upload with no handler",
                 IllegalStateException.class,
                 () -> handler.handleUploadRequest(null));
+    }
+
+    @SuppressWarnings("unchecked")
+    private UI setupMockUI() {
+        UI ui = Mockito.mock(UI.class);
+        // run the command immediately
+        Mockito.doAnswer(invocation -> {
+            Command command = invocation.getArgument(0);
+            command.execute();
+            return null;
+        }).when(ui).access(Mockito.any(Command.class));
+
+        // run the command immediately
+        Mockito.when(ui.beforeClientResponse(Mockito.any(Component.class),
+                Mockito.any(SerializableConsumer.class)))
+                .thenAnswer(invocation -> {
+                    SerializableConsumer<ExecutionContext> callback = invocation
+                            .getArgument(1);
+                    callback.accept(Mockito.mock(ExecutionContext.class));
+                    return null;
+                });
+        return ui;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Element setupMockElement(UI ui) {
+        Element owner = Mockito.mock(Element.class);
+        Component componentOwner = Mockito.mock(Component.class);
+        Mockito.when(owner.getComponent())
+                .thenReturn(Optional.of(componentOwner));
+        Mockito.when(componentOwner.getUI()).thenReturn(Optional.of(ui));
+
+        StateNode stateNode = Mockito.mock(StateNode.class);
+        // run the command immediately
+        Mockito.doAnswer(invocation -> {
+            SerializableConsumer<UI> callback = invocation.getArgument(0);
+            callback.accept(ui);
+            return null;
+        }).when(stateNode)
+                .runWhenAttached(Mockito.any(SerializableConsumer.class));
+        Mockito.when(owner.getNode()).thenReturn(stateNode);
+
+        return owner;
+    }
+
+    private Upload setupMockUpload(Element owner) {
+        Upload upload = Mockito.spy(new Upload());
+        Mockito.when(upload.getElement()).thenReturn(owner);
+        return upload;
+    }
+
+    private UploadEvent setupMockUploadEvent(VaadinRequest request,
+            VaadinResponse response, VaadinSession session, Element owner) {
+        UploadEvent uploadEvent = Mockito.mock(UploadEvent.class);
+        Mockito.when(uploadEvent.getRequest()).thenReturn(request);
+        Mockito.when(uploadEvent.getResponse()).thenReturn(response);
+        Mockito.when(uploadEvent.getSession()).thenReturn(session);
+        Mockito.when(uploadEvent.getOwningElement()).thenReturn(owner);
+        Mockito.when(uploadEvent.getOwningComponent())
+                .thenReturn(Mockito.mock(Component.class));
+        return uploadEvent;
     }
 }
