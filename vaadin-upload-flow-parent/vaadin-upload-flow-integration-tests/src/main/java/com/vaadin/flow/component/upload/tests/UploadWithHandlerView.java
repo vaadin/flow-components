@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
-import java.nio.charset.StandardCharsets;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
@@ -30,7 +28,7 @@ import com.vaadin.flow.server.streams.UploadHandler;
 @Route("vaadin-upload-with-handler")
 public class UploadWithHandlerView extends Div {
 
-    static final String UPLOAD_TEST_CONTENT_ID = "upload-with-handler-output-id";
+    static final String UPLOAD_TEST_CONTENT_SIZE_ID = "upload-with-handler-output-id";
     static final String UPLOAD_ID = "upload-with-handler-id";
     static final String UPLOAD_HANDLER_EVENTS_ID = "upload-with-handler-events-id";
     static final String WAITING_MESSAGE = "Waiting for upload...";
@@ -40,9 +38,8 @@ public class UploadWithHandlerView extends Div {
         Div handlerEventsOutput = new Div();
 
         InMemoryUploadHandler handler = UploadHandler
-                .inMemory((metaData, bytes) -> UI.getCurrent()
-                        .access(() -> output.setText(
-                                new String(bytes, StandardCharsets.UTF_8))))
+                .inMemory((metaData, bytes) -> UI.getCurrent().access(
+                        () -> output.setText(String.valueOf(bytes.length))))
                 .whenStart(() -> handlerEventsOutput.add("started"))
                 .onProgress((transferred, total) -> handlerEventsOutput
                         .add("-progress"))
@@ -57,7 +54,7 @@ public class UploadWithHandlerView extends Div {
         Upload upload = new Upload(handler);
         upload.setMaxFileSize(1024 * 100);
         upload.setId(UPLOAD_ID);
-        output.setId(UPLOAD_TEST_CONTENT_ID);
+        output.setId(UPLOAD_TEST_CONTENT_SIZE_ID);
         handlerEventsOutput.setId(UPLOAD_HANDLER_EVENTS_ID);
 
         addCard("Upload with handler", upload, output, handlerEventsOutput);

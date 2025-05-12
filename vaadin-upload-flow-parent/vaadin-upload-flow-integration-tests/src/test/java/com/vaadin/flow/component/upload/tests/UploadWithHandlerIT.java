@@ -48,7 +48,7 @@ public class UploadWithHandlerIT extends AbstractUploadIT {
         open();
         waitUntil(driver -> getUpload().isDisplayed());
         uploadOutput = getDriver().findElement(
-                By.id(UploadWithHandlerView.UPLOAD_TEST_CONTENT_ID));
+                By.id(UploadWithHandlerView.UPLOAD_TEST_CONTENT_SIZE_ID));
         eventsOutput = getDriver().findElement(
                 By.id(UploadWithHandlerView.UPLOAD_HANDLER_EVENTS_ID));
     }
@@ -79,6 +79,7 @@ public class UploadWithHandlerIT extends AbstractUploadIT {
 
     private File createTempBinaryFile() throws IOException {
         File tempFile = File.createTempFile("TestFileUpload", "");
+        tempFile.deleteOnExit();
 
         byte[] bytes = new byte[FILE_SIZE];
         new java.util.Random().nextBytes(bytes);
