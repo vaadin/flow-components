@@ -35,7 +35,7 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-date-time-picker")
 public class DateTimePickerElement extends TestBenchElement
-        implements HasLabel, HasHelper, HasClearButton {
+        implements HasLabel, HasHelper {
 
     private static final String VALUE_PROPERTY = "value";
 
