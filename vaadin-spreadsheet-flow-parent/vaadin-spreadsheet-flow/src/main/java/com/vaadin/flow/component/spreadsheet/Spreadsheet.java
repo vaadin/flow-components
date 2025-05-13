@@ -1480,6 +1480,31 @@ public class Spreadsheet extends Component
         return reload;
     }
 
+    /**
+     * Sets the visibility of the custom editor. By default, if a custom editor
+     * is defined for a cell, then it is displayed on that cell. This behavior
+     * can be changed by setting this property to true, which makes the custom
+     * editor visible when the cell is focused.
+     * 
+     * @param showCustomEditorOnFocus
+     *            a boolean indicating whether the custom editor should be
+     *            visible on focus (true) or not (false)
+     */
+    public void setShowCustomEditorOnFocus(boolean showCustomEditorOnFocus) {
+        getElement().setProperty("showCustomEditorOnFocus",
+                showCustomEditorOnFocus);
+    }
+
+    /**
+     * Returns whether the custom editor is shown on focus or not.
+     *
+     * @return a boolean indicating whether the custom editor is visible on
+     *         focus (true) or not (false)
+     */
+    public boolean isShowCustomEditorOnFocus() {
+        return getElement().getProperty("showCustomEditorOnFocus", false);
+    }
+
     /*
      * (non-Javadoc)
      *
