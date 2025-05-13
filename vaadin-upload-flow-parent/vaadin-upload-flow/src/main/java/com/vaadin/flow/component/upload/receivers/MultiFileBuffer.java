@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import com.vaadin.flow.component.upload.MultiFileReceiver;
+import com.vaadin.flow.server.streams.FileFactory;
 
 /**
  * Basic receiver implementation for receiving multiple file upload and storing

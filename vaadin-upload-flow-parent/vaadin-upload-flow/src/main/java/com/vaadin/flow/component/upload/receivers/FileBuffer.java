@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.util.logging.Level;
 
 import com.vaadin.flow.component.upload.Receiver;
+import com.vaadin.flow.server.streams.FileFactory;
 
 /**
  * Basic in file receiver implementation. File is stored by default to File

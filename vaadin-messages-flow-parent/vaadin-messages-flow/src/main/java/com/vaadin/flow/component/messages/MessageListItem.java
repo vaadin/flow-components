@@ -452,7 +452,7 @@ public class MessageListItem implements Serializable {
      * @see MessageListItem#setUserImage(String)
      * @deprecated Use {@link #setUserImageHandler(DownloadHandler)} instead
      */
-    @Deprecated(since = "24.8")
+    @Deprecated(since = "24.8", forRemoval = true)
     public void setUserImageResource(AbstractStreamResource resource) {
         imageResource = resource;
 

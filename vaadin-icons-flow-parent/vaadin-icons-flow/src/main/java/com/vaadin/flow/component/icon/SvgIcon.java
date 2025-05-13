@@ -68,7 +68,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * @see #setSrc(AbstractStreamResource)
      * @deprecated Use {@link #SvgIcon(DownloadHandler)} instead
      */
-    @Deprecated(since = "24.8")
+    @Deprecated(since = "24.8", forRemoval = true)
     public SvgIcon(AbstractStreamResource src) {
         setSrc(src);
     }
@@ -84,7 +84,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * @see #setSymbol(String)
      * @deprecated Use {@link #SvgIcon(DownloadHandler, String)} instead
      */
-    @Deprecated(since = "24.8")
+    @Deprecated(since = "24.8", forRemoval = true)
     public SvgIcon(AbstractStreamResource src, String symbol) {
         this(src);
         setSymbol(symbol);
@@ -165,7 +165,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      *            the source value, not null
      * @deprecated Use {@link #setSrc(DownloadHandler)} instead
      */
-    @Deprecated(since = "24.8")
+    @Deprecated(since = "24.8", forRemoval = true)
     public void setSrc(AbstractStreamResource src) {
         getElement().setAttribute("src", src);
     }
@@ -181,7 +181,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * @see #setSymbol(String)
      * @deprecated Use {@link #setSrc(DownloadHandler, String)} instead
      */
-    @Deprecated(since = "24.8")
+    @Deprecated(since = "24.8", forRemoval = true)
     public void setSrc(AbstractStreamResource src, String symbol) {
         setSrc(src);
         setSymbol(symbol);

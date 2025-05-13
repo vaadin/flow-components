@@ -254,7 +254,7 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
          *            the resource value or {@code null} to remove the resource
          * @deprecated Use {@link #setImageHandler(DownloadHandler)} instead
          */
-        @Deprecated(since = "24.8")
+        @Deprecated(since = "24.8", forRemoval = true)
         public void setImageResource(AbstractStreamResource resource) {
             imageResource = resource;
 

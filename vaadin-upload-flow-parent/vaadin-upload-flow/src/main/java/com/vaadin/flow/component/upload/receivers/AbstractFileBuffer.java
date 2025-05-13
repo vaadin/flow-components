@@ -22,6 +22,8 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.vaadin.flow.server.streams.FileFactory;
+
 /**
  * Abstract class for common file receiver buffers.
  */
