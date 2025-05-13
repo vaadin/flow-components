@@ -153,19 +153,19 @@ public class EventHandlingIT extends AbstractComponentIT {
         TextFieldElement lastNameField = crud.getEditor()
                 .$(TextFieldElement.class)
                 .withAttribute("editor-role", "last-name").first();
-        Assert.assertTrue(lastNameField.hasAttribute("invalid"));
+        Assert.assertTrue(lastNameField.isInvalid());
 
         // Invalid input
         lastNameField.setValue("Manolo");
         crud.getEditorSaveButton().click();
-        Assert.assertTrue(lastNameField.hasAttribute("invalid"));
+        Assert.assertTrue(lastNameField.isInvalid());
         Assert.assertTrue(crud.isEditorOpen());
         Assert.assertEquals("Sayo",
                 $(GridElement.class).first().getCell(0, 2).getText());
 
         // Valid input
         lastNameField.setValue("Oladeji");
-        Assert.assertFalse(lastNameField.hasAttribute("invalid"));
+        Assert.assertFalse(lastNameField.isInvalid());
 
         crud.getEditorSaveButton().click();
 
@@ -183,7 +183,7 @@ public class EventHandlingIT extends AbstractComponentIT {
                 .$(TextFieldElement.class)
                 .withAttribute("editor-role", "first-name").first();
 
-        Assert.assertFalse(firstNameField.hasAttribute("invalid"));
+        Assert.assertFalse(firstNameField.isInvalid());
 
         // To avoid editor being dirty
         TextFieldElement lastNameField = crud.getEditor()
@@ -193,7 +193,7 @@ public class EventHandlingIT extends AbstractComponentIT {
 
         crud.getEditorSaveButton().click();
 
-        Assert.assertTrue(firstNameField.hasAttribute("invalid"));
+        Assert.assertTrue(firstNameField.isInvalid());
     }
 
     @Test
@@ -205,12 +205,12 @@ public class EventHandlingIT extends AbstractComponentIT {
                 .$(TextFieldElement.class)
                 .withAttribute("editor-role", "last-name").first();
 
-        Assert.assertFalse(lastNameField.hasAttribute("invalid"));
+        Assert.assertFalse(lastNameField.isInvalid());
 
         lastNameField.setValue("Raiden");
         crud.getEditorSaveButton().click();
 
-        Assert.assertTrue(lastNameField.hasAttribute("invalid"));
+        Assert.assertTrue(lastNameField.isInvalid());
     }
 
     @Test
