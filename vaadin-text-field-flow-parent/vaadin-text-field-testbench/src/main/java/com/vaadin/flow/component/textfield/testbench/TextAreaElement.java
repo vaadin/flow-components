@@ -21,6 +21,7 @@ import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
 import com.vaadin.testbench.HasStringValueProperty;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -30,7 +31,8 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-text-area")
 public class TextAreaElement extends TestBenchElement
-        implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
+        implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper,
+        HasValidation {
     /**
      * Emulates the user changing the value, which in practice means setting
      * {@code value} of the {@code textarea} element to the given value and then

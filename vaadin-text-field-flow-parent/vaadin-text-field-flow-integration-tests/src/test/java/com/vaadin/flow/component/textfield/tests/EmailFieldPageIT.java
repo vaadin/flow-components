@@ -134,11 +134,11 @@ public class EmailFieldPageIT extends AbstractComponentIT {
 
         field.sendKeys("username");
         blur();
-        assertTrue(field.hasAttribute("invalid"));
+        assertTrue(field.isInvalid());
 
         field.sendKeys("username@domain.com");
         blur();
-        assertFalse(field.hasAttribute("invalid"));
+        assertFalse(field.isInvalid());
     }
 
     @Test
