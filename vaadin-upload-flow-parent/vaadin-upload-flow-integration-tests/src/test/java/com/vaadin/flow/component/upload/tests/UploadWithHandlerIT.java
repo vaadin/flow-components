@@ -19,50 +19,43 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
-import java.util.logging.Level;
 
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.logging.LogEntry;
 
 import com.vaadin.flow.component.upload.testbench.UploadElement;
 import com.vaadin.flow.testutil.TestPath;
 
-@TestPath("vaadin-upload-with-handler")
+@TestPath("vaadin-upload/handler")
 public class UploadWithHandlerIT extends AbstractUploadIT {
 
     // The size is made 100KB to be bigger than the default upload progress
     // interval
     private static final int FILE_SIZE = 1024 * 100;
+
+    private UploadElement upload;
     private WebElement uploadOutput;
     private WebElement eventsOutput;
 
     @Before
     public void init() {
         open();
-        waitUntil(driver -> getUpload().isDisplayed());
-        uploadOutput = getDriver().findElement(
-                By.id(UploadWithHandlerView.UPLOAD_TEST_CONTENT_SIZE_ID));
-        eventsOutput = getDriver().findElement(
-                By.id(UploadWithHandlerView.UPLOAD_HANDLER_EVENTS_ID));
+        upload = $(UploadElement.class).first();
+        uploadOutput = $("*")
+                .id(UploadWithHandlerView.UPLOAD_TEST_CONTENT_SIZE_ID);
+        eventsOutput = $("*")
+                .id(UploadWithHandlerView.UPLOAD_HANDLER_EVENTS_ID);
     }
 
     @Test
     public void uploadWithHandler_uploadSingleFile_fileUploadedAndNoErrorThrown()
             throws Exception {
         File tempFile = createTempBinaryFile();
-        getUpload().upload(tempFile);
+        upload.upload(tempFile);
 
-        List<LogEntry> logList = getLogEntries(Level.SEVERE);
-        MatcherAssert.assertThat(
-                "There should have no severe message in the console for Upload with Upload Handler",
-                logList.size(), CoreMatchers.is(0));
+        checkLogsForErrors();
 
         Assert.assertEquals(
                 "Unexpected handler events for upload with using upload handler",
@@ -71,10 +64,6 @@ public class UploadWithHandlerIT extends AbstractUploadIT {
         Assert.assertEquals(
                 "Unexpected file size for upload with upload handler",
                 uploadOutput.getText(), String.valueOf(FILE_SIZE));
-    }
-
-    private UploadElement getUpload() {
-        return $(UploadElement.class).id(UploadWithHandlerView.UPLOAD_ID);
     }
 
     private File createTempBinaryFile() throws IOException {

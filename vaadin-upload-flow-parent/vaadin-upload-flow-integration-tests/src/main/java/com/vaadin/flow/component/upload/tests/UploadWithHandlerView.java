@@ -25,7 +25,7 @@ import com.vaadin.flow.server.streams.InMemoryUploadHandler;
 import com.vaadin.flow.server.streams.UploadHandler;
 
 // Note: this test needs Push enabled for Upload handler to push UI updates
-@Route("vaadin-upload-with-handler")
+@Route("vaadin-upload/handler")
 public class UploadWithHandlerView extends Div {
 
     static final String UPLOAD_TEST_CONTENT_SIZE_ID = "upload-with-handler-output-id";
