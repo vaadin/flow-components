@@ -27,11 +27,10 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
+import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.server.VaadinSession;
 
-import elemental.json.JsonObject;
 import elemental.json.impl.JreJsonArray;
-import elemental.json.impl.JreJsonNull;
 
 public class MessageListUpdatesTest {
 
@@ -206,33 +205,8 @@ public class MessageListUpdatesTest {
         // Expect the parameters to equal the items in the message list
         var parameterItems = (JreJsonArray) invocation.getInvocation()
                 .getParameters().get(0);
-        var expectedItems = messageList.getItems();
-
-        Assert.assertEquals(expectedItems.size(), parameterItems.length());
-
-        for (int i = 0; i < expectedItems.size(); i++) {
-            var parameterItem = (JsonObject) parameterItems.get(i);
-            var expectedItem = expectedItems.get(i);
-
-            Assert.assertEquals(expectedItem.getText(),
-                    getStringValue(parameterItem, "text"));
-            Assert.assertEquals(expectedItem.getUserName(),
-                    getStringValue(parameterItem, "userName"));
-            Assert.assertEquals(expectedItem.getUserImage(),
-                    getStringValue(parameterItem, "userImage"));
-            Assert.assertEquals(expectedItem.getUserAbbreviation(),
-                    getStringValue(parameterItem, "userAbbreviation"));
-            Assert.assertEquals(expectedItem.getUserColorIndex(),
-                    getStringValue(parameterItem, "userColorIndex"));
-            Assert.assertEquals(expectedItem.getTime(),
-                    getStringValue(parameterItem, "time"));
-        }
-    }
-
-    private String getStringValue(JsonObject jsonObject, String key) {
-        var value = jsonObject.get(key);
-        return (value == null || value instanceof JreJsonNull) ? null
-                : jsonObject.getString(key);
+        var expectedItems = JsonUtils.listToJson(messageList.getItems());
+        Assert.assertTrue(JsonUtils.jsonEquals(expectedItems, parameterItems));
     }
 
     private List<PendingJavaScriptInvocation> getPendingJavaScriptInvocations() {
