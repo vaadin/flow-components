@@ -29,6 +29,10 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.server.VaadinSession;
 
+import elemental.json.JsonObject;
+import elemental.json.impl.JreJsonArray;
+import elemental.json.impl.JreJsonNull;
+
 public class MessageListUpdatesTest {
 
     private UI ui;
@@ -146,6 +150,89 @@ public class MessageListUpdatesTest {
         item2.setText("bar");
 
         Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+    }
+
+    @Test
+    public void addItem_setItems_expectFullUpdate() {
+        messageList.addItem(item1);
+        messageList.setItems(
+                Arrays.asList(new MessageListItem("Foo", null, "User")));
+        assertFullUpdate();
+    }
+
+    @Test
+    public void setItems_addItem_expectFullUpdate() {
+        messageList.setItems(
+                Arrays.asList(new MessageListItem("Foo", null, "User")));
+        messageList.addItem(item1);
+        assertFullUpdate();
+    }
+
+    @Test
+    public void setText_setItems_expectFullUpdate() {
+        messageList.setItems(Arrays.asList(item1));
+        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+
+        item1.setText("foobar");
+        messageList.setItems(item1, item2);
+        assertFullUpdate();
+    }
+
+    @Test
+    public void setItems_setText_expectFullUpdate() {
+        messageList.setItems(Arrays.asList(item1));
+        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+
+        messageList.setItems(item1, item2);
+        item1.setText("foobar");
+        assertFullUpdate();
+    }
+
+    /**
+     * Asserts that the only pending JavaScript invocation is a full update
+     * (setItems) and that the parameters of the invocation match the items in
+     * the message list.
+     */
+    private void assertFullUpdate() {
+        var pendingInvocations = getPendingJavaScriptInvocations();
+        // Expect only one pending invocation
+        Assert.assertEquals(1, pendingInvocations.size());
+
+        var invocation = pendingInvocations.get(0);
+        // Expect the only invocation to be setItems
+        Assert.assertTrue(invocation.getInvocation().getExpression()
+                .contains("setItems"));
+
+        // Expect the parameters to equal the items in the message list
+        var parameterItems = (JreJsonArray) invocation.getInvocation()
+                .getParameters().get(0);
+        var expectedItems = messageList.getItems();
+
+        Assert.assertEquals(expectedItems.size(), parameterItems.length());
+
+        for (int i = 0; i < expectedItems.size(); i++) {
+            var parameterItem = (JsonObject) parameterItems.get(i);
+            var expectedItem = expectedItems.get(i);
+
+            Assert.assertEquals(expectedItem.getText(),
+                    getStringValue(parameterItem, "text"));
+            Assert.assertEquals(expectedItem.getUserName(),
+                    getStringValue(parameterItem, "userName"));
+            Assert.assertEquals(expectedItem.getUserImage(),
+                    getStringValue(parameterItem, "userImage"));
+            Assert.assertEquals(expectedItem.getUserAbbreviation(),
+                    getStringValue(parameterItem, "userAbbreviation"));
+            Assert.assertEquals(expectedItem.getUserColorIndex(),
+                    getStringValue(parameterItem, "userColorIndex"));
+            Assert.assertEquals(expectedItem.getTime(),
+                    getStringValue(parameterItem, "time"));
+        }
+    }
+
+    private String getStringValue(JsonObject jsonObject, String key) {
+        var value = jsonObject.get(key);
+        return (value == null || value instanceof JreJsonNull) ? null
+                : jsonObject.getString(key);
     }
 
     private List<PendingJavaScriptInvocation> getPendingJavaScriptInvocations() {
