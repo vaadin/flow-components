@@ -32,6 +32,7 @@ public class MultipleAxes extends AbstractChartExample {
     @Override
     public void initDemo() {
         Chart chart = new Chart();
+        chart.setClassName("MultipleAxes");
         Configuration conf = chart.getConfiguration();
 
         conf.getChart().setZoomType(Dimension.XY);

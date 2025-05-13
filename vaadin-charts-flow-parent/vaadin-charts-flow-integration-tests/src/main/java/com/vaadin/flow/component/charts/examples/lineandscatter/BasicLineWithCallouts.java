@@ -26,6 +26,7 @@ public class BasicLineWithCallouts extends AbstractChartExample {
     @Override
     public void initDemo() {
         Chart chart = new Chart();
+        chart.setClassName("BasicLineWithCallouts");
 
         Configuration configuration = chart.getConfiguration();
         configuration.getChart().setType(ChartType.LINE);
