@@ -66,7 +66,9 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * @param src
      *            the resource value
      * @see #setSrc(AbstractStreamResource)
+     * @deprecated Use {@link #SvgIcon(DownloadHandler)} instead
      */
+    @Deprecated(since = "24.8")
     public SvgIcon(AbstractStreamResource src) {
         setSrc(src);
     }
@@ -80,7 +82,9 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      *            the symbol reference of the icon
      * @see #setSrc(AbstractStreamResource)
      * @see #setSymbol(String)
+     * @deprecated Use {@link #SvgIcon(DownloadHandler, String)} instead
      */
+    @Deprecated(since = "24.8")
     public SvgIcon(AbstractStreamResource src, String symbol) {
         this(src);
         setSymbol(symbol);
@@ -94,8 +98,7 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * @see #setSrc(AbstractStreamResource)
      */
     public SvgIcon(DownloadHandler src) {
-        setSrc(new StreamResourceRegistry.ElementStreamResource(src,
-                getElement()));
+        setSrc(src);
     }
 
     /**
@@ -160,7 +163,9 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      *
      * @param src
      *            the source value, not null
+     * @deprecated Use {@link #setSrc(DownloadHandler)} instead
      */
+    @Deprecated(since = "24.8")
     public void setSrc(AbstractStreamResource src) {
         getElement().setAttribute("src", src);
     }
@@ -174,8 +179,38 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      *            the symbol reference of the icon
      * @see #setSrc(AbstractStreamResource)
      * @see #setSymbol(String)
+     * @deprecated Use {@link #setSrc(DownloadHandler, String)} instead
      */
+    @Deprecated(since = "24.8")
     public void setSrc(AbstractStreamResource src, String symbol) {
+        setSrc(src);
+        setSymbol(symbol);
+    }
+
+    /**
+     * Defines the source of the icon from the given {@link DownloadHandler} The
+     * resource must contain a valid SVG element.
+     *
+     * @param src
+     *            the source value, not null
+     */
+    public void setSrc(DownloadHandler src) {
+        getElement().setAttribute("src",
+                new StreamResourceRegistry.ElementStreamResource(src,
+                        getElement()));
+    }
+
+    /**
+     * Defines the src and the symbol to be used in the icon.
+     *
+     * @param src
+     *            the source of the icon sprite file, not null
+     * @param symbol
+     *            the symbol reference of the icon
+     * @see #setSrc(AbstractStreamResource)
+     * @see #setSymbol(String)
+     */
+    public void setSrc(DownloadHandler src, String symbol) {
         setSrc(src);
         setSymbol(symbol);
     }

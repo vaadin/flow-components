@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import com.vaadin.flow.server.streams.FileFactory;
+
 public class TemporaryFileFactory implements FileFactory {
 
     /**
