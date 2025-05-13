@@ -679,7 +679,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     /**
      * Return the current receiver.
      * <p>
-     * Will return null weh used with the UploadHandler which is recommended.
+     * Will return null when used with the UploadHandler which is recommended.
      *
      * @return the StreamVariable.
      */
