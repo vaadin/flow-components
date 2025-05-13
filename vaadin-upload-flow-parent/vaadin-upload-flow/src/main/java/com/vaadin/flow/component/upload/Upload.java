@@ -189,6 +189,9 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
     /**
      * Create a new instance of Upload with the given upload handler.
+     * <p>
+     * This doesn't set the file limit. Call {@link #setMaxFiles(int)} if you
+     * want to limit the number of files.
      *
      * @param handler
      *            upload handler that handles the upload
@@ -682,7 +685,9 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * The given handler defines how uploaded file content is handled on the
      * server and invoked per each single file to be uploaded. Note! This method
      * overrides the receiver set by {@link #setReceiver(Receiver)} and removes
-     * the maximum files limit.
+     * the maximum files limit. Set the maximum files limit by calling
+     * {@link #setMaxFiles(int)} after calling this method, if you want to limit
+     * the number of files.
      *
      * @param handler
      *            upload handler to use for file receptions
