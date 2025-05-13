@@ -10,12 +10,15 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 import com.vaadin.flow.testutil.TestPath;
@@ -23,6 +26,9 @@ import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-spreadsheet")
 public class CustomEditorIT extends AbstractSpreadsheetIT {
+
+    private final String[] editorCellAddresses = { "B2", "C2", "D2", "E2",
+            "F2" };
 
     @Before
     public void init() {
@@ -203,6 +209,121 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         Assert.assertFalse(input.isFocused());
     }
 
+    @Test
+    public void customEditorVisible_editorsVisible() {
+
+        // Check that the editors are not visible
+        for (String cellAddress : editorCellAddresses) {
+            Assert.assertFalse(getCustomEditorInCell(cellAddress).isPresent());
+        }
+
+        clickToggleCellVisibleButton();
+
+        // Check that the editors are visible
+        for (String cellAddress : editorCellAddresses) {
+            Assert.assertTrue(getCustomEditorInCell(cellAddress).isPresent());
+        }
+
+        clickToggleCellVisibleButton();
+
+        // Check that the editors are not visible again
+        for (String cellAddress : editorCellAddresses) {
+            Assert.assertFalse(getCustomEditorInCell(cellAddress).isPresent());
+        }
+    }
+
+    @Test
+    public void customEditorVisible_pressEnterKey_editorIsFocused() {
+        clickToggleCellVisibleButton();
+        selectCell("A2");
+
+        for (String cellAddress : editorCellAddresses) {
+            moveToNextCellAndAssertEditorInCellIsFocusedWithKeyPress(
+                    cellAddress, Keys.ENTER);
+        }
+    }
+
+    @Test
+    public void customEditorVisible_pressF2Key_editorIsFocused() {
+        clickToggleCellVisibleButton();
+        selectCell("A2");
+
+        for (String cellAddress : editorCellAddresses) {
+            moveToNextCellAndAssertEditorInCellIsFocusedWithKeyPress(
+                    cellAddress, Keys.F2);
+        }
+    }
+
+    @Test
+    public void customEditorVisible_pressCharKey_editorIsFocused() {
+        clickToggleCellVisibleButton();
+        selectCell("A2");
+
+        for (String cellAddress : editorCellAddresses) {
+            // Skip the C2 cell, as it contains a checkbox editor
+            if (cellAddress.equals("C2")) {
+                getActiveElement().sendKeys(Keys.TAB);
+                continue;
+            }
+            moveToNextCellAndAssertEditorInCellIsFocusedWithKeyPress(
+                    cellAddress, "a");
+            var value = getActiveElement().getDomProperty("value");
+            Assert.assertEquals("a", value);
+        }
+    }
+
+    @Test
+    public void customEditorVisible_editorIsFocused_ESCKeyFocusesCell() {
+        clickToggleCellVisibleButton();
+        selectCell("A2");
+
+        for (String cellAddress : editorCellAddresses) {
+            moveToNextCellAndAssertEditorInCellIsFocusedWithKeyPress(
+                    cellAddress, Keys.ENTER);
+            getActiveElement().sendKeys(Keys.ESCAPE);
+            Assert.assertTrue(
+                    getSpreadsheet().getCellAt(cellAddress).isCellSelected());
+            // Checks that the editor is not removed when focus is moved away
+            // from it
+            var editor = getCustomEditorInCell(cellAddress);
+            Assert.assertTrue(editor.isPresent());
+        }
+    }
+
+    @Test
+    public void customEditorVisible_editorIsFocused_editorStaysOnEnter() {
+        clickToggleCellVisibleButton();
+        selectCell("A2");
+
+        for (String cellAddress : editorCellAddresses) {
+            moveToNextCellAndAssertEditorInCellIsFocusedWithKeyPress(
+                    cellAddress, Keys.ENTER);
+            getActiveElement().sendKeys(Keys.ENTER);
+            // Checks that the editor is not removed when the user presses ENTER
+            var editor = getCustomEditorInCell(cellAddress);
+            Assert.assertTrue(editor.isPresent());
+        }
+    }
+
+    @Test
+    public void customEditorIsVisible_sheetIsChanged_editorsRemoved() {
+        clickToggleCellVisibleButton();
+        getSpreadsheet().addSheet();
+
+        // Check that the editors are not visible in the new sheet
+        for (String cellAddress : editorCellAddresses) {
+            Assert.assertFalse(getCustomEditorInCell(cellAddress).isPresent());
+        }
+
+        getSpreadsheet().selectSheet("Sheet1");
+
+        // Check that the editors are visible when moving back to the first
+        // sheet
+        for (String cellAddress : editorCellAddresses) {
+            Assert.assertTrue(getCustomEditorInCell(cellAddress).isPresent());
+        }
+    }
+
     private void toggleCheckboxValue(String cellAddress) {
         clickCell(cellAddress);
         getEditorElement("input").click();
@@ -221,5 +342,51 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     private TestBenchElement getEditorElement(String elementSelector) {
         return getSpreadsheet().findElement(By.cssSelector(elementSelector));
+    }
+
+    private Optional<WebElement> getCustomEditorInCell(String cellAddress) {
+        var cell = getSpreadsheet().getCellAt(cellAddress);
+        try {
+            var slot = cell.findElement(By.tagName("slot"));
+            var slotName = slot.getDomAttribute("name");
+            var editor = getSpreadsheet()
+                    .findElement(By.cssSelector("[slot='" + slotName + "']"));
+
+            return Optional.of(editor);
+        } catch (NoSuchElementException e) {
+            return Optional.empty();
+        }
+    }
+
+    private void moveToNextCellAndAssertEditorInCellIsFocusedWithKeyPress(
+            String cellAddress, CharSequence key) {
+        getActiveElement().sendKeys(Keys.TAB);
+        getSpreadsheet().sendKeys(key);
+        assertEditorInCellIsFocused(cellAddress);
+    }
+
+    private void assertEditorInCellIsFocused(String cellAddress) {
+        var activeElement = getActiveElement();
+        String slotName = activeElement.getDomAttribute("slot");
+        if (!(slotName != null && slotName.startsWith("custom-editor"))) {
+            var parentElement = getActiveElement().findElement(By.xpath(".."));
+            slotName = parentElement.getDomAttribute("slot");
+        }
+
+        Assert.assertNotNull("Slot name is null", slotName);
+
+        var result = getSpreadsheet().getCellAt(cellAddress)
+                .findElements(By.cssSelector("slot[name='" + slotName + "']"));
+        Assert.assertEquals(1, result.size());
+    }
+
+    private WebElement getActiveElement() {
+        return getDriver().switchTo().activeElement();
+    }
+
+    private void clickToggleCellVisibleButton() {
+        var toggleButton = $(TestBenchElement.class)
+                .id("toggleCustomEditorVisibilityButton");
+        toggleButton.click();
     }
 }
