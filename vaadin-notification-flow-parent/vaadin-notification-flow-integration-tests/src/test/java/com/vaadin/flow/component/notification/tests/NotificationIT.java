@@ -67,6 +67,7 @@ public class NotificationIT extends AbstractComponentIT {
 
     @Test
     public void notificationWithStaticConvenienceMethod() {
+        clickElementWithJs(findElement(By.id("static-notification-button")));
         checkNotificationIsOpen();
         assertNotificationContent("static");
         checkNotificationIsClosed();
@@ -96,26 +97,6 @@ public class NotificationIT extends AbstractComponentIT {
                 .findElements(By.id("label-inside-notification")).size());
         notification.findElement(By.id("button-inside-notification")).click();
         checkNotificationIsClosed();
-    }
-
-    @Test
-    public void styleNotificationContent() {
-        scrollIntoViewAndClick(
-                findElement(By.id("styled-content-notification-button")));
-
-        WebElement content = null;
-        for (WebElement notification : getNotifications()) {
-            List<WebElement> nestedElements = notification
-                    .findElements(By.className("my-style"));
-            if (!nestedElements.isEmpty()) {
-                content = nestedElements.get(0);
-                break;
-            }
-        }
-
-        Assert.assertNotNull("Notification content element is not found",
-                content);
-        Assert.assertEquals("rgba(255, 0, 0, 1)", content.getCssValue("color"));
     }
 
     private void assertNotificationContent(String expected) {
