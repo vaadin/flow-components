@@ -180,7 +180,9 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      *
      * @param receiver
      *            receiver that handles the upload
+     * @deprecated use {@link #Upload(UploadHandler)} instead
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Upload(Receiver receiver) {
         this();
 
@@ -559,7 +561,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * @param listener
      *            progress listener to add
      * @return registration for removal of listener
+     * @deprecated use
+     *             {@link com.vaadin.flow.server.streams.TransferProgressListener}
+     *             with {@link com.vaadin.flow.server.streams.UploadHandler}
+     *             implementing the
+     *             {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}
+     *             interface.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Registration addProgressListener(
             ComponentEventListener<ProgressUpdateEvent> listener) {
         return addListener(ProgressUpdateEvent.class, listener);
@@ -571,7 +580,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * @param listener
      *            failed listener to add
      * @return registration for removal of listener
+     * @deprecated use
+     *             {@link com.vaadin.flow.server.streams.TransferProgressListener}
+     *             with {@link com.vaadin.flow.server.streams.UploadHandler}
+     *             implementing the
+     *             {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}
+     *             interface.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Registration addFailedListener(
             ComponentEventListener<FailedEvent> listener) {
         return addListener(FailedEvent.class, listener);
@@ -583,7 +599,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * @param listener
      *            finished listener to add
      * @return registration for removal of listener
+     * @deprecated use
+     *             {@link com.vaadin.flow.server.streams.TransferProgressListener}
+     *             with {@link com.vaadin.flow.server.streams.UploadHandler}
+     *             implementing the
+     *             {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}
+     *             interface.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Registration addFinishedListener(
             ComponentEventListener<FinishedEvent> listener) {
         return addListener(FinishedEvent.class, listener);
@@ -595,7 +618,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * @param listener
      *            start listener to add
      * @return registration for removal of listener
+     * @deprecated use
+     *             {@link com.vaadin.flow.server.streams.TransferProgressListener}
+     *             with {@link com.vaadin.flow.server.streams.UploadHandler}
+     *             implementing the
+     *             {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}
+     *             interface.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Registration addStartedListener(
             ComponentEventListener<StartedEvent> listener) {
         return addListener(StartedEvent.class, listener);
@@ -607,7 +637,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * @param listener
      *            succeeded listener to add
      * @return registration for removal of listener
+     * @deprecated use
+     *             {@link com.vaadin.flow.server.streams.TransferProgressListener}
+     *             with {@link com.vaadin.flow.server.streams.UploadHandler}
+     *             implementing the
+     *             {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}
+     *             interface.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Registration addSucceededListener(
             ComponentEventListener<SucceededEvent> listener) {
         return addListener(SucceededEvent.class, listener);
@@ -641,9 +678,12 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
     /**
      * Return the current receiver.
+     * <p>
+     * Will return null weh used with the UploadHandler which is recommended.
      *
      * @return the StreamVariable.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Receiver getReceiver() {
         return receiver;
     }
@@ -658,7 +698,9 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * @param receiver
      *            receiver to use for file reception
      * @see #setUploadHandler(UploadHandler)
+     * @deprecated use {@link #setUploadHandler(UploadHandler)} instead
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public void setReceiver(Receiver receiver) {
         Receiver oldReceiver = this.receiver;
         this.receiver = receiver;

@@ -25,7 +25,7 @@ import java.io.Serializable;
  * @author Vaadin Ltd.
  * @deprecated Use {@link com.vaadin.flow.server.streams.UploadHandler} instead
  */
-@Deprecated(since = "24.8")
+@Deprecated(since = "24.8", forRemoval = true)
 @FunctionalInterface
 public interface Receiver extends Serializable {
 
