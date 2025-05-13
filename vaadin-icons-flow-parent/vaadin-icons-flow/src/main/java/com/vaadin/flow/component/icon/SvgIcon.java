@@ -16,9 +16,9 @@
 package com.vaadin.flow.component.icon;
 
 import com.vaadin.flow.server.AbstractStreamResource;
-import com.vaadin.flow.server.DownloadHandler;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 /**
  * Component for displaying an icon from a SVG file.

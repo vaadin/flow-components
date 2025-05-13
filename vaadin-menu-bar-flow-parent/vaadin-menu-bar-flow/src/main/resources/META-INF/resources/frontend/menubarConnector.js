@@ -95,18 +95,6 @@ function initLazy(menubar, appId) {
       items = items.filter((item) => !item.component.hidden);
 
       menubar.items = items;
-
-      // Propagate click events from the menu buttons to the item components
-      menubar._buttons.forEach((button) => {
-        if (button.item && button.item.component) {
-          button.addEventListener('click', (e) => {
-            if (e.composedPath().indexOf(button.item.component) === -1) {
-              button.item.component.click();
-              e.stopPropagation();
-            }
-          });
-        }
-      });
     }
   };
 }

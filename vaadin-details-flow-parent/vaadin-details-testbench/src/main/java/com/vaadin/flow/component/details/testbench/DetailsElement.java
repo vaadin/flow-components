@@ -50,7 +50,8 @@ public class DetailsElement extends TestBenchElement {
      * Whether the details are opened or not
      */
     public boolean isOpened() {
-        return getPropertyBoolean("opened");
+        Boolean result = getPropertyBoolean("opened");
+        return result != null && result;
     }
 
     /**

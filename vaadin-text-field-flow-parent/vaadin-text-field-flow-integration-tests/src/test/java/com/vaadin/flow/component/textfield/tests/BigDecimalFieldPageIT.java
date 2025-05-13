@@ -154,9 +154,7 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
         input.sendKeys("300");
         blur();
 
-        TestBenchElement clearButton = field.$(TestBenchElement.class)
-                .withAttributeContainingWord("part", "clear-button").first();
-        clearButton.click();
+        field.clickClearButton();
 
         assertValueChange(2, 300, null);
     }

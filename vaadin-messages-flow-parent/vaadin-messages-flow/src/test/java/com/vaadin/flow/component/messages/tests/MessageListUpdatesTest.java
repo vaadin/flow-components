@@ -68,6 +68,86 @@ public class MessageListUpdatesTest {
         fakeClientCommunication();
     }
 
+    @Test
+    public void setItems_appendText() {
+        messageList.setItems(Arrays.asList(item1, item2));
+        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+
+        item1.appendText("foo");
+        Assert.assertEquals("foo", item1.getText());
+        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+    }
+
+    @Test
+    public void setItems_setText_appendText() {
+        messageList.setItems(Arrays.asList(item1, item2));
+        item1.setText("foo");
+        item1.appendText("bar");
+        Assert.assertEquals("foobar", item1.getText());
+    }
+
+    @Test
+    public void setItems_setText_appendTextNull() {
+        messageList.setItems(Arrays.asList(item1, item2));
+        item1.setText("foo");
+        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+
+        item1.appendText(null);
+        Assert.assertEquals(0, getPendingJavaScriptInvocations().size());
+    }
+
+    @Test
+    public void setItems_setText_appendTextEmpty() {
+        messageList.setItems(Arrays.asList(item1, item2));
+        item1.setText("foo");
+        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+
+        item1.appendText("");
+        Assert.assertEquals(0, getPendingJavaScriptInvocations().size());
+    }
+
+    @Test
+    public void addItem() {
+        messageList.addItem(item1);
+        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+        Assert.assertEquals(item1, messageList.getItems().get(0));
+        Assert.assertEquals(1, messageList.getItems().size());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void addItemNull_throws() {
+        messageList.addItem(null);
+    }
+
+    @Test
+    public void addItem_updateText() {
+        messageList.addItem(item1);
+        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+
+        item1.setText("foo");
+        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+    }
+
+    @Test
+    public void setItems_addItem() {
+        messageList.setItems(Arrays.asList(item1));
+        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+
+        messageList.addItem(item2);
+        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+    }
+
+    @Test
+    public void setTextAfteraAddItem_noExtraJSInvocations() {
+        messageList.setItems(Arrays.asList(item1));
+        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+
+        messageList.addItem(item2);
+        item2.setText("bar");
+
+        Assert.assertEquals(1, getPendingJavaScriptInvocations().size());
+    }
+
     private List<PendingJavaScriptInvocation> getPendingJavaScriptInvocations() {
         fakeClientCommunication();
         return ui.getInternals().dumpPendingJavaScriptInvocations();

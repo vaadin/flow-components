@@ -70,7 +70,7 @@ public class ClearValueIT extends AbstractComponentIT {
         comboBox.openPopup();
         comboBox.closePopup();
 
-        comboBox.$("[part~='clear-button']").get(0).click();
+        comboBox.clickClearButton();
 
         comboBox.openPopup();
 

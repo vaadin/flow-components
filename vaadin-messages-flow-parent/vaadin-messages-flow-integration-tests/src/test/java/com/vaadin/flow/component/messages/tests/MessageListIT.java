@@ -175,6 +175,40 @@ public class MessageListIT extends AbstractComponentIT {
     }
 
     @Test
+    public void addItem_itemAdded() {
+        clickElementWithJs("addItem");
+
+        var messages = messageList.getMessageElements();
+        var msg = messages.get(2);
+
+        Assert.assertEquals("User", msg.getUserName());
+        Assert.assertEquals("Foo", msg.getText());
+    }
+
+    @Test
+    public void addItem_setItems() {
+        clickElementWithJs("addItem");
+        clickElementWithJs("setItems");
+
+        var messages = messageList.getMessageElements();
+        Assert.assertEquals("Unexpected items count", 1, messages.size());
+        var msg = messages.get(0);
+
+        Assert.assertEquals("sender3", msg.getUserName());
+    }
+
+    @Test
+    public void addTwoItems_twoItemsAdded() {
+        clickElementWithJs("addTwoItems");
+
+        var messages = messageList.getMessageElements();
+        Assert.assertEquals("Unexpected items count", 4, messages.size());
+        var msg = messages.get(3);
+
+        Assert.assertEquals("Bar", msg.getText());
+    }
+
+    @Test
     public void setImageAsDownloadResource_imageLoaded() {
         getLogEntries(Level.WARNING); // message logs before setting resource
         clickElementWithJs("setImageAsDownloadHandler");

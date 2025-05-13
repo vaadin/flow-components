@@ -62,9 +62,7 @@ public class PasswordFieldPageIT extends AbstractComponentIT {
                 .id("clear-password-field");
         field.setValue("foo");
 
-        WebElement clearButton = field.$("*")
-                .withAttributeContainingWord("part", "clear-button").first();
-        clearButton.click();
+        field.clickClearButton();
 
         String value = findElement(By.id("clear-message")).getText();
         Assert.assertEquals("Old value: 'foo'. New value: ''.", value);
