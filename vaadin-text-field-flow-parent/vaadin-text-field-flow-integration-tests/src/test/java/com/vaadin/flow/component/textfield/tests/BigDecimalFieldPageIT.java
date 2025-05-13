@@ -54,7 +54,7 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
 
     @Test
     public void shouldHaveSameWidthAsNumberField() {
-        // The width-property is set as 8em, but getComputedStyle returns the
+        // The width-property is set as 12em, but getComputedStyle returns the
         // width in pixels.
         String widthInEm = (String) executeScript(
                 "const style = getComputedStyle(arguments[0]);"
@@ -62,7 +62,7 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
                         + "const fontSize = parseFloat(style.fontSize);"
                         + "return (widthInPx / fontSize) + 'em';",
                 field);
-        Assert.assertEquals("8em", widthInEm);
+        Assert.assertEquals("12em", widthInEm);
     }
 
     @Test

@@ -26,10 +26,6 @@ class BigDecimalField extends TextField {
     return [
       ...super.styles,
       css`
-        :host {
-          width: 8em;
-        }
-
         :host([dir='rtl']) [part='input-field'] {
           direction: ltr;
         }
