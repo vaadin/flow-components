@@ -21,6 +21,7 @@ import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
 import com.vaadin.testbench.HasStringValueProperty;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -30,7 +31,8 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-number-field")
 public class NumberFieldElement extends TestBenchElement
-        implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
+        implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper,
+        HasValidation {
 
     /**
      * Emulates the user changing the value, which in practice means setting
