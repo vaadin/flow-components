@@ -178,6 +178,23 @@ public class UploadTest {
                 () -> handler.handleUploadRequest(null));
     }
 
+    @Test
+    public void setUploadHandler_maxFileIsDefined_maxFileIsPreserved() {
+        var upload = new Upload();
+        upload.setMaxFiles(5);
+        upload.setUploadHandler(event -> {
+        });
+        Assert.assertEquals(5, upload.getMaxFiles());
+    }
+
+    @Test
+    public void setUploadHandler_maxFileIsNotDefined_doesNotSetMaxFiles() {
+        var upload = new Upload();
+        upload.setUploadHandler(event -> {
+        });
+        Assert.assertNull(upload.getElement().getProperty("maxFiles"));
+    }
+
     @SuppressWarnings("unchecked")
     private UI setupMockUI() {
         UI ui = Mockito.mock(UI.class);
