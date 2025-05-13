@@ -46,7 +46,7 @@ public class MessageListPage extends Div {
         add(messageList);
 
         addButton("setText", () -> foo.setText("newfoo"));
-        addButton("appendText", () -> foo.setText(foo.getText() + "2"));
+        addButton("appendText", () -> foo.appendText("2"));
         addButton("setTime",
                 () -> foo.setTime(Instant.parse("2000-02-02T12:00:00.00Z")));
         addButton("setUserName", () -> foo.setUserName("sender2"));
@@ -60,6 +60,13 @@ public class MessageListPage extends Div {
 
         addButton("setItems", () -> messageList
                 .setItems(new MessageListItem(null, null, "sender3")));
+
+        addButton("addItem", () -> messageList
+                .addItem(new MessageListItem("Foo", null, "User")));
+        addButton("addTwoItems", () -> {
+            messageList.addItem(new MessageListItem("Foo", null, "User"));
+            messageList.addItem(new MessageListItem("Bar", null, "User"));
+        });
 
         addButton("setLocale", () -> UI.getCurrent().setLocale(Locale.ITALIAN));
 

@@ -164,6 +164,19 @@ public class MessageListItem implements Serializable {
     }
 
     /**
+     * Appends the provided text to the message's text content.
+     * 
+     * @param text
+     *            the text to append to the message's text content
+     */
+    public void appendText(String text) {
+        if (text == null) {
+            return;
+        }
+        setText(Optional.ofNullable(this.text).orElse("") + text);
+    }
+
+    /**
      * Gets the time of sending the message.
      *
      * @return the time of the message, or {@code null} if none is set
