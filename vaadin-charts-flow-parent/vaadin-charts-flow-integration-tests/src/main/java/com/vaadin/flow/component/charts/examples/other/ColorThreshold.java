@@ -18,6 +18,8 @@ public class ColorThreshold extends AreaRange {
     @Override
     public void initDemo() {
         super.initDemo();
+        chart.setClassName("ColorThreshold");
+
         PlotOptionsArearange plotOptions = new PlotOptionsArearange();
         // Make "value" below -5 displayed with another color. Default threshold
         // value is 0
