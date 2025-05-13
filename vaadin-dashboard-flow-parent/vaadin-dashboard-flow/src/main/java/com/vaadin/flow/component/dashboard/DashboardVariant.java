@@ -25,7 +25,7 @@ import com.vaadin.flow.component.shared.ThemeVariant;
 public enum DashboardVariant implements ThemeVariant {
     
     LUMO_SHADED_BACKGROUND("shaded-background"),
-    LUMO_ELEVATED_WIDGETS("elvated-widgets"),
+    LUMO_ELEVATED_WIDGETS("elevated-widgets"),
     LUMO_FLAT_WIDGETS("flat-widgets");
 
     private final String variant;
