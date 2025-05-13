@@ -55,6 +55,7 @@ export function useLitWebComponents(): PluginOption {
             'chart',
             'chart-series',
             'checkbox',
+            'checkbox-group',
             'combo-box',
             'context-menu',
             'custom-field',
