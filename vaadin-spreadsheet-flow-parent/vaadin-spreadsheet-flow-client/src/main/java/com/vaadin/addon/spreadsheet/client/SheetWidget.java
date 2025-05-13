@@ -9,11 +9,9 @@
 package com.vaadin.addon.spreadsheet.client;
 
 import static com.vaadin.addon.spreadsheet.client.SheetJsniUtil.getAssignedElements;
-import static com.vaadin.addon.spreadsheet.client.SheetJsniUtil.getComposedPath;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,7 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1255,7 +1252,7 @@ public class SheetWidget extends Panel {
     public void focusCustomEditor() {
         var cell = getCell(selectedCellCol, selectedCellRow);
         var assignedElements = getAssignedElements(
-            cell.getElement().getFirstChildElement());
+                cell.getElement().getFirstChildElement());
         if (assignedElements != null && assignedElements.length == 1) {
             var assignedElement = assignedElements[0];
             if (assignedElement.getNodeType() == Node.ELEMENT_NODE) {

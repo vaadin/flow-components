@@ -733,8 +733,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         if (!customCellEditorDisplayed) {
             formulaBarWidget.setFormulaFieldEnabled(!cellLocked);
         } else {
-             sheetWidget.displayCustomCellEditor(customEditorFactory
-             .getCustomEditor(sheetWidget.getSelectedCellKey()), false);
+            sheetWidget.displayCustomCellEditor(customEditorFactory
+                    .getCustomEditor(sheetWidget.getSelectedCellKey()), false);
         }
         if (name != null) {
             formulaBarWidget.setSelectedCellAddress(name);
