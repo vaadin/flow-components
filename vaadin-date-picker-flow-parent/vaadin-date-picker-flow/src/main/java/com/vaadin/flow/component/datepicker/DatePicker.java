@@ -679,12 +679,14 @@ public class DatePicker
     }
 
     /**
+     * For internal use only.
+     * <p>
      * Returns whether the input value is unparsable.
      *
      * @return <code>true</code> if the input element's value is populated and
      *         unparsable, <code>false</code> otherwise
      */
-    protected boolean isInputUnparsable() {
+    protected final boolean isInputUnparsable() {
         return unparsableValue != null;
     }
 
