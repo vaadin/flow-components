@@ -149,8 +149,8 @@ public class EventHandlingIT extends AbstractParallelTest {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         crud.openRowForEditing(0);
         TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class)
-                .withAttribute("editor-role", "last-name").first();
+                .$(TextFieldElement.class).attribute("editor-role", "last-name")
+                .first();
         Assert.assertTrue(lastNameField.isInvalid());
 
         // Invalid input
