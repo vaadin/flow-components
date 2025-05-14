@@ -59,6 +59,7 @@ export function useLitWebComponents(): PluginOption {
             'combo-box',
             'confirm-dialog',
             'context-menu',
+            'cookie-consent',
             'custom-field',
             'date-picker',
             'date-time-picker',
