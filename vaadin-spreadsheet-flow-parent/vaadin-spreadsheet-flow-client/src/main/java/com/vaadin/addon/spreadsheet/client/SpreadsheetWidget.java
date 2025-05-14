@@ -34,6 +34,7 @@ import com.vaadin.addon.spreadsheet.client.MergedRegionUtil.MergedRegionContaine
 import com.vaadin.addon.spreadsheet.client.SheetTabSheet.SheetTabSheetHandler;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetConnector.CommsTrigger;
 import com.vaadin.addon.spreadsheet.shared.GroupingData;
+import com.vaadin.client.BrowserInfo;
 import com.vaadin.client.Focusable;
 import com.vaadin.client.ServerConnector;
 import com.vaadin.client.Util;
@@ -741,7 +742,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                     updateSelectedCellValues(column, row);
                 }
                 if (updateToActionHandler) {
-                    selectionHandler.newSelectedCellSet(true);
+                    selectionHandler.newSelectedCellSet(false);
                     spreadsheetHandler.cellSelected(row, column, true);
                     startDelayedSendingTimer();
                 }
@@ -768,8 +769,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         if (!customCellEditorDisplayed) {
             formulaBarWidget.setFormulaFieldEnabled(!cellLocked);
         } else {
-            // sheetWidget.displayCustomCellEditor(customEditorFactory
-            // .getCustomEditor(sheetWidget.getSelectedCellKey()), true);
+            sheetWidget.displayCustomCellEditor(customEditorFactory
+                    .getCustomEditor(sheetWidget.getSelectedCellKey()), false);
         }
         if (name != null) {
             formulaBarWidget.setSelectedCellAddress(name);
@@ -1267,7 +1268,15 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                         var assignedElement = ((Slot) customEditor)
                                 .getAssignedElement();
                         assignedElement.focus();
-                        assignedElement.setNodeValue(enteredCharacter);
+
+                        if (BrowserInfo.get().isFirefox()) {
+                            // Chrome and Safari pass down the keypress event to
+                            // the focused input while Firefox doesn't, so we do
+                            // our best effort to try to set the 'value'
+                            // property of the custom editor
+                            assignedElement.setPropertyString("value",
+                                    enteredCharacter);
+                        }
                     }
                 }
             }

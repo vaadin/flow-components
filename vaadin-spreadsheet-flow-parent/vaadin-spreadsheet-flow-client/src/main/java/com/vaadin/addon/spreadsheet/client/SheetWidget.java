@@ -9,11 +9,9 @@
 package com.vaadin.addon.spreadsheet.client;
 
 import static com.vaadin.addon.spreadsheet.client.SheetJsniUtil.getAssignedElements;
-import static com.vaadin.addon.spreadsheet.client.SheetJsniUtil.getComposedPath;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,11 +20,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.animation.client.AnimationScheduler;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
@@ -387,18 +385,6 @@ public class SheetWidget extends Panel {
 
     private Element host;
     private Node renderRoot;
-
-    public void focusCustomEditor() {
-        var cell = getCell(selectedCellCol, selectedCellRow);
-        var assignedElements = getAssignedElements(
-                cell.getElement().getFirstChildElement());
-        if (assignedElements != null && assignedElements.length == 1) {
-            var assignedElement = assignedElements[0];
-            if (assignedElement.getNodeType() == Node.ELEMENT_NODE) {
-                assignedElement.focus();
-            }
-        }
-    }
 
     static class CellCoord {
         private int col;
@@ -1148,14 +1134,6 @@ public class SheetWidget extends Panel {
 
         String className = target.getAttribute("class");
 
-        var customEditorCell = getCustomEditorCell(event);
-        if (customEditorCell != null) {
-            // className = customEditorCell.getClassName();
-            debugConsole
-                    .info("[SheetWidget:onSheetMouseDown] customEditorCell: "
-                            + customEditorCell.getClassName());
-        }
-
         if (cellCommentEditMode && !className.contains("comment-overlay")) {
             cellCommentEditMode = false;
             currentlyEditedCellComment.setEditMode(false);
@@ -1227,14 +1205,7 @@ public class SheetWidget extends Panel {
                 Event.releaseCapture(sheet);
                 actionHandler.onCellRightClick(event, targetCol, targetRow);
             } else {
-                // if (customEditorCell != null) {
-                // var slot = customEditorCell.getFirstChildElement();
-                // if (slot.getTagName().equals("SLOT")) {
-                // Arrays.stream(getAssignedElements(slot)).findFirst().ifPresent(Element::focus);
-                // }
-                // } else {
                 sheet.focus();
-                // }
                 // quit input if active
                 if (editingCell && !input.getElement().isOrHasChild(target)) {
                     actionHandler.onCellInputBlur(input.getValue());
@@ -1281,20 +1252,16 @@ public class SheetWidget extends Panel {
         }
     }
 
-    private Element getCustomEditorCell(Event event) {
-        var composedPath = getComposedPath(event);
-        var result = Arrays.stream(composedPath)
-                .filter(element -> Objects.equals(element.getTagName(), "SLOT")
-                        && element.getAttribute("name")
-                                .startsWith("custom-editor-"));
-
-        if (result.count() == 0) {
-            return null;
+    public void focusCustomEditor() {
+        var cell = getCell(selectedCellCol, selectedCellRow);
+        var assignedElements = getAssignedElements(
+                cell.getElement().getFirstChildElement());
+        if (assignedElements != null && assignedElements.length == 1) {
+            var assignedElement = assignedElements[0];
+            if (assignedElement.getNodeType() == Node.ELEMENT_NODE) {
+                assignedElement.focus();
+            }
         }
-
-        return Arrays.stream(composedPath)
-                .filter(element -> element.hasClassName("cell")).findFirst()
-                .orElse(null);
     }
 
     protected void onMouseMoveWhenSelectingCells(Event event) {
@@ -5126,8 +5093,13 @@ public class SheetWidget extends Panel {
 
         customEditorWidget.getElement()
                 .removeClassName(CUSTOM_EDITOR_CELL_CLASSNAME);
-        orphan(customEditorWidget);
-        customEditorWidget.removeFromParent();
+        // Firefox does not receive a change event if the element is removed
+        // at the same time the event should be fired. Delay the removal of
+        // the custom editor so that the change event is fired.
+        AnimationScheduler.get().requestAnimationFrame(timestamp -> {
+            orphan(customEditorWidget);
+            customEditorWidget.removeFromParent();
+        });
 
         if (loaded) {
             var jsniUtil = getSheetJsniUtil();
