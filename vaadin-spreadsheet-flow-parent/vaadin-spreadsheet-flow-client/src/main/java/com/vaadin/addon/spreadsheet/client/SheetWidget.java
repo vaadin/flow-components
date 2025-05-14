@@ -4354,9 +4354,8 @@ public class SheetWidget extends Panel {
                 }
 
                 var cellAddress = toKey(cell.getCol(), cell.getRow());
-                var hasCustomEditor = customEditorFactory
-                        .hasCustomEditor(cellAddress);
-                var hasWidget = customWidgetMap.containsKey(cellAddress);
+                var hasCustomEditor = customEditorFactory != null
+                        && customEditorFactory.hasCustomEditor(cellAddress);
                 if (hasCustomEditor) {
                     var customEditor = (Slot) customEditorFactory
                             .getCustomEditor(cellAddress);
