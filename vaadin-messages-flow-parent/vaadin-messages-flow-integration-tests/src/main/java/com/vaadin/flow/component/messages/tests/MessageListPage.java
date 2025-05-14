@@ -26,6 +26,7 @@ import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 @Route("vaadin-messages/message-list-test")
 public class MessageListPage extends Div {
@@ -44,7 +45,8 @@ public class MessageListPage extends Div {
         MessageList messageList = new MessageList(foo, bar);
         add(messageList);
 
-        addButton("setText", () -> foo.setText("foo2"));
+        addButton("setText", () -> foo.setText("newfoo"));
+        addButton("appendText", () -> foo.appendText("2"));
         addButton("setTime",
                 () -> foo.setTime(Instant.parse("2000-02-02T12:00:00.00Z")));
         addButton("setUserName", () -> foo.setUserName("sender2"));
@@ -59,6 +61,13 @@ public class MessageListPage extends Div {
         addButton("setItems", () -> messageList
                 .setItems(new MessageListItem(null, null, "sender3")));
 
+        addButton("addItem", () -> messageList
+                .addItem(new MessageListItem("Foo", null, "User")));
+        addButton("addTwoItems", () -> {
+            messageList.addItem(new MessageListItem("Foo", null, "User"));
+            messageList.addItem(new MessageListItem("Bar", null, "User"));
+        });
+
         addButton("setLocale", () -> UI.getCurrent().setLocale(Locale.ITALIAN));
 
         addButton("detachList", () -> remove(messageList));
@@ -69,6 +78,14 @@ public class MessageListPage extends Div {
                     () -> getClass().getResourceAsStream(
                             "/META-INF/resources/frontend/images/avatar.png"));
             foo.setUserImageResource(resource);
+        });
+
+        addButton("setImageAsDownloadHandler", () -> {
+            DownloadHandler resource = DownloadHandler.forClassResource(
+                    getClass(),
+                    "/META-INF/resources/frontend/images/avatar.png",
+                    "message-list-img");
+            foo.setUserImageHandler(resource);
         });
 
     }

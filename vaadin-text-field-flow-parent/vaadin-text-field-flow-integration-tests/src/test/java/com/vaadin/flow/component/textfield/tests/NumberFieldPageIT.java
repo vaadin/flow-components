@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.textfield.tests;
 
 import static org.junit.Assert.assertFalse;
-import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -103,20 +102,6 @@ public class NumberFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertRequired() {
-        NumberFieldElement numberField = $(NumberFieldElement.class).first();
-
-        assertFalse(numberField.hasAttribute("required"));
-
-        WebElement button = findElement(By.id("required"));
-        button.click();
-        waitUntil(attributeToBe(numberField, "required", "true"));
-
-        button.click();
-        waitUntil(attributeToBe(numberField, "required", ""));
-    }
-
-    @Test
     public void assertClearValue() {
         NumberFieldElement field = $(NumberFieldElement.class)
                 .id("clear-number-field");
@@ -125,9 +110,7 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         input.sendKeys("300");
         blur();
 
-        WebElement clearButton = field.$("*")
-                .withAttributeContainingWord("part", "clear-button").first();
-        clearButton.click();
+        field.clickClearButton();
 
         String value = findElement(By.id("clear-message")).getText();
         Assert.assertEquals("Old value: '300.0'. New value: 'null'.", value);
@@ -152,37 +135,5 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         field.setValue("123.0");
         String message = $("div").id("clear-message").getText();
         Assert.assertEquals("Old value: 'null'. New value: '123.0'.", message);
-    }
-
-    @Test
-    public void dollarFieldHasDollarPrefix() {
-        WebElement dollarField = findElement(By.id("dollar-field"));
-        WebElement span = dollarField.findElement(By.tagName("span"));
-
-        Assert.assertEquals("$", span.getText());
-
-        int spanX = span.getLocation().getX();
-        int middleX = dollarField.getLocation().getX()
-                + dollarField.getSize().getWidth() / 2;
-
-        Assert.assertTrue(
-                "The dollar sign should be located on the left side of the text field",
-                spanX < middleX);
-    }
-
-    @Test
-    public void euroFieldHasEuroSuffix() {
-        WebElement euroField = findElement(By.id("euro-field"));
-        WebElement span = euroField.findElement(By.tagName("span"));
-
-        Assert.assertEquals("€", span.getText());
-
-        int spanX = span.getLocation().getX();
-        int middleX = euroField.getLocation().getX()
-                + euroField.getSize().getWidth() / 2;
-
-        Assert.assertTrue(
-                "The euro sign should be located on the right side of the text field",
-                spanX > middleX);
     }
 }

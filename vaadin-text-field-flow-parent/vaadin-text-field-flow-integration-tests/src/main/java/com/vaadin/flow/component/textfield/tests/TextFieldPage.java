@@ -52,14 +52,6 @@ public class TextFieldPage extends Div {
                 event -> textField.setReadOnly(!textField.isReadOnly()));
         add(button);
 
-        NativeButton required = new NativeButton(
-                "Set/unset field required property");
-        required.setId("required");
-        required.addClickListener(
-                event -> textField.setRequiredIndicatorVisible(
-                        !textField.isRequiredIndicatorVisible()));
-        add(required);
-
         TextField valueChangeSource = new TextField();
         valueChangeSource.getStyle().set("display", "block");
         valueChangeSource.setId("value-change");

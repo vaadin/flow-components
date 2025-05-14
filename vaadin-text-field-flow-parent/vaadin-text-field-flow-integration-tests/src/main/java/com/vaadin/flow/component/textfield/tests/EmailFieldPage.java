@@ -45,14 +45,6 @@ public class EmailFieldPage extends Div {
                 event -> emailField.setReadOnly(!emailField.isReadOnly()));
         add(button);
 
-        NativeButton required = new NativeButton(
-                "Set/unset field required property");
-        required.setId("required");
-        required.addClickListener(
-                event -> emailField.setRequiredIndicatorVisible(
-                        !emailField.isRequiredIndicatorVisible()));
-        add(required);
-
         NativeButton enabled = new NativeButton(
                 "Set/unset field enabled property");
         enabled.setId("disabled");

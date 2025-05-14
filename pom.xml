@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-parent</artifactId>
-        <version>2.2.1</version>
+        <version>2.2.2</version>
     </parent>
     <artifactId>vaadin-flow-components</artifactId>
     <version>24.8-SNAPSHOT</version>
@@ -36,6 +36,7 @@
         <module>vaadin-virtual-list-flow-parent</module>
         <module>vaadin-list-box-flow-parent</module>
         <module>vaadin-login-flow-parent</module>
+        <module>vaadin-markdown-flow-parent</module>
         <module>vaadin-menu-bar-flow-parent</module>
         <module>vaadin-messages-flow-parent</module>
         <module>vaadin-notification-flow-parent</module>
@@ -62,6 +63,11 @@
         <module>vaadin-side-nav-flow-parent</module>
         <module>vaadin-master-detail-layout-flow-parent</module>
     </modules>
+    <scm>
+        <connection>scm:https:https://github.com/vaadin/flow-components.git</connection>
+        <developerConnection>scm:git:git@github.com:vaadin/flow-components.git</developerConnection>
+        <url>https://github.com/vaadin/flow-components</url>
+    </scm>
     <properties>
         <flow.version>24.8-SNAPSHOT</flow.version>
         <testbench.version>9.4.0.alpha1</testbench.version>
@@ -69,7 +75,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <jetty.version>12.0.19</jetty.version>
+        <jetty.version>12.0.21</jetty.version>
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
         <karaf-maven-plugin.version>4.4.7</karaf-maven-plugin.version>

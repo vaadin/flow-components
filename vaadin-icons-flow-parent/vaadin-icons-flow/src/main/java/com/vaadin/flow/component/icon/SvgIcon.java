@@ -17,6 +17,8 @@ package com.vaadin.flow.component.icon;
 
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 /**
  * Component for displaying an icon from a SVG file.
@@ -80,6 +82,33 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
      * @see #setSymbol(String)
      */
     public SvgIcon(AbstractStreamResource src, String symbol) {
+        this(src);
+        setSymbol(symbol);
+    }
+
+    /**
+     * Creates an SVG icon with the given download handler resource
+     *
+     * @param src
+     *            the download handler resource
+     * @see #setSrc(AbstractStreamResource)
+     */
+    public SvgIcon(DownloadHandler src) {
+        setSrc(new StreamResourceRegistry.ElementStreamResource(src,
+                getElement()));
+    }
+
+    /**
+     * Creates an SVG icon with the given download handler resource
+     *
+     * @param src
+     *            the download handler resource
+     * @param symbol
+     *            the symbol reference of the icon
+     * @see #setSrc(AbstractStreamResource)
+     * @see #setSymbol(String)
+     */
+    public SvgIcon(DownloadHandler src, String symbol) {
         this(src);
         setSymbol(symbol);
     }

@@ -31,6 +31,8 @@ import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
 
 import elemental.json.JsonType;
 import elemental.json.JsonValue;
@@ -112,6 +114,29 @@ public class MessageListTest {
     }
 
     @Test
+    public void setImageHandler_overridesImageUrl() {
+        UI.setCurrent(new UI());
+        item1.setUserImage("foo/bar");
+        item1.setUserImageHandler(
+                DownloadHandler.fromInputStream(data -> new DownloadResponse(
+                        getClass().getResourceAsStream("baz/qux"),
+                        "message-list-img", null, -1)));
+        MatcherAssert.assertThat(item1.getUserImage(),
+                startsWith("VAADIN/dynamic"));
+    }
+
+    @Test
+    public void setImageHandler_streamResourceBecomesNull() {
+        UI.setCurrent(new UI());
+        item1.setUserImageHandler(
+                DownloadHandler.fromInputStream(data -> new DownloadResponse(
+                        getClass().getResourceAsStream("baz/qux"),
+                        "message-list-img", null, -1)));
+        item1.setUserImage("foo/bar");
+        Assert.assertNull(item1.getUserImageResource());
+    }
+
+    @Test
     public void addThemeNames_serialize_separatedBySpaces() {
         item1.addThemeNames("foo", "bar");
         item1.addThemeNames("baz");
@@ -147,6 +172,18 @@ public class MessageListTest {
     public void hasThemeName_trueForExistingThemeName() {
         item1.addThemeNames("foo");
         Assert.assertTrue(item1.hasThemeName("foo"));
+    }
+
+    @Test
+    public void unattachedItem_setText_doesNotThrow() {
+        item1.setText("foo");
+    }
+
+    @Test
+    public void setMarkdown_isMarkdown() {
+        Assert.assertFalse(messageList.isMarkdown());
+        messageList.setMarkdown(true);
+        Assert.assertTrue(messageList.isMarkdown());
     }
 
     private String getSerializedThemeProperty(MessageListItem item) {

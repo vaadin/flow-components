@@ -30,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.internal.NodeOwner;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.server.AbstractStreamResource;
@@ -37,6 +38,7 @@ import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -50,6 +52,8 @@ public class MessageListItem implements Serializable {
     private MessageList host;
 
     private String text;
+    // Value of the text property in the client
+    String clientText;
     private Instant time;
 
     private String userName;
@@ -154,7 +158,22 @@ public class MessageListItem implements Serializable {
      */
     public void setText(String text) {
         this.text = text;
-        propsChanged();
+        if (getHost() != null) {
+            getHost().scheduleItemsTextUpdate();
+        }
+    }
+
+    /**
+     * Appends the provided text to the message's text content.
+     * 
+     * @param text
+     *            the text to append to the message's text content
+     */
+    public void appendText(String text) {
+        if (text == null) {
+            return;
+        }
+        setText(Optional.ofNullable(this.text).orElse("") + text);
     }
 
     /**
@@ -398,6 +417,28 @@ public class MessageListItem implements Serializable {
     @JsonIgnore
     public AbstractStreamResource getUserImageResource() {
         return imageResource;
+    }
+
+    /**
+     * Sets the image for the message sender's avatar.
+     * <p>
+     * Setting the image as a resource with this method overrides the image URL
+     * set with {@link MessageListItem#setUserImage(String)}.
+     *
+     * @param downloadHandler
+     *            download handler for the image resource, or {@code null} to
+     *            remove the resource
+     * @see MessageListItem#setUserImage(String)
+     */
+    public void setUserImageHandler(DownloadHandler downloadHandler) {
+        if (downloadHandler == null) {
+            unsetResource();
+            return;
+        }
+
+        setUserImageResource(new StreamResourceRegistry.ElementStreamResource(
+                downloadHandler, getHost() != null ? getHost().getElement()
+                        : UI.getCurrent().getElement()));
     }
 
     /**
