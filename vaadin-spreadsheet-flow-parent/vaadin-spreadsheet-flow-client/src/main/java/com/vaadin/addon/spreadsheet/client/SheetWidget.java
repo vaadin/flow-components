@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.animation.client.AnimationScheduler;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
@@ -5057,8 +5058,13 @@ public class SheetWidget extends Panel {
             customCellEditorDisplayed = false;
             customEditorWidget.getElement()
                     .removeClassName(CUSTOM_EDITOR_CELL_CLASSNAME);
-            orphan(customEditorWidget);
-            customEditorWidget.removeFromParent();
+            // Firefox does not receive a change event if the element is removed
+            // at the same time the event should be fired. Delay the removal of
+            // the custom editor so that the change event is fired.
+            AnimationScheduler.get().requestAnimationFrame(timestamp -> {
+                orphan(customEditorWidget);
+                customEditorWidget.removeFromParent();
+            });
 
             // the cell value should have been updated
             if (loaded) {
