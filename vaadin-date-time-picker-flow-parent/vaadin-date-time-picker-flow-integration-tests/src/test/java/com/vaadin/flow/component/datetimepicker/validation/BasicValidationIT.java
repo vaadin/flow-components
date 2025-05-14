@@ -134,11 +134,17 @@ public class BasicValidationIT
     public void min_changeValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
 
-        setValue("1/1/2000", "11:00");
+        setInputValue(dateInput, "1/1/2000");
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(MIN_ERROR_MESSAGE);
-        assertValidationCount(2);
+        assertValidationCount(1);
+
+        setInputValue(timeInput, "11:00");
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(MIN_ERROR_MESSAGE);
+        assertValidationCount(1);
 
         setInputValue(dateInput, "2/2/2000");
         assertClientInvalid();
@@ -158,11 +164,17 @@ public class BasicValidationIT
         assertErrorMessage("");
         assertValidationCount(1);
 
-        setValue("3/3/2000", "11:00");
+        setInputValue(dateInput, "3/3/2000");
         assertClientValid();
         assertServerValid();
         assertErrorMessage("");
-        assertValidationCount(2);
+        assertValidationCount(1);
+
+        setInputValue(timeInput, "11:00");
+        assertClientValid();
+        assertServerValid();
+        assertErrorMessage("");
+        assertValidationCount(1);
     }
 
     @Test
@@ -175,11 +187,23 @@ public class BasicValidationIT
         assertErrorMessage(MAX_ERROR_MESSAGE);
         assertValidationCount(1);
 
-        setValue("2/2/2000", "13:00");
+        setInputValue(timeInput, "12:00");
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(MAX_ERROR_MESSAGE);
-        assertValidationCount(2);
+        assertValidationCount(1);
+
+        setInputValue(dateInput, "2/2/2000");
+        assertServerValid();
+        assertClientValid();
+        assertErrorMessage("");
+        assertValidationCount(1);
+
+        setInputValue(timeInput, "13:00");
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(MAX_ERROR_MESSAGE);
+        assertValidationCount(1);
 
         setInputValue(timeInput, "12:00");
         assertClientValid();
@@ -193,11 +217,17 @@ public class BasicValidationIT
         assertErrorMessage("");
         assertValidationCount(1);
 
-        setValue("1/1/2000", "13:00");
+        setInputValue(dateInput, "1/1/2000");
         assertClientValid();
         assertServerValid();
         assertErrorMessage("");
-        assertValidationCount(2);
+        assertValidationCount(1);
+
+        setInputValue(timeInput, "13:00");
+        assertClientValid();
+        assertServerValid();
+        assertErrorMessage("");
+        assertValidationCount(1);
     }
 
     @Test
@@ -319,11 +349,17 @@ public class BasicValidationIT
         setInputValue(dateInput, "1/1/2000");
         resetValidationCount();
 
-        setValue("1/1/2001", "10:00");
+        setInputValue(dateInput, "1/1/2001");
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(INCOMPLETE_INPUT_ERROR_MESSAGE);
+        assertValidationCount(1);
+
+        setInputValue(timeInput, "10:00");
         assertServerValid();
         assertClientValid();
         assertErrorMessage("");
-        assertValidationCount(2);
+        assertValidationCount(1);
     }
 
     @Test
