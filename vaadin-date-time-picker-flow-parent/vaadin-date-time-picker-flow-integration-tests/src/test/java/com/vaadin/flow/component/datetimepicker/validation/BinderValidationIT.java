@@ -116,11 +116,17 @@ public class BinderValidationIT
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-03-03T11:00",
                 Keys.ENTER);
 
-        setValue("1/1/2000", "11:00");
+        setInputValue(dateInput, "1/1/2000");
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(MIN_ERROR_MESSAGE);
-        assertValidationCount(2);
+        assertValidationCount(1);
+
+        setInputValue(timeInput, "10:00");
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(MIN_ERROR_MESSAGE);
+        assertValidationCount(1);
 
         setInputValue(dateInput, "2/2/2000");
         assertClientInvalid();
@@ -141,10 +147,15 @@ public class BinderValidationIT
         assertValidationCount(1);
 
         setInputValue(dateInput, "3/3/2000");
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
+        assertValidationCount(1);
+
         setInputValue(timeInput, "11:00");
         assertClientValid();
         assertServerValid();
-        assertValidationCount(2);
+        assertValidationCount(1);
     }
 
     @Test
@@ -153,11 +164,17 @@ public class BinderValidationIT
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-01-01T13:00",
                 Keys.ENTER);
 
-        setValue("3/3/2000", "13:00");
+        setInputValue(dateInput, "3/3/2000");
         assertClientInvalid();
         assertServerInvalid();
         assertErrorMessage(MAX_ERROR_MESSAGE);
-        assertValidationCount(2);
+        assertValidationCount(1);
+
+        setInputValue(timeInput, "13:00");
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(MAX_ERROR_MESSAGE);
+        assertValidationCount(1);
 
         setInputValue(dateInput, "2/2/2000");
         assertClientInvalid();
@@ -177,10 +194,16 @@ public class BinderValidationIT
         assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
         assertValidationCount(1);
 
-        setValue("1/1/2000", "13:00");
+        setInputValue(dateInput, "1/1/2000");
+        assertClientInvalid();
+        assertServerInvalid();
+        assertErrorMessage(UNEXPECTED_VALUE_ERROR_MESSAGE);
+        assertValidationCount(1);
+
+        setInputValue(timeInput, "13:00");
         assertClientValid();
         assertServerValid();
-        assertValidationCount(2);
+        assertValidationCount(1);
     }
 
     @Test
@@ -225,11 +248,17 @@ public class BinderValidationIT
 
     @Test
     public void badInput_setValue_clearValue_assertValidity() {
-        setValue("INVALID", "INVALID");
+        setInputValue(dateInput, "INVALID");
         assertServerInvalid();
         assertClientInvalid();
         assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
-        assertValidationCount(2);
+        assertValidationCount(1);
+
+        setInputValue(timeInput, "INVALID");
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
+        assertValidationCount(1);
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertServerInvalid();
