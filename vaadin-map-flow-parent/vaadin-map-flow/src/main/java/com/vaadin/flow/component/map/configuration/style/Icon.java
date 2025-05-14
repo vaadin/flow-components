@@ -156,13 +156,12 @@ public class Icon extends ImageStyle {
 
     public Icon(Options options) {
         super(options);
-        if (options.src == null && options.img == null
-                && options.imgHandler == null) {
+        boolean hasImage = options.img != null || options.imgHandler != null;
+        if (options.src == null && !hasImage) {
             throw new NullPointerException(
                     "Either a source URL or an image must be specified in the options");
         }
-        if (options.src != null
-                && (options.img != null || options.imgHandler != null)) {
+        if (options.src != null && hasImage) {
             throw new IllegalStateException(
                     "Both a source URL or an image were specified in the options. You must only specify one of these options.");
         }

@@ -75,7 +75,7 @@ public class IconTest {
         Assert.assertThrows(IllegalStateException.class, () -> {
             Icon.Options options = new Icon.Options();
             options.setSrc("test");
-            options.setImg(Assets.PIN.getResource());
+            options.setImg(Assets.PIN.getHandler());
             new Icon(options);
         });
     }
