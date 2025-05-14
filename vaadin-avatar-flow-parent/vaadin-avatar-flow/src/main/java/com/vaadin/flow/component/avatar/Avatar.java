@@ -229,9 +229,9 @@ public class Avatar extends Component
      * set.
      * <p>
      * Setting the image with this method resets the image resource provided
-     * with {@link Avatar#setImageResource(AbstractStreamResource)}
+     * with {@link Avatar#setImageHandler(DownloadHandler)}
      *
-     * @see Avatar#setImageResource(AbstractStreamResource)
+     * @see Avatar#setImageHandler(DownloadHandler)
      * @param url
      *            the image url
      */
@@ -254,7 +254,9 @@ public class Avatar extends Component
      * @see Avatar#setImage(String)
      * @param resource
      *            the resource value or {@code null} to remove the resource
+     * @deprecated Use {@link #setImageHandler(DownloadHandler)} instead
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public void setImageResource(AbstractStreamResource resource) {
         imageResource = resource;
         if (resource == null) {

@@ -206,9 +206,9 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
          * name is set.
          * <p>
          * Setting the image with this method resets the image resource provided
-         * with {@link AvatarGroupItem#setImageResource(AbstractStreamResource)}
+         * with {@link AvatarGroupItem#setImageHandler(DownloadHandler)}
          *
-         * @see AvatarGroupItem#setImageResource(AbstractStreamResource)
+         * @see AvatarGroupItem#setImageHandler(DownloadHandler)
          * @param url
          *            the image url
          */
@@ -252,7 +252,9 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
          * @see AvatarGroupItem#setImage(String)
          * @param resource
          *            the resource value or {@code null} to remove the resource
+         * @deprecated Use {@link #setImageHandler(DownloadHandler)} instead
          */
+        @Deprecated(since = "24.8", forRemoval = true)
         public void setImageResource(AbstractStreamResource resource) {
             imageResource = resource;
 

@@ -21,7 +21,10 @@ import java.io.Serializable;
 
 /**
  * File factory interface for generating file to store the uploaded data into.
+ * 
+ * @deprecated Use {@link com.vaadin.flow.server.streams.FileFactory} instead
  */
+@Deprecated(since = "24.8", forRemoval = true)
 public interface FileFactory extends Serializable {
 
     /**

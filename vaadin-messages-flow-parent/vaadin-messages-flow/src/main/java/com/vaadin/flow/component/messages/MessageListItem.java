@@ -254,8 +254,8 @@ public class MessageListItem implements Serializable {
      * Gets the URL to the message sender's image.
      * <p>
      * If the image is set as a stream resource with
-     * {@link MessageListItem#setUserImageResource(AbstractStreamResource)},
-     * this method will return a URL that is generated for that resource.
+     * {@link MessageListItem#setUserImageHandler(DownloadHandler)}, this method
+     * will return a URL that is generated for that resource.
      *
      * @return the URL to the message sender's image, or {@code null} if none is
      *         set
@@ -270,12 +270,12 @@ public class MessageListItem implements Serializable {
      * avatar in the message component.
      * <p>
      * Setting the image with this method resets the image resource provided
-     * with {@link MessageListItem#setUserImageResource(AbstractStreamResource)}
+     * with {@link MessageListItem#setUserImageHandler(DownloadHandler)}
      *
      * @param userImage
      *            the URL to the message sender's image, or {@code null} to
      *            remove the image
-     * @see MessageListItem#setUserImageResource(AbstractStreamResource)
+     * @see MessageListItem#setUserImageHandler(DownloadHandler)
      */
     public void setUserImage(String userImage) {
         unsetResource();
@@ -450,7 +450,9 @@ public class MessageListItem implements Serializable {
      * @param resource
      *            the image resource, or {@code null} to remove the resource
      * @see MessageListItem#setUserImage(String)
+     * @deprecated Use {@link #setUserImageHandler(DownloadHandler)} instead
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public void setUserImageResource(AbstractStreamResource resource) {
         imageResource = resource;
 
