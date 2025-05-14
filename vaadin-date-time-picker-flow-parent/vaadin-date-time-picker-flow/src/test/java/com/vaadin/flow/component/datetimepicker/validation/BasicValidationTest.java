@@ -41,6 +41,7 @@ public class BasicValidationTest
     @Test
     public void badInputOnDatePicker_validate_emptyErrorMessageDisplayed() {
         getDatePicker().getElement().setProperty("_inputElementValue", "foo");
+        fireDomEvent("unparsable-change", getDatePicker().getElement());
         fireUnparsableChangeDomEvent();
         Assert.assertEquals("", testField.getErrorMessage());
     }
@@ -48,6 +49,7 @@ public class BasicValidationTest
     @Test
     public void badInputOnTimePicker_validate_emptyErrorMessageDisplayed() {
         getTimePicker().getElement().setProperty("_inputElementValue", "foo");
+        fireDomEvent("unparsable-change", getTimePicker().getElement());
         fireUnparsableChangeDomEvent();
         Assert.assertEquals("", testField.getErrorMessage());
     }
