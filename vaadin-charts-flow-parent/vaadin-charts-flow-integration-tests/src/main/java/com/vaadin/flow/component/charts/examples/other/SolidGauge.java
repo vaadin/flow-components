@@ -28,6 +28,7 @@ public class SolidGauge extends AbstractChartExample {
     @Override
     public void initDemo() {
         Chart chart = new Chart(ChartType.SOLIDGAUGE);
+        chart.setClassName("SolidGauge");
 
         Configuration configuration = chart.getConfiguration();
 

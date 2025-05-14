@@ -27,6 +27,7 @@ public class WaterfallChart extends AbstractChartExample {
     @Override
     public void initDemo() {
         Chart chart = new Chart(ChartType.WATERFALL);
+        chart.setClassName("WaterfallChart");
 
         DataSeries dataSeries = new DataSeries();
 

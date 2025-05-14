@@ -23,7 +23,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
+import com.vaadin.flow.component.menubar.testbench.MenuBarButtonElement;
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
+import com.vaadin.flow.component.menubar.testbench.MenuBarItemElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
@@ -99,9 +101,9 @@ public class MenuBarPageIT extends AbstractComponentIT {
         hoverOn(menuBar.getSubMenuItems().get(1));
 
         waitUntil(driver -> menuBar.getAllSubMenus().size() == 2);
-        TestBenchElement checkableItem = menuBar
+        MenuBarItemElement checkableItem = menuBar
                 .getSubMenuItems(menuBar.getAllSubMenus().get(1)).get(1);
-        Assert.assertTrue(checkableItem.hasAttribute("menu-item-checked"));
+        Assert.assertTrue(checkableItem.isChecked());
 
         checkableItem.click();
         verifyClosed();
@@ -110,16 +112,16 @@ public class MenuBarPageIT extends AbstractComponentIT {
         openSubSubMenu();
         checkableItem = menuBar.getSubMenuItems(menuBar.getAllSubMenus().get(1))
                 .get(1);
-        Assert.assertFalse(checkableItem.hasAttribute("menu-item-checked"));
+        Assert.assertFalse(checkableItem.isChecked());
     }
 
     @Test
     public void setCheckedExternally_openSubMenu_itemChecked() {
         click("toggle-checked");
         openSubSubMenu();
-        TestBenchElement checkableItem = menuBar
+        MenuBarItemElement checkableItem = menuBar
                 .getSubMenuItems(menuBar.getAllSubMenus().get(1)).get(1);
-        Assert.assertTrue(checkableItem.hasAttribute("menu-item-checked"));
+        Assert.assertTrue(checkableItem.isChecked());
     }
 
     @Test
@@ -160,7 +162,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
         click("set-width");
         waitForResizeObserver();
         click("add-root-item");
-        TestBenchElement overflowButton = menuBar.getOverflowButton();
+        MenuBarButtonElement overflowButton = menuBar.getOverflowButton();
         Assert.assertNotNull("Expected the overflow button to be rendered",
                 overflowButton);
         assertButtonContents("item 1");
@@ -200,8 +202,10 @@ public class MenuBarPageIT extends AbstractComponentIT {
     public void buttonWithClickListenerOverflows_clickListenerWorksInSubMenu() {
         click("set-width");
         waitForResizeObserver();
-        menuBar.getOverflowButton().click();
-        menuBar.getSubMenuItems().get(0).click();
+        var overflowButton = menuBar.getOverflowButton();
+        overflowButton.click();
+        Assert.assertNotNull(menuBar.getSubMenu());
+        menuBar.getSubMenuItems(overflowButton.getSubMenu()).get(0).click();
         assertMessage("clicked item 2");
     }
 
@@ -243,7 +247,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     @Test
     public void disableButton_removeDisabledAttribute_click_listenerNotCalled() {
         click("toggle-disable");
-        TestBenchElement button2 = menuBar.getButtons().get(1);
+        MenuBarButtonElement button2 = menuBar.getButtons().get(1);
         executeScript("arguments[0].disabled=false;"
                 + "arguments[0].querySelector('vaadin-menu-bar-item').disabled=false;",
                 button2);
@@ -417,7 +421,7 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     private String[] getOverlayMenuItemContents(
-            List<TestBenchElement> menuItems) {
+            List<MenuBarItemElement> menuItems) {
         return menuItems.stream().map(item -> item.getDomProperty("innerHTML"))
                 .toArray(String[]::new);
     }

@@ -22,6 +22,7 @@ import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
 import com.vaadin.testbench.HasStringValueProperty;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -32,7 +33,7 @@ import com.vaadin.testbench.elementsbase.Element;
 @Element("vaadin-password-field")
 public class PasswordFieldElement extends TestBenchElement
         implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper,
-        HasClearButton {
+        HasClearButton, HasValidation {
 
     /**
      * Checks whether the password is shown in clear text or is hidden from
