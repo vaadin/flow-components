@@ -57,6 +57,7 @@ export function useLitWebComponents(): PluginOption {
             'checkbox',
             'checkbox-group',
             'combo-box',
+            'confirm-dialog',
             'context-menu',
             'custom-field',
             'date-picker',
