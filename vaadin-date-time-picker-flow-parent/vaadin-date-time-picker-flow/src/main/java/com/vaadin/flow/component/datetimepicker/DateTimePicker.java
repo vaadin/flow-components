@@ -62,8 +62,7 @@ class DateTimePickerDatePicker
         // Should not change invalid state
     }
 
-    @Override
-    protected boolean isInputUnparsable() {
+    protected boolean isPickerInputUnparsable() {
         return super.isInputUnparsable();
     }
 }
@@ -76,8 +75,7 @@ class DateTimePickerTimePicker
         // Should not change invalid state
     }
 
-    @Override
-    protected boolean isInputUnparsable() {
+    protected boolean isPickerInputUnparsable() {
         return super.isInputUnparsable();
     }
 }
@@ -772,7 +770,8 @@ public class DateTimePicker
     }
 
     private boolean isInputUnparsable() {
-        return datePicker.isInputUnparsable() || timePicker.isInputUnparsable();
+        return datePicker.isPickerInputUnparsable()
+                || timePicker.isPickerInputUnparsable();
     }
 
     private boolean isInputIncomplete() {
