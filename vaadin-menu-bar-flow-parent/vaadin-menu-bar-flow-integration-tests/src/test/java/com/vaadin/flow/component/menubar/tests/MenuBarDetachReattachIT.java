@@ -20,9 +20,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
+import com.vaadin.flow.component.menubar.testbench.MenuBarButtonElement;
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-menu-bar/detach-reattach")
@@ -55,7 +55,7 @@ public class MenuBarDetachReattachIT extends AbstractComponentIT {
 
         waitForResizeObserver();
 
-        TestBenchElement overflowButton = menuBar.getOverflowButton();
+        MenuBarButtonElement overflowButton = menuBar.getOverflowButton();
 
         Assert.assertEquals("More options",
                 overflowButton.getDomAttribute("aria-label"));
@@ -74,7 +74,7 @@ public class MenuBarDetachReattachIT extends AbstractComponentIT {
 
         click("set-i18n");
 
-        TestBenchElement overflowButton = menuBar.getOverflowButton();
+        MenuBarButtonElement overflowButton = menuBar.getOverflowButton();
 
         Assert.assertEquals("more-options",
                 overflowButton.getDomAttribute("aria-label"));

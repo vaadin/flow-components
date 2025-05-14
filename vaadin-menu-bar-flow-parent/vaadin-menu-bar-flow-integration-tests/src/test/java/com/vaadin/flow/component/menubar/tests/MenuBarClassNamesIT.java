@@ -22,9 +22,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 
+import com.vaadin.flow.component.menubar.testbench.MenuBarButtonElement;
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
+import com.vaadin.flow.component.menubar.testbench.MenuBarItemElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-menu-bar/menu-bar-class-names")
@@ -42,7 +43,7 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
 
     @Test
     public void toggleMenuItemClassName_classNameIsToggled() {
-        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        MenuBarButtonElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("class"));
         click("toggle-item1-class-name");
         menuButton1 = menuBar.getButtons().get(0);
@@ -56,7 +57,7 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
 
     @Test
     public void setMenuItemClassName_classNameIsSet() {
-        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        MenuBarButtonElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("class"));
         click("toggle-item1-class-name");
         menuButton1 = menuBar.getButtons().get(0);
@@ -72,7 +73,7 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
 
     @Test
     public void toggleMenuItemClassNameWithSetClassName_classNameIsToggled() {
-        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        MenuBarButtonElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("class"));
         click("set-unset-item1-class-name");
         menuButton1 = menuBar.getButtons().get(0);
@@ -86,7 +87,7 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
 
     @Test
     public void toggleMultipleItemClassName_classNamesAreToggled() {
-        TestBenchElement menuButton1 = menuBar.getButtons().get(0);
+        MenuBarButtonElement menuButton1 = menuBar.getButtons().get(0);
         Assert.assertFalse(menuButton1.hasAttribute("class"));
         click("add-remove-multiple-classes");
         menuButton1 = menuBar.getButtons().get(0);
@@ -178,7 +179,7 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
         menuBar.getOverflowButton().click();
         click("change-item2-class-name");
         menuBar.getOverflowButton().click();
-        TestBenchElement menuItem = menuBar.getSubMenuItems().get(0);
+        MenuBarItemElement menuItem = menuBar.getSubMenuItems().get(0);
         Assert.assertEquals(
                 Set.of(MenuBarClassNamesPage.MENU_ITEM_SECOND_CLASS_NAME),
                 menuItem.getClassNames());
@@ -192,7 +193,7 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
         menuBar.getOverflowButton().click();
         click("remove-item2-class-name");
         menuBar.getOverflowButton().click();
-        TestBenchElement menuItem = menuBar.getSubMenuItems().get(0);
+        MenuBarItemElement menuItem = menuBar.getSubMenuItems().get(0);
         Assert.assertEquals(Set.of(), menuItem.getClassNames());
     }
 
@@ -205,7 +206,7 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
         click("reset-width");
         waitForResizeObserver();
         click("change-item2-class-name");
-        TestBenchElement menuItem = menuBar.getButtons().get(1);
+        MenuBarButtonElement menuItem = menuBar.getButtons().get(1);
         Assert.assertEquals(
                 Set.of(MenuBarClassNamesPage.MENU_ITEM_SECOND_CLASS_NAME),
                 menuItem.getClassNames());
@@ -246,7 +247,7 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
     private void verifySubMenuItemClassNames(boolean containsClassNames,
             String... classNames) {
         openSubMenu();
-        TestBenchElement subMenuItem = menuBar.getSubMenuItems().get(2);
+        MenuBarItemElement subMenuItem = menuBar.getSubMenuItems().get(2);
         var subMenuItemClassNames = subMenuItem.getClassNames();
         for (String className : classNames) {
             if (containsClassNames) {
