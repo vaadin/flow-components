@@ -36,9 +36,9 @@ public class MarkerFeatureTest {
         Assert.assertEquals(0, markerFeature.getCoordinates().getY(), 0);
 
         Assert.assertNotNull(markerFeature.getIcon());
-        Assert.assertNotNull(markerFeature.getIcon().getImg());
+        Assert.assertNotNull(markerFeature.getIcon().getImgHandler());
         Assert.assertEquals(Assets.PIN.getFileName(),
-                markerFeature.getIcon().getImg().getName());
+                markerFeature.getIcon().getImgHandler().getUrlPostfix());
 
         Assert.assertNotNull(markerFeature.getIcon().getImgSize());
         Assert.assertEquals(Assets.PIN.getWidth(),

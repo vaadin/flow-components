@@ -31,6 +31,7 @@ public class IconTest {
         Assert.assertNull(icon.getCrossOrigin());
         Assert.assertEquals("test", icon.getSrc());
         Assert.assertNull(icon.getImg());
+        Assert.assertNull(icon.getImgHandler());
         Assert.assertNull(icon.getImgSize());
     }
 

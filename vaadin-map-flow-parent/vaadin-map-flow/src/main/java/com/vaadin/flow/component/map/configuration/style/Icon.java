@@ -13,6 +13,7 @@ import java.io.Serializable;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 /**
  * An icon or image that can be used to visually represent a {@link Feature}, by
@@ -26,6 +27,7 @@ public class Icon extends ImageStyle {
     private final String crossOrigin;
     private final String src;
     private final StreamResource img;
+    private final DownloadHandler imgHandler;
     private final ImageSize imgSize;
 
     @Override
@@ -97,9 +99,9 @@ public class Icon extends ImageStyle {
     }
 
     /**
-     * The source URL from which the icon's image should be loaded. Either this
-     * or {@link #getImg()} must be specified in the options for the icon, and
-     * only one of the two options must be provided.
+     * The source URL from which the icon's image should be loaded. Either this,
+     * {@link #getImg()} or {@link #getImgHandler()} must be specified in the
+     * options for the icon, and only one of the two options must be provided.
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
@@ -119,9 +121,25 @@ public class Icon extends ImageStyle {
      * be set initially by passing an options object to the constructor.
      *
      * @return the stream resource containing the icon's image
+     * @deprecated use {@link #getImgHandler()} instead
      */
+    @Deprecated(since = "24.8")
     public StreamResource getImg() {
         return img;
+    }
+
+    /**
+     * The stream resource from which the icon's image should be loaded. Either
+     * this or {@link #getSrc()} must be specified in the options for the icon,
+     * and only one of the two options must be provided.
+     * <p>
+     * This value can not be changed after constructing an instance, it can only
+     * be set initially by passing an options object to the constructor.
+     *
+     * @return the stream resource containing the icon's image
+     */
+    public DownloadHandler getImgHandler() {
+        return imgHandler;
     }
 
     /**
@@ -138,11 +156,13 @@ public class Icon extends ImageStyle {
 
     public Icon(Options options) {
         super(options);
-        if (options.src == null && options.img == null) {
+        if (options.src == null && options.img == null
+                && options.imgHandler == null) {
             throw new NullPointerException(
                     "Either a source URL or an image must be specified in the options");
         }
-        if (options.src != null && options.img != null) {
+        if (options.src != null
+                && (options.img != null || options.imgHandler != null)) {
             throw new IllegalStateException(
                     "Both a source URL or an image were specified in the options. You must only specify one of these options.");
         }
@@ -153,6 +173,7 @@ public class Icon extends ImageStyle {
         crossOrigin = options.crossOrigin;
         src = options.src;
         img = options.img;
+        imgHandler = options.imgHandler;
         imgSize = options.imgSize;
     }
 
@@ -163,6 +184,7 @@ public class Icon extends ImageStyle {
         private String crossOrigin;
         private String src;
         private StreamResource img;
+        private DownloadHandler imgHandler;
         private ImageSize imgSize;
 
         /**
@@ -202,9 +224,18 @@ public class Icon extends ImageStyle {
 
         /**
          * @see Icon#getImg()
+         * @deprecated use {@link #setImg(DownloadHandler)} instead
          */
+        @Deprecated(since = "24.8")
         public void setImg(StreamResource img) {
             this.img = img;
+        }
+
+        /**
+         * @see Icon#getImgHandler()
+         */
+        public void setImg(DownloadHandler imgHandler) {
+            this.imgHandler = imgHandler;
         }
 
         /**
