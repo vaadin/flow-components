@@ -24,7 +24,7 @@ import java.io.Serializable;
  * 
  * @deprecated Use {@link com.vaadin.flow.server.streams.FileFactory} instead
  */
-@Deprecated(since = "24.8")
+@Deprecated(since = "24.8", forRemoval = true)
 public interface FileFactory extends Serializable {
 
     /**

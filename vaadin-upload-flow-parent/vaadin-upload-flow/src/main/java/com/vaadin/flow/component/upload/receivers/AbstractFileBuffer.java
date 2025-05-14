@@ -22,11 +22,12 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.vaadin.flow.server.streams.FileFactory;
-
 /**
  * Abstract class for common file receiver buffers.
+ * 
+ * @deprecated Use {@link com.vaadin.flow.server.streams.UploadHandler} instead
  */
+@Deprecated(since = "24.8", forRemoval = true)
 public abstract class AbstractFileBuffer implements Serializable {
 
     private FileFactory factory;

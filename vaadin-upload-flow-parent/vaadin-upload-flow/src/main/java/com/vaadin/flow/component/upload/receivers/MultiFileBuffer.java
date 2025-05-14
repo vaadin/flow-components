@@ -29,7 +29,6 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import com.vaadin.flow.component.upload.MultiFileReceiver;
-import com.vaadin.flow.server.streams.FileFactory;
 
 /**
  * Basic receiver implementation for receiving multiple file upload and storing
@@ -38,7 +37,10 @@ import com.vaadin.flow.server.streams.FileFactory;
  * <p>
  * For a custom file the constructor {@link AbstractFileBuffer(FileFactory)}
  * should be used.
+ * 
+ * @deprecated Use {@link com.vaadin.flow.server.streams.UploadHandler} instead
  */
+@Deprecated(since = "24.8", forRemoval = true)
 public class MultiFileBuffer extends AbstractFileBuffer
         implements MultiFileReceiver {
 
