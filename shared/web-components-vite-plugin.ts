@@ -92,6 +92,8 @@ export function useLitWebComponents(): PluginOption {
             'login-form',
             'login-overlay',
             'map',
+            'menu-bar',
+            'menu-bar-item',
             'multi-select-combo-box',
             'notification',
             'number-field',
