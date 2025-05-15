@@ -62,8 +62,12 @@ class DateTimePickerDatePicker
         // Should not change invalid state
     }
 
-    protected boolean isPickerInputUnparsable() {
+    boolean isPickerInputUnparsable() {
         return super.isInputUnparsable();
+    }
+
+    boolean isPickerInputValuePresent() {
+        return super.isInputValuePresent();
     }
 }
 
@@ -75,8 +79,12 @@ class DateTimePickerTimePicker
         // Should not change invalid state
     }
 
-    protected boolean isPickerInputUnparsable() {
+    boolean isPickerInputUnparsable() {
         return super.isInputUnparsable();
+    }
+
+    boolean isPickerInputValuePresent() {
+        return super.isInputValuePresent();
     }
 }
 
@@ -352,6 +360,31 @@ public class DateTimePicker
     private void addValidationListeners() {
         addValueChangeListener(e -> validate());
         getElement().addEventListener("unparsable-change", e -> validate(true));
+        // Add listeners to invalidate a required DateTimePicker when:
+        // 1. It's initially empty
+        // 2. The user selects a value in one picker (date or time)
+        // 3. The user then removes that value
+        // 4. The user leaves the field without proceeding to the other picker
+        datePicker.addValueChangeListener(event -> handlePickerValueChange());
+        timePicker.addValueChangeListener(event -> handlePickerValueChange());
+    }
+
+    private void handlePickerValueChange() {
+        // Only handle picker value change if required.
+        if (!isRequiredIndicatorVisible()) {
+            return;
+        }
+        // If the component is already invalid, any picker value change will
+        // trigger the listener for either unparsable-change event or value
+        // change event. Therefore, the component will be validated and there is
+        // no need to validate here.
+        if (isInvalid()) {
+            return;
+        }
+        if (isEmpty() && timePicker.isEmpty() && datePicker.isEmpty()
+                && !isInputValuePresent()) {
+            validate(true);
+        }
     }
 
     /**
@@ -968,6 +1001,11 @@ public class DateTimePicker
     private String getI18nErrorMessage(
             Function<DateTimePickerI18n, String> getter) {
         return Optional.ofNullable(i18n).map(getter).orElse("");
+    }
+
+    private boolean isInputValuePresent() {
+        return datePicker.isPickerInputValuePresent()
+                || timePicker.isPickerInputValuePresent();
     }
 
     /**

@@ -473,13 +473,13 @@ public class TimePicker
     }
 
     /**
+     * For internal use only.
+     * <p>
      * Returns whether the input element has a value or not.
      *
      * @return <code>true</code> if the input element's value is populated,
      *         <code>false</code> otherwise
-     * @deprecated Since v24.8
      */
-    @Deprecated(since = "24.8")
     protected boolean isInputValuePresent() {
         return !getInputElementValue().isEmpty();
     }
