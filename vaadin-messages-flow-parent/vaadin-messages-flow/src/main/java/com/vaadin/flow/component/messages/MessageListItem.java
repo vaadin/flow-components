@@ -30,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.internal.NodeOwner;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.server.AbstractStreamResource;
@@ -37,6 +38,7 @@ import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -162,6 +164,19 @@ public class MessageListItem implements Serializable {
     }
 
     /**
+     * Appends the provided text to the message's text content.
+     * 
+     * @param text
+     *            the text to append to the message's text content
+     */
+    public void appendText(String text) {
+        if (text == null) {
+            return;
+        }
+        setText(Optional.ofNullable(this.text).orElse("") + text);
+    }
+
+    /**
      * Gets the time of sending the message.
      *
      * @return the time of the message, or {@code null} if none is set
@@ -239,8 +254,8 @@ public class MessageListItem implements Serializable {
      * Gets the URL to the message sender's image.
      * <p>
      * If the image is set as a stream resource with
-     * {@link MessageListItem#setUserImageResource(AbstractStreamResource)},
-     * this method will return a URL that is generated for that resource.
+     * {@link MessageListItem#setUserImageHandler(DownloadHandler)}, this method
+     * will return a URL that is generated for that resource.
      *
      * @return the URL to the message sender's image, or {@code null} if none is
      *         set
@@ -255,12 +270,12 @@ public class MessageListItem implements Serializable {
      * avatar in the message component.
      * <p>
      * Setting the image with this method resets the image resource provided
-     * with {@link MessageListItem#setUserImageResource(AbstractStreamResource)}
+     * with {@link MessageListItem#setUserImageHandler(DownloadHandler)}
      *
      * @param userImage
      *            the URL to the message sender's image, or {@code null} to
      *            remove the image
-     * @see MessageListItem#setUserImageResource(AbstractStreamResource)
+     * @see MessageListItem#setUserImageHandler(DownloadHandler)
      */
     public void setUserImage(String userImage) {
         unsetResource();
@@ -410,10 +425,34 @@ public class MessageListItem implements Serializable {
      * Setting the image as a resource with this method overrides the image URL
      * set with {@link MessageListItem#setUserImage(String)}.
      *
+     * @param downloadHandler
+     *            download handler for the image resource, or {@code null} to
+     *            remove the resource
+     * @see MessageListItem#setUserImage(String)
+     */
+    public void setUserImageHandler(DownloadHandler downloadHandler) {
+        if (downloadHandler == null) {
+            unsetResource();
+            return;
+        }
+
+        setUserImageResource(new StreamResourceRegistry.ElementStreamResource(
+                downloadHandler, getHost() != null ? getHost().getElement()
+                        : UI.getCurrent().getElement()));
+    }
+
+    /**
+     * Sets the image for the message sender's avatar.
+     * <p>
+     * Setting the image as a resource with this method overrides the image URL
+     * set with {@link MessageListItem#setUserImage(String)}.
+     *
      * @param resource
      *            the image resource, or {@code null} to remove the resource
      * @see MessageListItem#setUserImage(String)
+     * @deprecated Use {@link #setUserImageHandler(DownloadHandler)} instead
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public void setUserImageResource(AbstractStreamResource resource) {
         imageResource = resource;
 

@@ -28,6 +28,7 @@ public class Scatter extends AbstractChartExample {
     @Override
     public void initDemo() {
         Chart chart = new Chart(ChartType.SCATTER);
+        chart.setClassName("Scatter");
 
         Configuration configuration = chart.getConfiguration();
 

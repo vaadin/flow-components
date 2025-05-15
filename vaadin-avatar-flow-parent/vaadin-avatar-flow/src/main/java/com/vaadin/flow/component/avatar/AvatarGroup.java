@@ -34,6 +34,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
@@ -46,6 +47,7 @@ import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -65,10 +67,10 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha15")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha18")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "24.8.0-alpha15")
+@NpmPackage(value = "@vaadin/avatar-group", version = "24.8.0-alpha18")
 public class AvatarGroup extends Component implements HasOverlayClassName,
         HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
@@ -204,9 +206,9 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
          * name is set.
          * <p>
          * Setting the image with this method resets the image resource provided
-         * with {@link AvatarGroupItem#setImageResource(AbstractStreamResource)}
+         * with {@link AvatarGroupItem#setImageHandler(DownloadHandler)}
          *
-         * @see AvatarGroupItem#setImageResource(AbstractStreamResource)
+         * @see AvatarGroupItem#setImageHandler(DownloadHandler)
          * @param url
          *            the image url
          */
@@ -226,9 +228,33 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
          * that was set with {@link AvatarGroupItem#setImage(String)}
          *
          * @see AvatarGroupItem#setImage(String)
+         * @param downloadHandler
+         *            the download resource or {@code null} to remove the
+         *            resource
+         */
+        public void setImageHandler(DownloadHandler downloadHandler) {
+            if (downloadHandler == null) {
+                unsetResource();
+                return;
+            }
+
+            setImageResource(new StreamResourceRegistry.ElementStreamResource(
+                    downloadHandler, getHost() != null ? getHost().getElement()
+                            : UI.getCurrent().getElement()));
+        }
+
+        /**
+         * Sets the image for the avatar.
+         * <p>
+         * Setting the image as a resource with this method resets the image URL
+         * that was set with {@link AvatarGroupItem#setImage(String)}
+         *
+         * @see AvatarGroupItem#setImage(String)
          * @param resource
          *            the resource value or {@code null} to remove the resource
+         * @deprecated Use {@link #setImageHandler(DownloadHandler)} instead
          */
+        @Deprecated(since = "24.8", forRemoval = true)
         public void setImageResource(AbstractStreamResource resource) {
             imageResource = resource;
 

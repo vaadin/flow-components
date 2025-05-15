@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Deprecated(since = "24.8", forRemoval = true)
 public final class TempDirectory {
     private final Path path;
 

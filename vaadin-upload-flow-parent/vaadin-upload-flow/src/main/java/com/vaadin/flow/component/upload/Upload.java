@@ -43,7 +43,9 @@ import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.server.NoInputStreamException;
 import com.vaadin.flow.server.NoOutputStreamException;
 import com.vaadin.flow.server.StreamReceiver;
+import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.StreamVariable;
+import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
@@ -60,9 +62,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha15")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha18")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/upload", version = "24.8.0-alpha15")
+@NpmPackage(value = "@vaadin/upload", version = "24.8.0-alpha18")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
@@ -101,7 +103,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     /**
      * Create a new instance of Upload.
      * <p>
-     * The receiver must be set before performing an upload.
+     * The upload handler must be set through
+     * {@link #setUploadHandler(UploadHandler)} before performing an upload.
      */
     public Upload() {
         final String eventDetailError = "event.detail.error";
@@ -125,9 +128,11 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         getElement().addEventListener("upload-abort",
                 event -> interruptUpload());
 
-        runBeforeClientResponse(ui -> getElement().setAttribute("target",
-                new StreamReceiver(getElement().getNode(), "upload",
-                        getStreamVariable())));
+        setUploadHandler(ignored -> {
+            throw new IllegalStateException(
+                    "Upload cannot be performed without a upload handler set. "
+                            + "Please firstly set the upload handler implementation with upload.setUploadHandler()");
+        });
 
         final String elementFiles = "element.files";
         DomEventListener allFinishedListener = e -> {
@@ -175,11 +180,24 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      *
      * @param receiver
      *            receiver that handles the upload
+     * @deprecated use {@link #Upload(UploadHandler)} instead
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Upload(Receiver receiver) {
         this();
 
         setReceiver(receiver);
+    }
+
+    /**
+     * Create a new instance of Upload with the given upload handler.
+     *
+     * @param handler
+     *            upload handler that handles the upload
+     */
+    public Upload(UploadHandler handler) {
+        this();
+        setUploadHandler(handler);
     }
 
     /**
@@ -543,7 +561,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * @param listener
      *            progress listener to add
      * @return registration for removal of listener
+     * @deprecated use
+     *             {@link com.vaadin.flow.server.streams.TransferProgressListener}
+     *             with {@link com.vaadin.flow.server.streams.UploadHandler}
+     *             implementing the
+     *             {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}
+     *             interface.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Registration addProgressListener(
             ComponentEventListener<ProgressUpdateEvent> listener) {
         return addListener(ProgressUpdateEvent.class, listener);
@@ -555,7 +580,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * @param listener
      *            failed listener to add
      * @return registration for removal of listener
+     * @deprecated use
+     *             {@link com.vaadin.flow.server.streams.TransferProgressListener}
+     *             with {@link com.vaadin.flow.server.streams.UploadHandler}
+     *             implementing the
+     *             {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}
+     *             interface.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Registration addFailedListener(
             ComponentEventListener<FailedEvent> listener) {
         return addListener(FailedEvent.class, listener);
@@ -567,7 +599,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * @param listener
      *            finished listener to add
      * @return registration for removal of listener
+     * @deprecated use
+     *             {@link com.vaadin.flow.server.streams.TransferProgressListener}
+     *             with {@link com.vaadin.flow.server.streams.UploadHandler}
+     *             implementing the
+     *             {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}
+     *             interface.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Registration addFinishedListener(
             ComponentEventListener<FinishedEvent> listener) {
         return addListener(FinishedEvent.class, listener);
@@ -579,7 +618,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * @param listener
      *            start listener to add
      * @return registration for removal of listener
+     * @deprecated use
+     *             {@link com.vaadin.flow.server.streams.TransferProgressListener}
+     *             with {@link com.vaadin.flow.server.streams.UploadHandler}
+     *             implementing the
+     *             {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}
+     *             interface.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Registration addStartedListener(
             ComponentEventListener<StartedEvent> listener) {
         return addListener(StartedEvent.class, listener);
@@ -591,7 +637,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * @param listener
      *            succeeded listener to add
      * @return registration for removal of listener
+     * @deprecated use
+     *             {@link com.vaadin.flow.server.streams.TransferProgressListener}
+     *             with {@link com.vaadin.flow.server.streams.UploadHandler}
+     *             implementing the
+     *             {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}
+     *             interface.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Registration addSucceededListener(
             ComponentEventListener<SucceededEvent> listener) {
         return addListener(SucceededEvent.class, listener);
@@ -625,9 +678,12 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
     /**
      * Return the current receiver.
+     * <p>
+     * Will return null when used with the UploadHandler which is recommended.
      *
      * @return the StreamVariable.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Receiver getReceiver() {
         return receiver;
     }
@@ -641,7 +697,10 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      *
      * @param receiver
      *            receiver to use for file reception
+     * @see #setUploadHandler(UploadHandler)
+     * @deprecated use {@link #setUploadHandler(UploadHandler)} instead
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public void setReceiver(Receiver receiver) {
         Receiver oldReceiver = this.receiver;
         this.receiver = receiver;
@@ -653,6 +712,36 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         } else {
             setMaxFiles(1);
         }
+
+        runBeforeClientResponse(ui -> getElement().setAttribute("target",
+                new StreamReceiver(getElement().getNode(), "upload",
+                        getStreamVariable())));
+    }
+
+    /**
+     * Set the upload handler to be used for this upload component.
+     * <p>
+     * The given handler defines how uploaded file content is handled on the
+     * server and invoked per each single file to be uploaded. Note! This method
+     * overrides the receiver set by {@link #setReceiver(Receiver)}.
+     *
+     * @param handler
+     *            upload handler to use for file receptions
+     */
+    public void setUploadHandler(UploadHandler handler) {
+        UploadHandler newUploadHandler = event -> {
+            try {
+                startUpload();
+                handler.handleUploadRequest(event);
+            } finally {
+                endUpload();
+            }
+        };
+        StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
+                newUploadHandler, this.getElement());
+        runBeforeClientResponse(ui -> getElement().setAttribute("target",
+                elementStreamResource));
+        receiver = null;
     }
 
     private boolean isMultiFileReceiver(Receiver receiver) {

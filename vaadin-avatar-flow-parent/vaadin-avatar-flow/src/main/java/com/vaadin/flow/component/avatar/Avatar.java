@@ -27,6 +27,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.server.AbstractStreamResource;
+import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import elemental.json.JsonObject;
 
@@ -53,10 +55,10 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha15")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha18")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar/src/vaadin-avatar.js")
-@NpmPackage(value = "@vaadin/avatar", version = "24.8.0-alpha15")
+@NpmPackage(value = "@vaadin/avatar", version = "24.8.0-alpha18")
 public class Avatar extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarVariant> {
 
@@ -227,9 +229,9 @@ public class Avatar extends Component
      * set.
      * <p>
      * Setting the image with this method resets the image resource provided
-     * with {@link Avatar#setImageResource(AbstractStreamResource)}
+     * with {@link Avatar#setImageHandler(DownloadHandler)}
      *
-     * @see Avatar#setImageResource(AbstractStreamResource)
+     * @see Avatar#setImageHandler(DownloadHandler)
      * @param url
      *            the image url
      */
@@ -252,7 +254,9 @@ public class Avatar extends Component
      * @see Avatar#setImage(String)
      * @param resource
      *            the resource value or {@code null} to remove the resource
+     * @deprecated Use {@link #setImageHandler(DownloadHandler)} instead
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public void setImageResource(AbstractStreamResource resource) {
         imageResource = resource;
         if (resource == null) {
@@ -261,6 +265,28 @@ public class Avatar extends Component
         }
 
         getElement().setAttribute("img", resource);
+    }
+
+    /**
+     * Sets the image for the avatar.
+     * <p>
+     * Setting the image as a resource with this method resets the image URL
+     * that was set with {@link Avatar#setImage(String)}
+     *
+     * @see Avatar#setImage(String)
+     * @param downloadHandler
+     *            the download resource or {@code null} to remove the resource
+     */
+    public void setImageHandler(DownloadHandler downloadHandler) {
+        if (downloadHandler == null) {
+            imageResource = null;
+            getElement().removeAttribute("img");
+            return;
+        }
+        imageResource = new StreamResourceRegistry.ElementStreamResource(
+                downloadHandler, getElement());
+
+        getElement().setAttribute("img", imageResource);
     }
 
     /**
