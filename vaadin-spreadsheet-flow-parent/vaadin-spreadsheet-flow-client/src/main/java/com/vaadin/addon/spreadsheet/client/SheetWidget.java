@@ -4320,20 +4320,22 @@ public class SheetWidget extends Panel {
                     cell = getFrozenCell(cd.col, cd.row);
                 }
 
-                var cellAddress = toKey(cell.getCol(), cell.getRow());
-                var hasCustomEditor = customEditorFactory != null
-                        && customEditorFactory.hasCustomEditor(cellAddress);
-                if (hasCustomEditor) {
-                    var customEditor = (Slot) customEditorFactory
-                            .getCustomEditor(cellAddress);
-                    if (customEditor.isElementFocused()) {
-                        customEditorFocused = true;
+                if (cell != null) {
+                    var cellAddress = toKey(cell.getCol(), cell.getRow());
+                    var hasCustomEditor = customEditorFactory != null
+                            && customEditorFactory.hasCustomEditor(cellAddress);
+                    if (hasCustomEditor) {
+                        var customEditor = (Slot) customEditorFactory
+                                .getCustomEditor(cellAddress);
+                        if (customEditor.isElementFocused()) {
+                            customEditorFocused = true;
+                        }
                     }
-                }
-                if (cell != null
-                        && !(hasCustomEditor && !isShowCustomEditorOnFocus())) {
-                    cell.setValue(cd.value, cd.cellStyle, cd.needsMeasure);
-                    cell.markAsOverflowDirty();
+
+                    if (!(hasCustomEditor && !isShowCustomEditorOnFocus())) {
+                        cell.setValue(cd.value, cd.cellStyle, cd.needsMeasure);
+                        cell.markAsOverflowDirty();
+                    }
                 }
                 int j = verticalSplitPosition > 0 ? 0 : firstColumnIndex;
                 for (; j < cd.col; j++) {
