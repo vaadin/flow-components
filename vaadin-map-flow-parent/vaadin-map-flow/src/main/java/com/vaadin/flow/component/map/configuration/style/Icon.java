@@ -10,6 +10,8 @@ package com.vaadin.flow.component.map.configuration.style;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.server.StreamResource;
@@ -100,8 +102,8 @@ public class Icon extends ImageStyle {
 
     /**
      * The source URL from which the icon's image should be loaded. Either this,
-     * {@link #getImg()} or {@link #getImgHandler()} must be specified in the
-     * options for the icon, and only one of the two options must be provided.
+     * {@link #getImg()} must be specified in the options for the icon, and only
+     * one of the two options must be provided.
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
@@ -121,9 +123,10 @@ public class Icon extends ImageStyle {
      * be set initially by passing an options object to the constructor.
      *
      * @return the stream resource containing the icon's image
-     * @deprecated use {@link #getImgHandler()} instead
+     * @deprecated use {@link #getImg()} instead
      */
     @Deprecated(since = "24.8")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public StreamResource getImg() {
         return img;
     }
@@ -138,6 +141,8 @@ public class Icon extends ImageStyle {
      *
      * @return the stream resource containing the icon's image
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonProperty("img")
     public DownloadHandler getImgHandler() {
         return imgHandler;
     }
