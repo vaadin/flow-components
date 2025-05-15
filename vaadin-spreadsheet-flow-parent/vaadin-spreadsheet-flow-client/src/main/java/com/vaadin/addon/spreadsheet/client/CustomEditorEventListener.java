@@ -15,17 +15,9 @@ import com.google.gwt.user.client.EventListener;
 
 public class CustomEditorEventListener implements EventListener {
 
-    private SheetWidget sheetWidget;
     private Slot slot;
     private String key;
-
-    public void setSheetWidget(SheetWidget sheetWidget) {
-        this.sheetWidget = sheetWidget;
-    }
-
-    SheetWidget getSheetWidget() {
-        return sheetWidget;
-    }
+    private SpreadsheetWidget widget;
 
     public void init(Slot slot, String key) {
         this.slot = slot;
@@ -43,8 +35,8 @@ public class CustomEditorEventListener implements EventListener {
             switch (event.getKeyCode()) {
             case KeyCodes.KEY_TAB:
                 event.preventDefault();
-                sheetWidget.focusSheet();
-                sheetWidget.getSheetHandler().onSheetKeyPress(event, "");
+                getSheetWidget().focusSheet();
+                getSheetWidget().getSheetHandler().onSheetKeyPress(event, "");
                 break;
             case KeyCodes.KEY_ESCAPE:
                 sheetWidget.focusSheet();
@@ -58,11 +50,26 @@ public class CustomEditorEventListener implements EventListener {
             var row = jsniUtil.getParsedRow();
             getSheetWidget().setSelectedCell(col, row);
             getSheetWidget().updateSelectionOutline(col, col, row, row);
+            getSheetWidget().updateSelectedCellStyles(col, col, row, row, true);
+            getSpreadsheetWidget().getSpreadsheetHandler().cellSelected(row,
+                    col, true);
             slot.setElementFocused(true);
             break;
         case Event.ONBLUR:
             slot.setElementFocused(false);
             break;
         }
+    }
+
+    SheetWidget getSheetWidget() {
+        return widget.getSheetWidget();
+    }
+
+    public void setSpreadsheetWidget(SpreadsheetWidget widget) {
+        this.widget = widget;
+    }
+
+    SpreadsheetWidget getSpreadsheetWidget() {
+        return widget;
     }
 }

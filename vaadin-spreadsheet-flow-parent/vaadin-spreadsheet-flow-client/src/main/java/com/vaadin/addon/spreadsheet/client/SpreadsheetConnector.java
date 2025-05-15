@@ -497,7 +497,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                         customEditors.put(key, slot);
                         CustomEditorEventListener listener = GWT
                                 .create(CustomEditorEventListener.class);
-                        listener.setSheetWidget(getWidget().getSheetWidget());
+                        listener.setSpreadsheetWidget(getWidget());
                         listener.init(slot, key);
                         return slot;
                     }
