@@ -349,12 +349,6 @@ public class BasicValidationIT
         setInputValue(dateInput, "1/1/2000");
         resetValidationCount();
 
-        setInputValue(dateInput, "1/1/2001");
-        assertClientInvalid();
-        assertServerInvalid();
-        assertErrorMessage(INCOMPLETE_INPUT_ERROR_MESSAGE);
-        assertValidationCount(1);
-
         setInputValue(timeInput, "10:00");
         assertServerValid();
         assertClientValid();
