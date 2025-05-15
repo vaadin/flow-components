@@ -43,7 +43,7 @@ import com.vaadin.flow.shared.Registration;
 public class RadioButtonGroupDataViewTest
         extends AbstractComponentDataViewTest {
 
-    private static final String OUTER_HTML = "<vaadin-radio-button>\n <label slot=\"label\"><span>%s</span></label>\n</vaadin-radio-button>";
+    private static final String OUTER_HTML = "<vaadin-radio-button><label slot=\"label\"><span>%s</span></label></vaadin-radio-button>";
 
     @Test
     public void getItem_dataViewWithItems_returnsCorrectItem() {
