@@ -94,6 +94,8 @@ export function useLitWebComponents(): PluginOption {
             'map',
             'menu-bar',
             'menu-bar-item',
+            'message-list',
+            'message-input',
             'multi-select-combo-box',
             'notification',
             'number-field',
