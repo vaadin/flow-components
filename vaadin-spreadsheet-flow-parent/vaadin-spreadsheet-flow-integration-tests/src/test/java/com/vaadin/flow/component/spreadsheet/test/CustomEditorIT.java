@@ -234,9 +234,10 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void customEditorVisible_editorsVisible() {
+    public void showCustomEditorOnFocus_editorsNotVisible() {
+        clickToggleCellVisibleButton();
 
-        // Check that the editors are not visible
+        // Check that the editors are visible
         for (String cellAddress : editorCellAddresses) {
             Assert.assertFalse(
                     getCustomEditorFromCell(cellAddress).isPresent());
@@ -244,14 +245,14 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
         clickToggleCellVisibleButton();
 
-        // Check that the editors are visible
+        // Check that the editors are not visible
         for (String cellAddress : editorCellAddresses) {
             Assert.assertTrue(getCustomEditorFromCell(cellAddress).isPresent());
         }
 
         clickToggleCellVisibleButton();
 
-        // Check that the editors are not visible again
+        // Check that the editors are visible again
         for (String cellAddress : editorCellAddresses) {
             Assert.assertFalse(
                     getCustomEditorFromCell(cellAddress).isPresent());
