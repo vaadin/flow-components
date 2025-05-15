@@ -89,6 +89,19 @@ public class BasicValidationIT
     }
 
     @Test
+    public void required_changeAndClearValueWithoutBlur_triggerBlur_assertValidity() {
+        $("button").id(REQUIRED_BUTTON).click();
+        dateInput.sendKeys("1/1/2000", Keys.ENTER);
+        dateInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
+        dateInput.sendKeys(Keys.TAB);
+        timeInput.sendKeys(Keys.TAB);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertValidationCount(1);
+    }
+
+    @Test
     public void required_changeValue_assertValidity() {
         $("button").id(REQUIRED_BUTTON).click();
 
