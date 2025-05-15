@@ -39,6 +39,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void setValueToTextField_valueAppliedToTextField() {
+        clickToggleCellVisibleButton();
         String sampleText = "text";
         setEditorValue("B2", sampleText, "input");
         clickCell("B3");
@@ -50,6 +51,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void setValueToTextFieldCell_setFormulaInAnotherCell_valueAppliedToToCell() {
+        clickToggleCellVisibleButton();
         String sampleText = "text";
         setEditorValue("B2", sampleText, "input");
         setCellValue("B3", "=B2");
@@ -64,6 +66,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void toggleCheckboxValue_valueAppliedToCheck() {
+        clickToggleCellVisibleButton();
         boolean sampleBoolean = true;
         Assert.assertEquals(!sampleBoolean,
                 Boolean.valueOf(getCellValue("C2")));
@@ -74,6 +77,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void toggleCheckboxValue_setFormulaInAnotherCell_valueAppliedToToCell() {
+        clickToggleCellVisibleButton();
         boolean sampleBoolean = true;
         Assert.assertEquals(!sampleBoolean,
                 Boolean.valueOf(getCellValue("C2")));
@@ -86,6 +90,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void setValueToDatePicker_valueAppliedToDatePicker() {
+        clickToggleCellVisibleButton();
         LocalDate date = LocalDate.of(2000, 10, 10);
         String sampleLocalDateTime = date
                 .format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
@@ -100,6 +105,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void setValueToDatePickerCell_setFormulaInAnotherCell_valueAppliedToToCell() {
+        clickToggleCellVisibleButton();
         LocalDate date = LocalDate.of(2000, 10, 10);
         setEditorValue("D2",
                 date.format(DateTimeFormatter.ofPattern("MM/dd/yyyy")),
@@ -112,6 +118,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void setValueToTextArea_valueAppliedToTextArea() {
+        clickToggleCellVisibleButton();
         String sampleText = "text";
         setEditorValue("E2", sampleText, "textarea");
         clickCell("E3");
@@ -123,6 +130,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void setValueToTextAreaCell_setFormulaInAnotherCell_valueAppliedToToCell() {
+        clickToggleCellVisibleButton();
         String sampleText = "text";
         setEditorValue("E2", sampleText, "textarea");
         setCellValue("E3", "=E2");
@@ -137,6 +145,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void setValueToComboBox_valueAppliedToComboBox() {
+        clickToggleCellVisibleButton();
         String sampleValue = "30";
         setEditorValue("F2", sampleValue, "input");
         clickCell("F3");
@@ -148,6 +157,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void setValueToComboBoxCell_setFormulaInAnotherCell_valueAppliedToToCell() {
+        clickToggleCellVisibleButton();
         String sampleValue = "30";
         setEditorValue("F2", sampleValue, "input");
         setCellValue("F3", "=F2");
@@ -190,7 +200,6 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         getSpreadsheet().sendKeys(Keys.TAB);
         getSpreadsheet().sendKeys(Keys.ENTER);
         assertEditorInCellIsFocused("B2");
-        Assert.assertTrue(getEditorElement("input").isFocused());
     }
 
     @Test
@@ -324,7 +333,6 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void customEditorIsVisible_sheetIsChanged_editorsRemoved() {
-        clickToggleCellVisibleButton();
         getSpreadsheet().addSheet();
 
         // Check that the editors are not visible in the new sheet
@@ -350,7 +358,10 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
     private void setEditorValue(String cellAddress, String value,
             String inputElementSelector) {
         clickCell(cellAddress);
-        TestBenchElement input = getEditorElement(inputElementSelector);
+        var inputOptional = getInputInCustomEditorFromCell(cellAddress,
+                inputElementSelector);
+        Assert.assertTrue(inputOptional.isPresent());
+        var input = inputOptional.get();
         input.click();
         input.clear();
         input.click();
@@ -379,9 +390,15 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     private Optional<TestBenchElement> getInputInCustomEditorFromCell(
             String cellAddress) {
+        return getInputInCustomEditorFromCell(cellAddress, "input");
+    }
+
+    private Optional<TestBenchElement> getInputInCustomEditorFromCell(
+            String cellAddress, String inputElementSelector) {
         var editor = getCustomEditorFromCell(cellAddress);
         try {
-            return editor.map(e -> e.findElement(By.cssSelector("input")));
+            return editor.map(
+                    e -> e.findElement(By.cssSelector(inputElementSelector)));
         } catch (NoSuchElementException e) {
             return Optional.empty();
         }
