@@ -42,6 +42,15 @@ public class BasicIT extends AbstractComponentIT {
     }
 
     @Test
+    public void noPolymer() {
+        var accordion = $(AccordionElement.class).first();
+        var polymerVersion = getCommandExecutor().executeScript(
+                "return arguments[0].constructor.polymerElementVersion",
+                accordion);
+        Assert.assertNull(polymerVersion);
+    }
+
+    @Test
     public void accordionIsPresent() {
         Assert.assertTrue($(AccordionElement.class).exists());
     }
