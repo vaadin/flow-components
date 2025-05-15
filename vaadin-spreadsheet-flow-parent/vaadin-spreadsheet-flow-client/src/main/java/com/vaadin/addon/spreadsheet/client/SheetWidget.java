@@ -4268,6 +4268,7 @@ public class SheetWidget extends Panel {
         Iterator<CellData> i = cellData2.iterator();
         ArrayList<Cell> row = null;
         int rowIndex = -1;
+        var customEditorFactory = getSheetHandler().getCustomEditorFactory();
         while (i.hasNext()) {
             CellData cd = i.next();
             if (cd.row >= r1 && cd.row <= r2 && cd.col >= c1 && cd.col <= c2) {
@@ -4282,8 +4283,11 @@ public class SheetWidget extends Panel {
                         c1 = row.get(0).getCol();
                     }
                 }
-                row.get(cd.col - c1).setValue(cd.value, cd.cellStyle,
-                        cd.needsMeasure);
+                if (!(customEditorFactory != null && customEditorFactory
+                        .hasCustomEditor(toKey(cd.col, cd.row)))) {
+                    row.get(cd.col - c1).setValue(cd.value, cd.cellStyle,
+                            cd.needsMeasure);
+                }
             }
             String key = toKey(cd.col, cd.row);
             setMergedCellValue(key, cd.value, cd.cellStyle, cd.needsMeasure);
