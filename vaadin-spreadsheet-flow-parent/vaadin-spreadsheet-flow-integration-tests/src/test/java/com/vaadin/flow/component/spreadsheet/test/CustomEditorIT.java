@@ -156,6 +156,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void editorFocused_tabKeyPressed_nextCellFocused() {
+        clickToggleCellVisibleButton();
         clickCell("F2");
         TestBenchElement editor = getEditorElement("input");
         editor.focus();
@@ -165,6 +166,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void editorFocused_shiftTabKeyPressed_previousCellFocused() {
+        clickToggleCellVisibleButton();
         clickCell("B2");
         TestBenchElement editor = getEditorElement("input");
         editor.focus();
@@ -174,38 +176,52 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     @Test
     public void cellWithEditor_F2Pressed_editorFocused() {
+        clickToggleCellVisibleButton();
         selectCell("A2");
         getSpreadsheet().sendKeys(Keys.TAB);
         getSpreadsheet().sendKeys(Keys.F2);
-        Assert.assertTrue(getEditorElement("input").isFocused());
+        assertEditorInCellIsFocused("B2");
     }
 
     @Test
     public void cellWithEditor_enterPressed_editorFocused() {
+        clickToggleCellVisibleButton();
         selectCell("A2");
         getSpreadsheet().sendKeys(Keys.TAB);
         getSpreadsheet().sendKeys(Keys.ENTER);
+        assertEditorInCellIsFocused("B2");
         Assert.assertTrue(getEditorElement("input").isFocused());
     }
 
     @Test
     public void cellWithEditor_charPressed_editorFocused() {
+        clickToggleCellVisibleButton();
         selectCell("A2");
         getSpreadsheet().sendKeys(Keys.TAB);
         getSpreadsheet().sendKeys("a");
-        var input = getEditorElement("input");
-        Assert.assertTrue(input.isFocused());
-        Assert.assertEquals("a", input.getDomProperty("value"));
+
+        var input = getInputInCustomEditorFromCell("B2");
+        Assert.assertTrue(input.isPresent());
+        var inputElement = input.get();
+
+        Assert.assertTrue(inputElement.isFocused());
+        Assert.assertEquals("a", inputElement.getDomProperty("value"));
     }
 
     @Test
     public void focusedCustomEditor_ESCPressed_cellIsFocused() {
+        clickToggleCellVisibleButton();
         selectCell("B2");
-        var input = getEditorElement("input");
-        input.focus();
-        input.sendKeys(Keys.ESCAPE);
+
+        var input = getInputInCustomEditorFromCell("B2");
+        Assert.assertTrue(input.isPresent());
+        var inputElement = input.get();
+
+        inputElement.focus();
+        inputElement.sendKeys(Keys.ESCAPE);
+
         Assert.assertTrue(getSpreadsheet().getCellAt("B2").isCellSelected());
-        Assert.assertFalse(input.isFocused());
+        Assert.assertFalse(inputElement.isFocused());
     }
 
     @Test
@@ -213,21 +229,23 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
         // Check that the editors are not visible
         for (String cellAddress : editorCellAddresses) {
-            Assert.assertFalse(getCustomEditorInCell(cellAddress).isPresent());
+            Assert.assertFalse(
+                    getCustomEditorFromCell(cellAddress).isPresent());
         }
 
         clickToggleCellVisibleButton();
 
         // Check that the editors are visible
         for (String cellAddress : editorCellAddresses) {
-            Assert.assertTrue(getCustomEditorInCell(cellAddress).isPresent());
+            Assert.assertTrue(getCustomEditorFromCell(cellAddress).isPresent());
         }
 
         clickToggleCellVisibleButton();
 
         // Check that the editors are not visible again
         for (String cellAddress : editorCellAddresses) {
-            Assert.assertFalse(getCustomEditorInCell(cellAddress).isPresent());
+            Assert.assertFalse(
+                    getCustomEditorFromCell(cellAddress).isPresent());
         }
     }
 
@@ -284,7 +302,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
                     getSpreadsheet().getCellAt(cellAddress).isCellSelected());
             // Checks that the editor is not removed when focus is moved away
             // from it
-            var editor = getCustomEditorInCell(cellAddress);
+            var editor = getCustomEditorFromCell(cellAddress);
             Assert.assertTrue(editor.isPresent());
         }
     }
@@ -299,7 +317,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
                     cellAddress, Keys.ENTER);
             getActiveElement().sendKeys(Keys.ENTER);
             // Checks that the editor is not removed when the user presses ENTER
-            var editor = getCustomEditorInCell(cellAddress);
+            var editor = getCustomEditorFromCell(cellAddress);
             Assert.assertTrue(editor.isPresent());
         }
     }
@@ -311,7 +329,8 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
         // Check that the editors are not visible in the new sheet
         for (String cellAddress : editorCellAddresses) {
-            Assert.assertFalse(getCustomEditorInCell(cellAddress).isPresent());
+            Assert.assertFalse(
+                    getCustomEditorFromCell(cellAddress).isPresent());
         }
 
         getSpreadsheet().selectSheet("Sheet1");
@@ -319,7 +338,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         // Check that the editors are visible when moving back to the first
         // sheet
         for (String cellAddress : editorCellAddresses) {
-            Assert.assertTrue(getCustomEditorInCell(cellAddress).isPresent());
+            Assert.assertTrue(getCustomEditorFromCell(cellAddress).isPresent());
         }
     }
 
@@ -343,7 +362,8 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         return getSpreadsheet().findElement(By.cssSelector(elementSelector));
     }
 
-    private Optional<WebElement> getCustomEditorInCell(String cellAddress) {
+    private Optional<TestBenchElement> getCustomEditorFromCell(
+            String cellAddress) {
         var cell = getSpreadsheet().getCellAt(cellAddress);
         try {
             var slot = cell.findElement(By.tagName("slot"));
@@ -352,6 +372,16 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
                     .findElement(By.cssSelector("[slot='" + slotName + "']"));
 
             return Optional.of(editor);
+        } catch (NoSuchElementException e) {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<TestBenchElement> getInputInCustomEditorFromCell(
+            String cellAddress) {
+        var editor = getCustomEditorFromCell(cellAddress);
+        try {
+            return editor.map(e -> e.findElement(By.cssSelector("input")));
         } catch (NoSuchElementException e) {
             return Optional.empty();
         }
