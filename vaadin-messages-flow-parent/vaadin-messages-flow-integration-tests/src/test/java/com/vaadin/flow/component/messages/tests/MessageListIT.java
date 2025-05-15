@@ -19,6 +19,7 @@ import static org.hamcrest.CoreMatchers.startsWith;
 
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
@@ -165,11 +166,55 @@ public class MessageListIT extends AbstractComponentIT {
 
     @Test
     public void setImageAsStreamResource_imageLoaded() {
+        getLogEntries(Level.WARNING); // message logs before setting resource
         clickElementWithJs("setImageAsStreamResource");
         String imageUrl = messageList.getMessageElements().get(0).getUserImg();
         MatcherAssert.assertThat(imageUrl, startsWith("VAADIN/dynamic"));
         // would fail if the avatar.png image wasn't hosted
         checkLogsForErrors(message -> message.contains("test.jpg"));
+    }
+
+    @Test
+    public void addItem_itemAdded() {
+        clickElementWithJs("addItem");
+
+        var messages = messageList.getMessageElements();
+        var msg = messages.get(2);
+
+        Assert.assertEquals("User", msg.getUserName());
+        Assert.assertEquals("Foo", msg.getText());
+    }
+
+    @Test
+    public void addItem_setItems() {
+        clickElementWithJs("addItem");
+        clickElementWithJs("setItems");
+
+        var messages = messageList.getMessageElements();
+        Assert.assertEquals("Unexpected items count", 1, messages.size());
+        var msg = messages.get(0);
+
+        Assert.assertEquals("sender3", msg.getUserName());
+    }
+
+    @Test
+    public void addTwoItems_twoItemsAdded() {
+        clickElementWithJs("addTwoItems");
+
+        var messages = messageList.getMessageElements();
+        Assert.assertEquals("Unexpected items count", 4, messages.size());
+        var msg = messages.get(3);
+
+        Assert.assertEquals("Bar", msg.getText());
+    }
+
+    @Test
+    public void setImageAsDownloadResource_imageLoaded() {
+        getLogEntries(Level.WARNING); // message logs before setting resource
+        clickElementWithJs("setImageAsDownloadHandler");
+        String imageUrl = messageList.getMessageElements().get(0).getUserImg();
+        MatcherAssert.assertThat(imageUrl, startsWith("VAADIN/dynamic"));
+        checkLogsForErrors(); // would fail if the image wasn't hosted
     }
 
     private MessageElement getFirstMessage(MessageListElement list) {

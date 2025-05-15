@@ -27,6 +27,7 @@ import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
 import com.vaadin.testbench.HasSelectByText;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.commands.TestBenchCommandExecutor;
 import com.vaadin.testbench.elementsbase.Element;
@@ -35,8 +36,8 @@ import com.vaadin.testbench.elementsbase.Element;
  * Testbench Element API for vaadin-select.
  */
 @Element("vaadin-select")
-public class SelectElement extends TestBenchElement
-        implements HasSelectByText, HasLabel, HasPlaceholder, HasHelper {
+public class SelectElement extends TestBenchElement implements HasSelectByText,
+        HasLabel, HasPlaceholder, HasHelper, HasValidation {
 
     @Element("vaadin-select-item")
     public static class ItemElement extends TestBenchElement {

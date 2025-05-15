@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.menubar.testbench.MenuBarButtonElement;
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
@@ -58,7 +59,7 @@ public class MenuBarVisibilityIT extends AbstractComponentIT {
         Assert.assertTrue(menuBar.isDisplayed());
 
         // Check that the menu item is disabled.
-        TestBenchElement button = menuBar.getButtons().get(0);
+        MenuBarButtonElement button = menuBar.getButtons().get(0);
         Assert.assertTrue(button.getPropertyBoolean("disabled"));
     }
 

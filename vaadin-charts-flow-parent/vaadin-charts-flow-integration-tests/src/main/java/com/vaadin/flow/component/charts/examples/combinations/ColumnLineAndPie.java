@@ -27,6 +27,7 @@ public class ColumnLineAndPie extends AbstractChartExample {
     @Override
     public void initDemo() {
         Chart chart = new Chart();
+        chart.setClassName("ColumnLineAndPie");
 
         Configuration conf = chart.getConfiguration();
 

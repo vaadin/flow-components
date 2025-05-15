@@ -23,8 +23,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.testbench.HasClearButton;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -34,7 +36,7 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-date-picker")
 public class DatePickerElement extends TestBenchElement
-        implements HasLabel, HasHelper {
+        implements HasLabel, HasHelper, HasClearButton, HasValidation {
 
     @Element("vaadin-date-picker-overlay-content")
     public static class OverlayContentElement extends TestBenchElement {
