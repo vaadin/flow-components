@@ -79,6 +79,8 @@ export function useLitWebComponents(): PluginOption {
             'grid-sorter',
             'grid-tree-column',
             'grid-tree-toggle',
+            'grid-pro',
+            'grid-pro-edit-column',
             'horizontal-layout',
             'list-box',
             'icon',
