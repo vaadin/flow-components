@@ -4283,8 +4283,9 @@ public class SheetWidget extends Panel {
                         c1 = row.get(0).getCol();
                     }
                 }
-                if (!(customEditorFactory != null && customEditorFactory
-                        .hasCustomEditor(toKey(cd.col, cd.row)))) {
+                if (!(selectedCellCol == cd.col && selectedCellRow == cd.row
+                        && customEditorFactory != null && customEditorFactory
+                                .hasCustomEditor(toKey(cd.col, cd.row)))) {
                     row.get(cd.col - c1).setValue(cd.value, cd.cellStyle,
                             cd.needsMeasure);
                 }
@@ -5102,10 +5103,15 @@ public class SheetWidget extends Panel {
         // Firefox does not receive a change event if the element is removed
         // at the same time the event should be fired. Delay the removal of
         // the custom editor so that the change event is fired.
-        AnimationScheduler.get().requestAnimationFrame(timestamp -> {
+        if (BrowserInfo.get().isFirefox()) {
+            AnimationScheduler.get().requestAnimationFrame(timestamp -> {
+                orphan(customEditorWidget);
+                customEditorWidget.removeFromParent();
+            });
+        } else {
             orphan(customEditorWidget);
             customEditorWidget.removeFromParent();
-        });
+        }
 
         if (loaded) {
             var jsniUtil = getSheetJsniUtil();

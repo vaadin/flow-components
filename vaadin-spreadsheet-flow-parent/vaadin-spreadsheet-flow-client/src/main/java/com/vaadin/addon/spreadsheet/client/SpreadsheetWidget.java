@@ -930,7 +930,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             cellEditingDone(editedValue, true);
         } else if (customCellEditorDisplayed) {
             customCellEditorDisplayed = false;
-            if (!isShowCustomEditorOnFocus()) {
+            if (isShowCustomEditorOnFocus()) {
                 sheetWidget.removeCustomCellEditor();
             }
             formulaBarWidget.setFormulaFieldEnabled(true);
