@@ -81,6 +81,7 @@ export function useLitWebComponents(): PluginOption {
             'grid-tree-toggle',
             'horizontal-layout',
             'list-box',
+            'icon',
             'integer-field',
             'item',
             'map',
