@@ -1,6 +1,6 @@
 bin
 target
-integration-tests
+integration-tests/*
 pom.xml.bak
 .env
 
@@ -36,3 +36,5 @@ error-screenshots
 **/frontend/*.tsx
 dev-bundle
 prod.bundle
+
+!integration-tests/vite.config.ts
