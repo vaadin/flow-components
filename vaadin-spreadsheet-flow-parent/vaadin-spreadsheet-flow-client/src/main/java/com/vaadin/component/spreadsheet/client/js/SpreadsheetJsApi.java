@@ -99,7 +99,8 @@ public class SpreadsheetJsApi {
 
                 "height", "width", "description", "descriptionContentMode",
                 "caption", "styles", "id", "primaryStyleName", "errorMessage",
-                "captionAsHtml", "tabIndex", "enabled" }) {
+                "captionAsHtml", "tabIndex", "enabled",
+                "showCustomEditorOnFocus" }) {
             if (sce.isInitialStateChange()
                     || sce.hasPropertyChanged(propertyName)) {
                 SpreadsheetWidget w = connector.getWidget();
@@ -185,6 +186,8 @@ public class SpreadsheetJsApi {
                     w.setWidth(s.width);
                 if ("id".equals(propertyName))
                     w.setId(s.id);
+                if ("showCustomEditorOnFocus".equals(propertyName))
+                    w.setShowCustomEditorOnFocus(s.showCustomEditorOnFocus);
             }
         }
     }
@@ -442,6 +445,10 @@ public class SpreadsheetJsApi {
 
     public void setNamedRanges(String namedRanges) {
         getState().namedRanges = Parser.parseArraylistString(namedRanges);
+    }
+
+    public void setShowCustomEditorOnFocus(boolean showCustomEditorOnFocus) {
+        getState().showCustomEditorOnFocus = showCustomEditorOnFocus;
     }
 
     public void setHeight(String height) {

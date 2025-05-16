@@ -379,6 +379,8 @@ public class SheetWidget extends Panel {
     private int calculatedRowGroupWidth;
     private int calculatedColGroupHeight;
 
+    private boolean showCustomEditorOnFocus;
+
     private String invalidFormulaMessage = null;
 
     private Element host;
@@ -4266,6 +4268,7 @@ public class SheetWidget extends Panel {
         Iterator<CellData> i = cellData2.iterator();
         ArrayList<Cell> row = null;
         int rowIndex = -1;
+        var customEditorFactory = getSheetHandler().getCustomEditorFactory();
         while (i.hasNext()) {
             CellData cd = i.next();
             if (cd.row >= r1 && cd.row <= r2 && cd.col >= c1 && cd.col <= c2) {
@@ -4280,8 +4283,12 @@ public class SheetWidget extends Panel {
                         c1 = row.get(0).getCol();
                     }
                 }
-                row.get(cd.col - c1).setValue(cd.value, cd.cellStyle,
-                        cd.needsMeasure);
+                if (!(selectedCellCol == cd.col && selectedCellRow == cd.row
+                        && customEditorFactory != null && customEditorFactory
+                                .hasCustomEditor(toKey(cd.col, cd.row)))) {
+                    row.get(cd.col - c1).setValue(cd.value, cd.cellStyle,
+                            cd.needsMeasure);
+                }
             }
             String key = toKey(cd.col, cd.row);
             setMergedCellValue(key, cd.value, cd.cellStyle, cd.needsMeasure);
@@ -4297,6 +4304,8 @@ public class SheetWidget extends Panel {
     }
 
     public void cellValuesUpdated(ArrayList<CellData> updatedCellData) {
+        var customEditorFactory = getSheetHandler().getCustomEditorFactory();
+        var customEditorFocused = false;
         // can contain cells from any of the panes -> just iterate and access
         for (CellData cd : updatedCellData) {
             String key = toKey(cd.col, cd.row);
@@ -4317,8 +4326,21 @@ public class SheetWidget extends Panel {
                 }
 
                 if (cell != null) {
-                    cell.setValue(cd.value, cd.cellStyle, cd.needsMeasure);
-                    cell.markAsOverflowDirty();
+                    var cellAddress = toKey(cell.getCol(), cell.getRow());
+                    var hasCustomEditor = customEditorFactory != null
+                            && customEditorFactory.hasCustomEditor(cellAddress);
+                    if (hasCustomEditor) {
+                        var customEditor = (Slot) customEditorFactory
+                                .getCustomEditor(cellAddress);
+                        if (customEditor.isElementFocused()) {
+                            customEditorFocused = true;
+                        }
+                    }
+
+                    if (!(hasCustomEditor && !isShowCustomEditorOnFocus())) {
+                        cell.setValue(cd.value, cd.cellStyle, cd.needsMeasure);
+                        cell.markAsOverflowDirty();
+                    }
                 }
                 int j = verticalSplitPosition > 0 ? 0 : firstColumnIndex;
                 for (; j < cd.col; j++) {
@@ -4332,7 +4354,10 @@ public class SheetWidget extends Panel {
 
         // Update cell overflow state
         updateOverflows(false);
-        focusSheet();
+
+        if (!customEditorFocused) {
+            focusSheet();
+        }
     }
 
     /**
@@ -5025,21 +5050,26 @@ public class SheetWidget extends Panel {
 
     public void displayCustomCellEditor(Widget customEditorWidget,
             boolean focusEditor) {
-        customCellEditorDisplayed = true;
-        jsniUtil.replaceSelector(editedCellFreezeColumnStyle,
-                ".notusedselector", 0);
-        this.customEditorWidget = customEditorWidget;
         Cell selectedCell = getSelectedCell();
         if (selectedCell == null) {
             return;
         }
-        selectedCell.setValue(null);
+        displayCustomCellEditor(customEditorWidget, focusEditor, selectedCell);
+    }
+
+    public void displayCustomCellEditor(Widget customEditorWidget,
+            boolean focusEditor, Cell editorCell) {
+        customCellEditorDisplayed = true;
+        jsniUtil.replaceSelector(editedCellFreezeColumnStyle,
+                ".notusedselector", 0);
+        this.customEditorWidget = customEditorWidget;
+        editorCell.setValue(null);
 
         Widget parent = customEditorWidget.getParent();
         if (parent != null && !equals(parent)) {
             customEditorWidget.removeFromParent();
         }
-        DivElement element = selectedCell.getElement();
+        DivElement element = editorCell.getElement();
         element.addClassName(CUSTOM_EDITOR_CELL_CLASSNAME);
         element.appendChild(customEditorWidget.getElement());
         if (parent == null || (parent != null && !equals(parent))) {
@@ -5053,27 +5083,54 @@ public class SheetWidget extends Panel {
         }
     }
 
-    public void removeCustomCellEditor() {
-        if (customCellEditorDisplayed) {
-            customCellEditorDisplayed = false;
-            customEditorWidget.getElement()
-                    .removeClassName(CUSTOM_EDITOR_CELL_CLASSNAME);
-            // Firefox does not receive a change event if the element is removed
-            // at the same time the event should be fired. Delay the removal of
-            // the custom editor so that the change event is fired.
+    public void setShowCustomEditorOnFocus(boolean showCustomEditorOnFocus) {
+        this.showCustomEditorOnFocus = showCustomEditorOnFocus;
+    }
+
+    public boolean isShowCustomEditorOnFocus() {
+        return showCustomEditorOnFocus;
+    }
+
+    public void removeCustomCellEditor(String address,
+            Widget customEditorWidget) {
+
+        if (customEditorWidget == null) {
+            return;
+        }
+
+        customEditorWidget.getElement()
+                .removeClassName(CUSTOM_EDITOR_CELL_CLASSNAME);
+        // Firefox does not receive a change event if the element is removed
+        // at the same time the event should be fired. Delay the removal of
+        // the custom editor so that the change event is fired.
+        if (BrowserInfo.get().isFirefox()) {
             AnimationScheduler.get().requestAnimationFrame(timestamp -> {
                 orphan(customEditorWidget);
                 customEditorWidget.removeFromParent();
             });
+        } else {
+            orphan(customEditorWidget);
+            customEditorWidget.removeFromParent();
+        }
 
-            // the cell value should have been updated
-            if (loaded) {
-                Cell cell = getSelectedCell();
-                if (cell != null) {
-                    CellData cd = cachedCellData.get(getSelectedCellKey());
-                    cell.setValue(cd == null ? null : cd.value);
-                }
+        if (loaded) {
+            var jsniUtil = getSheetJsniUtil();
+            jsniUtil.parseColRow(address);
+
+            Cell cell = getCell(jsniUtil.getParsedCol(),
+                    jsniUtil.getParsedRow());
+            if (cell != null) {
+                CellData cd = cachedCellData.get(address);
+                cell.setValue(cd == null ? null : cd.value);
             }
+
+        }
+    }
+
+    public void removeCustomCellEditor() {
+        if (customCellEditorDisplayed && isShowCustomEditorOnFocus()) {
+            customCellEditorDisplayed = false;
+            removeCustomCellEditor(getSelectedCellKey(), customEditorWidget);
             customEditorWidget = null;
         }
     }

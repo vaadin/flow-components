@@ -249,4 +249,6 @@ public interface SheetHandler extends GroupingHandler {
 
     boolean isRowProtected(int row);
 
+    SpreadsheetCustomEditorFactory getCustomEditorFactory();
+
 }

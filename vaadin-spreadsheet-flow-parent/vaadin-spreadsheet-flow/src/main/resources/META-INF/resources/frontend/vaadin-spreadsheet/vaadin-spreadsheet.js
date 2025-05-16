@@ -140,7 +140,9 @@ export class VaadinSpreadsheet extends LitElement {
 
       namedRanges: { type: String },
 
-      theme: { type: String, reflectToAttribute: true }
+      theme: { type: String, reflectToAttribute: true },
+
+      showCustomEditorOnFocus: { type: Boolean }
     };
   }
 
@@ -300,6 +302,8 @@ export class VaadinSpreadsheet extends LitElement {
         this.api.setResources(this, newVal);
       } else if ('api' == name) {
       } else if ('theme' == name) {
+      } else if ('showCustomEditorOnFocus' == name) {
+        this.api.setShowCustomEditorOnFocus(newVal);
       } else {
         console.error('<vaadin-spreadsheet> unsupported property received from server: property=' + name);
       }

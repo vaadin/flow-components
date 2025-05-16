@@ -15,6 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class Slot extends Widget {
 
     private final Element assignedElement;
+    private boolean isElementFocused;
 
     public Slot(String name, Element assignedElement, Element host) {
         this.assignedElement = assignedElement;
@@ -39,5 +40,13 @@ public class Slot extends Widget {
 
     public Element getAssignedElement() {
         return assignedElement;
+    }
+
+    public boolean isElementFocused() {
+        return isElementFocused;
+    }
+
+    public void setElementFocused(boolean isElementFocused) {
+        this.isElementFocused = isElementFocused;
     }
 }
