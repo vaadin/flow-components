@@ -148,6 +148,60 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         Assert.assertEquals(sampleValue, getCellValue("F3"));
     }
 
+    @Test
+    public void editorFocused_tabKeyPressed_nextCellFocused() {
+        clickCell("F2");
+        TestBenchElement editor = getEditorElement("input");
+        editor.focus();
+        editor.sendKeys(Keys.TAB);
+        Assert.assertTrue(getSpreadsheet().getCellAt("G2").isCellSelected());
+    }
+
+    @Test
+    public void editorFocused_shiftTabKeyPressed_previousCellFocused() {
+        clickCell("B2");
+        TestBenchElement editor = getEditorElement("input");
+        editor.focus();
+        editor.sendKeys(Keys.SHIFT, Keys.TAB);
+        Assert.assertTrue(getSpreadsheet().getCellAt("A2").isCellSelected());
+    }
+
+    @Test
+    public void cellWithEditor_F2Pressed_editorFocused() {
+        selectCell("A2");
+        getSpreadsheet().sendKeys(Keys.TAB);
+        getSpreadsheet().sendKeys(Keys.F2);
+        Assert.assertTrue(getEditorElement("input").isFocused());
+    }
+
+    @Test
+    public void cellWithEditor_enterPressed_editorFocused() {
+        selectCell("A2");
+        getSpreadsheet().sendKeys(Keys.TAB);
+        getSpreadsheet().sendKeys(Keys.ENTER);
+        Assert.assertTrue(getEditorElement("input").isFocused());
+    }
+
+    @Test
+    public void cellWithEditor_charPressed_editorFocused() {
+        selectCell("A2");
+        getSpreadsheet().sendKeys(Keys.TAB);
+        getSpreadsheet().sendKeys("a");
+        var input = getEditorElement("input");
+        Assert.assertTrue(input.isFocused());
+        Assert.assertEquals("a", input.getDomProperty("value"));
+    }
+
+    @Test
+    public void focusedCustomEditor_ESCPressed_cellIsFocused() {
+        selectCell("B2");
+        var input = getEditorElement("input");
+        input.focus();
+        input.sendKeys(Keys.ESCAPE);
+        Assert.assertTrue(getSpreadsheet().getCellAt("B2").isCellSelected());
+        Assert.assertFalse(input.isFocused());
+    }
+
     private void toggleCheckboxValue(String cellAddress) {
         clickCell(cellAddress);
         getEditorElement("input").click();

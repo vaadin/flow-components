@@ -27,7 +27,10 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetWidget.SheetContextMenuHandler;
@@ -465,8 +468,27 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                                 .get(key);
                         var editor = SheetJsniUtil.getVirtualChild(editorId,
                                 host.getPropertyString("appId"));
-                        return new Slot("custom-editor-" + editorId, editor,
-                                host);
+                        Slot slot = new Slot("custom-editor-" + editorId,
+                                editor, host);
+                        Event.setEventListener(slot.getAssignedElement(),
+                                event -> {
+                                    var sheetWidget = getWidget()
+                                            .getSheetWidget();
+                                    switch (event.getKeyCode()) {
+                                    case KeyCodes.KEY_TAB:
+                                        event.preventDefault();
+                                        sheetWidget.focusSheet();
+                                        sheetWidget.getSheetHandler()
+                                                .onSheetKeyPress(event, "");
+                                        break;
+                                    case KeyCodes.KEY_ESCAPE: // Handle escape
+                                        sheetWidget.focusSheet();
+                                        break;
+                                    }
+                                });
+                        DOM.sinkEvents(slot.getAssignedElement(),
+                                Event.ONKEYDOWN);
+                        return slot;
                     }
 
                 };
