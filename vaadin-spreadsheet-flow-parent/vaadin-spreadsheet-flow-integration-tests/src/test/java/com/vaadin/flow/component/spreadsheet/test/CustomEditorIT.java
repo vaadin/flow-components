@@ -138,9 +138,9 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
         int sampleNumber = 42;
         setEditorValue("E2", Integer.toString(sampleNumber), "textarea");
-        setCellValue("E3", "=E2*2");
+        setCellValue("E4", "=E2*2");
         Assert.assertEquals(Integer.toString(sampleNumber * 2),
-                getCellValue("E3"));
+                getCellValue("E4"));
     }
 
     @Test
