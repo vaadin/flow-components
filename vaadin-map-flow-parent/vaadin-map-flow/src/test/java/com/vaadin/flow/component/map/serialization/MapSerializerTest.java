@@ -26,6 +26,7 @@ import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.ElementRequestHandler;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
@@ -52,6 +53,15 @@ public class MapSerializerTest {
                 .registerResource((AbstractStreamResource) Mockito.any()))
                 .thenReturn(streamRegistrationMock);
         Mockito.when(streamRegistrationMock.getResourceUri())
+                .thenReturn(new URI("https://example.com"));
+
+        StreamRegistration elementStreamResourceMock = Mockito
+                .mock(StreamRegistration.class);
+
+        Mockito.when(streamResourceRegistryMock
+                .registerResource((ElementRequestHandler) Mockito.any()))
+                .thenReturn(elementStreamResourceMock);
+        Mockito.when(elementStreamResourceMock.getResourceUri())
                 .thenReturn(new URI("https://example.com"));
     }
 
@@ -88,7 +98,7 @@ public class MapSerializerTest {
         MapSerializer mapSerializer = new MapSerializer();
 
         Icon.Options options = new Icon.Options();
-        options.setImg(Assets.PIN.getResource());
+        options.setImg(Assets.PIN.getHandler());
         Icon icon = new Icon(options);
 
         mapSerializer.toJson(icon);
@@ -96,6 +106,6 @@ public class MapSerializerTest {
         mapSerializer.toJson(icon);
 
         Mockito.verify(streamResourceRegistryMock, Mockito.times(1))
-                .registerResource(Assets.PIN.getResource());
+                .registerResource(Assets.PIN.getHandler());
     }
 }

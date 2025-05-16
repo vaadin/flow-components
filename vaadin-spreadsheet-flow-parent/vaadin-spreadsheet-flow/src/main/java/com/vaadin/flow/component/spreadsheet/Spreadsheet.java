@@ -97,7 +97,9 @@ import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.pro.licensechecker.LicenseChecker;
 
@@ -3575,6 +3577,29 @@ public class Spreadsheet extends Component
         }
     }
 
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * com.vaadin.server.AbstractClientConnector#setResource(java.lang.String,
+     * com.vaadin.server.Resource)
+     *
+     * Provides package visibility.
+     */
+    protected void setResource(String key, DownloadHandler resource) {
+        if (resource == null) {
+            resources.remove(key);
+            getElement().removeAttribute("resource-" + key);
+        } else {
+            resources.put(key, resource.toString());
+            getElement().setProperty("resources",
+                    Serializer.serialize(new ArrayList<>(resources.keySet())));
+            getElement().setAttribute("resource-" + key,
+                    new StreamResourceRegistry.ElementStreamResource(resource,
+                            this.getElement()));
+        }
+    }
+
     void clearSheetServerSide() {
         workbook = null;
         styler = null;
@@ -4244,7 +4269,9 @@ public class Spreadsheet extends Component
             overlayComponents.add(overlay.getComponent(true));
         }
 
-        if (overlay.getId() != null && overlay.getResource() != null) {
+        if (overlay.getId() != null && overlay.getResourceHandler() != null) {
+            setResource(overlay.getId(), overlay.getResourceHandler());
+        } else if (overlay.getId() != null && overlay.getResource() != null) {
             setResource(overlay.getId(), overlay.getResource());
         }
 

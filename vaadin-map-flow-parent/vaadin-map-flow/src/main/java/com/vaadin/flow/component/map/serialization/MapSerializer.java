@@ -25,6 +25,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 import elemental.json.JsonValue;
 import elemental.json.impl.JreJsonFactory;
@@ -41,9 +42,13 @@ public class MapSerializer implements Serializable {
         // Add map-instance specific serializer to handle Flow stream resources
         SimpleModule module = new SimpleModule().addSerializer(
                 StreamResource.class, new StreamResourceSerializer());
+        // Add map-instance specific serializer to handle Flow stream resources
+        SimpleModule downloadModule = new SimpleModule().addSerializer(
+                DownloadHandler.class, new DownloadHandlerSerializer());
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(module);
+        mapper.registerModule(downloadModule);
         writer = mapper.writer();
     }
 
@@ -77,6 +82,7 @@ public class MapSerializer implements Serializable {
      * registry, and are available under a dynamic URL. The serializer also
      * returns the dynamic URL as serialized value.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     private static class StreamResourceSerializer
             extends StdSerializer<StreamResource> {
         private final Map<StreamResource, URI> streamResourceURICache = new HashMap<>();
@@ -97,6 +103,46 @@ public class MapSerializer implements Serializable {
         }
 
         private URI getURI(StreamResource resource) {
+            URI uri = streamResourceURICache.get(resource);
+            if (uri == null) {
+                StreamResourceRegistry resourceRegistry = UI.getCurrent()
+                        .getSession().getResourceRegistry();
+                StreamRegistration streamRegistration = resourceRegistry
+                        .registerResource(resource);
+                uri = streamRegistration.getResourceUri();
+                streamResourceURICache.put(resource, uri);
+            }
+            return uri;
+        }
+    }
+
+    /**
+     * Custom Jackson serializer for {@link DownloadHandler}s. The serializer
+     * guarantees that all stream resources encountered during serialization of
+     * a configuration object are registered in a Flow session's stream resource
+     * registry, and are available under a dynamic URL. The serializer also
+     * returns the dynamic URL as serialized value.
+     */
+    private static class DownloadHandlerSerializer
+            extends StdSerializer<DownloadHandler> {
+        private final Map<DownloadHandler, URI> streamResourceURICache = new HashMap<>();
+
+        public DownloadHandlerSerializer() {
+            super(DownloadHandler.class);
+        }
+
+        @Override
+        public void serialize(DownloadHandler value, JsonGenerator gen,
+                SerializerProvider provider) throws IOException {
+            if (value == null) {
+                gen.writeNull();
+                return;
+            }
+            URI uri = getURI(value);
+            gen.writeString(uri.toString());
+        }
+
+        private URI getURI(DownloadHandler resource) {
             URI uri = streamResourceURICache.get(resource);
             if (uri == null) {
                 StreamResourceRegistry resourceRegistry = UI.getCurrent()
