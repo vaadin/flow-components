@@ -1,5 +1,5 @@
-import { Debouncer } from '@polymer/polymer/lib/utils/debounce.js';
-import { timeOut } from '@polymer/polymer/lib/utils/async.js';
+import { Debouncer } from '@vaadin/component-base/src/debounce.js';
+import { timeOut } from '@vaadin/component-base/src/async.js';
 
 window.Vaadin.Flow.virtualListConnector = {
   initLazy: function (list) {
