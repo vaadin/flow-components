@@ -296,7 +296,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *            true to open or false to close
      */
     public void setOpened(boolean opened) {
-        getElement().callJsFunction("set", "editorOpened", opened);
+        getElement().executeJs("this.editorOpened = $0", opened);
     }
 
     /**
@@ -316,7 +316,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * @see #getSaveButton()
      */
     public void setDirty(boolean dirty) {
-        getElement().executeJs("this.set('__isDirty', $0)", dirty);
+        getElement().executeJs("this.__isDirty = $0", dirty);
     }
 
     /**
