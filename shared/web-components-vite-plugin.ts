@@ -102,7 +102,7 @@ export function useLitWebComponents(): PluginOption {
             'password-field',
             'progress-bar',
             'radio-button',
-            'radio-button-group',
+            'radio-group',
             'scroller',
             'select',
             'split-layout',
