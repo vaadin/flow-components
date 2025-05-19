@@ -100,6 +100,7 @@ export function useLitWebComponents(): PluginOption {
             'notification',
             'number-field',
             'password-field',
+            'progress-bar',
             'radio-button',
             'radio-button-group',
             'scroller',
