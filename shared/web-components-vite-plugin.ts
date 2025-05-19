@@ -103,6 +103,7 @@ export function useLitWebComponents(): PluginOption {
             'progress-bar',
             'radio-button',
             'radio-group',
+            'rich-text-editor',
             'scroller',
             'select',
             'split-layout',
