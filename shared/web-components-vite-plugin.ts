@@ -113,6 +113,7 @@ export function useLitWebComponents(): PluginOption {
             'text-area',
             'text-field',
             'time-picker',
+            'upload',
             'vertical-layout',
             'virtual-list'
           ].flatMap((component) => {
