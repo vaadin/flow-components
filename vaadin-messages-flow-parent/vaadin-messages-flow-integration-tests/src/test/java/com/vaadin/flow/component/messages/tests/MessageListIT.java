@@ -209,6 +209,21 @@ public class MessageListIT extends AbstractComponentIT {
     }
 
     @Test
+    public void changeLocale_addItem() {
+        clickElementWithJs("setLocale");
+
+        clickElementWithJs("addItem");
+
+        checkLogsForErrors(message -> message.contains("test.jpg"));
+
+        List<MessageElement> messages = messageList.getMessageElements();
+        MessageElement msg = messages.get(0);
+
+        Assert.assertTrue("Unexpected time prop",
+                msg.getTime().matches("1 gen 2021, [0-9]+:[0-9]+"));
+    }
+
+    @Test
     public void setImageAsDownloadResource_imageLoaded() {
         getLogEntries(Level.WARNING); // message logs before setting resource
         clickElementWithJs("setImageAsDownloadHandler");

@@ -33,6 +33,9 @@ import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.internal.JsonUtils;
 
+import elemental.json.JsonArray;
+import elemental.json.JsonValue;
+
 /**
  * Message List allows you to show a list of messages, for example, a chat log.
  * You can configure the text content, information about the sender and the time
@@ -210,6 +213,23 @@ public class MessageList extends Component
     }
 
     /**
+     * Converts the given message list items to a JSON array.
+     * 
+     * @param items
+     *            the list of message list items to convert
+     * @return a JSON array representing the items
+     */
+    private JsonArray itemsToJson(List<MessageListItem> items) {
+        var itemsJson = JsonUtils.listToJson(items);
+        for (int i = 0; i < itemsJson.length(); i++) {
+            var item = itemsJson.getObject(i);
+            // Include unformatted time in the JSON object
+            item.put("__unformattedTime", (JsonValue) item.get("time"));
+        }
+        return itemsJson;
+    }
+
+    /**
      * Handles a full update of the message list items.
      * 
      * @param ui
@@ -219,9 +239,8 @@ public class MessageList extends Component
         // Sync clientText for items
         items.forEach(item -> item.clientText = item.getText());
 
-        var itemsJson = JsonUtils.listToJson(items);
         getElement().executeJs(CONNECTOR_OBJECT + ".setItems(this, $0, $1)",
-                itemsJson, ui.getLocale().toLanguageTag());
+                itemsToJson(items), ui.getLocale().toLanguageTag());
     }
 
     /**
@@ -263,10 +282,9 @@ public class MessageList extends Component
         // Sync clientText for new items
         newItems.forEach(item -> item.clientText = item.getText());
 
-        var newItemsJson = JsonUtils.listToJson(newItems);
         // Call the connector function to add items
         getElement().executeJs(CONNECTOR_OBJECT + ".addItems(this, $0, $1)",
-                newItemsJson, ui.getLocale().toLanguageTag());
+                itemsToJson(newItems), ui.getLocale().toLanguageTag());
     }
 
     @Override
