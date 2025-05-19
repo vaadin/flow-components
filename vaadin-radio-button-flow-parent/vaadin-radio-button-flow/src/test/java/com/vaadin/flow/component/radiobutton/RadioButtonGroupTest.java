@@ -51,7 +51,7 @@ import com.vaadin.tests.DataProviderListenersTest;
 
 public class RadioButtonGroupTest {
 
-    private static final String OUTER_HTML = "<vaadin-radio-button>\n <label slot=\"label\"><span>%s</span></label>\n</vaadin-radio-button>";
+    private static final String OUTER_HTML = "<vaadin-radio-button><label slot=\"label\"><span>%s</span></label></vaadin-radio-button>";
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
