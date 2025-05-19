@@ -5023,8 +5023,7 @@ public class SheetWidget extends Panel {
         return lastRowIndex;
     }
 
-    public void displayCustomCellEditor(Widget customEditorWidget,
-            boolean focusEditor) {
+    public void displayCustomCellEditor(Widget customEditorWidget) {
         customCellEditorDisplayed = true;
         jsniUtil.replaceSelector(editedCellFreezeColumnStyle,
                 ".notusedselector", 0);
@@ -5046,11 +5045,7 @@ public class SheetWidget extends Panel {
             adopt(customEditorWidget);
         }
 
-        if (focusEditor && customEditorWidget instanceof Slot) {
-            ((Slot) customEditorWidget).getAssignedElement().focus();
-        } else {
-            focusSheet();
-        }
+        focusSheet();
     }
 
     public void removeCustomCellEditor() {

@@ -461,7 +461,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             if (customEditor != null) {
                 customCellEditorDisplayed = true;
                 formulaBarWidget.setFormulaFieldEnabled(false);
-                sheetWidget.displayCustomCellEditor(customEditor, false);
+                sheetWidget.displayCustomCellEditor(customEditor);
             }
         }
     }
@@ -707,7 +707,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                     updateSelectedCellValues(column, row);
                 }
                 if (updateToActionHandler) {
-                    selectionHandler.newSelectedCellSet(false);
+                    selectionHandler.newSelectedCellSet();
                     spreadsheetHandler.cellSelected(row, column, true);
                     startDelayedSendingTimer();
                 }
@@ -735,7 +735,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             formulaBarWidget.setFormulaFieldEnabled(!cellLocked);
         } else {
             sheetWidget.displayCustomCellEditor(customEditorFactory
-                    .getCustomEditor(sheetWidget.getSelectedCellKey()), false);
+                    .getCustomEditor(sheetWidget.getSelectedCellKey()));
         }
         if (name != null) {
             formulaBarWidget.setSelectedCellAddress(name);
