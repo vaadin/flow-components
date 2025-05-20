@@ -119,7 +119,8 @@ public class UploadTest {
     }
 
     @Test
-    public void uploadWithCustomHandler_doUpload_activeUploadsIsChanged_from0to1_from1to0() {
+    public void uploadWithCustomHandler_doUpload_activeUploadsIsChanged_from0to1_from1to0()
+            throws IOException {
         VaadinRequest request = Mockito.mock(VaadinRequest.class);
         VaadinResponse response = Mockito.mock(VaadinResponse.class);
         VaadinSession session = Mockito.mock(VaadinSession.class);

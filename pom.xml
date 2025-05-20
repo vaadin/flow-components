@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-parent</artifactId>
-        <version>2.2.2</version>
+        <version>3.0.0</version>
     </parent>
     <artifactId>vaadin-flow-components</artifactId>
     <version>24.8-SNAPSHOT</version>
@@ -70,7 +70,7 @@
     </scm>
     <properties>
         <flow.version>24.8-SNAPSHOT</flow.version>
-        <testbench.version>9.4.0.alpha1</testbench.version>
+        <testbench.version>9.4.0.alpha2</testbench.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
