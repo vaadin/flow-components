@@ -64,8 +64,8 @@ public class MessageListPage extends Div {
         addButton("addItem", () -> messageList
                 .addItem(new MessageListItem("Foo", Instant.now(), "User")));
         addButton("addTwoItems", () -> {
-            messageList.addItem(new MessageListItem("Foo", null, "User"));
-            messageList.addItem(new MessageListItem("Bar", null, "User"));
+            messageList.addItem(new MessageListItem("Foo", "User"));
+            messageList.addItem(new MessageListItem("Bar", "User"));
         });
 
         addButton("setLocale", () -> UI.getCurrent().setLocale(Locale.ITALIAN));
