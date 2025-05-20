@@ -178,7 +178,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
     @Test
     public void editorFocused_shiftTabKeyPressed_previousCellFocused() {
         clickToggleCellVisibleButton();
-      
+
         clickCell("B2");
         TestBenchElement editor = getEditorElement("input");
         editor.focus();
