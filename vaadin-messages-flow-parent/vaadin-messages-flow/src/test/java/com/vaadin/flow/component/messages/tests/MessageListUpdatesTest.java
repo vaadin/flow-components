@@ -30,7 +30,6 @@ import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.server.VaadinSession;
 
-import elemental.json.JsonValue;
 import elemental.json.impl.JreJsonArray;
 
 public class MessageListUpdatesTest {
@@ -207,10 +206,6 @@ public class MessageListUpdatesTest {
         var parameterItems = (JreJsonArray) invocation.getInvocation()
                 .getParameters().get(0);
         var expectedItems = JsonUtils.listToJson(messageList.getItems());
-        for (int i = 0; i < expectedItems.length(); i++) {
-            var item = expectedItems.getObject(i);
-            item.put("__unformattedTime", (JsonValue) item.get("time"));
-        }
         Assert.assertTrue(JsonUtils.jsonEquals(expectedItems, parameterItems));
     }
 

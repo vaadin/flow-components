@@ -26,9 +26,9 @@ window.Vaadin.Flow.messageListConnector = {
       minute: 'numeric'
     });
     list.items = items.map((item) =>
-      item.__unformattedTime
+      item.time
         ? Object.assign(item, {
-            time: formatter.format(new Date(item.__unformattedTime))
+            time: formatter.format(new Date(item.time))
           })
         : item
     );
