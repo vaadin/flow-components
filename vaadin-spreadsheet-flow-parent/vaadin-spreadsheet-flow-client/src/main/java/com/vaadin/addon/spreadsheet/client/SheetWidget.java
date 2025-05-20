@@ -8,6 +8,8 @@
  */
 package com.vaadin.addon.spreadsheet.client;
 
+import static com.vaadin.addon.spreadsheet.client.SheetJsniUtil.getAssignedElements;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,6 +24,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.animation.client.AnimationScheduler;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
@@ -1243,6 +1246,18 @@ public class SheetWidget extends Panel {
                         Event.setCapture(sheet);
                     }
                 }
+            }
+        }
+    }
+
+    public void focusCustomEditor() {
+        var cell = getCell(selectedCellCol, selectedCellRow);
+        var assignedElements = getAssignedElements(
+                cell.getElement().getFirstChildElement());
+        if (assignedElements != null && assignedElements.length == 1) {
+            var assignedElement = assignedElements[0];
+            if (assignedElement.getNodeType() == Node.ELEMENT_NODE) {
+                assignedElement.focus();
             }
         }
     }
@@ -4317,6 +4332,7 @@ public class SheetWidget extends Panel {
 
         // Update cell overflow state
         updateOverflows(false);
+        focusSheet();
     }
 
     /**
@@ -5037,8 +5053,13 @@ public class SheetWidget extends Panel {
             customCellEditorDisplayed = false;
             customEditorWidget.getElement()
                     .removeClassName(CUSTOM_EDITOR_CELL_CLASSNAME);
-            orphan(customEditorWidget);
-            customEditorWidget.removeFromParent();
+            // Firefox does not receive a change event if the element is removed
+            // at the same time the event should be fired. Delay the removal of
+            // the custom editor so that the change event is fired.
+            AnimationScheduler.get().requestAnimationFrame(timestamp -> {
+                orphan(customEditorWidget);
+                customEditorWidget.removeFromParent();
+            });
 
             // the cell value should have been updated
             if (loaded) {
