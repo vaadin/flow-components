@@ -13,25 +13,34 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
+/**
+ * Maps the given items to a new array of items with formatted time.
+ */
+function formatItems(items, locale) {
+  const formatter = new Intl.DateTimeFormat(locale, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric'
+  });
+
+  return items.map((item) =>
+    item.time
+      ? Object.assign(item, {
+          time: formatter.format(new Date(item.time))
+        })
+      : item
+  );
+}
+
 window.Vaadin.Flow.messageListConnector = {
   /**
    * Fully replaces the items in the list with the given items.
    */
   setItems(list, items, locale) {
-    const formatter = new Intl.DateTimeFormat(locale, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric'
-    });
-    list.items = items.map((item) =>
-      item.time
-        ? Object.assign(item, {
-            time: formatter.format(new Date(item.time))
-          })
-        : item
-    );
+    list.items = formatItems(items, locale);
   },
 
   /**
@@ -54,6 +63,6 @@ window.Vaadin.Flow.messageListConnector = {
    * Adds the given items to the end of the list.
    */
   addItems(list, newItems, locale) {
-    this.setItems(list, [...(list.items || []), ...newItems], locale);
+    list.items = [...(list.items || []), ...formatItems(newItems, locale)];
   }
 };
