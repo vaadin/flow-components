@@ -62,7 +62,7 @@ public class MessageListPage extends Div {
                 .setItems(new MessageListItem(null, null, "sender3")));
 
         addButton("addItem", () -> messageList
-                .addItem(new MessageListItem("Foo", null, "User")));
+                .addItem(new MessageListItem("Foo", Instant.now(), "User")));
         addButton("addTwoItems", () -> {
             messageList.addItem(new MessageListItem("Foo", null, "User"));
             messageList.addItem(new MessageListItem("Bar", null, "User"));

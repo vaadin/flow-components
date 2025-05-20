@@ -209,18 +209,23 @@ public class MessageListIT extends AbstractComponentIT {
     }
 
     @Test
-    public void changeLocale_addItem() {
+    public void changeLocale_addItem_doesNotThrow() {
         clickElementWithJs("setLocale");
-
         clickElementWithJs("addItem");
 
         checkLogsForErrors(message -> message.contains("test.jpg"));
+    }
+
+    @Test
+    public void changeLocale_addItem_itemTimesFormatted() {
+        clickElementWithJs("setLocale");
+        clickElementWithJs("addItem");
 
         List<MessageElement> messages = messageList.getMessageElements();
-        MessageElement msg = messages.get(0);
-
         Assert.assertTrue("Unexpected time prop",
-                msg.getTime().matches("1 gen 2021, [0-9]+:[0-9]+"));
+                messages.get(0).getTime().matches("1 gen 2021, [0-9]+:[0-9]+"));
+        Assert.assertTrue("Unexpected time format", messages.get(2).getTime()
+                .matches("[0-9]+ [a-z]+ [0-9]{4}, [0-9]+:[0-9]+"));
     }
 
     @Test
