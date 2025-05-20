@@ -89,6 +89,25 @@ public class MessageListItem implements Serializable {
     }
 
     /**
+     * Creates a message list item with the provided text content and user name.
+     * <p>
+     * The text will be rendered as plain text in the message body. The user
+     * name will also be displayed in the message component. The user name is
+     * also used in the message's avatar.
+     *
+     * @param text
+     *            the text content of the message
+     * @param userName
+     *            the user name of the message sender
+     * @see #setText(String)
+     * @see #setUserName(String)
+     */
+    public MessageListItem(String text, String userName) {
+        this(text);
+        this.userName = userName;
+    }
+
+    /**
      * Creates a message list item with the provided text content, time and user
      * name.
      * <p>
@@ -107,9 +126,8 @@ public class MessageListItem implements Serializable {
      * @see #setUserName(String)
      */
     public MessageListItem(String text, Instant time, String userName) {
-        this(text);
+        this(text, userName);
         this.time = time;
-        this.userName = userName;
     }
 
     /**
