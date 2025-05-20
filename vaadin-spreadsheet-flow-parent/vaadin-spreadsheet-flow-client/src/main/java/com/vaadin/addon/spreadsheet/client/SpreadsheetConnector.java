@@ -27,7 +27,10 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetWidget.SheetContextMenuHandler;
@@ -499,6 +502,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                                 .create(CustomEditorEventListener.class);
                         listener.setSpreadsheetWidget(getWidget());
                         listener.init(slot, key);
+
                         return slot;
                     }
 

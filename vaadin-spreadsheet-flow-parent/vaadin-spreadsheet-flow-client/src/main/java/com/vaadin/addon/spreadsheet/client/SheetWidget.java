@@ -5104,6 +5104,7 @@ public class SheetWidget extends Panel {
         // at the same time the event should be fired. Delay the removal of
         // the custom editor so that the change event is fired.
         if (BrowserInfo.get().isFirefox()) {
+
             AnimationScheduler.get().requestAnimationFrame(timestamp -> {
                 orphan(customEditorWidget);
                 customEditorWidget.removeFromParent();

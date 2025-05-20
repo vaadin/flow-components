@@ -113,18 +113,6 @@ public class SheetEventListener implements EventListener {
     private boolean isInsideCustomEditor(Event event) {
         var composedPath = getComposedPath(event);
 
-        var result = Arrays
-                .stream(composedPath).filter(
-                        element -> element.getNodeType() == Node.ELEMENT_NODE
-                                && Objects.equals(element.getTagName(), "SLOT")
-                                && element.getAttribute("name")
-                                        .startsWith("custom-editor-"))
-                .findFirst();
-
-        if (result.isPresent()) {
-            return true;
-        }
-
         return Arrays.stream(composedPath)
                 .anyMatch(element -> element.getNodeType() == Node.ELEMENT_NODE
                         && Objects.equals(element.getTagName(), "SLOT")
