@@ -8,8 +8,14 @@
  */
 package com.vaadin.addon.spreadsheet.client;
 
+import static com.vaadin.addon.spreadsheet.client.SheetJsniUtil.getComposedPath;
+
+import java.util.Arrays;
+import java.util.Objects;
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
@@ -46,6 +52,8 @@ public class SheetEventListener implements EventListener {
 
     @Override
     public void onBrowserEvent(Event event) {
+        var insideCustomEditor = isInsideCustomEditor(event);
+
         if ((SheetWidget.getEventTarget(event)).getAttribute("class")
                 .contains(PopupButtonWidget.BUTTON_CLASSNAME)) {
             widget.setFocused(true);
@@ -56,7 +64,7 @@ public class SheetEventListener implements EventListener {
         if (typeInt == Event.ONFOCUS) {
             widget.setFocused(true);
             sheetFocused = true;
-        } else if (typeInt == Event.ONBLUR) {
+        } else if (typeInt == Event.ONBLUR && !insideCustomEditor) {
             widget.setFocused(false);
             sheetFocused = false;
         } else if (typeInt == Event.ONTOUCHMOVE) {
@@ -102,6 +110,16 @@ public class SheetEventListener implements EventListener {
         }
     }
 
+    private boolean isInsideCustomEditor(Event event) {
+        var composedPath = getComposedPath(event);
+
+        return Arrays.stream(composedPath)
+                .anyMatch(element -> element.getNodeType() == Node.ELEMENT_NODE
+                        && Objects.equals(element.getTagName(), "SLOT")
+                        && element.getAttribute("name")
+                                .startsWith("custom-editor-"));
+    }
+
     private void onSheetDoubleClick(Event event) {
         Element target = SheetWidget.getEventTarget(event);
         String targetClassName = target.getAttribute("class");
@@ -144,7 +162,7 @@ public class SheetEventListener implements EventListener {
 
     private void onKeyDown(Event event) {
         if (!widget.isEditingCell()) {
-            if (!sheetFocused) {
+            if (!sheetFocused || isInsideCustomEditor(event)) {
                 return; // focus in input or custom editor
             }
             final int keyCode = event.getKeyCode();

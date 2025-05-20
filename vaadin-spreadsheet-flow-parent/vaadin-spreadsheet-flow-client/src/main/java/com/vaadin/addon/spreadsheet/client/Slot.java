@@ -14,7 +14,11 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class Slot extends Widget {
 
+    private final Element assignedElement;
+
     public Slot(String name, Element assignedElement, Element host) {
+        this.assignedElement = assignedElement;
+
         // Create the slot element with the given name
         var slotElement = Document.get().createElement("slot");
         slotElement.setAttribute("name", name);
@@ -31,5 +35,9 @@ public class Slot extends Widget {
                 assignedElement.removeFromParent();
             }
         });
+    }
+
+    public Element getAssignedElement() {
+        return assignedElement;
     }
 }
