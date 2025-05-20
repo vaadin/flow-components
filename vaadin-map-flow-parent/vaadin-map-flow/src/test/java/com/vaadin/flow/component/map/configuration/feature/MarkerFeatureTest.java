@@ -72,7 +72,7 @@ public class MarkerFeatureTest {
         MarkerFeature markerFeature = new MarkerFeature(coordinate, icon);
 
         Assert.assertNotNull(markerFeature.getIcon());
-        Assert.assertEquals(markerFeature.getIcon(), markerFeature.getIcon());
+        Assert.assertEquals(icon, markerFeature.getIcon());
     }
 
     @Test

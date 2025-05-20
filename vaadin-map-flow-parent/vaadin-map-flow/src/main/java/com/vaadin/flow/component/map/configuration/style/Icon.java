@@ -102,8 +102,8 @@ public class Icon extends ImageStyle {
 
     /**
      * The source URL from which the icon's image should be loaded. Either this,
-     * {@link #getImg()} must be specified in the options for the icon, and only
-     * one of the two options must be provided.
+     * or {@link #getImg()} must be specified in the options for the icon, and
+     * only one of the two options must be provided.
      * <p>
      * This value can not be changed after constructing an instance, it can only
      * be set initially by passing an options object to the constructor.
