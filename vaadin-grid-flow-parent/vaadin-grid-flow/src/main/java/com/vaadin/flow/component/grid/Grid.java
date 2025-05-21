@@ -215,8 +215,6 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha18")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/grid", version = "24.8.0-alpha18")
 @NpmPackage(value = "@vaadin/tooltip", version = "24.8.0-alpha18")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
@@ -443,8 +441,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha18")
-    @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
         private final String columnInternalId; // for internal implementation

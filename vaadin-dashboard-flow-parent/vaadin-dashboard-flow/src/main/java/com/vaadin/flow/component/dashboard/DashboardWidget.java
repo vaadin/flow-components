@@ -27,8 +27,6 @@ import com.vaadin.flow.component.shared.SlotUtils;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dashboard-widget")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha18")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard-widget.js")
 @NpmPackage(value = "@vaadin/dashboard", version = "24.8.0-alpha18")
 public class DashboardWidget extends Component {
