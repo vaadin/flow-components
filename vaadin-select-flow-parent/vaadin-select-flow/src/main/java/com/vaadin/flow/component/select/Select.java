@@ -293,7 +293,7 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
      * even though that is not visible from the component level.
      */
     @Tag("vaadin-select-list-box")
-            private class InternalListBox extends Component
+    private class InternalListBox extends Component
             implements HasItemComponents<T> {
 
         @Override

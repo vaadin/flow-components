@@ -441,7 +441,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-            public static class Column<T> extends AbstractColumn<Column<T>> {
+    public static class Column<T> extends AbstractColumn<Column<T>> {
 
         private final String columnInternalId; // for internal implementation
                                                // only

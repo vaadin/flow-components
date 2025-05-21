@@ -194,7 +194,7 @@ public class GridPro<E> extends Grid<E> {
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-pro-edit-column")
-            public static class EditColumn<T> extends Column<T> {
+    public static class EditColumn<T> extends Column<T> {
 
         private ItemUpdater<T, String> itemUpdater;
         private HasValueAndElement editorField;

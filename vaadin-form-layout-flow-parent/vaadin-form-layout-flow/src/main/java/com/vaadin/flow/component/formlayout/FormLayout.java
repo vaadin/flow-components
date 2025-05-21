@@ -301,7 +301,7 @@ public class FormLayout extends Component
      * @author Vaadin Ltd
      */
     @Tag("vaadin-form-item")
-            @NpmPackage(value = "@vaadin/form-layout", version = "24.8.0-alpha18")
+    @NpmPackage(value = "@vaadin/form-layout", version = "24.8.0-alpha18")
     @JsModule("@vaadin/form-layout/src/vaadin-form-item.js")
     public static class FormItem extends Component
             implements HasComponents, HasStyle, ClickNotifier<FormItem> {
@@ -407,7 +407,7 @@ public class FormLayout extends Component
      * @author Vaadin Ltd
      */
     @Tag("vaadin-form-row")
-            @NpmPackage(value = "@vaadin/form-layout", version = "24.8.0-alpha18")
+    @NpmPackage(value = "@vaadin/form-layout", version = "24.8.0-alpha18")
     @JsModule("@vaadin/form-layout/src/vaadin-form-row.js")
     public static class FormRow extends Component implements HasComponents {
 
