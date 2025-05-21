@@ -65,10 +65,6 @@ class DateTimePickerDatePicker
     boolean isPickerInputUnparsable() {
         return super.isInputUnparsable();
     }
-
-    boolean isPickerInputValuePresent() {
-        return super.isInputValuePresent();
-    }
 }
 
 @Tag("vaadin-time-picker")
@@ -81,10 +77,6 @@ class DateTimePickerTimePicker
 
     boolean isPickerInputUnparsable() {
         return super.isInputUnparsable();
-    }
-
-    boolean isPickerInputValuePresent() {
-        return super.isInputValuePresent();
     }
 }
 
@@ -382,7 +374,7 @@ public class DateTimePicker
             return;
         }
         if (isEmpty() && timePicker.isEmpty() && datePicker.isEmpty()
-                && !isInputValuePresent()) {
+                && !isInputUnparsable()) {
             validate(true);
         }
     }
@@ -1001,11 +993,6 @@ public class DateTimePicker
     private String getI18nErrorMessage(
             Function<DateTimePickerI18n, String> getter) {
         return Optional.ofNullable(i18n).map(getter).orElse("");
-    }
-
-    private boolean isInputValuePresent() {
-        return datePicker.isPickerInputValuePresent()
-                || timePicker.isPickerInputValuePresent();
     }
 
     /**
