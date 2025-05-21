@@ -171,7 +171,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         selectCell("A2");
         getSpreadsheet().sendKeys(Keys.TAB);
         getSpreadsheet().sendKeys(Keys.F2);
-        Assert.assertTrue(getEditorElement("input").isFocused());
+        Assert.assertTrue(isFocused(getEditorElement("input")));
     }
 
     @Test
@@ -179,7 +179,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         selectCell("A2");
         getSpreadsheet().sendKeys(Keys.TAB);
         getSpreadsheet().sendKeys(Keys.ENTER);
-        Assert.assertTrue(getEditorElement("input").isFocused());
+        Assert.assertTrue(isFocused(getEditorElement("input")));
     }
 
     @Test
@@ -188,7 +188,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         getSpreadsheet().sendKeys(Keys.TAB);
         getSpreadsheet().sendKeys("a");
         var input = getEditorElement("input");
-        Assert.assertTrue(input.isFocused());
+        Assert.assertTrue(isFocused(input));
         Assert.assertEquals("a", input.getDomProperty("value"));
     }
 
@@ -199,7 +199,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         input.focus();
         input.sendKeys(Keys.ESCAPE);
         Assert.assertTrue(getSpreadsheet().getCellAt("B2").isCellSelected());
-        Assert.assertFalse(input.isFocused());
+        Assert.assertFalse(isFocused(input));
     }
 
     private void toggleCheckboxValue(String cellAddress) {
@@ -220,5 +220,10 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     private TestBenchElement getEditorElement(String elementSelector) {
         return getSpreadsheet().findElement(By.cssSelector(elementSelector));
+    }
+
+    private boolean isFocused(TestBenchElement element) {
+        return element.getWrappedElement()
+                .equals(element.getDriver().switchTo().activeElement());
     }
 }
