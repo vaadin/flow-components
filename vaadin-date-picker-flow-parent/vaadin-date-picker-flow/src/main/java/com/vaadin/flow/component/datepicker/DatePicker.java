@@ -674,7 +674,7 @@ public class DatePicker
      * @deprecated Since v24.8
      */
     @Deprecated(since = "24.8")
-    protected final boolean isInputValuePresent() {
+    protected boolean isInputValuePresent() {
         return !getInputElementValue().isEmpty();
     }
 
