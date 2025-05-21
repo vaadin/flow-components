@@ -148,7 +148,7 @@ public class TimePicker
     private Validator<LocalTime> defaultValidator = (value, context) -> {
         boolean fromComponent = context == null;
 
-        if (unparsableValue != null) {
+        if (isInputUnparsable()) {
             return ValidationResult.error(getI18nErrorMessage(
                     TimePickerI18n::getBadInputErrorMessage));
         }
@@ -364,7 +364,7 @@ public class TimePicker
     @Override
     public void setValue(LocalTime value) {
         LocalTime oldValue = getValue();
-        if (oldValue == null && value == null && unparsableValue != null) {
+        if (oldValue == null && value == null && isInputUnparsable()) {
             // When the value is programmatically cleared while the field
             // contains an unparsable input, ValueChangeEvent isn't fired,
             // so we need to call setModelValue manually to clear the bad
@@ -475,13 +475,29 @@ public class TimePicker
     }
 
     /**
+     * For internal use only.
+     * <p>
      * Returns whether the input element has a value or not.
      *
      * @return <code>true</code> if the input element's value is populated,
      *         <code>false</code> otherwise
+     * @deprecated Since v24.8
      */
+    @Deprecated(since = "24.8")
     protected boolean isInputValuePresent() {
         return !getInputElementValue().isEmpty();
+    }
+
+    /**
+     * For internal use only.
+     * <p>
+     * Returns whether the input value is unparsable.
+     *
+     * @return <code>true</code> if the input element's value is populated and
+     *         unparsable, <code>false</code> otherwise
+     */
+    protected final boolean isInputUnparsable() {
+        return unparsableValue != null;
     }
 
     /**
