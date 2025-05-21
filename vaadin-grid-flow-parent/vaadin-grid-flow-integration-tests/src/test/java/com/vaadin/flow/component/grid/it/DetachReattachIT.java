@@ -72,6 +72,8 @@ public class DetachReattachIT extends AbstractComponentIT {
                 grid.findElement(By.className("item-details")).isDisplayed());
 
         grid.getCell(1, 0).click();
+        waitUntil(e -> $(GridElement.class).first()
+                .findElements(By.className("item-details")).isEmpty());
 
         Assert.assertEquals("Item details are hidden on subsequent cell click.",
                 0, grid.findElements(By.className("item-details")).size());
