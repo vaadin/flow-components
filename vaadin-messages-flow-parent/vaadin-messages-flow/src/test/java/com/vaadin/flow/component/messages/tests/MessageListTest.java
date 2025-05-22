@@ -186,6 +186,18 @@ public class MessageListTest {
         Assert.assertTrue(messageList.isMarkdown());
     }
 
+    @Test
+    public void setAnnounceMessages_isAnnounceMessages() {
+        Assert.assertFalse(messageList.isAnnounceMessages());
+        Assert.assertFalse(messageList.getElement()
+                .getProperty("announceMessages", false));
+
+        messageList.setAnnounceMessages(true);
+        Assert.assertTrue(messageList.isAnnounceMessages());
+        Assert.assertTrue(messageList.getElement()
+                .getProperty("announceMessages", false));
+    }
+
     private String getSerializedThemeProperty(MessageListItem item) {
         JsonValue theme = JsonUtils.beanToJson(item).get("theme");
         if (theme.getType() == JsonType.NULL) {
