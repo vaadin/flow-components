@@ -56,7 +56,7 @@ import elemental.json.JsonObject;
  */
 @Tag("vaadin-avatar")
 @JsModule("@vaadin/avatar/src/vaadin-avatar.js")
-@NpmPackage(value = "@vaadin/avatar", version = "24.8.0-alpha18")
+@NpmPackage(value = "@vaadin/avatar", version = "25.0.0-alpha1")
 public class Avatar extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarVariant> {
 

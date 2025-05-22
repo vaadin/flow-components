@@ -232,7 +232,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         inputElement.sendKeys(Keys.ESCAPE);
 
         Assert.assertTrue(getSpreadsheet().getCellAt("B2").isCellSelected());
-        Assert.assertFalse(inputElement.isFocused());
+        waitUntil(driver -> !input.isFocused());
     }
 
     @Test
@@ -370,6 +370,8 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         input.click();
         input.sendKeys(value);
         input.sendKeys(Keys.ENTER);
+        input.sendKeys(Keys.ESCAPE);
+        waitUntil(driver -> !input.isFocused());
     }
 
     private TestBenchElement getEditorElement(String elementSelector) {
