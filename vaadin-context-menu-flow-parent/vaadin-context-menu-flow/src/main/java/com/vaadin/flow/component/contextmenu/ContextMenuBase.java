@@ -347,23 +347,24 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     @Deprecated(since = "24.8")
     @Override
     public void addComponentAtIndex(int index, Component component) {
-        addItemAtIndex(index, component);
+        getMenuManager().addComponentAtIndex(index, component);
     }
 
     /**
-     * Adds the given component into this context menu at the given index.
+     * Adds the given component into this context menu at the given index as an
+     * item.
      * <p>
      * The added elements in the DOM will not be children of the
      * {@code <vaadin-context-menu>} element, but will be inserted into an
      * overlay that is attached into the {@code <body>}.
      *
      * @param index
-     *            the index, where the component will be added
+     *            the index, where the item will be added
      * @param component
      *            the component to add
      */
     public void addItemAtIndex(int index, Component component) {
-        getMenuManager().addComponentAtIndex(index, component);
+        getMenuManager().addItemAtIndex(index, component);
     }
 
     /**

@@ -221,7 +221,10 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      *
      * @see #add(Component...)
      * @see #remove(Component...)
+     * @deprecated Since 24.8, use {@link #addItemAtIndex(int, Component)} or
+     *             {@link #addSeparatorAtIndex(int)} instead
      */
+    @Deprecated(since = "24.8")
     public void addComponentAtIndex(int index, Component component) {
         if (parentMenuItem != null && parentMenuItem.isCheckable()) {
             throw new IllegalStateException(
@@ -234,6 +237,37 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
         }
         children.add(index, component);
         updateChildren();
+    }
+
+    /**
+     * Inserts component as a menu item to the (sub)menu using the
+     * {@code index}.
+     *
+     * @param index
+     *            index to insert, not negative
+     * @param component
+     *            the component for the menu item
+     *
+     * @see #addItem(Component)
+     * @see #remove(Component...)
+     *
+     * @return a new menu item
+     */
+    public I addItemAtIndex(int index, Component component) {
+        if (parentMenuItem != null && parentMenuItem.isCheckable()) {
+            throw new IllegalStateException(
+                    "A checkable item cannot have a sub menu");
+        }
+        Objects.requireNonNull(component, "Component should not be null");
+        if (index < 0) {
+            throw new IllegalArgumentException(
+                    "Cannot add a component with a negative index");
+        }
+        var menuItem = itemGenerator.apply(menu, contentReset);
+        children.add(index, menuItem);
+        updateChildren();
+        menuItem.add(component);
+        return menuItem;
     }
 
     /**

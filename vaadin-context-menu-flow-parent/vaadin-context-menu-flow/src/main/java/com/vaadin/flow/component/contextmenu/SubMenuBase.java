@@ -132,9 +132,29 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
      * @param component
      *            the component to add
      * @see #add(Component...)
+     * @deprecated Since 24.8, use {@link #addItemAtIndex(int, Component)}
+     *             instead
      */
+    @Deprecated(since = "24.8")
     public void addComponentAtIndex(int index, Component component) {
         getMenuManager().addComponentAtIndex(index, component);
+    }
+
+    /**
+     * Adds the given component into the sub menu overlay at the given index as
+     * an item.
+     * <p>
+     * The added elements will be inserted into an overlay that is attached into
+     * the {@code <body>}.
+     *
+     * @param index
+     *            the index, where the item will be added
+     * @param component
+     *            the component to add
+     * @see #addItem(Component)
+     */
+    public void addItemAtIndex(int index, Component component) {
+        getMenuManager().addItemAtIndex(index, component);
     }
 
     /**
