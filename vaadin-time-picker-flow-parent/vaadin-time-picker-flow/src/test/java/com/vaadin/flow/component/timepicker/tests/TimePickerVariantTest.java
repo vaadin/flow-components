@@ -71,14 +71,6 @@ public class TimePickerVariantTest {
     }
 
     @Test
-    public void addMaterialAlwaysFloatLabel_themeAttributeUpdated() {
-        assertThemeAttribute(null);
-        timePicker.addThemeVariants(
-                TimePickerVariant.MATERIAL_ALWAYS_FLOAT_LABEL);
-        assertThemeAttribute("always-float-label");
-    }
-
-    @Test
     public void addAndRemoveMultipleVariants_themeAttributeUpdated() {
         assertThemeAttribute(null);
         timePicker.addThemeVariants(TimePickerVariant.LUMO_SMALL);

@@ -21,14 +21,7 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for the {@link Popover} component.
  */
 public enum PopoverVariant implements ThemeVariant {
-    ARROW("arrow"),
-    LUMO_NO_PADDING("no-padding"),
-    /**
-     * @deprecated Since 24.7, the Material theme is deprecated and will be
-     *             removed in Vaadin 25.
-     */
-    @Deprecated
-    MATERIAL_NO_PADDING("no-padding");
+    ARROW("arrow"), LUMO_NO_PADDING("no-padding");
 
     private final String variant;
 
