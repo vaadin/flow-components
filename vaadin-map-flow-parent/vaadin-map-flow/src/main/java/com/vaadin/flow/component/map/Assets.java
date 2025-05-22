@@ -11,6 +11,7 @@ package com.vaadin.flow.component.map;
 import java.io.Serializable;
 
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 /**
  * Defines the default assets that the Map component provides
@@ -25,26 +26,39 @@ public class Assets {
     public static class Asset implements Serializable {
         private final String fileName;
         private final StreamResource resource;
+        private final DownloadHandler handler;
 
         private Asset(String fileName, String resourcePath) {
-            StreamResource resource = new StreamResource(fileName,
-                    () -> getClass().getResourceAsStream(resourcePath));
-
             this.fileName = fileName;
-            this.resource = resource;
+            this.resource = null;
+            this.handler = DownloadHandler.forClassResource(getClass(),
+                    resourcePath, fileName);
         }
 
+        @Deprecated(since = "24.8", forRemoval = true)
         private Asset(String fileName, StreamResource resource) {
             this.fileName = fileName;
             this.resource = resource;
+            this.handler = null;
+        }
+
+        private Asset(String fileName, DownloadHandler handler) {
+            this.fileName = fileName;
+            this.resource = null;
+            this.handler = handler;
         }
 
         public String getFileName() {
             return fileName;
         }
 
+        @Deprecated(since = "24.8", forRemoval = true)
         public StreamResource getResource() {
             return resource;
+        }
+
+        public DownloadHandler getHandler() {
+            return handler;
         }
     }
 

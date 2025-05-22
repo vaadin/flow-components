@@ -48,8 +48,6 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha18")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/crud", version = "24.8.0-alpha18")
 @JsModule("@vaadin/crud/src/vaadin-crud.js")
 @JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")

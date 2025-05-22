@@ -16,6 +16,8 @@ import org.apache.poi.ss.usermodel.ClientAnchor;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo.Type;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
 
 /**
  * SheetImageWrapper is an utility class of the Spreadsheet component. In
@@ -29,6 +31,7 @@ public class SheetImageWrapper extends SheetOverlayWrapper
         implements Serializable {
 
     private StreamResource resource;
+    private DownloadHandler handler;
 
     private final byte[] data;
     private final String MIMEType;
@@ -44,7 +47,9 @@ public class SheetImageWrapper extends SheetOverlayWrapper
      * Gets the resource containing this image
      *
      * @return Image resource
+     * @deprecated use {@link #getResourceHandler()} instead
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     @Override
     public StreamResource getResource() {
         if (resource == null) {
@@ -54,6 +59,23 @@ public class SheetImageWrapper extends SheetOverlayWrapper
         }
 
         return resource;
+    }
+
+    /**
+     * Gets the resource containing this image
+     *
+     * @return Image resource
+     */
+    @Override
+    public DownloadHandler getResourceHandler() {
+        if (handler == null) {
+            handler = DownloadHandler
+                    .fromInputStream(downloadEvent -> new DownloadResponse(
+                            new ByteArrayInputStream(data), "download",
+                            MIMEType, data.length));
+        }
+
+        return handler;
     }
 
     @Override

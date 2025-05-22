@@ -127,8 +127,6 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha18")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @NpmPackage(value = "@vaadin/date-picker", version = "24.8.0-alpha18")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
@@ -169,9 +167,9 @@ public class DatePicker
     private Validator<LocalDate> defaultValidator = (value, context) -> {
         boolean fromComponent = context == null;
 
-        if (unparsableValue != null && fallbackParserErrorMessage != null) {
+        if (isInputUnparsable() && fallbackParserErrorMessage != null) {
             return ValidationResult.error(fallbackParserErrorMessage);
-        } else if (unparsableValue != null) {
+        } else if (isInputUnparsable()) {
             return ValidationResult.error(getI18nErrorMessage(
                     DatePickerI18n::getBadInputErrorMessage));
         }
@@ -667,13 +665,29 @@ public class DatePicker
     }
 
     /**
+     * For internal use only.
+     * <p>
      * Returns whether the input element has a value or not.
      *
      * @return <code>true</code> if the input element's value is populated,
      *         <code>false</code> otherwise
+     * @deprecated Since v24.8
      */
+    @Deprecated(since = "24.8")
     protected boolean isInputValuePresent() {
         return !getInputElementValue().isEmpty();
+    }
+
+    /**
+     * For internal use only.
+     * <p>
+     * Returns whether the input value is unparsable.
+     *
+     * @return <code>true</code> if the input element's value is populated and
+     *         unparsable, <code>false</code> otherwise
+     */
+    protected final boolean isInputUnparsable() {
+        return unparsableValue != null;
     }
 
     /**
@@ -762,7 +776,7 @@ public class DatePicker
     @Override
     public void setValue(LocalDate value) {
         LocalDate oldValue = getValue();
-        if (oldValue == null && value == null && unparsableValue != null) {
+        if (oldValue == null && value == null && isInputUnparsable()) {
             // When the value is programmatically cleared while the field
             // contains an unparsable input, ValueChangeEvent isn't fired,
             // so we need to call setModelValue manually to clear the bad
@@ -797,7 +811,7 @@ public class DatePicker
         try {
             isFallbackParserRunning = true;
 
-            if (fallbackParser != null && unparsableValue != null) {
+            if (fallbackParser != null && isInputUnparsable()) {
                 Result<LocalDate> result = runFallbackParser(unparsableValue);
                 if (result.isError()) {
                     fallbackParserErrorMessage = result.getMessage()
