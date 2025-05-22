@@ -59,7 +59,7 @@ import elemental.json.JsonType;
 @Tag("vaadin-dashboard")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "24.8.0-alpha18")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.0.0-alpha1")
 public class Dashboard extends Component implements HasWidgets, HasSize {
 
     private static final ThreadLocal<Boolean> suppressClientUpdates = ThreadLocal
