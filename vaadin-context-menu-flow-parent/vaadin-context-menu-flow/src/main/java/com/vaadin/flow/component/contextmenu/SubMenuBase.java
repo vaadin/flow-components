@@ -96,7 +96,9 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
      *            the components to add
      * @see HasMenuItems#addItem(String, ComponentEventListener)
      * @see HasMenuItems#addItem(Component, ComponentEventListener)
+     * @deprecated Since 24.8, use {@link #addItem(Component)} instead
      */
+    @Deprecated(since = "24.8")
     public void add(Component... components) {
         getMenuManager().add(components);
     }

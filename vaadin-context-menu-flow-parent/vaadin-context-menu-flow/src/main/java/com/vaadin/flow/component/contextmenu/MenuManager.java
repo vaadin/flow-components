@@ -156,7 +156,9 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      *            components to add
      * @see #remove(Component...)
      * @see #addComponentAtIndex(int, Component)
+     * @deprecated Since 24.8, use {@link #addItem(Component)} instead
      */
+    @Deprecated(since = "24.8")
     public void add(Component... components) {
         if (parentMenuItem != null && parentMenuItem.isCheckable()) {
             throw new IllegalStateException(
