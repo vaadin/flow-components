@@ -74,7 +74,8 @@ public class SheetImageWrapper extends SheetOverlayWrapper
             handler = DownloadHandler
                     .fromInputStream(downloadEvent -> new DownloadResponse(
                             new ByteArrayInputStream(data), "download",
-                            MIMEType, data.length)).inline();
+                            MIMEType, data.length))
+                    .inline();
         }
 
         return handler;
