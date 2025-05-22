@@ -32,6 +32,7 @@ public class BinderValidationPage
 
     public static final String REQUIRED_ERROR_MESSAGE = "Field is required";
     public static final String BAD_INPUT_ERROR_MESSAGE = "Value has incorrect format";
+    public static final String INCOMPLETE_INPUT_ERROR_MESSAGE = "Value is incomplete";
     public static final String MIN_ERROR_MESSAGE = "Value is too small";
     public static final String MAX_ERROR_MESSAGE = "Value is too big";
     public static final String UNEXPECTED_VALUE_ERROR_MESSAGE = "Value does not match the expected value";
@@ -63,6 +64,7 @@ public class BinderValidationPage
 
         testField.setI18n(new DateTimePicker.DateTimePickerI18n()
                 .setBadInputErrorMessage(BAD_INPUT_ERROR_MESSAGE)
+                .setIncompleteInputErrorMessage(INCOMPLETE_INPUT_ERROR_MESSAGE)
                 .setMinErrorMessage(MIN_ERROR_MESSAGE)
                 .setMaxErrorMessage(MAX_ERROR_MESSAGE));
 
@@ -88,6 +90,12 @@ public class BinderValidationPage
     }
 
     protected DateTimePicker createTestField() {
-        return new DateTimePicker();
+        return new DateTimePicker() {
+            @Override
+            protected void validate() {
+                super.validate();
+                incrementServerValidationCounter();
+            }
+        };
     }
 }
