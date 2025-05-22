@@ -99,6 +99,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.pro.licensechecker.LicenseChecker;
@@ -3591,6 +3592,11 @@ public class Spreadsheet extends Component
             resources.remove(key);
             getElement().removeAttribute("resource-" + key);
         } else {
+            if (resource instanceof AbstractDownloadHandler<?> handler) {
+                // change disposition to inline in pre-defined handlers,
+                // where it is 'attachment' by default
+                handler.inline();
+            }
             resources.put(key, resource.toString());
             getElement().setProperty("resources",
                     Serializer.serialize(new ArrayList<>(resources.keySet())));
