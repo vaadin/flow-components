@@ -31,6 +31,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -60,7 +61,8 @@ import elemental.json.JsonType;
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
 @NpmPackage(value = "@vaadin/dashboard", version = "25.0.0-alpha1")
-public class Dashboard extends Component implements HasWidgets, HasSize {
+public class Dashboard extends Component
+        implements HasWidgets, HasSize, HasThemeVariant<DashboardVariant> {
 
     private static final ThreadLocal<Boolean> suppressClientUpdates = ThreadLocal
             .withInitial(() -> false);
