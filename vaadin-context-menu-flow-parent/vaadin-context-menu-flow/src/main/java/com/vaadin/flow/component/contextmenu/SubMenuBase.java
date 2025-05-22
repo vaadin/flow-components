@@ -172,6 +172,13 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
     }
 
     /**
+     * Adds a separator between items.
+     */
+    public void addSeparator() {
+        getMenuManager().addSeparator();
+    }
+
+    /**
      * Gets a (sub) menu manager.
      *
      * @return

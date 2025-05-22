@@ -367,6 +367,13 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     }
 
     /**
+     * Adds a separator between items.
+     */
+    public void addSeparator() {
+        getMenuManager().addSeparator();
+    }
+
+    /**
      * Gets the child components of this component. This includes components
      * added with {@link #add(Component...)} and the {@link MenuItem} components
      * created with {@link #addItem(String)} and its overload methods. This
