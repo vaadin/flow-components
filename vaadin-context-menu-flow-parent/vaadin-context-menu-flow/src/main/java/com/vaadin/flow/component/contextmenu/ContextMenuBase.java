@@ -374,6 +374,16 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     }
 
     /**
+     * Adds a separator between items using the {@code index}.
+     *
+     * @param index
+     *            index to insert, not negative
+     */
+    public void addSeparatorAtIndex(int index) {
+        getMenuManager().addSeparatorAtIndex(index);
+    }
+
+    /**
      * Gets the child components of this component. This includes components
      * added with {@link #add(Component...)} and the {@link MenuItem} components
      * created with {@link #addItem(String)} and its overload methods. This

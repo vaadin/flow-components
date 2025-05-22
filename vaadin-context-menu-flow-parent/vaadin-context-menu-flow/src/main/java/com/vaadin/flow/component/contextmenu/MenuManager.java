@@ -266,6 +266,23 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Adds a separator between items.
+     */
+    public void addSeparator() {
+        add(new Hr());
+    }
+
+    /**
+     * Adds a separator between items using the {@code index}.
+     *
+     * @param index
+     *            index to insert, not negative
+     */
+    public void addSeparatorAtIndex(int index) {
+        addComponentAtIndex(index, new Hr());
+    }
+
     private void updateChildren() {
         contentReset.run();
     }

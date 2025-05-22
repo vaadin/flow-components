@@ -179,6 +179,16 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
     }
 
     /**
+     * Adds a separator between items using the {@code index}.
+     *
+     * @param index
+     *            index to insert, not negative
+     */
+    public void addSeparatorAtIndex(int index) {
+        getMenuManager().addSeparatorAtIndex(index);
+    }
+
+    /**
      * Gets a (sub) menu manager.
      *
      * @return
