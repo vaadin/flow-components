@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
 /**
@@ -239,6 +240,11 @@ public class Icon extends ImageStyle {
          * @see Icon#getImgHandler()
          */
         public void setImg(DownloadHandler imgHandler) {
+            if (imgHandler instanceof AbstractDownloadHandler<?> handler) {
+                // change disposition to inline in pre-defined handlers,
+                // where it is 'attachment' by default
+                handler.inline();
+            }
             this.imgHandler = imgHandler;
         }
 
