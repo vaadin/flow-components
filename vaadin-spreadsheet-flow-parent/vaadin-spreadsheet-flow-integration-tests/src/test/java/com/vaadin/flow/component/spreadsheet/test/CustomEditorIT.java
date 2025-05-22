@@ -199,7 +199,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         input.focus();
         input.sendKeys(Keys.ESCAPE);
         Assert.assertTrue(getSpreadsheet().getCellAt("B2").isCellSelected());
-        Assert.assertFalse(isFocused(input));
+        waitUntil(driver -> !isFocused(input));
     }
 
     private void toggleCheckboxValue(String cellAddress) {
@@ -216,6 +216,8 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         input.click();
         input.sendKeys(value);
         input.sendKeys(Keys.ENTER);
+        input.sendKeys(Keys.ESCAPE);
+        waitUntil(driver -> !isFocused(input));
     }
 
     private TestBenchElement getEditorElement(String elementSelector) {
