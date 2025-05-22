@@ -28,6 +28,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
 import elemental.json.JsonObject;
@@ -269,7 +270,12 @@ public class Avatar extends Component
      * Sets the image for the avatar.
      * <p>
      * Setting the image as a resource with this method resets the image URL
-     * that was set with {@link Avatar#setImage(String)}
+     * that was set with {@link Avatar#setImage(String)}.
+     * <p>
+     * Sets the <code>Content-Disposition</code> header to <code>inline</code>
+     * for pre-defined download handlers, created by factory methods in
+     * {@link DownloadHandler}, as well as for other
+     * {@link AbstractDownloadHandler} implementations.
      *
      * @see Avatar#setImage(String)
      * @param downloadHandler
@@ -280,6 +286,11 @@ public class Avatar extends Component
             imageResource = null;
             getElement().removeAttribute("img");
             return;
+        }
+        if (downloadHandler instanceof AbstractDownloadHandler<?> handler) {
+            // change disposition to inline in pre-defined handlers,
+            // where it is 'attachment' by default
+            handler.inline();
         }
         imageResource = new StreamResourceRegistry.ElementStreamResource(
                 downloadHandler, getElement());
