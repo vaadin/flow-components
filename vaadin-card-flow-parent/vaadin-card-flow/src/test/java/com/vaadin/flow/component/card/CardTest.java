@@ -44,7 +44,6 @@ public class CardTest {
         var ui = new UI();
         UI.setCurrent(ui);
         card = new Card();
-        card.setFeatureFlagEnabled();
         ui.add(card);
     }
 
