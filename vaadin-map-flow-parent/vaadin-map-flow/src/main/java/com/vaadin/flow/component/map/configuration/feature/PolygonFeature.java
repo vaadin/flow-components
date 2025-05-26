@@ -30,15 +30,6 @@ import com.vaadin.flow.component.map.configuration.style.Style;
  * for representation.
  */
 public class PolygonFeature extends Feature {
-
-    private static final Style DEFAULT_STYLE;
-    static {
-        final Style style = new Style();
-        style.setStroke(new Stroke("hsl(214, 100%, 48%)", 2));
-        style.setFill(new Fill("hsla(214, 100%, 60%, 0.13)"));
-        DEFAULT_STYLE = style;
-    }
-
     /**
      * Creates a new polygon feature with the default style.
      */
@@ -62,8 +53,7 @@ public class PolygonFeature extends Feature {
      */
     public PolygonFeature(List<Coordinate> coordinates) {
         setGeometry(new Polygon(coordinates));
-        // Let the polygon be visible on the map
-        setStyle(DEFAULT_STYLE);
+        setStyle(createDefaultStyle());
     }
 
     /**
@@ -145,5 +135,12 @@ public class PolygonFeature extends Feature {
             throw new IllegalArgumentException("Geometry must be a polygon");
         }
         super.setGeometry(geometry);
+    }
+
+    private static Style createDefaultStyle() {
+        Style style = new Style();
+        style.setStroke(new Stroke("hsl(214, 100%, 48%)", 2));
+        style.setFill(new Fill("hsla(214, 100%, 60%, 0.13)"));
+        return style;
     }
 }

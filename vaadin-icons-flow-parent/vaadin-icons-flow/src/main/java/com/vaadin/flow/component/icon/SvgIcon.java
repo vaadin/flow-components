@@ -18,6 +18,7 @@ package com.vaadin.flow.component.icon;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
 /**
@@ -91,7 +92,12 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
     }
 
     /**
-     * Creates an SVG icon with the given download handler resource
+     * Creates an SVG icon with the given download handler resource.
+     * <p>
+     * Sets the <code>Content-Disposition</code> header to <code>inline</code>
+     * for pre-defined download handlers, created by factory methods in
+     * {@link DownloadHandler}, as well as for other
+     * {@link AbstractDownloadHandler} implementations.
      *
      * @param src
      *            the download handler resource
@@ -102,7 +108,12 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
     }
 
     /**
-     * Creates an SVG icon with the given download handler resource
+     * Creates an SVG icon with the given download handler resource.
+     * <p>
+     * Sets the <code>Content-Disposition</code> header to <code>inline</code>
+     * for pre-defined download handlers, created by factory methods in
+     * {@link DownloadHandler}, as well as for other
+     * {@link AbstractDownloadHandler} implementations.
      *
      * @param src
      *            the download handler resource
@@ -190,11 +201,21 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
     /**
      * Defines the source of the icon from the given {@link DownloadHandler} The
      * resource must contain a valid SVG element.
+     * <p>
+     * Sets the <code>Content-Disposition</code> header to <code>inline</code>
+     * for pre-defined download handlers, created by factory methods in
+     * {@link DownloadHandler}, as well as for other
+     * {@link AbstractDownloadHandler} implementations.
      *
      * @param src
      *            the source value, not null
      */
     public void setSrc(DownloadHandler src) {
+        if (src instanceof AbstractDownloadHandler<?> handler) {
+            // change disposition to inline in pre-defined handlers,
+            // where it is 'attachment' by default
+            handler.inline();
+        }
         getElement().setAttribute("src",
                 new StreamResourceRegistry.ElementStreamResource(src,
                         getElement()));
@@ -202,6 +223,11 @@ public class SvgIcon extends AbstractIcon<SvgIcon> {
 
     /**
      * Defines the src and the symbol to be used in the icon.
+     * <p>
+     * Sets the <code>Content-Disposition</code> header to <code>inline</code>
+     * for pre-defined download handlers, created by factory methods in
+     * {@link DownloadHandler}, as well as for other
+     * {@link AbstractDownloadHandler} implementations.
      *
      * @param src
      *            the source of the icon sprite file, not null

@@ -47,6 +47,7 @@ import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -68,7 +69,7 @@ import elemental.json.JsonObject;
  */
 @Tag("vaadin-avatar-group")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "24.8.0-alpha18")
+@NpmPackage(value = "@vaadin/avatar-group", version = "25.0.0-alpha1")
 public class AvatarGroup extends Component implements HasOverlayClassName,
         HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
@@ -223,7 +224,12 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
          * Sets the image for the avatar.
          * <p>
          * Setting the image as a resource with this method resets the image URL
-         * that was set with {@link AvatarGroupItem#setImage(String)}
+         * that was set with {@link AvatarGroupItem#setImage(String)}.
+         * <p>
+         * Sets the <code>Content-Disposition</code> header to
+         * <code>inline</code> for pre-defined download handlers, created by
+         * factory methods in {@link DownloadHandler}, as well as for other
+         * {@link AbstractDownloadHandler} implementations.
          *
          * @see AvatarGroupItem#setImage(String)
          * @param downloadHandler
@@ -234,6 +240,11 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
             if (downloadHandler == null) {
                 unsetResource();
                 return;
+            }
+            if (downloadHandler instanceof AbstractDownloadHandler<?> handler) {
+                // change disposition to inline in pre-defined handlers,
+                // where it is 'attachment' by default
+                handler.inline();
             }
 
             setImageResource(new StreamResourceRegistry.ElementStreamResource(
