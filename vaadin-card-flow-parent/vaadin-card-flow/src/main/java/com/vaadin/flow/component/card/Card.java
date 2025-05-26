@@ -24,14 +24,11 @@ import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
@@ -61,8 +58,6 @@ public class Card extends Component implements HasSize,
     private static final String TITLE_HEADING_LEVEL_PROPERTY = "titleHeadingLevel";
 
     private Element contentRoot;
-
-    private boolean featureFlagEnabled;
 
     /**
      * Sets the component used as the card's media. The media slot is typically
@@ -390,47 +385,6 @@ public class Card extends Component implements HasSize,
      */
     public Optional<String> getAriaRole() {
         return Optional.ofNullable(getElement().getAttribute("role"));
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        checkFeatureFlag();
-    }
-
-    /**
-     * Gets the feature flags for the current UI.
-     * <p>
-     * Not private in order to support mocking
-     *
-     * @return the current set of feature flags
-     */
-    FeatureFlags getFeatureFlags() {
-        return FeatureFlags
-                .get(UI.getCurrent().getSession().getService().getContext());
-    }
-
-    /**
-     * Only for test use.
-     */
-    void setFeatureFlagEnabled() {
-        featureFlagEnabled = true;
-    }
-
-    /**
-     * Checks whether the Card component feature flag is active. Succeeds if the
-     * flag is enabled, and throws otherwise.
-     *
-     * @throws ExperimentalFeatureException
-     *             when the {@link FeatureFlags#CARD_COMPONENT} feature is not
-     *             enabled
-     */
-    private void checkFeatureFlag() {
-        boolean enabled = featureFlagEnabled
-                || getFeatureFlags().isEnabled(FeatureFlags.CARD_COMPONENT);
-        if (!enabled) {
-            throw new ExperimentalFeatureException();
-        }
     }
 
     private void initContentRoot() {
