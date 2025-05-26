@@ -111,7 +111,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-select")
-@NpmPackage(value = "@vaadin/select", version = "25.0.0-alpha1")
+@NpmPackage(value = "@vaadin/select", version = "25.0.0-alpha3")
 @JsModule("@vaadin/select/src/vaadin-select.js")
 @JsModule("./selectConnector.js")
 public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
