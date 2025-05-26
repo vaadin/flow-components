@@ -293,4 +293,27 @@ public class MessageList extends Component
     public boolean isMarkdown() {
         return getElement().getProperty("markdown", false);
     }
+
+    /**
+     * When set to {@code true}, new messages are announced to assistive
+     * technologies using ARIA live regions. By default, this is set to
+     * {@code false}.
+     *
+     * @param announceMessages
+     *            {@code true} if new messages should be announced to assistive
+     *            technologies.
+     */
+    public void setAnnounceMessages(boolean announceMessages) {
+        getElement().setProperty("announceMessages", announceMessages);
+    }
+
+    /**
+     * Returns whether new messages are announced to assistive technologies.
+     *
+     * @return {@code true} if new messages are announced to assistive
+     *         technologies.
+     */
+    public boolean isAnnounceMessages() {
+        return getElement().getProperty("announceMessages", false);
+    }
 }
