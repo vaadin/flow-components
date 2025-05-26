@@ -110,14 +110,10 @@ public class DashboardTestBase {
     }
 
     protected DashboardWidget getNewWidget() {
-        var widget = new DashboardWidget();
-        widget.setFeatureFlagEnabled(true);
-        return widget;
+        return new DashboardWidget();
     }
 
     protected Dashboard getNewDashboard() {
-        var dashboard = new Dashboard();
-        dashboard.setFeatureFlagEnabled(true);
-        return dashboard;
+        return new Dashboard();
     }
 }

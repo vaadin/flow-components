@@ -35,7 +35,6 @@ public class DashboardItemMoveTest extends DashboardTestBase {
     public void setup() {
         super.setup();
         dashboard = getNewDashboard();
-        dashboard.setFeatureFlagEnabled(true);
         dashboard.add(getNewWidget(), getNewWidget());
         dashboard.setEditable(true);
         DashboardSection section = dashboard.addSection();
