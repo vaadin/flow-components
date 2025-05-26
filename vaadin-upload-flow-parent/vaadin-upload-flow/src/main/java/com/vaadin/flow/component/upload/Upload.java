@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.upload;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -37,6 +38,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.SlotUtils;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
@@ -45,6 +47,8 @@ import com.vaadin.flow.server.NoOutputStreamException;
 import com.vaadin.flow.server.StreamReceiver;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.StreamVariable;
+import com.vaadin.flow.server.VaadinResponse;
+import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -727,14 +731,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      *            upload handler to use for file receptions
      */
     public void setUploadHandler(UploadHandler handler) {
-        UploadHandler newUploadHandler = event -> {
-            try {
-                startUpload();
-                handler.handleUploadRequest(event);
-            } finally {
-                endUpload();
-            }
-        };
+        UploadHandler newUploadHandler = new UploadHandlerWrapper(handler);
         StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
                 newUploadHandler, this.getElement());
         runBeforeClientResponse(ui -> getElement().setAttribute("target",
@@ -943,6 +940,66 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
                 upload.fireUploadFinish(event.getFileName(),
                         event.getMimeType(), event.getContentLength());
             }
+        }
+    }
+
+    /**
+     * An internal wrapper class for the {@link UploadHandler} interface that
+     * delegates its behavior to user-defined handler, but adds additional
+     * functionality, such as managing the start and end of upload operations.
+     */
+    private final class UploadHandlerWrapper implements UploadHandler {
+        private final UploadHandler delegate;
+
+        private UploadHandlerWrapper(UploadHandler delegate) {
+            Objects.requireNonNull(delegate, "UploadHandler cannot be null");
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void handleUploadRequest(UploadEvent uploadEvent)
+                throws IOException {
+            try {
+                startUpload();
+                delegate.handleUploadRequest(uploadEvent);
+            } finally {
+                endUpload();
+            }
+        }
+
+        @Override
+        public void responseHandled(boolean success, VaadinResponse response) {
+            delegate.responseHandled(success, response);
+        }
+
+        @Override
+        public String getUrlPostfix() {
+            return delegate.getUrlPostfix();
+        }
+
+        @Override
+        public boolean isAllowInert() {
+            return delegate.isAllowInert();
+        }
+
+        @Override
+        public DisabledUpdateMode getDisabledUpdateMode() {
+            return delegate.getDisabledUpdateMode();
+        }
+
+        @Override
+        public long getRequestSizeMax() {
+            return delegate.getRequestSizeMax();
+        }
+
+        @Override
+        public long getFileSizeMax() {
+            return delegate.getFileSizeMax();
+        }
+
+        @Override
+        public long getFileCountMax() {
+            return delegate.getFileCountMax();
         }
     }
 }
