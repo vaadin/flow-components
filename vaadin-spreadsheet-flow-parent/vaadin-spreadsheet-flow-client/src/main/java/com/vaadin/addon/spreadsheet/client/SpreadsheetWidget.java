@@ -449,6 +449,12 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         selectionHandler.newSelectedCellSet();
     }
 
+    /**
+     * Show custom editors for the cells with the given keys.
+     *
+     * @param cellKeysToEditorIdMap
+     *            a map of cell keys to editor IDs
+     */
     public void showCellCustomEditors(
             HashMap<String, String> cellKeysToEditorIdMap) {
 
@@ -470,6 +476,12 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         }
     }
 
+    /**
+     * Remove custom editors for the cells with the given keys.
+     *
+     * @param customEditors
+     *            a map of cell keys to custom editor widgets
+     */
     public void removeCellCustomEditors(HashMap<String, Widget> customEditors) {
         if (customEditors == null || customEditors.isEmpty()) {
             return;
@@ -2138,10 +2150,21 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         sheetWidget.setHost(host, renderRoot);
     }
 
+    /**
+     * Returns whether the custom editor is shown when the cell gets focus.
+     * 
+     * @return true if the custom editor is shown on focus, false otherwise
+     */
     public boolean isShowCustomEditorOnFocus() {
         return sheetWidget.isShowCustomEditorOnFocus();
     }
 
+    /**
+     * Sets whether the custom editor should be shown when the cell gets focus.
+     * 
+     * @param showCustomEditorOnFocus
+     *            true to show the custom editor on focus, false to not show it
+     */
     public void setShowCustomEditorOnFocus(boolean showCustomEditorOnFocus) {
         sheetWidget.setShowCustomEditorOnFocus(showCustomEditorOnFocus);
     }

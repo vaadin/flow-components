@@ -13,6 +13,18 @@ import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 
+/**
+ * Custom editor event listener for handling keyboard events and focus changes
+ * in a custom editor slot within a spreadsheet.
+ *
+ * This class listens for keydown events to handle tab and escape keys, focus
+ * events to update the selected cell. The focus/blur events is also used to
+ * store the focused state of the assigned element in the slot.
+ *
+ * It is designed to work with a {@link Slot} that represents a custom editor
+ * and a {@link SpreadsheetWidget} that provides the context of the spreadsheet.
+ *
+ */
 public class CustomEditorEventListener implements EventListener {
 
     private Slot slot;

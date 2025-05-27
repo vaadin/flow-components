@@ -168,6 +168,14 @@ public class SelectionHandler {
         newSelectedCellSet(false);
     }
 
+    /**
+     * Sets the new selected cell and displays a custom cell editor if
+     * applicable. If the custom cell editor is displayed, it will be focused if
+     * <code>focusEditor</code> is true.
+     *
+     * @param focusEditor
+     *            if true, the custom cell editor will be focused
+     */
     public void newSelectedCellSet(boolean focusEditor) {
         if (spreadsheet.customCellEditorDisplayed) {
             spreadsheet.customCellEditorDisplayed = false;

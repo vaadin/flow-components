@@ -5083,14 +5083,37 @@ public class SheetWidget extends Panel {
         }
     }
 
+    /**
+     * Sets whether the custom editor should be displayed when the cell is
+     * focused.
+     *
+     * @param showCustomEditorOnFocus
+     *            true if the custom editor should be displayed on focus, false
+     *            otherwise
+     */
     public void setShowCustomEditorOnFocus(boolean showCustomEditorOnFocus) {
         this.showCustomEditorOnFocus = showCustomEditorOnFocus;
     }
 
+    /**
+     * Returns whether the custom editor should be displayed when the cell is
+     * focused.
+     *
+     * @return true if the custom editor should be displayed on focus, false
+     *         otherwise
+     */
     public boolean isShowCustomEditorOnFocus() {
         return showCustomEditorOnFocus;
     }
 
+    /**
+     * Removes the custom cell editor widget from the sheet.
+     *
+     * @param address
+     *            the address of the cell for which the custom editor is removed
+     * @param customEditorWidget
+     *            the custom editor widget to be removed
+     */
     public void removeCustomCellEditor(String address,
             Widget customEditorWidget) {
 
@@ -5128,6 +5151,11 @@ public class SheetWidget extends Panel {
         }
     }
 
+    /**
+     * Removes the custom cell editor widget from the selected cell if it is
+     * currently displayed. If the custom editor is not displayed, this method
+     * does nothing.
+     */
     public void removeCustomCellEditor() {
         if (customCellEditorDisplayed && isShowCustomEditorOnFocus()) {
             customCellEditorDisplayed = false;
