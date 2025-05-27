@@ -327,7 +327,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     }
 
     /**
-     * Adds the given component into this context menu at the given index.
+     * Adds the given component into this context menu overlay at the given
+     * index.
      * <p>
      * For the common use case of having a list of high-lightable items inside
      * the overlay, use {@link #addItem(String)} and its overload methods
@@ -345,6 +346,26 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     @Override
     public void addComponentAtIndex(int index, Component component) {
         getMenuManager().addComponentAtIndex(index, component);
+    }
+
+    /**
+     * Adds the given component as the first child into this context menu
+     * overlay.
+     * <p>
+     * For the common use case of having a list of high-lightable items inside
+     * the overlay, use {@link #addItem(String)} and its overload methods
+     * instead.
+     * <p>
+     * The added elements in the DOM will not be children of the
+     * {@code <vaadin-context-menu>} element, but will be inserted into an
+     * overlay that is attached into the {@code <body>}.
+     *
+     * @param component
+     *            the component to add
+     */
+    @Override
+    public void addComponentAsFirst(Component component) {
+        HasComponents.super.addComponentAsFirst(component);
     }
 
     /**
