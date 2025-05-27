@@ -96,11 +96,30 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
      *            the components to add
      * @see HasMenuItems#addItem(String, ComponentEventListener)
      * @see HasMenuItems#addItem(Component, ComponentEventListener)
-     * @deprecated Since 24.8, use {@link #addItem(Component)} instead
+     * @deprecated Since 24.8, use {@link #addComponent(Component...)} instead
      */
     @Deprecated(since = "24.8")
     public void add(Component... components) {
-        getMenuManager().add(components);
+        addComponent(components);
+    }
+
+    /**
+     * Adds the given components into the sub menu overlay.
+     * <p>
+     * For the common use case of having a list of high-lightable items inside
+     * the overlay, you can use the {@link #addItem(String)} convenience methods
+     * instead.
+     * <p>
+     * The added elements will be inserted into an overlay that is attached into
+     * the {@code <body>}.
+     *
+     * @param components
+     *            the components to add
+     * @see HasMenuItems#addItem(String, ComponentEventListener)
+     * @see HasMenuItems#addItem(Component, ComponentEventListener)
+     */
+    public void addComponent(Component... components) {
+        getMenuManager().addComponent(components);
     }
 
     /**
@@ -134,10 +153,7 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
      * @param component
      *            the component to add
      * @see #add(Component...)
-     * @deprecated Since 24.8, use {@link #addItemAtIndex(int, Component)}
-     *             instead
      */
-    @Deprecated(since = "24.8")
     public void addComponentAtIndex(int index, Component component) {
         getMenuManager().addComponentAtIndex(index, component);
     }

@@ -235,23 +235,58 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * @see HasMenuItems#addItem(String, ComponentEventListener)
      * @see HasMenuItems#addItem(Component, ComponentEventListener)
      *
-     * @deprecated Since 24.8, use {@link #addItem(Component)} instead
+     * @deprecated Since 24.8, use {@link #addComponent(Component...)} instead
      */
     @Deprecated(since = "24.8")
     @Override
     public void add(Component... components) {
-        getMenuManager().add(components);
+        addComponent(components);
+    }
+
+    /**
+     * Adds the given components into the context menu overlay.
+     * <p>
+     * The added elements in the DOM will not be children of the
+     * {@code <vaadin-context-menu>} element, but will be inserted into an
+     * overlay that is attached into the {@code <body>}.
+     *
+     * @param components
+     *            the components to add
+     * @see HasMenuItems#addItem(String, ComponentEventListener)
+     * @see HasMenuItems#addItem(Component, ComponentEventListener)
+     */
+    public void addComponent(Component... components) {
+        getMenuManager().addComponent(components);
     }
 
     /**
      * @inheritDoc
      *
-     * @deprecated Since 24.8, use {@link #addItem(Component)} instead
+     * @deprecated Since 24.8, use {@link #addComponent(Collection)} instead
      */
     @Deprecated(since = "24.8")
     @Override
     public void add(Collection<Component> components) {
-        HasComponents.super.add(components);
+        addComponent(components);
+    }
+
+    /**
+     * Adds the given components into the context menu overlay.
+     * <p>
+     * The added elements in the DOM will not be children of the
+     * {@code <vaadin-context-menu>} element, but will be inserted into an
+     * overlay that is attached into the {@code <body>}.
+     *
+     * @param components
+     *            the components to add
+     * @see HasMenuItems#addItem(String, ComponentEventListener)
+     * @see HasMenuItems#addItem(Component, ComponentEventListener)
+     */
+    public void addComponent(Collection<Component> components) {
+        if (components == null) {
+            return;
+        }
+        getMenuManager().addComponent(components.toArray(Component[]::new));
     }
 
     /**
@@ -263,25 +298,6 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     @Override
     public void add(String text) {
         HasComponents.super.add(text);
-    }
-
-    /**
-     * @inheritDoc
-     *
-     * @deprecated Since 24.8, use {@link #addItem(Component)} instead
-     */
-    @Deprecated(since = "24.8")
-    @Override
-    public void addComponentAsFirst(Component component) {
-        HasComponents.super.addComponentAsFirst(component);
-    }
-
-    /**
-     * @inheritDoc
-     *
-     */
-    @Deprecated(since = "24.8")
-    @Override
     }
 
     @Override
@@ -309,11 +325,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      *            the index, where the component will be added
      * @param component
      *            the component to add
-     *
-     * @deprecated Since 24.8, use {@link #addItemAtIndex(int, Component)}
-     *             instead
      */
-    @Deprecated(since = "24.8")
     @Override
     public void addComponentAtIndex(int index, Component component) {
         getMenuManager().addComponentAtIndex(index, component);

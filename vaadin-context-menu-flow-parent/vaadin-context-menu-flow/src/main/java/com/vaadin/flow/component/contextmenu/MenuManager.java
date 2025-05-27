@@ -156,10 +156,25 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      *            components to add
      * @see #remove(Component...)
      * @see #addComponentAtIndex(int, Component)
-     * @deprecated Since 24.8, use {@link #addItem(Component)} instead
+     * @deprecated Since 24.8, use {@link #addComponent(Component...)} instead
      */
     @Deprecated(since = "24.8")
     public void add(Component... components) {
+        addComponent(components);
+    }
+
+    /**
+     * Adds components to the (sub)menu.
+     * <p>
+     * The components are added into the content as is, they are not wrapped as
+     * menu items.
+     *
+     * @param components
+     *            components to add
+     * @see #remove(Component...)
+     * @see #addComponentAtIndex(int, Component)
+     */
+    public void addComponent(Component... components) {
         if (parentMenuItem != null && parentMenuItem.isCheckable()) {
             throw new IllegalStateException(
                     "A checkable item cannot have a sub menu");
@@ -224,10 +239,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      *
      * @see #add(Component...)
      * @see #remove(Component...)
-     * @deprecated Since 24.8, use {@link #addItemAtIndex(int, Component)} or
-     *             {@link #addSeparatorAtIndex(int)} instead
      */
-    @Deprecated(since = "24.8")
     public void addComponentAtIndex(int index, Component component) {
         if (parentMenuItem != null && parentMenuItem.isCheckable()) {
             throw new IllegalStateException(
@@ -276,7 +288,6 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      * Adds a separator between items.
      */
     public void addSeparator() {
-        add(new Hr());
         addComponent(new Hr());
     }
 
