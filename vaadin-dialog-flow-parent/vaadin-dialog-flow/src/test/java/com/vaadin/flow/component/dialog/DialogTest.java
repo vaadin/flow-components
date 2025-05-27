@@ -33,7 +33,6 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.server.VaadinSession;
@@ -61,34 +60,33 @@ public class DialogTest {
 
     @Test
     public void createDialogWithComponents_componentsArePartOfGetChildren() {
-        Label label1 = new Label("Label 1");
-        Label label2 = new Label("Label 2");
-        Label label3 = new Label("Label 3");
+        Span span1 = new Span("Text 1");
+        Span span2 = new Span("Text 2");
+        Span span3 = new Span("Text 3");
 
-        Dialog dialog = new Dialog(label1, label2);
+        Dialog dialog = new Dialog(span1, span2);
         dialog.setWidth("200px");
         dialog.setHeight("100px");
 
         List<Component> children = dialog.getChildren()
                 .collect(Collectors.toList());
         Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label1, label2));
+        Assert.assertThat(children, CoreMatchers.hasItems(span1, span2));
 
-        dialog.add(label3);
+        dialog.add(span3);
         children = dialog.getChildren().collect(Collectors.toList());
         Assert.assertEquals(3, children.size());
-        Assert.assertThat(children,
-                CoreMatchers.hasItems(label1, label2, label3));
+        Assert.assertThat(children, CoreMatchers.hasItems(span1, span2, span3));
 
-        dialog.remove(label2);
+        dialog.remove(span2);
         children = dialog.getChildren().collect(Collectors.toList());
         Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label1, label3));
+        Assert.assertThat(children, CoreMatchers.hasItems(span1, span3));
 
-        label1.getElement().removeFromParent();
+        span1.getElement().removeFromParent();
         children = dialog.getChildren().collect(Collectors.toList());
         Assert.assertEquals(1, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label3));
+        Assert.assertThat(children, CoreMatchers.hasItems(span3));
 
         dialog.removeAll();
         children = dialog.getChildren().collect(Collectors.toList());
