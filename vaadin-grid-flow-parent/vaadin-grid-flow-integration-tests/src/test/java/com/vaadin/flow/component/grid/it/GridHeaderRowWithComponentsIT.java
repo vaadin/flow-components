@@ -15,18 +15,14 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/grid-header-row-with-components")
@@ -37,61 +33,65 @@ public class GridHeaderRowWithComponentsIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        grid = $(GridElement.class).id("grid");
+        grid = $(GridElement.class).waitForFirst();
     }
 
     @Test // for https://github.com/vaadin/vaadin-grid-flow/issues/172
     public void appendHeaderRowsWithComponents_headerCellsAreRenderedInCorrectOrder() {
-        List<WebElement> headerCells = getHeaderCells();
         Assert.assertEquals(
-                "There should be 2 header cells after appending 2 header rows for "
-                        + "a Grid with one column",
-                2, headerCells.size());
+                "There should be 4 header cells after appending 2 header rows for "
+                        + "a Grid with two columns",
+                4, getHeaderCellCount());
 
-        Assert.assertThat(
+        Assert.assertTrue(
                 "The first header cell should contain the component "
                         + "of the first appended header row",
-                headerCells.get(0).getAttribute("innerHTML"),
-                CoreMatchers.containsString("<label>foo</label>"));
-
-        Assert.assertThat(
+                getInnerHtml(grid.getHeaderCellContent(0, 0))
+                        .contains("<label>foo</label>"));
+        Assert.assertTrue(
                 "The second header cell should contain the component "
                         + "of the second appended header row",
-                headerCells.get(1).getAttribute("innerHTML"),
-                CoreMatchers.containsString("<label>bar</label>"));
+                getInnerHtml(grid.getHeaderCellContent(1, 0))
+                        .contains("<label>bar</label>"));
     }
 
     @Test
     public void prependHeader_setText_setComponent_componentOverridesText() {
-        findElement(By.id("set-both-text-and-component")).click();
-        String headerContent = getHeaderCells().get(0)
-                .getAttribute("innerHTML");
-
-        Assert.assertThat(
+        clickElementWithJs("set-both-text-and-component");
+        var headerContent = getInnerHtml(grid.getHeaderCellContent(0, 0));
+        Assert.assertFalse(
                 "The header cell should not contain the text after "
                         + "overriding it with a component",
-                headerContent,
-                CoreMatchers.not(CoreMatchers.containsString("this is text")));
-        Assert.assertThat(
+                headerContent.contains("this is text"));
+        Assert.assertTrue(
                 "The header cell should contain the component which was last set",
-                headerContent, CoreMatchers
-                        .containsString("<label>this is component</label>"));
+                headerContent.contains("<label>this is component</label>"));
     }
 
-    private List<WebElement> getHeaderCells() {
-        WebElement thead = grid.$("*").id("header");
-        List<WebElement> headers = thead.findElements(By.tagName("th"));
-
-        List<String> cellNames = headers.stream().map(header -> header
-                .findElement(By.tagName("slot")).getAttribute("name"))
-                .collect(Collectors.toList());
-
-        List<WebElement> headerCells = cellNames.stream()
-                .map(name -> grid.findElement(By.cssSelector(
-                        "vaadin-grid-cell-content[slot='" + name + "']")))
-                .collect(Collectors.toList());
-
-        return headerCells;
+    @Test
+    public void initiallyHiddenHeaderComponents_headerContentIsEmpty() {
+        Assert.assertEquals("", getInnerHtml(grid.getHeaderCellContent(0, 1)));
+        Assert.assertEquals("", getInnerHtml(grid.getHeaderCellContent(1, 1)));
     }
 
+    @Test
+    public void initiallyHiddenHeaderComponents_setVisible_headerContentIsUpdated() {
+        clickElementWithJs("toggle-col-2-headers-visible");
+        Assert.assertNotEquals("",
+                getInnerHtml(grid.getHeaderCellContent(0, 1)));
+        Assert.assertNotEquals("",
+                getInnerHtml(grid.getHeaderCellContent(1, 1)));
+    }
+
+    private long getHeaderCellCount() {
+        var thead = grid.$("*").id("header");
+        var headerRows = thead.findElements(By.tagName("tr"));
+        return headerRows.stream()
+                .mapToLong(row -> row.findElements(By.tagName("th")).size())
+                .sum();
+    }
+
+    private String getInnerHtml(TestBenchElement headerCell) {
+        return headerCell.getDomProperty("innerHTML");
+    }
 }
