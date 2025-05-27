@@ -200,8 +200,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     }
 
     /**
-     * Adds a new item component with the given text content to the context menu
-     * overlay.
+     * Creates a new menu item with the given text content and adds it to the
+     * context menu overlay.
      *
      * @param text
      *            the text content for the created menu item
@@ -212,8 +212,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     }
 
     /**
-     * Adds a new item component with the given component to the context menu
-     * overlay.
+     * Creates a new menu item with the given component content and to the
+     * context menu overlay.
      *
      * @param component
      *            the component to add to the created menu item
@@ -225,6 +225,10 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     /**
      * Adds the given components into the context menu overlay.
+     * <p>
+     * For the common use case of having a list of high-lightable items inside
+     * the overlay, use {@link #addItem(String)} and its overload methods
+     * instead.
      * <p>
      * The added elements in the DOM will not be children of the
      * {@code <vaadin-context-menu>} element, but will be inserted into an
@@ -245,6 +249,10 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     /**
      * Adds the given components into the context menu overlay.
+     * <p>
+     * For the common use case of having a list of high-lightable items inside
+     * the overlay, use {@link #addItem(String)} and its overload methods
+     * instead.
      * <p>
      * The added elements in the DOM will not be children of the
      * {@code <vaadin-context-menu>} element, but will be inserted into an
@@ -272,6 +280,10 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     /**
      * Adds the given components into the context menu overlay.
+     * <p>
+     * For the common use case of having a list of high-lightable items inside
+     * the overlay, use {@link #addItem(String)} and its overload methods
+     * instead.
      * <p>
      * The added elements in the DOM will not be children of the
      * {@code <vaadin-context-menu>} element, but will be inserted into an
@@ -316,6 +328,10 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     /**
      * Adds the given component into this context menu at the given index.
+     * <p>
+     * For the common use case of having a list of high-lightable items inside
+     * the overlay, use {@link #addItem(String)} and its overload methods
+     * instead.
      * <p>
      * The added elements in the DOM will not be children of the
      * {@code <vaadin-context-menu>} element, but will be inserted into an

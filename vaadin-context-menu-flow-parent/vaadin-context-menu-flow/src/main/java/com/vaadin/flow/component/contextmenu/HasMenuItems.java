@@ -33,15 +33,8 @@ import com.vaadin.flow.component.ComponentEventListener;
 public interface HasMenuItems extends Serializable {
 
     /**
-     * Adds a new item component with the given text content and click listener
-     * to the context menu overlay.
-     * <p>
-     * This is a convenience method for the use case where you have a list of
-     * highlightable {@link MenuItem}s inside the overlay. If you want to
-     * configure the contents of the overlay without wrapping them inside
-     * {@link MenuItem}s, or if you just want to add some non-highlightable
-     * components between the items, use the
-     * {@link ContextMenu#add(Component...)} method.
+     * Creates a new menu item with the given text content and click listener
+     * and adds it to the context menu overlay.
      *
      * @param text
      *            the text content for the new item
@@ -57,15 +50,8 @@ public interface HasMenuItems extends Serializable {
             ComponentEventListener<ClickEvent<MenuItem>> clickListener);
 
     /**
-     * Adds a new item component with the given component and click listener to
-     * the context menu overlay.
-     * <p>
-     * This is a convenience method for the use case where you have a list of
-     * highlightable {@link MenuItem}s inside the overlay. If you want to
-     * configure the contents of the overlay without wrapping them inside
-     * {@link MenuItem}s, or if you just want to add some non-highlightable
-     * components between the items, use the
-     * {@link ContextMenu#add(Component...)} method.
+     * Creates a new menu item with the given component content and click
+     * listener and adds it to the context menu overlay.
      *
      * @param component
      *            the component inside the new item
