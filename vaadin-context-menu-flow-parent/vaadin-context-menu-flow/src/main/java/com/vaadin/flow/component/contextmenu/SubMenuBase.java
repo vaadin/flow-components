@@ -45,14 +45,8 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
     }
 
     /**
-     * Adds a new item component with the given text content to the sub menu
-     * overlay.
-     * <p>
-     * This is a convenience method for the use case where you have a list of
-     * highlightable {@link MenuItem}s inside the overlay. If you want to
-     * configure the contents of the overlay without wrapping them inside
-     * {@link MenuItem}s, or if you just want to add some non-highlightable
-     * components between the items, use the {@link #add(Component...)} method.
+     * Creates a new menu item with the given text content and adds it to the
+     * sub menu overlay.
      *
      * @param text
      *            the text content for the created menu item
@@ -64,14 +58,8 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
     }
 
     /**
-     * Adds a new item component with the given component to the sub menu
-     * overlay.
-     * <p>
-     * This is a convenience method for the use case where you have a list of
-     * highlightable {@link MenuItem}s inside the overlay. If you want to
-     * configure the contents of the overlay without wrapping them inside
-     * {@link MenuItem}s, or if you just want to add some non-highlightable
-     * components between the items, use the {@link #add(Component...)} method.
+     * Creates a new menu item with the given component content and adds it to
+     * the sub menu overlay.
      *
      * @param component
      *            the component to add to the created menu item
@@ -86,7 +74,28 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
      * Adds the given components into the sub menu overlay.
      * <p>
      * For the common use case of having a list of high-lightable items inside
-     * the overlay, you can use the {@link #addItem(String)} convenience methods
+     * the overlay, use {@link #addItem(String)} and its overload methods
+     * instead.
+     * <p>
+     * The added elements will be inserted into an overlay that is attached into
+     * the {@code <body>}.
+     *
+     * @param components
+     *            the components to add
+     * @see HasMenuItems#addItem(String, ComponentEventListener)
+     * @see HasMenuItems#addItem(Component, ComponentEventListener)
+     * @deprecated Since 24.8, use {@link #addComponent(Component...)} instead
+     */
+    @Deprecated(since = "24.8")
+    public void add(Component... components) {
+        addComponent(components);
+    }
+
+    /**
+     * Adds the given components into the sub menu overlay.
+     * <p>
+     * For the common use case of having a list of high-lightable items inside
+     * the overlay, use {@link #addItem(String)} and its overload methods
      * instead.
      * <p>
      * The added elements will be inserted into an overlay that is attached into
@@ -97,8 +106,8 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
      * @see HasMenuItems#addItem(String, ComponentEventListener)
      * @see HasMenuItems#addItem(Component, ComponentEventListener)
      */
-    public void add(Component... components) {
-        getMenuManager().add(components);
+    public void addComponent(Component... components) {
+        getMenuManager().addComponent(components);
     }
 
     /**
@@ -123,6 +132,10 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
 
     /**
      * Adds the given component into the sub menu overlay at the given index.
+     * <p>
+     * For the common use case of having a list of high-lightable items inside
+     * the overlay, use {@link #addItem(String)} and its overload methods
+     * instead.
      * <p>
      * The added elements will be inserted into an overlay that is attached into
      * the {@code <body>}.
@@ -169,6 +182,13 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
      */
     public I getParentMenuItem() {
         return parentMenuItem;
+    }
+
+    /**
+     * Adds a separator between items.
+     */
+    public void addSeparator() {
+        getMenuManager().addSeparator();
     }
 
     /**
