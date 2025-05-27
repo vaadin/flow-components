@@ -279,53 +279,22 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     /**
      * @inheritDoc
      *
-     * @deprecated Since 24.8, use {@link #removeItem(Component...)} instead
      */
     @Deprecated(since = "24.8")
     @Override
-    public void remove(Component... components) {
-        removeItem(components);
     }
 
-    /**
-     * Removes the provided components from the context menu overlay.
-     *
-     * @param components
-     *            the components to remove
-     */
-    public void removeItem(Component... components) {
+    @Override
+    public void remove(Component... components) {
         getMenuManager().remove(components);
     }
 
     /**
-     * @inheritDoc
-     *
-     * @deprecated Since 24.8, use {@link #removeItem(Component...)} instead
-     */
-    @Deprecated(since = "24.8")
-    @Override
-    public void remove(Collection<Component> components) {
-        removeItem(components == null ? null
-                : components.toArray(new Component[0]));
-    }
-
-    /**
      * Removes all the child components. This also removes all the items added
      * with {@link #addItem(String)} and its overload methods.
-     *
-     * @deprecated Since 24.8, use {@link #removeAllItems()} instead
      */
-    @Deprecated(since = "24.8")
     @Override
     public void removeAll() {
-        removeAllItems();
-    }
-
-    /**
-     * Removes all the child components. This also removes all the items added
-     * with {@link #addItem(String)} and its overload methods.
-     */
-    public void removeAllItems() {
         getMenuManager().removeAll();
     }
 
