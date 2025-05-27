@@ -26,6 +26,7 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableRunnable;
 
@@ -155,8 +156,25 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      *            components to add
      * @see #remove(Component...)
      * @see #addComponentAtIndex(int, Component)
+     * @deprecated Since 24.8, use {@link #addComponent(Component...)} instead
      */
+    @Deprecated(since = "24.8")
     public void add(Component... components) {
+        addComponent(components);
+    }
+
+    /**
+     * Adds components to the (sub)menu.
+     * <p>
+     * The components are added into the content as is, they are not wrapped as
+     * menu items.
+     *
+     * @param components
+     *            components to add
+     * @see #remove(Component...)
+     * @see #addComponentAtIndex(int, Component)
+     */
+    public void addComponent(Component... components) {
         if (parentMenuItem != null && parentMenuItem.isCheckable()) {
             throw new IllegalStateException(
                     "A checkable item cannot have a sub menu");
@@ -264,6 +282,13 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
     public List<I> getItems() {
         return getChildren().filter(itemType::isInstance).map(itemType::cast)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Adds a separator between items.
+     */
+    public void addSeparator() {
+        addComponent(new Hr());
     }
 
     private void updateChildren() {
