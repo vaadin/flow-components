@@ -27,10 +27,7 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetWidget.SheetContextMenuHandler;
@@ -187,6 +184,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     private SpreadsheetServerRpcImpl serverRPC;
 
     private Element host;
+
+    private HashMap<String, Widget> customEditors = null;
 
     // spreadsheet: we need the server side proxy
     public <T extends ServerRpc> T getProtectedRpcProxy(Class<T> rpcInterface) {
@@ -376,9 +375,22 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                 });
             }
             widget.showCellCustomComponents(customWidgetMap);
+            if (!state.showCustomEditorOnFocus) {
+                widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
+            }
         }
         if (stateChangeEvent.hasPropertyChanged("cellKeysToEditorIdMap")) {
             setupCustomEditors();
+            if (!state.showCustomEditorOnFocus) {
+                widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
+            }
+        }
+        if (stateChangeEvent.hasPropertyChanged("showCustomEditorOnFocus")) {
+            if (state.showCustomEditorOnFocus) {
+                widget.removeCellCustomEditors(getCustomEditors());
+            } else {
+                widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
+            }
         }
         if (stateChangeEvent.hasPropertyChanged("cellComments")
                 || stateChangeEvent.hasPropertyChanged("cellCommentAuthors")) {
@@ -449,10 +461,19 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         }
     }
 
+    public HashMap<String, Widget> getCustomEditors() {
+        return customEditors;
+    }
+
     private void setupCustomEditors() {
         if (getState().cellKeysToEditorIdMap == null) {
+            if (getWidget().isShowCustomEditorOnFocus()) {
+                getWidget().removeCellCustomEditors(getCustomEditors());
+            }
             getWidget().setCustomEditorFactory(null);
         } else if (getWidget().getCustomEditorFactory() == null) {
+            customEditors = new HashMap<>();
+
             if (customEditorFactory == null) {
                 customEditorFactory = new SpreadsheetCustomEditorFactory() {
 
@@ -464,30 +485,21 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
                     @Override
                     public Widget getCustomEditor(String key) {
+                        if (customEditors.containsKey(key)) {
+                            return customEditors.get(key);
+                        }
                         String editorId = getState().cellKeysToEditorIdMap
                                 .get(key);
                         var editor = SheetJsniUtil.getVirtualChild(editorId,
                                 host.getPropertyString("appId"));
                         Slot slot = new Slot("custom-editor-" + editorId,
                                 editor, host);
-                        Event.setEventListener(slot.getAssignedElement(),
-                                event -> {
-                                    var sheetWidget = getWidget()
-                                            .getSheetWidget();
-                                    switch (event.getKeyCode()) {
-                                    case KeyCodes.KEY_TAB:
-                                        event.preventDefault();
-                                        sheetWidget.focusSheet();
-                                        sheetWidget.getSheetHandler()
-                                                .onSheetKeyPress(event, "");
-                                        break;
-                                    case KeyCodes.KEY_ESCAPE: // Handle escape
-                                        sheetWidget.focusSheet();
-                                        break;
-                                    }
-                                });
-                        DOM.sinkEvents(slot.getAssignedElement(),
-                                Event.ONKEYDOWN);
+                        customEditors.put(key, slot);
+                        CustomEditorEventListener listener = GWT
+                                .create(CustomEditorEventListener.class);
+                        listener.setSpreadsheetWidget(getWidget());
+                        listener.init(slot, key);
+
                         return slot;
                     }
 

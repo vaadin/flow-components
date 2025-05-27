@@ -433,6 +433,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     /**
      * @return the customEditorFactory
      */
+    @Override
     public SpreadsheetCustomEditorFactory getCustomEditorFactory() {
         return customEditorFactory;
     }
@@ -449,6 +450,52 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     /**
+     * Show custom editors for the cells with the given keys.
+     *
+     * @param cellKeysToEditorIdMap
+     *            a map of cell keys to editor IDs
+     */
+    public void showCellCustomEditors(
+            HashMap<String, String> cellKeysToEditorIdMap) {
+
+        if (cellKeysToEditorIdMap == null || customEditorFactory == null) {
+            return;
+        }
+
+        var jsniUtil = sheetWidget.getSheetJsniUtil();
+        for (var entry : cellKeysToEditorIdMap.entrySet()) {
+            Widget customEditor = customEditorFactory
+                    .getCustomEditor(entry.getKey());
+            if (customEditor != null) {
+                jsniUtil.parseColRow(entry.getKey());
+                var col = jsniUtil.getParsedCol();
+                var row = jsniUtil.getParsedRow();
+                var cell = sheetWidget.getCell(col, row);
+                sheetWidget.displayCustomCellEditor(customEditor, false, cell);
+            }
+        }
+    }
+
+    /**
+     * Remove custom editors for the cells with the given keys.
+     *
+     * @param customEditors
+     *            a map of cell keys to custom editor widgets
+     */
+    public void removeCellCustomEditors(HashMap<String, Widget> customEditors) {
+        if (customEditors == null || customEditors.isEmpty()) {
+            return;
+        }
+
+        for (var customEditor : customEditors.entrySet()) {
+            if (customEditor != null) {
+                sheetWidget.removeCustomCellEditor(customEditor.getKey(),
+                        customEditor.getValue());
+            }
+        }
+    }
+
+    /**
      * Called when the {@link #customEditorFactory} might have a new editor for
      * the currently selected cell.
      */
@@ -461,7 +508,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             if (customEditor != null) {
                 customCellEditorDisplayed = true;
                 formulaBarWidget.setFormulaFieldEnabled(false);
-                sheetWidget.displayCustomCellEditor(customEditor);
+                sheetWidget.displayCustomCellEditor(customEditor, false);
             }
         }
     }
@@ -707,7 +754,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                     updateSelectedCellValues(column, row);
                 }
                 if (updateToActionHandler) {
-                    selectionHandler.newSelectedCellSet();
+                    selectionHandler.newSelectedCellSet(false);
                     spreadsheetHandler.cellSelected(row, column, true);
                     startDelayedSendingTimer();
                 }
@@ -735,7 +782,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             formulaBarWidget.setFormulaFieldEnabled(!cellLocked);
         } else {
             sheetWidget.displayCustomCellEditor(customEditorFactory
-                    .getCustomEditor(sheetWidget.getSelectedCellKey()));
+                    .getCustomEditor(sheetWidget.getSelectedCellKey()), false);
         }
         if (name != null) {
             formulaBarWidget.setSelectedCellAddress(name);
@@ -895,7 +942,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             cellEditingDone(editedValue, true);
         } else if (customCellEditorDisplayed) {
             customCellEditorDisplayed = false;
-            sheetWidget.removeCustomCellEditor();
+            if (isShowCustomEditorOnFocus()) {
+                sheetWidget.removeCustomCellEditor();
+            }
             formulaBarWidget.setFormulaFieldEnabled(true);
         }
     }
@@ -1222,8 +1271,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                         formulaBarWidget.cacheFormulaFieldValue();
                     }
                     formulaBarWidget.setCellPlainValue(enteredCharacter);
-                } else if (getCustomEditorFactory()
-                        .hasCustomEditor(sheetWidget.getSelectedCellKey())) {
+                } else if (getCustomEditorFactory() != null
+                        && getCustomEditorFactory().hasCustomEditor(
+                                sheetWidget.getSelectedCellKey())) {
                     Widget customEditor = getCustomEditorFactory()
                             .getCustomEditor(sheetWidget.getSelectedCellKey());
                     if (customEditor instanceof Slot) {
@@ -2098,5 +2148,24 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     public void setHost(Element host, Node renderRoot) {
         sheetWidget.setHost(host, renderRoot);
+    }
+
+    /**
+     * Returns whether the custom editor is shown when the cell gets focus.
+     * 
+     * @return true if the custom editor is shown on focus, false otherwise
+     */
+    public boolean isShowCustomEditorOnFocus() {
+        return sheetWidget.isShowCustomEditorOnFocus();
+    }
+
+    /**
+     * Sets whether the custom editor should be shown when the cell gets focus.
+     * 
+     * @param showCustomEditorOnFocus
+     *            true to show the custom editor on focus, false to not show it
+     */
+    public void setShowCustomEditorOnFocus(boolean showCustomEditorOnFocus) {
+        sheetWidget.setShowCustomEditorOnFocus(showCustomEditorOnFocus);
     }
 }
