@@ -327,7 +327,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     }
 
     /**
-     * Adds the given component into this context menu overlay at the given
+     * Adds the given component into the context menu overlay at the given
      * index.
      * <p>
      * For the common use case of having a list of high-lightable items inside
@@ -349,7 +349,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     }
 
     /**
-     * Adds the given component as the first child into this context menu
+     * Adds the given component as the first child into the context menu
      * overlay.
      * <p>
      * For the common use case of having a list of high-lightable items inside
