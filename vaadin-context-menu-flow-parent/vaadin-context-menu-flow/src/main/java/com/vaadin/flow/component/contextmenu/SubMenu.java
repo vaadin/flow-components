@@ -18,7 +18,6 @@ package com.vaadin.flow.component.contextmenu;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.function.SerializableRunnable;
 
 /**
@@ -56,12 +55,5 @@ public class SubMenu extends SubMenuBase<ContextMenu, MenuItem, SubMenu>
         return new MenuManager<>(getParentMenuItem().getContextMenu(),
                 contentReset, MenuItem::new, MenuItem.class,
                 getParentMenuItem());
-    }
-
-    /**
-     * Adds a separator between items.
-     */
-    public void addSeparator() {
-        add(new Hr());
     }
 }
