@@ -143,23 +143,6 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
     }
 
     /**
-     * Adds the given component into the sub menu overlay at the given index as
-     * an item.
-     * <p>
-     * The added elements will be inserted into an overlay that is attached into
-     * the {@code <body>}.
-     *
-     * @param index
-     *            the index, where the item will be added
-     * @param component
-     *            the component to add
-     * @see #addItem(Component)
-     */
-    public void addItemAtIndex(int index, Component component) {
-        getMenuManager().addItemAtIndex(index, component);
-    }
-
-    /**
      * Gets the child components of this sub menu. This includes components
      * added with {@link #add(Component...)} and the {@link MenuItem} components
      * created with {@link #addItem(String)} and its overload methods. This
@@ -198,16 +181,6 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
      */
     public void addSeparator() {
         getMenuManager().addSeparator();
-    }
-
-    /**
-     * Adds a separator between items using the {@code index}.
-     *
-     * @param index
-     *            index to insert, not negative
-     */
-    public void addSeparatorAtIndex(int index) {
-        getMenuManager().addSeparatorAtIndex(index);
     }
 
     /**

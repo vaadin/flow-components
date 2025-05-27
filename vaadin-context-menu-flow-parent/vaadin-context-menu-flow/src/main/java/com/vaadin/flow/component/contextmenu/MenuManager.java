@@ -243,37 +243,6 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
     }
 
     /**
-     * Inserts component as a menu item to the (sub)menu using the
-     * {@code index}.
-     *
-     * @param index
-     *            index to insert, not negative
-     * @param component
-     *            the component for the menu item
-     *
-     * @see #addItem(Component)
-     * @see #remove(Component...)
-     *
-     * @return a new menu item
-     */
-    public I addItemAtIndex(int index, Component component) {
-        if (parentMenuItem != null && parentMenuItem.isCheckable()) {
-            throw new IllegalStateException(
-                    "A checkable item cannot have a sub menu");
-        }
-        Objects.requireNonNull(component, "Component should not be null");
-        if (index < 0) {
-            throw new IllegalArgumentException(
-                    "Cannot add a component with a negative index");
-        }
-        var menuItem = itemGenerator.apply(menu, contentReset);
-        children.add(index, menuItem);
-        updateChildren();
-        menuItem.add(component);
-        return menuItem;
-    }
-
-    /**
      * Gets all (sub)menu children.
      * <p>
      * Children consist of components and items.
@@ -308,16 +277,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      */
     public void addSeparator() {
         add(new Hr());
-    }
-
-    /**
-     * Adds a separator between items using the {@code index}.
-     *
-     * @param index
-     *            index to insert, not negative
-     */
-    public void addSeparatorAtIndex(int index) {
-        addComponentAtIndex(index, new Hr());
+        addComponent(new Hr());
     }
 
     private void updateChildren() {
