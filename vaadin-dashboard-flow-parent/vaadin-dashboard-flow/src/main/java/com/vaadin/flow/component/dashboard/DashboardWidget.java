@@ -8,11 +8,8 @@
  */
 package com.vaadin.flow.component.dashboard;
 
-import com.vaadin.experimental.FeatureFlags;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
@@ -28,14 +25,12 @@ import com.vaadin.flow.component.shared.SlotUtils;
  */
 @Tag("vaadin-dashboard-widget")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard-widget.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.0.0-alpha1")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.0.0-alpha3")
 public class DashboardWidget extends Component {
 
     private int colspan = 1;
 
     private int rowspan = 1;
-
-    private boolean featureFlagEnabled;
 
     /**
      * Creates an empty widget.
@@ -224,12 +219,6 @@ public class DashboardWidget extends Component {
         return true;
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        checkFeatureFlag();
-    }
-
     private void notifyParentDashboardOrSection() {
         getParent().ifPresent(parent -> {
             if (parent instanceof Dashboard dashboard) {
@@ -238,40 +227,5 @@ public class DashboardWidget extends Component {
                 section.updateClient();
             }
         });
-    }
-
-    /**
-     * Checks whether the Dashboard component feature flag is active. Succeeds
-     * if the flag is enabled, and throws otherwise.
-     *
-     * @throws ExperimentalFeatureException
-     *             when the {@link FeatureFlags#DASHBOARD_COMPONENT} feature is
-     *             not enabled
-     */
-    private void checkFeatureFlag() {
-        boolean enabled = featureFlagEnabled || getFeatureFlags()
-                .isEnabled(FeatureFlags.DASHBOARD_COMPONENT);
-        if (!enabled) {
-            throw new ExperimentalFeatureException();
-        }
-    }
-
-    /**
-     * Gets the feature flags for the current UI.
-     * <p>
-     * Not private in order to support mocking
-     *
-     * @return the current set of feature flags
-     */
-    FeatureFlags getFeatureFlags() {
-        return FeatureFlags
-                .get(UI.getCurrent().getSession().getService().getContext());
-    }
-
-    /**
-     * Only for test use.
-     */
-    void setFeatureFlagEnabled(boolean featureFlagEnabled) {
-        this.featureFlagEnabled = featureFlagEnabled;
     }
 }

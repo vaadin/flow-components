@@ -30,19 +30,7 @@ public enum ButtonVariant implements ThemeVariant {
     LUMO_WARNING("warning"),
     LUMO_ERROR("error"),
     LUMO_CONTRAST("contrast"),
-    LUMO_ICON("icon"),
-    /**
-     * @deprecated Since 24.7, the Material theme is deprecated and will be
-     *             removed in Vaadin 25.
-     */
-    @Deprecated
-    MATERIAL_CONTAINED("contained"),
-    /**
-     * @deprecated Since 24.7, the Material theme is deprecated and will be
-     *             removed in Vaadin 25.
-     */
-    @Deprecated
-    MATERIAL_OUTLINED("outlined");
+    LUMO_ICON("icon");
 
     private final String variant;
 

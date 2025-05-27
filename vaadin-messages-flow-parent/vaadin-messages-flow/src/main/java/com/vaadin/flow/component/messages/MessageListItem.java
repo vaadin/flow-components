@@ -38,6 +38,7 @@ import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -183,7 +184,7 @@ public class MessageListItem implements Serializable {
 
     /**
      * Appends the provided text to the message's text content.
-     * 
+     *
      * @param text
      *            the text to append to the message's text content
      */
@@ -442,6 +443,11 @@ public class MessageListItem implements Serializable {
      * <p>
      * Setting the image as a resource with this method overrides the image URL
      * set with {@link MessageListItem#setUserImage(String)}.
+     * <p>
+     * Sets the <code>Content-Disposition</code> header to <code>inline</code>
+     * for pre-defined download handlers, created by factory methods in
+     * {@link DownloadHandler}, as well as for other
+     * {@link AbstractDownloadHandler} implementations.
      *
      * @param downloadHandler
      *            download handler for the image resource, or {@code null} to
@@ -452,6 +458,11 @@ public class MessageListItem implements Serializable {
         if (downloadHandler == null) {
             unsetResource();
             return;
+        }
+        if (downloadHandler instanceof AbstractDownloadHandler<?> handler) {
+            // change disposition to inline in pre-defined handlers,
+            // where it is 'attachment' by default
+            handler.inline();
         }
 
         setUserImageResource(new StreamResourceRegistry.ElementStreamResource(

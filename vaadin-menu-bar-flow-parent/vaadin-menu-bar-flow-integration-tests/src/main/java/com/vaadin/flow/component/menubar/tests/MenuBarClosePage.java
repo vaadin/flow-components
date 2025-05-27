@@ -34,7 +34,7 @@ public class MenuBarClosePage extends Div {
         final NativeButton closeButton = new NativeButton("Close",
                 e -> menuBar.close());
         closeButton.setId("close-button");
-        submenu.add(new Div(new Span("menu contents"), closeButton));
+        submenu.addComponent(new Div(new Span("menu contents"), closeButton));
         add(menuBar);
     }
 }

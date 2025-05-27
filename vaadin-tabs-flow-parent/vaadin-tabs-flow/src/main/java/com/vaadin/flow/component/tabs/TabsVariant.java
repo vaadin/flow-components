@@ -31,13 +31,7 @@ public enum TabsVariant implements ThemeVariant {
     LUMO_SMALL("small"),
     LUMO_MINIMAL("minimal"),
     LUMO_HIDE_SCROLL_BUTTONS("hide-scroll-buttons"),
-    LUMO_EQUAL_WIDTH_TABS("equal-width-tabs"),
-    /**
-     * @deprecated Since 24.7, the Material theme is deprecated and will be
-     *             removed in Vaadin 25.
-     */
-    @Deprecated
-    MATERIAL_FIXED("fixed");
+    LUMO_EQUAL_WIDTH_TABS("equal-width-tabs");
 
     private final String variant;
 

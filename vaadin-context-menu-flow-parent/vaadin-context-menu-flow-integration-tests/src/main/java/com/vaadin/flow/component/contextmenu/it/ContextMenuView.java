@@ -157,7 +157,7 @@ public class ContextMenuView extends Div {
 
         // Components can also be added to the overlay
         // without creating menu items with add()
-        contextMenu.add(new Label("This is not a menu item"));
+        contextMenu.addComponent(new Label("This is not a menu item"));
 
         addCard("ContextMenu With Components", target, message);
         target.setId("context-menu-with-components-target");
@@ -187,7 +187,7 @@ public class ContextMenuView extends Div {
         // Components can also be added to the submenu overlay
         // without creating menu items with add()
         subMenu.addComponentAtIndex(1, new Hr());
-        subMenu.add(new Label("This is not a menu item"));
+        subMenu.addComponent(new Label("This is not a menu item"));
 
         addCard("ContextMenu With Components in Sub Menu", target, message);
         target.setId("context-menu-with-submenu-components-target");
