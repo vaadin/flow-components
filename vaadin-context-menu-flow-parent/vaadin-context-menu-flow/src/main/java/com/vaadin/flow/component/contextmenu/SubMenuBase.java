@@ -51,7 +51,6 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
      * @param text
      *            the text content for the created menu item
      * @return the created menu item
-     * @see #add(Component...)
      */
     public I addItem(String text) {
         return getMenuManager().addItem(text);
@@ -64,31 +63,9 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
      * @param component
      *            the component to add to the created menu item
      * @return the created menu item
-     * @see #add(Component...)
      */
     public I addItem(Component component) {
         return getMenuManager().addItem(component);
-    }
-
-    /**
-     * Adds the given components into the sub menu overlay.
-     * <p>
-     * For the common use case of having a list of high-lightable items inside
-     * the overlay, use {@link #addItem(String)} and its overload methods
-     * instead.
-     * <p>
-     * The added elements will be inserted into an overlay that is attached into
-     * the {@code <body>}.
-     *
-     * @param components
-     *            the components to add
-     * @see HasMenuItems#addItem(String, ComponentEventListener)
-     * @see HasMenuItems#addItem(Component, ComponentEventListener)
-     * @deprecated Since 24.8, use {@link #addComponent(Component...)} instead
-     */
-    @Deprecated(since = "24.8")
-    public void add(Component... components) {
-        addComponent(components);
     }
 
     /**
@@ -115,7 +92,6 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
      *
      * @param components
      *            the components to remove
-     * @see #add(Component...)
      */
     public void remove(Component... components) {
         getMenuManager().remove(components);
@@ -123,8 +99,6 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
 
     /**
      * Removes all components inside the sub menu overlay.
-     *
-     * @see #add(Component...)
      */
     public void removeAll() {
         getMenuManager().removeAll();
@@ -144,7 +118,6 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
      *            the index, where the component will be added
      * @param component
      *            the component to add
-     * @see #add(Component...)
      */
     public void addComponentAtIndex(int index, Component component) {
         getMenuManager().addComponentAtIndex(index, component);
@@ -152,10 +125,10 @@ public abstract class SubMenuBase<C extends ContextMenuBase<C, I, S>, I extends 
 
     /**
      * Gets the child components of this sub menu. This includes components
-     * added with {@link #add(Component...)} and the {@link MenuItem} components
-     * created with {@link #addItem(String)} and its overload methods. This
-     * doesn't include the components added to the main context menu or any
-     * other sub menus it may have.
+     * added with {@link #addComponent(Component...)} and the {@link MenuItem}
+     * components created with {@link #addItem(String)} and its overload
+     * methods. This doesn't include the components added to the main context
+     * menu or any other sub menus it may have.
      *
      * @return the child components of this sub menu
      */
