@@ -46,14 +46,14 @@ public class ContextMenuTest {
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.setTarget(new Label("target"));
 
-        contextMenu.add(label1, label2);
+        contextMenu.addComponent(label1, label2);
 
         List<Component> children = contextMenu.getChildren()
                 .collect(Collectors.toList());
         Assert.assertEquals(2, children.size());
         Assert.assertThat(children, CoreMatchers.hasItems(label1, label2));
 
-        contextMenu.add(label3);
+        contextMenu.addComponent(label3);
         children = contextMenu.getChildren().collect(Collectors.toList());
         Assert.assertEquals(3, children.size());
         Assert.assertThat(children,
@@ -128,12 +128,12 @@ public class ContextMenuTest {
         MenuItem item1 = contextMenu.addItem("foo", null);
 
         Label label1 = new Label("foo");
-        contextMenu.add(label1);
+        contextMenu.addComponent(label1);
 
         MenuItem item2 = contextMenu.addItem("bar", null);
 
         Label label2 = new Label("bar");
-        contextMenu.add(label2);
+        contextMenu.addComponent(label2);
 
         List<Component> children = contextMenu.getChildren()
                 .collect(Collectors.toList());
@@ -169,12 +169,12 @@ public class ContextMenuTest {
         MenuItem item1 = contextMenu.addItem("foo", null);
 
         Label label1 = new Label("foo");
-        contextMenu.add(label1);
+        contextMenu.addComponent(label1);
 
         MenuItem item2 = contextMenu.addItem("bar", null);
 
         Label label2 = new Label("bar");
-        contextMenu.add(label2);
+        contextMenu.addComponent(label2);
 
         List<MenuItem> items = contextMenu.getItems();
         Assert.assertEquals(2, items.size());
@@ -207,7 +207,7 @@ public class ContextMenuTest {
     public void serializeContextMenu() throws IOException {
         NativeButton menuButton = new NativeButton();
         ContextMenu menu = new ContextMenu(menuButton);
-        menu.add(new Label());
+        menu.addComponent(new Label());
         ObjectOutputStream out = new ObjectOutputStream(
                 new ByteArrayOutputStream());
         out.writeObject(menu);

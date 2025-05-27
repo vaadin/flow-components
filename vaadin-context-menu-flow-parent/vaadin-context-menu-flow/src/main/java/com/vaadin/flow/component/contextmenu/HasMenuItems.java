@@ -43,8 +43,6 @@ public interface HasMenuItems extends Serializable {
      *            not add listener
      * @return the added {@link MenuItem} component
      * @see #addItem(Component, ComponentEventListener)
-     * @see ContextMenu#add(Component...)
-     * @see SubMenu#add(Component...)
      */
     MenuItem addItem(String text,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener);
@@ -60,8 +58,6 @@ public interface HasMenuItems extends Serializable {
      *            not add listener
      * @return the added {@link MenuItem} component
      * @see #addItem(String, ComponentEventListener)
-     * @see ContextMenu#add(Component...)
-     * @see SubMenu#add(Component...)
      */
     MenuItem addItem(Component component,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener);

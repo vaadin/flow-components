@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -59,7 +58,7 @@ import elemental.json.JsonObject;
 @JsModule("./contextMenuConnector.js")
 @JsModule("./contextMenuTargetConnector.js")
 public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
-        extends Component implements HasComponents, HasStyle {
+        extends Component implements HasStyle {
 
     public static final String EVENT_DETAIL = "event.detail";
 
@@ -238,44 +237,9 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      *            the components to add
      * @see HasMenuItems#addItem(String, ComponentEventListener)
      * @see HasMenuItems#addItem(Component, ComponentEventListener)
-     *
-     * @deprecated Since 24.8, use {@link #addComponent(Component...)} instead
-     */
-    @Deprecated(since = "24.8")
-    @Override
-    public void add(Component... components) {
-        addComponent(components);
-    }
-
-    /**
-     * Adds the given components into the context menu overlay.
-     * <p>
-     * For the common use case of having a list of high-lightable items inside
-     * the overlay, use {@link #addItem(String)} and its overload methods
-     * instead.
-     * <p>
-     * The added elements in the DOM will not be children of the
-     * {@code <vaadin-context-menu>} element, but will be inserted into an
-     * overlay that is attached into the {@code <body>}.
-     *
-     * @param components
-     *            the components to add
-     * @see HasMenuItems#addItem(String, ComponentEventListener)
-     * @see HasMenuItems#addItem(Component, ComponentEventListener)
      */
     public void addComponent(Component... components) {
         getMenuManager().addComponent(components);
-    }
-
-    /**
-     * @inheritDoc
-     *
-     * @deprecated Since 24.8, use {@link #addComponent(Collection)} instead
-     */
-    @Deprecated(since = "24.8")
-    @Override
-    public void add(Collection<Component> components) {
-        addComponent(components);
     }
 
     /**
@@ -302,17 +266,11 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     }
 
     /**
-     * @inheritDoc
-     *
-     * @deprecated Since 24.8, use {@link #addItem(String)} instead
+     * Removes the given components from the context menu overlay.
+     * 
+     * @param components
+     *            the components to remove
      */
-    @Deprecated(since = "24.8")
-    @Override
-    public void add(String text) {
-        HasComponents.super.add(text);
-    }
-
-    @Override
     public void remove(Component... components) {
         getMenuManager().remove(components);
     }
@@ -321,7 +279,6 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * Removes all the child components. This also removes all the items added
      * with {@link #addItem(String)} and its overload methods.
      */
-    @Override
     public void removeAll() {
         getMenuManager().removeAll();
     }
@@ -343,7 +300,6 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * @param component
      *            the component to add
      */
-    @Override
     public void addComponentAtIndex(int index, Component component) {
         getMenuManager().addComponentAtIndex(index, component);
     }
@@ -363,9 +319,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * @param component
      *            the component to add
      */
-    @Override
     public void addComponentAsFirst(Component component) {
-        HasComponents.super.addComponentAsFirst(component);
+        getMenuManager().addComponentAtIndex(0, component);
     }
 
     /**
@@ -377,10 +332,10 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     /**
      * Gets the child components of this component. This includes components
-     * added with {@link #add(Component...)} and the {@link MenuItem} components
-     * created with {@link #addItem(String)} and its overload methods. This
-     * doesn't include the components added to the sub menus of this context
-     * menu.
+     * added with {@link #addComponent(Component...)} and the {@link MenuItem}
+     * components created with {@link #addItem(String)} and its overload
+     * methods. This doesn't include the components added to the sub menus of
+     * this context menu.
      *
      * @return the child components of this component
      */

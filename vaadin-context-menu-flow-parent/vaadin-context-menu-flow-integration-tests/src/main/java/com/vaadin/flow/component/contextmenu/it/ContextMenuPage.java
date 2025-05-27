@@ -48,7 +48,7 @@ public class ContextMenuPage extends Div {
         contextMenu.setTarget(target);
 
         contextMenu.setId("menu-add-component-at-index");
-        contextMenu.add(new NativeButton(), new NativeButton(),
+        contextMenu.addComponent(new NativeButton(), new NativeButton(),
                 new NativeButton());
 
         NativeButton addedButton = new NativeButton("Added Button");
@@ -84,7 +84,7 @@ public class ContextMenuPage extends Div {
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.setTarget(target);
         Paragraph content = new Paragraph("Context menu test.");
-        contextMenu.add(content);
+        contextMenu.addComponent(content);
 
         Div message = new Div();
         message.setId("message");
@@ -105,7 +105,7 @@ public class ContextMenuPage extends Div {
         contextMenu.setTarget(target);
 
         Paragraph content = new Paragraph("Context menu With SetOpenOnClick.");
-        contextMenu.add(content);
+        contextMenu.addComponent(content);
 
         String current = "Current state is ";
         Div message = new Div();

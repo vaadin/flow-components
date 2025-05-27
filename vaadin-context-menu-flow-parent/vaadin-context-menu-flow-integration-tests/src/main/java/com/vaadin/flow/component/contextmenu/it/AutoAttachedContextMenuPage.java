@@ -38,7 +38,7 @@ public class AutoAttachedContextMenuPage extends Div {
                 "Target for context menu which is automatically added to the UI");
         target.setId("target-for-not-attached-context-menu");
         ContextMenu contextMenu = new ContextMenu(target);
-        contextMenu.add(new Label("Auto-attached context menu"));
+        contextMenu.addComponent(new Label("Auto-attached context menu"));
         contextMenu.setId("not-attached-context-menu");
 
         add(target);

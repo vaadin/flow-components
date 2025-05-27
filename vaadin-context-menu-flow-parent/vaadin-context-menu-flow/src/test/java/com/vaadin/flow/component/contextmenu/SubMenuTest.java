@@ -51,7 +51,7 @@ public class SubMenuTest {
         Label label2 = new Label("Label 2");
         Label label3 = new Label("Label 3");
 
-        subMenu.add(label1, label2);
+        subMenu.addComponent(label1, label2);
         verifyChildren(subMenu, label1, label2);
 
         subMenu.addComponentAtIndex(1, label3);
@@ -101,12 +101,12 @@ public class SubMenuTest {
         MenuItem item1 = subMenu.addItem("foo");
 
         Label label1 = new Label("foo");
-        subMenu.add(label1);
+        subMenu.addComponent(label1);
 
         MenuItem item2 = subMenu.addItem("bar");
 
         Label label2 = new Label("bar");
-        subMenu.add(label2);
+        subMenu.addComponent(label2);
 
         verifyChildren(subMenu, item1, label1, item2, label2);
     }
@@ -116,12 +116,12 @@ public class SubMenuTest {
         MenuItem item1 = subMenu.addItem("foo");
 
         Label label1 = new Label("foo");
-        subMenu.add(label1);
+        subMenu.addComponent(label1);
 
         MenuItem item2 = subMenu.addItem("bar");
 
         Label label2 = new Label("bar");
-        subMenu.add(label2);
+        subMenu.addComponent(label2);
 
         verifyItems(subMenu, item1, item2);
     }
@@ -147,7 +147,7 @@ public class SubMenuTest {
         subMenu.removeAll();
         Assert.assertFalse(parentItem.isParentItem());
 
-        subMenu.add(new Label());
+        subMenu.addComponent(new Label());
         Assert.assertTrue(parentItem.isParentItem());
         subMenu.removeAll();
         Assert.assertFalse(parentItem.isParentItem());
@@ -187,7 +187,7 @@ public class SubMenuTest {
 
         Stream<Consumer<SubMenu>> addOperations = Stream.of(
         //@formatter:off
-                menu -> menu.add(new Div()),
+                menu -> menu.addComponent(new Div()),
                 menu -> menu.addItem("foo"),
                 menu -> menu.addItem(new Div()),
                 menu -> menu.addItem("foo", e -> {}),

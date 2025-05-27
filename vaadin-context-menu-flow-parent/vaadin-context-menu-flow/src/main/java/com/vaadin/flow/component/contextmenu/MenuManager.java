@@ -88,7 +88,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
     public I addItem(String text) {
         I menuItem = itemGenerator.apply(menu, contentReset);
         menuItem.setText(text);
-        add(menuItem);
+        addComponent(menuItem);
         return menuItem;
     }
 
@@ -101,7 +101,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      */
     public I addItem(Component component) {
         I menuItem = itemGenerator.apply(menu, contentReset);
-        add(menuItem);
+        addComponent(menuItem);
         menuItem.add(component);
         return menuItem;
     }
@@ -156,23 +156,6 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      *            components to add
      * @see #remove(Component...)
      * @see #addComponentAtIndex(int, Component)
-     * @deprecated Since 24.8, use {@link #addComponent(Component...)} instead
-     */
-    @Deprecated(since = "24.8")
-    public void add(Component... components) {
-        addComponent(components);
-    }
-
-    /**
-     * Adds components to the (sub)menu.
-     * <p>
-     * The components are added into the content as is, they are not wrapped as
-     * menu items.
-     *
-     * @param components
-     *            components to add
-     * @see #remove(Component...)
-     * @see #addComponentAtIndex(int, Component)
      */
     public void addComponent(Component... components) {
         if (parentMenuItem != null && parentMenuItem.isCheckable()) {
@@ -195,7 +178,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      *
      * @param components
      *            components to remove
-     * @see #add(Component...)
+     * @see #addComponent(Component...)
      */
     public void remove(Component... components) {
         Objects.requireNonNull(components,
@@ -237,7 +220,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      * @param component
      *            component to insert
      *
-     * @see #add(Component...)
+     * @see #addComponent(Component...)
      * @see #remove(Component...)
      */
     public void addComponentAtIndex(int index, Component component) {
@@ -259,7 +242,7 @@ public class MenuManager<C extends Component, I extends MenuItemBase<?, I, S>, S
      * <p>
      * Children consist of components and items.
      *
-     * @see #add(Component...)
+     * @see #addComponent(Component...)
      * @see #addItem(Component)
      *
      * @see #getItems()

@@ -36,7 +36,7 @@ public class ContextMenuClosePage extends Div {
         NativeButton closeButton = new NativeButton("Close",
                 e -> contextMenu.close());
         closeButton.setId("close-menu");
-        contextMenu.add(new Div(closeButton));
+        contextMenu.addComponent(new Div(closeButton));
 
         Div message = new Div();
         message.setId("closed-message");
