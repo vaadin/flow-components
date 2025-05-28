@@ -40,6 +40,8 @@ import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.streams.UploadCompleteEvent;
+import com.vaadin.flow.internal.streams.UploadStartEvent;
 import com.vaadin.flow.server.NoInputStreamException;
 import com.vaadin.flow.server.NoOutputStreamException;
 import com.vaadin.flow.server.StreamReceiver;
@@ -93,6 +95,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     private Component dropLabelIcon;
     private Component defaultDropLabelIcon;
 
+    private Registration uploadHandlerEventsRegistration;
+
     /**
      * The output of the upload is redirected to this receiver.
      */
@@ -131,6 +135,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
                     "Upload cannot be performed without a upload handler set. "
                             + "Please firstly set the upload handler implementation with upload.setUploadHandler()");
         });
+        // event listeners are not needed when no handler is set
+        unregisterUploadHandlerEvents();
 
         final String elementFiles = "element.files";
         DomEventListener allFinishedListener = e -> {
@@ -191,7 +197,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * Create a new instance of Upload with the given upload handler.
      *
      * @param handler
-     *            upload handler that handles the upload
+     *            upload handler that handles the upload, not {@code null}
      */
     public Upload(UploadHandler handler) {
         this();
@@ -710,7 +716,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         } else {
             setMaxFiles(1);
         }
-
+        // upload handler events are not needed when the receiver is used
+        unregisterUploadHandlerEvents();
         runBeforeClientResponse(ui -> getElement().setAttribute("target",
                 new StreamReceiver(getElement().getNode(), "upload",
                         getStreamVariable())));
@@ -724,21 +731,22 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * overrides the receiver set by {@link #setReceiver(Receiver)}.
      *
      * @param handler
-     *            upload handler to use for file receptions
+     *            upload handler to use for file receptions, not {@code null}
      */
     public void setUploadHandler(UploadHandler handler) {
-        UploadHandler newUploadHandler = event -> {
-            try {
-                startUpload();
-                handler.handleUploadRequest(event);
-            } finally {
-                endUpload();
-            }
-        };
+        Objects.requireNonNull(handler, "UploadHandler cannot be null");
         StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
-                newUploadHandler, this.getElement());
+                handler, this.getElement());
         runBeforeClientResponse(ui -> getElement().setAttribute("target",
                 elementStreamResource));
+        if (uploadHandlerEventsRegistration == null) {
+            Registration startRegistration = addListener(UploadStartEvent.class,
+                    event -> startUpload());
+            Registration endRegistration = addListener(
+                    UploadCompleteEvent.class, event -> endUpload());
+            uploadHandlerEventsRegistration = Registration
+                    .combine(startRegistration, endRegistration);
+        }
         receiver = null;
     }
 
@@ -943,6 +951,13 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
                 upload.fireUploadFinish(event.getFileName(),
                         event.getMimeType(), event.getContentLength());
             }
+        }
+    }
+
+    private void unregisterUploadHandlerEvents() {
+        if (uploadHandlerEventsRegistration != null) {
+            uploadHandlerEventsRegistration.remove();
+            uploadHandlerEventsRegistration = null;
         }
     }
 }
