@@ -26,7 +26,6 @@ import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -83,16 +82,16 @@ public class GridTestPage extends Div {
         grid.setItems(firstList);
 
         grid.addColumn(new ComponentRenderer<>(item -> {
-            Label label = new Label(item.getName());
-            label.setId("grid-with-component-renderers-item-name-"
+            Span span = new Span(item.getName());
+            span.setId("grid-with-component-renderers-item-name-"
                     + item.getNumber());
-            return label;
+            return span;
         })).setKey("name").setHeader("Name");
         grid.addColumn(new ComponentRenderer<>(item -> {
-            Label label = new Label(String.valueOf(item.getNumber()));
-            label.setId("grid-with-component-renderers-item-number-"
+            Span span = new Span(String.valueOf(item.getNumber()));
+            span.setId("grid-with-component-renderers-item-number-"
                     + item.getNumber());
-            return label;
+            return span;
         })).setKey("number").setHeader("Number");
         grid.addColumn(new ComponentRenderer<>(item -> {
             NativeButton remove = new NativeButton("Remove", evt -> {
@@ -178,7 +177,7 @@ public class GridTestPage extends Div {
 
         grid.addColumn(Item::getName);
         grid.setItemDetailsRenderer(new ComponentRenderer<>(
-                item -> new Label("Details opened! " + item.getNumber())));
+                item -> new Span("Details opened! " + item.getNumber())));
 
         grid.setId("grid-with-component-details-row");
         grid.setWidth("500px");
@@ -213,9 +212,9 @@ public class GridTestPage extends Div {
     }
 
     private void createDetachableGrid() {
-        Div container1 = new Div(new Label("Container 1"));
+        Div container1 = new Div(new Span("Container 1"));
         container1.setId("detachable-grid-container-1");
-        Div container2 = new Div(new Label("Container 2"));
+        Div container2 = new Div(new Span("Container 2"));
         container2.setId("detachable-grid-container-2");
 
         Grid<Item> grid = new Grid<>();

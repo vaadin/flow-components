@@ -56,7 +56,7 @@ public class AddingColumnsIT extends AbstractComponentIT {
     @Test
     public void gridRendered_addColumnWithComponentRenderer_cellsRendered() {
         clickElementWithJs("add-component-column");
-        assertCellContentsContain("<label>foo</label>", "<label>bar</label>");
+        assertCellContentsContain("<span>foo</span>", "<span>bar</span>");
     }
 
     @Test

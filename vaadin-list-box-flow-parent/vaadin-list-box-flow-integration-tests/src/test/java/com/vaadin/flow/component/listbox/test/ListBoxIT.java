@@ -45,7 +45,7 @@ public class ListBoxIT extends AbstractComponentIT {
     private ListBoxElement listBox;
     private List<WebElement> items;
 
-    private WebElement messageLabel;
+    private WebElement message;
 
     @Before
     public void init() {
@@ -61,7 +61,7 @@ public class ListBoxIT extends AbstractComponentIT {
     @Test
     public void selection() {
         init("list-box-with-selection");
-        messageLabel = findElement(By.tagName("label"));
+        message = findElement(By.id("selection-message"));
 
         final List<String> texts = listBox.getOptions();
         Assert.assertEquals(Arrays.asList(BREAD, BUTTER, MILK), texts);
@@ -84,14 +84,14 @@ public class ListBoxIT extends AbstractComponentIT {
     private void assertMessage(String oldValue, String newValue,
             boolean fromClient) {
         Assert.assertThat(
-                "The label should show the old and new values of the ListBox "
+                "The message should show the old and new values of the ListBox "
                         + "after selection changes",
-                messageLabel.getText(), containsString(
+                message.getText(), containsString(
                         String.format("from %s to %s", oldValue, newValue)));
         Assert.assertThat(
-                "The label should indicate that the event is from "
+                "The message should indicate that the event is from "
                         + (fromClient ? "client" : "server"),
-                messageLabel.getText(),
+                message.getText(),
                 containsString("from client: " + fromClient));
     }
 
@@ -115,14 +115,14 @@ public class ListBoxIT extends AbstractComponentIT {
     @Test
     public void disabledListBox() {
         init("disabled-list-box");
-        messageLabel = findElement(By.id("message-label"));
+        message = findElement(By.id("disabled-selection-message"));
 
         Object[] texts = items.stream().map(WebElement::getText).toArray();
         Assert.assertArrayEquals(new Object[] { BREAD, BUTTER, MILK }, texts);
 
         executeScript("arguments[0].click(); return true;", items.get(1));
         Assert.assertEquals("Item should not have been selectable", "-",
-                messageLabel.getText());
+                message.getText());
 
         card.findElement(By.tagName("button")).click();
         assertMessage(null, MILK, false);
@@ -132,12 +132,12 @@ public class ListBoxIT extends AbstractComponentIT {
         Assert.assertNull("Items should be enabled in the beginning",
                 item.getDomAttribute("disabled"));
 
-        List<WebElement> labels = item.findElements(By.tagName("label"));
-        String nameText = labels.get(0).getText();
-        String stockText = labels.get(1).getText();
+        List<WebElement> spans = item.findElements(By.tagName("span"));
+        String nameText = spans.get(0).getText();
+        String stockText = spans.get(1).getText();
 
         Assert.assertThat(
-                "First label inside the item should contain the name of the item",
+                "First child inside the item should contain the name of the item",
                 nameText, containsString(itemName));
         Assert.assertThat(
                 "Second child inside the item should display the amount of items in stock",
@@ -150,7 +150,7 @@ public class ListBoxIT extends AbstractComponentIT {
                     $ -> item.findElement(By.tagName("button")).click());
         } catch (NumberFormatException e) {
             Assert.fail("Could not parse integer value from the last symbol "
-                    + "of the label text, which should indicate the "
+                    + "of the span text, which should indicate the "
                     + "amount of items in stock.");
         }
 
@@ -168,11 +168,11 @@ public class ListBoxIT extends AbstractComponentIT {
     }
 
     private void assertItemGenerator(WebElement item, String itemName) {
-        List<WebElement> labels = item.findElements(By.tagName("span"));
-        String nameText = labels.get(0).getText();
+        List<WebElement> spans = item.findElements(By.tagName("span"));
+        String nameText = spans.get(0).getText();
 
         Assert.assertThat(
-                "First label inside the item should contain the name of the item",
+                "First child inside the item should contain the name of the item",
                 nameText, containsString(itemName));
     }
 

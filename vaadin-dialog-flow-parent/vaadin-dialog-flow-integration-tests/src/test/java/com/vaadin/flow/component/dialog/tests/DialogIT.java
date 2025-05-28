@@ -35,20 +35,19 @@ public class DialogIT extends AbstractComponentIT {
     public void openAndCloseConfirmationDialog_buttonsRenderedWithClickListeners() {
         open();
 
-        WebElement messageLabel = findElement(
-                By.id("confirmation-dialog-label"));
+        WebElement message = findElement(By.id("confirmation-dialog-message"));
 
         findElement(By.id("confirmation-dialog-button")).click();
         getOverlayContent().findElements(By.tagName("vaadin-button")).get(0)
                 .click();
         verifyDialogClosed();
-        Assert.assertEquals("Confirmed!", messageLabel.getText());
+        Assert.assertEquals("Confirmed!", message.getText());
 
         findElement(By.id("confirmation-dialog-button")).click();
         getOverlayContent().findElements(By.tagName("vaadin-button")).get(1)
                 .click();
         verifyDialogClosed();
-        Assert.assertEquals("Cancelled...", messageLabel.getText());
+        Assert.assertEquals("Cancelled...", message.getText());
     }
 
     @Test
@@ -65,7 +64,8 @@ public class DialogIT extends AbstractComponentIT {
         verifyDialogClosed();
 
         Assert.assertEquals("Closed from server-side",
-                findElement(By.id("server-side-close-dialog-label")).getText());
+                findElement(By.id("server-side-close-dialog-message"))
+                        .getText());
     }
 
     @Test

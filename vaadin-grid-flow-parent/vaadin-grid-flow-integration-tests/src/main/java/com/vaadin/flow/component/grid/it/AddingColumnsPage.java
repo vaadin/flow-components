@@ -21,8 +21,8 @@ import java.time.LocalDateTime;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
@@ -55,7 +55,7 @@ public class AddingColumnsPage extends Div {
                         .withProperty("age", Person::getAge));
 
         addButton("add-component-column", new ComponentRenderer<>(
-                person -> new Label(person.getFirstName())));
+                person -> new Span(person.getFirstName())));
 
         addButton("add-number-column", new NumberRenderer<>(Person::getAge,
                 NumberFormat.getIntegerInstance()));

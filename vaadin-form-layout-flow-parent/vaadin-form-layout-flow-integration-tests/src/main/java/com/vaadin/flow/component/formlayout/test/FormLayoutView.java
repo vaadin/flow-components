@@ -29,8 +29,8 @@ import com.vaadin.flow.component.formlayout.FormLayout.FormItem;
 import com.vaadin.flow.component.formlayout.FormLayout.ResponsiveStep;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -249,7 +249,7 @@ public class FormLayoutView extends Div {
         email.setValueChangeMode(ValueChangeMode.EAGER);
         DatePicker birthDate = new DatePicker();
         Checkbox doNotCall = new Checkbox("Do not call");
-        Label infoLabel = new Label();
+        Span infoMessage = new Span();
         NativeButton save = new NativeButton("Save");
         NativeButton reset = new NativeButton("Reset");
 
@@ -306,7 +306,7 @@ public class FormLayoutView extends Div {
         // Click listeners for the buttons
         save.addClickListener(event -> {
             if (binder.writeBeanIfValid(contactBeingEdited)) {
-                infoLabel.setText("Saved bean values: " + contactBeingEdited);
+                infoMessage.setText("Saved bean values: " + contactBeingEdited);
             } else {
                 BinderValidationStatus<Contact> validate = binder.validate();
                 String errorText = validate.getFieldValidationStatuses()
@@ -314,17 +314,17 @@ public class FormLayoutView extends Div {
                         .map(BindingValidationStatus::getMessage)
                         .map(Optional::get).distinct()
                         .collect(Collectors.joining(", "));
-                infoLabel.setText("There are errors: " + errorText);
+                infoMessage.setText("There are errors: " + errorText);
             }
         });
         reset.addClickListener(event -> {
             // clear fields by setting null
             binder.readBean(null);
-            infoLabel.setText("");
+            infoMessage.setText("");
             doNotCall.setValue(false);
         });
 
-        infoLabel.setId("binder-info");
+        infoMessage.setId("binder-info");
         firstName.setId("binder-first-name");
         lastName.setId("binder-last-name");
         phone.setId("binder-phone");
@@ -335,7 +335,7 @@ public class FormLayoutView extends Div {
         reset.setId("binder-reset");
 
         addCard("A form layout with fields using Binder", layoutWithBinder,
-                actions, infoLabel);
+                actions, infoMessage);
 
     }
 

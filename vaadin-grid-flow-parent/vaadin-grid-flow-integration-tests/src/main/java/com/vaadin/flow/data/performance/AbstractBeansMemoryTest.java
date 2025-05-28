@@ -28,8 +28,8 @@ import org.openjdk.jol.info.GraphLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.bean.Address;
 import com.vaadin.flow.data.bean.Country;
@@ -46,8 +46,8 @@ public abstract class AbstractBeansMemoryTest<T extends Component> extends Div
     private int dataSize;
     private boolean isInMemory;
 
-    private Label logLabel;
-    private Label memoryLabel;
+    private Span logMessage;
+    private Span memoryMessage;
 
     @Override
     public void setParameter(BeforeEvent event, String parameter) {
@@ -65,15 +65,15 @@ public abstract class AbstractBeansMemoryTest<T extends Component> extends Div
 
         VerticalLayout layout = new VerticalLayout();
         add(layout);
-        layout.add(new Label(getClass().getSimpleName()));
+        layout.add(new Span(getClass().getSimpleName()));
 
-        memoryLabel = new Label();
-        memoryLabel.setId("memory");
-        layout.add(memoryLabel);
+        memoryMessage = new Span();
+        memoryMessage.setId("memory");
+        layout.add(memoryMessage);
 
-        logLabel = new Label();
-        logLabel.setId("log");
-        layout.add(logLabel);
+        logMessage = new Span();
+        logMessage.setId("log");
+        layout.add(logMessage);
 
         T component = createComponent();
         setData(itemsCount, component, true);
@@ -134,7 +134,7 @@ public abstract class AbstractBeansMemoryTest<T extends Component> extends Div
             setBackendContainer(component, persons);
         }
 
-        memoryLabel.setText(String
+        memoryMessage.setText(String
                 .valueOf(GraphLayout.parseInstance(component).totalSize()));
     }
 

@@ -24,7 +24,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.bean.SimpleBean;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -49,7 +48,7 @@ public class ComboBoxPage extends Div {
         MR, MRS;
     }
 
-    private Label selectedTitle = new Label();
+    private Span selectedTitle = new Span();
 
     /**
      * Creates a new instance.
@@ -85,7 +84,7 @@ public class ComboBoxPage extends Div {
     private void createExternalDisableTest() {
         ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setId("client-test");
-        Label message = new Label("Nothing clicked yet...");
+        Span message = new Span("Nothing clicked yet...");
         message.setId("get-value");
         comboBox.setItems("foo", "bar", "paa");
         NativeButton valueSet = new NativeButton("Set Value");
@@ -172,7 +171,7 @@ public class ComboBoxPage extends Div {
 
     private void createWithButtonRenderer() {
         ComboBox<String> comboBox = new ComboBox<>();
-        Label message = new Label("Nothing clicked yet...");
+        Span message = new Span("Nothing clicked yet...");
         message.setId("button-renderer-message");
 
         comboBox.setRenderer(new NativeButtonRenderer<>(item -> item,
@@ -186,7 +185,7 @@ public class ComboBoxPage extends Div {
     private void createWithUpdatableValue() {
         ComboBox<String> combo = new ComboBox<>();
         combo.setItems("Item 1", "Item 2", "Item 3");
-        Label message = new Label();
+        Span message = new Span();
         NativeButton button = new NativeButton("Update value",
                 evt -> combo.setValue("Item 2"));
 

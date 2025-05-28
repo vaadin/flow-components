@@ -94,7 +94,7 @@ public class NotificationIT extends AbstractComponentIT {
         Assert.assertEquals(1, notification
                 .findElements(By.id("button-inside-notification")).size());
         Assert.assertEquals(1, notification
-                .findElements(By.id("label-inside-notification")).size());
+                .findElements(By.id("text-inside-notification")).size());
         notification.findElement(By.id("button-inside-notification")).click();
         checkNotificationIsClosed();
     }

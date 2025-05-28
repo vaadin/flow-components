@@ -80,7 +80,7 @@ public class NotificationView extends Div {
         notification.setPosition(Position.MIDDLE);
         button.addClickListener(event -> notification.open());
         notification.setId("component-notification");
-        content.setId("label-inside-notification");
+        content.setId("text-inside-notification");
         buttonInside.setId("button-inside-notification");
         add(button);
     }
