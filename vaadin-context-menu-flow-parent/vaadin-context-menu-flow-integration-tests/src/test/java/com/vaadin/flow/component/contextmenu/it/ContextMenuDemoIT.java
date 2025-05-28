@@ -75,9 +75,9 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
                 .findElement(By.tagName("vaadin-checkbox"));
 
         getOverlay().findElement(By.tagName("hr"));
-        WebElement label = getOverlay().findElement(
-                By.cssSelector("vaadin-context-menu-list-box > label"));
-        Assert.assertEquals("This is not a menu item", label.getText());
+        WebElement span = getOverlay().findElement(
+                By.cssSelector("vaadin-context-menu-list-box > span"));
+        Assert.assertEquals("This is not a menu item", span.getText());
 
         checkbox.click();
         $("body").first().click();
@@ -111,7 +111,7 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
         getMenuItems(overlays.get(2)).get(0).click();
 
         Assert.assertEquals("Clicked on the third item",
-                $("label").id("hierarchical-menu-message").getText());
+                $("span").id("hierarchical-menu-message").getText());
 
         verifyClosed();
     }
@@ -130,7 +130,7 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
         items.get(1).click();
 
         Assert.assertEquals("Unselected option 2",
-                $("label").id("checkable-menu-items-message").getText());
+                $("span").id("checkable-menu-items-message").getText());
         verifyClosed();
 
         rightClickOn(By.id("checkable-menu-items-target"));
@@ -143,7 +143,7 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
         items.get(0).click();
 
         Assert.assertEquals("Selected option 1",
-                $("label").id("checkable-menu-items-message").getText());
+                $("span").id("checkable-menu-items-message").getText());
         verifyClosed();
 
         rightClickOn(By.id("checkable-menu-items-target"));
@@ -186,7 +186,7 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
                 items.get(1).getTagName().toLowerCase(Locale.ENGLISH));
         Assert.assertEquals("vaadin-context-menu-item",
                 items.get(2).getTagName().toLowerCase(Locale.ENGLISH));
-        Assert.assertEquals("label",
+        Assert.assertEquals("span",
                 items.get(3).getTagName().toLowerCase(Locale.ENGLISH));
     }
 

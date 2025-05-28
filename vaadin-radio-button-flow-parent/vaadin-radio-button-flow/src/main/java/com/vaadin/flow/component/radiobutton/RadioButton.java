@@ -24,7 +24,7 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.binder.HasItemComponents;
 
@@ -42,7 +42,7 @@ class RadioButton<T> extends Component
 
     private T item;
 
-    private final Label labelElement = appendLabelElement();
+    private final NativeLabel labelElement = appendLabelElement();
 
     RadioButton(String key, T item) {
         this.item = item;
@@ -65,8 +65,8 @@ class RadioButton<T> extends Component
         labelElement.add(component);
     }
 
-    private Label appendLabelElement() {
-        Label label = new Label();
+    private NativeLabel appendLabelElement() {
+        NativeLabel label = new NativeLabel();
         SlotUtils.addToSlot(this, "label", label);
         return label;
     }

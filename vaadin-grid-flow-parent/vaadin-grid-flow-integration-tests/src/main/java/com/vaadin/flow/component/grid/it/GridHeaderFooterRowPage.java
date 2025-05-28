@@ -25,8 +25,8 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
@@ -93,7 +93,7 @@ public class GridHeaderFooterRowPage extends Div {
         button = new NativeButton("Set components for headers",
                 event -> grid.getHeaderRows().stream()
                         .flatMap(row -> row.getCells().stream())
-                        .forEach(cell -> cell.setComponent(new Label("foo"))));
+                        .forEach(cell -> cell.setComponent(new Span("foo"))));
         button.setId("set-components-for-headers");
         add(button);
 

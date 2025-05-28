@@ -18,8 +18,8 @@ package com.vaadin.flow.component.dialog.tests;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
@@ -95,7 +95,7 @@ public class DialogTestPage extends Div {
 
         Dialog dialog = new Dialog();
         dialog.setId("dialog-outside-ui");
-        dialog.add(new Label("Hei! Moika! Moi!"), close);
+        dialog.add(new Span("Hei! Moika! Moi!"), close);
 
         open.addClickListener(event -> dialog.open());
         close.addClickListener(event -> dialog.close());
@@ -110,7 +110,7 @@ public class DialogTestPage extends Div {
 
         Dialog dialog = new Dialog();
         dialog.setId("dialog-in-ui-after-opened");
-        dialog.add(new Label("Hei! Moika! Moi!"), close);
+        dialog.add(new Span("Hei! Moika! Moi!"), close);
 
         open.addClickListener(event -> {
             dialog.setOpened(true);
@@ -300,7 +300,7 @@ public class DialogTestPage extends Div {
         Dialog dialog = new Dialog();
         VerticalLayout layout = new VerticalLayout();
         layout.setPadding(false);
-        layout.add(new Label("content 1"), new Label("content 2"));
+        layout.add(new Span("content 1"), new Span("content 2"));
         dialog.add(layout);
         button.addClickListener(e -> dialog.open());
         add(button);

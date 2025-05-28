@@ -24,7 +24,6 @@ import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.dialog.testbench.DialogElement;
 import com.vaadin.flow.component.html.testbench.DivElement;
-import com.vaadin.flow.component.html.testbench.LabelElement;
 import com.vaadin.flow.component.html.testbench.NativeButtonElement;
 import com.vaadin.flow.component.html.testbench.SpanElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -57,9 +56,9 @@ public class DialogWithTemplateIT extends AbstractComponentIT {
             btn.click();
 
             int size = i + 1;
-            LabelElement label = container.$(LabelElement.class)
-                    .id("label-" + size);
-            Assert.assertEquals("Label " + size, label.getText());
+            SpanElement span = container.$(SpanElement.class)
+                    .id("text-" + size);
+            Assert.assertEquals("Text " + size, span.getText());
         }
     }
 }

@@ -17,7 +17,6 @@ package com.vaadin.flow.component.contextmenu.it;
 
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
 
@@ -36,7 +35,7 @@ public class OverrideOnBeforeOpenContextMenuPage extends Div {
     }
 
     private void addContextMenuThatDoesNotOpen() {
-        Label target = new Label("Context menu that should not open");
+        Div target = new Div("Context menu that should not open");
         target.setId("no-open-menu-target");
 
         ContextMenu contextMenu = new ContextMenu(target) {
@@ -53,7 +52,7 @@ public class OverrideOnBeforeOpenContextMenuPage extends Div {
     }
 
     private void addContextMenuThatDynamicallyChangesItems() {
-        Label target = new Label("Context menu that changes items dynamically");
+        Div target = new Div("Context menu that changes items dynamically");
         target.setId("dynamic-context-menu-target");
 
         ContextMenu contextMenu = new ContextMenu(target) {

@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.grid.Person;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.Element;
 
 import elemental.json.Json;
@@ -47,10 +47,10 @@ public class EditorRendererTest {
 
     @Test
     public void setComponentFunction_editorIsOpen_componentIsRendered() {
-        Label label = new Label();
-        renderer.setComponentFunction(item -> label);
+        Span span = new Span();
+        renderer.setComponentFunction(item -> span);
         Mockito.when(editor.isOpen()).thenReturn(true);
-        Mockito.when(renderer.getComponentNodeId(label)).thenReturn(42);
+        Mockito.when(renderer.getComponentNodeId(span)).thenReturn(42);
 
         Person item = new Person("Special Person", 42);
 
@@ -60,16 +60,16 @@ public class EditorRendererTest {
         renderer.generateData(item, object);
 
         Assert.assertEquals(42, (int) object.getNumber("_col_editor"));
-        Mockito.verify(renderer, Mockito.times(1)).getComponentNodeId(label);
+        Mockito.verify(renderer, Mockito.times(1)).getComponentNodeId(span);
 
         Assert.assertEquals(1, editorContainer.getChildCount());
-        Assert.assertEquals(label,
+        Assert.assertEquals(span,
                 editorContainer.getChild(0).getComponent().get());
     }
 
     @Test
     public void setComponentFunction_editorIsClosed_nothingIsRendered() {
-        renderer.setComponentFunction(item -> new Label());
+        renderer.setComponentFunction(item -> new Span());
         Mockito.when(editor.isOpen()).thenReturn(false);
 
         Person item = new Person("Special Person", 42);

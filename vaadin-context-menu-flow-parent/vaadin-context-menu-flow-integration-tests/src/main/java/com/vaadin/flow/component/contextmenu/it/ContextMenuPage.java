@@ -18,7 +18,6 @@ package com.vaadin.flow.component.contextmenu.it;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.dom.Element;
@@ -41,7 +40,7 @@ public class ContextMenuPage extends Div {
     }
 
     private void createContextMenuAndAddComponentAtIndex() {
-        Label target = new Label(
+        Div target = new Div(
                 "Target for context menu with opened change listener");
         target.setId("context-menu-add-component-target");
         ContextMenu contextMenu = new ContextMenu();
@@ -78,7 +77,7 @@ public class ContextMenuPage extends Div {
     }
 
     private void addContextMenuWithOpenedChangeListener() {
-        Label target = new Label(
+        Div target = new Div(
                 "Target for context menu with opened change listener");
         target.setId("context-menu-test");
         ContextMenu contextMenu = new ContextMenu();
@@ -99,7 +98,7 @@ public class ContextMenuPage extends Div {
 
     private void addContextMenuWithControls() {
         ContextMenu contextMenu = new ContextMenu();
-        Label target = new Label(
+        Div target = new Div(
                 "Target for context menu with setOpenOnClick() and setTarget()");
         target.setId("context-menu-with-controls");
         contextMenu.setTarget(target);
@@ -126,7 +125,7 @@ public class ContextMenuPage extends Div {
             message.setText(current + contextMenu.isOpenOnClick());
         });
 
-        Label altTarget = new Label("Alternative target");
+        Div altTarget = new Div("Alternative target");
         altTarget.setId("alt-target");
 
         NativeButton changeTarget = new NativeButton("Change target",

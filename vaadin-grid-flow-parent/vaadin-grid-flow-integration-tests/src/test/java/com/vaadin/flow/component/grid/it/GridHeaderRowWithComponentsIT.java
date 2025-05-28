@@ -47,12 +47,12 @@ public class GridHeaderRowWithComponentsIT extends AbstractComponentIT {
                 "The first header cell should contain the component "
                         + "of the first appended header row",
                 getInnerHtml(grid.getHeaderCellContent(0, 0))
-                        .contains("<label>foo</label>"));
+                        .contains("<span>foo</span>"));
         Assert.assertTrue(
                 "The second header cell should contain the component "
                         + "of the second appended header row",
                 getInnerHtml(grid.getHeaderCellContent(1, 0))
-                        .contains("<label>bar</label>"));
+                        .contains("<span>bar</span>"));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class GridHeaderRowWithComponentsIT extends AbstractComponentIT {
                 headerContent.contains("this is text"));
         Assert.assertTrue(
                 "The header cell should contain the component which was last set",
-                headerContent.contains("<label>this is component</label>"));
+                headerContent.contains("<span>this is component</span>"));
     }
 
     @Test

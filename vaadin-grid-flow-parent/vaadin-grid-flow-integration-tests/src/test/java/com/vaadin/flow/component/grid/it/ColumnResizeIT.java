@@ -44,21 +44,21 @@ public class ColumnResizeIT extends AbstractComponentIT {
     public void columnWidthsAreSetCorrectly() {
         resizeSecondColumnBy(RESIZE_AMOUNT_PX);
 
-        WebElement resizedColIdLabel = findElement(
-                By.id(ColumnResizeEventPage.RESIZED_COLUMN_ID_LABEL));
+        WebElement resizedColIdMessage = findElement(
+                By.id(ColumnResizeEventPage.RESIZED_COLUMN_ID_MESSAGE));
         Assert.assertEquals("ID of resized column did not match expected one.",
                 ColumnResizeEventPage.RESIZED_COLUMN_ID,
-                resizedColIdLabel.getText());
+                resizedColIdMessage.getText());
 
-        WebElement colFlexGrowsLabel = findElement(
-                By.id(ColumnResizeEventPage.FLEX_GROWS_COLUMN_VALUES_LABEL));
+        WebElement colFlexGrowsMessage = findElement(
+                By.id(ColumnResizeEventPage.FLEX_GROWS_COLUMN_VALUES_MESSAGE));
         Assert.assertEquals(
                 "Column flex-grow values did not match expected ones.", "0|0|1",
-                colFlexGrowsLabel.getText());
+                colFlexGrowsMessage.getText());
 
-        WebElement colWidthsLabel = findElement(
-                By.id(ColumnResizeEventPage.WIDTHS_COLUMN_VALUES_LABEL));
-        String[] colWidths = colWidthsLabel.getText().split("\\|");
+        WebElement colWidthsMessage = findElement(
+                By.id(ColumnResizeEventPage.WIDTHS_COLUMN_VALUES_MESSAGE));
+        String[] colWidths = colWidthsMessage.getText().split("\\|");
 
         Assert.assertEquals("Expected 3 column widths from the event.",
                 colWidths.length, 3);

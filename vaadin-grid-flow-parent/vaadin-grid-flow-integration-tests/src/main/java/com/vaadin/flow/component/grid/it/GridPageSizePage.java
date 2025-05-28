@@ -20,8 +20,8 @@ import java.util.stream.IntStream;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
@@ -37,7 +37,7 @@ public class GridPageSizePage extends Div {
                     query -> getStream(query).mapToObj(Integer::toString),
                     query -> 10000);
 
-    private Label info;
+    private Span info;
 
     /**
      * Creates a view with a grid with page size of 10.
@@ -49,7 +49,7 @@ public class GridPageSizePage extends Div {
         grid.addColumn(i -> i).setHeader("text");
         grid.addColumn(i -> String.valueOf(i.length())).setHeader("length");
 
-        info = new Label();
+        info = new Span();
         info.setId("query-info");
 
         Input size = new Input();

@@ -99,7 +99,7 @@ public class DetachReattachIT extends AbstractComboBoxIT {
 
         TestBenchElement overlay = $("vaadin-combo-box-overlay").waitForFirst();
         List<TestBenchElement> items = overlay.$("vaadin-combo-box-item").all();
-        items.forEach(item -> Assert.assertTrue(item.$("label").exists()));
+        items.forEach(item -> Assert.assertTrue(item.$("span").exists()));
     }
 
     private void assertValueChanges(String... expected) {

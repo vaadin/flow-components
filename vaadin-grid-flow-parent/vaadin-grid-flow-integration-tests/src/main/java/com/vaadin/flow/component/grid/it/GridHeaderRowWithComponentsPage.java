@@ -18,7 +18,7 @@ package com.vaadin.flow.component.grid.it;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.html.NativeLabel;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
@@ -36,14 +36,14 @@ public class GridHeaderRowWithComponentsPage extends Div {
         add(grid);
 
         var headerRow1 = grid.appendHeaderRow();
-        headerRow1.getCell(column1).setComponent(new NativeLabel("foo"));
-        var initiallyHiddenHeader1 = new NativeLabel("Initially hidden foo");
+        headerRow1.getCell(column1).setComponent(new Span("foo"));
+        var initiallyHiddenHeader1 = new Span("Initially hidden foo");
         initiallyHiddenHeader1.setVisible(false);
         headerRow1.getCell(column2).setComponent(initiallyHiddenHeader1);
 
         var headerRow2 = grid.appendHeaderRow();
-        headerRow2.getCell(column1).setComponent(new NativeLabel("bar"));
-        var initiallyHiddenHeader2 = new NativeLabel("Initially hidden bar");
+        headerRow2.getCell(column1).setComponent(new Span("bar"));
+        var initiallyHiddenHeader2 = new Span("Initially hidden bar");
         initiallyHiddenHeader2.setVisible(false);
         headerRow2.getCell(column2).setComponent(initiallyHiddenHeader2);
 
@@ -53,8 +53,7 @@ public class GridHeaderRowWithComponentsPage extends Div {
         button.addClickListener(event -> {
             var topRow = grid.prependHeaderRow();
             topRow.getCell(column1).setText("this is text");
-            topRow.getCell(column1)
-                    .setComponent(new NativeLabel("this is component"));
+            topRow.getCell(column1).setComponent(new Span("this is component"));
         });
         add(button);
 

@@ -19,17 +19,17 @@ import java.util.Arrays;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-combo-box/combo-box-in-template")
 public class ComboBoxInTemplatePage extends Div {
 
-    private Label message;
+    private Span message;
 
     public ComboBoxInTemplatePage() {
-        message = new Label("-");
+        message = new Span("-");
         message.setId("message");
         add(message);
 
