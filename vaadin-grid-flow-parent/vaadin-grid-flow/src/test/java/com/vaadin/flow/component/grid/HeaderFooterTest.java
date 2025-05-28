@@ -36,7 +36,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.FooterRow.FooterCell;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
-import com.vaadin.flow.component.html.NativeLabel;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.dom.Element;
@@ -1143,7 +1143,7 @@ public class HeaderFooterTest {
                 .forEach(cell -> cell.setText(textContent));
         HeaderRow newHeaderRow = grid.appendHeaderRow();
         newHeaderRow.getCells()
-                .forEach(cell -> cell.setComponent(new NativeLabel("NEW")));
+                .forEach(cell -> cell.setComponent(new Span("NEW")));
         grid.removeHeaderRow(newHeaderRow);
         assertRowTextContent(textContent, grid.getHeaderRows().get(0));
     }
@@ -1155,7 +1155,7 @@ public class HeaderFooterTest {
                 defaultHeaderRow);
         HeaderRow newHeaderRow = grid.appendHeaderRow();
         newHeaderRow.getCells()
-                .forEach(cell -> cell.setComponent(new NativeLabel("NEW")));
+                .forEach(cell -> cell.setComponent(new Span("NEW")));
         grid.removeHeaderRow(newHeaderRow);
         assertRowComponents(defaultHeaderRowComponents,
                 grid.getHeaderRows().get(0));
@@ -1192,7 +1192,7 @@ public class HeaderFooterTest {
                 .forEach(cell -> cell.setText(textContent));
         FooterRow newFooterRow = grid.prependFooterRow();
         newFooterRow.getCells()
-                .forEach(cell -> cell.setComponent(new NativeLabel("NEW")));
+                .forEach(cell -> cell.setComponent(new Span("NEW")));
         grid.removeFooterRow(newFooterRow);
         assertRowTextContent(textContent, grid.getFooterRows().get(0));
     }
@@ -1204,7 +1204,7 @@ public class HeaderFooterTest {
                 footerRow);
         FooterRow newFooterRow = grid.prependFooterRow();
         newFooterRow.getCells()
-                .forEach(cell -> cell.setComponent(new NativeLabel("NEW")));
+                .forEach(cell -> cell.setComponent(new Span("NEW")));
         grid.removeFooterRow(newFooterRow);
         assertRowComponents(footerRowComponents, grid.getFooterRows().get(0));
     }
@@ -1545,9 +1545,8 @@ public class HeaderFooterTest {
 
     private List<? extends Component> setComponentsToRow(
             AbstractRow<? extends AbstractRow.AbstractCell> row) {
-        List<NativeLabel> rowComponents = IntStream
-                .range(0, grid.getColumns().size()).mapToObj(Integer::toString)
-                .map(NativeLabel::new).toList();
+        List<Span> rowComponents = IntStream.range(0, grid.getColumns().size())
+                .mapToObj(Integer::toString).map(Span::new).toList();
         for (int i = 0; i < rowComponents.size(); i++) {
             row.getCells().get(i).setComponent(rowComponents.get(i));
         }
