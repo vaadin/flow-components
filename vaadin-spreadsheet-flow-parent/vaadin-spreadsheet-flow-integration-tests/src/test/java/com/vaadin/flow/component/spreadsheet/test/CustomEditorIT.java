@@ -436,6 +436,11 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
     }
 
     private void clickToggleCellVisibleButton() {
+        waitUntil(driver -> {
+            var button = $(TestBenchElement.class)
+                    .id("toggleCustomEditorVisibilityButton");
+            return button.isDisplayed();
+        });
         var toggleButton = $(TestBenchElement.class)
                 .id("toggleCustomEditorVisibilityButton");
         toggleButton.click();
