@@ -25,6 +25,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.upload.Upload;
@@ -35,6 +36,8 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.ExecutionContext;
 import com.vaadin.flow.internal.StateNode;
+import com.vaadin.flow.internal.streams.UploadCompleteEvent;
+import com.vaadin.flow.internal.streams.UploadStartEvent;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinRequest;
@@ -133,6 +136,8 @@ public class UploadTest {
         Element owner = setupMockElement(ui);
         Upload upload = setupMockUpload(owner);
 
+        Mockito.when(owner.getComponent()).thenReturn(Optional.of(upload));
+
         Assert.assertFalse(upload.isUploading());
 
         UploadHandler customHandler = Mockito.spy(new UploadHandler() {
@@ -183,9 +188,9 @@ public class UploadTest {
                 .getValue();
         Assert.assertNotNull(elementStreamResource);
 
-        UploadHandler uploadHandlerWrapper = (UploadHandler) elementStreamResource
+        UploadHandler uploadHandler = (UploadHandler) elementStreamResource
                 .getElementRequestHandler();
-        uploadHandlerWrapper.handleRequest(request, response, session, owner);
+        uploadHandler.handleRequest(request, response, session, owner);
         // when the upload handling is completed,
         // then the upload is not in progress anymore
         Assert.assertFalse(upload.isUploading());
@@ -195,14 +200,20 @@ public class UploadTest {
                 .handleUploadRequest(Mockito.any(UploadEvent.class));
         Mockito.verify(customHandler).responseHandled(Mockito.anyBoolean(),
                 Mockito.any(VaadinResponse.class));
-        Assert.assertEquals(111L, uploadHandlerWrapper.getRequestSizeMax());
-        Assert.assertEquals(222L, uploadHandlerWrapper.getFileSizeMax());
-        Assert.assertEquals(333L, uploadHandlerWrapper.getFileCountMax());
-        Assert.assertEquals("custom-postfix",
-                uploadHandlerWrapper.getUrlPostfix());
-        Assert.assertTrue(uploadHandlerWrapper.isAllowInert());
+        Assert.assertEquals(111L, uploadHandler.getRequestSizeMax());
+        Assert.assertEquals(222L, uploadHandler.getFileSizeMax());
+        Assert.assertEquals(333L, uploadHandler.getFileCountMax());
+        Assert.assertEquals("custom-postfix", uploadHandler.getUrlPostfix());
+        Assert.assertTrue(uploadHandler.isAllowInert());
         Assert.assertEquals(DisabledUpdateMode.ALWAYS,
-                uploadHandlerWrapper.getDisabledUpdateMode());
+                uploadHandler.getDisabledUpdateMode());
+
+        // when the receiver is set, then the listeners are removed
+        upload.setReceiver(new MemoryBuffer());
+        Assert.assertTrue(ComponentUtil
+                .getListeners(upload, UploadStartEvent.class).isEmpty());
+        Assert.assertTrue(ComponentUtil
+                .getListeners(upload, UploadCompleteEvent.class).isEmpty());
     }
 
     @Test
