@@ -65,10 +65,13 @@ class RootCache<T> extends Cache<T> {
 
     private int getFlatIndexByPath(Cache<T> cache, int... path) {
         var index = path[0];
-        var restPath = Arrays.copyOfRange(path, 1, path.length);
+        if (index < 0) {
+            index = cache.getSize() + index;
+        }
 
         var flatIndex = cache.getFlatIndex(index);
         var subCache = cache.indexToCache.get(index);
+        var restPath = Arrays.copyOfRange(path, 1, path.length);
 
         if (subCache != null && subCache.getFlatSize() > 0
                 && restPath.length > 0) {
