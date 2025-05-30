@@ -941,7 +941,9 @@ public class TreeGrid<T> extends Grid<T>
      */
     @Override
     public void scrollToIndex(int rowIndex) {
-        super.scrollToIndex(rowIndex);
+        getUI().ifPresent(ui -> ui.beforeClientResponse(this,
+                ctx -> getElement().executeJs(
+                        "this.scrollToIndex($0);", rowIndex)));
     }
 
     /**
@@ -970,7 +972,7 @@ public class TreeGrid<T> extends Grid<T>
                 .collect(Collectors.joining(","));
         getUI().ifPresent(ui -> ui.beforeClientResponse(this,
                 ctx -> getElement().executeJs(
-                        "this.scrollToIndex(" + joinedIndexes + ");")));
+                        "this.scrollToIndex($0);", joinedIndexes)));
     }
 
     @Override
