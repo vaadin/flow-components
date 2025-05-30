@@ -104,12 +104,14 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
         getKeyMapper().refresh(item);
         dataGenerator.refreshData(item);
 
-        var itemContext = rootCache.getItemContext(item);
-        if (itemContext != null) {
-            itemContext.cache().refreshItem(item);
-        }
+        if (rootCache != null) {
+            var itemContext = rootCache.getItemContext(item);
+            if (itemContext != null) {
+                itemContext.cache().refreshItem(item);
+            }
 
-        requestFlush();
+            requestFlush();
+        }
     }
 
     /** New API */
