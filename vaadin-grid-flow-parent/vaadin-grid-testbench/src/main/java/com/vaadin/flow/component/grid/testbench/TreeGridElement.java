@@ -247,6 +247,7 @@ public class TreeGridElement extends GridElement {
     @Deprecated(since = "24.9", forRemoval = true)
     public long getNumberOfExpandedRows() {
         waitUntilLoadingFinished();
+        // FIXME: How to get this number now that expandedItems aren't shared with the client?
         return (long) executeScript("return arguments[0].expandedItems.length;",
                 this);
     }
@@ -294,14 +295,12 @@ public class TreeGridElement extends GridElement {
      */
     @Deprecated(since = "24.9", forRemoval = true)
     public boolean isLoadingExpandedRows() {
-        return (Boolean) executeScript(
-                "return !!arguments[0].$connector ? (arguments[0].$connector.hasEnsureSubCacheQueue() || arguments[0].$connector.hasParentRequestQueue()) : arguments[0]._dataProviderController.isLoading()",
-                this);
+        return isLoading();
     }
 
     @Override
     protected boolean isLoading() {
-        return super.isLoading() || isLoadingExpandedRows();
+        return super.isLoading();
     }
 
     /**
