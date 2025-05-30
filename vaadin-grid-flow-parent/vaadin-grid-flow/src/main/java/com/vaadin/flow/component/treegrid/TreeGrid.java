@@ -972,7 +972,7 @@ public class TreeGrid<T> extends Grid<T>
                 .collect(Collectors.joining(","));
         getUI().ifPresent(ui -> ui.beforeClientResponse(this,
                 ctx -> getElement().executeJs(
-                        "this.scrollToIndex($0);", joinedIndexes)));
+                        "this.scrollToIndex(" + joinedIndexes + ");")));
     }
 
     @Override
