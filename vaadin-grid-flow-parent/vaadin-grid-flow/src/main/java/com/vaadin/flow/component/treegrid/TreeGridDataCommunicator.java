@@ -150,6 +150,12 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
     private void preloadPath(Cache<T> cache, int... path) {
         var index = path[0];
 
+        if (index < 0) {
+            // If the index is negative, it is relative to the end of the
+            // cache.
+            index = cache.getSize() + index;
+        }
+
         if (!cache.hasItem(index)) {
             cache.setItems(index,
                     fetchDataProviderChildren(cache.getParentItem(),
@@ -161,7 +167,6 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
         }
 
         var item = cache.getItem(index);
-
         if (isExpanded(item)) {
             if (!cache.hasCache(index)) {
                 cache.createCache(index, getDataProviderChildCount(item));
