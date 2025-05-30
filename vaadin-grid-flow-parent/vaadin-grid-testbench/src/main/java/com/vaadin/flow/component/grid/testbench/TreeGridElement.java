@@ -323,7 +323,7 @@ public class TreeGridElement extends GridElement {
      */
     public void scrollToEnd() {
         executeScript(
-                "arguments[0].scrollToIndex(...Array(10).fill(Infinity));",
+                "arguments[0].scrollToIndex(...Array(10).fill(-1));",
                 this);
     }
 }
