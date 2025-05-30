@@ -977,7 +977,7 @@ public class TreeGrid<T> extends Grid<T>
     public void scrollToEnd() {
         getUI().ifPresent(ui -> ui.beforeClientResponse(this,
                 ctx -> getElement().executeJs(
-                        "this.scrollToIndex(...Array(10).fill(Infinity))")));
+                        "this.scrollToIndex(...Array(10).fill(-1))")));
     }
 
     @ClientCallable
