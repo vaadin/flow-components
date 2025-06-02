@@ -8,6 +8,8 @@
  */
 package com.vaadin.flow.component.charts.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.vaadin.flow.component.charts.model.serializers.LabelsRotationSerializer;
 import com.vaadin.flow.component.charts.model.style.Style;
 
 public class Labels extends AbstractConfigurationObject {
@@ -325,6 +327,7 @@ public class Labels extends AbstractConfigurationObject {
         this.zIndex = zIndex;
     }
 
+    @JsonSerialize(using = LabelsRotationSerializer.class)
     public String getRotation() {
         return rotation;
     }
