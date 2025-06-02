@@ -162,8 +162,12 @@ public class FormulaFormatIT extends AbstractSpreadsheetIT {
 
         // The invalid formula overlay can block subsequent clicks
         // Move the mouse cursor to some other element to hide it first
+        waitUntil(driver -> $("*")
+                .withClassName("comment-overlay-invalidformula").exists());
         TestBenchElement button = $("vaadin-button").id("freezePane");
         new Actions(driver).moveToElement(button).perform();
+        waitUntil(driver -> !$("*")
+                .withClassName("comment-overlay-invalidformula").exists());
 
         addFreezePane(); // Sheet content is reloaded
 
