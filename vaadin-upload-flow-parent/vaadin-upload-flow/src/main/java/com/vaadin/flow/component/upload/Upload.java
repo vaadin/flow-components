@@ -47,6 +47,7 @@ import com.vaadin.flow.server.NoOutputStreamException;
 import com.vaadin.flow.server.StreamReceiver;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.StreamVariable;
+import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
 
@@ -95,8 +96,6 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     private Component dropLabelIcon;
     private Component defaultDropLabelIcon;
 
-    private Registration uploadHandlerEventsRegistration;
-
     /**
      * The output of the upload is redirected to this receiver.
      */
@@ -130,13 +129,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         getElement().addEventListener("upload-abort",
                 event -> interruptUpload());
 
-        setUploadHandler(ignored -> {
-            throw new IllegalStateException(
-                    "Upload cannot be performed without a upload handler set. "
-                            + "Please firstly set the upload handler implementation with upload.setUploadHandler()");
-        });
-        // event listeners are not needed when no handler is set
-        unregisterUploadHandlerEvents();
+        setUploadHandler(new FailFastUploadHandler());
 
         final String elementFiles = "element.files";
         DomEventListener allFinishedListener = e -> {
@@ -716,8 +709,6 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         } else {
             setMaxFiles(1);
         }
-        // upload handler events are not needed when the receiver is used
-        unregisterUploadHandlerEvents();
         runBeforeClientResponse(ui -> getElement().setAttribute("target",
                 new StreamReceiver(getElement().getNode(), "upload",
                         getStreamVariable())));
@@ -739,13 +730,10 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
                 handler, this.getElement());
         runBeforeClientResponse(ui -> getElement().setAttribute("target",
                 elementStreamResource));
-        if (uploadHandlerEventsRegistration == null) {
-            Registration startRegistration = addListener(UploadStartEvent.class,
-                    event -> startUpload());
-            Registration endRegistration = addListener(
-                    UploadCompleteEvent.class, event -> endUpload());
-            uploadHandlerEventsRegistration = Registration
-                    .combine(startRegistration, endRegistration);
+        if (!hasListener(UploadStartEvent.class)
+                && !(handler instanceof FailFastUploadHandler)) {
+            addListener(UploadStartEvent.class, event -> startUpload());
+            addListener(UploadCompleteEvent.class, event -> endUpload());
         }
         receiver = null;
     }
@@ -954,10 +942,17 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         }
     }
 
-    private void unregisterUploadHandlerEvents() {
-        if (uploadHandlerEventsRegistration != null) {
-            uploadHandlerEventsRegistration.remove();
-            uploadHandlerEventsRegistration = null;
+    /**
+     * An internal implementation of the UploadHandler interface that just
+     * reminds the developer that UploadHandler must be set to Upload. Upload
+     * event listeners are not registered for this handler.
+     */
+    private static final class FailFastUploadHandler implements UploadHandler {
+        @Override
+        public void handleUploadRequest(UploadEvent event) {
+            throw new IllegalStateException(
+                    "Upload cannot be performed without a upload handler set. "
+                            + "Please firstly set the upload handler implementation with upload.setUploadHandler()");
         }
     }
 }

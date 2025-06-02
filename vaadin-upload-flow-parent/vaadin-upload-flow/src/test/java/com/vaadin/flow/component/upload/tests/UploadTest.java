@@ -25,7 +25,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.upload.Upload;
@@ -36,8 +35,6 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.ExecutionContext;
 import com.vaadin.flow.internal.StateNode;
-import com.vaadin.flow.internal.streams.UploadCompleteEvent;
-import com.vaadin.flow.internal.streams.UploadStartEvent;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinRequest;
@@ -207,13 +204,6 @@ public class UploadTest {
         Assert.assertTrue(uploadHandler.isAllowInert());
         Assert.assertEquals(DisabledUpdateMode.ALWAYS,
                 uploadHandler.getDisabledUpdateMode());
-
-        // when the receiver is set, then the listeners are removed
-        upload.setReceiver(new MemoryBuffer());
-        Assert.assertTrue(ComponentUtil
-                .getListeners(upload, UploadStartEvent.class).isEmpty());
-        Assert.assertTrue(ComponentUtil
-                .getListeners(upload, UploadCompleteEvent.class).isEmpty());
     }
 
     @Test
