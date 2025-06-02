@@ -23,8 +23,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 
@@ -70,7 +70,7 @@ public class NotificationTest {
 
     @Test
     public void componentCtor() {
-        notification = new Notification(new Label(), new NativeButton());
+        notification = new Notification(new Span(), new NativeButton());
 
         notification.setPosition(Position.BOTTOM_END);
         Assert.assertEquals("bottom-end",

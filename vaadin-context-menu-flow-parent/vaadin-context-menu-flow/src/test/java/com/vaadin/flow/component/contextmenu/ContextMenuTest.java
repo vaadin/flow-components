@@ -28,8 +28,8 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.HasOverlayClassName;
 
 /**
@@ -39,35 +39,34 @@ public class ContextMenuTest {
 
     @Test
     public void createContextMenuWithTargetAndChildren_getChildrenReturnsChildren() {
-        Label label1 = new Label("Label 1");
-        Label label2 = new Label("Label 2");
-        Label label3 = new Label("Label 3");
+        Span span1 = new Span("Text 1");
+        Span span2 = new Span("Text 2");
+        Span span3 = new Span("Text 3");
 
         ContextMenu contextMenu = new ContextMenu();
-        contextMenu.setTarget(new Label("target"));
+        contextMenu.setTarget(new Span("target"));
 
-        contextMenu.add(label1, label2);
+        contextMenu.addComponent(span1, span2);
 
         List<Component> children = contextMenu.getChildren()
                 .collect(Collectors.toList());
         Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label1, label2));
+        Assert.assertThat(children, CoreMatchers.hasItems(span1, span2));
 
-        contextMenu.add(label3);
+        contextMenu.addComponent(span3);
         children = contextMenu.getChildren().collect(Collectors.toList());
         Assert.assertEquals(3, children.size());
-        Assert.assertThat(children,
-                CoreMatchers.hasItems(label1, label2, label3));
+        Assert.assertThat(children, CoreMatchers.hasItems(span1, span2, span3));
 
-        contextMenu.remove(label2);
+        contextMenu.remove(span2);
         children = contextMenu.getChildren().collect(Collectors.toList());
         Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label1, label3));
+        Assert.assertThat(children, CoreMatchers.hasItems(span1, span3));
 
-        contextMenu.remove(label1);
+        contextMenu.remove(span1);
         children = contextMenu.getChildren().collect(Collectors.toList());
         Assert.assertEquals(1, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label3));
+        Assert.assertThat(children, CoreMatchers.hasItems(span3));
 
         contextMenu.removeAll();
         children = contextMenu.getChildren().collect(Collectors.toList());
@@ -76,7 +75,7 @@ public class ContextMenuTest {
 
     @Test
     public void setTarget_removeAll_targetNotMoved() {
-        Label target = new Label("target");
+        Span target = new Span("target");
         Div div = new Div(target);
 
         ContextMenu contextMenu = new ContextMenu();
@@ -127,22 +126,22 @@ public class ContextMenuTest {
 
         MenuItem item1 = contextMenu.addItem("foo", null);
 
-        Label label1 = new Label("foo");
-        contextMenu.add(label1);
+        Span span1 = new Span("foo");
+        contextMenu.addComponent(span1);
 
         MenuItem item2 = contextMenu.addItem("bar", null);
 
-        Label label2 = new Label("bar");
-        contextMenu.add(label2);
+        Span span2 = new Span("bar");
+        contextMenu.addComponent(span2);
 
         List<Component> children = contextMenu.getChildren()
                 .collect(Collectors.toList());
         Assert.assertEquals(4, children.size());
 
         Assert.assertEquals(item1, children.get(0));
-        Assert.assertEquals(label1, children.get(1));
+        Assert.assertEquals(span1, children.get(1));
         Assert.assertEquals(item2, children.get(2));
-        Assert.assertEquals(label2, children.get(3));
+        Assert.assertEquals(span2, children.get(3));
     }
 
     @Test
@@ -168,13 +167,13 @@ public class ContextMenuTest {
 
         MenuItem item1 = contextMenu.addItem("foo", null);
 
-        Label label1 = new Label("foo");
-        contextMenu.add(label1);
+        Span span1 = new Span("foo");
+        contextMenu.addComponent(span1);
 
         MenuItem item2 = contextMenu.addItem("bar", null);
 
-        Label label2 = new Label("bar");
-        contextMenu.add(label2);
+        Span span2 = new Span("bar");
+        contextMenu.addComponent(span2);
 
         List<MenuItem> items = contextMenu.getItems();
         Assert.assertEquals(2, items.size());
@@ -207,7 +206,7 @@ public class ContextMenuTest {
     public void serializeContextMenu() throws IOException {
         NativeButton menuButton = new NativeButton();
         ContextMenu menu = new ContextMenu(menuButton);
-        menu.add(new Label());
+        menu.addComponent(new Span());
         ObjectOutputStream out = new ObjectOutputStream(
                 new ByteArrayOutputStream());
         out.writeObject(menu);

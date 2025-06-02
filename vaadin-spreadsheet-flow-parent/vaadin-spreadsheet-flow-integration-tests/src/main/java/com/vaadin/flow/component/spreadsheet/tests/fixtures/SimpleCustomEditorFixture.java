@@ -17,6 +17,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -39,6 +40,7 @@ public class SimpleCustomEditorFixture implements SpreadsheetFixture {
                     componentType.getHeaderText());
         }
         spreadsheet.setSpreadsheetComponentFactory(new CustomEditorFactory());
+        spreadsheet.setColumnWidth(0, 200);
     }
 
     private static class CustomEditorFactory
@@ -57,7 +59,18 @@ public class SimpleCustomEditorFixture implements SpreadsheetFixture {
         @Override
         public Component getCustomComponentForCell(Cell cell, int rowIndex,
                 int columnIndex, Spreadsheet spreadsheet, Sheet sheet) {
-            return null;
+            if (rowIndex != 0 || columnIndex != 0) {
+                return null;
+            }
+
+            Button toggleCustomEditorVisibilityButton = new Button(
+                    "Toggle custom editor", event -> {
+                        spreadsheet.setShowCustomEditorOnFocus(
+                                !spreadsheet.isShowCustomEditorOnFocus());
+                    });
+            toggleCustomEditorVisibilityButton
+                    .setId("toggleCustomEditorVisibilityButton");
+            return toggleCustomEditorVisibilityButton;
         }
 
         @Override
@@ -66,7 +79,7 @@ public class SimpleCustomEditorFixture implements SpreadsheetFixture {
                 Sheet sheet) {
             EditorType editorType = EditorType.getEditorTypeByIndex(rowIndex,
                     columnIndex);
-            if (editorType == null) {
+            if (editorType == null || !sheet.getSheetName().equals("Sheet1")) {
                 return null;
             }
             return getCustomEditor(editorType, rowIndex, columnIndex,

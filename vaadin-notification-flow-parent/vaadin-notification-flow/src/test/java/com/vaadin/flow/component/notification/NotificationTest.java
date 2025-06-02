@@ -34,7 +34,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.notification.Notification.Position;
@@ -64,32 +63,31 @@ public class NotificationTest {
 
     @Test
     public void createNotificationWithComponents_componentsArePartOfGetChildren() {
-        Label label1 = new Label("Label 1");
-        Label label2 = new Label("Label 2");
-        Label label3 = new Label("Label 3");
+        Span span1 = new Span("Text 1");
+        Span span2 = new Span("Text 2");
+        Span span3 = new Span("Text 3");
 
-        Notification notification = new Notification(label1, label2);
+        Notification notification = new Notification(span1, span2);
 
         List<Component> children = notification.getChildren()
                 .collect(Collectors.toList());
         Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label1, label2));
+        Assert.assertThat(children, CoreMatchers.hasItems(span1, span2));
 
-        notification.add(label3);
+        notification.add(span3);
         children = notification.getChildren().collect(Collectors.toList());
         Assert.assertEquals(3, children.size());
-        Assert.assertThat(children,
-                CoreMatchers.hasItems(label1, label2, label3));
+        Assert.assertThat(children, CoreMatchers.hasItems(span1, span2, span3));
 
-        notification.remove(label2);
+        notification.remove(span2);
         children = notification.getChildren().collect(Collectors.toList());
         Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label1, label3));
+        Assert.assertThat(children, CoreMatchers.hasItems(span1, span3));
 
-        label1.getElement().removeFromParent();
+        span1.getElement().removeFromParent();
         children = notification.getChildren().collect(Collectors.toList());
         Assert.assertEquals(1, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label3));
+        Assert.assertThat(children, CoreMatchers.hasItems(span3));
 
         notification.removeAll();
         children = notification.getChildren().collect(Collectors.toList());
@@ -127,7 +125,7 @@ public class NotificationTest {
 
         Collection<Notification> notificationsToCheck = Arrays.asList(
                 new Notification(), new Notification("test"),
-                new Notification(new Label("one"), new Label("two")));
+                new Notification(new Span("one"), new Span("two")));
 
         Assert.assertEquals(
                 "Not all of the Notification constructors without duration parameter are tested",

@@ -21,7 +21,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.Orientation;
@@ -43,14 +43,14 @@ public class SplitLayoutView extends Div {
     }
 
     private void addLayoutCombination() {
-        Label firstLabel = new Label("First content component");
-        Label secondLabel = new Label("Second content component");
-        Label thirdLabel = new Label("Third content component");
+        Span first = new Span("First content component");
+        Span second = new Span("Second content component");
+        Span third = new Span("Third content component");
 
-        SplitLayout innerLayout = new SplitLayout(secondLabel, thirdLabel,
+        SplitLayout innerLayout = new SplitLayout(second, third,
                 Orientation.VERTICAL);
 
-        SplitLayout layout = new SplitLayout(firstLabel, innerLayout);
+        SplitLayout layout = new SplitLayout(first, innerLayout);
 
         layout.setId("split-layout-combination");
         layout.getPrimaryComponent().setId("first-component");
@@ -64,10 +64,10 @@ public class SplitLayoutView extends Div {
     private void addResizeNotificationLayout() {
         SplitLayout layout = new SplitLayout();
         layout.setId("split-layout-resize");
-        layout.addToPrimary(new Label("First content component"));
-        layout.addToSecondary(new Label("Second content component"));
+        layout.addToPrimary(new Span("First content component"));
+        layout.addToSecondary(new Span("Second content component"));
 
-        Label message = new Label("Drag and drop the splitter");
+        Span message = new Span("Drag and drop the splitter");
         AtomicInteger resizeCounter = new AtomicInteger();
         layout.addSplitterDragendListener(
                 event -> message.setText("SplitLayout Resized "
@@ -79,10 +79,10 @@ public class SplitLayoutView extends Div {
     }
 
     private void addInitialSplitterPositionLayout() {
-        Label firstLabel = new Label("First content component");
-        Label secondLabel = new Label("Second content component");
+        Span first = new Span("First content component");
+        Span second = new Span("Second content component");
 
-        SplitLayout layout = new SplitLayout(firstLabel, secondLabel);
+        SplitLayout layout = new SplitLayout(first, second);
         layout.setSplitterPosition(80);
 
         layout.getPrimaryComponent().setId("initial-sp-first-component");
@@ -94,8 +94,8 @@ public class SplitLayoutView extends Div {
     private void addMinMaxWidthLayout() {
         SplitLayout layout = new SplitLayout();
         layout.setId("split-layout-min-max");
-        layout.addToPrimary(new Label("First content component"));
-        layout.addToSecondary(new Label("Second content component"));
+        layout.addToPrimary(new Span("First content component"));
+        layout.addToSecondary(new Span("Second content component"));
 
         layout.setPrimaryStyle("minWidth", "100px");
         layout.setPrimaryStyle("maxWidth", "150px");

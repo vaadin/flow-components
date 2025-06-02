@@ -211,8 +211,8 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
     private void assertHeaderComponentsAreRendered() {
         List<String> headerContents = getHeaderContents();
         headerContents.forEach(content -> Assert.assertThat(
-                "Label components should be rendered in the headers", content,
-                CoreMatchers.containsString("<label>foo</label>")));
+                "Span components should be rendered in the headers", content,
+                CoreMatchers.containsString("<span>foo</span>")));
         headerContents.forEach(content -> Assert.assertThat(
                 "Header components should have overridden the header texts",
                 content, CoreMatchers.not(CoreMatchers.containsString("bar"))));
@@ -226,7 +226,7 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
         headerContents.forEach(content -> Assert.assertThat(
                 "The text should override the previously set components",
                 content,
-                CoreMatchers.not(CoreMatchers.containsString("<label>"))));
+                CoreMatchers.not(CoreMatchers.containsString("<span>"))));
     }
 
     @Test

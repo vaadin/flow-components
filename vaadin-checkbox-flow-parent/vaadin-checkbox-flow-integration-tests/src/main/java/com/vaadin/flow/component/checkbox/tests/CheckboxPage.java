@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -62,27 +62,27 @@ public class CheckboxPage extends Div {
         checkbox2.setIndeterminate(indeterminate);
         checkbox2.setId("cb-" + id);
 
-        Label valueLabel = new Label("Value: " + checkbox2.getValue());
-        valueLabel.setId("value-label-" + id);
+        Span valueText = new Span("Value: " + checkbox2.getValue());
+        valueText.setId("value-text-" + id);
 
-        Label indeterminateLabel = new Label(
+        Span indeterminateText = new Span(
                 "Indeterminate: " + checkbox2.isIndeterminate());
-        indeterminateLabel.setId("indeterminate-label-" + id);
+        indeterminateText.setId("indeterminate-text-" + id);
 
         AtomicInteger checkedCounter = new AtomicInteger();
 
         checkbox2.addValueChangeListener(event -> {
-            valueLabel.setText("Value: " + checkedCounter.incrementAndGet()
-                    + " " + event.getValue());
+            valueText.setText("Value: " + checkedCounter.incrementAndGet() + " "
+                    + event.getValue());
         });
 
         AtomicInteger indeterminateCounter = new AtomicInteger();
 
         checkbox2.getElement().addPropertyChangeListener("indeterminate",
-                event -> indeterminateLabel.setText("Indeterminate: "
+                event -> indeterminateText.setText("Indeterminate: "
                         + indeterminateCounter.incrementAndGet() + " "
                         + event.getValue()));
 
-        return new Div(checkbox2, valueLabel, indeterminateLabel);
+        return new Div(checkbox2, valueText, indeterminateText);
     }
 }

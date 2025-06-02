@@ -34,7 +34,7 @@ public class AutoAttachedContextMenuIT extends AbstractContextMenuIT {
     @Before
     public void init() {
         open();
-        waitForElementPresent(By.tagName("label"));
+        waitForElementPresent(By.id(TARGET_ID));
         checkLogsForErrors();
     }
 

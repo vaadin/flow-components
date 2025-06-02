@@ -113,7 +113,7 @@ public class MenuItemDisableOnClickView extends Div {
 
         var addReEnableInSameRoundTripItem = contextMenu.addItem(
                 "Add re-enable in same round-trip item",
-                event -> contextMenu.add(item));
+                event -> contextMenu.addComponent(item));
         addReEnableInSameRoundTripItem
                 .setId("add-re-enable-in-same-round-trip-menu-item");
     }
