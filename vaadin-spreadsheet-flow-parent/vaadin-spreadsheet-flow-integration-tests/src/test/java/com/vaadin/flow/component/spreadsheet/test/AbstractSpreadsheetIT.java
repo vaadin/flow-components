@@ -359,7 +359,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     public void setLocale(Locale locale) {
         ComboBoxElement localeSelect = $(ComboBoxElement.class)
                 .id("localeSelect");
-        localeSelect.selectByText(locale.getDisplayName());
+        localeSelect.selectByText(locale.getDisplayName(Locale.ENGLISH));
     }
 
     public void loadTestFixture(TestFixtures fixture) {
@@ -562,6 +562,21 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
         findElementInShadowRoot(By.cssSelector(".addressfield")).clear();
         findElementInShadowRoot(By.cssSelector(".addressfield")).sendKeys(cell);
         new Actions(getDriver()).sendKeys(Keys.RETURN).perform();
+    }
+
+    /**
+     * Suppresses the overlay that appears when hovering over a cell with an
+     * invalid formula. The overlay can appear when using setCellValue, and can
+     * cause subsequent button clicks to fail. Can be used in tests that enter
+     * invalid formulas in cells to test the invalid formular indicator (though
+     * obviously not in tests that check the overlay itself).
+     */
+    public void suppressInvalidFormulaCommentOverlay() {
+        executeScript("""
+                arguments[0].addEventListener("mouseover", e => {
+                  e.stopPropagation();
+                }, true);
+                """, getSpreadsheetInShadowRoot());
     }
 
     // Context menu helpers
