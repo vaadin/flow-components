@@ -135,6 +135,20 @@ public class PopoverIT extends AbstractComponentIT {
         Assert.assertTrue(popover.isOpen());
     }
 
+    @Test
+    public void openDialogAndSetTarget_closeDialog_popoverOpens() {
+        // Clear the target and remove the popover first to ensure the popover
+        // is auto-added when the dialog opens
+        clickElementWithJs("clear-target");
+        clickElementWithJs("remove-popover");
+
+        clickElementWithJs("open-dialog");
+        clickElementWithJs("close-dialog");
+
+        clickTarget();
+        checkPopoverIsOpened();
+    }
+
     private void clickTarget() {
         clickElementWithJs("popover-target");
     }
