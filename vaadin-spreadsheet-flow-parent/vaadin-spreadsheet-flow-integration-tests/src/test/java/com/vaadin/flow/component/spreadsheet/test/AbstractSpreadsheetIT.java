@@ -563,11 +563,8 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
      * obviously not in tests that check the overlay itself).
      */
     public void suppressInvalidFormulaCommentOverlay() {
-        executeScript("""
-                arguments[0].addEventListener("mouseover", e => {
-                  e.stopPropagation();
-                }, true);
-                """, getSpreadsheetInShadowRoot());
+        String script = "arguments[0].addEventListener(\"mouseover\", e => { e.stopPropagation(); }, true);";
+        executeScript(script, getSpreadsheetInShadowRoot());
     }
 
     // Context menu helpers
