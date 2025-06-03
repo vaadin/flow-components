@@ -13,13 +13,11 @@ import java.util.Locale;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-spreadsheet")
 public class FormulaFormatIT extends AbstractSpreadsheetIT {
@@ -28,6 +26,7 @@ public class FormulaFormatIT extends AbstractSpreadsheetIT {
     public void init() {
         open();
         createNewSpreadsheet();
+        suppressInvalidFormulaCommentOverlay();
     }
 
     @Test
@@ -156,14 +155,7 @@ public class FormulaFormatIT extends AbstractSpreadsheetIT {
     @Test
     public void formulaFormatting_addFreezePaneWhileACellHasAnInvalidFormula_cellStillHasInvalidFormulaIndicator()
             throws InterruptedException {
-        SheetCellElement a1 = $(SpreadsheetElement.class).first()
-                .getCellAt("A1");
-        a1.setValue("=a");
-
-        // The invalid formula overlay can block subsequent clicks
-        // Move the mouse cursor to some other element to hide it first
-        TestBenchElement button = $("vaadin-button").id("freezePane");
-        new Actions(driver).moveToElement(button).perform();
+        setCellValue("A1", "=a");
 
         addFreezePane(); // Sheet content is reloaded
 
