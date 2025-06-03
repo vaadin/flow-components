@@ -30,6 +30,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.ExecutionContext;
@@ -132,13 +133,50 @@ public class UploadTest {
         Element owner = setupMockElement(ui);
         Upload upload = setupMockUpload(owner);
 
+        Mockito.when(owner.getComponent()).thenReturn(Optional.of(upload));
+
         Assert.assertFalse(upload.isUploading());
 
-        // when the upload starts
-        UploadHandler handler = event ->
-        // then the upload is in progress
-        Assert.assertTrue(upload.isUploading());
-        upload.setUploadHandler(handler);
+        UploadHandler customHandler = Mockito.spy(new UploadHandler() {
+            @Override
+            public void handleUploadRequest(UploadEvent event) {
+                // when the upload starts,
+                // then the upload is in progress
+                Assert.assertTrue(upload.isUploading());
+            }
+
+            @Override
+            public long getRequestSizeMax() {
+                return 111L;
+            }
+
+            @Override
+            public long getFileSizeMax() {
+                return 222L;
+            }
+
+            @Override
+            public long getFileCountMax() {
+                return 333L;
+            }
+
+            @Override
+            public String getUrlPostfix() {
+                return "custom-postfix";
+            }
+
+            @Override
+            public boolean isAllowInert() {
+                return true;
+            }
+
+            @Override
+            public DisabledUpdateMode getDisabledUpdateMode() {
+                return DisabledUpdateMode.ALWAYS;
+            }
+        });
+
+        upload.setUploadHandler(customHandler);
 
         Mockito.verify(owner).setAttribute(Mockito.anyString(),
                 captor.capture());
@@ -147,11 +185,25 @@ public class UploadTest {
                 .getValue();
         Assert.assertNotNull(elementStreamResource);
 
-        // when the upload handling is completed
-        elementStreamResource.getElementRequestHandler().handleRequest(request,
-                response, session, owner);
+        UploadHandler uploadHandler = (UploadHandler) elementStreamResource
+                .getElementRequestHandler();
+        uploadHandler.handleRequest(request, response, session, owner);
+        // when the upload handling is completed,
         // then the upload is not in progress anymore
         Assert.assertFalse(upload.isUploading());
+
+        // verify that the original methods of custom handler were called
+        Mockito.verify(customHandler)
+                .handleUploadRequest(Mockito.any(UploadEvent.class));
+        Mockito.verify(customHandler).responseHandled(Mockito.anyBoolean(),
+                Mockito.any(VaadinResponse.class));
+        Assert.assertEquals(111L, uploadHandler.getRequestSizeMax());
+        Assert.assertEquals(222L, uploadHandler.getFileSizeMax());
+        Assert.assertEquals(333L, uploadHandler.getFileCountMax());
+        Assert.assertEquals("custom-postfix", uploadHandler.getUrlPostfix());
+        Assert.assertTrue(uploadHandler.isAllowInert());
+        Assert.assertEquals(DisabledUpdateMode.ALWAYS,
+                uploadHandler.getDisabledUpdateMode());
     }
 
     @Test
@@ -221,6 +273,7 @@ public class UploadTest {
     @SuppressWarnings("unchecked")
     private Element setupMockElement(UI ui) {
         Element owner = Mockito.mock(Element.class);
+        Mockito.when(owner.isEnabled()).thenReturn(true);
         Component componentOwner = Mockito.mock(Component.class);
         Mockito.when(owner.getComponent())
                 .thenReturn(Optional.of(componentOwner));
