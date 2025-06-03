@@ -18,7 +18,6 @@ package com.vaadin.flow.component.grid.contextmenu;
 import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
 import org.junit.Before;
