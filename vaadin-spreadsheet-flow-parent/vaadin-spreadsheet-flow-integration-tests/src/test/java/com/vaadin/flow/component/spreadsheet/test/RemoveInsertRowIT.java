@@ -26,6 +26,7 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
     public void init() {
         open();
         createNewSpreadsheet();
+        suppressInvalidFormulaCommentOverlay();
     }
 
     @Test
