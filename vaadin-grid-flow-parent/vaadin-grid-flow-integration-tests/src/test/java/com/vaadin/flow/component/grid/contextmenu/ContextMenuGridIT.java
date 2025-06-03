@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.contextmenu;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -232,7 +233,7 @@ public class ContextMenuGridIT extends AbstractComponentIT {
 
         grid.getCell(0, 0).contextClick();
 
-        getDriver().manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         Assert.assertFalse(isElementPresent(By.tagName(OVERLAY_TAG)));
     }
 
