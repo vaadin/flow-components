@@ -73,6 +73,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         super(defaultValue);
         // Force a value update when the change event generated
         getElement().addEventListener("change", e -> this.updateValue());
+        getElement().setProperty("manualValidation", true);
     }
 
     @Override
