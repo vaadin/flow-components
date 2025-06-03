@@ -26,6 +26,7 @@ public class FormulaFormatIT extends AbstractSpreadsheetIT {
     public void init() {
         open();
         createNewSpreadsheet();
+        suppressInvalidFormulaCommentOverlay();
     }
 
     @Test
@@ -154,10 +155,7 @@ public class FormulaFormatIT extends AbstractSpreadsheetIT {
     @Test
     public void formulaFormatting_addFreezePaneWhileACellHasAnInvalidFormula_cellStillHasInvalidFormulaIndicator()
             throws InterruptedException {
-        createNewSpreadsheet();
-        SheetCellElement a1 = $(SpreadsheetElement.class).first()
-                .getCellAt("A1");
-        a1.setValue("=a");
+        setCellValue("A1", "=a");
 
         addFreezePane(); // Sheet content is reloaded
 
