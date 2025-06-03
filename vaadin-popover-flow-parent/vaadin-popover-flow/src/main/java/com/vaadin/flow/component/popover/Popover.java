@@ -83,6 +83,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      */
     public Popover() {
         getElement().getNode().addAttachListener(this::attachComponentRenderer);
+        getElement().getNode().addDetachListener(this::dettachListener);
 
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         getElement().setProperty("opened", false);
@@ -696,10 +697,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
             targetDetachRegistration.remove();
         }
 
-        if (autoAddedToTheUi) {
-            getElement().removeFromParent();
-            autoAddedToTheUi = false;
-        }
+        removeFromUiIfAutoAdded();
 
         this.target = target;
 
@@ -714,11 +712,15 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
         targetAttachRegistration = target
                 .addAttachListener(e -> onTargetAttach(e.getUI()));
         targetDetachRegistration = target.addDetachListener(e -> {
-            if (autoAddedToTheUi) {
-                getElement().removeFromParent();
-                autoAddedToTheUi = false;
-            }
+            removeFromUiIfAutoAdded();
         });
+    }
+
+    private void removeFromUiIfAutoAdded() {
+        if (autoAddedToTheUi) {
+            autoAddedToTheUi = false;
+            getElement().removeFromParent();
+        }
     }
 
     private void onTargetAttach(UI ui) {
@@ -826,6 +828,14 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
         getElement().executeJs(
                 "this.renderer = (root) => Vaadin.FlowComponentHost.setChildNodes($0, this.virtualChildNodeIds, root)",
                 appId);
+    }
+
+    private void dettachListener() {
+        if (autoAddedToTheUi && target != null && target.isAttached()
+                && target.getUI().isPresent()) {
+            removeFromUiIfAutoAdded();
+            onTargetAttach(target.getUI().get());
+        }
     }
 
     private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
