@@ -45,6 +45,9 @@ public class CategoryView extends MasterDetailLayout
         setMaster(createMasterContent());
         setMasterMinSize("500px");
         setDetailMinSize("300px");
+
+        addBackdropClickListener(event -> closeDetails());
+        addDetailEscapePressListener(event -> closeDetails());
     }
 
     private Component createMasterContent() {
@@ -74,6 +77,11 @@ public class CategoryView extends MasterDetailLayout
         masterLayout.setHeightFull();
 
         return masterLayout;
+    }
+
+    private void closeDetails() {
+        UI.getCurrent().navigate(CategoryView.class, new RouteParameters(
+                new RouteParam("categoryName", categoryName)));
     }
 
     @Override
