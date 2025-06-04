@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
@@ -437,12 +438,14 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
     private void clickToggleCellVisibleButton() {
         waitUntil(driver -> {
-            var button = $(TestBenchElement.class)
-                    .id("toggleCustomEditorVisibilityButton");
-            return button.isDisplayed();
+            try {
+                var toggleButton = $(TestBenchElement.class)
+                        .id("toggleCustomEditorVisibilityButton");
+                toggleButton.click();
+                return true;
+            } catch (StaleElementReferenceException e) {
+                return false;
+            }
         });
-        var toggleButton = $(TestBenchElement.class)
-                .id("toggleCustomEditorVisibilityButton");
-        toggleButton.click();
     }
 }
