@@ -145,6 +145,8 @@ public class PopoverIT extends AbstractComponentIT {
         clickElementWithJs("open-dialog");
         clickElementWithJs("close-dialog");
 
+        waitForElementNotPresent(By.tagName("vaadin-dialog-overlay"));
+
         clickTarget();
         checkPopoverIsOpened();
     }
