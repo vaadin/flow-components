@@ -83,7 +83,6 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
      */
     public Popover() {
         getElement().getNode().addAttachListener(this::attachComponentRenderer);
-        getElement().getNode().addDetachListener(this::dettachListener);
 
         // Workaround for: https://github.com/vaadin/flow/issues/3496
         getElement().setProperty("opened", false);
@@ -708,9 +707,11 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
         // Target's JavaScript needs to be executed on each attach,
         // because Flow creates a new client-side element
-        target.getUI().ifPresent(this::onTargetAttach);
+        if (target.getUI().isPresent()) {
+            onTargetAttach();
+        }
         targetAttachRegistration = target
-                .addAttachListener(e -> onTargetAttach(e.getUI()));
+                .addAttachListener(e -> onTargetAttach());
         targetDetachRegistration = target.addDetachListener(e -> {
             removeFromUiIfAutoAdded();
         });
@@ -723,16 +724,14 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
         }
     }
 
-    private void onTargetAttach(UI ui) {
+    private void onTargetAttach() {
         if (target != null) {
-            ui.beforeClientResponse(ui, context -> {
-                if (getElement().getNode().getParent() == null) {
-                    // Remove the popover from its current state tree
-                    getElement().removeFromTree(false);
-                    ui.addToModalComponent(this);
-                    autoAddedToTheUi = true;
-                }
-            });
+            if (getElement().getNode().getParent() == null) {
+                // Remove the popover from its current state tree
+                getElement().removeFromTree(false);
+                target.getElement().getParent().appendChild(getElement());
+                autoAddedToTheUi = true;
+            }
             getElement().executeJs("this.target = $0", target.getElement());
         }
     }
@@ -828,14 +827,6 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
         getElement().executeJs(
                 "this.renderer = (root) => Vaadin.FlowComponentHost.setChildNodes($0, this.virtualChildNodeIds, root)",
                 appId);
-    }
-
-    private void dettachListener() {
-        if (autoAddedToTheUi && target != null && target.isAttached()
-                && target.getUI().isPresent()) {
-            removeFromUiIfAutoAdded();
-            onTargetAttach(target.getUI().get());
-        }
     }
 
     private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
