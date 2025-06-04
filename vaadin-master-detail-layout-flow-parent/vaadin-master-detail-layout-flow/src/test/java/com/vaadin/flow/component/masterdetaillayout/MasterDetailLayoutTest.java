@@ -24,6 +24,8 @@ import org.mockito.Mockito;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
@@ -359,6 +361,36 @@ public class MasterDetailLayoutTest {
                 layout.getOverlayMode());
         Assert.assertFalse(
                 layout.getElement().getProperty("stackOverlay", false));
+    }
+
+    @Test
+    public void addBackdropClickListener_verifyListenerTriggered() {
+        @SuppressWarnings("unchecked")
+        ComponentEventListener<MasterDetailLayout.BackdropClickEvent> listener = Mockito
+                .mock(ComponentEventListener.class);
+
+        layout.addBackdropClickListener(listener);
+
+        MasterDetailLayout.BackdropClickEvent backdropClickEvent = new MasterDetailLayout.BackdropClickEvent(
+                layout, true);
+        ComponentUtil.fireEvent(layout, backdropClickEvent);
+
+        Mockito.verify(listener).onComponentEvent(backdropClickEvent);
+    }
+
+    @Test
+    public void addDetailEscapePressListener_verifyListenerTriggered() {
+        @SuppressWarnings("unchecked")
+        ComponentEventListener<MasterDetailLayout.DetailEscapePressEvent> listener = Mockito
+                .mock(ComponentEventListener.class);
+
+        layout.addDetailEscapePressListener(listener);
+
+        MasterDetailLayout.DetailEscapePressEvent detailEscapePressEvent = new MasterDetailLayout.DetailEscapePressEvent(
+                layout, true);
+        ComponentUtil.fireEvent(layout, detailEscapePressEvent);
+
+        Mockito.verify(listener).onComponentEvent(detailEscapePressEvent);
     }
 
     private void assertMasterContent(Component component) {

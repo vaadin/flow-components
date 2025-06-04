@@ -22,7 +22,11 @@ import java.util.Optional;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
@@ -35,6 +39,7 @@ import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.RouterLayout;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * MasterDetailLayout is a component for building UIs with a master (or primary)
@@ -122,7 +127,9 @@ public class MasterDetailLayout extends Component
     }
 
     /**
-     * Sets the component to be displayed in the detail area.
+     * Sets the component to be displayed in the detail area. The details area
+     * is automatically shown when the detail component is set, and hidden when
+     * the detail component is removed by setting it to {@code null}.
      *
      * @param component
      *            the component to display in the detail area, or {@code null}
@@ -466,6 +473,38 @@ public class MasterDetailLayout extends Component
         getElement().setProperty("noAnimation", !enabled);
     }
 
+    /**
+     * Adds a listener for when the backdrop of the details overlay is clicked.
+     * The backdrop is the area outside the detail area when it is shown in
+     * drawer mode. Can be used to hide the details when the backdrop is
+     * clicked.
+     *
+     * @param listener
+     *            the listener to add, not {@code null}
+     * @return a registration for removing the listener
+     */
+    public Registration addBackdropClickListener(
+            ComponentEventListener<BackdropClickEvent> listener) {
+        Objects.requireNonNull(listener, "Listener cannot be null");
+        return ComponentUtil.addListener(this, BackdropClickEvent.class,
+                listener);
+    }
+
+    /**
+     * Adds a listener for when the Escape key is pressed within the details
+     * area. Can be used to hide the details when the Escape key is pressed.
+     *
+     * @param listener
+     *            the listener to add, not {@code null}
+     * @return a registration for removing the listener
+     */
+    public Registration addDetailEscapePressListener(
+            ComponentEventListener<DetailEscapePressEvent> listener) {
+        Objects.requireNonNull(listener, "Listener cannot be null");
+        return ComponentUtil.addListener(this, DetailEscapePressEvent.class,
+                listener);
+    }
+
     @Override
     public void showRouterLayoutContent(HasElement content) {
         doSetDetail(content);
@@ -492,6 +531,34 @@ public class MasterDetailLayout extends Component
 
         if (!enabled) {
             throw new ExperimentalFeatureException();
+        }
+    }
+
+    /**
+     * Event that is fired when the backdrop of the details overlay is clicked.
+     * The backdrop is the area outside the detail area when it is shown in
+     * drawer mode. Can be used to hide the details when the backdrop is
+     * clicked.
+     */
+    @DomEvent("backdrop-click")
+    public static class BackdropClickEvent
+            extends ComponentEvent<MasterDetailLayout> {
+        public BackdropClickEvent(MasterDetailLayout source,
+                boolean fromClient) {
+            super(source, fromClient);
+        }
+    }
+
+    /**
+     * Event that is fired when the Escape key is pressed within the details
+     * area. Can be used to hide the details when the Escape key is pressed.
+     */
+    @DomEvent("detail-escape-press")
+    public static class DetailEscapePressEvent
+            extends ComponentEvent<MasterDetailLayout> {
+        public DetailEscapePressEvent(MasterDetailLayout source,
+                boolean fromClient) {
+            super(source, fromClient);
         }
     }
 }
