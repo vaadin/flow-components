@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.concurrent.NotThreadSafe;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -72,22 +71,29 @@ public class NotificationTest {
         List<Component> children = notification.getChildren()
                 .collect(Collectors.toList());
         Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(span1, span2));
+        Assert.assertTrue(children.contains(span1));
+        Assert.assertTrue(children.contains(span2));
 
         notification.add(span3);
         children = notification.getChildren().collect(Collectors.toList());
         Assert.assertEquals(3, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(span1, span2, span3));
+        Assert.assertTrue(children.contains(span1));
+        Assert.assertTrue(children.contains(span2));
+        Assert.assertTrue(children.contains(span3));
 
         notification.remove(span2);
         children = notification.getChildren().collect(Collectors.toList());
         Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(span1, span3));
+        Assert.assertTrue("Children should contain span1",
+                children.contains(span1));
+        Assert.assertTrue("Children should contain span3",
+                children.contains(span3));
 
         span1.getElement().removeFromParent();
         children = notification.getChildren().collect(Collectors.toList());
         Assert.assertEquals(1, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(span3));
+        Assert.assertTrue("Children should contain span3",
+                children.contains(span3));
 
         notification.removeAll();
         children = notification.getChildren().collect(Collectors.toList());
@@ -103,9 +109,10 @@ public class NotificationTest {
         List<Component> children = notification.getChildren()
                 .collect(Collectors.toList());
         Assert.assertEquals(1, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(container2));
-        Assert.assertThat(children,
-                CoreMatchers.not(CoreMatchers.hasItem(container1)));
+        Assert.assertTrue("Children should contain container2",
+                children.contains(container2));
+        Assert.assertFalse("Children should not contain container1",
+                children.contains(container1));
     }
 
     @Test

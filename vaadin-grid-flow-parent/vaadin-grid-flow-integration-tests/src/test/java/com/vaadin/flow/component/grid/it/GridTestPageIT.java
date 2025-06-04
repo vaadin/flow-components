@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -110,8 +109,8 @@ public class GridTestPageIT extends AbstractComponentIT {
         // verify that the properties needed for the details row are not loaded
         items.forEach((row, map) -> {
             Assert.assertEquals("Item " + row, map.get("col0"));
-            Assert.assertThat(map.keySet(),
-                    CoreMatchers.not(CoreMatchers.hasItem("detailsProperty")));
+            Assert.assertFalse("detailsProperty should not be loaded initially",
+                    map.keySet().contains("detailsProperty"));
         });
 
         // click on the cell to open the details row
@@ -129,8 +128,9 @@ public class GridTestPageIT extends AbstractComponentIT {
                 Assert.assertEquals("Details opened! 0",
                         map.get(detailsProperty));
             } else {
-                Assert.assertThat(map.keySet(), CoreMatchers
-                        .not(CoreMatchers.hasItem("detailsProperty")));
+                Assert.assertFalse(
+                        "detailsProperty should not be loaded for other rows",
+                        map.keySet().contains("detailsProperty"));
             }
         });
     }
@@ -143,8 +143,8 @@ public class GridTestPageIT extends AbstractComponentIT {
         // verify that the nodeId of the details row is not loaded
         items.forEach((row, map) -> {
             Assert.assertEquals("Item " + row, map.get("col0"));
-            Assert.assertThat(map.keySet(),
-                    CoreMatchers.not(CoreMatchers.hasItem("nodeId")));
+            Assert.assertFalse("nodeId should not be loaded initially",
+                    map.keySet().contains("nodeId"));
         });
 
         // click on the cell to open the details row
@@ -178,8 +178,9 @@ public class GridTestPageIT extends AbstractComponentIT {
          */
         Map<String, Map<String, ?>> items = getItems(driver, grid);
         items.forEach((row, map) -> {
-            Assert.assertThat(map.keySet(),
-                    CoreMatchers.not(CoreMatchers.hasItem("col0")));
+            Assert.assertFalse(
+                    "col0 key should not be present after column removal",
+                    map.keySet().contains("col0"));
             Assert.assertEquals("Item " + row, map.get("col1"));
             Assert.assertEquals(String.valueOf(row),
                     String.valueOf(map.get("col2")));
@@ -194,10 +195,11 @@ public class GridTestPageIT extends AbstractComponentIT {
          */
         items = getItems(driver, grid);
         items.forEach((row, map) -> {
-            Assert.assertThat(map.keySet(),
-                    CoreMatchers.not(CoreMatchers.hasItem("col0")));
-            Assert.assertThat(map.keySet(),
-                    CoreMatchers.not(CoreMatchers.hasItem("col1")));
+            Assert.assertFalse("col0 key should not be present",
+                    map.keySet().contains("col0"));
+            Assert.assertFalse(
+                    "col1 key should not be present after column removal",
+                    map.keySet().contains("col1"));
             Assert.assertEquals(String.valueOf(row),
                     String.valueOf(map.get("col2")));
         });

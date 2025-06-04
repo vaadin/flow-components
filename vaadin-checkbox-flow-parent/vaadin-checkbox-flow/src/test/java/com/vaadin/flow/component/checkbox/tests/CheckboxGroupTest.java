@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -151,7 +150,8 @@ public class CheckboxGroupTest {
         array.set(0, disabledKey);
 
         group.getElement().setPropertyJson("value", array);
-        Assert.assertThat(group.getValue(), IsEmptyCollection.empty());
+        Assert.assertTrue("Group value should be empty",
+                group.getValue().isEmpty());
         Assert.assertTrue(events.isEmpty());
 
         array = Json.createArray();
@@ -162,7 +162,8 @@ public class CheckboxGroupTest {
         Assert.assertEquals(1, events.size());
 
         ValueChangeEvent<Set<String>> event = events.get(0);
-        Assert.assertThat(event.getOldValue(), IsEmptyCollection.empty());
+        Assert.assertTrue("Event old value should be empty",
+                event.getOldValue().isEmpty());
         Assert.assertEquals(Collections.singleton("enabled"), event.getValue());
     }
 
@@ -184,8 +185,10 @@ public class CheckboxGroupTest {
 
         checkboxGroup.setItems("Foo", "Baz");
 
-        Assert.assertThat(checkboxGroup.getValue(), IsEmptyCollection.empty());
-        Assert.assertThat(capture.get(), IsEmptyCollection.empty());
+        Assert.assertTrue("Checkbox group value should be empty",
+                checkboxGroup.getValue().isEmpty());
+        Assert.assertTrue("Captured value should be empty",
+                capture.get().isEmpty());
     }
 
     @Test
@@ -206,8 +209,10 @@ public class CheckboxGroupTest {
 
         checkboxGroup.deselectAll();
 
-        Assert.assertThat(checkboxGroup.getValue(), IsEmptyCollection.empty());
-        Assert.assertThat(capture.get(), IsEmptyCollection.empty());
+        Assert.assertTrue("Checkbox group value should be empty",
+                checkboxGroup.getValue().isEmpty());
+        Assert.assertTrue("Captured value should be empty",
+                capture.get().isEmpty());
     }
 
     @Test

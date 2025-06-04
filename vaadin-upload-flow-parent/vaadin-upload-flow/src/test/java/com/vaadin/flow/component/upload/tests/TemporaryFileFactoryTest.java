@@ -15,12 +15,9 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
-import static org.hamcrest.CoreMatchers.containsString;
-
 import java.io.File;
 import java.io.IOException;
 
-import org.hamcrest.core.IsNot;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -34,6 +31,7 @@ public class TemporaryFileFactoryTest {
         File testFile = temporaryFileFactory.createFile("test");
         String fileName = testFile.getName();
 
-        Assert.assertThat(fileName, IsNot.not(containsString("test")));
+        Assert.assertFalse("File name should not contain 'test'",
+                fileName.contains("test"));
     }
 }

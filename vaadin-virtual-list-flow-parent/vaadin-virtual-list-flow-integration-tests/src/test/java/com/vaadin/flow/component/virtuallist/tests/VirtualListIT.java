@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -156,8 +154,8 @@ public class VirtualListIT extends AbstractComponentIT {
 
         // all the remaining items should be empty
         for (int i = lastReceivedKey; i < items.length(); i++) {
-            MatcherAssert.assertThat(items.get(i),
-                    CoreMatchers.instanceOf(JsonNull.class));
+            Assert.assertTrue("Item at index " + i + " should be JsonNull",
+                    items.get(i) instanceof JsonNull);
         }
 
         scrollToBottom(list);
@@ -264,8 +262,9 @@ public class VirtualListIT extends AbstractComponentIT {
 
         assertListContainsMaxItems(items.size(), 25);
 
-        MatcherAssert.assertThat(list.getDomProperty("innerText"), CoreMatchers
-                .not(CoreMatchers.containsString("the-placeholder")));
+        String innerText = list.getDomProperty("innerText");
+        Assert.assertFalse("Inner text should not contain 'the-placeholder'",
+                innerText.contains("the-placeholder"));
 
         // Scroll to bottom and set an attribute when a placeholder becomes
         // visible.
@@ -294,10 +293,10 @@ public class VirtualListIT extends AbstractComponentIT {
         waitUntil(driver -> list.getDomProperty("innerText")
                 .contains("Person 100"));
 
-        MatcherAssert.assertThat(
+        String listInnerText = list.getDomProperty("innerText");
+        Assert.assertFalse(
                 "The VirtualList shouldn't display any placeholders after the data is loaded",
-                list.getDomProperty("innerText"), CoreMatchers
-                        .not(CoreMatchers.containsString("the-placeholder")));
+                listInnerText.contains("the-placeholder"));
 
         assertListContainsMaxItems(items.size(), 25);
     }
@@ -399,10 +398,9 @@ public class VirtualListIT extends AbstractComponentIT {
             int endingIndex, String itemLabelprefix) {
 
         for (int i = startingIndex; i < endingIndex; i++) {
-            MatcherAssert.assertThat(
+            Assert.assertTrue(
                     "Object at index " + i + " is null, when it shouldn't be",
-                    items.get(i),
-                    CoreMatchers.not(CoreMatchers.instanceOf(JsonNull.class)));
+                    !(items.get(i) instanceof JsonNull));
             Assert.assertEquals(itemLabelprefix + (i + 1),
                     getPropertyString(items.getObject(i), "label"));
         }
@@ -412,9 +410,9 @@ public class VirtualListIT extends AbstractComponentIT {
             int endingIndex) {
 
         for (int i = startingIndex; i < endingIndex; i++) {
-            MatcherAssert.assertThat(
+            Assert.assertTrue(
                     "Object at index " + i + " is not null, when it should be",
-                    items.get(i), CoreMatchers.instanceOf(JsonNull.class));
+                    items.get(i) instanceof JsonNull);
         }
     }
 

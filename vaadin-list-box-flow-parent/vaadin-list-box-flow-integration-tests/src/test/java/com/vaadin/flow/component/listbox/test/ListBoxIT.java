@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.listbox.test;
 
-import static org.hamcrest.CoreMatchers.containsString;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -83,16 +81,16 @@ public class ListBoxIT extends AbstractComponentIT {
 
     private void assertMessage(String oldValue, String newValue,
             boolean fromClient) {
-        Assert.assertThat(
+        String messageText = message.getText();
+        Assert.assertTrue(
                 "The message should show the old and new values of the ListBox "
                         + "after selection changes",
-                message.getText(), containsString(
+                messageText.contains(
                         String.format("from %s to %s", oldValue, newValue)));
-        Assert.assertThat(
+        Assert.assertTrue(
                 "The message should indicate that the event is from "
                         + (fromClient ? "client" : "server"),
-                message.getText(),
-                containsString("from client: " + fromClient));
+                messageText.contains("from client: " + fromClient));
     }
 
     @Test
@@ -136,12 +134,12 @@ public class ListBoxIT extends AbstractComponentIT {
         String nameText = spans.get(0).getText();
         String stockText = spans.get(1).getText();
 
-        Assert.assertThat(
+        Assert.assertTrue(
                 "First child inside the item should contain the name of the item",
-                nameText, containsString(itemName));
-        Assert.assertThat(
+                nameText.contains(itemName));
+        Assert.assertTrue(
                 "Second child inside the item should display the amount of items in stock",
-                stockText, containsString("In stock"));
+                stockText.contains("In stock"));
 
         try {
             int stock = Integer
@@ -171,9 +169,9 @@ public class ListBoxIT extends AbstractComponentIT {
         List<WebElement> spans = item.findElements(By.tagName("span"));
         String nameText = spans.get(0).getText();
 
-        Assert.assertThat(
+        Assert.assertTrue(
                 "First child inside the item should contain the name of the item",
-                nameText, containsString(itemName));
+                nameText.contains(itemName));
     }
 
 }
