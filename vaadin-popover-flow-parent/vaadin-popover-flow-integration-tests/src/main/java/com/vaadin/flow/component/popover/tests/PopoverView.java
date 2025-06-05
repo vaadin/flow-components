@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.popover.tests;
 
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.popover.Popover;
@@ -54,7 +55,22 @@ public class PopoverView extends Div {
                 event -> popover.setCloseOnOutsideClick(false));
         disableCloseOnOutsideClick.setId("disable-close-on-outside-click");
 
+        NativeButton openDialog = new NativeButton("Open dialog and set target",
+                event -> {
+                    var dialog = new Dialog();
+                    var close = new NativeButton("Close", e -> dialog.close());
+                    close.setId("close-dialog");
+                    dialog.add(close);
+                    dialog.open();
+                    popover.setTarget(target);
+                });
+        openDialog.setId("open-dialog");
+
+        NativeButton removePopover = new NativeButton("Remove popover",
+                event -> remove(popover));
+        removePopover.setId("remove-popover");
+
         add(popover, clearTarget, detachTarget, attachTarget, disableCloseOnEsc,
-                disableCloseOnOutsideClick, target);
+                disableCloseOnOutsideClick, removePopover, openDialog, target);
     }
 }
