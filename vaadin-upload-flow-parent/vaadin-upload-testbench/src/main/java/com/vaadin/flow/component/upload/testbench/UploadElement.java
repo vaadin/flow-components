@@ -16,8 +16,9 @@
 package com.vaadin.flow.component.upload.testbench;
 
 import java.io.File;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Timeouts;
@@ -135,7 +136,7 @@ public class UploadElement extends TestBenchElement {
      */
     private void waitForUploads(int maxSeconds) {
         Timeouts timeouts = getDriver().manage().timeouts();
-        timeouts.setScriptTimeout(maxSeconds, TimeUnit.SECONDS);
+        timeouts.scriptTimeout(Duration.of(15, ChronoUnit.SECONDS));
 
         String script = "var callback = arguments[arguments.length - 1];"
                 + "var upload = arguments[0];"
