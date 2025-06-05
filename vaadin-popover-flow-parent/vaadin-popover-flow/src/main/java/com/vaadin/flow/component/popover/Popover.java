@@ -698,10 +698,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
             targetDetachRegistration.remove();
         }
 
-        if (autoAddedToTheUi) {
-            getElement().removeFromParent();
-            autoAddedToTheUi = false;
-        }
+        removeFromUiIfAutoAdded();
 
         this.target = target;
 
@@ -712,27 +709,31 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
         // Target's JavaScript needs to be executed on each attach,
         // because Flow creates a new client-side element
-        target.getUI().ifPresent(this::onTargetAttach);
+        if (target.getUI().isPresent()) {
+            onTargetAttach();
+        }
         targetAttachRegistration = target
-                .addAttachListener(e -> onTargetAttach(e.getUI()));
+                .addAttachListener(e -> onTargetAttach());
         targetDetachRegistration = target.addDetachListener(e -> {
-            if (autoAddedToTheUi) {
-                getElement().removeFromParent();
-                autoAddedToTheUi = false;
-            }
+            removeFromUiIfAutoAdded();
         });
     }
 
-    private void onTargetAttach(UI ui) {
+    private void removeFromUiIfAutoAdded() {
+        if (autoAddedToTheUi) {
+            autoAddedToTheUi = false;
+            getElement().removeFromParent();
+        }
+    }
+
+    private void onTargetAttach() {
         if (target != null) {
-            ui.beforeClientResponse(ui, context -> {
-                if (getElement().getNode().getParent() == null) {
-                    // Remove the popover from its current state tree
-                    getElement().removeFromTree(false);
-                    ui.addToModalComponent(this);
-                    autoAddedToTheUi = true;
-                }
-            });
+            if (getElement().getNode().getParent() == null) {
+                // Remove the popover from its current state tree
+                getElement().removeFromTree(false);
+                target.getElement().getParent().appendChild(getElement());
+                autoAddedToTheUi = true;
+            }
             getElement().executeJs("this.target = $0", target.getElement());
         }
     }
