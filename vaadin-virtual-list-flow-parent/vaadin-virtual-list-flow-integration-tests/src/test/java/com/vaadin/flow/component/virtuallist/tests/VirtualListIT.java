@@ -398,9 +398,9 @@ public class VirtualListIT extends AbstractComponentIT {
             int endingIndex, String itemLabelprefix) {
 
         for (int i = startingIndex; i < endingIndex; i++) {
-            Assert.assertTrue(
+            Assert.assertFalse(
                     "Object at index " + i + " is null, when it shouldn't be",
-                    !(items.get(i) instanceof JsonNull));
+                    items.get(i) instanceof JsonNull);
             Assert.assertEquals(itemLabelprefix + (i + 1),
                     getPropertyString(items.getObject(i), "label"));
         }
