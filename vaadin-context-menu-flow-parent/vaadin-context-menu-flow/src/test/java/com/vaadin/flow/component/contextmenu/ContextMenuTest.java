@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -51,22 +50,26 @@ public class ContextMenuTest {
         List<Component> children = contextMenu.getChildren()
                 .collect(Collectors.toList());
         Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(span1, span2));
+        Assert.assertTrue(children.contains(span1));
+        Assert.assertTrue(children.contains(span2));
 
         contextMenu.addComponent(span3);
         children = contextMenu.getChildren().collect(Collectors.toList());
         Assert.assertEquals(3, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(span1, span2, span3));
+        Assert.assertTrue(children.contains(span1));
+        Assert.assertTrue(children.contains(span2));
+        Assert.assertTrue(children.contains(span3));
 
         contextMenu.remove(span2);
         children = contextMenu.getChildren().collect(Collectors.toList());
         Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(span1, span3));
+        Assert.assertTrue(children.contains(span1));
+        Assert.assertTrue(children.contains(span3));
 
         contextMenu.remove(span1);
         children = contextMenu.getChildren().collect(Collectors.toList());
         Assert.assertEquals(1, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(span3));
+        Assert.assertTrue(children.contains(span3));
 
         contextMenu.removeAll();
         children = contextMenu.getChildren().collect(Collectors.toList());

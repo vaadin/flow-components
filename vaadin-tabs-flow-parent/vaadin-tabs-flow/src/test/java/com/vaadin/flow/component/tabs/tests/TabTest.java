@@ -15,9 +15,6 @@
  */
 package com.vaadin.flow.component.tabs.tests;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -35,8 +32,9 @@ public class TabTest {
     @Test
     public void shouldCreateEmptyTabWithDefaultState() throws Exception {
 
-        assertThat("Initial label is invalid", tab.getLabel(), is(""));
-        assertThat("Initial flexGrow is invalid", tab.getFlexGrow(), is(0.0));
+        Assert.assertEquals("Initial label is invalid", "", tab.getLabel());
+        Assert.assertEquals("Initial flexGrow is invalid", 0.0,
+                tab.getFlexGrow(), 0.0);
     }
 
     @Test
@@ -45,25 +43,26 @@ public class TabTest {
 
         tab = new Tab(label);
 
-        assertThat("Initial label is invalid", tab.getLabel(), is(label));
-        assertThat("Initial flexGrow is invalid", tab.getFlexGrow(), is(0.0));
+        Assert.assertEquals("Initial label is invalid", label, tab.getLabel());
+        Assert.assertEquals("Initial flexGrow is invalid", 0.0,
+                tab.getFlexGrow(), 0.0);
     }
 
     @Test
     public void shouldSetFlexGrow() throws Exception {
         tab.setFlexGrow(1);
 
-        assertThat("flexGrow is invalid", tab.getFlexGrow(), is(1.0));
+        Assert.assertEquals("flexGrow is invalid", 1.0, tab.getFlexGrow(), 0.0);
     }
 
     @Test
     public void implementsHasTooltip() {
-        assertTrue(tab instanceof HasTooltip);
+        Assert.assertTrue(tab instanceof HasTooltip);
     }
 
     @Test
     public void implementHasAriaLabel() {
-        assertTrue(tab instanceof HasAriaLabel);
+        Assert.assertTrue(tab instanceof HasAriaLabel);
     }
 
     @Test

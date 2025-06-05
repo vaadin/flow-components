@@ -23,7 +23,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -651,11 +650,10 @@ public class HeaderFooterTest {
                 "The cell prepended on top of a joined cell should be "
                         + "a parent for the same column elements",
                 2, bottomChildColumns.size());
-        Assert.assertThat(
-                "The cell prepended on top of a joined cell should be "
-                        + "a parent for the same column elements",
-                bottomChildColumns,
-                CoreMatchers.hasItems(firstColumn, secondColumn));
+        Assert.assertTrue("The child columns should contain firstColumn",
+                bottomChildColumns.contains(firstColumn));
+        Assert.assertTrue("The child columns should contain secondColumn",
+                bottomChildColumns.contains(secondColumn));
     }
 
     @Test

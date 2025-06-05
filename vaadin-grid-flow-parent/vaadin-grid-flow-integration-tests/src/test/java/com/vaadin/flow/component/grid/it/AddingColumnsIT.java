@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -99,12 +97,12 @@ public class AddingColumnsIT extends AbstractComponentIT {
 
     private void assertCellContentsContain(String expectedFirstRow,
             String expectedSecondRow) {
-        MatcherAssert.assertThat(
-                TestHelper.stripComments(grid.getCell(0, 0).getInnerHTML()),
-                CoreMatchers.containsString(expectedFirstRow));
-        MatcherAssert.assertThat(
-                TestHelper.stripComments(grid.getCell(1, 0).getInnerHTML()),
-                CoreMatchers.containsString(expectedSecondRow));
+        Assert.assertTrue("First row should contain expected content",
+                TestHelper.stripComments(grid.getCell(0, 0).getInnerHTML())
+                        .contains(expectedFirstRow));
+        Assert.assertTrue("Second row should contain expected content",
+                TestHelper.stripComments(grid.getCell(1, 0).getInnerHTML())
+                        .contains(expectedSecondRow));
     }
 
 }

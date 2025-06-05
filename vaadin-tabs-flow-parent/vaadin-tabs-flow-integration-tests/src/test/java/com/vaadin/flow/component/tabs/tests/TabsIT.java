@@ -15,10 +15,9 @@
  */
 package com.vaadin.flow.component.tabs.tests;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -49,12 +48,12 @@ public class TabsIT extends AbstractComponentIT {
         WebElement tab3 = layout.findElement(By.id("tab3"));
         WebElement page1 = layout.findElement(By.id("page1"));
         assertFalse(isElementPresent(By.id("page3")));
-        assertThat(page1.getCssValue("display"), is("block"));
+        Assert.assertEquals("block", page1.getCssValue("display"));
 
         scrollIntoViewAndClick(tab3);
 
         assertFalse(isElementPresent(By.id("page1")));
         WebElement page3 = layout.findElement(By.id("page3"));
-        assertThat(page3.getCssValue("display"), is("block"));
+        Assert.assertEquals("block", page3.getCssValue("display"));
     }
 }
