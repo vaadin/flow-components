@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.tabs.tests;
 
-import static org.junit.Assert.*;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -59,12 +57,12 @@ public class TabTest {
 
     @Test
     public void implementsHasTooltip() {
-        assertTrue(tab instanceof HasTooltip);
+        Assert.assertTrue(tab instanceof HasTooltip);
     }
 
     @Test
     public void implementHasAriaLabel() {
-        assertTrue(tab instanceof HasAriaLabel);
+        Assert.assertTrue(tab instanceof HasAriaLabel);
     }
 
     @Test
