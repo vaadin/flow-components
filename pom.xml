@@ -69,7 +69,7 @@
     </scm>
     <properties>
         <flow.version>25.0-SNAPSHOT</flow.version>
-        <testbench.version>9.4.0.beta1</testbench.version>
+        <testbench.version>9.4.0.rc1</testbench.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -81,7 +81,7 @@
         <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.3</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
-        <spotless.plugin.version>2.44.3</spotless.plugin.version>
+        <spotless.plugin.version>2.44.5</spotless.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <spotless.npmExecutable/>
         <spotless.nodeExecutable/>
