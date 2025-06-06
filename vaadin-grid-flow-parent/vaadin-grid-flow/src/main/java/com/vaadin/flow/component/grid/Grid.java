@@ -207,11 +207,11 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.13")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/grid", version = "23.5.12")
-@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.5.12")
-@NpmPackage(value = "@vaadin/tooltip", version = "23.5.12")
+@NpmPackage(value = "@vaadin/grid", version = "23.5.13")
+@NpmPackage(value = "@vaadin/vaadin-grid", version = "23.5.13")
+@NpmPackage(value = "@vaadin/tooltip", version = "23.5.13")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -448,7 +448,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            type of the underlying grid this column is compatible with
      */
     @Tag("vaadin-grid-column")
-    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.12")
+    @NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "23.5.13")
     @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
     public static class Column<T> extends AbstractColumn<Column<T>> {
 
@@ -3021,13 +3021,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     /**
      * Gets a {@link Column} of this grid by its internal id ({@code _flowId}).
+     * Intended only for internal use and can be removed in the future.
      *
      * @param internalId
      *            the internal identifier of the column to get
      * @return the column corresponding to the given column identifier, or
      *         {@code null} if no column has such an identifier
      */
-    Column<T> getColumnByInternalId(String internalId) {
+    protected final Column<T> getColumnByInternalId(String internalId) {
         return idToColumnMap.get(internalId);
     }
 

@@ -119,9 +119,7 @@ public class EmailFieldPageIT extends AbstractComponentIT {
         input.sendKeys("foo");
         blur();
 
-        WebElement clearButton = field.$("*")
-                .attributeContains("part", "clear-button").first();
-        clearButton.click();
+        field.clickClearButton();
 
         String value = findElement(By.id("clear-message")).getText();
         Assert.assertEquals("Old value: 'foo'. New value: ''.", value);
@@ -134,11 +132,11 @@ public class EmailFieldPageIT extends AbstractComponentIT {
 
         field.sendKeys("username");
         blur();
-        assertTrue(field.hasAttribute("invalid"));
+        assertTrue(field.isInvalid());
 
         field.sendKeys("username@domain.com");
         blur();
-        assertFalse(field.hasAttribute("invalid"));
+        assertFalse(field.isInvalid());
     }
 
     @Test

@@ -57,11 +57,11 @@ public class TextAreaPatternIT extends AbstractComponentIT {
     }
 
     private void assertClientSideValid() {
-        Assert.assertFalse(textArea.hasAttribute("invalid"));
+        Assert.assertFalse(textArea.isInvalid());
     }
 
     private void assertClientSideInvalid() {
-        Assert.assertTrue(textArea.hasAttribute("invalid"));
+        Assert.assertTrue(textArea.isInvalid());
     }
 
     private void assertServerSideValid() {
