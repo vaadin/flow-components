@@ -10,8 +10,8 @@
   </parent>
   <groupId>com.vaadin</groupId>
   <artifactId>vaadin-spreadsheet-flow-client</artifactId>
-  <name>Vaadin Spreadsheet Flow Client</name>
   <packaging>jar</packaging>
+  <name>Vaadin Spreadsheet Flow Client</name>
 
   <properties>
     <!-- OBF is enabled in CI when releasing for production -->
