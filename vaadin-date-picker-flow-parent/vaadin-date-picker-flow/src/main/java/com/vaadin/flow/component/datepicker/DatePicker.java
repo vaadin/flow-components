@@ -130,7 +130,7 @@ import elemental.json.JsonType;
 @NpmPackage(value = "@vaadin/date-picker", version = "25.0.0-alpha3")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
-@NpmPackage(value = "date-fns", version = "2.29.3")
+@NpmPackage(value = "date-fns", version = "4.1.0")
 public class DatePicker
         extends AbstractSinglePropertyField<DatePicker, LocalDate>
         implements Focusable<DatePicker>, HasAllowedCharPattern, HasAriaLabel,
