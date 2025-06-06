@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -71,22 +70,26 @@ public class DialogTest {
         List<Component> children = dialog.getChildren()
                 .collect(Collectors.toList());
         Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(span1, span2));
+        Assert.assertTrue(children.contains(span1));
+        Assert.assertTrue(children.contains(span2));
 
         dialog.add(span3);
         children = dialog.getChildren().collect(Collectors.toList());
         Assert.assertEquals(3, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(span1, span2, span3));
+        Assert.assertTrue(children.contains(span1));
+        Assert.assertTrue(children.contains(span2));
+        Assert.assertTrue(children.contains(span3));
 
         dialog.remove(span2);
         children = dialog.getChildren().collect(Collectors.toList());
         Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(span1, span3));
+        Assert.assertTrue(children.contains(span1));
+        Assert.assertTrue(children.contains(span3));
 
         span1.getElement().removeFromParent();
         children = dialog.getChildren().collect(Collectors.toList());
         Assert.assertEquals(1, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(span3));
+        Assert.assertTrue(children.contains(span3));
 
         dialog.removeAll();
         children = dialog.getChildren().collect(Collectors.toList());

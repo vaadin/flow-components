@@ -21,7 +21,6 @@ import static com.vaadin.flow.component.combobox.test.FilteringPage.SWITCH_TO_UN
 
 import java.util.List;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -113,9 +112,9 @@ public class FilteringIT extends AbstractComboBoxIT {
 
         waitUntil(driver -> getNonEmptyOverlayContents().size() == 11);
 
-        getNonEmptyOverlayContents().forEach(item -> Assert.assertThat(
-                "Unexpected item found after filtering.", item,
-                CoreMatchers.startsWith("Item 2")));
+        getNonEmptyOverlayContents().forEach(item -> Assert.assertTrue(
+                "Unexpected item found after filtering.",
+                item.startsWith("Item 2")));
     }
 
     @Test
@@ -254,10 +253,10 @@ public class FilteringIT extends AbstractComboBoxIT {
                     + "Expected the items to be already filtered synchronously in client-side.",
                     expectedCount, items.size());
             items.forEach(item -> {
-                Assert.assertThat(
+                Assert.assertTrue(
                         "Found an item which doesn't match the filter. "
                                 + "Expected the items to be already filtered synchronously in client-side.",
-                        item, CoreMatchers.containsString(filter));
+                        item.contains(filter));
             });
         } else {
             Assert.assertEquals("Expected server-side filtering, so there "
@@ -266,9 +265,9 @@ public class FilteringIT extends AbstractComboBoxIT {
 
             waitUntil(driver -> getNonEmptyOverlayContents().size() > 0);
             getNonEmptyOverlayContents().forEach(rendered -> {
-                Assert.assertThat(
+                Assert.assertTrue(
                         "Item which doesn't match the filter was found after server-side filtering.",
-                        rendered, CoreMatchers.containsString(filter));
+                        rendered.contains(filter));
             });
         }
     }

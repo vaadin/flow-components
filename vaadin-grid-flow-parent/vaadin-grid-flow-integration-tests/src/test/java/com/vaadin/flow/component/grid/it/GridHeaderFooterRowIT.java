@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -210,23 +209,22 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
 
     private void assertHeaderComponentsAreRendered() {
         List<String> headerContents = getHeaderContents();
-        headerContents.forEach(content -> Assert.assertThat(
-                "Span components should be rendered in the headers", content,
-                CoreMatchers.containsString("<span>foo</span>")));
-        headerContents.forEach(content -> Assert.assertThat(
+        headerContents.forEach(content -> Assert.assertTrue(
+                "Span components should be rendered in the headers",
+                content.contains("<span>foo</span>")));
+        headerContents.forEach(content -> Assert.assertFalse(
                 "Header components should have overridden the header texts",
-                content, CoreMatchers.not(CoreMatchers.containsString("bar"))));
+                content.contains("bar")));
     }
 
     private void assertHeaderTextsAreRendered() {
         List<String> headerContents = getHeaderContents();
-        headerContents.forEach(content -> Assert.assertThat(
+        headerContents.forEach(content -> Assert.assertTrue(
                 "The text that was set should be rendered in the headers",
-                content, CoreMatchers.containsString("bar")));
-        headerContents.forEach(content -> Assert.assertThat(
+                content.contains("bar")));
+        headerContents.forEach(content -> Assert.assertFalse(
                 "The text should override the previously set components",
-                content,
-                CoreMatchers.not(CoreMatchers.containsString("<span>"))));
+                content.contains("<span>")));
     }
 
     @Test
@@ -241,10 +239,10 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
                 "There should be one header cell for multiselection checkbox "
                         + "and another for the header",
                 2, headerCells.size());
-        Assert.assertThat(
+        Assert.assertTrue(
                 "The first header cell should contain the multiselection checkbox",
-                headerCells.get(0).getDomProperty("innerHTML"),
-                CoreMatchers.containsString("vaadin-checkbox"));
+                headerCells.get(0).getDomProperty("innerHTML")
+                        .contains("vaadin-checkbox"));
         Assert.assertEquals(
                 "The second header cell should contain the set text", "0",
                 headerCells.get(1).getText());
@@ -368,8 +366,9 @@ public class GridHeaderFooterRowIT extends AbstractComponentIT {
     private void assertHeaderHasGridSorter(int headerIndexFromTop) {
         List<WebElement> headerCells = getHeaderCells();
         WebElement cellWithSorter = headerCells.get(headerIndexFromTop);
-        Assert.assertThat(cellWithSorter.getDomProperty("innerHTML"),
-                CoreMatchers.containsString("vaadin-grid-sorter"));
+        Assert.assertTrue("Cell should contain vaadin-grid-sorter",
+                cellWithSorter.getDomProperty("innerHTML")
+                        .contains("vaadin-grid-sorter"));
 
         Assert.assertTrue("Only one header should have the sorting indicators",
                 headerCells.stream()

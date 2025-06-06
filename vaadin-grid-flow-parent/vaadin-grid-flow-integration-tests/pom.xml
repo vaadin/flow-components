@@ -138,12 +138,6 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-core</artifactId>
             <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.hamcrest</groupId>
-                    <artifactId>hamcrest-core</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
@@ -159,11 +153,6 @@
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jol</groupId>

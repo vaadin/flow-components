@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import org.hamcrest.core.StringContains;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -169,8 +168,8 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
             String cellText = grid.getCell(i, 0).getText();
             if (cellText.contains("Dad")) {
                 String sonText = grid.getCell(i + 1, 0).getText();
-                Assert.assertThat(sonText + " is not a Son item", sonText,
-                        StringContains.containsString("Son"));
+                Assert.assertTrue(sonText + " is not a Son item",
+                        sonText.contains("Son"));
 
             }
         }
