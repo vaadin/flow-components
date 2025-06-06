@@ -365,6 +365,13 @@ public class MapElement extends TestBenchElement {
         public long getRevision() {
             return getLong("getRevision()");
         }
+
+        public boolean isTileLoaded(int z, int x, int y) {
+            String tileKey = String.format("%s/%s/%s", z, x, y);
+            return getBoolean(
+                    "getRenderer().getTileCache().getKeys().some(key => key.endsWith('%s'))",
+                    tileKey);
+        }
     }
 
     public static class SourceReference extends ConfigurationObjectReference {
@@ -406,11 +413,6 @@ public class MapElement extends TestBenchElement {
         private XyzSourceReference(ExpressionExecutor executor,
                 String expression) {
             super(executor, expression);
-        }
-
-        public boolean isTileLoaded(int z, int x, int y) {
-            String tileKey = String.format("%s/%s/%s", z, x, y);
-            return getBoolean("tileCache.containsKey('%s')", tileKey);
         }
     }
 

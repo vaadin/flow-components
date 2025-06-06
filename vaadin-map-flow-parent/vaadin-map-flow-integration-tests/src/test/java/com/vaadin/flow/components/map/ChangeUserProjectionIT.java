@@ -38,8 +38,7 @@ public class ChangeUserProjectionIT extends AbstractComponentIT {
         // https://c.tile.openstreetmap.org/10/575/294.png
         MapElement.LayerReference layer = map.getMapReference().getLayers()
                 .getLayer("background-layer");
-        MapElement.XyzSourceReference source = layer.getSource().asXyzSource();
-        waitUntilMapTileLoaded(source, 10, 575, 294);
+        waitUntilMapTileLoaded(layer, 10, 575, 294);
     }
 
     @Test
@@ -54,8 +53,7 @@ public class ChangeUserProjectionIT extends AbstractComponentIT {
         // (https://a.tile.openstreetmap.org/10/550/335.png)
         MapElement.LayerReference layer = map.getMapReference().getLayers()
                 .getLayer("background-layer");
-        MapElement.XyzSourceReference source = layer.getSource().asXyzSource();
-        waitUntilMapTileLoaded(source, 10, 550, 335);
+        waitUntilMapTileLoaded(layer, 10, 550, 335);
 
         // Check coordinates received server-side
         String[] parts = eventDataDiv.getText().split(";");
@@ -66,8 +64,8 @@ public class ChangeUserProjectionIT extends AbstractComponentIT {
         Assert.assertEquals(6893740.925498, centerY, 0.001);
     }
 
-    private void waitUntilMapTileLoaded(MapElement.XyzSourceReference source,
-            int z, int x, int y) {
-        waitUntil(driver -> source.isTileLoaded(z, x, y));
+    private void waitUntilMapTileLoaded(MapElement.LayerReference layer, int z,
+            int x, int y) {
+        waitUntil(driver -> layer.isTileLoaded(z, x, y));
     }
 }
