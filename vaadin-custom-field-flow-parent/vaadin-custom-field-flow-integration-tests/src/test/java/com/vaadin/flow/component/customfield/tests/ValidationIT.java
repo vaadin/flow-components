@@ -18,7 +18,10 @@ package com.vaadin.flow.component.customfield.tests;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.Keys;
 
+import com.vaadin.flow.component.customfield.testbench.CustomFieldElement;
+import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
@@ -26,53 +29,61 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-custom-field/validation")
 public class ValidationIT extends AbstractComponentIT {
 
-    private TestBenchElement customField;
-    private TestBenchElement setInvalid;
-    private TestBenchElement attach;
-    private TestBenchElement detach;
-    private TestBenchElement logInvalidState;
+    private CustomFieldElement customField;
     private TestBenchElement logOutput;
+
+    private CustomFieldElement customFieldWithDelegatedValidation;
 
     @Before
     public void init() {
         open();
 
-        customField = $("vaadin-custom-field").waitForFirst();
-        setInvalid = $("button").id("set-invalid");
-        attach = $("button").id("attach");
-        detach = $("button").id("detach");
-        logInvalidState = $("button").id("log-invalid-state");
+        customField = $(CustomFieldElement.class).id("custom-field");
         logOutput = $("span").id("log-output");
+        customFieldWithDelegatedValidation = $(CustomFieldElement.class)
+                .id("custom-field-with-delegated-validation");
     }
 
     @Test
     public void overridesClientValidation() {
-        setInvalid.click();
+        clickElementWithJs("set-invalid");
 
-        executeScript("arguments[0].validate()", customField);
+        executeScript("arguments[0]._requestValidation()", customField);
 
         Assert.assertEquals(true, customField.getPropertyBoolean("invalid"));
     }
 
     @Test
     public void detach_reattach_overridesClientValidation() {
-        setInvalid.click();
-        detach.click();
-        attach.click();
+        clickElementWithJs("set-invalid");
+        clickElementWithJs("detach");
+        clickElementWithJs("attach");
 
-        customField = $("vaadin-custom-field").waitForFirst();
-        executeScript("arguments[0].validate()", customField);
+        customField = $(CustomFieldElement.class).id("custom-field");
+        executeScript("arguments[0]._requestValidation()", customField);
 
         Assert.assertEquals(true, customField.getPropertyBoolean("invalid"));
     }
 
     @Test
     public void changeInvalidOnClient_notSynchronizedToServer() {
-        setInvalid.click();
+        clickElementWithJs("set-invalid");
 
         executeScript("arguments[0].invalid = false", customField);
-        logInvalidState.click();
+        clickElementWithJs("log-invalid-state");
 
         Assert.assertEquals("true", logOutput.getText());
+    }
+
+    @Test
+    public void delegatedValidation_initiallyInvalid_focus_blur_noClientValidation() {
+        clickElementWithJs("validate");
+        customFieldWithDelegatedValidation.focus();
+        customFieldWithDelegatedValidation.sendKeys(Keys.TAB);
+
+        var innerField = customFieldWithDelegatedValidation
+                .$(IntegerFieldElement.class).first();
+
+        Assert.assertTrue(innerField.getPropertyBoolean("invalid"));
     }
 }
