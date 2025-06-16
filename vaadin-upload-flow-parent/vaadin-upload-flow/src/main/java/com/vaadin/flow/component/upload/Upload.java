@@ -65,9 +65,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-rc1")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/upload", version = "24.8.0-rc1")
+@NpmPackage(value = "@vaadin/upload", version = "24.8.0")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
@@ -729,7 +729,12 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     public void setUploadHandler(UploadHandler handler) {
         Objects.requireNonNull(handler, "UploadHandler cannot be null");
         StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
-                handler, this.getElement());
+                handler, this.getElement()) {
+            @Override
+            public String getName() {
+                return "upload";
+            }
+        };
         runBeforeClientResponse(ui -> getElement().setAttribute("target",
                 elementStreamResource));
         if (!hasListener(UploadStartEvent.class)
