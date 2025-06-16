@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.avatar.tests;
 
-import static org.hamcrest.CoreMatchers.startsWith;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +56,8 @@ public class AvatarGroupIT extends AbstractComponentIT {
         clickElementWithJs("set-items-with-resource");
         String imageUrl = $(AvatarGroupElement.class).first()
                 .getAvatarElement(0).getPropertyString("img");
-        Assert.assertThat(imageUrl, startsWith("VAADIN/dynamic"));
+        Assert.assertTrue("Image URL should start with 'VAADIN/dynamic'",
+                imageUrl.startsWith("VAADIN/dynamic"));
         checkLogsForErrors(); // would fail if the image wasn't hosted
     }
 

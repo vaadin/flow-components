@@ -8,13 +8,11 @@
  */
 package com.vaadin.flow.component.spreadsheet.test;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -41,7 +39,7 @@ public class MergedCellNarrowFirstColumnIT extends AbstractSpreadsheetIT {
         String cellText = "123456";
 
         var a2 = spreadsheet.getCellAt("A2");
-        assertThat(a2.getValue(), equalTo(cellText));
+        Assert.assertEquals(cellText, a2.getValue());
 
         String cellSelector = String.format(".col%d.row%d.cell", 1, 2);
         List<WebElement> elements = findElementsInShadowRoot(
@@ -57,10 +55,10 @@ public class MergedCellNarrowFirstColumnIT extends AbstractSpreadsheetIT {
 
         var cellElement = underlyingCell.wrap(SheetCellElement.class);
 
-        assertThat(cellElement.getValue(), equalTo(cellText));
+        Assert.assertEquals(cellText, cellElement.getValue());
 
         String overFlow = cellElement.getCssValue("overflow");
-        assertThat(overFlow, not(equalTo("visible")));
+        Assert.assertNotEquals("visible", overFlow);
     }
 
 }

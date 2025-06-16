@@ -18,7 +18,6 @@ package com.vaadin.flow.component.grid.it;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -42,7 +41,8 @@ public class TextRendererIT extends AbstractComponentIT {
         // self check: click is handled with a result on the client side
         String classNames = findElement(By.tagName("vaadin-grid"))
                 .getDomAttribute("class");
-        Assert.assertThat(classNames, CoreMatchers.containsString("refreshed"));
+        Assert.assertTrue("Expected classNames to contain 'refreshed'",
+                classNames.contains("refreshed"));
 
         Set<String> cellsAfterRefresh = findElements(
                 By.tagName("vaadin-grid-cell-content")).stream()

@@ -727,7 +727,12 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     public void setUploadHandler(UploadHandler handler) {
         Objects.requireNonNull(handler, "UploadHandler cannot be null");
         StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
-                handler, this.getElement());
+                handler, this.getElement()) {
+            @Override
+            public String getName() {
+                return "upload";
+            }
+        };
         runBeforeClientResponse(ui -> getElement().setAttribute("target",
                 elementStreamResource));
         if (!hasListener(UploadStartEvent.class)

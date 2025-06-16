@@ -15,13 +15,10 @@
  */
 package com.vaadin.flow.component.messages.tests;
 
-import static org.hamcrest.CoreMatchers.startsWith;
-
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 
-import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -169,7 +166,8 @@ public class MessageListIT extends AbstractComponentIT {
         getLogEntries(Level.WARNING); // message logs before setting resource
         clickElementWithJs("setImageAsStreamResource");
         String imageUrl = messageList.getMessageElements().get(0).getUserImg();
-        MatcherAssert.assertThat(imageUrl, startsWith("VAADIN/dynamic"));
+        Assert.assertTrue("Image URL should start with 'VAADIN/dynamic'",
+                imageUrl.startsWith("VAADIN/dynamic"));
         // would fail if the avatar.png image wasn't hosted
         checkLogsForErrors(message -> message.contains("test.jpg"));
     }
@@ -233,7 +231,8 @@ public class MessageListIT extends AbstractComponentIT {
         getLogEntries(Level.WARNING); // message logs before setting resource
         clickElementWithJs("setImageAsDownloadHandler");
         String imageUrl = messageList.getMessageElements().get(0).getUserImg();
-        MatcherAssert.assertThat(imageUrl, startsWith("VAADIN/dynamic"));
+        Assert.assertTrue("Image URL should start with 'VAADIN/dynamic'",
+                imageUrl.startsWith("VAADIN/dynamic"));
         checkLogsForErrors(); // would fail if the image wasn't hosted
     }
 

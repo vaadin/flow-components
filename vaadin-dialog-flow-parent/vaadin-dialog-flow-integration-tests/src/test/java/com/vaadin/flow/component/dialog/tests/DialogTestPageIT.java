@@ -15,12 +15,8 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-
 import java.util.List;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -195,7 +191,8 @@ public class DialogTestPageIT extends AbstractComponentIT {
     private void assertDialogContent(String expected) {
         List<WebElement> dialogs = getDialogs();
         String content = dialogs.iterator().next().getText();
-        Assert.assertThat(content, CoreMatchers.containsString(expected));
+        Assert.assertTrue("Dialog content should contain: " + expected,
+                content.contains(expected));
     }
 
     private List<WebElement> getDialogs() {
@@ -221,9 +218,10 @@ public class DialogTestPageIT extends AbstractComponentIT {
 
         Long endpoint = contentPadding + contentMargin;
 
-        assertThat("Content didn't have a with over the padding and margin",
-                getLongValue(content.getCssValue("width")),
-                greaterThan(endpoint));
+        Long actualWidth = getLongValue(content.getCssValue("width"));
+        Assert.assertTrue(
+                "Content didn't have a width over the padding and margin",
+                actualWidth > endpoint);
     }
 
     @Test

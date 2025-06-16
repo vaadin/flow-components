@@ -19,7 +19,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -53,8 +52,8 @@ public class DateTimePickerIT extends AbstractComponentIT {
     public void selectDateTime() {
         picker.setDateTime(LocalDateTime.of(1985, 1, 10, 13, 51));
 
-        Assert.assertThat(message.getText(),
-                CoreMatchers.containsString("1985-01-10 13:51:00"));
+        Assert.assertTrue("Message should contain the selected date-time",
+                message.getText().contains("1985-01-10 13:51:00"));
 
         picker.clear();
 
@@ -66,16 +65,16 @@ public class DateTimePickerIT extends AbstractComponentIT {
         picker.setDate(LocalDate.of(1985, 1, 11));
         // message should not have date yet as time is still unset
         // (DateTimePicker value should still be null)
-        Assert.assertThat(message.getText(),
-                CoreMatchers.not(CoreMatchers.containsString("1985-01-11")));
+        Assert.assertFalse("Message should not contain date when time is unset",
+                message.getText().contains("1985-01-11"));
 
         picker.setTime(LocalTime.of(14, 42));
-        Assert.assertThat(message.getText(),
-                CoreMatchers.containsString("1985-01-11 14:42"));
+        Assert.assertTrue("Message should contain the complete date-time",
+                message.getText().contains("1985-01-11 14:42"));
 
         picker.setDate(LocalDate.of(1987, 4, 10));
-        Assert.assertThat(message.getText(),
-                CoreMatchers.containsString("1987-04-10 14:42"));
+        Assert.assertTrue("Message should contain the updated date-time",
+                message.getText().contains("1987-04-10 14:42"));
 
         picker.setDate(null);
         Assert.assertEquals("No date is selected", message.getText());
@@ -114,8 +113,8 @@ public class DateTimePickerIT extends AbstractComponentIT {
         button.click();
         waitUntil(webDriver -> message.getText().contains("2019-10"));
         // check value change message from server
-        Assert.assertThat(message.getText(),
-                CoreMatchers.containsString("2019-10-15 09:40"));
+        Assert.assertTrue("Message should contain the server-set date-time",
+                message.getText().contains("2019-10-15 09:40"));
         // check values of date-time-picker, date-picker and time-picker
         Assert.assertEquals(LocalDateTime.of(2019, 10, 15, 9, 40),
                 picker.getDateTime());

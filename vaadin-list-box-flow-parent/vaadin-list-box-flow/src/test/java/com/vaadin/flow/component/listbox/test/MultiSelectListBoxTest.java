@@ -24,7 +24,6 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -446,9 +445,9 @@ public class MultiSelectListBoxTest {
                 "The selectedValues property had different length than expected.",
                 selectedValues.length(), indices.length);
         for (int index : indices) {
-            Assert.assertThat(
+            Assert.assertTrue(
                     "The selectedValues property didn't contain expected value.",
-                    actualIndices, CoreMatchers.hasItem(index));
+                    actualIndices.contains(index));
         }
     }
 

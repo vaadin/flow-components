@@ -15,10 +15,6 @@
  */
 package com.vaadin.flow.component.tabs.tests;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -45,13 +41,14 @@ public class TabsTest {
     public void createTabsInDefaultState() {
         Tabs tabs = new Tabs();
 
-        assertThat("Initial tab count is invalid", tabs.getTabCount(), is(0));
-        assertThat("Initial orientation is invalid", tabs.getOrientation(),
-                is(Tabs.Orientation.HORIZONTAL));
-        assertThat("Initial selected index is invalid", tabs.getSelectedIndex(),
-                is(-1));
-        assertThat("Initial child count is invalid", tabs.getSelectedTab(),
-                CoreMatchers.nullValue());
+        Assert.assertEquals("Initial tab count is invalid", 0,
+                tabs.getTabCount());
+        Assert.assertEquals("Initial orientation is invalid",
+                Tabs.Orientation.HORIZONTAL, tabs.getOrientation());
+        Assert.assertEquals("Initial selected index is invalid", -1,
+                tabs.getSelectedIndex());
+        Assert.assertNull("Initial child count is invalid",
+                tabs.getSelectedTab());
     }
 
     @Test
@@ -61,13 +58,14 @@ public class TabsTest {
         Tab tab3 = new Tab("Tab three");
         Tabs tabs = new Tabs(tab1, tab2, tab3);
 
-        assertThat("Initial tab count is invalid", tabs.getTabCount(), is(3));
-        assertThat("Initial orientation is invalid", tabs.getOrientation(),
-                is(Tabs.Orientation.HORIZONTAL));
-        assertThat("Initial selected tab is invalid", tabs.getSelectedTab(),
-                is(tab1));
-        assertThat("Initial selected index is invalid", tabs.getSelectedIndex(),
-                is(0));
+        Assert.assertEquals("Initial tab count is invalid", 3,
+                tabs.getTabCount());
+        Assert.assertEquals("Initial orientation is invalid",
+                Tabs.Orientation.HORIZONTAL, tabs.getOrientation());
+        Assert.assertEquals("Initial selected tab is invalid", tab1,
+                tabs.getSelectedTab());
+        Assert.assertEquals("Initial selected index is invalid", 0,
+                tabs.getSelectedIndex());
     }
 
     @Test
@@ -76,8 +74,8 @@ public class TabsTest {
 
         tabs.setOrientation(Tabs.Orientation.VERTICAL);
 
-        assertThat("Orientation is invalid", tabs.getOrientation(),
-                is(Tabs.Orientation.VERTICAL));
+        Assert.assertEquals("Orientation is invalid", Tabs.Orientation.VERTICAL,
+                tabs.getOrientation());
     }
 
     @Test
@@ -89,8 +87,10 @@ public class TabsTest {
 
         tabs.setSelectedTab(tab2);
 
-        assertThat("Selected tab is invalid", tabs.getSelectedTab(), is(tab2));
-        assertThat("Selected index is invalid", tabs.getSelectedIndex(), is(1));
+        Assert.assertEquals("Selected tab is invalid", tab2,
+                tabs.getSelectedTab());
+        Assert.assertEquals("Selected index is invalid", 1,
+                tabs.getSelectedIndex());
     }
 
     @Test
@@ -102,8 +102,10 @@ public class TabsTest {
 
         tabs.setSelectedIndex(2);
 
-        assertThat("Selected tab is invalid", tabs.getSelectedTab(), is(tab3));
-        assertThat("Selected index is invalid", tabs.getSelectedIndex(), is(2));
+        Assert.assertEquals("Selected tab is invalid", tab3,
+                tabs.getSelectedTab());
+        Assert.assertEquals("Selected index is invalid", 2,
+                tabs.getSelectedIndex());
     }
 
     @Test
@@ -164,9 +166,12 @@ public class TabsTest {
 
         tabs.setFlexGrowForEnclosedTabs(1.5);
 
-        assertThat("flexGrow of tab1 is invalid", tab1.getFlexGrow(), is(1.5));
-        assertThat("flexGrow of tab2 is invalid", tab2.getFlexGrow(), is(1.5));
-        assertThat("flexGrow of tab3 is invalid", tab3.getFlexGrow(), is(1.5));
+        Assert.assertEquals("flexGrow of tab1 is invalid", 1.5,
+                tab1.getFlexGrow(), 0.0);
+        Assert.assertEquals("flexGrow of tab2 is invalid", 1.5,
+                tab2.getFlexGrow(), 0.0);
+        Assert.assertEquals("flexGrow of tab3 is invalid", 1.5,
+                tab3.getFlexGrow(), 0.0);
     }
 
     @Test
