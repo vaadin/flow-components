@@ -172,7 +172,7 @@ window.Vaadin.Flow.timepickerConnector.initLazy = (timepicker) => {
           // FIXME works but uses private API, needs fixes in web component
           if (timepicker.inputElement.value !== newValue) {
             timepicker.inputElement.value = newValue;
-            timepicker.$.comboBox.value = newValue;
+            timepicker.value = newValue;
           }
         }
       );

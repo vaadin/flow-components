@@ -39,16 +39,6 @@ public class TimePickerElement extends TestBenchElement
 
     /**
      * A TestBench element representing
-     * <code>&lt;vaadin-time-picker-combo-box&gt;</code> element inside the
-     * <code>&lt;vaadin-time-picker&gt;</code> element.
-     */
-    @Element("vaadin-time-picker-combo-box")
-    public static class TimePickerComboBoxElement extends TestBenchElement {
-
-    }
-
-    /**
-     * A TestBench element representing
      * <code>&lt;vaadin-time-picker-overlay&gt;</code> element that contains the
      * items for the <code>&lt;vaadin-time-picker&gt;</code> element when the
      * drop down has been opened with {@link #openDropDown()}.
@@ -85,20 +75,10 @@ public class TimePickerElement extends TestBenchElement
     }
 
     /**
-     * Gets the <code>&lt;vaadin-time-picker-combo-box&gt;</code> element inside
-     * the <code>&lt;vaadin-time-picker&gt;</code> element.
-     *
-     * @return the combo box light element
-     */
-    public TimePickerComboBoxElement getTimePickerComboBox() {
-        return $(TimePickerComboBoxElement.class).first();
-    }
-
-    /**
      * Gets the <code>&lt;input&gt;</code> element inside the
      * <code>&lt;vaadin-time-picker&gt;</code> element.
      *
-     * @return the combo box light element
+     * @return the input element
      */
     public TestBenchElement getTimePickerInputElement() {
         return $("input").first();
@@ -156,7 +136,7 @@ public class TimePickerElement extends TestBenchElement
      * Opens the drop down for the time picker.
      */
     public void openDropDown() {
-        executeScript("arguments[0].open()", getTimePickerComboBox());
+        callFunction("open");
         waitUntilDropDownOpen();
     }
 
@@ -170,7 +150,7 @@ public class TimePickerElement extends TestBenchElement
     public void closeDropDown() {
         executeScript(
                 "const cb = arguments[0]; window.requestAnimationFrame(function(){ cb.close(); });",
-                getTimePickerComboBox());
+                this);
         waitUntil(input -> input
                 .findElements(By.tagName("vaadin-time-picker-overlay"))
                 .isEmpty());
@@ -187,12 +167,12 @@ public class TimePickerElement extends TestBenchElement
      */
     public void scrollToItem(int index) {
         executeScript("arguments[0]._scroller.scrollIntoView(arguments[1])",
-                getTimePickerComboBox(), index);
+                this, index);
     }
 
     /**
      * Selects the item with the given index by clicking on the item from the
-     * combo box drop down.
+     * overlay drop down.
      *
      * @param index
      *            the index of the item to select
