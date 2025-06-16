@@ -100,7 +100,7 @@ public class ConfirmDialog extends Component
 
     @Override
     public String getWidth() {
-        return getElement().getProperty("_contentWidth");
+        return getElement().getProperty("width");
     }
 
     /**
@@ -118,12 +118,12 @@ public class ConfirmDialog extends Component
      */
     @Override
     public void setWidth(String width) {
-        getElement().setProperty("_contentWidth", width);
+        getElement().setProperty("width", width);
     }
 
     @Override
     public String getHeight() {
-        return getElement().getProperty("_contentHeight");
+        return getElement().getProperty("height");
     }
 
     /**
@@ -141,7 +141,7 @@ public class ConfirmDialog extends Component
      */
     @Override
     public void setHeight(String height) {
-        getElement().setProperty("_contentHeight", height);
+        getElement().setProperty("height", height);
     }
 
     /**
