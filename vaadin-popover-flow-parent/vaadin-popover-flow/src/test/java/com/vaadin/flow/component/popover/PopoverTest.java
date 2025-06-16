@@ -29,10 +29,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.server.VaadinService;
-import com.vaadin.flow.server.VaadinSession;
 
 import elemental.json.JsonArray;
 
@@ -41,16 +39,10 @@ import elemental.json.JsonArray;
  */
 public class PopoverTest {
     private Popover popover;
-    private UI ui;
 
     @Before
     public void setup() {
         popover = new Popover();
-
-        ui = new UI();
-        UI.setCurrent(ui);
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        ui.getInternals().setSession(session);
     }
 
     @Test
@@ -355,24 +347,5 @@ public class PopoverTest {
         }
         executorService.shutdown();
         Mockito.verify(current, times(1)).addUIInitListener(Mockito.any());
-    }
-
-    @Test
-    public void setTarget_openModal_popoverIsAttachedToUi() {
-        Div target = new Div();
-        popover.setTarget(target);
-        ui.add(target);
-
-        Div modalElement = new Div();
-        ui.setChildComponentModal(modalElement, true);
-        fakeClientCommunication(ui);
-
-        Assert.assertEquals(ui, popover.getParent().orElseThrow());
-    }
-
-    private void fakeClientCommunication(UI ui) {
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().getStateTree().collectChanges(ignore -> {
-        });
     }
 }
