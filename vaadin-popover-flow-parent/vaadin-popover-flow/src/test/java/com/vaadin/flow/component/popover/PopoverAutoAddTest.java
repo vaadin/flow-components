@@ -153,6 +153,20 @@ public class PopoverAutoAddTest {
         Assert.assertEquals(ui.getElement(), popover.getElement().getParent());
     }
 
+    @Test
+    public void setTarget_openModal_popoverIsAttachedToUi() {
+        Div target = new Div();
+        Popover popover = new Popover();
+        popover.setTarget(target);
+        ui.add(target);
+
+        Div modalElement = new Div();
+        ui.setChildComponentModal(modalElement, true);
+        fakeClientResponse();
+
+        Assert.assertEquals(ui, popover.getParent().orElseThrow());
+    }
+
     private void fakeClientResponse() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
