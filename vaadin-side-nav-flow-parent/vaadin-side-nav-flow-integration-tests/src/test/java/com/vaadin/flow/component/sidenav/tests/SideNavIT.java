@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.vaadin.flow.component.html.testbench.DivElement;
 import com.vaadin.flow.component.html.testbench.NativeButtonElement;
@@ -71,11 +72,7 @@ public class SideNavIT extends AbstractComponentIT {
     public void clickNavigableParent_urlChanged() {
         navigableParent.click();
 
-        waitUntil(
-                driver -> findElement(By.id("navigate-to-main-page")) != null);
-
-        Assert.assertTrue(getDriver().getCurrentUrl()
-                .contains("side-nav-test-target-view"));
+        waitUntil(ExpectedConditions.urlContains("side-nav-test-target-view"));
     }
 
     @Test
@@ -83,11 +80,7 @@ public class SideNavIT extends AbstractComponentIT {
         navigableParent.toggle();
         navigableParent.getItems().get(0).click();
 
-        waitUntil(
-                driver -> findElement(By.id("navigate-to-main-page")) != null);
-
-        Assert.assertTrue(getDriver().getCurrentUrl()
-                .contains("side-nav-test-target-view"));
+        waitUntil(ExpectedConditions.urlContains("side-nav-test-target-view"));
     }
 
     @Test
@@ -127,8 +120,8 @@ public class SideNavIT extends AbstractComponentIT {
     public void navigateToPage_correctItemIsCurrent() {
         // First navigate away from the page
         navigableParent.click();
-        waitUntil(driver -> $(NativeButtonElement.class)
-                .id("navigate-to-main-page") != null, 1);
+        waitUntil(ExpectedConditions
+                .presenceOfElementLocated(By.id("navigate-to-main-page")), 1);
 
         $(NativeButtonElement.class).id("navigate-to-main-page").click();
         waitUntil(driver -> $(SideNavElement.class).exists(), 1);
