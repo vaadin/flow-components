@@ -17,8 +17,6 @@ package com.vaadin.flow.component.grid.it;
 
 import static com.vaadin.flow.component.grid.it.ItemClickListenerPage.GRID_FILTER_FOCUSABLE_HEADER;
 
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,11 +50,13 @@ public class ItemClickListenerIT extends AbstractComponentIT {
 
         String yCoord = getDoubleClickMessage();
 
-        Assert.assertThat(Integer.parseInt(yCoord),
-                CoreMatchers.allOf(
-                        Matchers.greaterThan(firstRow.getLocation().getY()),
-                        Matchers.lessThan(firstRow.getLocation().getY()
-                                + firstRow.getSize().getHeight())));
+        int yCoordInt = Integer.parseInt(yCoord);
+        Assert.assertTrue(
+                "Y coordinate should be greater than first row location",
+                yCoordInt > firstRow.getLocation().getY());
+        Assert.assertTrue("Y coordinate should be less than first row bottom",
+                yCoordInt < firstRow.getLocation().getY()
+                        + firstRow.getSize().getHeight());
     }
 
     @Test

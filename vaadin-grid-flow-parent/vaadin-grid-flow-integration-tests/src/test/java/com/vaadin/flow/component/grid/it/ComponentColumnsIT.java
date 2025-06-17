@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -80,8 +79,8 @@ public class ComponentColumnsIT extends AbstractComponentIT {
 
     private void assertCellContains(GridElement grid, int rowIndex,
             int colIndex, String expected) {
-        Assert.assertThat(grid.getCell(rowIndex, colIndex).getInnerHTML(),
-                CoreMatchers.containsString(expected));
+        Assert.assertTrue("Expected cell content to contain: " + expected, grid
+                .getCell(rowIndex, colIndex).getInnerHTML().contains(expected));
     }
 
 }

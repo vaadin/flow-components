@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -310,8 +309,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         waitUntil(driver -> getNonEmptyOverlayContents().size() > 0);
 
         getNonEmptyOverlayContents().forEach(rendered -> {
-            Assert.assertThat(rendered,
-                    CoreMatchers.containsString("Born: 10"));
+            Assert.assertTrue("Expected rendered to contain 'Born: 10'",
+                    rendered.contains("Born: 10"));
         });
     }
 

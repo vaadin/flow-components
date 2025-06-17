@@ -15,12 +15,9 @@
  */
 package com.vaadin.flow.component.messages.tests;
 
-import static org.hamcrest.CoreMatchers.startsWith;
-
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.hamcrest.MatcherAssert;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -100,8 +97,9 @@ public class MessageListTest {
         item1.setUserImage("foo/bar");
         item1.setUserImageResource(new StreamResource("message-list-img",
                 () -> getClass().getResourceAsStream("baz/qux")));
-        MatcherAssert.assertThat(item1.getUserImage(),
-                startsWith("VAADIN/dynamic"));
+        String userImage = item1.getUserImage();
+        Assert.assertTrue("User image should start with 'VAADIN/dynamic'",
+                userImage.startsWith("VAADIN/dynamic"));
     }
 
     @Test
@@ -121,8 +119,9 @@ public class MessageListTest {
                 DownloadHandler.fromInputStream(data -> new DownloadResponse(
                         getClass().getResourceAsStream("baz/qux"),
                         "message-list-img", null, -1)));
-        MatcherAssert.assertThat(item1.getUserImage(),
-                startsWith("VAADIN/dynamic"));
+        String userImage = item1.getUserImage();
+        Assert.assertTrue("User image should start with 'VAADIN/dynamic'",
+                userImage.startsWith("VAADIN/dynamic"));
     }
 
     @Test
