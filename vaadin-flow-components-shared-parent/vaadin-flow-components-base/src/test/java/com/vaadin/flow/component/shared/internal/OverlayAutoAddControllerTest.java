@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.shared.internal;
 
-import javax.annotation.concurrent.NotThreadSafe;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +28,8 @@ import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.router.BeforeLeaveEvent;
 import com.vaadin.flow.router.internal.BeforeLeaveHandler;
 import com.vaadin.flow.server.VaadinSession;
+
+import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class OverlayAutoAddControllerTest {
