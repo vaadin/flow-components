@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.notification.tests;
 
-import javax.annotation.concurrent.NotThreadSafe;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,6 +25,8 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
+
+import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class NotificationTest {
