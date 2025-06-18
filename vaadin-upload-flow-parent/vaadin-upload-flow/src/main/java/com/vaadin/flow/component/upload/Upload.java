@@ -77,7 +77,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     }
 
     private StreamVariable streamVariable;
-    private boolean interrupted = false;
+    private volatile boolean interrupted = false;
 
     private int activeUploads = 0;
     private boolean uploading;
@@ -443,7 +443,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * The interruption will be done by the receiving thread so this method will
      * return immediately and the actual interrupt will happen a bit later.
      * <p>
-     * Note! this will interrupt all uploads in multi-upload mode.
+     * Note! this will interrupt all ongoing uploads in multi-upload mode.
      */
     public void interruptUpload() {
         if (isUploading()) {
@@ -453,7 +453,9 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
     private void endUpload() {
         activeUploads--;
-        interrupted = false;
+        if (activeUploads == 0) {
+            interrupted = false;
+        }
     }
 
     /**
