@@ -19,9 +19,6 @@
         <module>vaadin-grid-pro-flow</module>
         <module>vaadin-grid-pro-testbench</module>
     </modules>
-    <properties>
-        <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/vaadin-commercial-license-header.txt</spotless.licence-header>
-    </properties>
     <profiles>
         <profile>
             <id>default</id>

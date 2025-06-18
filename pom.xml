@@ -28,7 +28,7 @@
         <maven.resources.plugin.version>3.3.0</maven.resources.plugin.version>
         <maven.deploy.plugin.version>2.8.2</maven.deploy.plugin.version>
         <spotless.plugin.version>2.43.0</spotless.plugin.version>
-        <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
+        <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/vaadin-commercial-license-header.txt</spotless.licence-header>
         <failsafe.forkCount>4</failsafe.forkCount>
         <com.vaadin.tests.SharedBrowser.reuseBrowser>true</com.vaadin.tests.SharedBrowser.reuseBrowser>
         <com.vaadin.testbench.Parameters.testsInParallel>1</com.vaadin.testbench.Parameters.testsInParallel>
@@ -488,40 +488,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>3.1.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>com.mycila</groupId>
-                    <artifactId>license-maven-plugin</artifactId>
-                    <version>2.6</version>
-                    <configuration>
-                        <header>src/license/vclst/header.txt</header>
-                        <quiet>false</quiet>
-                        <failIfMissing>true</failIfMissing>
-                        <aggregate>false</aggregate>
-                        <useDefaultExcludes>true</useDefaultExcludes>
-                        <useDefaultMapping>true</useDefaultMapping>
-                        <encoding>UTF-8</encoding>
-                        <properties>
-                            <year>${currentYear}</year>
-                        </properties>
-                        <excludes>
-                            <exclude>**/target/**</exclude>
-                            <exclude>**/*.xml</exclude>
-                            <exclude>**/*.css</exclude>
-                            <exclude>**/*.properties</exclude>
-                            <exclude>src/license/**/*</exclude>
-                            <exclude>**/*.txt</exclude>
-                            <exclude>scripts/**</exclude>
-                            <exclude>**/resources/META-INF/**</exclude>
-                            <exclude>**/demo/**</exclude>
-                            <exclude>**/tests/**</exclude>
-                            <exclude>**/test/**</exclude>
-                            <exclude>**/LICENSE/</exclude>
-                            <exclude>**/README.md/</exclude>
-                            <exclude>**/styles/**</exclude>
-                            <exclude>**/frontend/**</exclude>
-                        </excludes>
-                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
