@@ -573,6 +573,7 @@
                         </excludes>
                         <prettier>
                             <npmExecutable>${spotless.npmExecutable}</npmExecutable>
+                            <npmInstallCache>${maven.multiModuleProjectDirectory}/target/.spotless-npm-install-cache</npmInstallCache>
                             <nodeExecutable>${spotless.nodeExecutable}</nodeExecutable>
                             <configFile>${maven.multiModuleProjectDirectory}/.prettierrc</configFile>
                         </prettier>
