@@ -9,12 +9,9 @@
 package com.vaadin.flow.component.upload.testbench;
 
 import java.io.File;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriver.Timeouts;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.WrapsElement;
@@ -128,17 +125,10 @@ public class UploadElement extends TestBenchElement {
      *            the number of seconds to wait for the upload to finish
      */
     private void waitForUploads(int maxSeconds) {
-        Timeouts timeouts = getDriver().manage().timeouts();
-        timeouts.scriptTimeout(Duration.of(15, ChronoUnit.SECONDS));
+        String script = "return arguments[0].files.every((file) => !file.uploading);";
 
-        String script = "var callback = arguments[arguments.length - 1];"
-                + "var upload = arguments[0];"
-                + "window.setTimeout(function() {"
-                + "  var inProgress = upload.files.filter(function(file) { return file.uploading;}).length >0;"
-                + "  if (!inProgress) callback();" //
-                + "}, 500);";
-        getCommandExecutor().getDriver().executeAsyncScript(script, this);
-
+        waitUntil(driver -> (Boolean) executeScript(script, UploadElement.this),
+                maxSeconds);
     }
 
     private void removeFile(int i) {
