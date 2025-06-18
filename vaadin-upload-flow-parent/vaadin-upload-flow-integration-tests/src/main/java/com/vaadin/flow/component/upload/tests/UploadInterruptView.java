@@ -64,14 +64,9 @@ public class UploadInterruptView extends Div {
         @Override
         public OutputStream receiveUpload(String fileName, String MIMEType) {
             OutputStream outputStream = super.receiveUpload(fileName, MIMEType);
-            if (isInterruptableFile(fileName)) {
-                // Also delay the interrupted file to allow other uploads to
-                // start
-                return new SlowOutputStream(outputStream, 500);
-            }
-            {
-                return new SlowOutputStream(outputStream, 1000);
-            }
+            // Also delay the interrupted file to allow other uploads to start
+            int delay = isInterruptableFile(fileName) ? 500 : 1000;
+            return new SlowOutputStream(outputStream, delay);
         }
     }
 
