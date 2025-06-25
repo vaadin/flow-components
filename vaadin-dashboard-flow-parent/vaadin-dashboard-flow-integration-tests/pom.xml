@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-dashboard-flow-parent</artifactId>
-        <version>24.8-SNAPSHOT</version>
+        <version>24.9-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-dashboard-integration-tests</artifactId>
     <packaging>war</packaging>
@@ -39,13 +39,13 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-dashboard-flow</artifactId>
-            <version>24.8-SNAPSHOT</version>
+            <version>24.9-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-dashboard-testbench</artifactId>
-            <version>24.8-SNAPSHOT</version>
+            <version>24.9-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
