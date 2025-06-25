@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.concurrent.NotThreadSafe;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -37,6 +36,8 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.server.VaadinSession;
+
+import net.jcip.annotations.NotThreadSafe;
 
 /**
  * Unit tests for the Notification.

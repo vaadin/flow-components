@@ -65,7 +65,7 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/upload", version = "25.0.0-alpha3")
+@NpmPackage(value = "@vaadin/upload", version = "25.0.0-alpha4")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
@@ -80,7 +80,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     }
 
     private StreamVariable streamVariable;
-    private boolean interrupted = false;
+    private volatile boolean interrupted = false;
 
     private int activeUploads = 0;
     private boolean uploading;
@@ -458,7 +458,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      * The interruption will be done by the receiving thread so this method will
      * return immediately and the actual interrupt will happen a bit later.
      * <p>
-     * Note! this will interrupt all uploads in multi-upload mode.
+     * Note! this will interrupt all ongoing uploads in multi-upload mode.
      */
     public void interruptUpload() {
         if (isUploading()) {
@@ -468,7 +468,9 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
     private void endUpload() {
         activeUploads--;
-        interrupted = false;
+        if (activeUploads == 0) {
+            interrupted = false;
+        }
     }
 
     /**
@@ -727,7 +729,12 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     public void setUploadHandler(UploadHandler handler) {
         Objects.requireNonNull(handler, "UploadHandler cannot be null");
         StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
-                handler, this.getElement());
+                handler, this.getElement()) {
+            @Override
+            public String getName() {
+                return "upload";
+            }
+        };
         runBeforeClientResponse(ui -> getElement().setAttribute("target",
                 elementStreamResource));
         if (!hasListener(UploadStartEvent.class)

@@ -40,12 +40,11 @@ public class ConfirmDialogTest {
 
         Assert.assertEquals("100px", confirmDialog.getWidth());
         Assert.assertEquals("100px",
-                confirmDialog.getElement().getProperty("_contentWidth"));
+                confirmDialog.getElement().getProperty("width"));
 
         confirmDialog.setWidth(null);
         Assert.assertNull(confirmDialog.getWidth());
-        Assert.assertNull(
-                confirmDialog.getElement().getProperty("_contentWidth"));
+        Assert.assertNull(confirmDialog.getElement().getProperty("width"));
     }
 
     @Test
@@ -55,11 +54,10 @@ public class ConfirmDialogTest {
 
         Assert.assertEquals("100px", confirmDialog.getHeight());
         Assert.assertEquals("100px",
-                confirmDialog.getElement().getProperty("_contentHeight"));
+                confirmDialog.getElement().getProperty("height"));
 
         confirmDialog.setHeight(null);
         Assert.assertNull(confirmDialog.getHeight());
-        Assert.assertNull(
-                confirmDialog.getElement().getProperty("_contentHeight"));
+        Assert.assertNull(confirmDialog.getElement().getProperty("height"));
     }
 }
