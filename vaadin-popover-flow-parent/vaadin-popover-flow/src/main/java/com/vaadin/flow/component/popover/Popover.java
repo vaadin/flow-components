@@ -709,11 +709,9 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
         // Target's JavaScript needs to be executed on each attach,
         // because Flow creates a new client-side element
-        if (target.getUI().isPresent()) {
-            onTargetAttach();
-        }
+        target.getUI().ifPresent(this::onTargetAttach);
         targetAttachRegistration = target
-                .addAttachListener(e -> onTargetAttach());
+                .addAttachListener(e -> onTargetAttach(e.getUI()));
         targetDetachRegistration = target.addDetachListener(e -> {
             removeFromUiIfAutoAdded();
         });
@@ -722,16 +720,29 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     private void removeFromUiIfAutoAdded() {
         if (autoAddedToTheUi) {
             autoAddedToTheUi = false;
-            getElement().removeFromParent();
+            // Remove the popover from the UI
+            // When using HasComponents.removeAll on the popover's parent, the
+            // parent's children are cleared before sending detach events to the
+            // children and clearing the parent reference from the children. If
+            // the popover and its target are both children of the same parent,
+            // then running Element.removeFromParent in the target's detach
+            // listener will fail, as the popover still has a parent reference,
+            // but the parent does not have it as a child anymore. Thus, check
+            // beforehand if the parent still has the popover as a child.
+            Optional<Component> maybeParent = getParent();
+            if (maybeParent.isPresent() && maybeParent.get().getChildren()
+                    .anyMatch(child -> child == this)) {
+                getElement().removeFromParent();
+            }
         }
     }
 
-    private void onTargetAttach() {
+    private void onTargetAttach(UI ui) {
         if (target != null) {
             if (getElement().getNode().getParent() == null) {
                 // Remove the popover from its current state tree
                 getElement().removeFromTree(false);
-                target.getElement().getParent().appendChild(getElement());
+                ui.addToModalComponent(this);
                 autoAddedToTheUi = true;
             }
             getElement().executeJs("this.target = $0", target.getElement());
