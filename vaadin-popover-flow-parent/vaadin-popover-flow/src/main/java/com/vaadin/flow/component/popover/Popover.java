@@ -707,9 +707,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
         // Target's JavaScript needs to be executed on each attach,
         // because Flow creates a new client-side element
-        if (target.getUI().isPresent()) {
-            onTargetAttach(target.getUI().get());
-        }
+        target.getUI().ifPresent(this::onTargetAttach);
         targetAttachRegistration = target
                 .addAttachListener(e -> onTargetAttach(e.getUI()));
         targetDetachRegistration = target.addDetachListener(e -> {
