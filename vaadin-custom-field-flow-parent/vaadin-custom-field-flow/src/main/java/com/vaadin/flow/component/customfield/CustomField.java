@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasTheme;
@@ -73,13 +72,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         super(defaultValue);
         // Force a value update when the change event generated
         getElement().addEventListener("change", e -> this.updateValue());
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-
-        FieldValidationUtil.disableClientValidation(this);
+        getElement().setProperty("manualValidation", true);
     }
 
     /**
