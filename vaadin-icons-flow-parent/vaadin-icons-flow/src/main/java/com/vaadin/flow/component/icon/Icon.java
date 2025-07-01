@@ -27,7 +27,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd
  * @see VaadinIcon
  */
-@NpmPackage(value = "@vaadin/icons", version = "24.8.1")
+@NpmPackage(value = "@vaadin/icons", version = "24.8.2")
 @JsModule("@vaadin/icons/vaadin-iconset.js")
 public class Icon extends AbstractIcon<Icon> {
 
