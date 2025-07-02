@@ -15,23 +15,17 @@
  */
 package com.vaadin.flow.component.customfield.tests;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-custom-field/validation")
 public class ValidationPage extends Div {
     public ValidationPage() {
         MyField customField = new MyField();
-        customField.setLabel("Custom field");
-        customField.setId("custom-field");
 
         NativeButton setInvalid = new NativeButton("Set invalid", e -> {
             customField.setInvalid(true);
@@ -59,23 +53,6 @@ public class ValidationPage extends Div {
 
         add(customField);
         add(new Div(setInvalid, attach, detach, logInvalidState, logOutput));
-
-        var customFieldWithDelegatedValidation = new CustomFieldWithDelegatedValidation();
-        customFieldWithDelegatedValidation
-                .setLabel("CustomField with delegated validation");
-        customFieldWithDelegatedValidation
-                .setId("custom-field-with-delegated-validation");
-
-        var binder = new Binder<AtomicInteger>();
-        binder.forField(customFieldWithDelegatedValidation)
-                .asRequired("Cannot be empty")
-                .bind(AtomicInteger::get, AtomicInteger::set);
-
-        var validate = new NativeButton("Validate", e -> binder.validate());
-        validate.setId("validate");
-
-        add(customFieldWithDelegatedValidation);
-        add(new Div(validate));
     }
 
     private class MyField extends CustomField<Integer> {
@@ -101,45 +78,7 @@ public class ValidationPage extends Div {
 
         @Override
         protected void setPresentationValue(Integer integer) {
-        }
-    }
 
-    private static class CustomFieldWithDelegatedValidation
-            extends CustomField<Integer> {
-        private final IntegerField field = new IntegerField();
-
-        CustomFieldWithDelegatedValidation() {
-            add(field);
-        }
-
-        @Override
-        protected Integer generateModelValue() {
-            return field.getValue();
-        }
-
-        @Override
-        protected void setPresentationValue(Integer newPresentationValue) {
-            field.setValue(newPresentationValue);
-        }
-
-        @Override
-        public void setErrorMessage(String errorMessage) {
-            field.setErrorMessage(errorMessage);
-        }
-
-        @Override
-        public String getErrorMessage() {
-            return field.getErrorMessage();
-        }
-
-        @Override
-        public void setInvalid(boolean invalid) {
-            field.setInvalid(invalid);
-        }
-
-        @Override
-        public boolean isInvalid() {
-            return field.isInvalid();
         }
     }
 }
