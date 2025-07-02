@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.customfield.testbench.CustomFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
@@ -26,7 +27,7 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-custom-field/validation")
 public class ValidationIT extends AbstractComponentIT {
 
-    private TestBenchElement customField;
+    private CustomFieldElement customField;
     private TestBenchElement setInvalid;
     private TestBenchElement attach;
     private TestBenchElement detach;
@@ -37,7 +38,7 @@ public class ValidationIT extends AbstractComponentIT {
     public void init() {
         open();
 
-        customField = $("vaadin-custom-field").waitForFirst();
+        customField = $(CustomFieldElement.class).waitForFirst();
         setInvalid = $("button").id("set-invalid");
         attach = $("button").id("attach");
         detach = $("button").id("detach");
@@ -51,7 +52,7 @@ public class ValidationIT extends AbstractComponentIT {
 
         executeScript("arguments[0].validate()", customField);
 
-        Assert.assertEquals(true, customField.getPropertyBoolean("invalid"));
+        Assert.assertEquals(true, customField.isInvalid());
     }
 
     @Test
@@ -60,10 +61,10 @@ public class ValidationIT extends AbstractComponentIT {
         detach.click();
         attach.click();
 
-        customField = $("vaadin-custom-field").waitForFirst();
+        customField = $(CustomFieldElement.class).waitForFirst();
         executeScript("arguments[0].validate()", customField);
 
-        Assert.assertEquals(true, customField.getPropertyBoolean("invalid"));
+        Assert.assertEquals(true, customField.isInvalid());
     }
 
     @Test
