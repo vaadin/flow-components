@@ -33,16 +33,6 @@ public class ValidationPage extends Div {
         });
         setInvalid.setId("set-invalid");
 
-        NativeButton attach = new NativeButton("Attach", e -> {
-            add(customField);
-        });
-        attach.setId("attach");
-
-        NativeButton detach = new NativeButton("Detach", e -> {
-            remove(customField);
-        });
-        detach.setId("detach");
-
         Span logOutput = new Span();
         logOutput.setId("log-output");
         NativeButton logInvalidState = new NativeButton("Log Invalid State",
@@ -52,7 +42,7 @@ public class ValidationPage extends Div {
         logInvalidState.setId("log-invalid-state");
 
         add(customField);
-        add(new Div(setInvalid, attach, detach, logInvalidState, logOutput));
+        add(new Div(setInvalid, logInvalidState, logOutput));
     }
 
     private class MyField extends CustomField<Integer> {
