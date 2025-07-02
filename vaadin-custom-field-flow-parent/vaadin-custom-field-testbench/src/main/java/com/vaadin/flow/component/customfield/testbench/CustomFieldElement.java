@@ -23,7 +23,8 @@ import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 @Element("vaadin-custom-field")
-public class CustomFieldElement extends TestBenchElement implements HasHelper, HasLabel, HasValidation {
+public class CustomFieldElement extends TestBenchElement
+        implements HasHelper, HasLabel, HasValidation {
     /**
      * {@inheritDoc}
      */
