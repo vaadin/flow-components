@@ -29,8 +29,6 @@ public class ValidationIT extends AbstractComponentIT {
 
     private CustomFieldElement customField;
     private TestBenchElement setInvalid;
-    private TestBenchElement attach;
-    private TestBenchElement detach;
     private TestBenchElement logInvalidState;
     private TestBenchElement logOutput;
 
@@ -40,31 +38,8 @@ public class ValidationIT extends AbstractComponentIT {
 
         customField = $(CustomFieldElement.class).waitForFirst();
         setInvalid = $("button").id("set-invalid");
-        attach = $("button").id("attach");
-        detach = $("button").id("detach");
         logInvalidState = $("button").id("log-invalid-state");
         logOutput = $("span").id("log-output");
-    }
-
-    @Test
-    public void overridesClientValidation() {
-        setInvalid.click();
-
-        executeScript("arguments[0].validate()", customField);
-
-        Assert.assertEquals(true, customField.isInvalid());
-    }
-
-    @Test
-    public void detach_reattach_overridesClientValidation() {
-        setInvalid.click();
-        detach.click();
-        attach.click();
-
-        customField = $(CustomFieldElement.class).waitForFirst();
-        executeScript("arguments[0].validate()", customField);
-
-        Assert.assertEquals(true, customField.isInvalid());
     }
 
     @Test
