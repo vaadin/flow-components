@@ -31,7 +31,7 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-progress-bar")
-@NpmPackage(value = "@vaadin/progress-bar", version = "25.0.0-alpha6")
+@NpmPackage(value = "@vaadin/progress-bar", version = "25.0.0-alpha7")
 @JsModule("@vaadin/progress-bar/src/vaadin-progress-bar.js")
 public class ProgressBar extends Component
         implements HasSize, HasStyle, HasThemeVariant<ProgressBarVariant> {
