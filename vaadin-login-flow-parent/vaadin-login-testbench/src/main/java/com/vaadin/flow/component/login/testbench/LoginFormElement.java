@@ -82,13 +82,15 @@ public class LoginFormElement extends TestBenchElement implements Login {
 
     @Override
     public String getErrorMessage() {
-        return getErrorComponent().$("p").first().getText();
+        return getErrorComponent().$(TestBenchElement.class)
+                .withAttribute("part", "error-message-description").first()
+                .getText();
     }
 
     @Override
     public String getAdditionalInformation() {
         return getFormWrapper().$(TestBenchElement.class)
-                .withAttribute("part", "footer").first().$("p").first()
+                .withAttribute("part", "footer").first().$("div").first()
                 .getText();
     }
 
