@@ -46,7 +46,7 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/grid-pro", version = "25.0.0-alpha6")
+@NpmPackage(value = "@vaadin/grid-pro", version = "25.0.0-alpha7")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
