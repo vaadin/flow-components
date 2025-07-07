@@ -56,11 +56,11 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dashboard")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.2")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.3")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "24.8.2")
+@NpmPackage(value = "@vaadin/dashboard", version = "24.8.3")
 public class Dashboard extends Component
         implements HasWidgets, HasSize, HasThemeVariant<DashboardVariant> {
 
