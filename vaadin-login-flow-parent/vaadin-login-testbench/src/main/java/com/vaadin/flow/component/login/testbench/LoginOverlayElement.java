@@ -105,8 +105,7 @@ public class LoginOverlayElement extends TestBenchElement implements Login {
      */
     public String getDescription() {
         return getLoginOverlayWrapper().$(TestBenchElement.class)
-                .withAttribute("part", "brand").first().$("p").first()
-                .getText();
+                .withAttribute("part", "description").first().getText();
     }
 
     /**
