@@ -45,7 +45,7 @@ public class Lumo implements AbstractTheme {
 
     @Override
     public String getThemeUrl() {
-        return "src/";
+        return "theme/lumo/";
     }
 
     @Override
