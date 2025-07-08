@@ -47,6 +47,11 @@ describe('grid connector - data range', () => {
       <vaadin-grid>
         <vaadin-grid-column path="name"></vaadin-grid-column>
       </vaadin-grid>
+      <style>
+        vaadin-grid::part(cell) {
+          min-height: 36px;
+        }
+      </style>
     `);
 
     init(grid);
