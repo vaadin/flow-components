@@ -45,6 +45,7 @@ public class LumoThemeIT extends AbstractComponentIT {
                 testComponent.getCssValue("border"));
         Assert.assertEquals("12px 24px", testComponent.getCssValue("margin"));
         Assert.assertEquals("20px", testComponent.getCssValue("border-radius"));
-        Assert.assertEquals("lumo-icons", testComponent.getCssValue("font-family"));
+        Assert.assertEquals("lumo-icons",
+                testComponent.getCssValue("font-family"));
     }
 }
