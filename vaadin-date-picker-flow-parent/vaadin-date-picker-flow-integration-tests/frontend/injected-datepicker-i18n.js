@@ -1,5 +1,5 @@
 import { html, LitElement } from 'lit';
-import '@vaadin/date-picker/vaadin-date-picker.js';
+import '@vaadin/date-picker/src/vaadin-date-picker.js';
 
 class InjectedDatepickerI18n extends LitElement {
   render() {
