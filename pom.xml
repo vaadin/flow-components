@@ -148,7 +148,7 @@
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>flow-server</artifactId>
-                <version>${flow.version}</version>
+                <version>25.0.21096-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
