@@ -132,7 +132,8 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
                         && grid.getRow(rowIndex).getText().equals(content);
             }, 5);
         } catch (TimeoutException e) {
-            Assert.fail("There was no first row with content '%s'".formatted(content));
+            Assert.fail("There was no first row with content '%s'"
+                    .formatted(content));
         }
     }
 
@@ -144,7 +145,8 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
                         && grid.getRow(rowIndex).getText().equals(content);
             }, 5);
         } catch (TimeoutException e) {
-            Assert.fail("There was no last row with content '%s'".formatted(content));
+            Assert.fail("There was no last row with content '%s'"
+                    .formatted(content));
         }
     }
 }
