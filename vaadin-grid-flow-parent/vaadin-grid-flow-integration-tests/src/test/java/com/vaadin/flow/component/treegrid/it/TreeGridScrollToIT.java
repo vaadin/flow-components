@@ -15,9 +15,11 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -123,18 +125,26 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
     }
 
     private void assertFirstVisibleRowContent(String content) {
-        waitUntil(e -> {
-            int rowIndex = grid.getFirstVisibleRowIndex();
-            return grid.hasRow(rowIndex)
-                    && grid.getRow(rowIndex).getText().equals(content);
-        }, 5);
+        try {
+            waitUntil(driver -> {
+                int rowIndex = grid.getFirstVisibleRowIndex();
+                return grid.hasRow(rowIndex)
+                        && grid.getRow(rowIndex).getText().equals(content);
+            }, 5);
+        } catch (TimeoutException e) {
+            Assert.fail("There was no first row with content '%s'".formatted(content));
+        }
     }
 
     private void assertLastVisibleRowContent(String content) {
-        waitUntil(e -> {
-            int rowIndex = grid.getLastVisibleRowIndex();
-            return grid.hasRow(rowIndex)
-                    && grid.getRow(rowIndex).getText().equals(content);
-        }, 5);
+        try {
+            waitUntil(driver -> {
+                int rowIndex = grid.getLastVisibleRowIndex();
+                return grid.hasRow(rowIndex)
+                        && grid.getRow(rowIndex).getText().equals(content);
+            }, 5);
+        } catch (TimeoutException e) {
+            Assert.fail("There was no last row with content '%s'".formatted(content));
+        }
     }
 }
