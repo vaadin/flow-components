@@ -31,8 +31,8 @@ import com.vaadin.flow.router.Route;
 public class TreeGridMultiSelectionPage extends Div {
     public TreeGridMultiSelectionPage() {
         TreeGrid<PersonWithLevel> treeGrid = new TreeGrid<>();
-        treeGrid.addHierarchyColumn(
-                (person) -> person.getFirstName()).setHeader("Name");
+        treeGrid.addHierarchyColumn((person) -> person.getFirstName())
+                .setHeader("Name");
         treeGrid.setSelectionMode(SelectionMode.MULTI);
 
         ((GridMultiSelectionModel<PersonWithLevel>) treeGrid
