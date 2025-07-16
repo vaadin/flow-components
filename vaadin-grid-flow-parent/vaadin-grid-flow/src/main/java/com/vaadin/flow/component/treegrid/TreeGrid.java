@@ -31,7 +31,6 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridArrayUpdater;
-import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
@@ -54,7 +53,6 @@ import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
@@ -86,8 +84,8 @@ public class TreeGrid<T> extends Grid<T>
 
         private SerializableConsumer<List<JsonValue>> arrayUpdateListener;
 
-        private TreeGridUpdateQueue(UpdateQueueData data, int size) {
-            super(data, size);
+        private TreeGridUpdateQueue(Element element, int size) {
+            super(element, size);
         }
 
         public void setArrayUpdateListener(
@@ -115,14 +113,6 @@ public class TreeGrid<T> extends Grid<T>
         }
 
         @Override
-        public void clear(int start, int length) {
-            if (!getData().getHasExpandedItems().get()) {
-                enqueue("$connector.clearExpanded");
-            }
-            super.clear(start, length);
-        }
-
-        @Override
         public void clear(int start, int length, String parentKey) {
             enqueue("$connector.clear", start, length, parentKey);
         }
@@ -138,21 +128,13 @@ public class TreeGrid<T> extends Grid<T>
         // Approximated size of the viewport. Used for eager fetching.
         private static final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
 
-        private UpdateQueueData data;
-        private SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory;
         private int viewportRemaining = 0;
         private final List<JsonValue> queuedParents = new ArrayList<>();
         private transient VaadinRequest previousRequest;
 
-        public TreeGridArrayUpdaterImpl(
-                SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
-            this.updateQueueFactory = updateQueueFactory;
-        }
-
         @Override
         public TreeGridUpdateQueue startUpdate(int sizeChange) {
-            TreeGridUpdateQueue queue = (TreeGridUpdateQueue) updateQueueFactory
-                    .apply(data, sizeChange);
+            TreeGridUpdateQueue queue = new TreeGridUpdateQueue(getElement(), sizeChange);
 
             if (VaadinRequest.getCurrent() != null
                     && !VaadinRequest.getCurrent().equals(previousRequest)) {
@@ -201,16 +183,6 @@ public class TreeGrid<T> extends Grid<T>
             updateSelectionModeOnClient();
             getDataCommunicator().setRequestedRange(0, getPageSize());
         }
-
-        @Override
-        public void setUpdateQueueData(UpdateQueueData data) {
-            this.data = data;
-        }
-
-        @Override
-        public UpdateQueueData getUpdateQueueData() {
-            return data;
-        }
     }
 
     /**
@@ -237,11 +209,9 @@ public class TreeGrid<T> extends Grid<T>
      */
     protected TreeGrid(int pageSize,
             DataCommunicatorBuilder<T, TreeGridArrayUpdater> dataCommunicatorBuilder) {
-        super(pageSize, TreeGridUpdateQueue::new, dataCommunicatorBuilder);
+        super(pageSize, dataCommunicatorBuilder);
 
         setUniqueKeyProperty("key");
-        getArrayUpdater().getUpdateQueueData()
-                .setHasExpandedItems(getDataCommunicator()::hasExpandedItems);
 
         addItemHasChildrenPathGenerator();
     }
@@ -318,20 +288,17 @@ public class TreeGrid<T> extends Grid<T>
     private TreeGrid(Class<T> beanType,
             DataCommunicatorBuilder<T, TreeGridArrayUpdater> dataCommunicatorBuilder,
             boolean autoCreateColumns) {
-        super(beanType, TreeGridUpdateQueue::new, dataCommunicatorBuilder,
+        super(beanType, dataCommunicatorBuilder,
                 autoCreateColumns);
 
         setUniqueKeyProperty("key");
-        getArrayUpdater().getUpdateQueueData()
-                .setHasExpandedItems(getDataCommunicator()::hasExpandedItems);
 
         addItemHasChildrenPathGenerator();
     }
 
     @Override
-    protected GridArrayUpdater createDefaultArrayUpdater(
-            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
-        return new TreeGridArrayUpdaterImpl(updateQueueFactory);
+    protected GridArrayUpdater createDefaultArrayUpdater() {
+        return new TreeGridArrayUpdaterImpl();
     }
 
     /**
