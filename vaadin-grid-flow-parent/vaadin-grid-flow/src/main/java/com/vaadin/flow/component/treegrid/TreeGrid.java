@@ -115,14 +115,6 @@ public class TreeGrid<T> extends Grid<T>
         }
 
         @Override
-        public void clear(int start, int length) {
-            if (!getData().getHasExpandedItems().get()) {
-                enqueue("$connector.clearExpanded");
-            }
-            super.clear(start, length);
-        }
-
-        @Override
         public void clear(int start, int length, String parentKey) {
             enqueue("$connector.clear", start, length, parentKey);
         }
@@ -240,8 +232,6 @@ public class TreeGrid<T> extends Grid<T>
         super(pageSize, TreeGridUpdateQueue::new, dataCommunicatorBuilder);
 
         setUniqueKeyProperty("key");
-        getArrayUpdater().getUpdateQueueData()
-                .setHasExpandedItems(getDataCommunicator()::hasExpandedItems);
 
         addItemHasChildrenPathGenerator();
     }
@@ -322,8 +312,6 @@ public class TreeGrid<T> extends Grid<T>
                 autoCreateColumns);
 
         setUniqueKeyProperty("key");
-        getArrayUpdater().getUpdateQueueData()
-                .setHasExpandedItems(getDataCommunicator()::hasExpandedItems);
 
         addItemHasChildrenPathGenerator();
     }
