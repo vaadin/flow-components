@@ -134,7 +134,8 @@ public class TreeGrid<T> extends Grid<T>
 
         @Override
         public TreeGridUpdateQueue startUpdate(int sizeChange) {
-            TreeGridUpdateQueue queue = new TreeGridUpdateQueue(getElement(), sizeChange);
+            TreeGridUpdateQueue queue = new TreeGridUpdateQueue(getElement(),
+                    sizeChange);
 
             if (VaadinRequest.getCurrent() != null
                     && !VaadinRequest.getCurrent().equals(previousRequest)) {
@@ -288,8 +289,7 @@ public class TreeGrid<T> extends Grid<T>
     private TreeGrid(Class<T> beanType,
             DataCommunicatorBuilder<T, TreeGridArrayUpdater> dataCommunicatorBuilder,
             boolean autoCreateColumns) {
-        super(beanType, dataCommunicatorBuilder,
-                autoCreateColumns);
+        super(beanType, dataCommunicatorBuilder, autoCreateColumns);
 
         setUniqueKeyProperty("key");
 

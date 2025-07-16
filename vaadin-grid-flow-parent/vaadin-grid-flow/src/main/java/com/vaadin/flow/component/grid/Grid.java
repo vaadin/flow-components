@@ -1599,8 +1599,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the GridArrayUpdater type
      */
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
-            Class<T> beanType,
-            B dataCommunicatorBuilder) {
+            Class<T> beanType, B dataCommunicatorBuilder) {
         this(beanType, dataCommunicatorBuilder, true);
     }
 
@@ -1635,8 +1634,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the properties of the beanType
      */
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
-            Class<T> beanType,
-            B dataCommunicatorBuilder, boolean autoCreateColumns) {
+            Class<T> beanType, B dataCommunicatorBuilder,
+            boolean autoCreateColumns) {
         this(50, dataCommunicatorBuilder);
         Objects.requireNonNull(dataCommunicatorBuilder,
                 "Data communicator builder can't be null");
@@ -1666,8 +1665,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     @SuppressWarnings("unchecked")
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
-            int pageSize,
-            B dataCommunicatorBuilder) {
+            int pageSize, B dataCommunicatorBuilder) {
         Objects.requireNonNull(dataCommunicatorBuilder,
                 "Data communicator builder can't be null");
         arrayUpdater = createDefaultArrayUpdater();
