@@ -1633,8 +1633,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the data communicator builder type
      * @param <U>
      *            the GridArrayUpdater type
-     * @deprecated since 24.9. In Vaadin 25, this constructor will continue to
-     *             exist without the {@code updateQueueBuilder} parameter.
+     * @deprecated since 24.9 and will be removed in Vaadin 25. Use
+     *             {@link #Grid(Class, DataCommunicatorBuilder)} instead.
      */
     @Deprecated(since = "24.9")
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
@@ -1666,7 +1666,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
             Class<T> beanType, B dataCommunicatorBuilder) {
-        this(beanType, dataCommunicatorBuilder, true);
+        this(beanType, null, dataCommunicatorBuilder);
     }
 
     /**
@@ -1708,6 +1708,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuilder,
             B dataCommunicatorBuilder, boolean autoCreateColumns) {
         this(50, updateQueueBuilder, dataCommunicatorBuilder);
+        Objects.requireNonNull(dataCommunicatorBuilder,
+                "Data communicator builder can't be null");
+        configureBeanType(beanType, autoCreateColumns);
     }
 
     /**
@@ -1741,10 +1744,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
             Class<T> beanType, B dataCommunicatorBuilder,
             boolean autoCreateColumns) {
-        this(50, dataCommunicatorBuilder);
-        Objects.requireNonNull(dataCommunicatorBuilder,
-                "Data communicator builder can't be null");
-        configureBeanType(beanType, autoCreateColumns);
+        this(beanType, null, dataCommunicatorBuilder, autoCreateColumns);
     }
 
     /**
