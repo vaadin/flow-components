@@ -1633,8 +1633,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the data communicator builder type
      * @param <U>
      *            the GridArrayUpdater type
-     * @deprecated since 24.9. In Vaadin 25, this method will continue to exist
-     *             without the {@code updateQueueBuild} parameter.
+     * @deprecated since 24.9. In Vaadin 25, this constructor will continue to
+     *             exist without the {@code updateQueueBuilder} parameter.
      */
     @Deprecated(since = "24.9")
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
@@ -1673,8 +1673,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      * @param autoCreateColumns
      *            when <code>true</code>, columns are created automatically for
      *            the properties of the beanType
-     * @deprecated since 24.9. In Vaadin 25, this method will continue to exist
-     *             without the {@code updateQueueBuild} parameter.
+     * @deprecated since 24.9. In Vaadin 25, this constructor will continue to
+     *             exist without the {@code updateQueueBuilder} parameter.
      */
     @Deprecated(since = "24.9")
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
@@ -1707,8 +1707,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the data communicator builder type
      * @param <U>
      *            the GridArrayUpdater type
-     * @deprecated since 24.9. In Vaadin 25, this method will continue to exist
-     *             without the {@code updateQueueBuild} parameter.
+     * @deprecated since 24.9. In Vaadin 25, this constructor will continue to
+     *             exist without the {@code updateQueueBuilder} parameter.
      */
     @SuppressWarnings("unchecked")
     @Deprecated(since = "24.9")
