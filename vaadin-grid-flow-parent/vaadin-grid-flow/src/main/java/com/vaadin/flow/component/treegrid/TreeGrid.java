@@ -226,7 +226,12 @@ public class TreeGrid<T> extends Grid<T>
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
+     * @deprecated since 24.9. In Vaadin 25, the type of the
+     *             {@code dataCommunicatorBuilder} parameter will use
+     *             {@link GridArrayUpdater} instead of
+     *             {@link TreeGridArrayUpdater}.
      */
+    @Deprecated(since = "24.9")
     protected TreeGrid(int pageSize,
             DataCommunicatorBuilder<T, TreeGridArrayUpdater> dataCommunicatorBuilder) {
         super(pageSize, TreeGridUpdateQueue::new, dataCommunicatorBuilder);
@@ -299,7 +304,12 @@ public class TreeGrid<T> extends Grid<T>
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
+     * @deprecated since 24.9. In Vaadin 25, the type of the
+     *             {@code dataCommunicatorBuilder} parameter will use
+     *             {@link GridArrayUpdater} instead of
+     *             {@link TreeGridArrayUpdater}.
      */
+    @Deprecated(since = "24.9")
     protected TreeGrid(Class<T> beanType,
             DataCommunicatorBuilder<T, TreeGridArrayUpdater> dataCommunicatorBuilder) {
         this(beanType, dataCommunicatorBuilder, true);
