@@ -1588,8 +1588,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param beanType
      *            the bean type to use, not <code>null</code>
-     * @param updateQueueBuilder
-     *            the builder for new {@link UpdateQueue} instance
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
@@ -1620,8 +1618,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param beanType
      *            the bean type to use, not <code>null</code>
-     * @param updateQueueBuilder
-     *            the builder for new {@link UpdateQueue} instance
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
@@ -1653,8 +1649,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param pageSize
      *            the page size. Must be greater than zero.
-     * @param updateQueueBuilder
-     *            the builder for new {@link UpdateQueue} instance
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.

@@ -22,4 +22,5 @@ import com.vaadin.flow.data.provider.ArrayUpdater;
  *
  * @author Vaadin Ltd
  */
-public interface GridArrayUpdater extends ArrayUpdater {}
+public interface GridArrayUpdater extends ArrayUpdater {
+}
