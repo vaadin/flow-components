@@ -21,7 +21,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
 
     dataProviderControllerProto.__loadCachePage.call(this, cache, page);
-  }
+  };
 
   dataProviderController.isLoading = function () {
     return grid.$connector.hasRootRequestQueue() || dataProviderControllerProto.isLoading.call(this);
@@ -206,7 +206,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.$connector.getViewportSize = function () {
     const viewportRange = grid.$connector.getViewportPageRange();
     return (viewportRange[1] - viewportRange[0] + 1) * grid.pageSize;
-  }
+  };
 
   grid.$connector.fetchPage = function (fetch, page) {
     // Adjust the requested page to be within the valid range in case
