@@ -30,9 +30,9 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-markdown")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.3")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.4")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/markdown", version = "24.8.3")
+@NpmPackage(value = "@vaadin/markdown", version = "24.8.4")
 @JsModule("@vaadin/markdown/src/vaadin-markdown.js")
 public class Markdown extends Component implements HasSize {
 
