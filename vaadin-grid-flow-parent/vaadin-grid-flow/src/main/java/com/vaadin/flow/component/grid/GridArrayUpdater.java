@@ -26,13 +26,15 @@ import com.vaadin.flow.function.SerializableSupplier;
  * Array update strategy aware class for Grid.
  *
  * @author Vaadin Ltd
- *
  */
 public interface GridArrayUpdater extends ArrayUpdater {
 
     /**
      * Data object for {@link TreeGridArrayUpdater}.
+     *
+     * @deprecated since 24.9 and will be removed in Vaadin 25
      */
+    @Deprecated(since = "24.9", forRemoval = true)
     public static class UpdateQueueData implements Serializable {
         private final Element element;
 
@@ -71,13 +73,19 @@ public interface GridArrayUpdater extends ArrayUpdater {
      *
      * @param data
      *            the new {@link UpdateQueueData} object
+     *
+     * @deprecated since 24.9 and will be removed in Vaadin 25
      */
+    @Deprecated(since = "24.9", forRemoval = true)
     void setUpdateQueueData(UpdateQueueData data);
 
     /**
      * Gets {@link UpdateQueueData} set for this array updater.
      *
      * @return the new {@link UpdateQueueData} or null if not set.
+     *
+     * @deprecated since 24.9 and will be removed in Vaadin 25
      */
+    @Deprecated(since = "24.9", forRemoval = true)
     UpdateQueueData getUpdateQueueData();
 }
