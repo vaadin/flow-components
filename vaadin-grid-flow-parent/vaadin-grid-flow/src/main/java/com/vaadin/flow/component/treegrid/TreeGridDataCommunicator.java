@@ -54,7 +54,7 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
     private final SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier;
 
     private RootCache<T> rootCache;
-    private Range requestedRange;
+    private Range viewportRange;
     private int nextUpdateId = 0;
 
     public TreeGridDataCommunicator(CompositeDataGenerator<T> dataGenerator,
@@ -117,7 +117,7 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
     /** @see DataCommunicator#setRequestedRange(int, int) */
     @Override
     public void setRequestedRange(int start, int length) {
-        requestedRange = Range.withLength(start, length);
+        viewportRange = Range.withLength(start, length);
         requestFlush();
     }
 
@@ -132,6 +132,8 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
     }
 
     public int preloadPath(int[] path, int buffer) {
+        var rootCache = ensureRootCache();
+
         preloadPath(rootCache, path);
 
         if (buffer > 0) {
@@ -178,9 +180,7 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
     }
 
     private List<T> preloadRange(int start, int length) {
-        if (rootCache == null) {
-            rootCache = createRootCache(getDataProviderChildCount(null));
-        }
+        var rootCache = ensureRootCache();
 
         // +1 = forward
         // -1 = backward
@@ -203,6 +203,7 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
                 var range = direction > 0
                         ? Range.between(index, index + remainingLength)
                         : Range.between(index + 1 - remainingLength, index + 1);
+
                 range = range.restrictTo(Range.withLength(0, cache.getSize()));
 
                 cache.setItems(range.getStart(),
@@ -238,15 +239,24 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
     /** @see DataCommunicator#flush() */
     @Override
     protected void flush() {
-        int start = requestedRange.getStart();
-        int end = requestedRange.getEnd();
-        int length = end - start;
+        var rootCache = ensureRootCache();
+
+        if (viewportRange.getStart() >= rootCache.getFlatSize()) {
+            viewportRange = Range.withLength(0, viewportRange.length());
+        }
+
+        int length = viewportRange.length();
+        int start = viewportRange.getStart();
+        int end = viewportRange.getEnd();
 
         List<T> result = preloadRange(start, length);
 
         int flatSize = rootCache.getFlatSize();
+
         Update update = arrayUpdater.startUpdate(flatSize);
-        update.clear(0, start);
+        if (start > 0) {
+            update.clear(0, start);
+        }
         update.clear(end, flatSize - end);
         update.set(start, result.stream().map(this::generateItemJson).toList());
         update.commit(nextUpdateId++);
@@ -265,6 +275,10 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
     public int getDepth(T item) {
         if (isFlatHierarchy()) {
             return getDataProvider().getDepth(item);
+        }
+
+        if (rootCache == null) {
+            return -1;
         }
 
         var itemContext = rootCache.getItemContext(item);
@@ -320,7 +334,7 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
 
         if (isFlatHierarchy()) {
             reset();
-        } else {
+        } else if (rootCache != null) {
             rootCache.removeDescendantCacheIf(
                     (cache) -> !isExpanded(cache.getParentItem()));
             requestFlush();
@@ -359,16 +373,20 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
         };
     }
 
-    private RootCache<T> createRootCache(int size) {
-        return new RootCache<>(size, getDataProvider()::getId) {
-            @Override
-            void removeItemContext(T item) {
-                super.removeItemContext(item);
+    private RootCache<T> ensureRootCache() {
+        if (rootCache == null) {
+            rootCache = new RootCache<>(getDataProviderChildCount(null),
+                    getDataProvider()::getId) {
+                @Override
+                void removeItemContext(T item) {
+                    super.removeItemContext(item);
 
-                getKeyMapper().remove(item);
-                dataGenerator.destroyData(item);
-            }
-        };
+                    getKeyMapper().remove(item);
+                    dataGenerator.destroyData(item);
+                }
+            };
+        }
+        return rootCache;
     }
 
     @SuppressWarnings("unchecked")
