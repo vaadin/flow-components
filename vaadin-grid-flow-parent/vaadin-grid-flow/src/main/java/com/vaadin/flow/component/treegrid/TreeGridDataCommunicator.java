@@ -114,11 +114,6 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
         }
     }
 
-    /** New API */
-    public void refreshAllVisible() {
-        requestFlush();
-    }
-
     /** @see DataCommunicator#setRequestedRange(int, int) */
     @Override
     public void setRequestedRange(int start, int length) {
