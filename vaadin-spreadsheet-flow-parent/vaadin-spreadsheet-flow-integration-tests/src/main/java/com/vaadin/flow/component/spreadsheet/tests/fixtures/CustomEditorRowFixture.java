@@ -82,7 +82,7 @@ public class CustomEditorRowFixture implements SpreadsheetFixture {
             }
 
             if (customEditor instanceof TextField editor) {
-                editor.setValue( cell.getStringCellValue());
+                editor.setValue(cell.getStringCellValue());
             }
         }
     }
