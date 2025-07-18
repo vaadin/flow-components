@@ -354,6 +354,85 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         }
     }
 
+    @Test
+    public void customEditorInFrozenCells_persistsValueOnVariousKeyActions()
+            throws Exception {
+        createNewSpreadsheet();
+        loadTestFixture(TestFixtures.CustomEditorRow);
+        // Freeze 2 rows and 15 columns
+        addFreezePane(10, 2);
+
+        performKeyboardTestsToCell("A");
+        performKeyboardTestsToCell("J");
+        performKeyboardTestsToCell("K");
+
+        getSpreadsheet().scrollLeft(1000);
+        performKeyboardTestsToCell("AI");
+    }
+
+    @Test
+    public void customEditorAlwaysVisibleInFrozenCells_persistsValue()
+            throws Exception {
+        createNewSpreadsheet();
+        loadTestFixture(TestFixtures.CustomEditorRow);
+        // Toggle custom editor visibility to always show
+        $("vaadin-button").id("toggleCustomEditorVisibilityButton").click();
+        getCommandExecutor().waitForVaadin();
+        addFreezePane(15, 2);
+
+        performKeyboardTestsToCell("A");
+        performKeyboardTestsToCell("J");
+        performKeyboardTestsToCell("K");
+
+        getSpreadsheet().scrollLeft(1000);
+        performKeyboardTestsToCell("AI");
+    }
+
+    private void performKeyboardTestsToCell(String column) {
+        final String cellAddress = column + "2";
+
+        clickCell(cellAddress);
+        var maybeEditor = getInputInCustomEditorFromCell(cellAddress);
+        Assert.assertTrue(maybeEditor.isPresent());
+
+        var editor = maybeEditor.get();
+
+        // Test Esc with arrow keys persistence on cell
+        editor.click();
+        editor.setProperty("value", "");
+        editor.sendKeys("EscWithArrowKeys", Keys.ESCAPE, Keys.ARROW_DOWN);
+        getCommandExecutor().waitForVaadin();
+        clickCell(cellAddress);
+        Assert.assertEquals("EscWithArrowKeys", getFormulaFieldValue());
+
+        // Test ENTER key persistence on cell
+        clickCell(cellAddress);
+        editor.setProperty("value", "");
+        editor.sendKeys("EnterTest", Keys.ENTER);
+        getCommandExecutor().waitForVaadin();
+        clickCell(cellAddress);
+        Assert.assertEquals("EnterTest", getFormulaFieldValue());
+
+        // Test TAB key persistence on cell
+        clickCell(cellAddress);
+        editor.click();
+        editor.setProperty("value", "");
+        editor.sendKeys("TabTest", Keys.TAB);
+        getCommandExecutor().waitForVaadin();
+        clickCell(cellAddress);
+        Assert.assertEquals("TabTest", getFormulaFieldValue());
+
+        // Test SHIFT+TAB persistence on A2
+        clickCell(cellAddress);
+        editor.click();
+        editor.setProperty("value", "");
+        editor.sendKeys("ShiftTabTest", Keys.chord(Keys.SHIFT, Keys.TAB));
+        getCommandExecutor().waitForVaadin();
+        clickCell(cellAddress);
+        Assert.assertEquals("ShiftTabTest", getFormulaFieldValue());
+
+    }
+
     private void toggleCheckboxValue(String cellAddress) {
         clickCell(cellAddress);
         getEditorElement("input").click();
