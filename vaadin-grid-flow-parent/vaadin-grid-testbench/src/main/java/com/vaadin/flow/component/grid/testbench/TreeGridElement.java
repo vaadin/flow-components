@@ -247,7 +247,8 @@ public class TreeGridElement extends GridElement {
     @Deprecated(since = "24.9", forRemoval = true)
     public long getNumberOfExpandedRows() {
         waitUntilLoadingFinished();
-        // FIXME: How to get this number now that expandedItems aren't shared with the client?
+        // FIXME: How to get this number now that expandedItems aren't shared
+        // with the client?
         return (long) executeScript("return arguments[0].expandedItems.length;",
                 this);
     }
@@ -333,8 +334,7 @@ public class TreeGridElement extends GridElement {
      * Scrolls the TreeGrid to the end.
      */
     public void scrollToEnd() {
-        executeScript(
-                "arguments[0].scrollToIndex(...Array(10).fill(-1));",
+        executeScript("arguments[0].scrollToIndex(...Array(10).fill(-1));",
                 this);
     }
 }
