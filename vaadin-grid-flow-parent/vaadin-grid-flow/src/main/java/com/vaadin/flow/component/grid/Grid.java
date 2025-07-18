@@ -215,8 +215,8 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.0.0-alpha5")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha5")
+@NpmPackage(value = "@vaadin/grid", version = "25.0.0-alpha7")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha7")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -263,10 +263,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             // need to sync it otherwise server will overwrite client value with
             // the old server one
             enqueue("$connector.updateSize", size);
-            if (data.getUniqueKeyProperty() != null) {
-                enqueue("$connector.updateUniqueItemIdPath",
-                        data.getUniqueKeyProperty());
-            }
             getElement().setProperty("size", size);
         }
 
@@ -1741,11 +1737,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     private void generateUniqueKeyData(T item, JsonObject jsonObject) {
-        String uniqueKeyPropertyName = arrayUpdater.getUpdateQueueData()
-                .getUniqueKeyProperty();
-        if (uniqueKeyPropertyName != null
-                && !jsonObject.hasKey(uniqueKeyPropertyName)) {
-            jsonObject.put(uniqueKeyPropertyName, getUniqueKey(item));
+        if (uniqueKeyProperty != null
+                && !jsonObject.hasKey(uniqueKeyProperty)) {
+            jsonObject.put(uniqueKeyProperty, getUniqueKey(item));
         }
     }
 
@@ -4625,8 +4619,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     protected void setUniqueKeyProperty(String uniqueKeyProperty) {
         this.uniqueKeyProperty = uniqueKeyProperty;
-        arrayUpdater.getUpdateQueueData()
-                .setUniqueKeyProperty(uniqueKeyProperty);
+        if (uniqueKeyProperty != null) {
+            getElement().callJsFunction("$connector.updateUniqueItemIdPath",
+                    uniqueKeyProperty);
+        }
     }
 
     protected GridArrayUpdater getArrayUpdater() {
