@@ -55,7 +55,6 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
@@ -120,7 +119,6 @@ import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -254,15 +252,11 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     protected static class UpdateQueue implements Update {
         private final ArrayList<SerializableRunnable> queue = new ArrayList<>();
-        private final UpdateQueueData data;
+        private final Element element;
 
-        /**
-         * @deprecated since 24.9 and will be replaced by
-         *             {@code UpdateQueue(Element element, int size)}
-         */
-        @Deprecated(since = "24.9")
-        protected UpdateQueue(UpdateQueueData data, int size) {
-            this.data = data;
+        protected UpdateQueue(Element element, int size) {
+            this.element = element;
+
             // 'size' property is not synchronized by the web component since
             // there are no events for it, but we
             // need to sync it otherwise server will overwrite client value with
@@ -298,18 +292,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         protected Element getElement() {
-            return data.getElement();
-        }
-
-        /**
-         * Gets {@link UpdateQueueData} for this queue.
-         *
-         * @return the {@link UpdateQueueData} object.
-         * @deprecated since 24.9 and will be removed in Vaadin 25
-         */
-        @Deprecated(since = "24.9", forRemoval = true)
-        public UpdateQueueData getData() {
-            return data;
+            return element;
         }
     }
 
@@ -1383,17 +1366,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     private class GridArrayUpdaterImpl implements GridArrayUpdater {
-        private UpdateQueueData data;
-        private SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory;
-
-        public GridArrayUpdaterImpl(
-                SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
-            this.updateQueueFactory = updateQueueFactory;
-        }
-
         @Override
         public UpdateQueue startUpdate(int sizeChange) {
-            return updateQueueFactory.apply(data, sizeChange);
+            return new UpdateQueue(getElement(), sizeChange);
         }
 
         @Override
@@ -1402,17 +1377,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
             updateSelectionModeOnClient();
             setRequestedRange(0, getPageSize());
         }
-
-        @Override
-        public void setUpdateQueueData(UpdateQueueData data) {
-            this.data = data;
-        }
-
-        @Override
-        public UpdateQueueData getUpdateQueueData() {
-            return data;
-        }
-
     }
 
     private final GridArrayUpdater arrayUpdater;
@@ -1624,38 +1588,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param beanType
      *            the bean type to use, not <code>null</code>
-     * @param updateQueueBuilder
-     *            the builder for new {@link UpdateQueue} instance
-     * @param dataCommunicatorBuilder
-     *            Builder for {@link DataCommunicator} implementation this Grid
-     *            uses to handle all data communication.
-     * @param <B>
-     *            the data communicator builder type
-     * @param <U>
-     *            the GridArrayUpdater type
-     * @deprecated since 24.9 and will be removed in Vaadin 25. Use
-     *             {@link #Grid(Class, DataCommunicatorBuilder)} instead.
-     */
-    @Deprecated(since = "24.9")
-    protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
-            Class<T> beanType,
-            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuilder,
-            B dataCommunicatorBuilder) {
-        this(beanType, updateQueueBuilder, dataCommunicatorBuilder, true);
-    }
-
-    /**
-     * Creates a new grid with an initial set of columns for each of the bean's
-     * properties. The property-values of the bean will be converted to Strings.
-     * Full names of the properties will be used as the
-     * {@link Column#setKey(String) column keys} and the property captions will
-     * be used as the {@link Column#setHeader(String) column headers}.
-     * <p>
-     * You can add columns for nested properties of the bean with
-     * {@link #addColumn(String)}.
-     *
-     * @param beanType
-     *            the bean type to use, not <code>null</code>
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
@@ -1666,51 +1598,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
             Class<T> beanType, B dataCommunicatorBuilder) {
-        this(beanType, null, dataCommunicatorBuilder);
-    }
-
-    /**
-     * Creates a new grid with an initial set of columns for each of the bean's
-     * properties. The property-values of the bean will be converted to Strings.
-     * Full names of the properties will be used as the
-     * {@link Column#setKey(String) column keys} and the property captions will
-     * be used as the {@link Column#setHeader(String) column headers}.
-     * <p>
-     * When autoCreateColumns is <code>true</code>, only the direct properties
-     * of the bean are included and they will be in alphabetical order. Use
-     * {@link Grid#setColumns(String...)} to define which properties to include
-     * and in which order. You can also add a column for an individual property
-     * with {@link #addColumn(String)}. Both of these methods support also
-     * sub-properties with dot-notation, eg.
-     * <code>"property.nestedProperty"</code>.
-     *
-     * @param beanType
-     *            the bean type to use, not <code>null</code>
-     * @param updateQueueBuilder
-     *            the builder for new {@link UpdateQueue} instance
-     * @param dataCommunicatorBuilder
-     *            Builder for {@link DataCommunicator} implementation this Grid
-     *            uses to handle all data communication.
-     * @param <B>
-     *            the data communicator builder type
-     * @param <U>
-     *            the GridArrayUpdater type
-     * @param autoCreateColumns
-     *            when <code>true</code>, columns are created automatically for
-     *            the properties of the beanType
-     * @deprecated since 24.9 and will be removed in Vaadin 25. Use
-     *             {@link #Grid(Class, DataCommunicatorBuilder, boolean)}
-     *             instead.
-     */
-    @Deprecated(since = "24.9", forRemoval = true)
-    protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
-            Class<T> beanType,
-            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuilder,
-            B dataCommunicatorBuilder, boolean autoCreateColumns) {
-        this(50, updateQueueBuilder, dataCommunicatorBuilder);
-        Objects.requireNonNull(dataCommunicatorBuilder,
-                "Data communicator builder can't be null");
-        configureBeanType(beanType, autoCreateColumns);
+        this(beanType, dataCommunicatorBuilder, true);
     }
 
     /**
@@ -1744,7 +1632,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
             Class<T> beanType, B dataCommunicatorBuilder,
             boolean autoCreateColumns) {
-        this(beanType, null, dataCommunicatorBuilder, autoCreateColumns);
+        this(50, dataCommunicatorBuilder);
+        Objects.requireNonNull(dataCommunicatorBuilder,
+                "Data communicator builder can't be null");
+        configureBeanType(beanType, autoCreateColumns);
     }
 
     /**
@@ -1758,8 +1649,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param pageSize
      *            the page size. Must be greater than zero.
-     * @param updateQueueBuilder
-     *            the builder for new {@link UpdateQueue} instance
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
@@ -1767,22 +1656,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the data communicator builder type
      * @param <U>
      *            the GridArrayUpdater type
-     * @deprecated since 24.9 and will be removed in Vaadin 25. Use
-     *             {@link #Grid(int, DataCommunicatorBuilder)} instead.
      */
     @SuppressWarnings("unchecked")
-    @Deprecated(since = "24.9", forRemoval = true)
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
-            int pageSize,
-            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuilder,
-            B dataCommunicatorBuilder) {
+            int pageSize, B dataCommunicatorBuilder) {
         Objects.requireNonNull(dataCommunicatorBuilder,
                 "Data communicator builder can't be null");
-        arrayUpdater = createDefaultArrayUpdater(
-                Optional.ofNullable(updateQueueBuilder)
-                        .orElseGet(() -> UpdateQueue::new));
-        arrayUpdater.setUpdateQueueData(
-                new UpdateQueueData(getElement(), getUniqueKeyProperty()));
+        arrayUpdater = createDefaultArrayUpdater();
         gridDataGenerator = new CompositeDataGenerator<>();
         gridDataGenerator.addDataGenerator(this::generateUniqueKeyData);
         gridDataGenerator.addDataGenerator(this::generateStyleData);
@@ -1809,30 +1689,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         updateMultiSortPriority(defaultMultiSortPriority);
 
         initSelectionPreservationHandler();
-    }
-
-    /**
-     * Creates a new instance, with the specified page size and data
-     * communicator.
-     * <p>
-     * The page size influences the {@link Query#getLimit()} sent by the client,
-     * but it's up to the webcomponent to determine the actual query limit,
-     * based on the height of the component and scroll position. Usually the
-     * limit is 3 times the page size (e.g. 150 items with a page size of 50).
-     *
-     * @param pageSize
-     *            the page size. Must be greater than zero.
-     * @param dataCommunicatorBuilder
-     *            Builder for {@link DataCommunicator} implementation this Grid
-     *            uses to handle all data communication.
-     * @param <B>
-     *            the data communicator builder type
-     * @param <U>
-     *            the GridArrayUpdater type
-     */
-    protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
-            int pageSize, B dataCommunicatorBuilder) {
-        this(pageSize, null, dataCommunicatorBuilder);
     }
 
     private void generateUniqueKeyData(T item, JsonObject jsonObject) {
@@ -1937,14 +1793,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
     }
 
-    /**
-     * @deprecated since 24.9. In Vaadin 25, this method will continue to exist
-     *             without the {@code updateQueueFactory} parameter.
-     */
-    @Deprecated(since = "24.9")
-    protected GridArrayUpdater createDefaultArrayUpdater(
-            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
-        return new GridArrayUpdaterImpl(updateQueueFactory);
+    protected GridArrayUpdater createDefaultArrayUpdater() {
+        return new GridArrayUpdaterImpl();
     }
 
     /**
