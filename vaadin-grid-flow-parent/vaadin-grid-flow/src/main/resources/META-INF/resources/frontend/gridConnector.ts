@@ -649,12 +649,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     updateGridItemsInDomBasedOnCache(updatedItems);
   };
 
-  grid.$connector.clearExpanded = function () {
-    grid.expandedItems = [];
-    ensureSubCacheQueue = [];
-    parentRequestQueue = [];
-  };
-
   /**
    * Ensures that the last requested page range does not include pages for data that has been cleared.
    * The last requested range is used in `fetchPage` to skip requests to the server if the page range didn't
