@@ -22,8 +22,10 @@ import com.vaadin.flow.data.provider.hierarchy.HierarchicalArrayUpdater;
  * Array update strategy aware class for TreeGrid.
  *
  * @author Vaadin Ltd
- *
+ * @deprecated since 24.9 and will be removed in Vaadin 25. Use
+ *             {@link GridArrayUpdater} instead.
  */
+@Deprecated(since = "24.9", forRemoval = true)
 public interface TreeGridArrayUpdater
         extends GridArrayUpdater, HierarchicalArrayUpdater {
 
