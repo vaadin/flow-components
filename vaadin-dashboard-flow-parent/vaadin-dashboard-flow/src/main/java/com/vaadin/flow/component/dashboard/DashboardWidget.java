@@ -25,7 +25,7 @@ import com.vaadin.flow.component.shared.SlotUtils;
  */
 @Tag("vaadin-dashboard-widget")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard-widget.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.0.0-alpha5")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.0.0-alpha7")
 public class DashboardWidget extends Component {
 
     private int colspan = 1;

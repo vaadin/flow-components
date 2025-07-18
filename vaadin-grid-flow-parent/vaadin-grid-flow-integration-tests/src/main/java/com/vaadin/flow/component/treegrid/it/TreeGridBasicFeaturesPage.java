@@ -22,10 +22,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.grid.Grid.SelectionMode;
-import com.vaadin.flow.component.grid.GridMultiSelectionModel;
-import com.vaadin.flow.component.grid.GridMultiSelectionModel.SelectAllCheckboxVisibility;
-import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -57,7 +53,6 @@ public class TreeGridBasicFeaturesPage extends Div {
         initializeDataProviders();
         grid = new TreeGrid<>(HierarchicalTestBean.class);
         grid.setWidth("100%");
-        grid.setSelectionMode(SelectionMode.SINGLE);
         grid.setColumns("id",
                 hierarchicalTestBean -> hierarchicalTestBean.getIndex() < 0
                         ? null
@@ -88,7 +83,6 @@ public class TreeGridBasicFeaturesPage extends Div {
         createExpandMenu();
         createCollapseMenu();
         createListenerMenu();
-        createSelectionModeMenu();
         createDisableEnableMenu();
     }
 
@@ -216,28 +210,6 @@ public class TreeGridBasicFeaturesPage extends Div {
                         + event.getItems().stream().findFirst()
                                 .map(HierarchicalTestBean::toString)
                                 .orElse("null"))));
-    }
-
-    @SuppressWarnings("rawtypes")
-    private void createSelectionModeMenu() {
-        LinkedHashMap<String, SelectionMode> options = new LinkedHashMap<>();
-        options.put("none", SelectionMode.NONE);
-        options.put("single", SelectionMode.SINGLE);
-        options.put("multi", SelectionMode.MULTI);
-
-        options.entrySet().forEach(entry -> {
-            addAction("Selection mode - " + entry.getKey(), () -> {
-                grid.setSelectionMode(entry.getValue());
-                if (entry.getValue() == SelectionMode.MULTI) {
-                    GridSelectionModel model = grid.getSelectionModel();
-                    if (model instanceof GridMultiSelectionModel) {
-                        ((GridMultiSelectionModel) model)
-                                .setSelectAllCheckboxVisibility(
-                                        SelectAllCheckboxVisibility.VISIBLE);
-                    }
-                }
-            });
-        });
     }
 
     private void createDisableEnableMenu() {
