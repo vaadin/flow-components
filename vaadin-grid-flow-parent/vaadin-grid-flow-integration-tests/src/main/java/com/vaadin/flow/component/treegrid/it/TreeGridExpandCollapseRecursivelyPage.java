@@ -69,8 +69,8 @@ public class TreeGridExpandCollapseRecursivelyPage extends Div {
         }
     }
 
-    private static final int DEPTH = 4;
-    private static final int CHILDREN = 5;
+    private static final int DEPTH = 3;
+    private static final int CHILDREN = 2;
 
     public TreeGridExpandCollapseRecursivelyPage() {
 
@@ -78,8 +78,8 @@ public class TreeGridExpandCollapseRecursivelyPage extends Div {
 
         TreeGrid<Directory> grid = new TreeGrid<>();
         grid.addHierarchyColumn(item -> "Item" + item.getName());
-
         grid.setItems(roots, Directory::getSubDirectories);
+        grid.setHeight("800px");
 
         RadioButtonGroup<Integer> depthSelector = new RadioButtonGroup<>();
         depthSelector.setItems(0, 1, 2, 3);
