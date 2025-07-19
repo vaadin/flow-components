@@ -32,7 +32,7 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-grid/treegrid-expand-collapse-recursively")
 public class TreeGridExpandCollapseRecursivelyIT extends AbstractComponentIT {
 
-    private static final int CHILD_COUNT = 2;
+    private static final int LEVEL_SIZE = 2;
 
     private TreeGridElement treeGrid;
     private WebElement depthSelector;
@@ -107,13 +107,15 @@ public class TreeGridExpandCollapseRecursivelyIT extends AbstractComponentIT {
         executeScript("arguments[0].checked=true", radiobutton);
     }
 
-    private void assertNumberOfExpandedLevels(int expectedLevels) {
+    private void assertNumberOfExpandedLevels(int expectedNumberOfLevels) {
         waitUntilNot((driver) -> treeGrid.isLoadingExpandedRows());
 
-        // 2 (level 0) + 4 (level 1) + 6 (level 2) + ...
-        int size = (int) (Math.pow(CHILD_COUNT, (expectedLevels + 2)) - CHILD_COUNT)
-                / (CHILD_COUNT - 1);
-        Assert.assertEquals(size, treeGrid.getRowCount());
+        // Calculate the total number of rows in a tree with the given number of
+        // expanded levels using a geometric-like series: 2 + 6 + 14 + 30 ...
+        // when LEVEL_SIZE is 2.
+        int expectedRowCount = IntStream.rangeClosed(0, expectedNumberOfLevels)
+                .reduce(0, (sum, n) -> sum + (int) Math.pow(LEVEL_SIZE, n + 1));
+        Assert.assertEquals(expectedRowCount, treeGrid.getRowCount());
     }
 
     private void assertRows(String... expectedRows) {
