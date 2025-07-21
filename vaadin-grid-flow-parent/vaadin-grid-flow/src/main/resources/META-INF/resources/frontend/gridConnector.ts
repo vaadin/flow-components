@@ -335,6 +335,18 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
   };
 
+  grid._isExpanded = function (item) {
+    return item?.expanded;
+  };
+
+  grid.expandItem = function (item) {
+    grid.$server.toggleFromClient(grid.getItemId(item), true);
+  };
+
+  grid.collapseItem = function (item) {
+    grid.$server.toggleFromClient(grid.getItemId(item), false);
+  };
+
   const itemsUpdated = function (items) {
     if (!items || !Array.isArray(items)) {
       throw 'Attempted to call itemsUpdated with an invalid value: ' + JSON.stringify(items);
