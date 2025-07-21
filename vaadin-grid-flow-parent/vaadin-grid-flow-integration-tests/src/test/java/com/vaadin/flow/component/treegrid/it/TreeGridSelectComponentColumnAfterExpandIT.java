@@ -24,7 +24,8 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/treegrid-select-component-column-after-expand")
-public class TreeGridSelectComponentColumnAfterExpandIT extends AbstractComponentIT {
+public class TreeGridSelectComponentColumnAfterExpandIT
+        extends AbstractComponentIT {
     private TreeGridElement treeGrid;
 
     @Before
