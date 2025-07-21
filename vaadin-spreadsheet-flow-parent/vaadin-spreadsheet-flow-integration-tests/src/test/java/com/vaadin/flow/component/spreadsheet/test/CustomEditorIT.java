@@ -400,10 +400,17 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         // Test Esc with arrow keys persistence on cell
         editor.click();
         editor.setProperty("value", "");
-        editor.sendKeys("EscWithArrowKeys", Keys.ESCAPE, Keys.ARROW_DOWN);
+        editor.sendKeys("EscWithArrowKeys");
+        getCommandExecutor().waitForVaadin();
+        editor.sendKeys(Keys.ESCAPE);
+        getCommandExecutor().waitForVaadin();
+        editor.sendKeys(Keys.ARROW_DOWN);
         getCommandExecutor().waitForVaadin();
         clickCell(cellAddress);
-        Assert.assertEquals("EscWithArrowKeys", getFormulaFieldValue());
+        Assert.assertEquals(
+                "Expect <EscWithArrowKeys> to be persisted in cell "
+                        + cellAddress,
+                "EscWithArrowKeys", getFormulaFieldValue());
 
         // Test ENTER key persistence on cell
         clickCell(cellAddress);
@@ -411,7 +418,9 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         editor.sendKeys("EnterTest", Keys.ENTER);
         getCommandExecutor().waitForVaadin();
         clickCell(cellAddress);
-        Assert.assertEquals("EnterTest", getFormulaFieldValue());
+        Assert.assertEquals(
+                "Expect <EnterTest> to be persisted in cell " + cellAddress,
+                "EnterTest", getFormulaFieldValue());
 
         // Test TAB key persistence on cell
         clickCell(cellAddress);
@@ -420,7 +429,9 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         editor.sendKeys("TabTest", Keys.TAB);
         getCommandExecutor().waitForVaadin();
         clickCell(cellAddress);
-        Assert.assertEquals("TabTest", getFormulaFieldValue());
+        Assert.assertEquals(
+                "Expect <TabTest> to be persisted in cell " + cellAddress,
+                "TabTest", getFormulaFieldValue());
 
         // Test SHIFT+TAB persistence on A2
         clickCell(cellAddress);
@@ -429,7 +440,9 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         editor.sendKeys("ShiftTabTest", Keys.chord(Keys.SHIFT, Keys.TAB));
         getCommandExecutor().waitForVaadin();
         clickCell(cellAddress);
-        Assert.assertEquals("ShiftTabTest", getFormulaFieldValue());
+        Assert.assertEquals(
+                "Expect <ShiftTabTest> to be persisted in cell " + cellAddress,
+                "ShiftTabTest", getFormulaFieldValue());
 
     }
 
