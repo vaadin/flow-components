@@ -30,6 +30,7 @@ import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataGenerator;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
@@ -72,10 +73,37 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
         setDataProvider(new TreeDataProvider<>(new TreeData<>()), null);
     }
 
-    /** @see DataCommunicator#getDataProvider() */
     @Override
     public HierarchicalDataProvider<T, ?> getDataProvider() {
         return (HierarchicalDataProvider<T, ?>) super.getDataProvider();
+    }
+
+    @Override
+    public <F> SerializableConsumer<F> setDataProvider(
+            DataProvider<T, F> dataProvider, F initialFilter) {
+        return setDataProvider(asHierarchicalDataProvider(dataProvider),
+                initialFilter);
+    }
+
+    @Override
+    public <F> SerializableConsumer<Filter<F>> setDataProvider(
+            DataProvider<T, F> dataProvider, F initialFilter,
+            boolean notifiesOnChange) {
+        return setDataProvider(asHierarchicalDataProvider(dataProvider),
+                initialFilter, notifiesOnChange);
+    }
+
+    public <F> SerializableConsumer<F> setDataProvider(
+            HierarchicalDataProvider<T, F> dataProvider, F initialFilter) {
+        return super.setDataProvider(dataProvider, initialFilter);
+    }
+
+    public <F> SerializableConsumer<Filter<F>> setDataProvider(
+            HierarchicalDataProvider<T, F> dataProvider, F initialFilter,
+            boolean notifiesOnChange) {
+        expandedItemIds.clear();
+        return super.setDataProvider(dataProvider, initialFilter,
+                notifiesOnChange);
     }
 
     /** @see DataCommunicator#getDataProviderSize() */
@@ -406,5 +434,15 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
 
         return ((HierarchicalDataProvider<T, Object>) getDataProvider())
                 .getChildCount(query);
+    }
+
+    private <F> HierarchicalDataProvider<T, F> asHierarchicalDataProvider(
+            DataProvider<T, F> dataProvider) {
+        if (dataProvider instanceof HierarchicalDataProvider<T, F> hierarchicalDataProvider) {
+            return hierarchicalDataProvider;
+        }
+
+        throw new IllegalArgumentException(
+                "Only HierarchicalDataCommunicator and its subtypes are supported");
     }
 }
