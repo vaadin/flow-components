@@ -56,17 +56,17 @@ public class TreeGridExpandCollapseRecursivelyIT extends AbstractComponentIT {
         selectRecursionDepth(0);
         expandButton.click();
         assertNumberOfExpandedLevels(1);
-        assertRows("Item-0", "Item-0-0", "Item-0-1");
+        assertRowContents("Item-0", "Item-0-0", "Item-0-1");
 
         selectRecursionDepth(1);
         expandButton.click();
         assertNumberOfExpandedLevels(2);
-        assertRows("Item-0", "Item-0-0", "Item-0-0-0", "Item-0-0-1");
+        assertRowContents("Item-0", "Item-0-0", "Item-0-0-0", "Item-0-0-1");
 
         selectRecursionDepth(2);
         expandButton.click();
         assertNumberOfExpandedLevels(3);
-        assertRows("Item-0", "Item-0-0", "Item-0-0-0", "Item-0-0-0-0",
+        assertRowContents("Item-0", "Item-0-0", "Item-0-0-0", "Item-0-0-0-0",
                 "Item-0-0-0-1");
     }
 
@@ -97,7 +97,7 @@ public class TreeGridExpandCollapseRecursivelyIT extends AbstractComponentIT {
 
         // Open just one subtree to see if it is still fully expanded
         treeGrid.expandWithClick(2, 0);
-        assertRows("Item-0", "Item-0-0", "Item-0-1", "Item-0-1-0",
+        assertRowContents("Item-0", "Item-0-0", "Item-0-1", "Item-0-1-0",
                 "Item-0-1-0-0");
     }
 
@@ -118,9 +118,9 @@ public class TreeGridExpandCollapseRecursivelyIT extends AbstractComponentIT {
         Assert.assertEquals(expectedRowCount, treeGrid.getRowCount());
     }
 
-    private void assertRows(String... expectedRows) {
-        List<String> actualRows = IntStream.range(0, expectedRows.length)
+    private void assertRowContents(String... expected) {
+        List<String> actual = IntStream.range(0, expected.length)
                 .mapToObj(i -> treeGrid.getRow(i).getText()).toList();
-        Assert.assertEquals(Arrays.asList(expectedRows), actualRows);
+        Assert.assertEquals(Arrays.asList(expected), actual);
     }
 }
