@@ -49,6 +49,7 @@ import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
@@ -98,6 +99,7 @@ public class TreeGrid<T> extends Grid<T>
         super(pageSize, dataCommunicatorBuilder);
 
         setUniqueKeyProperty("key");
+        addItemExpandedGenerator();
         addItemHasChildrenPathGenerator();
     }
 
@@ -110,6 +112,12 @@ public class TreeGrid<T> extends Grid<T>
             if (getDataCommunicator().hasChildren(item)) {
                 jsonObject.put("children", true);
             }
+        });
+    }
+
+    private void addItemExpandedGenerator() {
+        addDataGenerator((T item, JsonObject jsonObject) -> {
+            jsonObject.put("expanded", isExpanded(item));
         });
     }
 
@@ -181,6 +189,7 @@ public class TreeGrid<T> extends Grid<T>
         super(beanType, dataCommunicatorBuilder, autoCreateColumns);
 
         setUniqueKeyProperty("key");
+        addItemExpandedGenerator();
         addItemHasChildrenPathGenerator();
     }
 
@@ -498,15 +507,8 @@ public class TreeGrid<T> extends Grid<T>
                 .withProperty("name", value -> {
                     Object name = valueProvider.apply(value);
                     return name == null ? "" : String.valueOf(name);
-                }).withFunction("onClick", item -> {
-                    if (getDataCommunicator().hasChildren(item)) {
-                        if (isExpanded(item)) {
-                            collapse(List.of(item), true);
-                        } else {
-                            expand(List.of(item), true);
-                        }
-                    }
-                }));
+                }).withFunction("onClick",
+                        item -> toggleFromClient(item, !isExpanded(item))));
 
         final SerializableComparator<T> comparator = (a,
                 b) -> compareMaybeComparables(valueProvider.apply(a),
@@ -694,6 +696,27 @@ public class TreeGrid<T> extends Grid<T>
             throw new IllegalArgumentException(
                     "Multiple columns for the same property: "
                             + property.getName());
+        }
+    }
+
+    @ClientCallable(DisabledUpdateMode.ONLY_WHEN_ENABLED)
+    private void toggleFromClient(String key, boolean expanded) {
+        T item = getDataCommunicator().getKeyMapper().get(key);
+        if (item != null) {
+            toggleFromClient(item, expanded);
+        }
+    }
+
+    private void toggleFromClient(T item, boolean expanded) {
+        if (expanded) {
+            if (getDataCommunicator().hasChildren(item)
+                    && !getDataCommunicator().isExpanded(item)) {
+                expand(Arrays.asList(item), true);
+            }
+        } else {
+            if (getDataCommunicator().isExpanded(item)) {
+                collapse(Arrays.asList(item), true);
+            }
         }
     }
 
