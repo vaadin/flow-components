@@ -16,13 +16,22 @@
 package com.vaadin.flow.component.treegrid.it;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 
+import com.vaadin.flow.component.grid.testbench.TreeGridElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath(SelectComponentColumnAfterExpandPage.VIEW)
-public class SelectComponentColumnAfterExpandIT extends AbstractTreeGridIT {
+@TestPath("vaadin-grid/treegrid-select-component-column-after-expand")
+public class TreeGridSelectComponentColumnAfterExpandIT extends AbstractComponentIT {
+    private TreeGridElement treeGrid;
+
+    @Before
+    public void init() {
+        open();
+        treeGrid = $(TreeGridElement.class).first();
+    }
 
     /**
      * <a href="https://github.com/vaadin/vaadin-flow-components/issues/376">
@@ -30,24 +39,18 @@ public class SelectComponentColumnAfterExpandIT extends AbstractTreeGridIT {
      */
     @Test
     public void select_after_expand_should_not_remove_item_text() {
-        open();
-        setupTreeGrid();
         assertExpectedValuesWhenExpanded();
-        Assert.assertEquals(4, getTreeGrid().getRowCount());
-        click("collapse-button");
-        Assert.assertEquals(1, getTreeGrid().getRowCount());
-        click("expand-button");
-        click("select-button");
+        Assert.assertEquals(4, treeGrid.getRowCount());
+        clickElementWithJs("collapse-button");
+        Assert.assertEquals(1, treeGrid.getRowCount());
+        clickElementWithJs("expand-button");
+        clickElementWithJs("select-button");
         assertExpectedValuesWhenExpanded();
-    }
-
-    private void click(String id) {
-        findElement(By.id(id)).click();
     }
 
     private void assertCellText(int rowIndex, int collIndex, String expected) {
         Assert.assertEquals(expected,
-                getTreeGrid().getCellWaitForRow(rowIndex, collIndex).getText());
+                treeGrid.getCellWaitForRow(rowIndex, collIndex).getText());
     }
 
     private void assertRowText(int rowIndex, String expected) {

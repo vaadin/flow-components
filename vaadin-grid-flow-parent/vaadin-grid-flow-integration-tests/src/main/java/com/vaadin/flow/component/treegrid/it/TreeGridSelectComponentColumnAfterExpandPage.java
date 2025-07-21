@@ -22,12 +22,9 @@ import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.router.Route;
 
-@Route(SelectComponentColumnAfterExpandPage.VIEW)
-public class SelectComponentColumnAfterExpandPage extends Div {
-
-    public static final String VIEW = "vaadin-grid/select-component-column-after-expand";
-
-    public SelectComponentColumnAfterExpandPage() {
+@Route("vaadin-grid/treegrid-select-component-column-after-expand")
+public class TreeGridSelectComponentColumnAfterExpandPage extends Div {
+    public TreeGridSelectComponentColumnAfterExpandPage() {
         TreeGrid<String> grid = new TreeGrid<>();
         grid.addHierarchyColumn(String::toString).setHeader("HierarchyColumn");
         grid.addComponentColumn(Span::new).setHeader("ComponentColumn");
