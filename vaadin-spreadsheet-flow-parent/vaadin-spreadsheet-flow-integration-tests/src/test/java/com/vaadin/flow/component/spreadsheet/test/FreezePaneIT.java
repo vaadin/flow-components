@@ -135,7 +135,7 @@ public class FreezePaneIT extends AbstractSpreadsheetIT {
         getSpreadsheet().scroll(0);
 
         // Count rendered column headers after resize
-        int countAfter = getHeaderCount(".bottom-left-pane.sheet > .rh");
+        int countAfter = getHeaderCount(".rh");
 
         Assert.assertEquals("Height should be the same", spreadsheetHeight,
                 getSpreadsheet().getSize().getHeight());
