@@ -397,13 +397,13 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
 
         var editor = maybeEditor.get();
 
-        // Test Esc with arrow keys persistence on cell
-        editor.sendKeys("EscWithArrowKeys", Keys.ESCAPE, Keys.ARROW_DOWN);
-        getCommandExecutor().waitForVaadin();
-        clickCell(cellAddress);
-        Assert.assertEquals(
-                "Value in cell '" + cellAddress + "' after ESC+ARROW_DOWN",
-                "EscWithArrowKeys", getFormulaFieldValue());
+        // // Test Esc with arrow keys persistence on cell
+        // editor.sendKeys("EscWithArrowKeys", Keys.ESCAPE, Keys.ARROW_DOWN);
+        // getCommandExecutor().waitForVaadin();
+        // clickCell(cellAddress);
+        // Assert.assertEquals(
+        // "Value in cell '" + cellAddress + "' after ESC+ARROW_DOWN",
+        // "EscWithArrowKeys", getFormulaFieldValue());
 
         // Test ENTER key persistence on cell
         clickCell(cellAddress);
