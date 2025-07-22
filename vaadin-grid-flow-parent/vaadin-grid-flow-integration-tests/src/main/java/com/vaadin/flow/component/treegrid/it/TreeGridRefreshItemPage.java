@@ -38,10 +38,10 @@ public class TreeGridRefreshItemPage extends Div {
         refreshItem_0_1.setId("refresh-item-0-1");
 
         NativeButton refreshItem_0_and_0_1 = new NativeButton(
-            "Refresh item 0 and 0-1", event -> {
-                refreshItemByPath(0);
-                refreshItemByPath(0, 1);
-            });
+                "Refresh item 0 and 0-1", event -> {
+                    refreshItemByPath(0);
+                    refreshItemByPath(0, 1);
+                });
         refreshItem_0_and_0_1.setId("refresh-item-0-and-0-1");
 
         add(treeGrid, refreshItem_0, refreshItem_0_1, refreshItem_0_and_0_1);
