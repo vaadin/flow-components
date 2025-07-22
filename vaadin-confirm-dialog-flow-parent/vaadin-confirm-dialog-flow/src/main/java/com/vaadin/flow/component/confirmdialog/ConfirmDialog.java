@@ -18,7 +18,6 @@ package com.vaadin.flow.component.confirmdialog;
 import java.util.Collection;
 import java.util.Optional;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -27,7 +26,6 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasOrderedComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -864,14 +862,6 @@ public class ConfirmDialog extends Component
     @Override
     public Component getComponentAt(int index) {
         return HasOrderedComponents.super.getComponentAt(index);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-
-        // Same as https://github.com/vaadin/flow-components/pull/725
-        Shortcuts.setShortcutListenOnElement("this._overlayElement", this);
     }
 
     private void setModality(boolean modal) {
