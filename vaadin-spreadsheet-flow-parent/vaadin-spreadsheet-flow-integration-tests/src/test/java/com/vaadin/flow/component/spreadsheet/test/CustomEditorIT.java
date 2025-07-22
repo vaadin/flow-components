@@ -378,9 +378,9 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         // Toggle custom editor visibility to always show
         $("vaadin-button").id("toggleCustomEditorVisibilityButton").click();
         getCommandExecutor().waitForVaadin();
-        addFreezePane(15, 2);
+        addFreezePane(10, 2);
 
-        // performKeyboardTestsToCell("A");
+        performKeyboardTestsToCell("A");
         performKeyboardTestsToCell("J");
         performKeyboardTestsToCell("K");
 
@@ -400,7 +400,8 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         // Test Esc with arrow keys persistence on cell
         editor.sendKeys("EscWithArrowKeys", Keys.ESCAPE, Keys.ARROW_DOWN);
         getCommandExecutor().waitForVaadin();
-        clickCell(cellAddress);
+        selectCell(cellAddress);
+        // clickCell(cellAddress);
         Assert.assertEquals(
                 "Value in cell '" + cellAddress + "' after ESC+ARROW_DOWN",
                 "EscWithArrowKeys", getFormulaFieldValue());
