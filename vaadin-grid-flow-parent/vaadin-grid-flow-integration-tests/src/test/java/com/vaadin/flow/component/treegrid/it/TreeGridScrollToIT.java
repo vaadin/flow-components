@@ -56,62 +56,62 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
     public void expandAll_scrollToEnd_correctLastVisibleItem() {
         expandAllButton.click();
         scrollToEndButton.click();
-        assertLastVisibleRowContent("Son 49/19/19");
+        assertLastVisibleRowContent("Item 49-19-19");
     }
 
     @Test
     public void expandAll_scrollToEndFromClient_correctLastVisibleItem() {
         expandAllButton.click();
         grid.scrollToEnd();
-        assertLastVisibleRowContent("Son 49/19/19");
+        assertLastVisibleRowContent("Item 49-19-19");
     }
 
     @Test
     public void scrollToEnd_correctLastVisibleItem() {
         scrollToEndButton.click();
-        assertLastVisibleRowContent("Granddad 49");
+        assertLastVisibleRowContent("Item 49");
     }
 
     @Test
     public void scrollToEnd_scrollToStart_correctFirstVisibleItem() {
         scrollToEndButton.click();
-        assertLastVisibleRowContent("Granddad 49");
+        assertLastVisibleRowContent("Item 49");
 
         scrollToStartButton.click();
-        assertFirstVisibleRowContent("Granddad 0");
+        assertFirstVisibleRowContent("Item 0");
     }
 
     @Test
     public void expandAll_scrollToIndex30_correctFirstVisibleItem() {
         expandAllButton.click();
         scrollToIndexInput.sendKeys("30", Keys.TAB);
-        assertFirstVisibleRowContent("Granddad 30");
+        assertFirstVisibleRowContent("Item 30");
     }
 
     @Test
     public void scrollToIndex30_correctFirstVisibleItem() {
         scrollToIndexInput.sendKeys("30", Keys.TAB);
-        assertFirstVisibleRowContent("Granddad 30");
+        assertFirstVisibleRowContent("Item 30");
     }
 
     @Test
     public void expandAll_scrollToIndex30_1_correctFirstVisibleItem() {
         expandAllButton.click();
         scrollToIndexInput.sendKeys("30-1", Keys.TAB);
-        assertFirstVisibleRowContent("Dad 30/1");
+        assertFirstVisibleRowContent("Item 30-1");
     }
 
     @Test
     public void scrollToIndex30_1_correctFirstVisibleItem() {
         scrollToIndexInput.sendKeys("30-1", Keys.TAB);
-        assertFirstVisibleRowContent("Granddad 30");
+        assertFirstVisibleRowContent("Item 30");
     }
 
     @Test
     public void expandAll_scrollToIndex30_1_1_correctFirstVisibleItem() {
         expandAllButton.click();
         scrollToIndexInput.sendKeys("30-1-1", Keys.TAB);
-        assertFirstVisibleRowContent("Son 30/1/1");
+        assertFirstVisibleRowContent("Item 30-1-1");
     }
 
     @Test
@@ -121,7 +121,7 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
         // Manual test triggers an infinite loop.
         // The indexes to reproduce this loop depends on the grid height.
         scrollToIndexInput.sendKeys("10-1-1", Keys.TAB);
-        assertFirstVisibleRowContent("Son 10/1/1");
+        assertFirstVisibleRowContent("Item 10-1-1");
     }
 
     private void assertFirstVisibleRowContent(String content) {

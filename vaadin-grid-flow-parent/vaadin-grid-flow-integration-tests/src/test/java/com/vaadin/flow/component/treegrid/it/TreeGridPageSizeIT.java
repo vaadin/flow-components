@@ -40,16 +40,16 @@ public class TreeGridPageSizeIT extends AbstractTreeGridIT {
         waitUntil(test -> grid.getNumberOfExpandedRows() == 12, 1);
         // assert here only minimum required fetches
         assertLogContainsFetch(0, 3, "root");
-        assertLogContainsFetch(0, 3, "Granddad 0");
-        assertLogContainsFetch(0, 10, "Dad 0/0");
-        assertLogContainsFetch(10, 30, "Dad 0/0/");
+        assertLogContainsFetch(0, 3, "Item 0");
+        assertLogContainsFetch(0, 10, "Item 0-0");
+        assertLogContainsFetch(10, 30, "Item 0-0-\n");
 
         assertPageSize(grid, 10);
         assertCellContents(grid);
 
-        assertLogContainsFetch(150, 10, "Dad 0/0");
-        assertLogContainsFetch(290, 10, "Dad 0/0");
-        assertLogContainsFetch(0, 10, "Dad 0/1");
+        assertLogContainsFetch(150, 10, "Item 0-0");
+        assertLogContainsFetch(290, 10, "Item 0-0");
+        assertLogContainsFetch(0, 10, "Item 0-1");
 
         clearLog();
 

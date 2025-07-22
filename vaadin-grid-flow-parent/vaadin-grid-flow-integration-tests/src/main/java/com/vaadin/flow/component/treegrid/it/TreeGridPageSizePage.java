@@ -23,7 +23,6 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
-import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.router.Route;
@@ -38,21 +37,19 @@ public class TreeGridPageSizePage extends Div {
      */
     public TreeGridPageSizePage() {
 
-        TreeGrid<String> grid = new TreeGrid<>();
+        TreeGrid<ItemTreeData.Item> grid = new TreeGrid<>();
         grid.setPageSize(10);
-        grid.addHierarchyColumn(String::toString).setHeader("String")
+        grid.addHierarchyColumn(ItemTreeData.Item::toString).setHeader("String")
                 .setId("string");
 
-        TreeData<String> data = new TreeGridStringDataBuilder()
-                .addLevel("Granddad", 3).addLevel("Dad", 3).addLevel("Son", 300)
-                .build();
+        ItemTreeData treeData = new ItemTreeData(3, 3, 300);
 
-        TreeDataProvider<String> dataProvider = new TreeDataProvider<String>(
-                data) {
+        TreeDataProvider<ItemTreeData.Item> dataProvider = new TreeDataProvider<ItemTreeData.Item>(
+                treeData) {
 
             @Override
-            public Stream<String> fetchChildren(
-                    HierarchicalQuery<String, SerializablePredicate<String>> query) {
+            public Stream<ItemTreeData.Item> fetchChildren(
+                    HierarchicalQuery<ItemTreeData.Item, SerializablePredicate<ItemTreeData.Item>> query) {
                 if (log != null) {
                     log.setValue(String.format(
                             "Query offset: %d Query limit: %d Query parent: %s",
@@ -67,7 +64,7 @@ public class TreeGridPageSizePage extends Div {
         };
         grid.setDataProvider(dataProvider);
 
-        grid.expandRecursively(data.getRootItems(), 3);
+        grid.expandRecursively(treeData.getRootItems(), 3);
 
         log = new TextArea();
         log.setId("log");

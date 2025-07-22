@@ -15,42 +15,24 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import java.util.Collections;
-
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel;
 import com.vaadin.flow.component.grid.GridMultiSelectionModel.SelectAllCheckboxVisibility;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.treegrid.TreeGrid;
-import com.vaadin.flow.data.bean.PeopleGenerator;
-import com.vaadin.flow.data.bean.PersonWithLevel;
-import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-grid/treegrid-multi-selection")
 public class TreeGridMultiSelectionPage extends Div {
     public TreeGridMultiSelectionPage() {
-        TreeGrid<PersonWithLevel> treeGrid = new TreeGrid<>();
-        treeGrid.addHierarchyColumn((person) -> person.getFirstName())
-                .setHeader("Name");
+        TreeGrid<ItemTreeData.Item> treeGrid = new TreeGrid<>();
+        treeGrid.addHierarchyColumn((item) -> item.getName()).setHeader("Name");
         treeGrid.setSelectionMode(SelectionMode.MULTI);
+        treeGrid.setTreeData(new ItemTreeData(3, 3, 3));
 
-        ((GridMultiSelectionModel<PersonWithLevel>) treeGrid
+        ((GridMultiSelectionModel<ItemTreeData.Item>) treeGrid
                 .getSelectionModel()).setSelectAllCheckboxVisibility(
                         SelectAllCheckboxVisibility.VISIBLE);
-
-        PeopleGenerator peopleGenerator = new PeopleGenerator();
-        TreeData<PersonWithLevel> treeData = new TreeData<>();
-        treeData.addItems(peopleGenerator.generatePeopleWithLevels(3, 0),
-                person -> {
-                    if (person.getLevel() <= 1) {
-                        return peopleGenerator.generatePeopleWithLevels(3,
-                                person.getLevel() + 1);
-                    }
-
-                    return Collections.emptyList();
-                });
-        treeGrid.setTreeData(treeData);
 
         add(treeGrid);
     }

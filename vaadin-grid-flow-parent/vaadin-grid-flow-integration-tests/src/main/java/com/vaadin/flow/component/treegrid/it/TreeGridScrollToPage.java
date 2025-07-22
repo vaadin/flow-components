@@ -21,8 +21,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.treegrid.TreeGrid;
-import com.vaadin.flow.data.provider.hierarchy.TreeData;
-import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 
@@ -30,20 +28,16 @@ import com.vaadin.flow.router.Route;
 public class TreeGridScrollToPage extends Div {
 
     public TreeGridScrollToPage() {
-        TreeGrid<String> grid = new TreeGrid<>();
+        TreeGrid<ItemTreeData.Item> grid = new TreeGrid<>();
         grid.setPageSize(10);
-        grid.addHierarchyColumn(String::toString).setHeader("Item");
+        grid.addHierarchyColumn(ItemTreeData.Item::toString).setHeader("Item");
 
         add(grid);
 
-        TreeData<String> data = new TreeGridStringDataBuilder()
-                .addLevel("Granddad", 50).addLevel("Dad", 20)
-                .addLevel("Son", 20).build();
+        grid.setTreeData(new ItemTreeData(50, 20, 20));
 
-        grid.setDataProvider(new TreeDataProvider<>(data));
-
-        NativeButton expandAll = new NativeButton("Expand all",
-                e -> grid.expandRecursively(data.getRootItems(), 3));
+        NativeButton expandAll = new NativeButton("Expand all", e -> grid
+                .expandRecursively(grid.getTreeData().getRootItems(), 3));
         expandAll.setId("expand-all");
 
         NativeButton scrollToStart = new NativeButton("Scroll to start",

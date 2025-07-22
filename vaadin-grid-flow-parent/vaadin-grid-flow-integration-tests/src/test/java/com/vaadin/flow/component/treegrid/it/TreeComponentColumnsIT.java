@@ -46,22 +46,22 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
 
     @Test
     public void compThenGridRendered_compButton() {
-        assertCellContains(compThenGrid, 0, 0, "vaadin-text-field");
-        assertCellContains(compThenGrid, 1, 0, "vaadin-text-field");
-        assertCellContains(compThenGrid, 0, 1, "vaadin-text-field");
-        assertCellContains(compThenGrid, 1, 1, "vaadin-text-field");
-        assertCellContains(compThenGrid, 1, 2, "vaadin-button");
-        assertCellContains(compThenGrid, 1, 2, "Granddad");
+        assertCellContainsTag(compThenGrid, 0, 0, "<vaadin-text-field>");
+        assertCellContainsTag(compThenGrid, 1, 0, "<vaadin-text-field>");
+        assertCellContainsTag(compThenGrid, 0, 1, "<vaadin-text-field>");
+        assertCellContainsTag(compThenGrid, 1, 1, "<vaadin-text-field>");
+        assertCellContainsTag(compThenGrid, 1, 2, "<vaadin-button>");
+        assertCellText(compThenGrid, 1, 2, "Item 1");
     }
 
     @Test
     public void gridThenCompRendered_compButton() {
-        assertCellContains(gridThenComp, 0, 0, "vaadin-text-field");
-        assertCellContains(gridThenComp, 1, 0, "vaadin-text-field");
-        assertCellContains(gridThenComp, 0, 1, "vaadin-text-field");
-        assertCellContains(gridThenComp, 1, 1, "vaadin-text-field");
-        assertCellContains(gridThenComp, 1, 2, "vaadin-button");
-        assertCellContains(gridThenComp, 1, 2, "Granddad");
+        assertCellContainsTag(gridThenComp, 0, 0, "<vaadin-text-field>");
+        assertCellContainsTag(gridThenComp, 1, 0, "<vaadin-text-field>");
+        assertCellContainsTag(gridThenComp, 0, 1, "<vaadin-text-field>");
+        assertCellContainsTag(gridThenComp, 1, 1, "<vaadin-text-field>");
+        assertCellContainsTag(gridThenComp, 1, 2, "<vaadin-button>");
+        assertCellText(gridThenComp, 1, 2, "Item 1");
     }
 
     @Test
@@ -71,15 +71,15 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
         compThenGrid.collapseWithClick(0);
         compThenGrid.select(1);
 
-        assertCellContains(compThenGrid, 2, 0, "vaadin-text-field");
-        assertCellContains(compThenGrid, 3, 0, "vaadin-text-field");
-        assertCellContains(compThenGrid, 4, 0, "vaadin-text-field");
-        assertCellContains(compThenGrid, 2, 1, "vaadin-text-field");
-        assertCellContains(compThenGrid, 3, 1, "vaadin-text-field");
-        assertCellContains(compThenGrid, 4, 1, "vaadin-text-field");
-        assertCellContains(compThenGrid, 2, 2, "Dad 1/0");
-        assertCellContains(compThenGrid, 3, 2, "Dad 1/1");
-        assertCellContains(compThenGrid, 4, 2, "Dad 1/2");
+        assertCellContainsTag(compThenGrid, 2, 0, "<vaadin-text-field>");
+        assertCellContainsTag(compThenGrid, 3, 0, "<vaadin-text-field>");
+        assertCellContainsTag(compThenGrid, 4, 0, "<vaadin-text-field>");
+        assertCellContainsTag(compThenGrid, 2, 1, "<vaadin-text-field>");
+        assertCellContainsTag(compThenGrid, 3, 1, "<vaadin-text-field>");
+        assertCellContainsTag(compThenGrid, 4, 1, "<vaadin-text-field>");
+        assertCellText(compThenGrid, 2, 2, "Item 1-0");
+        assertCellText(compThenGrid, 3, 2, "Item 1-1");
+        assertCellText(compThenGrid, 4, 2, "Item 1-2");
     }
 
     @Test
@@ -88,9 +88,9 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
         compThenGrid.collapseWithClick(0);
         compThenGrid.expandWithClick(0);
 
-        assertCellContains(compThenGrid, 4, 0, "vaadin-text-field");
-        assertCellContains(compThenGrid, 4, 1, "vaadin-text-field");
-        assertCellContains(compThenGrid, 4, 2, "Granddad 1");
+        assertCellContainsTag(compThenGrid, 4, 0, "<vaadin-text-field>");
+        assertCellContainsTag(compThenGrid, 4, 1, "<vaadin-text-field>");
+        assertCellText(compThenGrid, 4, 2, "Item 1");
     }
 
     @Test
@@ -111,10 +111,16 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
         }
     }
 
-    private void assertCellContains(GridElement grid, int rowIndex,
-            int colIndex, String expected) {
-        Assert.assertTrue("Expected cell content to contain: " + expected, grid
-                .getCell(rowIndex, colIndex).getInnerHTML().contains(expected));
+    private void assertCellText(GridElement grid, int rowIndex, int colIndex,
+            String expected) {
+        Assert.assertEquals("Expected cell text to be " + expected, expected,
+                grid.getCell(rowIndex, colIndex).getText());
+    }
+
+    private void assertCellContainsTag(GridElement grid, int rowIndex,
+            int colIndex, String tagName) {
+        Assert.assertTrue("Expected cell content to contain: " + tagName, grid
+                .getCell(rowIndex, colIndex).getInnerHTML().contains(tagName));
     }
 
 }

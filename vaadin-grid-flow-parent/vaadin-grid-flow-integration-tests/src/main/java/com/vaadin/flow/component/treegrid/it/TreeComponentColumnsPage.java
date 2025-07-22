@@ -21,8 +21,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.treegrid.TreeGrid;
-import com.vaadin.flow.data.provider.hierarchy.TreeData;
-import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
@@ -46,45 +44,41 @@ public class TreeComponentColumnsPage extends Div {
     }
 
     private void addTreeGrid(boolean addGridBefore) {
-        TreeGrid<String> grid = new TreeGrid<>();
+        TreeGrid<ItemTreeData.Item> grid = new TreeGrid<>();
         if (addGridBefore) {
             grid.setId("grid-then-comp");
             add(grid);
         }
 
-        ComponentRenderer<TextField, String> componentRenderer = new ComponentRenderer<>(
+        ComponentRenderer<TextField, ItemTreeData.Item> componentRenderer = new ComponentRenderer<>(
                 TextField::new, (component, item) -> {
                     component.setReadOnly(true);
-                    component.setValue(item);
+                    component.setValue(item.getName());
                 });
 
         grid.addComponentHierarchyColumn(this::createTextField)
                 .setHeader("Header A").setId("textfield");
         grid.addColumn(componentRenderer).setHeader("Header B");
 
-        ComponentRenderer<Button, String> componentRendererBtn = new ComponentRenderer<>(
+        ComponentRenderer<Button, ItemTreeData.Item> componentRendererBtn = new ComponentRenderer<>(
                 () -> new Button("btn"), ((button, s) -> {
-                    button.setText(s);
+                    button.setText(s.getName());
                     button.setThemeName(
                             ButtonVariant.LUMO_ERROR.getVariantName());
                 }));
         grid.addColumn(componentRendererBtn).setHeader("Header C");
 
-        TreeData<String> data = new TreeGridStringDataBuilder()
-                .addLevel("Granddad", 3).addLevel("Dad", 3).addLevel("Son", 100)
-                .build();
-
-        grid.setDataProvider(new TreeDataProvider<>(data));
+        grid.setTreeData(new ItemTreeData(3, 3, 100));
         if (!addGridBefore) {
             grid.setId("comp-then-grid");
             add(grid);
         }
     }
 
-    private TextField createTextField(String val) {
+    private TextField createTextField(ItemTreeData.Item item) {
         TextField textField = new TextField();
         textField.setReadOnly(true);
-        textField.setValue(val);
+        textField.setValue(item.getName());
         return textField;
     }
 }
