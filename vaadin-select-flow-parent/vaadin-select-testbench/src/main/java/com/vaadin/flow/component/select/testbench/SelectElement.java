@@ -76,8 +76,7 @@ public class SelectElement extends TestBenchElement implements HasSelectByText,
 
     public Stream<ItemElement> getItemsStream() {
         openPopup();
-        List<WebElement> elements = getPropertyElement("_overlayElement")
-                .findElement(By.tagName("vaadin-select-list-box"))
+        List<WebElement> elements = getPropertyElement("_menuElement")
                 .findElements(By.tagName("vaadin-select-item"));
         if (elements.size() == 0) {
             return Stream.<ItemElement> builder().build();
