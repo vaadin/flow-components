@@ -17,7 +17,6 @@ package com.vaadin.flow.component.treegrid.it;
 
 import org.junit.Assert;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
 import com.vaadin.tests.AbstractComponentIT;
@@ -42,17 +41,6 @@ public abstract class AbstractTreeGridIT extends AbstractComponentIT {
     }
 
     /**
-     * Returns id by clearing spaces from the given text.
-     *
-     * @param id
-     *            the text to make id from
-     * @return the new id
-     */
-    protected String makeId(String id) {
-        return id.replace(" ", "");
-    }
-
-    /**
      * Finds element with id 'log' and checks if its value contains given text.
      * Uses {@link String#contains(CharSequence)} to search.
      *
@@ -71,24 +59,6 @@ public abstract class AbstractTreeGridIT extends AbstractComponentIT {
      */
     protected void clearLog() {
         executeScript("arguments[0].value=''", findElement(By.id("log")));
-    }
-
-    /**
-     * Finds element by given text by translating it to id with
-     * {@link #makeId(String)} and finding element by that id.
-     * <p>
-     * Shortcut for calling:
-     *
-     * <pre>
-     * findElement(By.id(makeId(text)))
-     * </pre>
-     *
-     * @param text
-     *            the target text
-     * @return the found element
-     */
-    protected WebElement findElementByText(String text) {
-        return findElement(By.id(makeId(text)));
     }
 
     /**
