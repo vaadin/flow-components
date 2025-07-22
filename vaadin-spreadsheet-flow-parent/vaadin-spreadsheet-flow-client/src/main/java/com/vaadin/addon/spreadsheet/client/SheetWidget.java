@@ -2310,7 +2310,7 @@ public class SheetWidget extends Panel {
 
     private int calculateLeftValueOfScrolledColumns() {
         int left = 0;
-        for (int i = 1; i < (firstColumnIndex - horizontalSplitPosition); i++) {
+        for (int i = horizontalSplitPosition + 1; i < firstColumnIndex; i++) {
             left += actionHandler.getColWidth(i);
         }
         return left;
@@ -2318,7 +2318,7 @@ public class SheetWidget extends Panel {
 
     private int calculateTopValueOfScrolledRows() {
         int top = 0;
-        for (int i = 1; i < (firstRowIndex - verticalSplitPosition); i++) {
+        for (int i = verticalSplitPosition + 1; i < firstRowIndex; i++) {
             top += definedRowHeights[i - 1];
         }
         return top;
