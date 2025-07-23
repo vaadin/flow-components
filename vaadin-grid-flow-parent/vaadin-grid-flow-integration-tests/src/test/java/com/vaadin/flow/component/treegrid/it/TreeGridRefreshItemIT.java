@@ -48,7 +48,7 @@ public class TreeGridRefreshItemIT extends AbstractComponentIT {
         clickElementWithJs("refresh-item-0-1");
 
         assertRowContents(0, "Item 0", "Item 0-0", "Updated", "Item 0-2",
-                "Item 2");
+                "Item 1");
     }
 
     @Test
