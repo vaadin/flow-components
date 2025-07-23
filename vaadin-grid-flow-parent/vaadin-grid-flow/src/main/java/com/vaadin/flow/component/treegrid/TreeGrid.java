@@ -70,6 +70,7 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @JsModule("@vaadin/grid/src/vaadin-grid-tree-toggle.js")
+@JsModule("./treeGridConnector.ts")
 public class TreeGrid<T> extends Grid<T>
         implements HasHierarchicalDataProvider<T> {
     /**
@@ -102,6 +103,14 @@ public class TreeGrid<T> extends Grid<T>
         setUniqueKeyProperty("key");
         addItemExpandedGenerator();
         addItemHasChildrenPathGenerator();
+    }
+
+    protected void initConnector() {
+        getUI().orElseThrow(() -> new IllegalStateException(
+                "Connector can only be initialized for an attached Grid"))
+                .getPage()
+                .executeJs("window.Vaadin.Flow.treeGridConnector.initLazy($0)",
+                        getElement());
     }
 
     /**
@@ -1006,13 +1015,15 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     @ClientCallable
-    private int preloadPath(int[] path, int buffer) {
-        int flatIndex = getDataCommunicator().preloadPath(path, buffer);
-        int pageSize = getPageSize();
+    private int setRequestedRangeByIndexPath(int[] path, int viewportSize) {
+        // TODO: Should we expose preloadRange to separate concerns?
+        int flatIndex = getDataCommunicator().resolveIndexPath(path, viewportSize);
 
+        // TODO: Rewrite this in a more readable way
+        int pageSize = getPageSize();
         int startPage = Math.max(0,
-                (int) Math.ceil((flatIndex - buffer) / (float) pageSize));
-        int endPage = (int) Math.floor((flatIndex + buffer) / (float) pageSize);
+                (int) Math.ceil((flatIndex - viewportSize) / (float) pageSize));
+        int endPage = (int) Math.floor((flatIndex + viewportSize) / (float) pageSize);
         getDataCommunicator().setRequestedRange(startPage * pageSize,
                 endPage * pageSize);
 
