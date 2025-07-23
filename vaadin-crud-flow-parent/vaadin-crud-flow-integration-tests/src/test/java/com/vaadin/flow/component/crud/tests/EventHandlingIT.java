@@ -246,9 +246,7 @@ public class EventHandlingIT extends AbstractComponentIT {
             ConfirmDialogType type) {
         ConfirmDialogElement confirmDialog = crud.$(ConfirmDialogElement.class)
                 .withAttribute("slot", type.getId()).first();
-        TestBenchElement overlay = ((TestBenchElement) confirmDialog
-                .getContext());
-        return overlay.getPropertyBoolean("opened");
+        return confirmDialog.getPropertyBoolean("opened");
     }
 
     private enum ConfirmDialogType {
