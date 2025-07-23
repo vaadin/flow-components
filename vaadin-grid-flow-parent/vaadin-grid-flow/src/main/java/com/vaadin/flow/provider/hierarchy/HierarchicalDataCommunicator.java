@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.treegrid;
+package com.vaadin.flow.provider.hierarchy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -32,7 +31,6 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.KeyMapper;
-import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
@@ -48,68 +46,33 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
 
-public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
+public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
     private final Set<Object> expandedItemIds = new HashSet<>();
     private final ArrayUpdater arrayUpdater;
     private final DataGenerator<T> dataGenerator;
-    private final SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier;
 
     private RootCache<T> rootCache;
     private Range viewportRange;
     private int nextUpdateId = 0;
 
-    public TreeGridDataCommunicator(CompositeDataGenerator<T> dataGenerator,
+    public HierarchicalDataCommunicator(CompositeDataGenerator<T> dataGenerator,
             ArrayUpdater arrayUpdater,
             SerializableConsumer<JsonArray> dataUpdater, StateNode stateNode,
             SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
-        super(dataGenerator, arrayUpdater, dataUpdater, stateNode);
+        super(dataGenerator, arrayUpdater, dataUpdater, stateNode, false);
         this.arrayUpdater = arrayUpdater;
         this.dataGenerator = dataGenerator;
-        this.uniqueKeyProviderSupplier = uniqueKeyProviderSupplier;
 
-        KeyMapper<T> keyMapper = createKeyMapper();
+        KeyMapper<T> keyMapper = createKeyMapper(uniqueKeyProviderSupplier);
         setKeyMapper(keyMapper);
 
         setDataProvider(new TreeDataProvider<>(new TreeData<>()), null);
+
+        stateNode.addAttachListener(this::requestFlush);
     }
 
-    @Override
-    public HierarchicalDataProvider<T, ?> getDataProvider() {
-        return (HierarchicalDataProvider<T, ?>) super.getDataProvider();
-    }
+    private void requestFlush() {
 
-    @Override
-    public <F> SerializableConsumer<F> setDataProvider(
-            DataProvider<T, F> dataProvider, F initialFilter) {
-        return setDataProvider(asHierarchicalDataProvider(dataProvider),
-                initialFilter);
-    }
-
-    @Override
-    public <F> SerializableConsumer<Filter<F>> setDataProvider(
-            DataProvider<T, F> dataProvider, F initialFilter,
-            boolean notifiesOnChange) {
-        return setDataProvider(asHierarchicalDataProvider(dataProvider),
-                initialFilter, notifiesOnChange);
-    }
-
-    public <F> SerializableConsumer<F> setDataProvider(
-            HierarchicalDataProvider<T, F> dataProvider, F initialFilter) {
-        return super.setDataProvider(dataProvider, initialFilter);
-    }
-
-    public <F> SerializableConsumer<Filter<F>> setDataProvider(
-            HierarchicalDataProvider<T, F> dataProvider, F initialFilter,
-            boolean notifiesOnChange) {
-        expandedItemIds.clear();
-        return super.setDataProvider(dataProvider, initialFilter,
-                notifiesOnChange);
-    }
-
-    /** @see DataCommunicator#getDataProviderSize() */
-    @Override
-    public int getDataProviderSize() {
-        return getDataProviderChildCount(null);
     }
 
     /** @see DataCommunicator#reset() */
@@ -127,8 +90,8 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
     /** @see DataCommunicator#refresh(T) */
     @Override
     public void refresh(T item) {
-        Objects.requireNonNull(item,
-                "DataCommunicator can not refresh null object");
+        Objects.requireNonNull(item, "Item cannot be null");
+
         getKeyMapper().refresh(item);
         dataGenerator.refreshData(item);
 
@@ -291,7 +254,8 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
     }
 
     public boolean isFlatHierarchy() {
-        return getDataProvider().isFlatHierarchy();
+        // return getDataProvider().isFlatHierarchy();
+        return false;
     }
 
     /** @see HierarchicalDataCommunicator#hasChildren(T) */
@@ -301,9 +265,9 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
 
     /** @see HierarchicalDataCommunicator#getDepth(T) */
     public int getDepth(T item) {
-        if (isFlatHierarchy()) {
-            return getDataProvider().getDepth(item);
-        }
+        // if (isFlatHierarchy()) {
+        // return getDataProvider().getDepth(item);
+        // }
 
         if (rootCache == null) {
             return -1;
@@ -378,25 +342,27 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
         return json;
     }
 
-    private KeyMapper<T> createKeyMapper() {
+    private KeyMapper<T> createKeyMapper(
+            SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
         return new KeyMapper<T>() {
             private T object;
 
             @Override
             public String key(T o) {
-                this.object = o;
+                object = o;
                 try {
                     return super.key(o);
                 } finally {
-                    this.object = null;
+                    object = null;
                 }
             }
 
             @Override
             protected String createKey() {
-                return Optional.ofNullable(uniqueKeyProviderSupplier.get())
-                        .map(provider -> provider.apply(object))
-                        .orElse(super.createKey());
+                var uniqueKeyProvider = uniqueKeyProviderSupplier.get();
+                return uniqueKeyProvider != null
+                        ? uniqueKeyProvider.apply(object)
+                        : super.createKey();
             }
         };
     }
@@ -417,11 +383,60 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
         return rootCache;
     }
 
+    @Override
+    public HierarchicalDataProvider<T, ?> getDataProvider() {
+        return (HierarchicalDataProvider<T, ?>) super.getDataProvider();
+    }
+
+    @Override
+    public <F> SerializableConsumer<F> setDataProvider(
+            DataProvider<T, F> dataProvider, F initialFilter) {
+        return setDataProvider(asHierarchicalDataProvider(dataProvider),
+                initialFilter);
+    }
+
+    @Override
+    public <F> SerializableConsumer<Filter<F>> setDataProvider(
+            DataProvider<T, F> dataProvider, F initialFilter,
+            boolean notifiesOnChange) {
+        return setDataProvider(asHierarchicalDataProvider(dataProvider),
+                initialFilter, notifiesOnChange);
+    }
+
+    public <F> SerializableConsumer<F> setDataProvider(
+            HierarchicalDataProvider<T, F> dataProvider, F initialFilter) {
+        return super.setDataProvider(dataProvider, initialFilter);
+    }
+
+    public <F> SerializableConsumer<Filter<F>> setDataProvider(
+            HierarchicalDataProvider<T, F> dataProvider, F initialFilter,
+            boolean notifiesOnChange) {
+        expandedItemIds.clear();
+
+        return super.setDataProvider(dataProvider, initialFilter,
+                notifiesOnChange);
+    }
+
+    /** @see DataCommunicator#getDataProviderSize() */
+    @Override
+    public int getDataProviderSize() {
+        return getDataProviderChildCount(null);
+    }
+
+    /** @see DataCommunicator#fetchFromProvider() */
+    @Override
+    public Stream<T> fetchFromProvider(int offset, int limit) {
+        return fetchDataProviderChildren(null, Range.withLength(offset, limit));
+    }
+
     @SuppressWarnings("unchecked")
     private Stream<T> fetchDataProviderChildren(T parent, Range range) {
+        // HierarchicalQuery<T, Object> query = new HierarchicalQuery<>(
+        // range.getStart(), range.length(), getBackEndSorting(),
+        // getInMemorySorting(), getFilter(), expandedItemIds, parent);
         HierarchicalQuery<T, Object> query = new HierarchicalQuery<>(
                 range.getStart(), range.length(), getBackEndSorting(),
-                getInMemorySorting(), getFilter(), expandedItemIds, parent);
+                getInMemorySorting(), getFilter(), parent);
 
         return ((HierarchicalDataProvider<T, Object>) getDataProvider())
                 .fetchChildren(query);
@@ -429,8 +444,10 @@ public class TreeGridDataCommunicator<T> extends DataCommunicator<T> {
 
     @SuppressWarnings("unchecked")
     private int getDataProviderChildCount(T parent) {
+        // HierarchicalQuery<T, Object> query = new HierarchicalQuery<>(
+        // getFilter(), expandedItemIds, parent);
         HierarchicalQuery<T, Object> query = new HierarchicalQuery<>(
-                getFilter(), expandedItemIds, parent);
+                getFilter(), parent);
 
         return ((HierarchicalDataProvider<T, Object>) getDataProvider())
                 .getChildCount(query);

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.component.treegrid;
+package com.vaadin.flow.provider.hierarchy;
 
-record FlatIndexContext<T>(Cache<T> cache, int index) {
+record ItemContext<T>(Object id, Cache<T> cache, int index) {
 }
