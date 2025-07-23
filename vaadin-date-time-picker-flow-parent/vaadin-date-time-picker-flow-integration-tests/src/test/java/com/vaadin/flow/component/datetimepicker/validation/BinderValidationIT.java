@@ -285,11 +285,11 @@ public class BinderValidationIT
 
     private void setValue(String dateValue, String timeValue) {
         setInputValue(dateInput, dateValue);
-        dateInput.sendKeys(Keys.TAB);
         setInputValue(timeInput, timeValue);
     }
 
     private void setInputValue(TestBenchElement input, String value) {
+        input.focus();
         input.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
         input.sendKeys(value, Keys.ENTER);
     }
