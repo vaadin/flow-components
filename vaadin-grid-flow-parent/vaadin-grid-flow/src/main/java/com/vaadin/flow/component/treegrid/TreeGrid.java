@@ -55,6 +55,7 @@ import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonObject;
@@ -217,7 +218,8 @@ public class TreeGrid<T> extends Grid<T>
                 GridArrayUpdater arrayUpdater,
                 SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
 
-            return new TreeGridDataCommunicator<>(dataGenerator, arrayUpdater,
+            return new HierarchicalDataCommunicator<>(dataGenerator,
+                    arrayUpdater,
                     data -> element.callJsFunction("$connector.updateFlatData",
                             data),
                     element.getNode(), uniqueKeyProviderSupplier);
@@ -935,8 +937,8 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     @Override
-    public TreeGridDataCommunicator<T> getDataCommunicator() {
-        return (TreeGridDataCommunicator<T>) super.getDataCommunicator();
+    public HierarchicalDataCommunicator<T> getDataCommunicator() {
+        return (HierarchicalDataCommunicator<T>) super.getDataCommunicator();
     }
 
     @SuppressWarnings("unchecked")
