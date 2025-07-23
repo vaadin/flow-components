@@ -194,11 +194,10 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
         // +1 = forward
         // -1 = backward
         var direction = Math.signum(length);
-        var absLength = Math.abs(length);
 
         List<T> result = new ArrayList<>();
 
-        while (result.size() < absLength) {
+        while (result.size() < Math.abs(length)) {
             var context = rootCache.getFlatIndexContext(start);
             if (context == null) {
                 break;
@@ -207,7 +206,7 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
             var index = context.index();
 
             if (!cache.hasItem(index)) {
-                var remainingLength = absLength - result.size();
+                var remainingLength = Math.abs(length) - result.size();
 
                 var range = direction > 0
                         ? Range.between(index, index + remainingLength)
