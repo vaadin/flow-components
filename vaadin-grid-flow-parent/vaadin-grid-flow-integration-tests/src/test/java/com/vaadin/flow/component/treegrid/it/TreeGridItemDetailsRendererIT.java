@@ -41,7 +41,6 @@ public class TreeGridItemDetailsRendererIT extends AbstractTreeGridIT {
     @Test
     public void treegridItemDetails_openDetailsInDifferentLevels() {
         getTreeGrid().expandWithClick(1);
-        waitUntil(test -> getTreeGrid().getNumberOfExpandedRows() == 2);
 
         getTreeGrid().getCell(1, 0).click();
         Assert.assertTrue(getTreeGrid().isDetailsOpen(1));
@@ -61,7 +60,6 @@ public class TreeGridItemDetailsRendererIT extends AbstractTreeGridIT {
     @Test
     public void treegridItemDetails_collapseRoot_rememberOpenedDetails() {
         getTreeGrid().expandWithClick(1);
-        waitUntil(test -> getTreeGrid().getNumberOfExpandedRows() == 2);
 
         getTreeGrid().getCell(1, 0).click();
         Assert.assertTrue(getTreeGrid().isDetailsOpen(1));
@@ -74,7 +72,6 @@ public class TreeGridItemDetailsRendererIT extends AbstractTreeGridIT {
     @Test
     public void treegridItemDetails_collapseLevel1_rememberOpenedDetails() {
         getTreeGrid().expandWithClick(1);
-        waitUntil(test -> getTreeGrid().getNumberOfExpandedRows() == 2);
 
         getTreeGrid().getCell(2, 0).click();
         Assert.assertTrue(getTreeGrid().isDetailsOpen(2));
