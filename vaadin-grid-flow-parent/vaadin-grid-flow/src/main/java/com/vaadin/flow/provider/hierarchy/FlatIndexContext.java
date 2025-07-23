@@ -15,5 +15,7 @@
  */
 package com.vaadin.flow.provider.hierarchy;
 
-record FlatIndexContext<T>(Cache<T> cache, int index) {
+import java.io.Serializable;
+
+record FlatIndexContext<T>(Cache<T> cache, int index) implements Serializable {
 }
