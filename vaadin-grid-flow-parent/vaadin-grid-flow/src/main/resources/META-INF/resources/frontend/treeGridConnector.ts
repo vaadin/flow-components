@@ -19,6 +19,18 @@ window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
     Object.getPrototypeOf(this).__loadCachePage.call(this, cache, page);
   };
 
+  function getViewportRange() {
+    const renderedRows = grid._getRenderedRows();
+    return [
+      renderedRows[0]?.index ?? 0,
+      renderedRows[renderedRows.length - 1]?.index ?? 0
+    ];
+  }
+
+  function getViewportPageRange() {
+    return getViewportRange().map((index) => Math.floor(index / grid.pageSize));
+  }
+
   grid.scrollToIndex = async function (...indexes) {
     grid.__pendingScrollToIndexes = indexes;
 
@@ -26,11 +38,10 @@ window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
       return;
     }
 
-    const viewportRange = grid.$connector.getViewportRange();
-    const [startPage, endPage] = grid.$connector.getPageRange(viewportRange);
-    const viewportSize = (endPage - startPage + 1) * grid.pageSize;
+    const [startPage, endPage] = getViewportPageRange();
+    const viewportPageRangeSize = endPage - startPage + 1;
 
-    const flatIndex = await grid.$server.setRequestedRangeByIndexPath(indexes, viewportSize);
+    const flatIndex = await grid.$server.setRequestedRangeByIndexPath(indexes, viewportPageRangeSize * grid.pageSize);
 
     grid._scrollToFlatIndex(flatIndex);
 

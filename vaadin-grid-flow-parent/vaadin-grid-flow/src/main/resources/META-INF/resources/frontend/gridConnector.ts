@@ -156,18 +156,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     });
   };
 
-  grid.$connector.getViewportRange = function () {
-    const visibleRows = grid._getRenderedRows();
-    return [
-      visibleRows.length > 0 ? visibleRows[0].index : 0,
-      visibleRows.length > 0 ? visibleRows[visibleRows.length - 1].index : 0
-    ];
-  };
-
-  grid.$connector.getPageRange = function (range) {
-    return [Math.floor(range[0] / grid.pageSize), Math.floor(range[1] / grid.pageSize)];
-  };
-
   grid.$connector.fetchPage = function (fetch, page) {
     // Adjust the requested page to be within the valid range in case
     // the grid size has changed while fetchPage was debounced.
@@ -175,14 +163,18 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
     // Determine what to fetch based on scroll position and not only
     // what grid asked for
-    const viewportRange = grid.$connector.getViewportRange();
+    const visibleRows = grid._getRenderedRows();
+    let start = visibleRows.length > 0 ? visibleRows[0].index : 0;
+    let end = visibleRows.length > 0 ? visibleRows[visibleRows.length - 1].index : 0;
 
     // The buffer size could be multiplied by some constant defined by the user,
     // if he needs to reduce the number of items sent to the Grid to improve performance
     // or to increase it to make Grid smoother when scrolling
-    const buffer = viewportRange[1] - viewportRange[0];
-    viewportRange[0] = Math.max(viewportRange[0] - buffer, 0);
-    viewportRange[1] = Math.min(viewportRange[1] + buffer, grid._flatSize);
+    let buffer = end - start;
+    start = Math.max(0, start - buffer);
+    end = Math.min(end + buffer, grid._flatSize);
+
+    let pageRange = [Math.floor(start / grid.pageSize), Math.floor(end / grid.pageSize)];
 
     // When the viewport doesn't contain the requested page or it doesn't contain any items from
     // the requested level at all, it means that the scroll position has changed while fetchPage
@@ -191,8 +183,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // hanging. To avoid this, as a workaround, we reset the range to only include the requested page
     // to make sure all hanging requests are resolved. After that, the grid requests the first page
     // or whatever in the viewport again.
-    let pageRange = grid.$connector.getPageRange(viewportRange);
-    if (pageRange.some((p) => p === null) || page < pageRange[0] || page > pageRange[1]) {
+    if (page < pageRange[0] || page > pageRange[1]) {
       pageRange = [page, page];
     }
 
@@ -866,3 +857,4 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     return item?.selectable === undefined || item.selectable;
   };
 };
+
