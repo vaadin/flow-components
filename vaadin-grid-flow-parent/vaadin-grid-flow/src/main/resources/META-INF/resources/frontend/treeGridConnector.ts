@@ -43,13 +43,13 @@ window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
 
   grid.expandItem = function (item) {
     if (item !== undefined) {
-      grid.$server.toggleFromClient(grid.getItemId(item), true);
+      grid.$server.updateExpandedState(grid.getItemId(item), true);
     }
   };
 
   grid.collapseItem = function (item) {
     if (item !== undefined) {
-      grid.$server.toggleFromClient(grid.getItemId(item), false);
+      grid.$server.updateExpandedState(grid.getItemId(item), false);
     }
   };
 };

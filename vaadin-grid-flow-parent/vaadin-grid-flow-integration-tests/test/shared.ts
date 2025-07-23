@@ -34,7 +34,7 @@ export type GridServer = {
   setDetailsVisible: ((key: string) => void) & sinon.SinonSpy;
   updateExpandedState: ((key: string, expanded: boolean) => void) & sinon.SinonSpy;
   setViewportRange: ((firstIndex: number, size: number) => void) & sinon.SinonSpy;
-  toggleFromClient: ((key: string, expanded: boolean) => void) & sinon.SinonSpy;
+  updateExpandedState: ((key: string, expanded: boolean) => void) & sinon.SinonSpy;
   sortersChanged: ((sorters: { path: string, direction: string }[]) => void) & sinon.SinonSpy;
   setShiftKeyDown: ((shiftKeyDown: boolean) => void) & sinon.SinonSpy;
 };
@@ -100,7 +100,7 @@ export function init(grid: FlowGrid, gridConnector = Vaadin.Flow.gridConnector):
     setViewportRange: sinon.spy(),
     sortersChanged: sinon.spy(),
     setShiftKeyDown: sinon.spy(),
-    toggleFromClient: sinon.spy(),
+    updateExpandedState: sinon.spy(),
   };
 
   gridConnector.initLazy(grid);

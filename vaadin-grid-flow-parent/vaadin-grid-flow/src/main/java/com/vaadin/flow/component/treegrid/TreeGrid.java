@@ -518,8 +518,15 @@ public class TreeGrid<T> extends Grid<T>
                 .withProperty("name", value -> {
                     Object name = valueProvider.apply(value);
                     return name == null ? "" : String.valueOf(name);
-                }).withFunction("onClick",
-                        item -> toggleFromClient(item, !isExpanded(item))));
+                }).withFunction("onClick", item -> {
+                    if (getDataCommunicator().hasChildren(item)) {
+                        if (isExpanded(item)) {
+                            collapse(List.of(item), true);
+                        } else {
+                            expand(List.of(item), true);
+                        }
+                    }
+                }));
 
         final SerializableComparator<T> comparator = (a,
                 b) -> compareMaybeComparables(valueProvider.apply(a),
@@ -711,21 +718,12 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     @ClientCallable(DisabledUpdateMode.ONLY_WHEN_ENABLED)
-    private void toggleFromClient(String key, boolean expanded) {
+    private void updateExpandedState(String key, boolean expanded) {
         T item = getDataCommunicator().getKeyMapper().get(key);
         if (item != null) {
-            toggleFromClient(item, expanded);
-        }
-    }
-
-    private void toggleFromClient(T item, boolean expanded) {
-        if (expanded) {
-            if (getDataCommunicator().hasChildren(item)
-                    && !getDataCommunicator().isExpanded(item)) {
+            if (expanded) {
                 expand(Arrays.asList(item), true);
-            }
-        } else {
-            if (getDataCommunicator().isExpanded(item)) {
+            } else {
                 collapse(Arrays.asList(item), true);
             }
         }
@@ -1019,13 +1017,15 @@ public class TreeGrid<T> extends Grid<T>
     @ClientCallable
     private int setRequestedRangeByIndexPath(int[] path, int viewportSize) {
         // TODO: Should we expose preloadRange to separate concerns?
-        int flatIndex = getDataCommunicator().resolveIndexPath(path, viewportSize);
+        int flatIndex = getDataCommunicator().resolveIndexPath(path,
+                viewportSize);
 
         // TODO: Rewrite this in a more readable way
         int pageSize = getPageSize();
         int startPage = Math.max(0,
                 (int) Math.ceil((flatIndex - viewportSize) / (float) pageSize));
-        int endPage = (int) Math.floor((flatIndex + viewportSize) / (float) pageSize);
+        int endPage = (int) Math
+                .floor((flatIndex + viewportSize) / (float) pageSize);
         getDataCommunicator().setRequestedRange(startPage * pageSize,
                 endPage * pageSize);
 

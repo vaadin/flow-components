@@ -866,4 +866,3 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     return item?.selectable === undefined || item.selectable;
   };
 };
-
