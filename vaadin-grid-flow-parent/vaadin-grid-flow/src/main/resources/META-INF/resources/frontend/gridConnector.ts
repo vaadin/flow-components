@@ -407,8 +407,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     });
   };
 
-  grid._updateItem = function (row, item) {
-    Grid.prototype._updateItem.call(grid, row, item);
+  grid.__updateRow = function (row) {
+    Grid.prototype.__updateRow.call(grid, row);
 
     // There might be inactive component renderers on hidden rows that still refer to the
     // same component instance as one of the renderers on a visible row. Making the
