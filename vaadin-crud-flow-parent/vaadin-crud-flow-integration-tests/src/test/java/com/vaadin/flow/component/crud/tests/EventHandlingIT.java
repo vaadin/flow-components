@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.crud.tests;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -43,8 +42,8 @@ public class EventHandlingIT extends AbstractComponentIT {
     private void dismissConfirmDialog(CrudElement crud,
             ConfirmDialogType type) {
         final TestBenchElement confirmButton = crud
-                .$(ConfirmDialogElement.class).id(type.getId())
-                .getConfirmButton();
+                .$(ConfirmDialogElement.class)
+                .withAttribute("slot", type.getId()).first().getConfirmButton();
         confirmButton.click();
     }
 
@@ -246,7 +245,7 @@ public class EventHandlingIT extends AbstractComponentIT {
     private boolean isConfirmDialogOpen(CrudElement crud,
             ConfirmDialogType type) {
         ConfirmDialogElement confirmDialog = crud.$(ConfirmDialogElement.class)
-                .id(type.getId());
+                .withAttribute("slot", type.getId()).first();
         TestBenchElement overlay = ((TestBenchElement) confirmDialog
                 .getContext());
         return overlay.getPropertyBoolean("opened");
@@ -256,7 +255,7 @@ public class EventHandlingIT extends AbstractComponentIT {
         CANCEL, DELETE;
 
         private String getId() {
-            return "confirm" + StringUtils.capitalize(name().toLowerCase());
+            return "confirm-" + name().toLowerCase();
         }
     }
 }
