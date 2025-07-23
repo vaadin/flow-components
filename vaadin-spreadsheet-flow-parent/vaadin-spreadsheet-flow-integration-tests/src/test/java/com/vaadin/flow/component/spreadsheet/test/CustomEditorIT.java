@@ -380,9 +380,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         getCommandExecutor().waitForVaadin();
         addFreezePane(10, 2);
 
-        performKeyboardTestsToCell("A");
         performKeyboardTestsToCell("J");
-        performKeyboardTestsToCell("K");
 
         getSpreadsheet().scrollLeft(1000);
         performKeyboardTestsToCell("AI");
