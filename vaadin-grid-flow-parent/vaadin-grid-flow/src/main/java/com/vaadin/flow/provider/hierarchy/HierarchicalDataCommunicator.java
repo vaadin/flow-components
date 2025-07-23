@@ -136,14 +136,14 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
         // NO-OP
     }
 
-    public int preloadPath(int... path) {
-        return preloadPath(path, 0);
+    public int resolveIndexPath(int... path) {
+        return resolveIndexPath(path, 0);
     }
 
-    public int preloadPath(int[] path, int buffer) {
+    public int resolveIndexPath(int[] path, int buffer) {
         var rootCache = ensureRootCache();
 
-        preloadPath(rootCache, path);
+        preloadIndexPath(rootCache, path);
 
         if (buffer > 0) {
             preloadRange(rootCache.getFlatIndexByPath(path), -buffer);
@@ -155,7 +155,7 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
         return rootCache.getFlatIndexByPath(path);
     }
 
-    private void preloadPath(Cache<T> cache, int... path) {
+    private void preloadIndexPath(Cache<T> cache, int... path) {
         var index = path[0];
 
         if (index < 0) {
@@ -183,7 +183,7 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
             var subCache = cache.getCache(index);
             var restPath = Arrays.copyOfRange(path, 1, path.length);
             if (restPath.length > 0) {
-                preloadPath(subCache, restPath);
+                preloadIndexPath(subCache, restPath);
             }
         }
     }
