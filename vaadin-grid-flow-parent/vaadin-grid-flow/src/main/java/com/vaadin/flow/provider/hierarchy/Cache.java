@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.provider.hierarchy;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ import java.util.TreeMap;
 
 import com.vaadin.flow.function.SerializablePredicate;
 
-class Cache<T> {
+class Cache<T> implements Serializable {
     private final RootCache<T> rootCache;
     private final Cache<T> parentCache;
     private final int parentIndex;
