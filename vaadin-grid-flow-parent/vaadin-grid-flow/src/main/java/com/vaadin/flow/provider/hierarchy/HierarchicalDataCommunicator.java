@@ -38,6 +38,7 @@ import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.internal.ExecutionContext;
 import com.vaadin.flow.internal.Range;
 import com.vaadin.flow.internal.StateNode;
 
@@ -48,10 +49,12 @@ import elemental.json.JsonValue;
 
 public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
     private final Set<Object> expandedItemIds = new HashSet<>();
+    private final StateNode stateNode;
     private final ArrayUpdater arrayUpdater;
     private final DataGenerator<T> dataGenerator;
 
     private RootCache<T> rootCache;
+    private boolean pendingFlush = false;
     private Range viewportRange;
     private int nextUpdateId = 0;
 
@@ -60,6 +63,7 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
             SerializableConsumer<JsonArray> dataUpdater, StateNode stateNode,
             SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
         super(dataGenerator, arrayUpdater, dataUpdater, stateNode, false);
+        this.stateNode = stateNode;
         this.arrayUpdater = arrayUpdater;
         this.dataGenerator = dataGenerator;
 
@@ -68,11 +72,26 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
 
         setDataProvider(new TreeDataProvider<>(new TreeData<>()), null);
 
-        stateNode.addAttachListener(this::requestFlush);
+        stateNode.addAttachListener(this::onAttach);
+        stateNode.addDetachListener(this::onDetach);
+    }
+
+    private void onAttach() {
+        requestFlush();
+    }
+
+    private void onDetach() {
+
     }
 
     private void requestFlush() {
+        if (pendingFlush) {
+            return;
+        }
 
+        pendingFlush = true;
+        stateNode.runWhenAttached(ui -> ui.getInternals().getStateTree()
+                .beforeClientResponse(stateNode, this::flush));
     }
 
     /** @see DataCommunicator#reset() */
@@ -100,7 +119,6 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
             if (itemContext != null) {
                 itemContext.cache().refreshItem(item);
             }
-
             requestFlush();
         }
     }
@@ -227,9 +245,12 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
         return result;
     }
 
-    /** @see DataCommunicator#flush() */
-    @Override
-    protected void flush() {
+    private void flush(ExecutionContext context) {
+        if (!context.isClientSideInitialized()) {
+            reset();
+            arrayUpdater.initialize();
+        }
+
         var rootCache = ensureRootCache();
 
         if (viewportRange.getStart() >= rootCache.getFlatSize()) {
@@ -251,6 +272,8 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
         update.clear(end, flatSize - end);
         update.set(start, result.stream().map(this::generateItemJson).toList());
         update.commit(nextUpdateId++);
+
+        pendingFlush = false;
     }
 
     public boolean isFlatHierarchy() {
