@@ -17,5 +17,6 @@ package com.vaadin.flow.provider.hierarchy;
 
 import java.io.Serializable;
 
-record ItemContext<T>(Object id, Cache<T> cache, int index) implements Serializable {
+record ItemContext<T>(Object id, Cache<T> cache,
+        int index) implements Serializable {
 }
