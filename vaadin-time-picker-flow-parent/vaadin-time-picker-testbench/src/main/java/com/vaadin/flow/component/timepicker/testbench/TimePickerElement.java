@@ -36,44 +36,6 @@ import com.vaadin.testbench.elementsbase.Element;
 public class TimePickerElement extends TestBenchElement
         implements HasStringValueProperty, HasSelectByText, HasHelper,
         HasClearButton, HasValidation {
-
-    /**
-     * A TestBench element representing
-     * <code>&lt;vaadin-time-picker-overlay&gt;</code> element that contains the
-     * items for the <code>&lt;vaadin-time-picker&gt;</code> element when the
-     * drop down has been opened with {@link #openDropDown()}.
-     */
-    @Element("vaadin-time-picker-overlay")
-    public static class TimePickerOverlayElement extends TestBenchElement {
-
-        /**
-         * Gets the item at the given index from the opened drop down for the
-         * <code>&lt;vaadin-time-picker&gt;</code> element.
-         *
-         * @param index
-         *            the index of the item
-         * @return the item element
-         */
-        public TestBenchElement getItem(int index) {
-            return $("vaadin-time-picker-item").all().stream()
-                    .filter(item -> index == item.getPropertyInteger("index"))
-                    .findFirst().get();
-        }
-
-        /**
-         * Gets the last item from the opened drop down for the
-         * <code>&lt;vaadin-time-picker&gt;</code> element.
-         *
-         * @return the last item element
-         */
-        public TestBenchElement getLastItem() {
-            return $("vaadin-time-picker-item").all().stream()
-                    .max((a, b) -> a.getPropertyInteger("index")
-                            - b.getPropertyInteger("index"))
-                    .get();
-        }
-    }
-
     /**
      * Gets the <code>&lt;input&gt;</code> element inside the
      * <code>&lt;vaadin-time-picker&gt;</code> element.
@@ -92,6 +54,37 @@ public class TimePickerElement extends TestBenchElement
     }
 
     /**
+     * Gets the item at the given index from the drop down.
+     * <p>
+     * <em>NOTE:</em> the time picker drop down should be opened with
+     * {@link #openDropDown()} first.
+     *
+     * @param index
+     *            the index of the item
+     * @return the item element
+     */
+    public TestBenchElement getItem(int index) {
+        return $("vaadin-time-picker-item").all().stream()
+                .filter(item -> index == item.getPropertyInteger("index"))
+                .findFirst().get();
+    }
+
+    /**
+     * Gets the last item inside the drop down.
+     * <p>
+     * <em>NOTE:</em> the time picker drop down should be opened with
+     * {@link #openDropDown()} first.
+     *
+     * @return the last item element
+     */
+    public TestBenchElement getLastItem() {
+        return $("vaadin-time-picker-item").all().stream()
+                .max((a, b) -> a.getPropertyInteger("index")
+                        - b.getPropertyInteger("index"))
+                .get();
+    }
+
+    /**
      * Gets the text content for the item inside the drop down with the given
      * index.
      * <p>
@@ -103,8 +96,7 @@ public class TimePickerElement extends TestBenchElement
      * @return the text content for the item
      */
     public String getItemText(int index) {
-        return $(TimePickerOverlayElement.class).onPage().first().getItem(index)
-                .getText();
+        return getItem(index).getText();
     }
 
     /**
@@ -116,8 +108,7 @@ public class TimePickerElement extends TestBenchElement
      * @return the text content for the last item
      */
     public String getLastItemText() {
-        return $(TimePickerOverlayElement.class).onPage().first().getLastItem()
-                .getText();
+        return getLastItem().getText();
     }
 
     /**
@@ -137,11 +128,6 @@ public class TimePickerElement extends TestBenchElement
      */
     public void openDropDown() {
         callFunction("open");
-        waitUntilDropDownOpen();
-    }
-
-    public void waitUntilDropDownOpen() {
-        $(TimePickerOverlayElement.class).onPage().waitForFirst();
     }
 
     /**
@@ -151,9 +137,6 @@ public class TimePickerElement extends TestBenchElement
         executeScript(
                 "const cb = arguments[0]; window.requestAnimationFrame(function(){ cb.close(); });",
                 this);
-        waitUntil(input -> input
-                .findElements(By.tagName("vaadin-time-picker-overlay"))
-                .isEmpty());
     }
 
     /**
@@ -181,8 +164,7 @@ public class TimePickerElement extends TestBenchElement
         openDropDown();
         scrollToItem(index);
 
-        TestBenchElement item = $(TimePickerOverlayElement.class).onPage()
-                .first().getItem(index);
+        TestBenchElement item = getItem(index);
         item.click();
     }
 
