@@ -355,6 +355,35 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
     }
 
     @Test
+    public void customEditorsInSheet_editingAndMovingToAnotherSheetAllowed() {
+        createNewSpreadsheet();
+        loadTestFixture(TestFixtures.CustomEditorRow);
+        selectCell("A2");
+        var editor = getInputInCustomEditorFromCell("A2");
+        editor.get().sendKeys("A2", Keys.ENTER);
+
+        getSpreadsheet().addSheet();
+        Assert.assertEquals("Should be at sheet Sheet2", "Sheet2",
+                getSelectedSheetName());
+
+        getSpreadsheet().selectSheet("Sheet1");
+        Assert.assertEquals("Should be at sheet Sheet1", "Sheet1",
+                getSelectedSheetName());
+        clickToggleCellVisibleButton();
+
+        selectCell("B2");
+        editor = getInputInCustomEditorFromCell("B2");
+        editor.get().sendKeys("B2", Keys.ENTER);
+
+        getSpreadsheet().selectSheet("Sheet2");
+        getCommandExecutor().waitForVaadin();
+
+        Assert.assertEquals("Should be at sheet Sheet2", "Sheet2",
+                getSelectedSheetName());
+
+    }
+
+    @Test
     public void customEditorInFrozenCells_persistsValueOnVariousKeyActions()
             throws Exception {
         createNewSpreadsheet();
