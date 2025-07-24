@@ -13,9 +13,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   }
 
   const dataProviderController = grid._dataProviderController;
-  dataProviderController.isLoading = function () {
-    return grid.$connector.hasRootRequestQueue() || Object.getPrototypeOf(this).isLoading.call(this);
-  };
 
   let cache = {};
 
