@@ -18,7 +18,6 @@ package com.vaadin.flow.component.login.tests;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.html.testbench.NativeButtonElement;
@@ -28,8 +27,6 @@ import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-login/overlay-class-name")
 public class OverlayClassNameIT extends AbstractComponentIT {
-
-    private static final String LOGIN_OVERLAY_WRAPPER_TAG = "vaadin-login-overlay-wrapper";
 
     private NativeButtonElement openOverlay;
     private NativeButtonElement closeOverlay;
@@ -48,7 +45,6 @@ public class OverlayClassNameIT extends AbstractComponentIT {
     @Test
     public void openLoginOverlay_overlayWrapperHasSameClassNames() {
         openOverlay.click();
-        waitForElementPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
 
         LoginOverlayElement overlay = $(LoginOverlayElement.class).first();
         assertClassAttribute(overlay, "custom");
@@ -57,7 +53,6 @@ public class OverlayClassNameIT extends AbstractComponentIT {
     @Test
     public void openLoginOverlay_overlayWrapperChangeClassName() {
         openOverlay.click();
-        waitForElementPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
 
         addClassName.click();
 
@@ -68,7 +63,6 @@ public class OverlayClassNameIT extends AbstractComponentIT {
     @Test
     public void openLoginOverlay_overlayWrapperNoClassNameAfterClearClassName() {
         openOverlay.click();
-        waitForElementPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
 
         clearClassNames.click();
 
@@ -79,16 +73,13 @@ public class OverlayClassNameIT extends AbstractComponentIT {
     @Test
     public void openLoginOverlay_overlayWrapperChangedClassNameAfterSecondOpening() {
         openOverlay.click();
-        waitForElementPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
 
         clearClassNames.click();
         addClassName.click();
 
         closeOverlay.click();
-        waitForElementNotPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
 
         openOverlay.click();
-        waitForElementPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
 
         LoginOverlayElement overlay = $(LoginOverlayElement.class).first();
         assertClassAttribute(overlay, "added");

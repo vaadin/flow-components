@@ -64,8 +64,8 @@ public class LoginFormElement extends TestBenchElement implements Login {
 
     @Override
     public String getFormTitle() {
-        return getFormWrapper().$(TestBenchElement.class)
-                .withAttribute("part", "form-title").first().getText();
+        return $(TestBenchElement.class).withAttribute("part", "form-title")
+                .first().getText();
     }
 
     @Override
