@@ -32,13 +32,14 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.data.provider.*;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.tests.dataprovider.MockUI;
 
 public class AbstractGridMultiSelectionModelTest {
 
     private Set<String> selected;
     private Set<String> deselected;
     private Grid<String> grid;
-    private DataCommunicatorTest.MockUI ui;
+    private MockUI ui;
 
     @Before
     public void setup() {
@@ -62,7 +63,7 @@ public class AbstractGridMultiSelectionModelTest {
             }
         };
 
-        ui = new DataCommunicatorTest.MockUI();
+        ui = new MockUI();
         ui.add(grid);
     }
 
