@@ -36,7 +36,7 @@ export function useLocalWebComponents(webComponentsRepoPath: string): PluginOpti
       };
     },
     resolveId(id: string) {
-      if (/^(@vaadin)/.test(id)) {
+      if (id.startsWith('@vaadin')) {
         return this.resolve(path.join(nodeModulesPath, id));
       }
     }
