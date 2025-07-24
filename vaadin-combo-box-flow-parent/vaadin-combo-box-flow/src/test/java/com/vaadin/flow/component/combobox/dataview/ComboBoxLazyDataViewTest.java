@@ -35,10 +35,10 @@ import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.tests.dataprovider.MockUI;
 
 import elemental.json.JsonValue;
 
@@ -53,7 +53,7 @@ public class ComboBoxLazyDataViewTest {
     private String[] items = { "foo", "bar", "baz" };
     private ComboBoxLazyDataView<String> dataView;
     private ComboBox<String> comboBox;
-    private DataCommunicatorTest.MockUI ui;
+    private MockUI ui;
     private DataCommunicator<String> dataCommunicator;
     private ArrayUpdater arrayUpdater;
     private SerializableConsumer<DataCommunicator.Filter<String>> filterSlot;
@@ -87,7 +87,7 @@ public class ComboBoxLazyDataViewTest {
                         .count());
 
         comboBox = new ComboBox<>();
-        ui = new DataCommunicatorTest.MockUI();
+        ui = new MockUI();
         ui.add(comboBox);
 
         ArrayUpdater.Update update = new ArrayUpdater.Update() {

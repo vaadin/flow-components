@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.data.provider.AbstractComponentDataViewTest;
 import com.vaadin.flow.data.provider.AbstractDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderListener;
@@ -38,6 +37,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.tests.dataprovider.AbstractComponentDataViewTest;
 
 public class SelectDataViewTest extends AbstractComponentDataViewTest {
 
