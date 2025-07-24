@@ -21,11 +21,14 @@ import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.login.testbench.LoginFormElement;
+import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-login")
-public class LoginFormIT extends AbstractLoginIT {
+public class LoginFormIT extends AbstractComponentIT {
 
     @Before
     public void init() {
@@ -46,9 +49,19 @@ public class LoginFormIT extends AbstractLoginIT {
     @Test
     public void testDefaults() {
         LoginFormElement login = getLoginForm();
-        checkLoginFormDefaults(login);
-        checkLoginForm(login.getUsernameField(), login.getPasswordField(),
-                login.getSubmitButton());
+
+        Assert.assertEquals("Log in", login.getFormTitle());
+        Assert.assertEquals("", login.getErrorMessageTitle());
+        Assert.assertEquals("", login.getErrorMessage());
+        Assert.assertEquals("Forgot password",
+                login.getForgotPasswordButton().getText().trim());
+        Assert.assertFalse(
+                login.getForgotPasswordButton().hasAttribute("hidden"));
+        Assert.assertEquals("", login.getAdditionalInformation());
+
+        Assert.assertEquals("Username", login.getUsernameField().getLabel());
+        Assert.assertEquals("Password", login.getPasswordField().getLabel());
+        Assert.assertEquals("Log in", login.getSubmitButton().getText().trim());
     }
 
     @Test
@@ -154,5 +167,13 @@ public class LoginFormIT extends AbstractLoginIT {
         LoginFormElement login = getLoginForm();
         Assert.assertTrue(
                 login.getForgotPasswordButton().hasAttribute("hidden"));
+    }
+
+    protected void checkSuccessfulLogin(TextFieldElement usernameField,
+            PasswordFieldElement passwordField, Runnable submit) {
+        usernameField.setValue("username");
+        passwordField.setValue("password");
+        submit.run();
+        Assert.assertEquals("Successful login", $("div").id("info").getText());
     }
 }
