@@ -26,9 +26,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.tests.DataProviderListenersTest;
+import com.vaadin.tests.dataprovider.DataProviderListenersTest;
+import com.vaadin.tests.dataprovider.MockUI;
 
 public class GridTest {
 
@@ -88,8 +88,7 @@ public class GridTest {
     public void dataProviderListeners_gridAttachedAndDetached_oldDataProviderListenerRemoved() {
         DataProviderListenersTest
                 .checkOldListenersRemovedOnComponentAttachAndDetach(
-                        new Grid<>(), 2, 2, new int[] { 0, 2 },
-                        new DataCommunicatorTest.MockUI());
+                        new Grid<>(), 2, 2, new int[] { 0, 2 }, new MockUI());
     }
 
     @Test
