@@ -24,14 +24,14 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.tests.dataprovider.MockUI;
 
 public class GridLazyDataViewTest {
 
     private GridLazyDataView<String> dataView;
     private Grid<String> grid;
-    private DataCommunicatorTest.MockUI ui;
+    private MockUI ui;
 
     @Before
     public void setup() {
@@ -43,7 +43,7 @@ public class GridLazyDataViewTest {
                 }, query -> 3);
 
         grid = new Grid<>();
-        ui = new DataCommunicatorTest.MockUI();
+        ui = new MockUI();
         ui.add(grid);
 
         dataView = grid.setItems(dataProvider);
