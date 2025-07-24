@@ -398,8 +398,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         // Test Esc with arrow keys persistence on cell
         editor.sendKeys("EscWithArrowKeys", Keys.ESCAPE, Keys.ARROW_DOWN);
         getCommandExecutor().waitForVaadin();
-        selectCell(cellAddress);
-        // clickCell(cellAddress);
+        clickCell(cellAddress);
         Assert.assertEquals(
                 "Value in cell '" + cellAddress + "' after ESC+ARROW_DOWN",
                 "EscWithArrowKeys", getFormulaFieldValue());
