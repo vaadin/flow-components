@@ -172,7 +172,8 @@ public class CrudElement extends TestBenchElement {
      * @return the confirm cancel dialog
      */
     public ConfirmDialogElement getConfirmCancelDialog() {
-        return this.$(ConfirmDialogElement.class).id("confirmCancel");
+        return $(ConfirmDialogElement.class)
+                .withAttribute("slot", "confirm-cancel").first();
     }
 
     /**
@@ -181,6 +182,7 @@ public class CrudElement extends TestBenchElement {
      * @return the confirm delete dialog
      */
     public ConfirmDialogElement getConfirmDeleteDialog() {
-        return this.$(ConfirmDialogElement.class).id("confirmDelete");
+        return $(ConfirmDialogElement.class)
+                .withAttribute("slot", "confirm-delete").first();
     }
 }

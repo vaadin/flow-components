@@ -20,14 +20,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.treegrid.TreeGrid;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import com.vaadin.tests.dataprovider.MockUI;
 
 public class TreeGridTest {
 
-    private DataCommunicatorTest.MockUI ui;
+    private MockUI ui;
     private TreeGrid<Item> treeGrid;
 
     @Before
@@ -42,7 +42,7 @@ public class TreeGridTest {
                 treeData);
         treeGrid.setDataProvider(treeDataProvider);
 
-        ui = new DataCommunicatorTest.MockUI();
+        ui = new MockUI();
         ui.add(treeGrid);
     }
 

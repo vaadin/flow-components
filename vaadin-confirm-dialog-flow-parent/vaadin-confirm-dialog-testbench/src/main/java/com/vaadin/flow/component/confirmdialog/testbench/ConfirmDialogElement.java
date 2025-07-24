@@ -15,19 +15,11 @@
  */
 package com.vaadin.flow.component.confirmdialog.testbench;
 
-import org.openqa.selenium.SearchContext;
-
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 @Element("vaadin-confirm-dialog")
 public class ConfirmDialogElement extends TestBenchElement {
-
-    @Override
-    public SearchContext getContext() {
-        return getPropertyElement("$", "dialog", "$", "overlay");
-    }
-
     public TestBenchElement getConfirmButton() {
         return getPropertyElement("_confirmButton");
     }

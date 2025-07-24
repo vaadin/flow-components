@@ -25,13 +25,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelect;
+import com.vaadin.tests.dataprovider.MockUI;
 
 public class AbstractGridMultiSelectionModelSelectedItemsTest {
 
-    private DataCommunicatorTest.MockUI ui;
+    private MockUI ui;
     private Grid<String> grid;
     private String item1;
     private String item2;
@@ -65,7 +65,7 @@ public class AbstractGridMultiSelectionModelSelectedItemsTest {
         selectionModel = ((AbstractGridMultiSelectionModel<String>) grid
                 .getSelectionModel());
 
-        ui = new DataCommunicatorTest.MockUI();
+        ui = new MockUI();
         ui.add(grid);
     }
 
