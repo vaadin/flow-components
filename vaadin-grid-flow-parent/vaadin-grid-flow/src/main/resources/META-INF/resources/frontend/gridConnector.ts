@@ -396,9 +396,10 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       const updatedItems = updateGridCache(page);
       if (updatedItems) {
         itemsUpdated(updatedItems);
-        updateGridItemsInDomBasedOnCache(updatedItems);
       }
     }
+
+    grid.requestContentUpdate();
   };
 
   const itemToCacheLocation = function (item) {
