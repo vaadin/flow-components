@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
+import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -106,21 +107,43 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
         requestFlush();
     }
 
-    /** @see DataCommunicator#refresh(T) */
+    /** @see DataCommunicator#handleDataRefreshEvent() */
+    @Override
+    protected void handleDataRefreshEvent(
+            DataChangeEvent.DataRefreshEvent<T> event) {
+        refresh(event.getItem(), event.isRefreshChildren());
+    }
+
+    /** @see DataCommunicator#refresh() */
     @Override
     public void refresh(T item) {
+        refresh(item, false);
+    }
+
+    private void refresh(T item, boolean refreshChildren) {
         Objects.requireNonNull(item, "Item cannot be null");
 
         getKeyMapper().refresh(item);
         dataGenerator.refreshData(item);
 
-        if (rootCache != null) {
-            var itemContext = rootCache.getItemContext(item);
-            if (itemContext != null) {
-                itemContext.cache().refreshItem(item);
-            }
-            requestFlush();
+        if (rootCache == null) {
+            return;
         }
+
+        var itemContext = rootCache.getItemContext(item);
+        if (itemContext == null) {
+            return;
+        }
+
+        var cache = itemContext.cache();
+        cache.refreshItem(item);
+
+        if (refreshChildren) {
+            cache.clear();
+            cache.setSize(getDataProviderChildCount(item));
+        }
+
+        requestFlush();
     }
 
     /** @see DataCommunicator#setRequestedRange(int, int) */

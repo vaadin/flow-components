@@ -28,7 +28,7 @@ class Cache<T> implements Serializable {
     private final RootCache<T> rootCache;
     private final Cache<T> parentCache;
     private final int parentIndex;
-    private final int size;
+    private int size;
 
     final Map<Object, T> itemIdToItem = new HashMap<>();
     final SortedMap<Integer, Object> indexToItemId = new TreeMap<>();
@@ -48,6 +48,10 @@ class Cache<T> implements Serializable {
 
     public int getDepth() {
         return parentCache != null ? parentCache.getDepth() + 1 : 0;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
 
     public int getSize() {
