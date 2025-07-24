@@ -149,7 +149,7 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
     /** @see DataCommunicator#setRequestedRange(int, int) */
     @Override
     public void setRequestedRange(int start, int length) {
-        viewportRange = Range.withLength(start, length);
+        viewportRange = computeRequestedRange(start, length);
         requestFlush();
     }
 
@@ -159,26 +159,13 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
         // NO-OP
     }
 
-    public int resolveIndexPath(int... path) {
-        return resolveIndexPath(path, 0);
-    }
-
-    public int resolveIndexPath(int[] path, int buffer) {
+    protected int resolveIndexPath(int... path) {
         var rootCache = ensureRootCache();
-
-        preloadIndexPath(rootCache, path);
-
-        if (buffer > 0) {
-            preloadRange(rootCache.getFlatIndexByPath(path), -buffer);
-            preloadRange(rootCache.getFlatIndexByPath(path), +buffer);
-        }
-
-        requestFlush();
-
+        resolveIndexPath(rootCache, path);
         return rootCache.getFlatIndexByPath(path);
     }
 
-    private void preloadIndexPath(Cache<T> cache, int... path) {
+    private void resolveIndexPath(Cache<T> cache, int... path) {
         var index = path[0];
 
         if (index < 0) {
@@ -201,17 +188,18 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
         if (isExpanded(item)) {
             if (!cache.hasCache(index)) {
                 cache.createCache(index, getDataProviderChildCount(item));
+                requestFlush();
             }
 
             var subCache = cache.getCache(index);
             var restPath = Arrays.copyOfRange(path, 1, path.length);
             if (restPath.length > 0) {
-                preloadIndexPath(subCache, restPath);
+                resolveIndexPath(subCache, restPath);
             }
         }
     }
 
-    private List<T> preloadRange(int start, int length) {
+    protected List<T> preloadRange(int start, int length) {
         var rootCache = ensureRootCache();
 
         // +1 = forward

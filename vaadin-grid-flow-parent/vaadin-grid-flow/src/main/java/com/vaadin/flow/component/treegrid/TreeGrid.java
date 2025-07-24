@@ -36,6 +36,7 @@ import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.data.binder.PropertyDefinition;
+import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
@@ -52,12 +53,15 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableComparator;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.internal.StateNode;
 import com.vaadin.flow.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.shared.Registration;
 
+import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 /**
@@ -218,6 +222,26 @@ public class TreeGrid<T> extends Grid<T>
         setDataProvider(dataProvider);
     }
 
+    private static class TreeGridDataCommunicator<T>
+            extends HierarchicalDataCommunicator<T> {
+        public TreeGridDataCommunicator(CompositeDataGenerator<T> dataGenerator,
+                ArrayUpdater arrayUpdater,
+                SerializableConsumer<JsonArray> dataUpdater,
+                StateNode stateNode,
+                SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
+            super(dataGenerator, arrayUpdater, dataUpdater, stateNode,
+                    uniqueKeyProviderSupplier);
+        }
+
+        protected List<T> preloadRange(int start, int length) {
+            return super.preloadRange(start, length);
+        }
+
+        protected int resolveIndexPath(int... path) {
+            return super.resolveIndexPath(path);
+        }
+    }
+
     private static class TreeDataCommunicatorBuilder<T>
             extends DataCommunicatorBuilder<T, GridArrayUpdater> {
 
@@ -227,8 +251,7 @@ public class TreeGrid<T> extends Grid<T>
                 GridArrayUpdater arrayUpdater,
                 SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
 
-            return new HierarchicalDataCommunicator<>(dataGenerator,
-                    arrayUpdater,
+            return new TreeGridDataCommunicator<>(dataGenerator, arrayUpdater,
                     data -> element.callJsFunction("$connector.updateFlatData",
                             data),
                     element.getNode(), uniqueKeyProviderSupplier);
@@ -1013,19 +1036,32 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     @ClientCallable
-    private int setRequestedRangeByIndexPath(int[] path, int viewportSize) {
-        // TODO: Should we expose preloadRange to separate concerns?
-        int flatIndex = getDataCommunicator().resolveIndexPath(path,
-                viewportSize);
-
-        // TODO: Rewrite this in a more readable way
+    private int setRequestedRangeByIndexPath(int[] path, int buffer) {
+        // TODO: Add a check to throw an exception if buffer size is too large
+        var dataCommunicator = (TreeGridDataCommunicator<T>) getDataCommunicator();
         int pageSize = getPageSize();
-        int startPage = Math.max(0,
-                (int) Math.ceil((flatIndex - viewportSize) / (float) pageSize));
-        int endPage = (int) Math
-                .floor((flatIndex + viewportSize) / (float) pageSize);
+
+        // Resolve the flat index from the given index path
+        int flatIndex = dataCommunicator.resolveIndexPath(path);
+
+        // Preload items around the resolved flat index. It adds page size
+        // to the buffer to guarantee that the preloaded range is never
+        // smaller than the requested range once that one is aligned to
+        // the page size, thus avoiding extra requests that could
+        // shift the viewport.
+        dataCommunicator.preloadRange(flatIndex, -(buffer + pageSize));
+        flatIndex = dataCommunicator.resolveIndexPath(path);
+
+        dataCommunicator.preloadRange(flatIndex, +(buffer + pageSize));
+        flatIndex = dataCommunicator.resolveIndexPath(path);
+
+        // Calculate the viewport range based on the flat index and buffer size,
+        // aligning the range with page size.
+        int startPage = Math.max(0, (flatIndex - buffer) / pageSize);
+        int endPage = (flatIndex + buffer) / pageSize;
+
         getDataCommunicator().setRequestedRange(startPage * pageSize,
-                endPage * pageSize);
+                (endPage - startPage + 1) * pageSize);
 
         return flatIndex;
     }
