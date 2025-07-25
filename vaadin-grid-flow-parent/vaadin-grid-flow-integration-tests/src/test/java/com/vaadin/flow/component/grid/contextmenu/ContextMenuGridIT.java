@@ -232,7 +232,6 @@ public class ContextMenuGridIT extends AbstractComponentIT {
 
         grid.getCell(0, 0).contextClick();
 
-
         getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         Assert.assertFalse(isElementPresent(By.tagName(OVERLAY_TAG)));
     }
