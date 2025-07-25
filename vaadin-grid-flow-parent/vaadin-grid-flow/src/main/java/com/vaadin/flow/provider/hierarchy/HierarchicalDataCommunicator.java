@@ -136,11 +136,13 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
         }
 
         var cache = itemContext.cache();
+        var index = itemContext.index();
         cache.refreshItem(item);
 
         if (refreshChildren) {
-            cache.clear();
-            cache.setSize(getDataProviderChildCount(item));
+            var subCache = cache.getCache(index);
+            subCache.clear();
+            subCache.setSize(getDataProviderChildCount(item));
         }
 
         requestFlush();
