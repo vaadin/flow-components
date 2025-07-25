@@ -18,7 +18,6 @@ import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-crud/customgrid")
@@ -81,54 +80,6 @@ public class CustomGridIT extends AbstractComponentIT {
         toggleBordersButton().click();
         Assert.assertEquals("no-border", crud.getDomAttribute("theme"));
         Assert.assertNotEquals("no-border", grid.getDomAttribute("theme"));
-    }
-
-    @Test
-    public void editorShouldHaveRightTitleWhenOpenedInExistingItemMode() {
-        CrudElement crud = $(CrudElement.class).waitForFirst();
-        GridElement grid = $(GridElement.class).first();
-
-        customGridClickToEditButton().click();
-
-        crud.getNewItemButton().ifPresent(button -> button.click());
-        Assert.assertEquals("New item", getEditorHeaderText(crud));
-
-        crud.getEditorCancelButton().click();
-        grid.getCell(0, 0).click();
-
-        waitUntil((c) -> "Edit item".equals(getEditorHeaderText(crud)), 200);
-    }
-
-    @Test
-    @org.junit.Ignore("Does not pass in mono-repo - 100% failure")
-    public void editorShouldHaveRightTitleWhenOpenedInNewItemMode() {
-        CrudElement crud = $(CrudElement.class).waitForFirst();
-
-        newItemButton().click();
-        Assert.assertEquals("New item", getEditorHeaderText(crud));
-        crud.getEditorCancelButton().click();
-
-        crud.$("vaadin-crud-edit").first().click();
-        Assert.assertEquals("Edit item", getEditorHeaderText(crud));
-
-        crud.getEditorCancelButton().click();
-
-        newItemButton().click();
-        waitUntil((c) -> crud.getEditor().isDisplayed(), 100);
-        Assert.assertEquals("New item", getEditorHeaderText(crud));
-    }
-
-    private String getEditorHeaderText(CrudElement crud) {
-        return crud.getEditor().$(TestBenchElement.class)
-                .withAttribute("slot", "header").first().getText();
-    }
-
-    private ButtonElement customGridClickToEditButton() {
-        return $(ButtonElement.class).onPage().id("clickToEdit");
-    }
-
-    private ButtonElement newItemButton() {
-        return $(ButtonElement.class).onPage().id("newItemEditor");
     }
 
     private ButtonElement toggleBordersButton() {

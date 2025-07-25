@@ -121,17 +121,12 @@ public class CrudElement extends TestBenchElement {
     }
 
     /**
-     * Checks if an editor overlay is open on the default editor position
-     * Otherwise, checks the value of editorOpened property
+     * Checks if the editor is open, either as inline editor or as a dialog
      *
      * @return {@code true} if the editor is open and {@code false}, otherwise
      */
     public boolean isEditorOpen() {
-        if (getEditorPosition().isEmpty()) {
-            return $("vaadin-crud-dialog-overlay").onPage()
-                    .withAttribute("opened").exists();
-        }
-        return getPropertyBoolean("editorOpened");
+        return "true".equals(getDomProperty("editorOpened"));
     }
 
     /**
@@ -159,10 +154,6 @@ public class CrudElement extends TestBenchElement {
      * @return the open editor overlay
      */
     public TestBenchElement getEditor() {
-        if (getEditorPosition().isEmpty()) {
-            return $("vaadin-crud-dialog-overlay").onPage()
-                    .withAttribute("opened").first();
-        }
         return this;
     }
 
