@@ -83,7 +83,7 @@ public class GridDropEvent<T> extends ComponentEvent<Grid<T>> {
 
         this.dropLocation = Arrays.asList(GridDropLocation.values()).stream()
                 .filter(dl -> dl.getClientName().equals(dropLocation))
-                .findFirst().get();
+                .findFirst().orElse(GridDropLocation.EMPTY);
     }
 
     /**
