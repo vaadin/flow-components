@@ -244,6 +244,7 @@ public class TreeGridElement extends GridElement {
      *             Instead, it's recommended to assert the actual presence of
      *             expanded rows in the grid by checking row content.
      */
+    @Deprecated(since = "24.9", forRemoval = true)
     public long getNumberOfExpandedRows() {
         waitUntilLoadingFinished();
         return (long) executeScript("return arguments[0].expandedItems.length;",
@@ -291,6 +292,7 @@ public class TreeGridElement extends GridElement {
      *             as full hierarchy will be returned in a single batch from the
      *             server.
      */
+    @Deprecated(since = "24.9", forRemoval = true)
     public boolean isLoadingExpandedRows() {
         return (Boolean) executeScript(
                 "return !!arguments[0].$connector ? (arguments[0].$connector.hasEnsureSubCacheQueue() || arguments[0].$connector.hasParentRequestQueue()) : arguments[0]._dataProviderController.isLoading()",
