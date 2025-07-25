@@ -30,12 +30,13 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.GridArrayUpdater;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
-import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.data.binder.PropertyDefinition;
+import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
@@ -43,8 +44,6 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HasHierarchicalDataProvider;
-import com.vaadin.flow.data.provider.hierarchy.HierarchicalArrayUpdater.HierarchicalUpdate;
-import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
@@ -58,13 +57,12 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.JsonUtils;
-import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.internal.StateNode;
+import com.vaadin.flow.provider.hierarchy.HierarchicalDataCommunicator;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
-import elemental.json.JsonValue;
 
 /**
  * Tree Grid is a component for displaying hierarchical tabular data grouped
@@ -76,116 +74,9 @@ import elemental.json.JsonValue;
  * @author Vaadin Ltd
  */
 @JsModule("@vaadin/grid/src/vaadin-grid-tree-toggle.js")
+@JsModule("./treeGridConnector.ts")
 public class TreeGrid<T> extends Grid<T>
         implements HasHierarchicalDataProvider<T> {
-
-    private static final class TreeGridUpdateQueue extends UpdateQueue
-            implements HierarchicalUpdate {
-
-        private SerializableConsumer<List<JsonValue>> arrayUpdateListener;
-
-        private TreeGridUpdateQueue(Element element, int size) {
-            super(element, size);
-        }
-
-        public void setArrayUpdateListener(
-                SerializableConsumer<List<JsonValue>> arrayUpdateListener) {
-            this.arrayUpdateListener = arrayUpdateListener;
-        }
-
-        @Override
-        public void set(int start, List<JsonValue> items) {
-            super.set(start, items);
-
-            if (arrayUpdateListener != null) {
-                arrayUpdateListener.accept(items);
-            }
-        }
-
-        @Override
-        public void set(int start, List<JsonValue> items, String parentKey) {
-            enqueue("$connector.set", start,
-                    items.stream().collect(JsonUtils.asArray()), parentKey);
-
-            if (arrayUpdateListener != null) {
-                arrayUpdateListener.accept(items);
-            }
-        }
-
-        @Override
-        public void clear(int start, int length, String parentKey) {
-            enqueue("$connector.clear", start, length, parentKey);
-        }
-
-        @Override
-        public void commit(int updateId, String parentKey, int levelSize) {
-            enqueue("$connector.confirmParent", updateId, parentKey, levelSize);
-            commit();
-        }
-    }
-
-    private class TreeGridArrayUpdaterImpl implements TreeGridArrayUpdater {
-        // Approximated size of the viewport. Used for eager fetching.
-        private static final int EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE = 40;
-
-        private int viewportRemaining = 0;
-        private final List<JsonValue> queuedParents = new ArrayList<>();
-        private transient VaadinRequest previousRequest;
-
-        @Override
-        public TreeGridUpdateQueue startUpdate(int sizeChange) {
-            TreeGridUpdateQueue queue = new TreeGridUpdateQueue(getElement(),
-                    sizeChange);
-
-            if (VaadinRequest.getCurrent() != null
-                    && !VaadinRequest.getCurrent().equals(previousRequest)) {
-                // Reset the viewportRemaining once for a server roundtrip.
-                viewportRemaining = EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE;
-                queuedParents.clear();
-                previousRequest = VaadinRequest.getCurrent();
-            }
-
-            queue.setArrayUpdateListener((items) -> {
-                // Prepend the items to the queue of potential parents.
-                queuedParents.addAll(0, items);
-
-                while (viewportRemaining > 0 && !queuedParents.isEmpty()) {
-                    viewportRemaining--;
-                    JsonObject parent = (JsonObject) queuedParents.remove(0);
-                    T parentItem = getDataCommunicator().getKeyMapper()
-                            .get(parent.getString("key"));
-
-                    if (isExpanded(parentItem)) {
-                        int childLength = Math.max(
-                                EAGER_FETCH_VIEWPORT_SIZE_ESTIMATE,
-                                getPageSize());
-
-                        // There's still room left in the viewport and the item
-                        // is expanded. Set parent requested range for it.
-                        getDataCommunicator().setParentRequestedRange(0,
-                                childLength, parentItem);
-
-                        // Stop iterating the items on this level. The request
-                        // for child items above will end up back in this while
-                        // loop, and to processing any parent siblings that
-                        // might be left in the queue.
-                        break;
-                    }
-
-                }
-            });
-
-            return queue;
-        }
-
-        @Override
-        public void initialize() {
-            initConnector();
-            updateSelectionModeOnClient();
-            getDataCommunicator().setRequestedRange(0, getPageSize());
-        }
-    }
-
     /**
      * Creates a new {@code TreeGrid} without support for creating columns based
      * on property names. Use an alternative constructor, such as
@@ -207,19 +98,23 @@ public class TreeGrid<T> extends Grid<T>
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
-     * @deprecated since 24.9. In Vaadin 25, the type of the
-     *             {@code dataCommunicatorBuilder} parameter will use
-     *             {@link GridArrayUpdater} instead of
-     *             {@link TreeGridArrayUpdater}.
      */
     @Deprecated(since = "24.9")
     protected TreeGrid(int pageSize,
-            DataCommunicatorBuilder<T, TreeGridArrayUpdater> dataCommunicatorBuilder) {
+            DataCommunicatorBuilder<T, GridArrayUpdater> dataCommunicatorBuilder) {
         super(pageSize, dataCommunicatorBuilder);
 
         setUniqueKeyProperty("key");
-
+        addItemExpandedGenerator();
         addItemHasChildrenPathGenerator();
+    }
+
+    protected void initConnector() {
+        getUI().orElseThrow(() -> new IllegalStateException(
+                "Connector can only be initialized for an attached Grid"))
+                .getPage()
+                .executeJs("window.Vaadin.Flow.treeGridConnector.initLazy($0)",
+                        getElement());
     }
 
     /**
@@ -231,6 +126,12 @@ public class TreeGrid<T> extends Grid<T>
             if (getDataCommunicator().hasChildren(item)) {
                 jsonObject.put("children", true);
             }
+        });
+    }
+
+    private void addItemExpandedGenerator() {
+        addDataGenerator((T item, JsonObject jsonObject) -> {
+            jsonObject.put("expanded", isExpanded(item));
         });
     }
 
@@ -292,23 +193,18 @@ public class TreeGrid<T> extends Grid<T>
      */
     @Deprecated(since = "24.9")
     protected TreeGrid(Class<T> beanType,
-            DataCommunicatorBuilder<T, TreeGridArrayUpdater> dataCommunicatorBuilder) {
+            DataCommunicatorBuilder<T, GridArrayUpdater> dataCommunicatorBuilder) {
         this(beanType, dataCommunicatorBuilder, true);
     }
 
     private TreeGrid(Class<T> beanType,
-            DataCommunicatorBuilder<T, TreeGridArrayUpdater> dataCommunicatorBuilder,
+            DataCommunicatorBuilder<T, GridArrayUpdater> dataCommunicatorBuilder,
             boolean autoCreateColumns) {
         super(beanType, dataCommunicatorBuilder, autoCreateColumns);
 
         setUniqueKeyProperty("key");
-
+        addItemExpandedGenerator();
         addItemHasChildrenPathGenerator();
-    }
-
-    @Override
-    protected GridArrayUpdater createDefaultArrayUpdater() {
-        return new TreeGridArrayUpdaterImpl();
     }
 
     /**
@@ -326,19 +222,38 @@ public class TreeGrid<T> extends Grid<T>
         setDataProvider(dataProvider);
     }
 
+    private static class TreeGridDataCommunicator<T>
+            extends HierarchicalDataCommunicator<T> {
+        public TreeGridDataCommunicator(CompositeDataGenerator<T> dataGenerator,
+                ArrayUpdater arrayUpdater,
+                SerializableConsumer<JsonArray> dataUpdater,
+                StateNode stateNode,
+                SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
+            super(dataGenerator, arrayUpdater, dataUpdater, stateNode,
+                    uniqueKeyProviderSupplier);
+        }
+
+        protected List<T> preloadRange(int start, int length) {
+            return super.preloadRange(start, length);
+        }
+
+        protected int resolveIndexPath(int... path) {
+            return super.resolveIndexPath(path);
+        }
+    }
+
     private static class TreeDataCommunicatorBuilder<T>
-            extends DataCommunicatorBuilder<T, TreeGridArrayUpdater> {
+            extends DataCommunicatorBuilder<T, GridArrayUpdater> {
 
         @Override
         protected DataCommunicator<T> build(Element element,
                 CompositeDataGenerator<T> dataGenerator,
-                TreeGridArrayUpdater arrayUpdater,
+                GridArrayUpdater arrayUpdater,
                 SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
 
-            return new HierarchicalDataCommunicator<>(dataGenerator,
-                    arrayUpdater,
-                    data -> element.callJsFunction(
-                            "$connector.updateHierarchicalData", data),
+            return new TreeGridDataCommunicator<>(dataGenerator, arrayUpdater,
+                    data -> element.callJsFunction("$connector.updateFlatData",
+                            data),
                     element.getNode(), uniqueKeyProviderSupplier);
         }
     }
@@ -615,10 +530,14 @@ public class TreeGrid<T> extends Grid<T>
      */
     public Column<T> addHierarchyColumn(ValueProvider<T, ?> valueProvider) {
         Column<T> column = addColumn(LitRenderer.<T> of(
-                "<vaadin-grid-tree-toggle @click=${onClick} .leaf=${!item.children} .expanded=${model.expanded} .level=${model.level}>"
+                "<vaadin-grid-tree-toggle @click=${onClick} .leaf=${!item.children} .expanded=${live(item.expanded)} .level=${item.level}>"
                         + "${item.name}</vaadin-grid-tree-toggle>")
                 .withProperty("children",
                         item -> getDataCommunicator().hasChildren(item))
+                .withProperty("expanded",
+                        item -> getDataCommunicator().isExpanded(item))
+                .withProperty("level",
+                        item -> getDataCommunicator().getDepth(item))
                 .withProperty("name", value -> {
                     Object name = valueProvider.apply(value);
                     return name == null ? "" : String.valueOf(name);
@@ -821,27 +740,6 @@ public class TreeGrid<T> extends Grid<T>
         }
     }
 
-    @AllowInert
-    @ClientCallable(DisabledUpdateMode.ALWAYS)
-    private void setParentRequestedRange(int start, int length,
-            String parentKey) {
-        T item = getDataCommunicator().getKeyMapper().get(parentKey);
-        if (item != null) {
-            getDataCommunicator().setParentRequestedRange(start, length, item);
-        }
-    }
-
-    @AllowInert
-    @ClientCallable(DisabledUpdateMode.ALWAYS)
-    private void setParentRequestedRanges(JsonArray array) {
-        for (int index = 0; index < array.length(); index++) {
-            JsonObject object = array.getObject(index);
-            setParentRequestedRange((int) object.getNumber("firstIndex"),
-                    (int) object.getNumber("size"),
-                    object.getString("parentKey"));
-        }
-    }
-
     @ClientCallable(DisabledUpdateMode.ONLY_WHEN_ENABLED)
     private void updateExpandedState(String key, boolean expanded) {
         T item = getDataCommunicator().getKeyMapper().get(key);
@@ -852,12 +750,6 @@ public class TreeGrid<T> extends Grid<T>
                 collapse(Arrays.asList(item), true);
             }
         }
-    }
-
-    @AllowInert
-    @ClientCallable(DisabledUpdateMode.ALWAYS)
-    private void confirmParentUpdate(int id, String parentKey) {
-        getDataCommunicator().confirmUpdate(id, parentKey);
     }
 
     /**
@@ -1104,7 +996,9 @@ public class TreeGrid<T> extends Grid<T>
      */
     @Override
     public void scrollToIndex(int rowIndex) {
-        super.scrollToIndex(rowIndex);
+        getUI().ifPresent(
+                ui -> ui.beforeClientResponse(this, ctx -> getElement()
+                        .executeJs("this.scrollToIndex($0);", rowIndex)));
     }
 
     /**
@@ -1126,9 +1020,7 @@ public class TreeGrid<T> extends Grid<T>
             throw new IllegalArgumentException(
                     "At least one index should be provided.");
         }
-        int pageSize = getPageSize();
-        int firstRootIndex = indexes[0] - indexes[0] % pageSize;
-        getDataCommunicator().setRequestedRange(firstRootIndex, pageSize);
+
         String joinedIndexes = Arrays.stream(indexes).mapToObj(String::valueOf)
                 .collect(Collectors.joining(","));
         getUI().ifPresent(ui -> ui.beforeClientResponse(this,
@@ -1140,7 +1032,37 @@ public class TreeGrid<T> extends Grid<T>
     public void scrollToEnd() {
         getUI().ifPresent(ui -> ui.beforeClientResponse(this,
                 ctx -> getElement().executeJs(
-                        "this.scrollToIndex(...Array(10).fill(Infinity))")));
+                        "this.scrollToIndex(...Array(10).fill(-1))")));
+    }
+
+    @ClientCallable
+    int setViewportRangeByIndexPath(int[] path, int buffer) {
+        // TODO: Add a check to throw an exception if buffer size is too large
+        var dataCommunicator = (TreeGridDataCommunicator<T>) getDataCommunicator();
+        int pageSize = getPageSize();
+
+        // Resolve the flat index from the given index path
+        int flatIndex = dataCommunicator.resolveIndexPath(path);
+
+        // Preload items around the resolved flat index. It adds page size
+        // to the buffer to guarantee that the preloaded range is never
+        // smaller than the requested range once that one is aligned to
+        // the page size, thus avoiding extra requests that could
+        // shift the viewport.
+        dataCommunicator.preloadRange(flatIndex, -(buffer + pageSize));
+        dataCommunicator.preloadRange(flatIndex, +(buffer + pageSize));
+
+        flatIndex = dataCommunicator.resolveIndexPath(path);
+
+        // Calculate the viewport range based on the flat index and buffer size,
+        // aligning the range with page size.
+        int startPage = Math.max(0, (flatIndex - buffer) / pageSize);
+        int endPage = (flatIndex + buffer) / pageSize;
+
+        getDataCommunicator().setRequestedRange(startPage * pageSize,
+                (endPage - startPage + 1) * pageSize);
+
+        return flatIndex;
     }
 
     /**
