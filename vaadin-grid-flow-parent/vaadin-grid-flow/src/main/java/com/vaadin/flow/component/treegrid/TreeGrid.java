@@ -1038,7 +1038,7 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     @ClientCallable
-    private int setRequestedRangeByIndexPath(int[] path, int buffer) {
+    int setViewportRangeByIndexPath(int[] path, int buffer) {
         // TODO: Add a check to throw an exception if buffer size is too large
         var dataCommunicator = (TreeGridDataCommunicator<T>) getDataCommunicator();
         int pageSize = getPageSize();
@@ -1052,9 +1052,8 @@ public class TreeGrid<T> extends Grid<T>
         // the page size, thus avoiding extra requests that could
         // shift the viewport.
         dataCommunicator.preloadRange(flatIndex, -(buffer + pageSize));
-        flatIndex = dataCommunicator.resolveIndexPath(path);
-
         dataCommunicator.preloadRange(flatIndex, +(buffer + pageSize));
+
         flatIndex = dataCommunicator.resolveIndexPath(path);
 
         // Calculate the viewport range based on the flat index and buffer size,
