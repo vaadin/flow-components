@@ -22,11 +22,21 @@ export function useLocalWebComponents(webComponentsRepoPath: string): PluginOpti
           watch: {
             ignored: [`!${nodeModulesPath}/**`]
           }
+        },
+        // The following dependencies are imported both in the external web-components, and in Flow application sources.
+        // Vite always resolves dependencies from where they are imported, so these dependencies would then be bundled
+        // twice. To avoid that, use dedupe. Dedupe only works for non-optimized dependencies, so they also need to be
+        // excluded from optimization / pre-bundling.
+        optimizeDeps: {
+          exclude: ['lit', 'lit-html', 'ol']
+        },
+        resolve: {
+          dedupe: ['lit', 'lit-html', 'ol'],
         }
       };
     },
-    resolveId(id) {
-      if (/^(@polymer|@vaadin)/.test(id)) {
+    resolveId(id: string) {
+      if (id.startsWith('@vaadin')) {
         return this.resolve(path.join(nodeModulesPath, id));
       }
     }

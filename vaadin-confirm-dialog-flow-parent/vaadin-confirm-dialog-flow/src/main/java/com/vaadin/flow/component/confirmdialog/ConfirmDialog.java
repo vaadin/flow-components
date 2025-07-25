@@ -34,7 +34,6 @@ import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.dom.ClassList;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
 
@@ -368,18 +367,6 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets custom Reject button
-     *
-     * @param element
-     *            the element to display instead of default Reject button
-     * @deprecated Usage of Element API at Component level should be avoided
-     */
-    @Deprecated(forRemoval = true)
-    public void setRejectButton(Element element) {
-        SlotUtils.setSlot(this, "reject-button", element);
-    }
-
-    /**
      * Sets Cancel button text and `cancel` event listener. Makes Cancel button
      * visible
      *
@@ -420,18 +407,6 @@ public class ConfirmDialog extends Component
      */
     public void setCancelButton(Component component) {
         SlotUtils.setSlot(this, "cancel-button", component);
-    }
-
-    /**
-     * Sets custom cancel button
-     *
-     * @param element
-     *            the element to display instead of default Cancel button
-     * @deprecated Usage of Element API at Component level should be avoided
-     */
-    @Deprecated(forRemoval = true)
-    public void setCancelButton(Element element) {
-        SlotUtils.setSlot(this, "cancel-button", element);
     }
 
     /**
@@ -477,18 +452,6 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets custom confirm button
-     *
-     * @param element
-     *            the element to display instead of default Confirm button
-     * @deprecated Usage of Element API at Component level should be avoided
-     */
-    @Deprecated(forRemoval = true)
-    public void setConfirmButton(Element element) {
-        SlotUtils.setSlot(this, "confirm-button", element);
-    }
-
-    /**
      * Sets confirmation message text
      */
     public void setText(String message) {
@@ -504,19 +467,6 @@ public class ConfirmDialog extends Component
      */
     public void setText(Component component) {
         getElement().appendChild(component.getElement());
-    }
-
-    /**
-     * Sets custom confirmation message element
-     *
-     * @param element
-     *            the element to display instead of default confirmation text
-     *            node
-     * @deprecated Usage of Element API at Component level should be avoided
-     */
-    @Deprecated(forRemoval = true)
-    public void setText(Element element) {
-        getElement().appendChild(element);
     }
 
     /**
@@ -601,18 +551,6 @@ public class ConfirmDialog extends Component
      */
     public void setHeader(Component component) {
         SlotUtils.setSlot(this, "header", component);
-    }
-
-    /**
-     * Sets confirmation dialog custom header element
-     *
-     * @param element
-     *            the element to display instead of default header text
-     * @deprecated Usage of Element API at Component level should be avoided
-     */
-    @Deprecated(forRemoval = true)
-    public void setHeader(Element element) {
-        SlotUtils.setSlot(this, "header", element);
     }
 
     /**
