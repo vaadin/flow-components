@@ -485,15 +485,20 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
                     @Override
                     public Widget getCustomEditor(String key) {
-                        if (customEditors.containsKey(key)) {
-                            return customEditors.get(key);
-                        }
-                        String editorId = getState().cellKeysToEditorIdMap
+                        var editorId = getState().cellKeysToEditorIdMap
                                 .get(key);
+                        var slotName = "custom-editor-" + editorId;
+                        if (customEditors.containsKey(key)) {
+                            var customEditor = customEditors.get(key);
+                            if (customEditor instanceof Slot
+                                    && slotName.equals(customEditor.getElement()
+                                            .getAttribute("name"))) {
+                                return customEditor;
+                            }
+                        }
                         var editor = SheetJsniUtil.getVirtualChild(editorId,
                                 host.getPropertyString("appId"));
-                        Slot slot = new Slot("custom-editor-" + editorId,
-                                editor, host);
+                        var slot = new Slot(slotName, editor, host);
                         customEditors.put(key, slot);
                         CustomEditorEventListener listener = GWT
                                 .create(CustomEditorEventListener.class);
