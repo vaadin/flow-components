@@ -393,7 +393,7 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
             rootCache = new RootCache<>(getDataProviderChildCount(null),
                     getDataProvider()::getId) {
                 @Override
-                void removeItemContext(T item) {
+                protected void removeItemContext(T item) {
                     super.removeItemContext(item);
 
                     getKeyMapper().remove(item);
