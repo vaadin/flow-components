@@ -137,7 +137,7 @@ public class ComboBoxLazyDataViewTest {
         final AtomicInteger itemCount = new AtomicInteger(0);
         dataView.addItemCountChangeListener(
                 event -> itemCount.set(event.getItemCount()));
-        dataCommunicator.setRequestedRange(0, 50);
+        dataCommunicator.setViewportRange(0, 50);
 
         ComboBoxDataViewTestHelper.fakeClientCommunication(ui);
 
