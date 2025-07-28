@@ -65,7 +65,7 @@ public class GridLazyDataViewTest {
         final AtomicInteger itemCount = new AtomicInteger(0);
         dataView.addItemCountChangeListener(
                 event -> itemCount.set(event.getItemCount()));
-        grid.getDataCommunicator().setRequestedRange(0, 50);
+        grid.getDataCommunicator().setViewportRange(0, 50);
 
         dataView.setItemCountCallback(query -> 2);
 

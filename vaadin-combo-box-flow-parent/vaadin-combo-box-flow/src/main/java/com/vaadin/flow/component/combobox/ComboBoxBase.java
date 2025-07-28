@@ -1342,8 +1342,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * Called by the client-side connector, delegates to data controller
      */
     @ClientCallable
-    private void setRequestedRange(int start, int length, String filter) {
-        dataController.setRequestedRange(start, length, filter);
+    private void setViewportRange(int start, int length, String filter) {
+        dataController.setViewportRange(start, length, filter);
     }
 
     /**

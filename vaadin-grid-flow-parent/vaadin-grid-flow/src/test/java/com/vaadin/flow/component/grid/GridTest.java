@@ -93,33 +93,33 @@ public class GridTest {
     }
 
     @Test
-    public void setSmallPageSize_callSetRequestedRangeWithLengthLargerThan500_doesNotThrowException() {
+    public void setSmallPageSize_callSetViewportRangeWithLengthLargerThan500_doesNotThrowException() {
         final Grid<String> grid = new Grid<>();
 
         grid.setPageSize(10);
-        callSetRequestedRange(grid, 0, 600);
+        callSetViewportRange(grid, 0, 600);
     }
 
     @Test
-    public void setAllRowsVisible_setLargePageSize_callSetRequestedRangeWithLengthLargerThan500_doesNotThrowException() {
+    public void setAllRowsVisible_setLargePageSize_callSetViewportRangeWithLengthLargerThan500_doesNotThrowException() {
         final Grid<String> grid = new Grid<>();
 
         grid.setPageSize(100);
         grid.setAllRowsVisible(true);
-        callSetRequestedRange(grid, 0, 600);
+        callSetViewportRange(grid, 0, 600);
     }
 
     @Test
-    public void setAllRowsVisible_setSmallPageSize_callSetRequestedRangeWithLengthSmallerThan500_doesNotThrowException() {
+    public void setAllRowsVisible_setSmallPageSize_callSetViewportRangeWithLengthSmallerThan500_doesNotThrowException() {
         final Grid<String> grid = new Grid<>();
 
         grid.setPageSize(10);
         grid.setAllRowsVisible(true);
-        callSetRequestedRange(grid, 0, 400);
+        callSetViewportRange(grid, 0, 400);
     }
 
     @Test
-    public void setAllRowsVisible_setSmallPageSize_callSetRequestedRangeWithLengthLargerThan500_throwsException() {
+    public void setAllRowsVisible_setSmallPageSize_callSetViewportRangeWithLengthLargerThan500_throwsException() {
         exceptionRule.expect(IllegalArgumentException.class);
         exceptionRule.expectMessage(
                 "Attempted to fetch more items from server than allowed in one go");
@@ -128,7 +128,7 @@ public class GridTest {
 
         grid.setPageSize(10);
         grid.setAllRowsVisible(true);
-        callSetRequestedRange(grid, 0, 600);
+        callSetViewportRange(grid, 0, 600);
     }
 
     @Test
@@ -145,10 +145,10 @@ public class GridTest {
         Assert.assertFalse(grid.getElement().hasProperty("accessibleName"));
     }
 
-    private void callSetRequestedRange(Grid<String> grid, int start,
+    private void callSetViewportRange(Grid<String> grid, int start,
             int length) {
         try {
-            Method method = Grid.class.getDeclaredMethod("setRequestedRange",
+            Method method = Grid.class.getDeclaredMethod("setViewportRange",
                     int.class, int.class);
             method.setAccessible(true);
             method.invoke(grid, start, length);
@@ -158,7 +158,7 @@ public class GridTest {
             if (e.getCause() instanceof IllegalArgumentException) {
                 throw (IllegalArgumentException) e.getCause();
             }
-            Assert.fail("Could not call Grid.setRequestedRange");
+            Assert.fail("Could not call Grid.setViewportRange");
         }
     }
 }
