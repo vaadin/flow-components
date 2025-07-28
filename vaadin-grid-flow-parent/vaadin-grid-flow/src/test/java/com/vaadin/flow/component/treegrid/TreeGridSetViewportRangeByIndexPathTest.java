@@ -152,6 +152,28 @@ public class TreeGridSetViewportRangeByIndexPathTest {
         assertViewportRange(7, "Item 99-1-0", "Item 99-2-2");
     }
 
+    @Test
+    public void setSmallPageSize_setViewportRangeByIndexPath_throwsWhenBufferExceedsLimit() {
+        treeGrid.setPageSize(20);
+
+        treeGrid.setViewportRangeByIndexPath(new int[] { 0 }, 500);
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            treeGrid.setViewportRangeByIndexPath(new int[] { 0 }, 1001);
+        });
+    }
+
+    @Test
+    public void setLargePageSize_setViewportRangeByIndexPath_throwsWhenBufferExceedsLimit() {
+        treeGrid.setPageSize(80);
+
+        treeGrid.setViewportRangeByIndexPath(new int[] { 0 }, 800);
+
+        Assert.assertThrows(IllegalArgumentException.class, () -> {
+            treeGrid.setViewportRangeByIndexPath(new int[] { 0 }, 800 * 2);
+        });
+    }
+
     private LinkedList<String> captureViewportRange() {
         verify(updateMock).set(Mockito.anyInt(), updateItemsCaptor.capture());
 

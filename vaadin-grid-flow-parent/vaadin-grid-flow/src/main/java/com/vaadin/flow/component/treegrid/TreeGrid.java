@@ -1037,14 +1037,35 @@ public class TreeGrid<T> extends Grid<T>
                         "this.scrollToIndex(...Array(10).fill(-1))")));
     }
 
+    /**
+     * Sets the viewport range centered on an index specified by a hierarchical
+     * index path e.g. int[] { 0, 1, 1 }. The buffer parameter defines how many
+     * items the range should contain on each side of the index.
+     * <p>
+     * This method has package-private visibility to allow testing.
+     *
+     * @param path
+     *            the path to the index used as the center of the viewport range
+     * @param buffer
+     *            the number of items to include on each side of the index
+     */
     @ClientCallable
     int setViewportRangeByIndexPath(int[] path, int buffer) {
-        // TODO: Add a check to throw an exception if buffer size is too large
+        var pageSize = getPageSize();
+        var maxAllowedItems = 10 * Math.max(50, pageSize);
+        if (maxAllowedItems < buffer) {
+            throw new IllegalArgumentException(String.format(
+                    "Requested viewport size (%d items) "
+                            + "exceeds security limit (%d items max). "
+                            + "Consider reducing the grid height or increasing "
+                            + "the page size to at least %d if it's a valid request.",
+                    buffer, maxAllowedItems, (int) Math.ceil(buffer / 10.0)));
+        }
+
         var dataCommunicator = (TreeGridDataCommunicator<T>) getDataCommunicator();
-        int pageSize = getPageSize();
 
         // Resolve the flat index from the given index path
-        int flatIndex = dataCommunicator.resolveIndexPath(path);
+        var flatIndex = dataCommunicator.resolveIndexPath(path);
 
         // Preload items around the resolved flat index. It adds page size
         // to the buffer to guarantee that the preloaded range is never
@@ -1054,12 +1075,13 @@ public class TreeGrid<T> extends Grid<T>
         dataCommunicator.preloadRange(flatIndex, -(buffer + pageSize));
         dataCommunicator.preloadRange(flatIndex, +(buffer + pageSize));
 
+        // Update the flat index after preloading, as it might have changed
         flatIndex = dataCommunicator.resolveIndexPath(path);
 
         // Calculate the viewport range based on the flat index and buffer size,
         // aligning the range with page size.
-        int startPage = Math.max(0, (flatIndex - buffer) / pageSize);
-        int endPage = (flatIndex + buffer) / pageSize;
+        var startPage = Math.max(0, (flatIndex - buffer) / pageSize);
+        var endPage = (flatIndex + buffer) / pageSize;
 
         getDataCommunicator().setRequestedRange(startPage * pageSize,
                 (endPage - startPage + 1) * pageSize);
