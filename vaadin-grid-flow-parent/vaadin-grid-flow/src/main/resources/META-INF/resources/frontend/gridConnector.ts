@@ -234,7 +234,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     const delay = grid._hasData ? rootRequestDelay : 0;
 
     rootRequestDebouncer = Debouncer.debounce(rootRequestDebouncer, timeOut.after(delay), () => {
-      grid.$connector.fetchPage((firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size), page, root);
+      grid.$connector.fetchPage((firstIndex, size) => grid.$server.setViewportRange(firstIndex, size), page, root);
     });
   };
 

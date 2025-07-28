@@ -199,7 +199,7 @@ public class TreeGrid<T> extends Grid<T>
         public void initialize() {
             initConnector();
             updateSelectionModeOnClient();
-            getDataCommunicator().setRequestedRange(0, getPageSize());
+            getDataCommunicator().setViewportRange(0, getPageSize());
         }
 
         @Override
@@ -1161,7 +1161,7 @@ public class TreeGrid<T> extends Grid<T>
         }
         int pageSize = getPageSize();
         int firstRootIndex = indexes[0] - indexes[0] % pageSize;
-        getDataCommunicator().setRequestedRange(firstRootIndex, pageSize);
+        getDataCommunicator().setViewportRange(firstRootIndex, pageSize);
         String joinedIndexes = Arrays.stream(indexes).mapToObj(String::valueOf)
                 .collect(Collectors.joining(","));
         getUI().ifPresent(ui -> ui.beforeClientResponse(this,

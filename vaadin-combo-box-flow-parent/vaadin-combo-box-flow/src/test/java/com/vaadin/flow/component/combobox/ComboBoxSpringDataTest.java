@@ -86,7 +86,7 @@ public class ComboBoxSpringDataTest {
 
             return filteredData(filterString);
         });
-        comboBox.getDataController().setRequestedRange(0, 50, "J");
+        comboBox.getDataController().setViewportRange(0, 50, "J");
 
         List<Person> items = comboBox.getLazyDataView().getItems().toList();
         Assert.assertEquals(2, items.size());

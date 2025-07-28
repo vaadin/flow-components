@@ -304,8 +304,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     }
 
     @ClientCallable(DisabledUpdateMode.ALWAYS)
-    private void setRequestedRange(int start, int length) {
-        getDataCommunicator().setRequestedRange(start, length);
+    private void setViewportRange(int start, int length) {
+        getDataCommunicator().setViewportRange(start, length);
     }
 
     /**
