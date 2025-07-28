@@ -155,8 +155,8 @@ public class TreeGridSetViewportRangeByIndexPathTest {
     private LinkedList<String> captureViewportRange() {
         verify(updateMock).set(Mockito.anyInt(), updateItemsCaptor.capture());
 
-        return updateItemsCaptor.getValue().stream()
-                .map((jsonObject) -> ((JsonObject) jsonObject).getString("name"))
+        return updateItemsCaptor.getValue().stream().map(
+                (jsonObject) -> ((JsonObject) jsonObject).getString("name"))
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
