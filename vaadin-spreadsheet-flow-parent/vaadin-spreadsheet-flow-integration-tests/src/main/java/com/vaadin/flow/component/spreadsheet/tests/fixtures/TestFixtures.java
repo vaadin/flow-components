@@ -21,12 +21,11 @@ public enum TestFixtures {
     AddOrRemoveComment(AddOrRemoveCommentFixture.class),
     Formats(FormatsFixture.class),
     DisableChartOverlays(DisableChartsFixture.class),
-    StyleMergeReigions(
-            com.vaadin.flow.component.spreadsheet.tests.fixtures.StyleMergeReigions.class),
-    RemoveFixture(
-            com.vaadin.flow.component.spreadsheet.tests.fixtures.RemoveFixture.class),
+    StyleMergeReigions(StyleMergeReigions.class),
+    RemoveFixture(RemoveFixture.class),
     DefaultStyleUnlocked(DefaultStyleUnlockedFixture.class),
     HideSecondRow(HideSecondRowFixture.class),
+    HideSecondColumn(HideSecondColumnFixture.class),
     LargeSpreadsheet(LargeSpreadsheetFixture.class),
     ColumnToggle(ColumnToggleFixture.class),
     RowToggle(RowToggleFixture.class),
@@ -37,6 +36,7 @@ public enum TestFixtures {
     Rename(RenameFixture.class),
     CreateSheet(SheetsFixture.class),
     CustomEditor(SimpleCustomEditorFixture.class),
+    CustomEditorRow(CustomEditorRowFixture.class),
     Styles(StylesFixture.class),
     LockCell(LockCellFixture.class),
     CustomComponent(CustomComponentFixture.class),
