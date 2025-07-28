@@ -62,7 +62,7 @@ describe('grid connector', () => {
       grid.clearCache();
       await nextFrame();
 
-      expect(grid.$server.setRequestedRange.called).to.be.false;
+      expect(grid.$server.setViewportRange.called).to.be.false;
     });
   });
 
@@ -86,9 +86,9 @@ describe('grid connector', () => {
         // Request a range of items at the top
         clear(grid.$connector, 0, 50);
         await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-        expect(grid.$server.setRequestedRange).to.be.calledOnceWith(0, 50);
+        expect(grid.$server.setViewportRange).to.be.calledOnceWith(0, 50);
         setRootItems(grid.$connector, items, 0, 50);
-        grid.$server.setRequestedRange.resetHistory();
+        grid.$server.setViewportRange.resetHistory();
       });
 
       it('should request new items after incomplete confirm', async () => {
@@ -100,7 +100,7 @@ describe('grid connector', () => {
         await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
 
         // Grid should have requested for the missing items
-        expect(grid.$server.setRequestedRange).to.be.calledOnceWith(0, 50);
+        expect(grid.$server.setViewportRange).to.be.calledOnceWith(0, 50);
       });
 
       it('should not request for new items after complete confirm', async () => {
@@ -112,7 +112,7 @@ describe('grid connector', () => {
         await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
 
         // Grid should not have request for items
-        expect(grid.$server.setRequestedRange).to.be.not.called;
+        expect(grid.$server.setViewportRange).to.be.not.called;
       });
     });
 
@@ -122,9 +122,9 @@ describe('grid connector', () => {
         clear(grid.$connector, 50, 50);
         grid.scrollToIndex(50);
         await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-        expect(grid.$server.setRequestedRange).to.have.been.calledOnceWith(25, 75);
+        expect(grid.$server.setViewportRange).to.have.been.calledOnceWith(25, 75);
         setRootItems(grid.$connector, items, 25, 75);
-        grid.$server.setRequestedRange.resetHistory();
+        grid.$server.setViewportRange.resetHistory();
       });
 
       it('should request for items if part of the last range was cleared', async () => {
@@ -136,12 +136,12 @@ describe('grid connector', () => {
         clear(grid.$connector, 50, grid.pageSize);
         setRootItems(grid.$connector, items, 0, 50);
         await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-        expect(grid.$server.setRequestedRange).to.not.have.been.called;
+        expect(grid.$server.setViewportRange).to.not.have.been.called;
 
         // Scroll down again, should reload the range because part of it was cleared
         grid.scrollToIndex(50);
         await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-        expect(grid.$server.setRequestedRange).to.have.been.calledOnceWith(25, 75);
+        expect(grid.$server.setViewportRange).to.have.been.calledOnceWith(25, 75);
       });
 
       it('should not request for items if data outside of the last range was cleared', async () => {
@@ -153,12 +153,12 @@ describe('grid connector', () => {
         clear(grid.$connector, 75, grid.pageSize);
         grid.$connector.confirm(-1);
         await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-        expect(grid.$server.setRequestedRange).to.not.have.been.called;
+        expect(grid.$server.setViewportRange).to.not.have.been.called;
 
         // Scroll down again, should not reload the range because nothing from it was cleared
         grid.scrollToIndex(50);
         await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
-        expect(grid.$server.setRequestedRange).to.not.have.been.called;
+        expect(grid.$server.setViewportRange).to.not.have.been.called;
       });
     });
   });

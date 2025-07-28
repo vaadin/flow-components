@@ -245,7 +245,7 @@ class ComboBoxDataController<TItem>
     void reset() {
         lastFilter = null;
         if (dataCommunicator != null) {
-            dataCommunicator.setRequestedRange(0, 0);
+            dataCommunicator.setViewportRange(0, 0);
             dataCommunicator.reset();
         }
         comboBox.runBeforeClientResponse(ui -> ui.getPage().executeJs(
@@ -269,7 +269,7 @@ class ComboBoxDataController<TItem>
     /**
      * Called when the client-side connector requests data
      */
-    void setRequestedRange(int start, int length, String filter) {
+    void setViewportRange(int start, int length, String filter) {
         // If the filter is null, which indicates that the combo box was closed
         // before, then reset the data communicator to force sending an update
         // to the client connector. This covers an edge-case when using an empty
@@ -283,7 +283,7 @@ class ComboBoxDataController<TItem>
         if (lastFilter == null) {
             dataCommunicator.reset();
         }
-        dataCommunicator.setRequestedRange(start, length);
+        dataCommunicator.setViewportRange(start, length);
         filterSlot.accept(filter);
     }
 
@@ -605,7 +605,7 @@ class ComboBoxDataController<TItem>
             removeLazyOpenRegistration();
             dataCommunicator.setFetchEnabled(true);
             if (!comboBox.isAutoOpen()) {
-                setRequestedRange(0, comboBox.getPageSize(),
+                setViewportRange(0, comboBox.getPageSize(),
                         comboBox.getFilter());
             }
         }
