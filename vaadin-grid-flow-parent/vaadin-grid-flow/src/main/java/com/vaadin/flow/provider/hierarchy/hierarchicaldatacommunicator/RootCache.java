@@ -39,7 +39,7 @@ public class RootCache<T> extends Cache<T> {
     private final Map<Object, ItemContext<T>> itemIdToContext = new HashMap<>();
 
     public RootCache(int size, ValueProvider<T, Object> itemIdProvider) {
-        super(null, null, -1, size);
+        super(null, -1, size);
         this.itemIdProvider = itemIdProvider;
     }
 

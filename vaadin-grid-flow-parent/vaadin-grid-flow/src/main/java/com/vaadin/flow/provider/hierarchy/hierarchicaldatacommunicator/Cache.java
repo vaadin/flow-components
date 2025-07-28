@@ -49,9 +49,9 @@ public class Cache<T> implements Serializable {
     private final SortedMap<Integer, Object> indexToItemId = new TreeMap<>();
     private final SortedMap<Integer, Cache<T>> indexToCache = new TreeMap<>();
 
-    protected Cache(RootCache<T> rootCache, Cache<T> parentCache,
-            int parentIndex, int size) {
-        this.rootCache = rootCache;
+    protected Cache(Cache<T> parentCache, int parentIndex, int size) {
+        this.rootCache = parentCache != null ? parentCache.rootCache
+                : (RootCache<T>) this;
         this.parentCache = parentCache;
         this.parentIndex = parentIndex;
         this.size = size;
@@ -92,7 +92,7 @@ public class Cache<T> implements Serializable {
         itemIdToItem.replace(itemId, item);
     }
 
-    public final void setItems(int startIndex, List<T> items) {
+    public void setItems(int startIndex, List<T> items) {
         for (int i = 0; i < items.size(); i++) {
             var item = items.get(i);
             var itemId = rootCache.getItemId(item);
@@ -133,7 +133,7 @@ public class Cache<T> implements Serializable {
     }
 
     public Cache<T> createCache(int index, int size) {
-        var cache = new Cache<>(rootCache, this, index, size);
+        var cache = new Cache<>(this, index, size);
         indexToCache.put(index, cache);
         return cache;
     }
