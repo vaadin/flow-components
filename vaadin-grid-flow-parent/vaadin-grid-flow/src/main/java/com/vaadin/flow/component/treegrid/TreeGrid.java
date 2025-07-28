@@ -1067,13 +1067,17 @@ public class TreeGrid<T> extends Grid<T>
         // Resolve the flat index from the given index path
         var flatIndex = dataCommunicator.resolveIndexPath(path);
 
-        // Preload items around the resolved flat index. It adds page size
-        // to the buffer to guarantee that the preloaded range is never
-        // smaller than the requested range once that one is aligned to
-        // the page size, thus avoiding extra requests that could
-        // shift the viewport.
-        dataCommunicator.preloadRange(flatIndex, -(buffer + pageSize));
+        // Preload items after the resolved flat index traversing
+        // the tree forward from the start (from lower to higher indexes).
         dataCommunicator.preloadRange(flatIndex, +(buffer + pageSize));
+
+        // Preload items before the resolved flat index traversing
+        // the tree backward from the start (from higher to lower indexes).
+        // This strategy ensures that all nearby items are cached ahead of time,
+        // preventing viewport shifts that would otherwise occur when calling
+        // setRequestedRange which expands items from lower to higher indexes
+        // when not found in the cache.
+        dataCommunicator.preloadRange(flatIndex, -(buffer + pageSize));
 
         // Update the flat index after preloading, as it might have changed
         flatIndex = dataCommunicator.resolveIndexPath(path);
