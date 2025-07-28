@@ -23,14 +23,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
+import com.vaadin.tests.dataprovider.MockUI;
 
 public class MultiSelectComboBoxFilteringTest {
-    private DataCommunicatorTest.MockUI ui;
+    private MockUI ui;
 
     @Before
     public void setUp() {
-        ui = new DataCommunicatorTest.MockUI();
+        ui = new MockUI();
     }
 
     @Test

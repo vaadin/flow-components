@@ -11,7 +11,7 @@ package com.vaadin.flow.component.spreadsheet.tests.fixtures;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 /**
- * Fixture to hide the second row.
+ * Fixture to hide the second column.
  *
  */
 public class HideSecondColumnFixture implements SpreadsheetFixture {

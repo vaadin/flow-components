@@ -238,7 +238,13 @@ public class TreeGridElement extends GridElement {
      * visible expanded rows.
      *
      * @return the number of expanded rows
+     * @deprecated since 24.9 and will be removed in Vaadin 25 where expanded
+     *             items will no longer be available on the client-side, as
+     *             hierarchy management is being moved to the server-side.
+     *             Instead, it's recommended to assert the actual presence of
+     *             expanded rows in the grid by checking row content.
      */
+    @Deprecated(since = "24.9", forRemoval = true)
     public long getNumberOfExpandedRows() {
         waitUntilLoadingFinished();
         return (long) executeScript("return arguments[0].expandedItems.length;",
@@ -281,7 +287,12 @@ public class TreeGridElement extends GridElement {
      *
      * @return <code>true</code> if grid is loading expanded rows,
      *         <code>false</code> otherwise
+     * @deprecated since 24.9 and will be removed in Vaadin 25 where explicit
+     *             waiting for expanded rows to load will no longer be required,
+     *             as full hierarchy will be returned in a single batch from the
+     *             server.
      */
+    @Deprecated(since = "24.9", forRemoval = true)
     public boolean isLoadingExpandedRows() {
         return (Boolean) executeScript(
                 "return !!arguments[0].$connector ? (arguments[0].$connector.hasEnsureSubCacheQueue() || arguments[0].$connector.hasParentRequestQueue()) : arguments[0]._dataProviderController.isLoading()",

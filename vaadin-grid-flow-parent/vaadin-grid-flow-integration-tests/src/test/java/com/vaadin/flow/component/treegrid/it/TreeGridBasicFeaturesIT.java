@@ -51,59 +51,59 @@ public class TreeGridBasicFeaturesIT extends AbstractTreeGridIT {
         Assert.assertEquals(3, getTreeGrid().getRowCount());
         assertCellTexts(0, 0, new String[] { "0 | 0", "0 | 1", "0 | 2" });
 
-        findElementByText("Expand 0 | 0").click();
+        findElement(By.id("expand-0-0")).click();
         Assert.assertEquals(6, getTreeGrid().getRowCount());
         assertCellTexts(1, 0, new String[] { "1 | 0", "1 | 1", "1 | 2" });
 
         // expanding already expanded item should have no effect
-        findElementByText("Expand 0 | 0").click();
+        findElement(By.id("expand-0-0")).click();
         Assert.assertEquals(6, getTreeGrid().getRowCount());
         assertCellTexts(1, 0, new String[] { "1 | 0", "1 | 1", "1 | 2" });
 
-        findElementByText("Collapse 0 | 0").click();
+        findElement(By.id("collapse-0-0")).click();
         Assert.assertEquals(3, getTreeGrid().getRowCount());
         assertCellTexts(0, 0, new String[] { "0 | 0", "0 | 1", "0 | 2" });
 
         // collapsing the same item twice should have no effect
-        findElementByText("Collapse 0 | 0").click();
+        findElement(By.id("collapse-0-0")).click();
         Assert.assertEquals(3, getTreeGrid().getRowCount());
         assertCellTexts(0, 0, new String[] { "0 | 0", "0 | 1", "0 | 2" });
 
-        findElementByText("Expand 1 | 1").click();
+        findElement(By.id("expand-1-1")).click();
         // 1 | 1 not yet visible, shouldn't immediately expand anything
         Assert.assertEquals(3, getTreeGrid().getRowCount());
         assertCellTexts(0, 0, new String[] { "0 | 0", "0 | 1", "0 | 2" });
 
-        findElementByText("Expand 0 | 0").click();
+        findElement(By.id("expand-0-0")).click();
         // 1 | 1 becomes visible and is also expanded
         Assert.assertEquals(9, getTreeGrid().getRowCount());
         assertCellTexts(1, 0, new String[] { "1 | 0", "1 | 1", "2 | 0", "2 | 1",
                 "2 | 2", "1 | 2" });
 
         // collapsing a leaf should have no effect
-        findElementByText("Collapse 2 | 1").click();
+        findElement(By.id("collapse-2-1")).click();
         Assert.assertEquals(9, getTreeGrid().getRowCount());
         assertCellTexts(1, 0, new String[] { "1 | 0", "1 | 1", "2 | 0", "2 | 1",
                 "2 | 2", "1 | 2" });
 
         // collapsing 0 | 0 should collapse the expanded 1 | 1
-        findElementByText("Collapse 0 | 0").click();
+        findElement(By.id("collapse-0-0")).click();
         Assert.assertEquals(3, getTreeGrid().getRowCount());
         assertCellTexts(0, 0, new String[] { "0 | 0", "0 | 1", "0 | 2" });
 
         // expand 0 | 0 recursively
-        findElementByText("Expand 0 | 0 recursively").click();
+        findElement(By.id("expand-0-0-recursively")).click();
         Assert.assertEquals(15, getTreeGrid().getRowCount());
         assertCellTexts(0, 0, new String[] { "0 | 0", "1 | 0", "2 | 0" });
 
         // collapse 0 | 0 recursively
-        findElementByText("Collapse 0 | 0 recursively").click();
+        findElement(By.id("collapse-0-0-recursively")).click();
         Assert.assertEquals(3, getTreeGrid().getRowCount());
         assertCellTexts(0, 0, new String[] { "0 | 0", "0 | 1", "0 | 2" });
 
         // expanding 0 | 0 should result in 3 additional nodes after recursive
         // collapse
-        findElementByText("Expand 0 | 0").click();
+        findElement(By.id("expand-0-0")).click();
         Assert.assertEquals(6, getTreeGrid().getRowCount());
         assertCellTexts(1, 0, new String[] { "1 | 0", "1 | 1", "1 | 2" });
 
@@ -112,7 +112,7 @@ public class TreeGridBasicFeaturesIT extends AbstractTreeGridIT {
 
     @Test
     public void pending_expands_cleared_when_data_provider_set() {
-        findElementByText("Expand 1 | 1").click();
+        findElement(By.id("expand-1-1")).click();
         findElement(By.id("LazyHierarchicalDataProvider")).click();
 
         getTreeGrid().expandWithClick(0);
@@ -240,12 +240,12 @@ public class TreeGridBasicFeaturesIT extends AbstractTreeGridIT {
         assertTrue(getTreeGrid().hasExpandToggle(0, 0));
         assertFalse(getTreeGrid().hasExpandToggle(0, 1));
 
-        findElementByText("Set hierarchy column - depth").click();
+        findElement(By.id("set-hierarchy-column-depth")).click();
 
         assertFalse(getTreeGrid().hasExpandToggle(0, 0));
         assertTrue(getTreeGrid().hasExpandToggle(0, 1));
 
-        findElementByText("Set hierarchy column - id").click();
+        findElement(By.id("set-hierarchy-column-id")).click();
 
         assertTrue(getTreeGrid().hasExpandToggle(0, 0));
         assertFalse(getTreeGrid().hasExpandToggle(0, 1));
@@ -253,8 +253,8 @@ public class TreeGridBasicFeaturesIT extends AbstractTreeGridIT {
 
     @Test
     public void expand_and_collapse_listeners() {
-        findElementByText("Expand listener").click();
-        findElementByText("Collapse listener").click();
+        findElement(By.id("add-expand-listener")).click();
+        findElement(By.id("add-collapse-listener")).click();
 
         assertFalse(
                 logContainsText("Item(s) expanded (from client: true): 0 | 0"));
@@ -275,14 +275,14 @@ public class TreeGridBasicFeaturesIT extends AbstractTreeGridIT {
         assertTrue(logContainsText(
                 "Item(s) collapsed (from client: true): 0 | 0"));
 
-        findElementByText("Expand 0 | 0").click();
+        findElement(By.id("expand-0-0")).click();
 
         assertTrue(logContainsText(
                 "Item(s) expanded (from client: false): 0 | 0"));
         assertFalse(logContainsText(
                 "Item(s) collapsed (from client: false): 0 | 0"));
 
-        findElementByText("Collapse 0 | 0").click();
+        findElement(By.id("collapse-0-0")).click();
 
         assertTrue(logContainsText(
                 "Item(s) expanded (from client: false): 0 | 0"));
@@ -309,5 +309,4 @@ public class TreeGridBasicFeaturesIT extends AbstractTreeGridIT {
                 "2 | 1", "2 | 2", "1 | 1", "1 | 2", "0 | 2" });
         Assert.assertEquals(9, getTreeGrid().getRowCount());
     }
-
 }

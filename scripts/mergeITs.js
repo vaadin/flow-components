@@ -169,8 +169,7 @@ function copyFolderRecursiveSync(source, target, replaceCall) {
   }
 }
 
-// Create an index.html. Useful for monkey patching
-async function createFrontendIndex() {
+async function createProjectFiles() {
   if (/^14/.test(version)) {
     const javaFolder = `${itFolder}/src/main/java/com/vaadin`;
     const servicesFolder = `${itFolder}/src/main/resources/META-INF/services`
@@ -182,6 +181,7 @@ async function createFrontendIndex() {
     const frontendFolder = `${itFolder}/frontend`;
     fs.mkdirSync(frontendFolder, { recursive: true });
     copyFileSync(`${templateDir}/index.html`, `${frontendFolder}`);
+    copyFileSync(`${templateDir}/vite.config.ts`, `${itFolder}`);
   }
 }
 
@@ -224,7 +224,7 @@ async function main() {
   await computeVersion();
   await computeModules();
   await copySources();
-  await createFrontendIndex();
+  await createProjectFiles();
   await createPom();
 }
 

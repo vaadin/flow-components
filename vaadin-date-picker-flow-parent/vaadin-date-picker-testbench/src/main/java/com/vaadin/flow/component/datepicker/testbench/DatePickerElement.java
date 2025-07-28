@@ -215,8 +215,7 @@ public class DatePickerElement extends TestBenchElement
      * @return
      */
     public OverlayContentElement getOverlayContent() {
-        return this.$("vaadin-date-picker-overlay").onPage().waitForFirst()
-                .$(OverlayContentElement.class).first();
+        return $(OverlayContentElement.class).first();
     }
 
     @Override
