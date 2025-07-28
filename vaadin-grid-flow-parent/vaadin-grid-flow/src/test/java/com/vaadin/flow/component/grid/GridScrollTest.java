@@ -124,8 +124,7 @@ public class GridScrollTest {
             var viewportRangeField = communicator.getClass()
                     .getDeclaredField("viewportRange");
             viewportRangeField.setAccessible(true);
-            Range viewportRange = (Range) viewportRangeField
-                    .get(communicator);
+            Range viewportRange = (Range) viewportRangeField.get(communicator);
             return viewportRange.getStart() + "-" + viewportRange.getEnd();
 
         } catch (Exception e) {
