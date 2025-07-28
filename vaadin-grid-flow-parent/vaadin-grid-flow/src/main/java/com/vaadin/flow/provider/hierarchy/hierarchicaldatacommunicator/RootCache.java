@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.provider.hierarchy;
+package com.vaadin.flow.provider.hierarchy.hierarchicaldatacommunicator;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,7 +22,19 @@ import java.util.Map.Entry;
 
 import com.vaadin.flow.function.ValueProvider;
 
-class RootCache<T> extends Cache<T> {
+/**
+ * An extension of {@link Cache} that represents the root level in the
+ * hierarchy.
+ * <p>
+ * WARNING: This class is intended for internal use only and may change at any
+ * time without notice. It is not part of the public API and should not be used
+ * directly in your applications.
+ *
+ * @param <T>
+ *            the type of items in the cache
+ * @private
+ */
+public class RootCache<T> extends Cache<T> {
     private final ValueProvider<T, Object> itemIdProvider;
     private final Map<Object, ItemContext<T>> itemIdToContext = new HashMap<>();
 
@@ -39,7 +51,7 @@ class RootCache<T> extends Cache<T> {
             int flatIndex) {
         int index = flatIndex;
 
-        for (Entry<Integer, Cache<T>> entry : cache.indexToCache.entrySet()) {
+        for (Entry<Integer, Cache<T>> entry : cache.getCaches()) {
             var subCacheIndex = entry.getKey();
             var subCache = entry.getValue();
 
@@ -70,7 +82,7 @@ class RootCache<T> extends Cache<T> {
         }
 
         var flatIndex = cache.getFlatIndex(index);
-        var subCache = cache.indexToCache.get(index);
+        var subCache = cache.getCache(index);
         var restPath = Arrays.copyOfRange(path, 1, path.length);
 
         if (subCache != null && subCache.getFlatSize() > 0
@@ -86,17 +98,17 @@ class RootCache<T> extends Cache<T> {
         return itemIdToContext.get(itemId);
     }
 
-    void addItemContext(T item, Cache<T> cache, int index) {
+    protected void addItemContext(T item, Cache<T> cache, int index) {
         Object itemId = getItemId(item);
         itemIdToContext.put(itemId, new ItemContext<>(itemId, cache, index));
     }
 
-    void removeItemContext(T item) {
+    protected void removeItemContext(T item) {
         Object itemId = getItemId(item);
         itemIdToContext.remove(itemId);
     }
 
-    Object getItemId(T item) {
+    protected Object getItemId(T item) {
         return itemIdProvider.apply(item);
     }
 }

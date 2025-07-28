@@ -41,6 +41,8 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.ExecutionContext;
 import com.vaadin.flow.internal.Range;
 import com.vaadin.flow.internal.StateNode;
+import com.vaadin.flow.provider.hierarchy.hierarchicaldatacommunicator.Cache;
+import com.vaadin.flow.provider.hierarchy.hierarchicaldatacommunicator.RootCache;
 
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -176,9 +178,9 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
         }
 
         if (!cache.hasItem(index)) {
-            cache.setItems(index,
-                    fetchDataProviderChildren(cache.getParentItem(),
-                            Range.withOnly(index)).toList());
+            var items = fetchDataProviderChildren(cache.getParentItem(),
+                    Range.withOnly(index)).toList();
+            cache.setItems(index, items);
         }
 
         if (!cache.hasItem(index)) {
@@ -227,9 +229,8 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
                 range = range.restrictTo(Range.withLength(0, cache.getSize()));
 
                 var items = fetchDataProviderChildren(cache.getParentItem(),
-                        range);
-
-                cache.setItems(range.getStart(), items.toList());
+                        range).toList();
+                cache.setItems(range.getStart(), items);
             }
 
             var item = cache.getItem(index);

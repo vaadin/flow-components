@@ -13,30 +13,45 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.provider.hierarchy;
+package com.vaadin.flow.provider.hierarchy.hierarchicaldatacommunicator;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import com.vaadin.flow.function.SerializablePredicate;
 
-class Cache<T> implements Serializable {
+/**
+ * A cache for hierarchical data. Each instance of {@link Cache} represents a
+ * level in the hierarchy. It is used to store the size of the level, the items,
+ * and references to their child caches if they are expanded.
+ * <p>
+ * WARNING: This class is intended for internal use only and may change at any
+ * time without notice. It is not part of the public API and should not be used
+ * directly in your applications.
+ *
+ * @param <T>
+ *            the type of items in the cache
+ * @private
+ */
+public class Cache<T> implements Serializable {
     private final RootCache<T> rootCache;
     private final Cache<T> parentCache;
     private final int parentIndex;
     private int size;
 
-    final Map<Object, T> itemIdToItem = new HashMap<>();
-    final SortedMap<Integer, Object> indexToItemId = new TreeMap<>();
-    final SortedMap<Integer, Cache<T>> indexToCache = new TreeMap<>();
+    private final Map<Object, T> itemIdToItem = new HashMap<>();
+    private final SortedMap<Integer, Object> indexToItemId = new TreeMap<>();
+    private final SortedMap<Integer, Cache<T>> indexToCache = new TreeMap<>();
 
     protected Cache(RootCache<T> rootCache, Cache<T> parentCache,
             int parentIndex, int size) {
-        this.rootCache = rootCache != null ? rootCache : (RootCache<T>) this;
+        this.rootCache = rootCache;
         this.parentCache = parentCache;
         this.parentIndex = parentIndex;
         this.size = size;
@@ -77,10 +92,9 @@ class Cache<T> implements Serializable {
         itemIdToItem.replace(itemId, item);
     }
 
-    public void setItems(int startIndex, List<T> items) {
+    public final void setItems(int startIndex, List<T> items) {
         for (int i = 0; i < items.size(); i++) {
             var item = items.get(i);
-
             var itemId = rootCache.getItemId(item);
             var index = startIndex + i;
 
@@ -110,14 +124,18 @@ class Cache<T> implements Serializable {
         return indexToCache.containsKey(index);
     }
 
+    public Cache<T> getCache(int index) {
+        return indexToCache.get(index);
+    }
+
+    public Set<Entry<Integer, Cache<T>>> getCaches() {
+        return indexToCache.entrySet();
+    }
+
     public Cache<T> createCache(int index, int size) {
         var cache = new Cache<>(rootCache, this, index, size);
         indexToCache.put(index, cache);
         return cache;
-    }
-
-    public Cache<T> getCache(int index) {
-        return indexToCache.get(index);
     }
 
     public void removeDescendantCacheIf(

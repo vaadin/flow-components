@@ -13,9 +13,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.provider.hierarchy;
+package com.vaadin.flow.provider.hierarchy.hierarchicaldatacommunicator;
 
 import java.io.Serializable;
 
-record FlatIndexContext<T>(Cache<T> cache, int index) implements Serializable {
+/**
+ * A record that contains the cache holding the item for the given flat index,
+ * and the item's local index within that cache.
+ * <p>
+ * WARNING: This record is intended for internal use only and may change at any
+ * time without notice. It is not part of the public API and should not be used
+ * directly in your applications.
+ *
+ * @param <T>
+ *            the type of items in the cache
+ * @private
+ */
+public final record FlatIndexContext<T>(Cache<T> cache,
+        int index) implements Serializable {
 }
