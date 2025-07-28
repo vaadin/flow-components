@@ -15,30 +15,26 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedCondition;
 
+import com.vaadin.flow.component.grid.testbench.TreeGridElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/treegrid-expand-collapse-recursively")
-public class TreeGridExpandCollapseRecursivelyIT extends AbstractTreeGridIT {
+public class TreeGridExpandCollapseRecursivelyIT extends AbstractComponentIT {
 
-    private static final int itemsPerLevel = 5;
-    private static final int rowCount0 = itemsPerLevel;
-    private static final int rowCount1 = rowCount0 + rowCount0 * itemsPerLevel;
-    private static final int rowCount2 = rowCount1
-            + (rowCount1 - rowCount0) * itemsPerLevel;
-    private static final int rowCount3 = rowCount2
-            + (rowCount2 - rowCount1) * itemsPerLevel;
+    private static final int LEVEL_SIZE = 2;
 
+    private TreeGridElement treeGrid;
     private WebElement depthSelector;
     private WebElement expandButton;
     private WebElement collapseButton;
@@ -46,7 +42,7 @@ public class TreeGridExpandCollapseRecursivelyIT extends AbstractTreeGridIT {
     @Before
     public void before() {
         open();
-        setupTreeGrid();
+        treeGrid = $(TreeGridElement.class).first();
 
         depthSelector = findElement(By.tagName("vaadin-radio-group"));
 
@@ -57,117 +53,74 @@ public class TreeGridExpandCollapseRecursivelyIT extends AbstractTreeGridIT {
 
     @Test
     public void expandVariousDepth() {
-        Assert.assertEquals(rowCount0, getTreeGrid().getRowCount());
-
-        selectDepth(0);
+        selectRecursionDepth(0);
         expandButton.click();
-        getTreeGrid().scrollToRow(rowCount1);
+        assertNumberOfExpandedLevels(1);
+        assertRowContents("Item-0", "Item-0-0", "Item-0-1");
 
-        waitUntil(input -> getTreeGrid().getRowCount() == rowCount1, 20);
-        Assert.assertEquals(itemsPerLevel,
-                getTreeGrid().getNumberOfExpandedRows());
-
-        assertCellTexts(0, 0,
-                new String[] { "Item-0", "Item-0-0", "Item-0-1" });
-
-        selectDepth(1);
+        selectRecursionDepth(1);
         expandButton.click();
+        assertNumberOfExpandedLevels(2);
+        assertRowContents("Item-0", "Item-0-0", "Item-0-0-0", "Item-0-0-1");
 
-        waitUntil(input -> getTreeGrid().getNumberOfExpandedRows() == rowCount1,
-                20);
-
-        assertCellTexts(0, 0, new String[] { "Item-0", "Item-0-0", "Item-0-0-0",
-                "Item-0-0-1" });
-
-        selectDepth(2);
+        selectRecursionDepth(2);
         expandButton.click();
-
-        waitUntil(input -> getTreeGrid().getNumberOfExpandedRows() == rowCount2,
-                20);
-
-        assertCellTexts(0, 0, new String[] { "Item-0", "Item-0-0", "Item-0-0-0",
-                "Item-0-0-0-0", "Item-0-0-0-1" });
-
-        selectDepth(3);
-        expandButton.click();
-
-        waitUntil(input -> getTreeGrid().getNumberOfExpandedRows() == rowCount3,
-                20);
-
-        assertCellTexts(0, 0, new String[] { "Item-0", "Item-0-0", "Item-0-0-0",
-                "Item-0-0-0-0", "Item-0-0-0-0-0", "Item-0-0-0-0-1" });
+        assertNumberOfExpandedLevels(3);
+        assertRowContents("Item-0", "Item-0-0", "Item-0-0-0", "Item-0-0-0-0",
+                "Item-0-0-0-1");
     }
 
-    @Test(timeout = 5000)
+    @Test
     public void expandAndCollapseAllItems() {
-        Assert.assertEquals(rowCount0, getTreeGrid().getRowCount());
+        selectRecursionDepth(2);
 
-        selectDepth(3);
         expandButton.click();
-
-        waitUntil(
-                input -> getTreeGrid().getNumberOfExpandedRows() == rowCount3);
+        assertNumberOfExpandedLevels(3);
 
         collapseButton.click();
-
-        waitUntil(input -> getTreeGrid().getNumberOfExpandedRows() == 0);
-        Assert.assertEquals(rowCount0, getTreeGrid().getRowCount());
+        assertNumberOfExpandedLevels(0);
     }
 
     @Test
     public void partialCollapse() {
-        Assert.assertEquals(rowCount0, getTreeGrid().getRowCount());
-
-        selectDepth(3);
+        selectRecursionDepth(2);
         expandButton.click();
+        assertNumberOfExpandedLevels(3);
 
-        final AtomicInteger expandedRows = new AtomicInteger(rowCount3);
-        waitUntil(input -> getTreeGrid()
-                .getNumberOfExpandedRows() == expandedRows.get(), 20);
-
-        selectDepth(1);
+        selectRecursionDepth(1);
         collapseButton.click();
+        assertNumberOfExpandedLevels(0);
 
-        expandedRows.addAndGet(-rowCount1);
-        waitUntil(input -> getTreeGrid()
-                .getNumberOfExpandedRows() == expandedRows.get(), 20);
-        Assert.assertEquals(rowCount0, getTreeGrid().getRowCount());
-
-        selectDepth(0);
+        selectRecursionDepth(0);
         expandButton.click();
-
-        waitUntil(new ExpectedCondition<Boolean>() {
-            @Override
-            public Boolean apply(WebDriver input) {
-                return getTreeGrid().getRowCount() == rowCount1;
-            }
-
-            @Override
-            public String toString() {
-                return "Tree Grid has " + getTreeGrid().getRowCount()
-                        + " rows intead of exected " + rowCount1;
-            }
-        }, 20);
-        Assert.assertEquals(expandedRows.addAndGet(rowCount0),
-                getTreeGrid().getNumberOfExpandedRows());
+        assertNumberOfExpandedLevels(1);
 
         // Open just one subtree to see if it is still fully expanded
-        getTreeGrid().getExpandToggleElement(2, 0).click();
-
-        expandedRows.addAndGet(1);
-        waitUntil(input -> getTreeGrid()
-                .getNumberOfExpandedRows() == expandedRows.get(), 20);
-        waitUntil(input -> !getTreeGrid().isLoadingExpandedRows(), 20);
-
-        assertCellTexts(0, 0, new String[] { "Item-0", "Item-0-0", "Item-0-1",
-                "Item-0-1-0", "Item-0-1-0-0", "Item-0-1-0-0-0" });
-
+        treeGrid.expandWithClick(2, 0);
+        assertRowContents("Item-0", "Item-0-0", "Item-0-1", "Item-0-1-0",
+                "Item-0-1-0-0");
     }
 
-    private void selectDepth(int depth) {
+    private void selectRecursionDepth(int depth) {
         WebElement radiobutton = depthSelector
                 .findElements(By.tagName("vaadin-radio-button")).get(depth);
         executeScript("arguments[0].checked=true", radiobutton);
     }
 
+    private void assertNumberOfExpandedLevels(int expectedNumberOfLevels) {
+        waitUntilNot((driver) -> treeGrid.isLoadingExpandedRows());
+
+        // Calculate the total number of rows in a tree with the given number of
+        // expanded levels using a geometric-like series: 2 + 6 + 14 + 30 ...
+        // when LEVEL_SIZE is 2.
+        int expectedRowCount = IntStream.rangeClosed(0, expectedNumberOfLevels)
+                .reduce(0, (sum, n) -> sum + (int) Math.pow(LEVEL_SIZE, n + 1));
+        Assert.assertEquals(expectedRowCount, treeGrid.getRowCount());
+    }
+
+    private void assertRowContents(String... expected) {
+        List<String> actual = IntStream.range(0, expected.length)
+                .mapToObj(i -> treeGrid.getRow(i).getText()).toList();
+        Assert.assertEquals(Arrays.asList(expected), actual);
+    }
 }

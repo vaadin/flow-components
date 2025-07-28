@@ -36,6 +36,7 @@ export type GridServer = {
   deselect: ((key: string) => void) & sinon.SinonSpy;
   deselectAll: () => void & sinon.SinonSpy;
   setDetailsVisible: ((key: string) => void) & sinon.SinonSpy;
+  updateExpandedState: ((key: string, expanded: boolean) => void) & sinon.SinonSpy;
   setRequestedRange: ((firstIndex: number, size: number) => void) & sinon.SinonSpy;
   setParentRequestedRanges: ((ranges: { firstIndex: number; size: number; parentKey: string }[]) => void) &
     sinon.SinonSpy;
@@ -47,6 +48,7 @@ export type Item = {
   key: string;
   name?: string;
   price?: number,
+  children?: boolean;
   selectable?: boolean;
   selected?: boolean;
   detailsOpened?: boolean;
@@ -97,6 +99,7 @@ export function init(grid: FlowGrid): void {
     deselect: sinon.spy(),
     deselectAll: sinon.spy(),
     setDetailsVisible: sinon.spy(),
+    updateExpandedState: sinon.spy(),
     setRequestedRange: sinon.spy(),
     setParentRequestedRanges: sinon.spy(),
     sortersChanged: sinon.spy(),

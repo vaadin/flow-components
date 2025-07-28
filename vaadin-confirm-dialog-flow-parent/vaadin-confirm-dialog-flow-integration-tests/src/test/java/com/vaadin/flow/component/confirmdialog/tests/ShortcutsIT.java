@@ -40,7 +40,7 @@ public class ShortcutsIT extends AbstractComponentIT {
     public void clickShortcut_dialogClosed() {
         openDialog.click();
 
-        waitForElementPresent(By.tagName("vaadin-confirm-dialog-overlay"));
+        waitForElementPresent(By.tagName("vaadin-confirm-dialog"));
 
         ConfirmDialogElement confirmDialog = getConfirmDialog();
 
@@ -49,7 +49,7 @@ public class ShortcutsIT extends AbstractComponentIT {
         shortcutButton.focus();
         shortcutButton.sendKeys("x");
 
-        waitForElementNotPresent(By.tagName("vaadin-confirm-dialog-overlay"));
+        waitForElementNotPresent(By.tagName("vaadin-confirm-dialog"));
     }
 
     private ConfirmDialogElement getConfirmDialog() {
