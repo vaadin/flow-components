@@ -150,14 +150,11 @@ public class Cache<T> implements Serializable {
         });
     }
 
-    public int getFlatIndex(int localIndex) {
-        var clampedIndex = Math.min(size - 1, localIndex);
-        return indexToCache.entrySet().stream().reduce(clampedIndex,
-                (prev, entry) -> {
-                    var index = entry.getKey();
-                    var subCache = entry.getValue();
-                    return clampedIndex > index ? prev + subCache.getFlatSize()
-                            : prev;
-                }, Integer::sum);
+    public int getFlatIndex(int index) {
+        return indexToCache.entrySet().stream().reduce(index, (prev, entry) -> {
+            var subCacheIndex = entry.getKey();
+            var subCache = entry.getValue();
+            return index > subCacheIndex ? prev + subCache.getFlatSize() : prev;
+        }, Integer::sum);
     }
 }
