@@ -1075,7 +1075,7 @@ public class TreeGrid<T> extends Grid<T>
         // the tree backward from the start (from higher to lower indexes).
         // This strategy ensures that all nearby items are cached ahead of time,
         // preventing viewport shifts that would otherwise occur when calling
-        // setRequestedRange which expands items from lower to higher indexes
+        // setViewportRange which expands items from lower to higher indexes
         // when not found in the cache.
         dataCommunicator.preloadRange(flatIndex, -(buffer + pageSize));
 
@@ -1087,7 +1087,7 @@ public class TreeGrid<T> extends Grid<T>
         var startPage = Math.max(0, (flatIndex - buffer) / pageSize);
         var endPage = (flatIndex + buffer) / pageSize;
 
-        getDataCommunicator().setRequestedRange(startPage * pageSize,
+        getDataCommunicator().setViewportRange(startPage * pageSize,
                 (endPage - startPage + 1) * pageSize);
 
         return flatIndex;

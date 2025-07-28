@@ -149,10 +149,10 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
         requestFlush();
     }
 
-    /** @see DataCommunicator#setRequestedRange(int, int) */
+    /** @see DataCommunicator#setViewportRange(int, int) */
     @Override
-    public void setRequestedRange(int start, int length) {
-        viewportRange = computeRequestedRange(start, length);
+    public void setViewportRange(int start, int length) {
+        viewportRange = computeViewportRange(start, length);
         requestFlush();
     }
 
