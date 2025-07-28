@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.data.provider.ArrayUpdater;
-import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataChangeEvent;
 import com.vaadin.flow.data.provider.DataCommunicator;
@@ -227,14 +226,15 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
 
                 range = range.restrictTo(Range.withLength(0, cache.getSize()));
 
-                cache.setItems(range.getStart(),
-                        fetchDataProviderChildren(cache.getParentItem(), range)
-                                .toList());
+                var items = fetchDataProviderChildren(cache.getParentItem(),
+                        range);
+
+                cache.setItems(range.getStart(), items.toList());
             }
 
             var item = cache.getItem(index);
 
-            if (!isFlatHierarchy() && isExpanded(item) && !cache.hasCache(index)
+            if (isExpanded(item) && !cache.hasCache(index)
                     && (direction > 0 || result.size() > 0)) {
                 var subCache = cache.createCache(index,
                         getDataProviderChildCount(item));
@@ -269,15 +269,15 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
             viewportRange = Range.withLength(0, viewportRange.length());
         }
 
-        int length = viewportRange.length();
-        int start = viewportRange.getStart();
-        int end = viewportRange.getEnd();
+        var length = viewportRange.length();
+        var start = viewportRange.getStart();
+        var end = viewportRange.getEnd();
 
-        List<T> result = preloadRange(start, length);
+        var result = preloadRange(start, length);
 
-        int flatSize = rootCache.getFlatSize();
+        var flatSize = rootCache.getFlatSize();
 
-        Update update = arrayUpdater.startUpdate(flatSize);
+        var update = arrayUpdater.startUpdate(flatSize);
         if (start > 0) {
             update.clear(0, start);
         }
@@ -288,11 +288,6 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
         pendingFlush = false;
     }
 
-    public boolean isFlatHierarchy() {
-        // return getDataProvider().isFlatHierarchy();
-        return false;
-    }
-
     /** @see HierarchicalDataCommunicator#hasChildren(T) */
     public boolean hasChildren(T item) {
         return getDataProvider().hasChildren(item);
@@ -300,10 +295,6 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
 
     /** @see HierarchicalDataCommunicator#getDepth(T) */
     public int getDepth(T item) {
-        // if (isFlatHierarchy()) {
-        // return getDataProvider().getDepth(item);
-        // }
-
         if (rootCache == null) {
             return -1;
         }
@@ -331,7 +322,7 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
 
     /** @see HierarchicalDataCommunicator#expand(Collection) */
     public Collection<T> expand(Collection<T> items) {
-        List<T> expandedItems = items.stream().filter(item -> {
+        var expandedItems = items.stream().filter(item -> {
             if (!hasChildren(item)) {
                 return false;
             }
@@ -339,11 +330,7 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
             return expandedItemIds.add(getDataProvider().getId(item));
         }).toList();
 
-        if (isFlatHierarchy()) {
-            reset();
-        } else {
-            requestFlush();
-        }
+        requestFlush();
 
         return expandedItems;
     }
@@ -355,13 +342,11 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
 
     /** @see HierarchicalDataCommunicator#collapse(Collection) */
     public Collection<T> collapse(Collection<T> items) {
-        List<T> collapsedItems = items.stream().filter(
+        var collapsedItems = items.stream().filter(
                 item -> expandedItemIds.remove(getDataProvider().getId(item)))
                 .toList();
 
-        if (isFlatHierarchy()) {
-            reset();
-        } else if (rootCache != null) {
+        if (rootCache != null) {
             rootCache.removeDescendantCacheIf(
                     (cache) -> !isExpanded(cache.getParentItem()));
             requestFlush();
@@ -466,12 +451,8 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
 
     @SuppressWarnings("unchecked")
     private Stream<T> fetchDataProviderChildren(T parent, Range range) {
-        // HierarchicalQuery<T, Object> query = new HierarchicalQuery<>(
-        // range.getStart(), range.length(), getBackEndSorting(),
-        // getInMemorySorting(), getFilter(), expandedItemIds, parent);
-        HierarchicalQuery<T, Object> query = new HierarchicalQuery<>(
-                range.getStart(), range.length(), getBackEndSorting(),
-                getInMemorySorting(), getFilter(), parent);
+        var query = new HierarchicalQuery<>(range.getStart(), range.length(),
+                getBackEndSorting(), getInMemorySorting(), getFilter(), parent);
 
         return ((HierarchicalDataProvider<T, Object>) getDataProvider())
                 .fetchChildren(query);
@@ -479,10 +460,7 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
 
     @SuppressWarnings("unchecked")
     private int getDataProviderChildCount(T parent) {
-        // HierarchicalQuery<T, Object> query = new HierarchicalQuery<>(
-        // getFilter(), expandedItemIds, parent);
-        HierarchicalQuery<T, Object> query = new HierarchicalQuery<>(
-                getFilter(), parent);
+        var query = new HierarchicalQuery<>(getFilter(), parent);
 
         return ((HierarchicalDataProvider<T, Object>) getDataProvider())
                 .getChildCount(query);

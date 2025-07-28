@@ -68,12 +68,12 @@ class Cache<T> implements Serializable {
     }
 
     public T getItem(int index) {
-        Object itemId = indexToItemId.get(index);
+        var itemId = indexToItemId.get(index);
         return itemIdToItem.get(itemId);
     }
 
     public void refreshItem(T item) {
-        Object itemId = rootCache.getItemId(item);
+        var itemId = rootCache.getItemId(item);
         itemIdToItem.replace(itemId, item);
     }
 
@@ -111,7 +111,7 @@ class Cache<T> implements Serializable {
     }
 
     public Cache<T> createCache(int index, int size) {
-        Cache<T> cache = new Cache<>(rootCache, this, index, size);
+        var cache = new Cache<>(rootCache, this, index, size);
         indexToCache.put(index, cache);
         return cache;
     }
@@ -133,7 +133,7 @@ class Cache<T> implements Serializable {
     }
 
     public int getFlatIndex(int localIndex) {
-        int clampedIndex = Math.min(size - 1, localIndex);
+        var clampedIndex = Math.min(size - 1, localIndex);
         return indexToCache.entrySet().stream().reduce(clampedIndex,
                 (prev, entry) -> {
                     var index = entry.getKey();
