@@ -293,16 +293,14 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     @Test
     public void customItemFilter() {
         filterBox.openPopup();
-        waitForElementVisible(By.tagName("vaadin-combo-box-overlay"));
 
         filterBox.setFilter("Person");
-
-        waitForElementNotPresent(By.tagName("vaadin-combo-box-overlay"));
+        WebElement overlay = filterBox.$("vaadin-combo-box-overlay").first();
 
         Assert.assertEquals(
                 "None of the items should match the filter "
                         + "and overlay is not displayed",
-                0, $("vaadin-combo-box-overlay").all().size());
+                Boolean.FALSE.toString(), overlay.getDomProperty("opened"));
 
         filterBox.setFilter("10");
 
