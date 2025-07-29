@@ -134,7 +134,7 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
         // opens the dropdown
         clickElementWithJs(input);
 
-        WebElement item = getItemElements().get(0);
+        WebElement item = getItemElements(combo).get(0);
         WebElement button = item.findElement(By.cssSelector("button"));
         clickElementWithJs(button);
 
