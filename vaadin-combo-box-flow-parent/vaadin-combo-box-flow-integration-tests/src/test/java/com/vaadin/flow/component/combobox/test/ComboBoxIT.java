@@ -253,23 +253,23 @@ public class ComboBoxIT extends AbstractComboBoxIT {
         Assert.assertEquals(
                 "First page should be loaded after opening overlay.", 50,
                 getLoadedItems(comboBox).size());
-        assertRendered();
+        assertRendered(comboBox);
 
         scrollToItem(comboBox, 50);
         Assert.assertEquals("Second page should be loaded after scrolling.",
                 100, getLoadedItems(comboBox).size());
     }
 
-    private void assertRendered() {
+    private void assertRendered(ComboBoxElement comboBox) {
         try {
             waitUntil(driver -> {
-                List<String> items = getRenderedItems();
+                List<String> items = getRenderedItems(comboBox);
                 return items.size() > 0 && items.get(0).length() > 0;
             });
         } catch (TimeoutException e) {
             Assert.fail("Timeout: no items with text content rendered.");
         }
-        List<String> items = getRenderedItems();
+        List<String> items = getRenderedItems(comboBox);
         Assert.assertTrue("Expected more than 10 items to be rendered.",
                 items.size() > 10);
         items.forEach(item -> {
@@ -282,8 +282,8 @@ public class ComboBoxIT extends AbstractComboBoxIT {
         });
     }
 
-    private List<String> getRenderedItems() {
-        return getItemElements().stream()
+    private List<String> getRenderedItems(ComboBoxElement comboBox) {
+        return getItemElements(comboBox).stream()
                 .map(element -> element.getPropertyString("innerHTML"))
                 .collect(Collectors.toList());
     }

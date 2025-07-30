@@ -73,7 +73,7 @@ public class ComponentRendererIT extends AbstractComboBoxIT {
                 .id("multiple-pages-of-items");
 
         comboBox.openPopup();
-        waitUntilTextInContent("Song");
+        waitUntilTextInContent(comboBox, "Song");
 
         for (int i = 0; i < 600; i += 50) {
             scrollToItem(comboBox, i);
