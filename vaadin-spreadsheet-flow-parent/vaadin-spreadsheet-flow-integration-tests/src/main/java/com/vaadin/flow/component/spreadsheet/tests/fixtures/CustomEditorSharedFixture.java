@@ -32,20 +32,17 @@ public class CustomEditorSharedFixture implements SpreadsheetFixture {
         spreadsheet.setShowCustomEditorOnFocus(true);
 
         var cells = new ArrayList<Cell>();
-        for (int i = 0; i < spreadsheet.getColumns(); i++) {
-            cells.add(spreadsheet.createCell(COMPONENT_ROW_INDEX, i, ""));
-        }
-        for (int i = 0; i < spreadsheet.getColumns(); i++) {
-            cells.add(spreadsheet.createCell(COMPONENT_ROW_INDEX + 1, i, ""));
-        }
+        cells.add(spreadsheet.createCell(COMPONENT_ROW_INDEX,
+                COMPONENT_COL_INDEX, ""));
+        cells.add(spreadsheet.createCell(COMPONENT_ROW_INDEX + 1,
+                COMPONENT_COL_INDEX, ""));
         spreadsheet.refreshCells(cells);
     }
 
     private static class CustomEditorFactory
             implements SpreadsheetComponentFactory {
 
-        private TextField editorColB;
-        private TextField editorColC;
+        private TextField textField;
 
         @Override
         public Component getCustomComponentForCell(Cell cell, int rowIndex,
@@ -60,36 +57,19 @@ public class CustomEditorSharedFixture implements SpreadsheetFixture {
             if (!sheet.getSheetName().equals("Sheet1")
                     || rowIndex < COMPONENT_ROW_INDEX
                     || rowIndex > COMPONENT_ROW_INDEX + 1
-                    || columnIndex < COMPONENT_COL_INDEX
-                    || columnIndex > COMPONENT_COL_INDEX + 1) {
+                    || columnIndex != COMPONENT_COL_INDEX) {
                 return null;
             }
 
-            if (columnIndex == COMPONENT_COL_INDEX) {
-                if (editorColB == null) {
-                    editorColB = new TextField();
-                    editorColB.setId("editorColB");
-                    editorColB.addValueChangeListener(
+            if (textField == null) {
+                textField = new TextField();
+                textField.addValueChangeListener(
                             e -> spreadsheet.refreshCells(
                                     spreadsheet.createCell(activeCell.getRow(),
                                             activeCell.getColumn(),
                                             e.getValue())));
                 }
-                return editorColB;
-            } else if (columnIndex == COMPONENT_COL_INDEX + 1) {
-                if (editorColC == null) {
-                    editorColC = new TextField();
-                    editorColC.setId("editorColC");
-                    editorColC.addValueChangeListener(
-                            e -> spreadsheet.refreshCells(
-                                    spreadsheet.createCell(activeCell.getRow(),
-                                            activeCell.getColumn(),
-                                            e.getValue())));
-                }
-                return editorColC;
-            }
-
-            return null;
+                return textField;
         }
 
         private CellAddress activeCell;

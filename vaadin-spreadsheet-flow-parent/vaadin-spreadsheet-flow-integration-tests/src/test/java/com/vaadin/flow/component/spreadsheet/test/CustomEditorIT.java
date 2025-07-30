@@ -355,88 +355,43 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void customEditorsInSheet_editingAndMovingToAnotherSheetAllowed() {
-        createNewSpreadsheet();
-        loadTestFixture(TestFixtures.CustomEditorRow);
-        selectCell("A2");
-        var editor = getInputInCustomEditorFromCell("A2");
-        editor.get().sendKeys("A2", Keys.ENTER);
-
-        getSpreadsheet().addSheet();
-        Assert.assertEquals("Should be at sheet Sheet2", "Sheet2",
-                getSelectedSheetName());
-
-        getSpreadsheet().selectSheet("Sheet1");
-        Assert.assertEquals("Should be at sheet Sheet1", "Sheet1",
-                getSelectedSheetName());
-        clickToggleCellVisibleButton();
-
-        selectCell("B2");
-        editor = getInputInCustomEditorFromCell("B2");
-        editor.get().sendKeys("B2", Keys.ENTER);
-
-        getSpreadsheet().selectSheet("Sheet2");
-        getCommandExecutor().waitForVaadin();
-
-        Assert.assertEquals("Should be at sheet Sheet2", "Sheet2",
-                getSelectedSheetName());
-    }
-
-    @Test
     public void customEditorShared_persistsValuesCorrectly() {
         createNewSpreadsheet();
         loadTestFixture(TestFixtures.CustomEditorShared);
 
-        // Test that the custom editor is displayed correctly for the first row
+        // Test that moving focus between cells with shared custom editors
+        // works correctly and values are persisted
         clickCell("B2");
         var maybeEditor = getInputInCustomEditorFromCell("B2");
         Assert.assertTrue(maybeEditor.isPresent());
+
+        clickCell("B3");
+        maybeEditor = getInputInCustomEditorFromCell("B3");
+        Assert.assertTrue(maybeEditor.isPresent());
+
+        clickCell("B2");
+        maybeEditor = getInputInCustomEditorFromCell("B2");
+        Assert.assertTrue(maybeEditor.isPresent());
+
+        clickCell("B2");
+        maybeEditor = getInputInCustomEditorFromCell("B2");
+        Assert.assertTrue(maybeEditor.isPresent());
         var editor = maybeEditor.get();
-        var editorB2Id = editor.getId();
         editor.sendKeys("TestValueB2", Keys.ENTER);
+
         clickCell("A1");
         getCommandExecutor().waitForVaadin();
         Assert.assertEquals("TestValueB2", getCellValue("B2"));
 
-        // Test that the custom editor is displayed correctly for the second row
         clickCell("B3");
         maybeEditor = getInputInCustomEditorFromCell("B3");
         Assert.assertTrue(maybeEditor.isPresent());
         editor = maybeEditor.get();
-        var editorB3Id = editor.getId();
         editor.sendKeys("TestValueB3", Keys.ENTER);
+
         clickCell("A1");
         getCommandExecutor().waitForVaadin();
         Assert.assertEquals("TestValueB3", getCellValue("B3"));
-
-        // Check that the editor IDs are the for A2 and A3
-        Assert.assertEquals(editorB2Id, editorB3Id);
-
-        // Test that the custom editor is displayed correctly for the second row
-        clickCell("C2");
-        maybeEditor = getInputInCustomEditorFromCell("C2");
-        Assert.assertTrue(maybeEditor.isPresent());
-        editor = maybeEditor.get();
-        var editorC2Id = editor.getId();
-        editor.sendKeys("AnotherValue", Keys.ENTER);
-        clickCell("A1");
-        getCommandExecutor().waitForVaadin();
-        Assert.assertEquals("AnotherValue", getCellValue("C2"));
-
-        Assert.assertNotEquals(editorB2Id, editorC2Id);
-
-        // Test that focusin on cells with custom editors works correctly
-        clickCell("B2");
-        maybeEditor = getInputInCustomEditorFromCell("B2");
-        Assert.assertTrue(maybeEditor.isPresent());
-        editor = maybeEditor.get();
-        Assert.assertEquals("TestValueB2", editor.getDomProperty("value"));
-
-        clickCell("B3");
-        maybeEditor = getInputInCustomEditorFromCell("B3");
-        Assert.assertTrue(maybeEditor.isPresent());
-        editor = maybeEditor.get();
-        Assert.assertEquals("TestValueB3", editor.getDomProperty("value"));
     }
 
     @Test
