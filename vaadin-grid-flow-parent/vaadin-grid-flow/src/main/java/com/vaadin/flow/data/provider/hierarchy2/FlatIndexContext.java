@@ -13,13 +13,13 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package com.vaadin.flow.data.provider.hierarchy;
+package com.vaadin.flow.data.provider.hierarchy2;
 
 import java.io.Serializable;
 
 /**
- * A record that contains the item ID, the cache holding the item, and the
- * item's local index within that cache.
+ * A record that contains the cache holding the item for the given flat index,
+ * and the item's local index within that cache.
  * <p>
  * WARNING: This record is intended for internal use only and may change at any
  * time without notice. It is not part of the public API and should not be used
@@ -28,6 +28,6 @@ import java.io.Serializable;
  * @param <T>
  *            the type of items in the cache
  */
-final record ItemContext<T>(Object id, Cache<T> cache,
+final record FlatIndexContext<T>(Cache<T> cache,
         int index) implements Serializable {
 }

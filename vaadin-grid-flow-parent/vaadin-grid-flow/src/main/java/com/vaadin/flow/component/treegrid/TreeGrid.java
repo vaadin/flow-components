@@ -47,7 +47,7 @@ import com.vaadin.flow.data.provider.hierarchy.HasHierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalQuery;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
-import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataCommunicator;
+import com.vaadin.flow.data.provider.hierarchy2.HierarchicalDataCommunicator;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -530,12 +530,10 @@ public class TreeGrid<T> extends Grid<T>
      */
     public Column<T> addHierarchyColumn(ValueProvider<T, ?> valueProvider) {
         Column<T> column = addColumn(LitRenderer.<T> of(
-                "<vaadin-grid-tree-toggle @click=${onClick} .leaf=${!item.children} .expanded=${live(item.expanded)} .level=${item.level}>"
+                "<vaadin-grid-tree-toggle @click=${onClick} .leaf=${!item.children} .expanded=${model.expanded} .level=${item.level}>"
                         + "${item.name}</vaadin-grid-tree-toggle>")
                 .withProperty("children",
                         item -> getDataCommunicator().hasChildren(item))
-                .withProperty("expanded",
-                        item -> getDataCommunicator().isExpanded(item))
                 .withProperty("level",
                         item -> getDataCommunicator().getDepth(item))
                 .withProperty("name", value -> {
