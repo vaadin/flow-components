@@ -63,13 +63,11 @@ public class CustomEditorSharedFixture implements SpreadsheetFixture {
 
             if (textField == null) {
                 textField = new TextField();
-                textField.addValueChangeListener(
-                            e -> spreadsheet.refreshCells(
-                                    spreadsheet.createCell(activeCell.getRow(),
-                                            activeCell.getColumn(),
-                                            e.getValue())));
-                }
-                return textField;
+                textField.addValueChangeListener(e -> spreadsheet.refreshCells(
+                        spreadsheet.createCell(activeCell.getRow(),
+                                activeCell.getColumn(), e.getValue())));
+            }
+            return textField;
         }
 
         private CellAddress activeCell;
