@@ -50,7 +50,7 @@ public class ItemCountEstimateComboBoxIT extends AbstractItemCountComboBoxIT {
 
         verifyItemsCount(undefinedCountBackendItemsCount);
         scrollToItem(comboBoxElement, undefinedCountBackendItemsCount - 1);
-        waitUntilTextInContent(
+        waitUntilTextInContent(comboBoxElement,
                 "Callback Item " + (undefinedCountBackendItemsCount - 1));
 
         // check that new estimate is not applied after item count is known
@@ -58,7 +58,7 @@ public class ItemCountEstimateComboBoxIT extends AbstractItemCountComboBoxIT {
 
         verifyItemsCount(undefinedCountBackendItemsCount);
         scrollToItem(comboBoxElement, undefinedCountBackendItemsCount - 1);
-        waitUntilTextInContent(
+        waitUntilTextInContent(comboBoxElement,
                 "Callback Item " + (undefinedCountBackendItemsCount - 1));
     }
 

@@ -35,7 +35,7 @@ public class ClearItemsIT extends AbstractComboBoxIT {
     @Test
     public void loadItems_setEmptyDataSet_open_loadingStateResolved() {
         combo.openPopup();
-        assertRendered("foo");
+        assertRendered(combo, "foo");
         combo.closePopup();
         clickButton("set-empty-data-provider");
         combo.openPopup();
@@ -46,7 +46,7 @@ public class ClearItemsIT extends AbstractComboBoxIT {
     @Test
     public void loadItems_clearAndRefreshDataProvider_open_loadingStateResolved() {
         combo.openPopup();
-        assertRendered("foo");
+        assertRendered(combo, "foo");
         combo.closePopup();
         clickButton("clear-and-refresh-data-provider");
         combo.openPopup();
