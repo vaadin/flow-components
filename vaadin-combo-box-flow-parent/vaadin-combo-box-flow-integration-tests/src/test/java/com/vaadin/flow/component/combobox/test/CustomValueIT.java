@@ -59,7 +59,7 @@ public class CustomValueIT extends AbstractComboBoxIT {
     @Test
     public void typeAndEnterExistingValue_noCustomValueChanges() {
         combo.sendKeys("foo");
-        assertRendered("foo");
+        assertRendered(combo, "foo");
         combo.sendKeys(Keys.ENTER);
         assertCustomValueChanges();
     }
@@ -67,7 +67,7 @@ public class CustomValueIT extends AbstractComboBoxIT {
     @Test
     public void typeAndEnterExistingValue_valueChanged() {
         combo.sendKeys("foo");
-        assertRendered("foo");
+        assertRendered(combo, "foo");
         combo.sendKeys(Keys.ENTER);
         assertValueChanges("foo");
     }
@@ -84,7 +84,7 @@ public class CustomValueIT extends AbstractComboBoxIT {
     @Test
     public void enterExistingValue_clearAndEnter_noCustomValueChange() {
         combo.sendKeys("foo");
-        assertRendered("foo");
+        assertRendered(combo, "foo");
         combo.sendKeys(Keys.ENTER);
         repeatKey(Keys.BACK_SPACE, 3);
         combo.sendKeys(Keys.ENTER);
@@ -94,7 +94,7 @@ public class CustomValueIT extends AbstractComboBoxIT {
     @Test
     public void enterExistingValue_clearAndEnter_valueChangedToNull() {
         combo.sendKeys("foo");
-        assertRendered("foo");
+        assertRendered(combo, "foo");
         combo.sendKeys(Keys.ENTER);
         repeatKey(Keys.BACK_SPACE, 3);
         combo.sendKeys(Keys.ENTER);
@@ -120,13 +120,13 @@ public class CustomValueIT extends AbstractComboBoxIT {
         assertValueChanges("bar");
 
         combo.openPopup();
-        waitUntilTextInContent("bar");
+        waitUntilTextInContent(combo, "bar");
         assertLoadedItemsCount(
                 "Expected 2 items to be loaded after adding the custom value",
                 2, combo);
-        assertRendered("foo");
-        assertRendered("bar");
-        assertItemSelected("bar");
+        assertRendered(combo, "foo");
+        assertRendered(combo, "bar");
+        assertItemSelected(combo, "bar");
 
         repeatKey(Keys.BACK_SPACE, 3);
         combo.sendKeys("foo", Keys.ENTER);
@@ -134,7 +134,7 @@ public class CustomValueIT extends AbstractComboBoxIT {
         assertValueChanges("bar", "foo");
         combo.openPopup();
         assertLoadedItemsCount("Expected 2 items to be loaded", 2, combo);
-        assertItemSelected("foo");
+        assertItemSelected(combo, "foo");
 
         combo.sendKeys("baz", Keys.ENTER);
         assertCustomValueChanges("bar", "foobaz");
@@ -143,7 +143,7 @@ public class CustomValueIT extends AbstractComboBoxIT {
         assertLoadedItemsCount(
                 "Expected 3 items to be loaded after adding the custom value",
                 3, combo);
-        assertItemSelected("foobaz");
+        assertItemSelected(combo, "foobaz");
 
         repeatKey(Keys.BACK_SPACE, 6);
         combo.sendKeys(Keys.ENTER);
