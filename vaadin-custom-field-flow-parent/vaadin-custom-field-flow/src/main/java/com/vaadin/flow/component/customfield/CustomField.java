@@ -55,6 +55,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         HasTheme, HasValidationProperties {
 
     private final DomListenerRegistration updateValueListener;
+
     /**
      * Default constructor.
      */
@@ -73,7 +74,8 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
     public CustomField(T defaultValue) {
         super(defaultValue);
         // Force a value update when the change event generated
-        updateValueListener = getElement().addEventListener("change", e -> this.updateValue());
+        updateValueListener = getElement().addEventListener("change",
+                e -> this.updateValue());
         getElement().setProperty("manualValidation", true);
     }
 
@@ -211,8 +213,9 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
     }
 
     /**
-     * Remove the listener that calls {@link #updateValue()} when an inner field "onchange" event is sent.
-     * That means the {@link #updateValue()}  needs to be called programmatically in the implementation of the CustomField
+     * Remove the listener that calls {@link #updateValue()} when an inner field
+     * "onchange" event is sent. That means the {@link #updateValue()} needs to
+     * be called programmatically in the implementation of the CustomField
      */
     public void disableUpdateValueOnChange() {
         updateValueListener.remove();

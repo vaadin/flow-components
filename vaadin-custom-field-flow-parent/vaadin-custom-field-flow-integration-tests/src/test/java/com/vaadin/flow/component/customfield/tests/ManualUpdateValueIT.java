@@ -18,7 +18,6 @@ package com.vaadin.flow.component.customfield.tests;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.html.HTMLDivElement;
 
 import com.vaadin.flow.component.customfield.testbench.CustomFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
