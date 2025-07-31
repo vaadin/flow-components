@@ -482,15 +482,16 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
      * @param customEditors
      *            a map of cell keys to custom editor widgets
      */
-    public void removeCellCustomEditors(HashMap<String, Widget> customEditors) {
+    public void removeCellCustomEditors(HashMap<String, Slot> customEditors) {
         if (customEditors == null || customEditors.isEmpty()) {
             return;
         }
 
-        for (var customEditor : customEditors.entrySet()) {
+        for (var customEditor : customEditors.values()) {
             if (customEditor != null) {
-                sheetWidget.removeCustomCellEditor(customEditor.getKey(),
-                        customEditor.getValue());
+                sheetWidget.removeCustomCellEditor(
+                        customEditor.getListener().getCellAddress(),
+                        customEditor);
             }
         }
     }
