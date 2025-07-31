@@ -63,7 +63,7 @@ public class ComboBoxLitRendererIT extends AbstractComboBoxIT {
     }
 
     private void assertHasItem(String type, String name) {
-        Assert.assertTrue(getOverlayContents().stream().anyMatch(text -> {
+        Assert.assertTrue(getOverlayContents(combo).stream().anyMatch(text -> {
             return text.contains(type) && text.contains(name);
         }));
     }

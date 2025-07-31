@@ -53,7 +53,7 @@ public class DetachReattachIT extends AbstractComboBoxIT {
     @Test
     public void openComboBox_detach_reattach_open_itemsLoaded() {
         combo.openPopup();
-        assertRendered("foo");
+        assertRendered(combo, "foo");
         clickButton("detach");
         clickButton("attach");
         combo = $(ComboBoxElement.class).first();
