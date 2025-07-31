@@ -31,6 +31,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -53,6 +54,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         InputField<AbstractField.ComponentValueChangeEvent<CustomField<T>, T>, T>,
         HasTheme, HasValidationProperties {
 
+    private final DomListenerRegistration updateValueListener;
     /**
      * Default constructor.
      */
@@ -71,7 +73,7 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
     public CustomField(T defaultValue) {
         super(defaultValue);
         // Force a value update when the change event generated
-        getElement().addEventListener("change", e -> this.updateValue());
+        updateValueListener = getElement().addEventListener("change", e -> this.updateValue());
         getElement().setProperty("manualValidation", true);
     }
 
@@ -206,5 +208,13 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         getThemeNames().removeAll(
                 Stream.of(variants).map(CustomFieldVariant::getVariantName)
                         .collect(Collectors.toList()));
+    }
+
+    /**
+     * Remove the listener that calls {@link #updateValue()} when an inner field "onchange" event is sent.
+     * That means the {@link #updateValue()}  needs to be called programmatically in the implementation of the CustomField
+     */
+    public void disableUpdateValueOnChange() {
+        updateValueListener.remove();
     }
 }
