@@ -5170,7 +5170,7 @@ public class SheetWidget extends Panel {
     public void removeCustomCellEditor(String address,
             Widget customEditorWidget) {
 
-        if (customEditorWidget == null) {
+        if (customEditorWidget == null || !customEditorWidget.isAttached()) {
             return;
         }
 
@@ -6012,7 +6012,7 @@ public class SheetWidget extends Panel {
     // This is for clearing of sheet from custom widgets
     protected Collection<Widget> getCustomWidgetIterator() {
         final List<Widget> emptyList = new ArrayList<Widget>();
-        if (customEditorWidget != null) {
+        if (customEditorWidget != null && customEditorWidget.isAttached()) {
             emptyList.add(customEditorWidget);
         }
         emptyList.addAll(sheetOverlays.values());
