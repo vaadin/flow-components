@@ -18,7 +18,6 @@ package com.vaadin.flow.component.combobox.test;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -53,13 +52,13 @@ public class RefreshEmptyLazyDataProviderIT extends AbstractComboBoxIT {
         // when refreshing an empty data provider while it is closed.
         assertLoadingStateResolved(comboBox);
 
-        WebElement overlay = comboBox.$("vaadin-combo-box-overlay").first();
+        TestBenchElement overlay = comboBox.$("vaadin-combo-box-overlay")
+                .first();
 
         // Verify the overlay is closed
         // When there are no items to display then the overlay is hidden, but
         // the opened state of the combo box is still true, so we can't check
         // the opened state. Instead, we test that there is no overlay opened.
-        Assert.assertEquals(Boolean.FALSE.toString(),
-                overlay.getDomProperty("opened"));
+        Assert.assertFalse(overlay.getPropertyBoolean("opened"));
     }
 }
