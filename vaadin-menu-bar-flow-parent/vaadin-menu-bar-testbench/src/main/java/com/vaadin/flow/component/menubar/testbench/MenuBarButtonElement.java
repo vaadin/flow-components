@@ -35,7 +35,9 @@ public class MenuBarButtonElement extends TestBenchElement {
      */
     public TestBenchElement getSubMenu() {
         waitForSubMenu();
-        return getPropertyElement("__overlay");
+        MenuBarElement menuBar = ((TestBenchElement) getPropertyElement(
+                "parentElement")).wrap(MenuBarElement.class);
+        return menuBar.getSubMenu();
     }
 
     /**
@@ -44,7 +46,9 @@ public class MenuBarButtonElement extends TestBenchElement {
      * @return List of MenuBarItemElement representing sub menu items.
      */
     public List<MenuBarItemElement> getSubMenuItems() {
-        return getSubMenu().$(MenuBarItemElement.class).all();
+        MenuBarElement menuBar = ((TestBenchElement) getPropertyElement(
+                "parentElement")).wrap(MenuBarElement.class);
+        return menuBar.getSubMenuItems();
     }
 
     /**

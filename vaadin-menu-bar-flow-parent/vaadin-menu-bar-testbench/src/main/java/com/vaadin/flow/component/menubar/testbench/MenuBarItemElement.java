@@ -35,7 +35,9 @@ public class MenuBarItemElement extends TestBenchElement {
      */
     public TestBenchElement getSubMenu() {
         waitForSubMenu();
-        return getPropertyElement("__overlay");
+        TestBenchElement listBox = getPropertyElement("parentElement");
+        TestBenchElement subMenu = listBox.getPropertyElement("parentElement");
+        return subMenu.getPropertyElement("_subMenu");
     }
 
     /**

@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -31,7 +30,7 @@ import com.vaadin.testbench.elementsbase.Element;
 @Element("vaadin-menu-bar")
 public class MenuBarElement extends TestBenchElement {
 
-    public static final String OVERLAY_TAG = "vaadin-menu-bar-overlay";
+    public static final String SUBMENU_TAG = "vaadin-menu-bar-submenu";
 
     /**
      * Gets the button elements wrapping the root level items. This does not
@@ -84,41 +83,38 @@ public class MenuBarElement extends TestBenchElement {
      * Get TestBenchElements representing sub menu items under specific sub
      * menu.
      *
-     * @param overlay
-     *            The sub menu overlay from which items are being collected.
+     * @param subMenu
+     *            The sub menu from which items are being collected.
      * @return List of MenuBarItemElement representing sub menu items.
      */
-    public List<MenuBarItemElement> getSubMenuItems(TestBenchElement overlay) {
-        return overlay.$(MenuBarItemElement.class).all();
+    public List<MenuBarItemElement> getSubMenuItems(TestBenchElement subMenu) {
+        return subMenu.getPropertyElement("_listBox")
+                .$(MenuBarItemElement.class).all();
     }
 
     /**
-     * Get the sub menu overlay element.
+     * Get the sub menu element.
      *
-     * @return TestBenchElement for the first open sub menu in this menu bar
+     * @return TestBenchElement for the first sub menu in this menu bar
      */
     public TestBenchElement getSubMenu() {
-        var button = $(MenuBarButtonElement.class).withAttribute("expanded")
-                .withCondition(this::isVisible).first();
-        return button != null ? button.getSubMenu() : null;
+        return getPropertyElement("_subMenu");
     }
 
     /**
-     * Get all the open sub menu overlay elements.
+     * Get all the opened sub menu elements.
      *
-     * @return List of TestBenchElements representing currently open sub menus.
+     * @return List of TestBenchElements representing all opened sub menus.
      */
     public List<TestBenchElement> getAllSubMenus() {
-        waitForSubMenu();
         List<TestBenchElement> elements = new ArrayList<>();
-        getDriver().findElements(By.tagName(OVERLAY_TAG))
-                .forEach(element -> elements.add((TestBenchElement) element));
+        findElements(By.tagName(SUBMENU_TAG)).forEach(element -> {
+            if (element.getDomProperty("opened")
+                    .equals(Boolean.TRUE.toString())) {
+                elements.add((TestBenchElement) element);
+            }
+        });
         return elements;
-    }
-
-    private void waitForSubMenu() {
-        waitUntil(ExpectedConditions
-                .presenceOfElementLocated(By.tagName(OVERLAY_TAG)));
     }
 
 }
