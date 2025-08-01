@@ -24,8 +24,8 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.contextmenu.testbench.ContextMenuElement;
 import com.vaadin.flow.component.contextmenu.testbench.ContextMenuItemElement;
-import com.vaadin.flow.component.contextmenu.testbench.ContextMenuOverlayElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
@@ -44,13 +44,13 @@ public class SubMenuIT extends AbstractContextMenuIT {
     @Test
     public void addItemToSubMenu_subMenuRendered_clickListenerWorks() {
         rightClickOn("target");
-        verifyNumOfOverlays(1);
+        verifyNumberOfMenus(1);
 
         openSubMenu(getMenuItems().get(0));
-        verifyNumOfOverlays(2);
+        verifyNumberOfMenus(2);
 
-        List<ContextMenuOverlayElement> overlays = getAllOverlays();
-        ContextMenuItemElement subItem = getMenuItems(overlays.get(1)).get(0);
+        List<ContextMenuElement> menus = getAllMenus();
+        ContextMenuItemElement subItem = getMenuItems(menus.get(1)).get(0);
         Assert.assertEquals("bar", subItem.getText());
 
         subItem.click();
@@ -62,7 +62,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
     public void openAndCloseSubMenu_addContent_contentUpdatedAndFunctional() {
         rightClickOn("target");
         openSubMenu(getMenuItems().get(0));
-        verifyNumOfOverlays(2);
+        verifyNumberOfMenus(2);
         clickBody();
         verifyClosed();
 
@@ -72,11 +72,10 @@ public class SubMenuIT extends AbstractContextMenuIT {
         rightClickOn("target");
 
         openSubMenu(getMenuItems().get(0));
-        verifyNumOfOverlays(2);
+        verifyNumberOfMenus(2);
 
-        List<ContextMenuOverlayElement> overlays = getAllOverlays();
-        List<ContextMenuItemElement> subMenuItems = getMenuItems(
-                overlays.get(1));
+        List<ContextMenuElement> menus = getAllMenus();
+        List<ContextMenuItemElement> subMenuItems = getMenuItems(menus.get(1));
         String[] menuItemCaptions = getMenuItemCaptions(subMenuItems);
         Assert.assertArrayEquals(new String[] { "bar", "0", "1" },
                 menuItemCaptions);
@@ -97,14 +96,13 @@ public class SubMenuIT extends AbstractContextMenuIT {
         rightClickOn("target");
 
         openSubMenu(getMenuItems().get(0));
-        verifyNumOfOverlays(2);
+        verifyNumberOfMenus(2);
 
-        openSubMenu(getMenuItems(getAllOverlays().get(1)).get(0));
-        verifyNumOfOverlays(3);
+        openSubMenu(getMenuItems(getAllMenus().get(1)).get(0));
+        verifyNumberOfMenus(3);
 
-        List<ContextMenuOverlayElement> overlays = getAllOverlays();
-        List<ContextMenuItemElement> subMenuItems = getMenuItems(
-                overlays.get(2));
+        List<ContextMenuElement> menus = getAllMenus();
+        List<ContextMenuItemElement> subMenuItems = getMenuItems(menus.get(2));
         String[] menuItemCaptions = getMenuItemCaptions(subMenuItems);
         Assert.assertArrayEquals(new String[] { "0" }, menuItemCaptions);
 
@@ -120,7 +118,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
         assertHasPopup(parent, true);
 
         openSubMenu(parent);
-        verifyNumOfOverlays(2);
+        verifyNumberOfMenus(2);
 
         clickBody();
         verifyClosed();
@@ -132,7 +130,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
         assertHasPopup(parent, false);
 
         openSubMenu(parent);
-        verifyNumOfOverlays(1);
+        verifyNumberOfMenus(1);
     }
 
     @Test
@@ -142,12 +140,13 @@ public class SubMenuIT extends AbstractContextMenuIT {
 
         openSubMenu(getMenuItems().get(0));
 
-        verifyNumOfOverlays(2);
+        verifyNumberOfMenus(2);
 
-        ContextMenuOverlayElement subMenuOverlay = getAllOverlays().get(1);
+        ContextMenuElement subMenu = getAllMenus().get(1);
 
-        WebElement firstItem = subMenuOverlay.$("vaadin-context-menu-list-box")
-                .first().findElement(By.xpath("./*"));
+        WebElement firstItem = getMenuContent(subMenu)
+                .$("vaadin-context-menu-list-box").first()
+                .findElement(By.xpath("./*"));
 
         Assert.assertEquals("a",
                 firstItem.getTagName().toLowerCase(Locale.ENGLISH));
@@ -161,11 +160,11 @@ public class SubMenuIT extends AbstractContextMenuIT {
 
         openSubMenu(getMenuItems().get(0));
 
-        verifyNumOfOverlays(2);
+        verifyNumberOfMenus(2);
 
-        ContextMenuOverlayElement subMenuOverlay = getAllOverlays().get(1);
+        ContextMenuElement subMenu = getAllMenus().get(1);
 
-        WebElement checkableItem = subMenuOverlay
+        WebElement checkableItem = getMenuContent(subMenu)
                 .$("vaadin-context-menu-list-box").first()
                 .findElements(By.xpath("./*")).get(1);
 
@@ -189,14 +188,22 @@ public class SubMenuIT extends AbstractContextMenuIT {
 
         openSubMenu(getMenuItems().get(0));
 
-        verifyNumOfOverlays(2);
+        verifyNumberOfMenus(2);
 
-        subMenuOverlay = getAllOverlays().get(1);
+        subMenu = getAllMenus().get(1);
 
-        checkableItem = subMenuOverlay.$("vaadin-context-menu-list-box").first()
+        checkableItem = getMenuContent(subMenu)
+                .$("vaadin-context-menu-list-box").first()
                 .findElements(By.xpath("./*")).get(1);
 
         Assert.assertNull(checkableItem.getDomAttribute("menu-item-checked"));
+    }
+
+    @Test
+    public void clickParentItem_menuNotClosed() {
+        rightClickOn("target");
+        getMenuItems().get(0).click();
+        verifyOpened();
     }
 
     private void assertHasPopup(TestBenchElement item, boolean isParent) {
@@ -209,13 +216,6 @@ public class SubMenuIT extends AbstractContextMenuIT {
             Assert.assertFalse("Item should have aria-haspopup set to false",
                     hasPopup);
         }
-    }
-
-    @Test
-    public void clickParentItem_overlayNotClosed() {
-        rightClickOn("target");
-        getMenuItems().get(0).click();
-        verifyOpened();
     }
 
     private void assertMessage(String expected) {

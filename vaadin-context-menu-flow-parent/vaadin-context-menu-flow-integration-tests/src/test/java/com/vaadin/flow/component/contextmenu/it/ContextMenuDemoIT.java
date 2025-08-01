@@ -23,21 +23,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 
+import com.vaadin.flow.component.contextmenu.testbench.ContextMenuElement;
 import com.vaadin.flow.component.contextmenu.testbench.ContextMenuItemElement;
-import com.vaadin.flow.component.contextmenu.testbench.ContextMenuOverlayElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the {@link ContextMenuView}.
  */
 @TestPath("vaadin-context-menu")
-public class ContextMenuDemoIT extends AbstractComponentIT {
-
-    private static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
+public class ContextMenuDemoIT extends AbstractContextMenuIT {
 
     @Before
     public void init() {
@@ -48,7 +44,7 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
     public void openAndCloseBasicContextMenu_contentIsRendered() {
         verifyClosed();
 
-        rightClickOn(By.id("basic-context-menu-target"));
+        rightClickOn("basic-context-menu-target");
         verifyOpened();
 
         Assert.assertArrayEquals(new String[] { "First menu item",
@@ -66,19 +62,17 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
     public void openAndCloseContextMenuWithComponents_contentIsRendered() {
         verifyClosed();
 
-        rightClickOn(By.id("context-menu-with-components-target"));
+        rightClickOn("context-menu-with-components-target");
         verifyOpened();
 
         Assert.assertArrayEquals(new String[] { "First menu item", "Checkbox" },
                 getMenuItemCaptions());
-        WebElement checkbox = getMenuItems().get(1)
-                .findElement(By.tagName("vaadin-checkbox"));
-
-        getOverlay().findElement(By.tagName("hr"));
-        WebElement span = getOverlay().findElement(
-                By.cssSelector("vaadin-context-menu-list-box > span"));
+        Assert.assertTrue(getMenuContent().$("hr").exists());
+        WebElement span = getMenuContent().$("span").first();
         Assert.assertEquals("This is not a menu item", span.getText());
 
+        WebElement checkbox = getMenuItems().get(1)
+                .findElement(By.tagName("vaadin-checkbox"));
         checkbox.click();
         $("body").first().click();
         verifyClosed();
@@ -92,23 +86,18 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
     public void hierarchicalContextMenu_openSubMenus() {
         verifyClosed();
 
-        rightClickOn(By.id("hierarchical-menu-target"));
-        verifyOpened();
+        rightClickOn("hierarchical-menu-target");
+        verifyNumberOfMenus(1);
 
         openSubMenu(getMenuItems().get(1));
+        verifyNumberOfMenus(2);
 
-        waitUntil(
-                driver -> $(ContextMenuOverlayElement.class).all().size() == 2);
-        List<ContextMenuOverlayElement> overlays = $(
-                ContextMenuOverlayElement.class).all();
+        List<ContextMenuElement> menus = getAllMenus();
+        openSubMenu(getMenuItems(menus.get(1)).get(1));
 
-        openSubMenu(getMenuItems(overlays.get(1)).get(1));
-
-        waitUntil(
-                driver -> $(ContextMenuOverlayElement.class).all().size() == 3);
-        overlays = $(ContextMenuOverlayElement.class).all();
-
-        getMenuItems(overlays.get(2)).get(0).click();
+        verifyNumberOfMenus(3);
+        menus = getAllMenus();
+        getMenuItems(menus.get(2)).get(0).click();
 
         Assert.assertEquals("Clicked on the third item",
                 $("span").id("hierarchical-menu-message").getText());
@@ -120,7 +109,7 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
     public void checkableMenuItems() {
         verifyClosed();
 
-        rightClickOn(By.id("checkable-menu-items-target"));
+        rightClickOn("checkable-menu-items-target");
         verifyOpened();
 
         List<ContextMenuItemElement> items = getMenuItems();
@@ -133,7 +122,7 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
                 $("span").id("checkable-menu-items-message").getText());
         verifyClosed();
 
-        rightClickOn(By.id("checkable-menu-items-target"));
+        rightClickOn("checkable-menu-items-target");
         verifyOpened();
 
         items = getMenuItems();
@@ -146,7 +135,7 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
                 $("span").id("checkable-menu-items-message").getText());
         verifyClosed();
 
-        rightClickOn(By.id("checkable-menu-items-target"));
+        rightClickOn("checkable-menu-items-target");
         verifyOpened();
 
         items = getMenuItems();
@@ -166,19 +155,17 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
     public void subMenuHasComponents_componentsAreNotItems() {
         verifyClosed();
 
-        rightClickOn(By.id("context-menu-with-submenu-components-target"));
+        rightClickOn("context-menu-with-submenu-components-target");
         verifyOpened();
 
         openSubMenu(getMenuItems().get(1));
-        waitUntil(
-                driver -> $(ContextMenuOverlayElement.class).all().size() == 2);
+        verifyNumberOfMenus(2);
 
-        ContextMenuOverlayElement subMenuOverlay = $(
-                ContextMenuOverlayElement.class).all().get(1);
-
-        TestBenchElement overlayContainer = subMenuOverlay
-                .$("vaadin" + "-context-menu-list-box").first();
-        List<WebElement> items = overlayContainer.findElements(By.xpath("./*"));
+        ContextMenuElement subMenu = getAllMenus().get(1);
+        TestBenchElement menuContent = getMenuContent(subMenu);
+        TestBenchElement menuListBox = menuContent
+                .$("vaadin-context-menu-list-box").first();
+        List<WebElement> items = menuListBox.findElements(By.xpath("./*"));
         Assert.assertEquals(4, items.size());
         Assert.assertEquals("vaadin-context-menu-item",
                 items.get(0).getTagName().toLowerCase(Locale.ENGLISH));
@@ -188,41 +175,5 @@ public class ContextMenuDemoIT extends AbstractComponentIT {
                 items.get(2).getTagName().toLowerCase(Locale.ENGLISH));
         Assert.assertEquals("span",
                 items.get(3).getTagName().toLowerCase(Locale.ENGLISH));
-    }
-
-    private void rightClickOn(By by) {
-        Actions action = new Actions(getDriver());
-        WebElement element = findElement(by);
-        action.contextClick(element).perform();
-    }
-
-    private ContextMenuOverlayElement getOverlay() {
-        return $(ContextMenuOverlayElement.class).first();
-    }
-
-    private void verifyClosed() {
-        waitForElementNotPresent(By.tagName(OVERLAY_TAG));
-    }
-
-    private void verifyOpened() {
-        waitForElementPresent(By.tagName(OVERLAY_TAG));
-    }
-
-    private String[] getMenuItemCaptions() {
-        return getMenuItems().stream().map(WebElement::getText)
-                .toArray(String[]::new);
-    }
-
-    private List<ContextMenuItemElement> getMenuItems() {
-        return getOverlay().getMenuItems();
-    }
-
-    private List<ContextMenuItemElement> getMenuItems(
-            ContextMenuOverlayElement overlay) {
-        return overlay.getMenuItems();
-    }
-
-    private void openSubMenu(ContextMenuItemElement parentItem) {
-        parentItem.openSubMenu();
     }
 }
