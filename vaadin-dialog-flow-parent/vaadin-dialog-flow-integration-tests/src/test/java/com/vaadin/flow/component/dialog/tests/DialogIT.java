@@ -22,14 +22,12 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
+import com.vaadin.flow.component.dialog.testbench.DialogElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-dialog-view")
 public class DialogIT extends AbstractComponentIT {
-
-    private static final String DIALOG_OVERLAY_TAG = "vaadin-dialog-overlay";
 
     @Test
     public void openAndCloseConfirmationDialog_buttonsRenderedWithClickListeners() {
@@ -38,14 +36,12 @@ public class DialogIT extends AbstractComponentIT {
         WebElement message = findElement(By.id("confirmation-dialog-message"));
 
         findElement(By.id("confirmation-dialog-button")).click();
-        getOverlayContent().findElements(By.tagName("vaadin-button")).get(0)
-                .click();
+        getDialog().findElements(By.tagName("vaadin-button")).get(0).click();
         verifyDialogClosed();
         Assert.assertEquals("Confirmed!", message.getText());
 
         findElement(By.id("confirmation-dialog-button")).click();
-        getOverlayContent().findElements(By.tagName("vaadin-button")).get(1)
-                .click();
+        getDialog().findElements(By.tagName("vaadin-button")).get(1).click();
         verifyDialogClosed();
         Assert.assertEquals("Cancelled...", message.getText());
     }
@@ -74,10 +70,9 @@ public class DialogIT extends AbstractComponentIT {
 
         findElement(By.id("focus-dialog-button")).click();
 
-        WebElement element = getOverlayContent()
-                .findElement(By.tagName("input"));
+        WebElement element = getDialog().findElement(By.tagName("input"));
 
-        Assert.assertTrue(element.equals(driver.switchTo().activeElement()));
+        Assert.assertEquals(element, driver.switchTo().activeElement());
     }
 
     @Test
@@ -87,26 +82,21 @@ public class DialogIT extends AbstractComponentIT {
         scrollIntoViewAndClick(
                 findElement(By.id("styled-content-dialog-button")));
 
-        WebElement element = getOverlayContent()
-                .findElement(By.className("my-style"));
+        WebElement element = getDialog().findElement(By.className("my-style"));
 
         Assert.assertEquals("rgba(255, 0, 0, 1)", element.getCssValue("color"));
     }
 
-    private TestBenchElement getOverlayContent() {
-        return $(DIALOG_OVERLAY_TAG).first();
+    private DialogElement getDialog() {
+        return $(DialogElement.class).withAttribute("opened").first();
     }
 
     private void verifyDialogClosed() {
-        waitForElementNotPresent(By.tagName(DIALOG_OVERLAY_TAG));
+        waitForElementNotPresent(By.cssSelector("vaadin-dialog[opened]"));
     }
 
     private void verifyDialogOpened() {
-        waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
+        waitForElementPresent(By.cssSelector("vaadin-dialog[opened]"));
     }
 
-    @Override
-    protected String getTestPath() {
-        return ("/vaadin-dialog-view");
-    }
 }
