@@ -18,7 +18,7 @@ package com.vaadin.flow.component.customfield.tests;
 import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-custom-field/manual")
@@ -26,22 +26,21 @@ public class ManualUpdateValueView extends Div {
     public ManualUpdateValueView() {
         final Div result = new Div();
         result.setId("result");
-        MyField customField = new MyField();
-        NativeButton button = new NativeButton("Update");
-        button.setId("button1");
-        button.addClickListener(e -> customField.updateValue());
+        ManualCustomField customField = new ManualCustomField();
+        NativeButton button = new NativeButton("Update",
+                e -> customField.updateValue());
         customField
                 .addValueChangeListener(e -> result.setText("" + e.getValue()));
         add(customField, result, button);
     }
 
-    private class MyField extends CustomField<Integer> {
-        final TextField field1 = new TextField();
-        final TextField field2 = new TextField();
+    private class ManualCustomField extends CustomField<Integer> {
+        final IntegerField field1 = new IntegerField();
+        final IntegerField field2 = new IntegerField();
         final Div updateValueCounter = new Div();
         int valueChangeCount = 0;
 
-        MyField() {
+        ManualCustomField() {
             disableUpdateValueOnChange();
             field1.setId("field1");
             field2.setId("field2");
@@ -52,13 +51,9 @@ public class ManualUpdateValueView extends Div {
 
         @Override
         protected Integer generateModelValue() {
-            try {
-                int i1 = Integer.valueOf(field1.getValue());
-                int i2 = Integer.valueOf(field2.getValue());
-                return i1 + i2;
-            } catch (NumberFormatException e) {
-                return 0;
-            }
+            int i1 = field1.getValue();
+            int i2 = field2.getValue();
+            return i1 + i2;
         }
 
         @Override

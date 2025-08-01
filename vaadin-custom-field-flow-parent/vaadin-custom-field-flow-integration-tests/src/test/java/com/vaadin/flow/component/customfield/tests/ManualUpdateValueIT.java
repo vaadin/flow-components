@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.customfield.testbench.CustomFieldElement;
+import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
@@ -39,9 +40,9 @@ public class ManualUpdateValueIT extends AbstractComponentIT {
 
         Assert.assertEquals("0", $("div").id("updateValueCounter").getText());
 
-        TextFieldElement field1 = getById(customField, "field1");
+        IntegerFieldElement field1 = getById(customField, "field1");
         field1.setValue("1");
-        TextFieldElement field2 = getById(customField, "field2");
+        IntegerFieldElement field2 = getById(customField, "field2");
         field2.setValue("2");
         Assert.assertEquals("0", $("div").id("updateValueCounter").getText());
         $("button").waitForFirst().click();
@@ -51,8 +52,8 @@ public class ManualUpdateValueIT extends AbstractComponentIT {
         Assert.assertEquals("1", $("div").id("updateValueCounter").getText());
     }
 
-    private TextFieldElement getById(CustomFieldElement customField,
-            String id) {
-        return customField.$(TextFieldElement.class).id(id);
+    private IntegerFieldElement getById(CustomFieldElement customField,
+                                                     String id) {
+        return customField.$(IntegerFieldElement.class).id(id);
     }
 }
