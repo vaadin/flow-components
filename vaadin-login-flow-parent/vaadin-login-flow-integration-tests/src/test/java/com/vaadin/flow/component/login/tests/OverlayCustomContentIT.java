@@ -19,16 +19,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.html.testbench.NativeButtonElement;
+import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-login/custom-content")
 public class OverlayCustomContentIT extends AbstractComponentIT {
-
-    private static final String LOGIN_OVERLAY_WRAPPER_TAG = "vaadin-login-overlay-wrapper";
 
     private NativeButtonElement openOverlay;
     private NativeButtonElement addFooter;
@@ -57,11 +55,11 @@ public class OverlayCustomContentIT extends AbstractComponentIT {
     }
 
     @Test
-    public void openOverlay_addFooter_contentIsNotRendered() {
+    public void openOverlay_addFooter_contentIsRendered() {
         openOverlay.click();
         addFooter.click();
         verifyOverlayOpened();
-        assertOverlayNotContains(OverlayCustomContentPage.FOOTER_CONTENT);
+        assertOverlayContains(OverlayCustomContentPage.FOOTER_CONTENT);
     }
 
     @Test
@@ -82,11 +80,11 @@ public class OverlayCustomContentIT extends AbstractComponentIT {
     }
 
     @Test
-    public void openOverlay_addCustomFormArea_contentIsNotRendered() {
+    public void openOverlay_addCustomFormArea_contentIsRendered() {
         openOverlay.click();
         addCustomFormArea.click();
         verifyOverlayOpened();
-        assertOverlayNotContains(OverlayCustomContentPage.CUSTOM_FORM_CONTENT);
+        assertOverlayContains(OverlayCustomContentPage.CUSTOM_FORM_CONTENT);
     }
 
     @Test
@@ -99,22 +97,20 @@ public class OverlayCustomContentIT extends AbstractComponentIT {
     }
 
     private void assertOverlayContains(String text) {
-        var wrapper = getOverlayWrapper();
+        LoginOverlayElement login = $(LoginOverlayElement.class).first();
+        var wrapper = login.getLoginOverlayWrapper();
         Assert.assertTrue("Overlay should contain text " + text,
                 wrapper.getText().contains(text));
     }
 
     private void assertOverlayNotContains(String text) {
-        var wrapper = getOverlayWrapper();
+        LoginOverlayElement login = $(LoginOverlayElement.class).first();
+        var wrapper = login.getLoginOverlayWrapper();
         Assert.assertFalse("Overlay should not contain text " + text,
                 wrapper.getText().contains(text));
     }
 
     private void verifyOverlayOpened() {
-        waitForElementPresent(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
-    }
-
-    private WebElement getOverlayWrapper() {
-        return findElement(By.tagName(LOGIN_OVERLAY_WRAPPER_TAG));
+        waitForElementPresent(By.tagName("vaadin-login-overlay"));
     }
 }
