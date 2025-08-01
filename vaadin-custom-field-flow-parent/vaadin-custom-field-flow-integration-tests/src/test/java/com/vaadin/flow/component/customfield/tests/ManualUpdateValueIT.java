@@ -21,7 +21,6 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.customfield.testbench.CustomFieldElement;
 import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
-import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -53,7 +52,7 @@ public class ManualUpdateValueIT extends AbstractComponentIT {
     }
 
     private IntegerFieldElement getById(CustomFieldElement customField,
-                                                     String id) {
+            String id) {
         return customField.$(IntegerFieldElement.class).id(id);
     }
 }
