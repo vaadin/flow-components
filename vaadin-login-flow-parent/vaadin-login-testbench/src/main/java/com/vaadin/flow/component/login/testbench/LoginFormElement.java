@@ -39,7 +39,7 @@ public class LoginFormElement extends TestBenchElement implements Login {
 
     @Override
     public ButtonElement getSubmitButton() {
-        return $(ButtonElement.class).first();
+        return $(ButtonElement.class).withAttribute("slot", "submit").first();
     }
 
     private TestBenchElement getFormWrapper() {
