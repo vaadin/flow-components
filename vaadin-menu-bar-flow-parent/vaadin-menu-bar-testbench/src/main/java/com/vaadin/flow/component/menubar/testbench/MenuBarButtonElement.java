@@ -29,7 +29,7 @@ import com.vaadin.testbench.elementsbase.Element;
 public class MenuBarButtonElement extends TestBenchElement {
 
     /**
-     * Get the sub menu overlay element linked to this menu button.
+     * Get the sub menu element linked to this menu button.
      *
      * @return TestBenchElement for the open sub menu.
      */

@@ -96,11 +96,11 @@ public class MenuBarPageIT extends AbstractComponentIT {
         assertMessage("true");
 
         menuBar.$("vaadin-menu-bar-button").first().click();
-        hoverOn(menuBar.getSubMenuItems().get(1));
+        MenuBarItemElement parentItem = menuBar.getSubMenuItems().get(1);
+        hoverOn(parentItem);
 
         waitUntil(driver -> menuBar.getAllSubMenus().size() == 2);
-        MenuBarItemElement checkableItem = menuBar
-                .getSubMenuItems(menuBar.getAllSubMenus().get(1)).get(1);
+        MenuBarItemElement checkableItem = parentItem.getSubMenuItems().get(1);
         Assert.assertTrue(checkableItem.isChecked());
 
         checkableItem.click();
@@ -108,8 +108,9 @@ public class MenuBarPageIT extends AbstractComponentIT {
         assertMessage("false");
 
         openSubSubMenu();
-        checkableItem = menuBar.getSubMenuItems(menuBar.getAllSubMenus().get(1))
-                .get(1);
+
+        parentItem = menuBar.getSubMenuItems().get(1);
+        checkableItem = checkableItem = parentItem.getSubMenuItems().get(1);
         Assert.assertFalse(checkableItem.isChecked());
     }
 
