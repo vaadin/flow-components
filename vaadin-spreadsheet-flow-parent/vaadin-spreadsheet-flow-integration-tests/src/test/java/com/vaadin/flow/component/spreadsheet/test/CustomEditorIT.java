@@ -369,7 +369,7 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         cellsToModify.forEach(address -> Assert.assertEquals(valueToSet,
                 getCellValue(address)));
     }
-  
+
     public void customEditorShared_persistsValuesCorrectly() {
         createNewSpreadsheet();
         loadTestFixture(TestFixtures.CustomEditorShared);
