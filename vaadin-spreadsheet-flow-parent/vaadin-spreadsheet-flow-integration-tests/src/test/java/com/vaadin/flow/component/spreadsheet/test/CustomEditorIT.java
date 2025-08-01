@@ -355,6 +355,46 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
     }
 
     @Test
+    public void customEditorShared_persistsValuesCorrectly() {
+        createNewSpreadsheet();
+        loadTestFixture(TestFixtures.CustomEditorShared);
+
+        // Test that moving focus between cells with shared custom editors
+        // works correctly and values are persisted
+        clickCell("B2");
+        var maybeEditor = getInputInCustomEditorFromCell("B2");
+        Assert.assertTrue(maybeEditor.isPresent());
+
+        clickCell("B3");
+        maybeEditor = getInputInCustomEditorFromCell("B3");
+        Assert.assertTrue(maybeEditor.isPresent());
+
+        clickCell("B2");
+        maybeEditor = getInputInCustomEditorFromCell("B2");
+        Assert.assertTrue(maybeEditor.isPresent());
+
+        clickCell("B2");
+        maybeEditor = getInputInCustomEditorFromCell("B2");
+        Assert.assertTrue(maybeEditor.isPresent());
+        var editor = maybeEditor.get();
+        editor.sendKeys("TestValueB2", Keys.ENTER);
+
+        clickCell("A1");
+        getCommandExecutor().waitForVaadin();
+        Assert.assertEquals("TestValueB2", getCellValue("B2"));
+
+        clickCell("B3");
+        maybeEditor = getInputInCustomEditorFromCell("B3");
+        Assert.assertTrue(maybeEditor.isPresent());
+        editor = maybeEditor.get();
+        editor.sendKeys("TestValueB3", Keys.ENTER);
+
+        clickCell("A1");
+        getCommandExecutor().waitForVaadin();
+        Assert.assertEquals("TestValueB3", getCellValue("B3"));
+    }
+
+    @Test
     public void customEditorInFrozenCells_persistsValueOnVariousKeyActions()
             throws Exception {
         createNewSpreadsheet();
