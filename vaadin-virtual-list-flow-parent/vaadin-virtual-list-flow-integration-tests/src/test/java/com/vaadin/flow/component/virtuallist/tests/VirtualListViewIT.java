@@ -103,7 +103,7 @@ public class VirtualListViewIT extends AbstractComponentIT {
         // Check that an item wasn't removed
         Assert.assertTrue(removalInfo.getText().trim().isEmpty());
 
-        JsonArray items = VirtualListIT.getItems(getDriver(), list);
+        JsonArray items = VirtualListHelpers.getItems(getDriver(), list);
         List<JsonValue> loadedItems = getLoadedItems(list);
         int loadedItemsSize = loadedItems.size();
 
@@ -185,7 +185,7 @@ public class VirtualListViewIT extends AbstractComponentIT {
     }
 
     private void validateListSize(WebElement list, int expectedSize) {
-        JsonArray items = VirtualListIT.getItems(getDriver(), list);
+        JsonArray items = VirtualListHelpers.getItems(getDriver(), list);
         Assert.assertEquals(
                 "There should be " + expectedSize + " items in the '"
                         + list.getDomAttribute("id") + "' virtual-list",
@@ -193,7 +193,7 @@ public class VirtualListViewIT extends AbstractComponentIT {
     }
 
     private List<JsonValue> getLoadedItems(WebElement list) {
-        JsonArray items = VirtualListIT.getItems(getDriver(), list);
+        JsonArray items = VirtualListHelpers.getItems(getDriver(), list);
         List<JsonValue> result = new ArrayList<>();
         for (int i = 0; i < items.length(); i++) {
             JsonValue value = items.get(i);
