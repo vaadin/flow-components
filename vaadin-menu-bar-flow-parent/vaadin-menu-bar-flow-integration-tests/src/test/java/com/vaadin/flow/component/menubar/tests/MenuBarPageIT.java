@@ -438,12 +438,10 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     public void verifyClosed() {
-        Assert.assertEquals(Boolean.FALSE.toString(),
-                menuBar.getSubMenu().getDomProperty("opened"));
+        Assert.assertFalse(menuBar.getSubMenu().getPropertyBoolean("opened"));
     }
 
     public void verifyOpened() {
-        Assert.assertEquals(Boolean.TRUE.toString(),
-                menuBar.getSubMenu().getDomProperty("opened"));
+        Assert.assertTrue(menuBar.getSubMenu().getPropertyBoolean("opened"));
     }
 }

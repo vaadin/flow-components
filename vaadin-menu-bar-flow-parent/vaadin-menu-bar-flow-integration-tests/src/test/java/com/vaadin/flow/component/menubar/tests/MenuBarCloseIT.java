@@ -26,24 +26,20 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-menu-bar/close")
 public class MenuBarCloseIT extends AbstractComponentIT {
 
-    private MenuBarElement menuBar;
-
     @Before
     public void init() {
         open();
-        menuBar = $(MenuBarElement.class).first();
     }
 
     @Test
     public void clickingCloseButton_closesSubmenu() {
+        MenuBarElement menuBar = $(MenuBarElement.class).first();
         menuBar.getButtons().get(0).click();
 
-        Assert.assertEquals(Boolean.TRUE.toString(),
-                menuBar.getSubMenu().getDomProperty("opened"));
+        Assert.assertTrue(menuBar.getSubMenu().getPropertyBoolean("opened"));
 
         clickElementWithJs("close-button");
 
-        Assert.assertEquals(Boolean.FALSE.toString(),
-                menuBar.getSubMenu().getDomProperty("opened"));
+        Assert.assertFalse(menuBar.getSubMenu().getPropertyBoolean("opened"));
     }
 }
