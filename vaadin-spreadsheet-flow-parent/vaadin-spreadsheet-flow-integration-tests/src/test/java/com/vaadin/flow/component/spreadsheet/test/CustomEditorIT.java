@@ -10,6 +10,7 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.Assert;
@@ -355,6 +356,20 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
     }
 
     @Test
+    public void adjacentCustomEditors_showOnFocus_navigateWithTabAndModify_valuesUpdated() {
+        getSpreadsheet().addSheet();
+        loadTestFixture(TestFixtures.AdjacentCustomEditors);
+        var cellsToModify = List.of("B2", "C2", "D2", "E2", "F2");
+        var valueToSet = "a";
+        selectCell("A2");
+        cellsToModify.forEach(
+                address -> moveToNextCellAndAssertEditorInCellIsFocusedWithKeyPress(
+                        address, valueToSet));
+        getActiveElement().sendKeys(Keys.TAB);
+        cellsToModify.forEach(address -> Assert.assertEquals(valueToSet,
+                getCellValue(address)));
+    }
+
     public void customEditorShared_persistsValuesCorrectly() {
         createNewSpreadsheet();
         loadTestFixture(TestFixtures.CustomEditorShared);
