@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.menubar.tests;
 
 import com.vaadin.flow.component.contextmenu.MenuItem;
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.NativeButton;
@@ -24,7 +23,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.router.Route;
 
-@CssImport("./menu-bar-not-animated-styles.css")
 @Route("vaadin-menu-bar/menu-bar-theme")
 public class MenuBarThemePage extends Div {
 

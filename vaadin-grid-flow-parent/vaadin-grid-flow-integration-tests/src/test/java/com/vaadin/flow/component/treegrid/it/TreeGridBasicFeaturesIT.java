@@ -309,4 +309,27 @@ public class TreeGridBasicFeaturesIT extends AbstractTreeGridIT {
                 "2 | 1", "2 | 2", "1 | 1", "1 | 2", "0 | 2" });
         Assert.assertEquals(9, getTreeGrid().getRowCount());
     }
+
+    @Test
+    public void expand_and_collapse_rowLevelStateUpdated() {
+        assertRowLevel(0, new int[] { 0, 0, 0 });
+
+        getTreeGrid().expandWithClick(0);
+        assertRowLevel(0, new int[] { 0, 1, 1, 1, 0, 0 });
+
+        getTreeGrid().collapseWithClick(0);
+        assertRowLevel(0, new int[] { 0, 0, 0 });
+    }
+
+    @Test
+    public void expand_and_collapse_rowExpandedStateUpdated() {
+        assertRowExpanded(0, new boolean[] { false, false, false });
+
+        getTreeGrid().expandWithClick(0);
+        assertRowExpanded(0,
+                new boolean[] { true, false, false, false, false, false });
+
+        getTreeGrid().collapseWithClick(0);
+        assertRowExpanded(0, new boolean[] { false, false, false });
+    }
 }
