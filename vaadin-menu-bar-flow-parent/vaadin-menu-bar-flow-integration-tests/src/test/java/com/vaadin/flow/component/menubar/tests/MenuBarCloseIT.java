@@ -15,9 +15,9 @@
  */
 package com.vaadin.flow.component.menubar.tests;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
 import com.vaadin.flow.testutil.TestPath;
@@ -33,18 +33,13 @@ public class MenuBarCloseIT extends AbstractComponentIT {
 
     @Test
     public void clickingCloseButton_closesSubmenu() {
-        var menuBar = $(MenuBarElement.class).first();
+        MenuBarElement menuBar = $(MenuBarElement.class).first();
         menuBar.getButtons().get(0).click();
-        verifyOpened();
+
+        Assert.assertTrue(menuBar.getSubMenu().getPropertyBoolean("opened"));
+
         clickElementWithJs("close-button");
-        verifyClosed();
-    }
 
-    private void verifyOpened() {
-        waitForElementPresent(By.tagName(MenuBarPageIT.OVERLAY_TAG));
-    }
-
-    private void verifyClosed() {
-        waitForElementNotPresent(By.tagName(MenuBarPageIT.OVERLAY_TAG));
+        Assert.assertFalse(menuBar.getSubMenu().getPropertyBoolean("opened"));
     }
 }
