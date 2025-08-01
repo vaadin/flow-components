@@ -36,6 +36,7 @@ public enum TestFixtures {
     Rename(RenameFixture.class),
     CreateSheet(SheetsFixture.class),
     CustomEditor(SimpleCustomEditorFixture.class),
+    AdjacentCustomEditors(AdjacentCustomEditorsFixture.class),
     CustomEditorShared(CustomEditorSharedFixture.class),
     CustomEditorRow(CustomEditorRowFixture.class),
     Styles(StylesFixture.class),
