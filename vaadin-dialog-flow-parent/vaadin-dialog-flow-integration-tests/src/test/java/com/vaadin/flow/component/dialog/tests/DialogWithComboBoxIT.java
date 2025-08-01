@@ -41,8 +41,8 @@ public class DialogWithComboBoxIT extends AbstractComponentIT {
         WebElement info = $("div").id("info");
         waitUntil(driver -> info.getText().equals(Boolean.TRUE.toString()));
 
-        Assert.assertTrue(findElement(By.tagName("vaadin-combo-box-scroller"))
-                .isDisplayed());
+        TestBenchElement comboBox = $("vaadin-combo-box").first();
+        Assert.assertTrue(comboBox.getPropertyBoolean("opened"));
     }
 
     @Test
@@ -57,8 +57,8 @@ public class DialogWithComboBoxIT extends AbstractComponentIT {
         WebElement info = $("div").id("info");
         waitUntil(driver -> info.getText().equals(Boolean.TRUE.toString()));
 
-        Assert.assertTrue(findElement(By.tagName("vaadin-combo-box-scroller"))
-                .isDisplayed());
+        TestBenchElement comboBox = $("vaadin-combo-box").first();
+        Assert.assertTrue(comboBox.getPropertyBoolean("opened"));
     }
 
 }
