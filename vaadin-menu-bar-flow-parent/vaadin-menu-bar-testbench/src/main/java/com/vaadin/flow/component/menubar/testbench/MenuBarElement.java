@@ -15,11 +15,8 @@
  */
 package com.vaadin.flow.component.menubar.testbench;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.openqa.selenium.By;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -29,8 +26,6 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-menu-bar")
 public class MenuBarElement extends TestBenchElement {
-
-    public static final String SUBMENU_TAG = "vaadin-menu-bar-submenu";
 
     /**
      * Gets the button elements wrapping the root level items. This does not
@@ -107,14 +102,7 @@ public class MenuBarElement extends TestBenchElement {
      * @return List of TestBenchElements representing all opened sub menus.
      */
     public List<TestBenchElement> getAllSubMenus() {
-        List<TestBenchElement> elements = new ArrayList<>();
-        findElements(By.tagName(SUBMENU_TAG)).forEach(element -> {
-            if (element.getDomProperty("opened")
-                    .equals(Boolean.TRUE.toString())) {
-                elements.add((TestBenchElement) element);
-            }
-        });
-        return elements;
+        return $("vaadin-menu-bar-submenu").withAttribute("opened").all();
     }
 
 }
