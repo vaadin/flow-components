@@ -126,7 +126,8 @@ public class CrudElement extends TestBenchElement {
      * @return {@code true} if the editor is open and {@code false}, otherwise
      */
     public boolean isEditorOpen() {
-        return "true".equals(getDomProperty("editorOpened"));
+        // editorOpened can be null initially
+        return Boolean.TRUE.equals(getPropertyBoolean("editorOpened"));
     }
 
     /**

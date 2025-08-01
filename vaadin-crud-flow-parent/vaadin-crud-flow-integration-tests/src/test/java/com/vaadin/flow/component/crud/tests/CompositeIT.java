@@ -40,7 +40,8 @@ public class CompositeIT extends AbstractComponentIT {
         $(TextFieldElement.class).withAttribute("editor-role", "language-field")
                 .first().setValue("English");
 
-        $(TestBenchElement.class).withId("overlay").last()
+        $(TestBenchElement.class)
+                .withAttribute("editor-role", "composite-dialog").first()
                 .$(ButtonElement.class).first().click();
 
         Assert.assertTrue(
