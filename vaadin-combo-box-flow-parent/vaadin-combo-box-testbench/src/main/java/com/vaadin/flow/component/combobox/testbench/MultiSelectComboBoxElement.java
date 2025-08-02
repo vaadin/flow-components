@@ -76,7 +76,7 @@ public class MultiSelectComboBoxElement extends TestBenchElement implements
         //@formatter:off
         String script =
                 "const comboBox=arguments[0];" +
-                "return comboBox.$.comboBox.filteredItems.map(item => item.label || '')";
+                "return comboBox.filteredItems.map(item => item.label || '')";
         //@formatter:on
         return (List<String>) executeScript(script, this);
     }
@@ -97,7 +97,7 @@ public class MultiSelectComboBoxElement extends TestBenchElement implements
         String script =
                 "const combobox = arguments[0];" +
                 "const label = arguments[1];" +
-                "const itemToSelect = combobox.$.comboBox.filteredItems.find(item => item.label === label);" +
+                "const itemToSelect = combobox.filteredItems.find(item => item.label === label);" +
                 "if (!itemToSelect) return false;" +
                 "const isSelected = combobox.selectedItems.some(item => item.key === itemToSelect.key);" +
                 "if (!isSelected) {" +
@@ -181,8 +181,7 @@ public class MultiSelectComboBoxElement extends TestBenchElement implements
      * Waits until the combo box has finished loading items to show in the popup
      */
     public void waitForLoadingFinished() {
-        waitUntil(
-                driver -> !getInternalComboBox().getPropertyBoolean("loading"));
+        waitUntil(driver -> !getPropertyBoolean("loading"));
     }
 
     /**
@@ -197,9 +196,5 @@ public class MultiSelectComboBoxElement extends TestBenchElement implements
     @Override
     public void sendKeys(CharSequence... keysToSend) {
         findElement(By.tagName("input")).sendKeys(keysToSend);
-    }
-
-    private TestBenchElement getInternalComboBox() {
-        return $("vaadin-multi-select-combo-box-internal").first();
     }
 }

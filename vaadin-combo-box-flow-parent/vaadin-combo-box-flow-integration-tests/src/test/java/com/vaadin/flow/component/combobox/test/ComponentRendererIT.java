@@ -89,8 +89,7 @@ public class ComponentRendererIT extends AbstractComboBoxIT {
 
     private void testItems(TestBenchElement comboBox) {
         executeScript("arguments[0].open(); return true;", comboBox);
-        TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
-        ElementQuery<TestBenchElement> items = overlay
+        ElementQuery<TestBenchElement> items = comboBox
                 .$("vaadin-combo-box-item");
 
         Assert.assertEquals("ComboBox should always contain 3 items", 3,

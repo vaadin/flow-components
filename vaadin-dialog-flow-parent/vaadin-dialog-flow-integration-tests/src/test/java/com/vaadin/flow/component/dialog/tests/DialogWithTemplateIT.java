@@ -42,7 +42,7 @@ public class DialogWithTemplateIT extends AbstractComponentIT {
     public void openDialog_clickThreeTimes_containerIsUpdated() {
         $(NativeButtonElement.class).id("open").click();
 
-        waitForElementPresent(By.tagName(DialogTestPageIT.DIALOG_OVERLAY_TAG));
+        waitForElementPresent(By.cssSelector("vaadin-dialog[opened]"));
         DialogElement dialog = $(DialogElement.class).first();
 
         TestBenchElement template = dialog.$("vaadin-dialog-flow-test-template")

@@ -24,6 +24,7 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-combo-box/lazy-loading")
 public class LazyLoadingIT extends AbstractComboBoxIT {
@@ -293,16 +294,15 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     @Test
     public void customItemFilter() {
         filterBox.openPopup();
-        waitForElementVisible(By.tagName("vaadin-combo-box-overlay"));
 
         filterBox.setFilter("Person");
+        TestBenchElement overlay = filterBox.$("vaadin-combo-box-overlay")
+                .first();
 
-        waitForElementNotPresent(By.tagName("vaadin-combo-box-overlay"));
-
-        Assert.assertEquals(
+        Assert.assertFalse(
                 "None of the items should match the filter "
                         + "and overlay is not displayed",
-                0, $("vaadin-combo-box-overlay").all().size());
+                overlay.getPropertyBoolean("opened"));
 
         filterBox.setFilter("10");
 

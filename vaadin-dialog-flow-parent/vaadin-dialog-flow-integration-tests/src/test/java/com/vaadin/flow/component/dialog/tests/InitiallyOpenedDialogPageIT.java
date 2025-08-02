@@ -19,7 +19,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
@@ -34,9 +33,8 @@ public class InitiallyOpenedDialogPageIT extends AbstractComponentIT {
 
     @Test
     public void openDialogDuringPageLoad() {
-        waitForElementPresent(By.tagName(DialogTestPageIT.DIALOG_OVERLAY_TAG));
-        WebElement overlay = findElement(
-                By.tagName(DialogTestPageIT.DIALOG_OVERLAY_TAG));
+        waitForElementPresent(By.cssSelector("vaadin-dialog[opened]"));
+
         Assert.assertTrue(isElementPresent(By.id("nested-component")));
     }
 }

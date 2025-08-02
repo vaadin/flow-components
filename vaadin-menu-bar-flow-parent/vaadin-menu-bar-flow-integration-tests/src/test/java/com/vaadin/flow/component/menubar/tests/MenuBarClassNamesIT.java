@@ -31,8 +31,6 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-menu-bar/menu-bar-class-names")
 public class MenuBarClassNamesIT extends AbstractComponentIT {
 
-    public static final String OVERLAY_TAG = "vaadin-menu-bar-overlay";
-
     private MenuBarElement menuBar;
 
     @Before
@@ -231,11 +229,11 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
     }
 
     public void verifyClosed() {
-        waitForElementNotPresent(By.tagName(OVERLAY_TAG));
+        Assert.assertFalse(menuBar.getSubMenu().getPropertyBoolean("opened"));
     }
 
     public void verifyOpened() {
-        waitForElementPresent(By.tagName(OVERLAY_TAG));
+        Assert.assertTrue(menuBar.getSubMenu().getPropertyBoolean("opened"));
     }
 
     private void waitForResizeObserver() {

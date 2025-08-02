@@ -63,7 +63,7 @@ public class AutoAttachedContextMenuIT extends AbstractContextMenuIT {
 
         verifyOpened();
         Assert.assertEquals("Auto-attached context menu",
-                getOverlay().getDomProperty("innerText"));
+                getMenu().getDomProperty("innerText"));
 
         checkLogsForErrors();
     }

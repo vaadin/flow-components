@@ -36,7 +36,7 @@ public class CloseListenerReopenDialogIT extends AbstractComponentIT {
 
         // Dialog is opened
         Assert.assertTrue(
-                isElementPresent(By.tagName("vaadin-dialog-overlay")));
+                isElementPresent(By.cssSelector("vaadin-dialog[opened]")));
 
         // try to close dialog
         closeDialog();
@@ -67,7 +67,7 @@ public class CloseListenerReopenDialogIT extends AbstractComponentIT {
 
         // Dialog is opened
         Assert.assertTrue(
-                isElementPresent(By.tagName("vaadin-dialog-overlay")));
+                isElementPresent(By.cssSelector("vaadin-dialog[opened]")));
 
         // try to close dialog
         closeDialog();
@@ -86,7 +86,7 @@ public class CloseListenerReopenDialogIT extends AbstractComponentIT {
 
         // Dialog should be closed
         waitUntilNot(driver -> isElementPresent(
-                By.tagName("vaadin-dialog-overlay")));
+                By.cssSelector("vaadin-dialog[opened]")));
     }
 
     @Test
@@ -99,13 +99,14 @@ public class CloseListenerReopenDialogIT extends AbstractComponentIT {
 
         // Two dialogs are opened
         Assert.assertEquals("Expected two dialogs", 2,
-                findElements(By.tagName("vaadin-dialog-overlay")).size());
+                findElements(By.cssSelector("vaadin-dialog[opened]")).size());
 
         closeDialog();
 
         // One dialog is opened
-        waitUntil(driver -> findElements(By.tagName("vaadin-dialog-overlay"))
-                .size() == 1);
+        waitUntil(
+                driver -> findElements(By.cssSelector("vaadin-dialog[opened]"))
+                        .size() == 1);
 
         // close action listener prints its info message
         Assert.assertEquals(

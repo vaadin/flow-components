@@ -147,9 +147,7 @@ public class MultiSelectComboBoxSelectedItemsOnTopIT
     }
 
     private ElementQuery<TestBenchElement> getItems() {
-        TestBenchElement overlay = $("vaadin-multi-select-combo-box-overlay")
-                .first();
-        return overlay.$("vaadin-multi-select-combo-box-item");
+        return comboBox.$("vaadin-multi-select-combo-box-item");
     }
 
     private void addCustomItem(String item) {

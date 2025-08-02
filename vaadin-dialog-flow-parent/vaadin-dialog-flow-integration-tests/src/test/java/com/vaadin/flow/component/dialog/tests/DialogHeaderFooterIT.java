@@ -235,30 +235,27 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
     }
 
     private void assertDialogContains(String text) {
-        var overlay = getOverlayElement();
+        var dialog = getDialog();
         Assert.assertTrue("Dialog should contains text " + text,
-                overlay.getText().contains(text));
+                dialog.getText().contains(text));
     }
 
     private void assertDialogNotContains(String text) {
-        var overlay = getOverlayElement();
+        var dialog = getDialog();
         Assert.assertFalse("Dialog should not contain text " + text,
-                overlay.getText().contains(text));
+                dialog.getText().contains(text));
     }
 
     private void verifyDialogOpened() {
-        waitForElementPresent(By.cssSelector("vaadin-dialog-overlay button"));
+        waitForElementPresent(By.cssSelector("vaadin-dialog[opened]"));
     }
 
     private void verifyContentRendered(String content) {
         waitUntil(c -> {
             try {
-                WebElement el = findElement(
-                        By.tagName("vaadin-dialog-overlay"));
-                if (el.isDisplayed() && el.getText().contains(content)) {
-                    return true;
-                }
-                return false;
+                WebElement dialog = getDialog();
+                return dialog.isDisplayed()
+                        && dialog.getText().contains(content);
             } catch (StaleElementReferenceException
                     | NoSuchElementException e) {
                 return false;
@@ -266,7 +263,7 @@ public class DialogHeaderFooterIT extends AbstractComponentIT {
         });
     }
 
-    private WebElement getOverlayElement() {
-        return findElement(By.tagName("vaadin-dialog-overlay"));
+    private WebElement getDialog() {
+        return findElement(By.cssSelector("vaadin-dialog[opened]"));
     }
 }

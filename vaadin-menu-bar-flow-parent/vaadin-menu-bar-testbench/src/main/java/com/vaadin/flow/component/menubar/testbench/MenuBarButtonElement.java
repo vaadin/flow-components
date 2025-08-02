@@ -29,13 +29,15 @@ import com.vaadin.testbench.elementsbase.Element;
 public class MenuBarButtonElement extends TestBenchElement {
 
     /**
-     * Get the sub menu overlay element linked to this menu button.
+     * Get the sub menu element linked to this menu button.
      *
      * @return TestBenchElement for the open sub menu.
      */
     public TestBenchElement getSubMenu() {
         waitForSubMenu();
-        return getPropertyElement("__overlay");
+        MenuBarElement menuBar = ((TestBenchElement) getPropertyElement(
+                "parentElement")).wrap(MenuBarElement.class);
+        return menuBar.getSubMenu();
     }
 
     /**
@@ -44,7 +46,9 @@ public class MenuBarButtonElement extends TestBenchElement {
      * @return List of MenuBarItemElement representing sub menu items.
      */
     public List<MenuBarItemElement> getSubMenuItems() {
-        return getSubMenu().$(MenuBarItemElement.class).all();
+        MenuBarElement menuBar = ((TestBenchElement) getPropertyElement(
+                "parentElement")).wrap(MenuBarElement.class);
+        return menuBar.getSubMenuItems();
     }
 
     /**

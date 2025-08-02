@@ -37,7 +37,7 @@ public class NestedTargetsIT extends AbstractContextMenuIT {
     @Test
     public void nestedTargets_rightClickParentTargetOutsideChildTarget_onlyParentTargetMenuOpened() {
         rightClickOn("not-in-child-target");
-        verifyNumOfOverlays(1);
+        verifyNumberOfMenus(1);
 
         Assert.assertArrayEquals(new String[] { "menu on parent target" },
                 getMenuItemCaptions());
@@ -50,7 +50,7 @@ public class NestedTargetsIT extends AbstractContextMenuIT {
     @Test
     public void nestedTargets_rightClickChildTarget_onlyChildTargetMenuOpened() {
         rightClickOn("child-target");
-        verifyNumOfOverlays(1);
+        verifyNumberOfMenus(1);
 
         Assert.assertArrayEquals(new String[] { "menu on child target" },
                 getMenuItemCaptions());
