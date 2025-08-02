@@ -24,11 +24,16 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.ElementUtil;
 import com.vaadin.flow.function.SerializableSupplier;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.router.BeforeLeaveEvent;
 import com.vaadin.flow.router.internal.BeforeLeaveHandler;
 import com.vaadin.flow.server.VaadinSession;
 
+import elemental.json.Json;
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
@@ -134,19 +139,70 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
-    public void close_withoutParent_autoRemoved() {
+    public void autoAdded_closeWithoutEvent_notAutoRemoved() {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
         fakeClientResponse();
 
+        // Just setting the property should not yet remove the component,
+        // instead it should wait for the closed event
         component.setOpened(false);
+
+        Assert.assertEquals(ui.getElement(),
+                component.getElement().getParent());
+    }
+
+    @Test
+    public void autoAdded_closeWithEventOnly_notAutoRemoved() {
+        TestComponent component = new TestComponent();
+
+        component.setOpened(true);
+        fakeClientResponse();
+
+        // Just receiving the closed event should not remove the component,
+        // as the component also needs to be closed on the server side
+        fireClosedEvent(component);
+
+        Assert.assertEquals(ui.getElement(),
+                component.getElement().getParent());
+    }
+
+    @Test
+    public void autoAdded_close_autoRemoved() {
+        TestComponent component = new TestComponent();
+
+        component.setOpened(true);
+        fakeClientResponse();
+
+        // Setting the property and receiving a closed event should remove the
+        // component
+        component.setOpened(false);
+        fireClosedEvent(component);
 
         Assert.assertNull(component.getElement().getParent());
     }
 
     @Test
-    public void close_withParent_notAutoRemoved() {
+    public void autoAdded_inert_close_autoRemoved() {
+        TestComponent component = new TestComponent(() -> false);
+
+        component.setOpened(true);
+        fakeClientResponse();
+
+        // Mark the component as inert
+        ElementUtil.setInert(component.getElement(), true);
+        fakeClientResponse();
+        Assert.assertTrue(component.getElement().getNode().isInert());
+
+        // Inert components should still receive the closed event
+        component.setOpened(false);
+        fireClosedEvent(component);
+        Assert.assertNull(component.getElement().getParent());
+    }
+
+    @Test
+    public void notAutoAdded_close_notAutoRemoved() {
         ParentComponent parent = new ParentComponent();
         TestComponent component = new TestComponent();
         parent.add(component);
@@ -155,19 +211,24 @@ public class OverlayAutoAddControllerTest {
         fakeClientResponse();
 
         component.setOpened(false);
+        fireClosedEvent(component);
 
         Assert.assertEquals(parent.getElement(),
                 component.getElement().getParent());
     }
 
     @Test
-    public void close_reopenBeforeClientResponse_autoRemovedAndAutoAdded() {
+    public void autoAdded_close_reopenBeforeClientResponse_autoRemovedAndAutoAdded() {
         TestComponent component = new TestComponent();
 
         component.setOpened(true);
         fakeClientResponse();
 
         component.setOpened(false);
+        fireClosedEvent(component);
+
+        Assert.assertNull(component.getElement().getParent());
+
         component.setOpened(true);
         fakeClientResponse();
 
@@ -212,6 +273,12 @@ public class OverlayAutoAddControllerTest {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
         });
+    }
+
+    private void fireClosedEvent(Component component) {
+        Element element = component.getElement();
+        element.getNode().getFeature(ElementListenerMap.class).fireEvent(
+                new DomEvent(element, "closed", Json.createObject()));
     }
 
     @Tag("test")

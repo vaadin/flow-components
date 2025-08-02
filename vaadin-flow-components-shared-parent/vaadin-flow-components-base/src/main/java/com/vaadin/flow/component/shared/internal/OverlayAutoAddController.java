@@ -48,13 +48,25 @@ public class OverlayAutoAddController<C extends Component>
         this.component = component;
         this.isModalSupplier = isModalSupplier;
 
+        // Automatically add the component to the UI when it is opened.
         component.getElement().addPropertyChangeListener("opened", event -> {
             if (isOpened()) {
                 handleOpen();
-            } else {
-                handleClose();
             }
         });
+
+        // Automatically remove the component from the UI after the overlay's
+        // closing animation has finished. This way auto-removal works by first
+        // setting `opened` on the client-side to `false` and then waiting for
+        // the `closed` event from the client-side.
+        // The event needs to be allowed for inert components so that closing
+        // from the server still works. This requires double-checking that the
+        // component is actually in a closed state on the server.
+        component.getElement().addEventListener("closed", event -> {
+            if (!isOpened()) {
+                handleClose();
+            }
+        }).allowInert();
     }
 
     /**
