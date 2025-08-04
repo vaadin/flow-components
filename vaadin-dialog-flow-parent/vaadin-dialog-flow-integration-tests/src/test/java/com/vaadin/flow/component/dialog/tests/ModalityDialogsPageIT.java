@@ -63,13 +63,14 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
     @Test
     public void openModalDialog_removeBackdrop_logClickNotAccepted() {
         $(NativeButtonElement.class).id("open-modal-dialog").click();
-        final DivElement backdrop = $(TestBenchElement.class).id("overlay")
-                .$(DivElement.class).id("backdrop");
+        final DivElement backdrop = $(DialogElement.class).first().$("*")
+                .id("overlay").$(DivElement.class).id("backdrop");
 
         executeScript("arguments[0].remove()", backdrop);
 
         Assert.assertFalse("Backdrop was not removed from dom",
-                $(TestBenchElement.class).id("overlay").$(DivElement.class)
+                $(DialogElement.class).first().$(TestBenchElement.class)
+                        .id("overlay").$(DivElement.class)
                         .withAttribute("id", "backdrop").exists());
 
         $(NativeButtonElement.class).id("log").click();
@@ -100,8 +101,8 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
 
         // Click anything to close dialog
         $("body").first().click();
-        Assert.assertFalse("Dialog should be hidden",
-                $(DialogElement.class).first().isDisplayed());
+        Assert.assertFalse("Dialog should be closed",
+                $(DialogElement.class).first().isOpen());
 
         // Now that dialog is closed, verify that click events work
         $(NativeButtonElement.class).id("log").click();

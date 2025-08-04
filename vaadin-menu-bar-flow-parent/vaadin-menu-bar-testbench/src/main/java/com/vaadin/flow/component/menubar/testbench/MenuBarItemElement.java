@@ -29,13 +29,16 @@ import com.vaadin.testbench.elementsbase.Element;
 public class MenuBarItemElement extends TestBenchElement {
 
     /**
-     * Get the sub menu overlay element linked to this menu item.
+     * Get the sub menu element linked to this menu item.
      *
      * @return TestBenchElement for the open sub menu.
      */
     public TestBenchElement getSubMenu() {
         waitForSubMenu();
-        return getPropertyElement("__overlay");
+        TestBenchElement listBox = getPropertyElement("parentElement");
+        TestBenchElement subMenu = listBox.getPropertyElement("parentElement")
+                .getPropertyElement("parentElement");
+        return subMenu.getPropertyElement("_subMenu");
     }
 
     /**

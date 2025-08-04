@@ -33,8 +33,6 @@ import com.vaadin.tests.AbstractComponentIT;
 @TestPath("vaadin-menu-bar/menu-bar-test")
 public class MenuBarPageIT extends AbstractComponentIT {
 
-    public static final String OVERLAY_TAG = "vaadin-menu-bar-overlay";
-
     private MenuBarElement menuBar;
 
     @Before
@@ -98,11 +96,11 @@ public class MenuBarPageIT extends AbstractComponentIT {
         assertMessage("true");
 
         menuBar.$("vaadin-menu-bar-button").first().click();
-        hoverOn(menuBar.getSubMenuItems().get(1));
+        MenuBarItemElement parentItem = menuBar.getSubMenuItems().get(1);
+        hoverOn(parentItem);
 
         waitUntil(driver -> menuBar.getAllSubMenus().size() == 2);
-        MenuBarItemElement checkableItem = menuBar
-                .getSubMenuItems(menuBar.getAllSubMenus().get(1)).get(1);
+        MenuBarItemElement checkableItem = parentItem.getSubMenuItems().get(1);
         Assert.assertTrue(checkableItem.isChecked());
 
         checkableItem.click();
@@ -110,8 +108,9 @@ public class MenuBarPageIT extends AbstractComponentIT {
         assertMessage("false");
 
         openSubSubMenu();
-        checkableItem = menuBar.getSubMenuItems(menuBar.getAllSubMenus().get(1))
-                .get(1);
+
+        parentItem = menuBar.getSubMenuItems().get(1);
+        checkableItem = checkableItem = parentItem.getSubMenuItems().get(1);
         Assert.assertFalse(checkableItem.isChecked());
     }
 
@@ -440,10 +439,10 @@ public class MenuBarPageIT extends AbstractComponentIT {
     }
 
     public void verifyClosed() {
-        waitForElementNotPresent(By.tagName(OVERLAY_TAG));
+        Assert.assertFalse(menuBar.getSubMenu().getPropertyBoolean("opened"));
     }
 
     public void verifyOpened() {
-        waitForElementPresent(By.tagName(OVERLAY_TAG));
+        Assert.assertTrue(menuBar.getSubMenu().getPropertyBoolean("opened"));
     }
 }

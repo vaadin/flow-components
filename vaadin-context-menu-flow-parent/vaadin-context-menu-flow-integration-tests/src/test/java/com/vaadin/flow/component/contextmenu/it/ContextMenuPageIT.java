@@ -22,14 +22,13 @@ import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.contextmenu.testbench.ContextMenuItemElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 /**
  * @author Vaadin Ltd
  */
 @TestPath("vaadin-context-menu/context-menu-test")
 public class ContextMenuPageIT extends AbstractContextMenuIT {
-
-    static final String CONTEXT_MENU_OVERLAY_TAG = "vaadin-context-menu-overlay";
 
     @Before
     public void init() {
@@ -47,7 +46,7 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
 
         rightClickOn("context-menu-test");
         verifyOpened();
-        Assert.assertEquals("Context menu test.", getOverlay().getText());
+        Assert.assertEquals("Context menu test.", getMenu().getText());
         assertMessage(string, true, messageId);
 
         clickBody();
@@ -156,12 +155,12 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
     }
 
     @Test
-    public void clickOnNonItemContent_overlayNotClosed() {
+    public void clickOnNonItemContent_menuNotClosed() {
         verifyClosed();
         rightClickOn("context-menu-test");
         verifyOpened();
 
-        getOverlay().$("p").first().click();
+        getMenuContent().$("p").first().click();
         verifyOpened();
     }
 
@@ -250,9 +249,9 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
     }
 
     private void assertButtonText(int index) {
+        TestBenchElement menuContent = getMenuContent(getMenu());
         Assert.assertEquals("Button Text is not correct", "Added Button",
-                findElements(By.tagName(CONTEXT_MENU_OVERLAY_TAG)).get(0)
-                        .findElements(By.tagName("button")).get(index)
+                menuContent.findElements(By.tagName("button")).get(index)
                         .getText());
     }
 
@@ -266,11 +265,10 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
     }
 
     private void assertButtonNumberInMenu(int expectedButtonNumber) {
-        Assert.assertEquals(
-                "Number of buttons in the menu overlay is not correct.",
+        TestBenchElement menuContent = getMenuContent(getMenu());
+        Assert.assertEquals("Number of buttons in the menu is not correct.",
                 expectedButtonNumber,
-                findElement(By.tagName(CONTEXT_MENU_OVERLAY_TAG))
-                        .findElements(By.tagName("button")).size());
+                menuContent.findElements(By.tagName("button")).size());
     }
 
     private void assertMessage(String string, Boolean state, String id) {
