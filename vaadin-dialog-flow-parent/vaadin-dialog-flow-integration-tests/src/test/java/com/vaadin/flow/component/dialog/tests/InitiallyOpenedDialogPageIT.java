@@ -21,10 +21,9 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-dialog/initial-dialog-open")
-public class InitiallyOpenedDialogPageIT extends AbstractComponentIT {
+public class InitiallyOpenedDialogPageIT extends AbstractDialogIT {
 
     @Before
     public void init() {
@@ -33,7 +32,7 @@ public class InitiallyOpenedDialogPageIT extends AbstractComponentIT {
 
     @Test
     public void openDialogDuringPageLoad() {
-        waitForElementPresent(By.cssSelector("vaadin-dialog[opened]"));
+        verifyOpened();
 
         Assert.assertTrue(isElementPresent(By.id("nested-component")));
     }
