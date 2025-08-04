@@ -35,14 +35,14 @@ public class OverrideOnBeforeOpenContextMenuIT extends AbstractContextMenuIT {
 
     @Test
     public void shouldNotOpenContextMenuWhenOnBeforeMenuOpenReturnsFalse() {
-        verifyClosed();
+        verifyClosedAndRemoved();
         rightClickOn("no-open-menu-target");
-        verifyClosed();
+        verifyClosedAndRemoved();
     }
 
     @Test
     public void shouldDynamicallyModifyContextMenuItems() {
-        verifyClosed();
+        verifyClosedAndRemoved();
 
         rightClickOn("dynamic-context-menu-target");
         verifyOpened();
@@ -50,6 +50,6 @@ public class OverrideOnBeforeOpenContextMenuIT extends AbstractContextMenuIT {
         Assert.assertEquals("Dynamic Item", getMenu().getText());
 
         clickBody();
-        verifyClosed();
+        verifyClosedAndRemoved();
     }
 }

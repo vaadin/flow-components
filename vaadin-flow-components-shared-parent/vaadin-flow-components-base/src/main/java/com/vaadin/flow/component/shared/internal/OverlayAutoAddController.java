@@ -73,6 +73,21 @@ public class OverlayAutoAddController<C extends Component>
     }
 
     /**
+     * Adds the component to the UI if it is not already attached, regardless of
+     * the current opened state of the component. Allows components with custom
+     * opening logic, such as ContextMenu, to add themselves to the UI and reuse
+     * the automatic removal logic when the component is closed.
+     */
+    public void add() {
+        if (!isAttached()) {
+            UI ui = getUI();
+            ui.addToModalComponent(component);
+            ui.setChildComponentModal(component, isModalSupplier.get());
+            autoAdded = true;
+        }
+    }
+
+    /**
      * Force remove the component from the UI in case it was auto-added. Can be
      * used by components with custom closing logic. For example, Notification
      * removes itself from the UI whenever it is detached.
@@ -96,11 +111,8 @@ public class OverlayAutoAddController<C extends Component>
         UI ui = getUI();
         StateTree.ExecutionRegistration addToUiRegistration = ui
                 .beforeClientResponse(ui, context -> {
-                    if (isOpened() && !isAttached()) {
-                        ui.addToModalComponent(component);
-                        ui.setChildComponentModal(component,
-                                isModalSupplier.get());
-                        autoAdded = true;
+                    if (isOpened()) {
+                        add();
                     }
                     if (beforeLeaveRegistration != null) {
                         beforeLeaveRegistration.remove();

@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
@@ -246,8 +247,10 @@ public class ContextMenuTest {
             e.unregisterListener();
         });
 
-        contextMenu.getElement().setProperty("opened", true);
-        contextMenu.getElement().setProperty("opened", false);
+        ComponentUtil.fireEvent(contextMenu,
+                new ContextMenuBase.OpenedChangeEvent<>(contextMenu, false));
+        ComponentUtil.fireEvent(contextMenu,
+                new ContextMenuBase.OpenedChangeEvent<>(contextMenu, false));
 
         Assert.assertEquals(1, listenerInvokedCount.get());
     }
