@@ -10,6 +10,7 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.Assert;
@@ -352,6 +353,141 @@ public class CustomEditorIT extends AbstractSpreadsheetIT {
         for (String cellAddress : editorCellAddresses) {
             Assert.assertTrue(getCustomEditorFromCell(cellAddress).isPresent());
         }
+    }
+
+    @Test
+    public void adjacentCustomEditors_showOnFocus_navigateWithTabAndModify_valuesUpdated() {
+        getSpreadsheet().addSheet();
+        loadTestFixture(TestFixtures.AdjacentCustomEditors);
+        var cellsToModify = List.of("B2", "C2", "D2", "E2", "F2");
+        var valueToSet = "a";
+        selectCell("A2");
+        cellsToModify.forEach(
+                address -> moveToNextCellAndAssertEditorInCellIsFocusedWithKeyPress(
+                        address, valueToSet));
+        getActiveElement().sendKeys(Keys.TAB);
+        cellsToModify.forEach(address -> Assert.assertEquals(valueToSet,
+                getCellValue(address)));
+    }
+
+    public void customEditorShared_persistsValuesCorrectly() {
+        createNewSpreadsheet();
+        loadTestFixture(TestFixtures.CustomEditorShared);
+
+        // Test that moving focus between cells with shared custom editors
+        // works correctly and values are persisted
+        clickCell("B2");
+        var maybeEditor = getInputInCustomEditorFromCell("B2");
+        Assert.assertTrue(maybeEditor.isPresent());
+
+        clickCell("B3");
+        maybeEditor = getInputInCustomEditorFromCell("B3");
+        Assert.assertTrue(maybeEditor.isPresent());
+
+        clickCell("B2");
+        maybeEditor = getInputInCustomEditorFromCell("B2");
+        Assert.assertTrue(maybeEditor.isPresent());
+
+        clickCell("B2");
+        maybeEditor = getInputInCustomEditorFromCell("B2");
+        Assert.assertTrue(maybeEditor.isPresent());
+        var editor = maybeEditor.get();
+        editor.sendKeys("TestValueB2", Keys.ENTER);
+
+        clickCell("A1");
+        getCommandExecutor().waitForVaadin();
+        Assert.assertEquals("TestValueB2", getCellValue("B2"));
+
+        clickCell("B3");
+        maybeEditor = getInputInCustomEditorFromCell("B3");
+        Assert.assertTrue(maybeEditor.isPresent());
+        editor = maybeEditor.get();
+        editor.sendKeys("TestValueB3", Keys.ENTER);
+
+        clickCell("A1");
+        getCommandExecutor().waitForVaadin();
+        Assert.assertEquals("TestValueB3", getCellValue("B3"));
+    }
+
+    @Test
+    public void customEditorInFrozenCells_persistsValueOnVariousKeyActions()
+            throws Exception {
+        createNewSpreadsheet();
+        loadTestFixture(TestFixtures.CustomEditorRow);
+        // Freeze 2 rows and 15 columns
+        addFreezePane(10, 2);
+
+        performKeyboardTestsToCell("A");
+        performKeyboardTestsToCell("J");
+        performKeyboardTestsToCell("K");
+
+        getSpreadsheet().scrollLeft(1000);
+        performKeyboardTestsToCell("AI");
+    }
+
+    @Test
+    public void customEditorAlwaysVisibleInFrozenCells_persistsValue()
+            throws Exception {
+        createNewSpreadsheet();
+        loadTestFixture(TestFixtures.CustomEditorRow);
+        // Toggle custom editor visibility to always show
+        $("vaadin-button").id("toggleCustomEditorVisibilityButton").click();
+        getCommandExecutor().waitForVaadin();
+        addFreezePane(10, 2);
+
+        performKeyboardTestsToCell("J");
+
+        getSpreadsheet().scrollLeft(1000);
+        performKeyboardTestsToCell("AI");
+    }
+
+    private void performKeyboardTestsToCell(String column) {
+        final String cellAddress = column + "2";
+
+        clickCell(cellAddress);
+        var maybeEditor = getInputInCustomEditorFromCell(cellAddress);
+        Assert.assertTrue(maybeEditor.isPresent());
+
+        var editor = maybeEditor.get();
+
+        // Test Esc with arrow keys persistence on cell
+        editor.sendKeys("EscWithArrowKeys", Keys.ESCAPE, Keys.ARROW_DOWN);
+        getCommandExecutor().waitForVaadin();
+        clickCell(cellAddress);
+        Assert.assertEquals(
+                "Value in cell '" + cellAddress + "' after ESC+ARROW_DOWN",
+                "EscWithArrowKeys", getFormulaFieldValue());
+
+        // Test ENTER key persistence on cell
+        clickCell(cellAddress);
+        editor.setProperty("value", "");
+        editor.sendKeys("EnterTest", Keys.ENTER);
+        getCommandExecutor().waitForVaadin();
+        clickCell(cellAddress);
+        Assert.assertEquals("Value in cell '" + cellAddress + "' after ENTER",
+                "EnterTest", getFormulaFieldValue());
+
+        // Test TAB key persistence on cell
+        clickCell(cellAddress);
+        editor.click();
+        editor.setProperty("value", "");
+        editor.sendKeys("TabTest", Keys.TAB);
+        getCommandExecutor().waitForVaadin();
+        clickCell(cellAddress);
+        Assert.assertEquals("Value in cell '" + cellAddress + "' after TAB",
+                "TabTest", getFormulaFieldValue());
+
+        // Test SHIFT+TAB persistence on A2
+        clickCell(cellAddress);
+        editor.click();
+        editor.setProperty("value", "");
+        editor.sendKeys("ShiftTabTest", Keys.chord(Keys.SHIFT, Keys.TAB));
+        getCommandExecutor().waitForVaadin();
+        clickCell(cellAddress);
+        Assert.assertEquals(
+                "Value in cell '" + cellAddress + "' after SHIFT+TAB",
+                "ShiftTabTest", getFormulaFieldValue());
+
     }
 
     private void toggleCheckboxValue(String cellAddress) {

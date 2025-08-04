@@ -61,8 +61,7 @@ public class ComboBoxItemClassNameIT extends AbstractComponentIT {
     }
 
     private void assertItemClassNames(String... expectedClassNames) {
-        TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
-        ElementQuery<TestBenchElement> items = overlay
+        ElementQuery<TestBenchElement> items = comboBox
                 .$("vaadin-combo-box-item");
 
         for (int i = 0; i < expectedClassNames.length; i++) {

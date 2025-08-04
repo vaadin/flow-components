@@ -22,10 +22,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.grid.Grid.SelectionMode;
-import com.vaadin.flow.component.grid.GridMultiSelectionModel;
-import com.vaadin.flow.component.grid.GridMultiSelectionModel.SelectAllCheckboxVisibility;
-import com.vaadin.flow.component.grid.GridSelectionModel;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -57,7 +53,6 @@ public class TreeGridBasicFeaturesPage extends Div {
         initializeDataProviders();
         grid = new TreeGrid<>(HierarchicalTestBean.class);
         grid.setWidth("100%");
-        grid.setSelectionMode(SelectionMode.SINGLE);
         grid.setColumns("id",
                 hierarchicalTestBean -> hierarchicalTestBean.getIndex() < 0
                         ? null
@@ -74,22 +69,17 @@ public class TreeGridBasicFeaturesPage extends Div {
         log.setId("log");
         log.setHeight("100px");
         log.setWidth("100%");
-        add(grid, new VerticalLayout(
-                setIdByText(new NativeButton("Clear log", e -> log.clear())),
-                log));
 
-        createActions();
+        var clearLog = new NativeButton("Clear log", e -> log.clear());
+        clearLog.setId("clear-log");
 
-    }
+        add(grid, new VerticalLayout(clearLog, log));
 
-    protected void createActions() {
         createDataProviderSelect();
         createHierarchyColumnSelect();
         createExpandMenu();
         createCollapseMenu();
         createListenerMenu();
-        createSelectionModeMenu();
-        createDisableEnableMenu();
     }
 
     private void initializeDataProviders() {
@@ -152,7 +142,7 @@ public class TreeGridBasicFeaturesPage extends Div {
         options.put("DataProviderWithNullValues", dataProviderWithNullValues);
 
         options.entrySet().forEach(entry -> {
-            addAction(entry.getKey(),
+            addButton(entry.getKey(),
                     () -> grid.setDataProvider(entry.getValue()));
         });
     }
@@ -164,7 +154,7 @@ public class TreeGridBasicFeaturesPage extends Div {
         options.put("index", HierarchicalTestBean::getIndex);
 
         options.entrySet().forEach(entry -> {
-            addAction("Set hierarchy column - " + entry.getKey(), () -> {
+            addButton("set-hierarchy-column-" + entry.getKey(), () -> {
                 grid.setHierarchyColumn(entry.getKey(), entry.getValue());
                 // reset headers
                 grid.getColumnByKey("depth").setHeader("Depth");
@@ -174,86 +164,59 @@ public class TreeGridBasicFeaturesPage extends Div {
     }
 
     private void createExpandMenu() {
-        addAction("Expand 0 | 0",
+        addButton("expand-0-0",
                 () -> grid.expand(new HierarchicalTestBean(null, 0, 0)));
 
-        addAction("Expand 1 | 1",
+        addButton("expand-1-1",
                 () -> grid.expand(new HierarchicalTestBean("/0/0", 1, 1)));
 
-        addAction("Expand 2 | 1",
+        addButton("expand-2-1",
                 () -> grid.expand(new HierarchicalTestBean("/0/0/1/1", 2, 1)));
 
-        addAction("Expand 0 | 0 recursively",
+        addButton("expand-0-0-recursively",
                 () -> grid.expandRecursively(
                         Arrays.asList(new HierarchicalTestBean(null, 0, 0)),
                         1));
     }
 
     private void createCollapseMenu() {
-        addAction("Collapse 0 | 0",
+        addButton("collapse-0-0",
                 () -> grid.collapse(new HierarchicalTestBean(null, 0, 0)));
-        addAction("Collapse 1 | 1",
+        addButton("collapse-1-1",
                 () -> grid.collapse(new HierarchicalTestBean("/0/0", 1, 1)));
-        addAction("Collapse 2 | 1", () -> grid
+        addButton("collapse-2-1", () -> grid
                 .collapse(new HierarchicalTestBean("/0/0/1/1", 2, 1)));
-        addAction("Collapse 0 | 0 recursively",
+        addButton("collapse-0-0-recursively",
                 () -> grid.collapseRecursively(
                         Arrays.asList(new HierarchicalTestBean(null, 0, 0)),
                         2));
     }
 
     private void createListenerMenu() {
-        addAction("Collapse listener",
-                () -> grid.addCollapseListener(
-                        event -> log("Item(s) collapsed (from client: "
-                                + event.isFromClient() + "): "
-                                + event.getItems().stream().findFirst()
-                                        .map(HierarchicalTestBean::toString)
-                                        .orElse("null"))));
+        addButton("add-collapse-listener", () -> {
+            grid.addCollapseListener(event -> {
+                String item = event.getItems().stream().findFirst()
+                        .map(HierarchicalTestBean::toString).orElse("null");
+                log("Item(s) collapsed (from client: %s): %s"
+                        .formatted(event.isFromClient(), item));
+            });
+        });
 
-        addAction("Expand listener", () -> grid.addExpandListener(event -> log(
-                "Item(s) expanded (from client: " + event.isFromClient() + "): "
-                        + event.getItems().stream().findFirst()
-                                .map(HierarchicalTestBean::toString)
-                                .orElse("null"))));
-    }
-
-    @SuppressWarnings("rawtypes")
-    private void createSelectionModeMenu() {
-        LinkedHashMap<String, SelectionMode> options = new LinkedHashMap<>();
-        options.put("none", SelectionMode.NONE);
-        options.put("single", SelectionMode.SINGLE);
-        options.put("multi", SelectionMode.MULTI);
-
-        options.entrySet().forEach(entry -> {
-            addAction("Selection mode - " + entry.getKey(), () -> {
-                grid.setSelectionMode(entry.getValue());
-                if (entry.getValue() == SelectionMode.MULTI) {
-                    GridSelectionModel model = grid.getSelectionModel();
-                    if (model instanceof GridMultiSelectionModel) {
-                        ((GridMultiSelectionModel) model)
-                                .setSelectAllCheckboxVisibility(
-                                        SelectAllCheckboxVisibility.VISIBLE);
-                    }
-                }
+        addButton("add-expand-listener", () -> {
+            grid.addExpandListener(event -> {
+                String item = event.getItems().stream().findFirst()
+                        .map(HierarchicalTestBean::toString).orElse("null");
+                log("Item(s) expanded (from client: %s): %s"
+                        .formatted(event.isFromClient(), item));
             });
         });
     }
 
-    private void createDisableEnableMenu() {
-        addAction("Toggle Enabled/Disabled",
-                () -> grid.setEnabled(!grid.isEnabled()));
-    }
-
-    private void addAction(String title, Runnable action) {
-        NativeButton b = new NativeButton(title, event -> action.run());
-        setIdByText(b);
+    private void addButton(String id, Runnable onClick) {
+        NativeButton b = new NativeButton(id.replace("-", " "),
+                event -> onClick.run());
+        b.setId(id);
         add(b);
-    }
-
-    private NativeButton setIdByText(NativeButton button) {
-        button.setId(button.getText().replace(" ", ""));
-        return button;
     }
 
     public class CustomTreeDataProvider

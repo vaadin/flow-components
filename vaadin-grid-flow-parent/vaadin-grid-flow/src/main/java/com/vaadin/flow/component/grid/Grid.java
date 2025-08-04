@@ -55,7 +55,6 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.grid.GridArrayUpdater.UpdateQueueData;
 import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
@@ -120,7 +119,6 @@ import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
@@ -215,8 +213,8 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.0.0-alpha7")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha7")
+@NpmPackage(value = "@vaadin/grid", version = "25.0.0-alpha10")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha10")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -254,19 +252,16 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     protected static class UpdateQueue implements Update {
         private final ArrayList<SerializableRunnable> queue = new ArrayList<>();
-        private final UpdateQueueData data;
+        private final Element element;
 
-        protected UpdateQueue(UpdateQueueData data, int size) {
-            this.data = data;
+        protected UpdateQueue(Element element, int size) {
+            this.element = element;
+
             // 'size' property is not synchronized by the web component since
             // there are no events for it, but we
             // need to sync it otherwise server will overwrite client value with
             // the old server one
             enqueue("$connector.updateSize", size);
-            if (data.getUniqueKeyProperty() != null) {
-                enqueue("$connector.updateUniqueItemIdPath",
-                        data.getUniqueKeyProperty());
-            }
             getElement().setProperty("size", size);
         }
 
@@ -297,16 +292,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
 
         protected Element getElement() {
-            return data.getElement();
-        }
-
-        /**
-         * Gets {@link UpdateQueueData} for this queue.
-         *
-         * @return the {@link UpdateQueueData} object.
-         */
-        public UpdateQueueData getData() {
-            return data;
+            return element;
         }
     }
 
@@ -1380,36 +1366,17 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     private class GridArrayUpdaterImpl implements GridArrayUpdater {
-        private UpdateQueueData data;
-        private SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory;
-
-        public GridArrayUpdaterImpl(
-                SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
-            this.updateQueueFactory = updateQueueFactory;
-        }
-
         @Override
         public UpdateQueue startUpdate(int sizeChange) {
-            return updateQueueFactory.apply(data, sizeChange);
+            return new UpdateQueue(getElement(), sizeChange);
         }
 
         @Override
         public void initialize() {
             initConnector();
             updateSelectionModeOnClient();
-            setRequestedRange(0, getPageSize());
+            setViewportRange(0, getPageSize());
         }
-
-        @Override
-        public void setUpdateQueueData(UpdateQueueData data) {
-            this.data = data;
-        }
-
-        @Override
-        public UpdateQueueData getUpdateQueueData() {
-            return data;
-        }
-
     }
 
     private final GridArrayUpdater arrayUpdater;
@@ -1555,7 +1522,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the page size. Must be greater than zero.
      */
     public Grid(int pageSize) {
-        this(pageSize, null, new DataCommunicatorBuilder<>());
+        this(pageSize, new DataCommunicatorBuilder<>());
     }
 
     /**
@@ -1621,8 +1588,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param beanType
      *            the bean type to use, not <code>null</code>
-     * @param updateQueueBuilder
-     *            the builder for new {@link UpdateQueue} instance
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
@@ -1632,10 +1597,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the GridArrayUpdater type
      */
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
-            Class<T> beanType,
-            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuilder,
-            B dataCommunicatorBuilder) {
-        this(beanType, updateQueueBuilder, dataCommunicatorBuilder, true);
+            Class<T> beanType, B dataCommunicatorBuilder) {
+        this(beanType, dataCommunicatorBuilder, true);
     }
 
     /**
@@ -1655,8 +1618,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param beanType
      *            the bean type to use, not <code>null</code>
-     * @param updateQueueBuilder
-     *            the builder for new {@link UpdateQueue} instance
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
@@ -1669,10 +1630,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the properties of the beanType
      */
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
-            Class<T> beanType,
-            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuilder,
-            B dataCommunicatorBuilder, boolean autoCreateColumns) {
-        this(50, updateQueueBuilder, dataCommunicatorBuilder);
+            Class<T> beanType, B dataCommunicatorBuilder,
+            boolean autoCreateColumns) {
+        this(50, dataCommunicatorBuilder);
         Objects.requireNonNull(dataCommunicatorBuilder,
                 "Data communicator builder can't be null");
         configureBeanType(beanType, autoCreateColumns);
@@ -1689,8 +1649,6 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *
      * @param pageSize
      *            the page size. Must be greater than zero.
-     * @param updateQueueBuilder
-     *            the builder for new {@link UpdateQueue} instance
      * @param dataCommunicatorBuilder
      *            Builder for {@link DataCommunicator} implementation this Grid
      *            uses to handle all data communication.
@@ -1698,20 +1656,13 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      *            the data communicator builder type
      * @param <U>
      *            the GridArrayUpdater type
-     *
      */
     @SuppressWarnings("unchecked")
     protected <U extends GridArrayUpdater, B extends DataCommunicatorBuilder<T, U>> Grid(
-            int pageSize,
-            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueBuilder,
-            B dataCommunicatorBuilder) {
+            int pageSize, B dataCommunicatorBuilder) {
         Objects.requireNonNull(dataCommunicatorBuilder,
                 "Data communicator builder can't be null");
-        arrayUpdater = createDefaultArrayUpdater(
-                Optional.ofNullable(updateQueueBuilder)
-                        .orElseGet(() -> UpdateQueue::new));
-        arrayUpdater.setUpdateQueueData(
-                new UpdateQueueData(getElement(), getUniqueKeyProperty()));
+        arrayUpdater = createDefaultArrayUpdater();
         gridDataGenerator = new CompositeDataGenerator<>();
         gridDataGenerator.addDataGenerator(this::generateUniqueKeyData);
         gridDataGenerator.addDataGenerator(this::generateStyleData);
@@ -1741,11 +1692,9 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     private void generateUniqueKeyData(T item, JsonObject jsonObject) {
-        String uniqueKeyPropertyName = arrayUpdater.getUpdateQueueData()
-                .getUniqueKeyProperty();
-        if (uniqueKeyPropertyName != null
-                && !jsonObject.hasKey(uniqueKeyPropertyName)) {
-            jsonObject.put(uniqueKeyPropertyName, getUniqueKey(item));
+        if (uniqueKeyProperty != null
+                && !jsonObject.hasKey(uniqueKeyProperty)) {
+            jsonObject.put(uniqueKeyProperty, getUniqueKey(item));
         }
     }
 
@@ -1844,9 +1793,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
     }
 
-    protected GridArrayUpdater createDefaultArrayUpdater(
-            SerializableBiFunction<UpdateQueueData, Integer, UpdateQueue> updateQueueFactory) {
-        return new GridArrayUpdaterImpl(updateQueueFactory);
+    protected GridArrayUpdater createDefaultArrayUpdater() {
+        return new GridArrayUpdaterImpl();
     }
 
     /**
@@ -3115,7 +3063,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         getElement()
                 .executeJs("if (this.$connector) { this.$connector.reset() }");
         getDataCommunicator().setPageSize(pageSize);
-        setRequestedRange(0, pageSize);
+        setViewportRange(0, pageSize);
         getDataCommunicator().reset();
     }
 
@@ -3893,7 +3841,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
-    private void setRequestedRange(int start, int length) {
+    private void setViewportRange(int start, int length) {
         if (length > 500 && length / getPageSize() > 10 && isAllRowsVisible()) {
             throw new IllegalArgumentException(
                     "Attempted to fetch more items from server than allowed in one go. "
@@ -3904,7 +3852,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             + "reason this is not an option, increase the page size of the grid so that rendering "
                             + "every item at once doesn't result in a request for over 10 pages.");
         }
-        getDataCommunicator().setRequestedRange(start, length);
+        getDataCommunicator().setViewportRange(start, length);
     }
 
     @ClientCallable
@@ -4625,8 +4573,10 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
      */
     protected void setUniqueKeyProperty(String uniqueKeyProperty) {
         this.uniqueKeyProperty = uniqueKeyProperty;
-        arrayUpdater.getUpdateQueueData()
-                .setUniqueKeyProperty(uniqueKeyProperty);
+        if (uniqueKeyProperty != null) {
+            getElement().callJsFunction("$connector.updateUniqueItemIdPath",
+                    uniqueKeyProperty);
+        }
     }
 
     protected GridArrayUpdater getArrayUpdater() {
@@ -5142,7 +5092,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         int preloadedItemsCount = lastIndexPageEndIndex - targetPageStartIndex
                 + 1;
         // Preload the items
-        setRequestedRange(targetPageStartIndex, preloadedItemsCount);
+        setViewportRange(targetPageStartIndex, preloadedItemsCount);
 
         // Scroll to the requested index
         getElement().callJsFunction("scrollToIndex", rowIndex);

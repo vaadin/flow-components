@@ -45,7 +45,7 @@ import com.vaadin.flow.dom.Style;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value = "@vaadin/login", version = "25.0.0-alpha7")
+@NpmPackage(value = "@vaadin/login", version = "25.0.0-alpha10")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
 public class LoginOverlay extends AbstractLogin implements HasStyle {
 
@@ -115,8 +115,7 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     /**
      * Sets the application title. Detaches the component title if it was set
      * earlier. Note: the method calls {@link #setTitle(Component)}, which will
-     * reset the custom title, if it was set. Custom title can be reset only
-     * when the overlay is closed.
+     * reset the custom title, if it was set.
      *
      * Title is a part of the I18n object. See {@link #setI18n(LoginI18n)}.
      *
@@ -143,8 +142,7 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
 
     /**
      * Sets the application title, <code>null</code> to remove any previous
-     * title and to display title set via {@link #setTitle(String)}. Note: the
-     * title component has to be set when the overlay is closed.
+     * title and to display title set via {@link #setTitle(String)}.
      *
      * @see #getTitle()
      * @param title
@@ -152,9 +150,6 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
      *            previously set title
      */
     public void setTitle(Component title) {
-        if (isOpened()) {
-            return;
-        }
         if (this.title != null) {
             this.title.getElement().removeFromParent();
         }
@@ -268,21 +263,12 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
         }
 
         /**
-         * Adds the given components to the container. Note: components have to
-         * be added when the overlay is closed.
+         * Adds the given components to the container.
          *
          * @param components
          *            the components to be added.
-         *
-         * @throws UnsupportedOperationException
-         *             when using this method while overlay is opened
          */
         public void add(Component... components) {
-            if (overlay.isOpened()) {
-                throw new UnsupportedOperationException(
-                        "LoginOverlay does not support adding content when opened");
-            }
-
             Objects.requireNonNull(components, "Components should not be null");
             for (Component component : components) {
                 Objects.requireNonNull(component,
@@ -292,21 +278,12 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
         }
 
         /**
-         * Removes the given components from the container. Note: components
-         * have to be removed when the overlay is closed.
+         * Removes the given components from the container.
          *
          * @param components
          *            the components to be removed.
-         *
-         * @throws UnsupportedOperationException
-         *             when using this method while overlay is opened
          */
         public void remove(Component... components) {
-            if (overlay.isOpened()) {
-                throw new UnsupportedOperationException(
-                        "LoginOverlay does not support removing content when opened");
-            }
-
             Objects.requireNonNull(components, "Components should not be null");
             for (Component component : components) {
                 Objects.requireNonNull(component,
@@ -322,18 +299,9 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
         }
 
         /**
-         * Removes all components from the container. Note: components have to
-         * be removed when the overlay is closed.
-         *
-         * @throws UnsupportedOperationException
-         *             when using this method while overlay is opened
+         * Removes all components from the container.
          */
         public void removeAll() {
-            if (overlay.isOpened()) {
-                throw new UnsupportedOperationException(
-                        "LoginOverlay does not support removing content when opened");
-            }
-
             SlotUtils.clearSlot(overlay, slot);
         }
     }

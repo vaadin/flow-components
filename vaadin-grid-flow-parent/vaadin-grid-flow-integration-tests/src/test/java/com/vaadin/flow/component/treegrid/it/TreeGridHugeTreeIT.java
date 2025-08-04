@@ -119,25 +119,17 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
 
         TreeGridElement grid = getTreeGrid();
 
-        waitUntil(tets -> grid.getNumberOfExpandedRows() == 99);
-
         // assuming cache size to be visible row count + buffer before/after
         // assuming buffer to match visible row count
         int assumedCachedSize = (grid.getLastVisibleRowIndex()
                 - grid.getFirstVisibleRowIndex()) * 3;
-        waitUntil(test -> !grid.isLoadingExpandedRows(), 20);
         String[] cellTexts = new String[assumedCachedSize];
         for (int i = 0; i < assumedCachedSize; i++) {
             cellTexts[i] = grid.getCellWaitForRow(i, 0).getText();
         }
         grid.scrollToRowAndWait(0);
-
         grid.collapseWithClick(1);
-        waitUntil(tets -> grid.getNumberOfExpandedRows() == 98);
-
         grid.expandWithClick(1);
-        waitUntil(tets -> grid.getNumberOfExpandedRows() == 99);
-        waitUntil(test -> !grid.isLoadingExpandedRows(), 25);
 
         assertCellTexts(0, 0, cellTexts);
     }

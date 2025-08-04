@@ -74,8 +74,7 @@ public class ClearValueIT extends AbstractComponentIT {
 
         comboBox.openPopup();
 
-        TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
-        ElementQuery<TestBenchElement> items = overlay
+        ElementQuery<TestBenchElement> items = comboBox
                 .$("vaadin-combo-box-item");
 
         items.all()

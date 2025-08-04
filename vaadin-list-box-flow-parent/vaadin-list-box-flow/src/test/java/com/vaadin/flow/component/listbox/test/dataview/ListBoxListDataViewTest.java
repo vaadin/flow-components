@@ -17,8 +17,8 @@ package com.vaadin.flow.component.listbox.test.dataview;
 
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.data.provider.AbstractListDataView;
-import com.vaadin.flow.data.provider.AbstractListDataViewListenerTest;
 import com.vaadin.flow.data.provider.HasListDataView;
+import com.vaadin.tests.dataprovider.AbstractListDataViewListenerTest;
 
 public class ListBoxListDataViewTest extends AbstractListDataViewListenerTest {
 

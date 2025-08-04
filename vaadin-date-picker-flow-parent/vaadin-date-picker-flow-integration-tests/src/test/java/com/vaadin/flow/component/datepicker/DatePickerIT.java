@@ -40,7 +40,7 @@ public class DatePickerIT extends AbstractComponentIT {
     @Test
     public void openSimpleDatePickerFromServer_overlayVisible() {
         scrollIntoViewAndClick(findElement(By.id("open-simple-picker")));
-        waitForElementVisible(By.tagName("vaadin-date-picker-overlay"));
+        waitForElementVisible(By.tagName("vaadin-date-picker-overlay-content"));
     }
 
     @Test

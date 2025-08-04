@@ -87,7 +87,7 @@ public class StylingIT extends AbstractComponentIT {
     }
 
     private TestBenchElement getOverlay() {
-        return ((TestBenchElement) getConfirmDialog().getContext());
+        return getConfirmDialog().getPropertyElement("_overlayElement");
     }
 
     private String getOverlayClassName() {

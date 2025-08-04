@@ -129,7 +129,7 @@ public class LitRendererTestComponentWrapper extends Div
     @Override
     public void setItems(Collection<String> items) {
         HasDataProvider.super.setItems(items);
-        dataCommunicator.setRequestedRange(0, items.size());
+        dataCommunicator.setViewportRange(0, items.size());
     }
 
     @Override

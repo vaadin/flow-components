@@ -234,7 +234,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     const delay = grid._hasData ? rootRequestDelay : 0;
 
     rootRequestDebouncer = Debouncer.debounce(rootRequestDebouncer, timeOut.after(delay), () => {
-      grid.$connector.fetchPage((firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size), page, root);
+      grid.$connector.fetchPage((firstIndex, size) => grid.$server.setViewportRange(firstIndex, size), page, root);
     });
   };
 
@@ -407,8 +407,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     });
   };
 
-  grid._updateItem = function (row, item) {
-    Grid.prototype._updateItem.call(grid, row, item);
+  grid.__updateRow = function (row) {
+    Grid.prototype.__updateRow.call(grid, row);
 
     // There might be inactive component renderers on hidden rows that still refer to the
     // same component instance as one of the renderers on a visible row. Making the
@@ -647,12 +647,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     itemsUpdated(updatedItems);
 
     updateGridItemsInDomBasedOnCache(updatedItems);
-  };
-
-  grid.$connector.clearExpanded = function () {
-    grid.expandedItems = [];
-    ensureSubCacheQueue = [];
-    parentRequestQueue = [];
   };
 
   /**
