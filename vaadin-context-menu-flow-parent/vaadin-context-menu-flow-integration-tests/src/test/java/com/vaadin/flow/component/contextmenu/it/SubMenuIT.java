@@ -38,7 +38,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
     @Before
     public void init() {
         open();
-        verifyClosed();
+        verifyClosedAndRemoved();
     }
 
     @Test
@@ -54,7 +54,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
         Assert.assertEquals("bar", subItem.getText());
 
         subItem.click();
-        verifyClosed();
+        verifyClosedAndRemoved();
         assertMessage("bar");
     }
 
@@ -64,7 +64,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
         openSubMenu(getMenuItems().get(0));
         verifyNumberOfMenus(2);
         clickBody();
-        verifyClosed();
+        verifyClosedAndRemoved();
 
         clickElementWithJs("add-item");
         clickElementWithJs("add-item");
@@ -81,7 +81,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
                 menuItemCaptions);
 
         subMenuItems.get(1).click();
-        verifyClosed();
+        verifyClosedAndRemoved();
         assertMessage("0");
     }
 
@@ -90,6 +90,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
         rightClickOn("target");
         openSubMenu(getMenuItems().get(0));
         clickBody();
+        verifyClosedAndRemoved();
 
         clickElementWithJs("add-sub-sub-menu");
 
@@ -107,7 +108,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
         Assert.assertArrayEquals(new String[] { "0" }, menuItemCaptions);
 
         subMenuItems.get(0).click();
-        verifyClosed();
+        verifyClosedAndRemoved();
         assertMessage("0");
     }
 
@@ -121,7 +122,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
         verifyNumberOfMenus(2);
 
         clickBody();
-        verifyClosed();
+        verifyClosedAndRemoved();
 
         clickElementWithJs("remove-all");
         rightClickOn("target");
@@ -178,7 +179,7 @@ public class SubMenuIT extends AbstractContextMenuIT {
         // uncheck the item
         checkableItem.click();
 
-        verifyClosed();
+        verifyClosedAndRemoved();
 
         // We should have a message about selected item:
         assertMessage("Checkable item is false");

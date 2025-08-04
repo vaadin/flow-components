@@ -42,7 +42,7 @@ public class ContextMenuDemoIT extends AbstractContextMenuIT {
 
     @Test
     public void openAndCloseBasicContextMenu_contentIsRendered() {
-        verifyClosed();
+        verifyClosedAndRemoved();
 
         rightClickOn("basic-context-menu-target");
         verifyOpened();
@@ -55,12 +55,12 @@ public class ContextMenuDemoIT extends AbstractContextMenuIT {
                 getMenuItems().get(2).isEnabled());
 
         $("body").first().click();
-        verifyClosed();
+        verifyClosedAndRemoved();
     }
 
     @Test
     public void openAndCloseContextMenuWithComponents_contentIsRendered() {
-        verifyClosed();
+        verifyClosedAndRemoved();
 
         rightClickOn("context-menu-with-components-target");
         verifyOpened();
@@ -75,7 +75,7 @@ public class ContextMenuDemoIT extends AbstractContextMenuIT {
                 .findElement(By.tagName("vaadin-checkbox"));
         checkbox.click();
         $("body").first().click();
-        verifyClosed();
+        verifyClosedAndRemoved();
         WebElement message = findElement(
                 By.id("context-menu-with-components-message"));
         Assert.assertEquals("Clicked on checkbox with value: true",
@@ -84,7 +84,7 @@ public class ContextMenuDemoIT extends AbstractContextMenuIT {
 
     @Test
     public void hierarchicalContextMenu_openSubMenus() {
-        verifyClosed();
+        verifyClosedAndRemoved();
 
         rightClickOn("hierarchical-menu-target");
         verifyNumberOfMenus(1);
@@ -102,12 +102,12 @@ public class ContextMenuDemoIT extends AbstractContextMenuIT {
         Assert.assertEquals("Clicked on the third item",
                 $("span").id("hierarchical-menu-message").getText());
 
-        verifyClosed();
+        verifyClosedAndRemoved();
     }
 
     @Test
     public void checkableMenuItems() {
-        verifyClosed();
+        verifyClosedAndRemoved();
 
         rightClickOn("checkable-menu-items-target");
         verifyOpened();
@@ -120,7 +120,7 @@ public class ContextMenuDemoIT extends AbstractContextMenuIT {
 
         Assert.assertEquals("Unselected option 2",
                 $("span").id("checkable-menu-items-message").getText());
-        verifyClosed();
+        verifyClosedAndRemoved();
 
         rightClickOn("checkable-menu-items-target");
         verifyOpened();
@@ -133,7 +133,7 @@ public class ContextMenuDemoIT extends AbstractContextMenuIT {
 
         Assert.assertEquals("Selected option 1",
                 $("span").id("checkable-menu-items-message").getText());
-        verifyClosed();
+        verifyClosedAndRemoved();
 
         rightClickOn("checkable-menu-items-target");
         verifyOpened();
@@ -153,7 +153,7 @@ public class ContextMenuDemoIT extends AbstractContextMenuIT {
 
     @Test
     public void subMenuHasComponents_componentsAreNotItems() {
-        verifyClosed();
+        verifyClosedAndRemoved();
 
         rightClickOn("context-menu-with-submenu-components-target");
         verifyOpened();
