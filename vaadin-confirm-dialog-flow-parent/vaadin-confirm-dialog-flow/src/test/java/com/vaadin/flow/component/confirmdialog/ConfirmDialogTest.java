@@ -17,6 +17,14 @@ package com.vaadin.flow.component.confirmdialog;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
+
+import elemental.json.Json;
 
 public class ConfirmDialogTest {
 
@@ -59,5 +67,22 @@ public class ConfirmDialogTest {
         confirmDialog.setHeight(null);
         Assert.assertNull(confirmDialog.getHeight());
         Assert.assertNull(confirmDialog.getElement().getProperty("height"));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void addClosedListener_listenerInvokedOnClose() {
+        ConfirmDialog dialog = new ConfirmDialog();
+        ComponentEventListener<ConfirmDialog.ClosedEvent> listener = Mockito
+                .mock(ComponentEventListener.class);
+        dialog.addClosedListener(listener);
+
+        Element element = dialog.getElement();
+        dialog.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(
+                        new DomEvent(element, "closed", Json.createObject()));
+
+        Mockito.verify(listener, Mockito.times(1))
+                .onComponentEvent(Mockito.any(ConfirmDialog.ClosedEvent.class));
     }
 }
