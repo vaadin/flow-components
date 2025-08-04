@@ -113,7 +113,7 @@ public class FeaturesDiyIT extends AbstractComponentIT {
     }
 
     public void assertDialogClosed() {
-        Assert.assertFalse(getConfirmDialog().isPresent());
+        waitForElementNotPresent(By.tagName("vaadin-confirm-dialog"));
     }
 
     private void clickConfirm() {

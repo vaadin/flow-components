@@ -89,7 +89,7 @@ public class OverlayIT extends AbstractComponentIT {
         loginOverlay.getPasswordField().setValue("value");
         loginOverlay.submit();
 
-        Assert.assertFalse($(LoginOverlayElement.class).exists());
+        waitUntil(driver -> !$(LoginOverlayElement.class).exists());
     }
 
     @Test

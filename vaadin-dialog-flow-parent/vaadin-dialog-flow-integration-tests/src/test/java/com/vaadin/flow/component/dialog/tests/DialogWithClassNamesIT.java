@@ -23,10 +23,9 @@ import com.vaadin.flow.component.dialog.testbench.DialogElement;
 import com.vaadin.flow.component.html.testbench.NativeButtonElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-dialog/dialog-class-names-test")
-public class DialogWithClassNamesIT extends AbstractComponentIT {
+public class DialogWithClassNamesIT extends AbstractDialogIT {
 
     @Before
     public void init() {
@@ -38,7 +37,7 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         $(NativeButtonElement.class).id("open").click();
 
         DialogElement dialog = getDialog();
-        TestBenchElement overlay = getOverlay();
+        TestBenchElement overlay = getOverlayComponent(dialog);
 
         String overlayClassNames = overlay.getDomAttribute("class");
         String dialogClassNames = dialog.getDomAttribute("class");
@@ -53,7 +52,7 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         $(NativeButtonElement.class).id("add").click();
 
         DialogElement dialog = getDialog();
-        TestBenchElement overlay = getOverlay();
+        TestBenchElement overlay = getOverlayComponent(dialog);
 
         String overlayClassNames = overlay.getDomAttribute("class");
         String dialogClassNames = dialog.getDomAttribute("class");
@@ -68,7 +67,7 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         $(NativeButtonElement.class).id("clear").click();
 
         DialogElement dialog = getDialog();
-        TestBenchElement overlay = getOverlay();
+        TestBenchElement overlay = getOverlayComponent(dialog);
 
         String overlayClassNames = overlay.getDomAttribute("class");
         String dialogClassNames = dialog.getDomAttribute("class");
@@ -78,7 +77,7 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
     }
 
     @Test
-    public void openDialog_overlayChagedClassNameAfterSecondOpening() {
+    public void openDialog_overlayChangedClassNameAfterSecondOpening() {
         $(NativeButtonElement.class).id("open").click();
         $(NativeButtonElement.class).id("clear").click();
         $(NativeButtonElement.class).id("add").click();
@@ -88,20 +87,12 @@ public class DialogWithClassNamesIT extends AbstractComponentIT {
         $(NativeButtonElement.class).id("open").click();
 
         DialogElement dialog = getDialog();
-        TestBenchElement overlay = getOverlay();
+        TestBenchElement overlay = getOverlayComponent(dialog);
 
         String overlayClassNames = overlay.getDomAttribute("class");
         String dialogClassNames = dialog.getDomAttribute("class");
 
         Assert.assertEquals("added", dialogClassNames);
         Assert.assertEquals("added", overlayClassNames);
-    }
-
-    private DialogElement getDialog() {
-        return $(DialogElement.class).first();
-    }
-
-    private TestBenchElement getOverlay() {
-        return getDialog().$("vaadin-dialog-overlay").first();
     }
 }
