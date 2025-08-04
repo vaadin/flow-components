@@ -19,6 +19,7 @@ import java.io.Serializable;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
@@ -62,11 +63,13 @@ public class OverlayAutoAddController<C extends Component>
         // The event needs to be allowed for inert components so that closing
         // from the server still works. This requires double-checking that the
         // component is actually in a closed state on the server.
+        // Also allow the event on disabled components, as LoginOverlay for
+        // example disables itself on the login event.
         component.getElement().addEventListener("closed", event -> {
             if (!isOpened()) {
                 handleClose();
             }
-        }).allowInert();
+        }).allowInert().setDisabledUpdateMode(DisabledUpdateMode.ALWAYS);
     }
 
     /**
