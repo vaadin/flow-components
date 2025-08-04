@@ -65,7 +65,13 @@ public class ConfirmDialog extends Component
         implements HasSize, HasStyle, HasOrderedComponents {
 
     /**
-     * `confirm` is sent when the user clicks Confirm button
+     * Event that is fired when the user clicks the Confirm button
+     * <p>
+     * Note that the event is fired before the dialog's closing animation has
+     * finished. When manually adding / removing the dialog to / from the UI,
+     * use the {@link ClosedEvent} to wait with the removal until the animation
+     * has finished. When relying on the auto-add behavior by just calling
+     * {@link #open()} or {@link #setOpened(boolean)}, this is not necessary.
      */
     @DomEvent("confirm")
     public static class ConfirmEvent extends ComponentEvent<ConfirmDialog> {
@@ -75,7 +81,13 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * `reject` is sent when the user clicks Reject button
+     * Event that is fired when the user clicks the Reject button
+     * <p>
+     * Note that the event is fired before the dialog's closing animation has
+     * finished. When manually adding / removing the dialog to / from the UI,
+     * use the {@link ClosedEvent} to wait with the removal until the animation
+     * has finished. When relying on the auto-add behavior by just calling
+     * {@link #open()} or {@link #setOpened(boolean)}, this is not necessary.
      */
     @DomEvent("reject")
     public static class RejectEvent extends ComponentEvent<ConfirmDialog> {
@@ -85,12 +97,29 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * `cancel` is sent when the user clicks Cancel button or presses Escape
-     * key. `cancel` is not sent if Cancel button is hidden
+     * Event that is fired when the user clicks the Cancel button or presses
+     * Escape. The event is not sent if the Cancel button is hidden.
+     * <p>
+     * Note that the event is fired before the dialog's closing animation has
+     * finished. When manually adding / removing the dialog to / from the UI,
+     * use the {@link ClosedEvent} to wait with the removal until the animation
+     * has finished. When relying on the auto-add behavior by just calling
+     * {@link #open()} or {@link #setOpened(boolean)}, this is not necessary.
      */
     @DomEvent("cancel")
     public static class CancelEvent extends ComponentEvent<ConfirmDialog> {
         public CancelEvent(ConfirmDialog source, boolean fromClient) {
+            super(source, fromClient);
+        }
+    }
+
+    /**
+     * Event that is fired after the dialog's closing animation has finished.
+     * Can be used to remove a dialog from the UI afterward.
+     */
+    @DomEvent("closed")
+    public static class ClosedEvent extends ComponentEvent<ConfirmDialog> {
+        public ClosedEvent(ConfirmDialog source, boolean fromClient) {
             super(source, fromClient);
         }
     }
@@ -484,7 +513,17 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Adds `confirm` event listener
+     * Adds a listener for when the user clicks the Confirm button.
+     * <p>
+     * Note: The event is fired before the dialog's closing animation has
+     * finished. When manually adding or removing the dialog to or from the UI,
+     * use the {@link ClosedEvent} to wait with the removal until the animation
+     * has finished. When relying on the auto-add behavior by just calling
+     * {@link #open()} or {@link #setOpened(boolean)}, this is not necessary.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
      */
     public Registration addConfirmListener(
             ComponentEventListener<ConfirmEvent> listener) {
@@ -507,7 +546,18 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Adds `cancel` event listener
+     * Adds a listener for when the user clicks the Cancel button or presses
+     * Escape.
+     * <p>
+     * Note: The event is fired before the dialog's closing animation has
+     * finished. When manually adding or removing the dialog to or from the UI,
+     * use the {@link ClosedEvent} to wait with the removal until the animation
+     * has finished. When relying on the auto-add behavior by just calling
+     * {@link #open()} or {@link #setOpened(boolean)}, this is not necessary.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
      */
     public Registration addCancelListener(
             ComponentEventListener<CancelEvent> listener) {
@@ -529,11 +579,34 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Adds `reject` event listener
+     * Adds a listener for when the user clicks the Reject button.
+     * <p>
+     * Note: The event is fired before the dialog's closing animation has
+     * finished. When manually adding or removing the dialog to or from the UI,
+     * use the {@link ClosedEvent} to wait with the removal until the animation
+     * has finished. When relying on the auto-add behavior by just calling
+     * {@link #open()} or {@link #setOpened(boolean)}, this is not necessary.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
      */
     public Registration addRejectListener(
             ComponentEventListener<RejectEvent> listener) {
         return ComponentUtil.addListener(this, RejectEvent.class, listener);
+    }
+
+    /**
+     * Add a lister for when the dialog's closing animation has finished. Can be
+     * used to remove the dialog from the UI afterward.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
+     */
+    public Registration addClosedListener(
+            ComponentEventListener<ClosedEvent> listener) {
+        return ComponentUtil.addListener(this, ClosedEvent.class, listener);
     }
 
     /**
