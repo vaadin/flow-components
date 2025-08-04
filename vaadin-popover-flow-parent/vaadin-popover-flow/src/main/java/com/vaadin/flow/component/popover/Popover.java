@@ -345,7 +345,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Sets the ARIA role for the dialog element, used by screen readers.
+     * Sets the ARIA role for the popover element, used by screen readers.
      *
      * @param role
      *            the role to set
