@@ -85,7 +85,7 @@ public class MenuItemDisableOnClickIT extends AbstractContextMenuIT {
         verifyOpened();
         waitUntil(ExpectedConditions.elementToBeClickable(By.id(itemId)), 2);
         clickElementWithJs(itemId);
-        verifyClosed();
+        verifyClosedAndRemoved();
     }
 
     @Test
@@ -185,7 +185,7 @@ public class MenuItemDisableOnClickIT extends AbstractContextMenuIT {
         Assert.assertTrue(menuItem.isEnabled());
 
         clickBody();
-        verifyClosed();
+        verifyClosedAndRemoved();
         clickElementWithJs("toggle-keep-open");
         rightClickOn(TARGET_ID);
         waitForElementPresent(By.id(itemId));

@@ -171,6 +171,7 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
         item.click();
         Assert.assertEquals("false",
                 findElement(By.id("checked-message")).getText());
+        verifyClosed();
 
         rightClickOn("context-menu-checkable-item-target");
         item = getMenuItems().get(0);
@@ -188,6 +189,7 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
         item.click();
         Assert.assertEquals("true",
                 findElement(By.id("checked-message")).getText());
+        verifyClosed();
 
         rightClickOn("context-menu-checkable-item-target");
         item = getMenuItems().get(0);
@@ -196,6 +198,7 @@ public class ContextMenuPageIT extends AbstractContextMenuIT {
         item.click();
         Assert.assertEquals("false",
                 findElement(By.id("checked-message")).getText());
+        verifyClosed();
 
         rightClickOn("context-menu-checkable-item-target");
         item = getMenuItems().get(0);

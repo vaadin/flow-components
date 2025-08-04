@@ -62,7 +62,12 @@ public abstract class AbstractContextMenuIT extends AbstractComponentIT {
     }
 
     protected void verifyClosed() {
-        waitForElementNotPresent(By.cssSelector("vaadin-context-menu[opened]"));
+        waitForElementNotPresent(By.cssSelector(
+                "vaadin-context-menu[opened], vaadin-context-menu[closing]"));
+    }
+
+    protected void verifyClosedAndRemoved() {
+        waitForElementNotPresent(By.cssSelector("vaadin-context-menu"));
     }
 
     protected void verifyOpened() {

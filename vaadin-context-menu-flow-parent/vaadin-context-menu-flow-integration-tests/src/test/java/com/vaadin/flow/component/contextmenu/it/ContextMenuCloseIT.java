@@ -37,7 +37,7 @@ public class ContextMenuCloseIT extends AbstractContextMenuIT {
         verifyOpened();
 
         clickBody();
-        verifyClosed();
+        verifyClosedAndRemoved();
 
         WebElement message = findElement(By.id("closed-message"));
         Assert.assertEquals("Closed from client: true", message.getText());
@@ -49,7 +49,7 @@ public class ContextMenuCloseIT extends AbstractContextMenuIT {
         verifyOpened();
 
         leftClickOn("close-menu");
-        verifyClosed();
+        verifyClosedAndRemoved();
 
         WebElement message = findElement(By.id("closed-message"));
         Assert.assertEquals("Closed from client: false", message.getText());
@@ -61,13 +61,13 @@ public class ContextMenuCloseIT extends AbstractContextMenuIT {
         verifyOpened();
 
         leftClickOn("close-menu");
-        verifyClosed();
+        verifyClosedAndRemoved();
 
         rightClickOn("context-menu-target");
         verifyOpened();
 
         clickBody();
-        verifyClosed();
+        verifyClosedAndRemoved();
 
         WebElement message = findElement(By.id("closed-message"));
         Assert.assertEquals("Closed from client: true", message.getText());

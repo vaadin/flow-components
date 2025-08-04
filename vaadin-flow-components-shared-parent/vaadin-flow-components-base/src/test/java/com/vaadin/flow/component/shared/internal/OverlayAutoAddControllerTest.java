@@ -270,6 +270,47 @@ public class OverlayAutoAddControllerTest {
     }
 
     @Test
+    public void add_autoAdded() {
+        TestComponent component = new TestComponent();
+        component.controller.add();
+
+        Assert.assertEquals(ui.getElement(),
+                component.getElement().getParent());
+    }
+
+    @Test
+    public void add_doesNotOpen() {
+        TestComponent component = new TestComponent();
+        component.controller.add();
+
+        Assert.assertFalse(component.getElement().getProperty("opened", false));
+    }
+
+    @Test
+    public void add_withParent_notAutoAdded() {
+        ParentComponent parent = new ParentComponent();
+        TestComponent component = new TestComponent();
+        parent.add(component);
+        component.controller.add();
+
+        Assert.assertEquals(parent.getElement(),
+                component.getElement().getParent());
+    }
+
+    @Test
+    public void add_close_autoRemoved() {
+        TestComponent component = new TestComponent();
+        component.controller.add();
+
+        component.setOpened(true);
+        fakeClientResponse();
+        component.setOpened(false);
+        fireClosedEvent(component);
+
+        Assert.assertNull(component.getElement().getParent());
+    }
+
+    @Test
     public void autoAdded_remove_forceRemovesComponent() {
         TestComponent component = new TestComponent();
 

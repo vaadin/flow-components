@@ -31,7 +31,7 @@ public class NestedTargetsIT extends AbstractContextMenuIT {
     @Before
     public void init() {
         open();
-        verifyClosed();
+        verifyClosedAndRemoved();
     }
 
     @Test
@@ -43,7 +43,7 @@ public class NestedTargetsIT extends AbstractContextMenuIT {
                 getMenuItemCaptions());
 
         getMenuItems().get(0).click();
-        verifyClosed();
+        verifyClosedAndRemoved();
         Assert.assertEquals("parent", findElement(By.id("messages")).getText());
     }
 
@@ -56,7 +56,7 @@ public class NestedTargetsIT extends AbstractContextMenuIT {
                 getMenuItemCaptions());
 
         getMenuItems().get(0).click();
-        verifyClosed();
+        verifyClosedAndRemoved();
         Assert.assertEquals("child", findElement(By.id("messages")).getText());
     }
 }
