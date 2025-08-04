@@ -125,7 +125,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
             setLeft(event.getLeft());
         });
 
-        setOverlayRole("dialog");
+        setRole("dialog");
 
         // Initialize auto-add behavior
         new OverlayAutoAddController<>(this, this::isModal);
@@ -1100,15 +1100,29 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Sets the ARIA role for the overlay element, used by screen readers.
+     * Sets the ARIA role for the dialog element, used by screen readers.
      *
      * @param role
      *            the role to set
      */
+    public void setRole(String role) {
+        Objects.requireNonNull(role, "Role cannot be null");
+
+        getElement().setProperty("role", role);
+    }
+
+    /**
+     * Sets the ARIA role for the overlay element, used by screen readers.
+     *
+     * @param role
+     *            the role to set
+     * @deprecated Use {@link #setRole(String)} instead
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setOverlayRole(String role) {
         Objects.requireNonNull(role, "Role cannot be null");
 
-        getElement().setProperty("overlayRole", role);
+        setRole(role);
     }
 
     /**
@@ -1117,8 +1131,20 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @return the role
      */
+    public String getRole() {
+        return getElement().getProperty("role");
+    }
+
+    /**
+     * Gets the ARIA role for the overlay element, used by screen readers.
+     * Defaults to {@code dialog}.
+     *
+     * @return the role
+     * @deprecated Use {@link #getRole()} instead
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     public String getOverlayRole() {
-        return getElement().getProperty("overlayRole");
+        return getRole();
     }
 
     /**

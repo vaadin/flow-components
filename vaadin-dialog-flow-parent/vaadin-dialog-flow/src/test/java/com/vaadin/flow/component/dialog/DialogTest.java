@@ -193,12 +193,12 @@ public class DialogTest {
     }
 
     @Test
-    public void getOverlayRole_defaultDialog() {
+    public void getRole_defaultDialog() {
         Dialog dialog = new Dialog();
 
+        Assert.assertEquals("dialog", dialog.getRole());
         Assert.assertEquals("dialog", dialog.getOverlayRole());
-        Assert.assertEquals("dialog",
-                dialog.getElement().getProperty("overlayRole"));
+        Assert.assertEquals("dialog", dialog.getElement().getProperty("role"));
     }
 
     @Test
@@ -206,15 +206,33 @@ public class DialogTest {
         Dialog dialog = new Dialog();
         dialog.setOverlayRole("alertdialog");
 
+        Assert.assertEquals("alertdialog", dialog.getRole());
         Assert.assertEquals("alertdialog", dialog.getOverlayRole());
         Assert.assertEquals("alertdialog",
-                dialog.getElement().getProperty("overlayRole"));
+                dialog.getElement().getProperty("role"));
     }
 
     @Test(expected = NullPointerException.class)
     public void setOverlayRole_null_throws() {
         Dialog dialog = new Dialog();
         dialog.setOverlayRole(null);
+    }
+
+    @Test
+    public void setRole_getRole() {
+        Dialog dialog = new Dialog();
+        dialog.setRole("alertdialog");
+
+        Assert.assertEquals("alertdialog", dialog.getRole());
+        Assert.assertEquals("alertdialog", dialog.getOverlayRole());
+        Assert.assertEquals("alertdialog",
+                dialog.getElement().getProperty("role"));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setRole_null_throws() {
+        Dialog dialog = new Dialog();
+        dialog.setRole(null);
     }
 
     @Test
