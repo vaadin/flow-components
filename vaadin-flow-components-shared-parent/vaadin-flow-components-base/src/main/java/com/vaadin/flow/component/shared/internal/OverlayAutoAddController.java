@@ -73,6 +73,15 @@ public class OverlayAutoAddController<C extends Component>
     }
 
     /**
+     * Force remove the component from the UI in case it was auto-added. Can be
+     * used by components with custom closing logic. For example, Notification
+     * removes itself from the UI whenever it is detached.
+     */
+    public void remove() {
+        handleClose();
+    }
+
+    /**
      * Sets whether to skip auto-adding when the UI navigates to a new view
      * before the component is opened.
      *

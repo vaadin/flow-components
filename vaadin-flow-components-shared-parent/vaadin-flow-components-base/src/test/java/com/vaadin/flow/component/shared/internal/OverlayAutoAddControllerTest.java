@@ -269,6 +269,39 @@ public class OverlayAutoAddControllerTest {
                 false);
     }
 
+    @Test
+    public void autoAdded_remove_forceRemovesComponent() {
+        TestComponent component = new TestComponent();
+
+        component.setOpened(true);
+        fakeClientResponse();
+
+        Assert.assertEquals(ui.getElement(),
+                component.getElement().getParent());
+
+        component.controller.remove();
+
+        Assert.assertNull(component.getElement().getParent());
+    }
+
+    @Test
+    public void notAutoAdded_remove_doesNothing() {
+        ParentComponent parent = new ParentComponent();
+        TestComponent component = new TestComponent();
+        parent.add(component);
+
+        component.setOpened(true);
+        fakeClientResponse();
+
+        Assert.assertEquals(parent.getElement(),
+                component.getElement().getParent());
+
+        component.controller.remove();
+
+        Assert.assertEquals(parent.getElement(),
+                component.getElement().getParent());
+    }
+
     private void fakeClientResponse() {
         ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
         ui.getInternals().getStateTree().collectChanges(ignore -> {
