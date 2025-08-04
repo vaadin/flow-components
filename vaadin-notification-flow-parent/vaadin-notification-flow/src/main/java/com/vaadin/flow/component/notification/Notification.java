@@ -63,6 +63,8 @@ public class Notification extends Component implements HasComponents, HasStyle,
     private static final Position DEFAULT_POSITION = Position.BOTTOM_START;
     private static final String OPENED_PROPERTY = "opened";
 
+    private OverlayAutoAddController<Notification> autoAddController;
+
     /**
      * Enumeration of all available positions for notification component
      */
@@ -244,7 +246,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
                         new OpenedChangeEvent(this, event.isUserOriginated())));
 
         // Initialize auto add behavior
-        new OverlayAutoAddController<>(this);
+        autoAddController = new OverlayAutoAddController<>(this);
     }
 
     /**
@@ -660,6 +662,7 @@ public class Notification extends Component implements HasComponents, HasStyle,
             // itself when its parent, for example a dialog, gets attached
             // again.
             setOpened(false);
+            autoAddController.remove();
         });
     }
 

@@ -22,12 +22,10 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.flow.component.dialog.testbench.DialogElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-dialog-view")
-public class DialogIT extends AbstractComponentIT {
+public class DialogIT extends AbstractDialogIT {
 
     @Test
     public void openAndCloseConfirmationDialog_buttonsRenderedWithClickListeners() {
@@ -37,12 +35,12 @@ public class DialogIT extends AbstractComponentIT {
 
         findElement(By.id("confirmation-dialog-button")).click();
         getDialog().findElements(By.tagName("vaadin-button")).get(0).click();
-        verifyDialogClosed();
+        verifyClosedAndRemoved();
         Assert.assertEquals("Confirmed!", message.getText());
 
         findElement(By.id("confirmation-dialog-button")).click();
         getDialog().findElements(By.tagName("vaadin-button")).get(1).click();
-        verifyDialogClosed();
+        verifyClosedAndRemoved();
         Assert.assertEquals("Cancelled...", message.getText());
     }
 
@@ -51,13 +49,13 @@ public class DialogIT extends AbstractComponentIT {
         open();
 
         findElement(By.id("server-side-close-dialog-button")).click();
-        verifyDialogOpened();
+        verifyOpened();
 
         executeScript("document.body.click()");
-        verifyDialogOpened();
+        verifyOpened();
 
         new Actions(getDriver()).sendKeys(Keys.ESCAPE).perform();
-        verifyDialogClosed();
+        verifyClosedAndRemoved();
 
         Assert.assertEquals("Closed from server-side",
                 findElement(By.id("server-side-close-dialog-message"))
@@ -86,17 +84,4 @@ public class DialogIT extends AbstractComponentIT {
 
         Assert.assertEquals("rgba(255, 0, 0, 1)", element.getCssValue("color"));
     }
-
-    private DialogElement getDialog() {
-        return $(DialogElement.class).withAttribute("opened").first();
-    }
-
-    private void verifyDialogClosed() {
-        waitForElementNotPresent(By.cssSelector("vaadin-dialog[opened]"));
-    }
-
-    private void verifyDialogOpened() {
-        waitForElementPresent(By.cssSelector("vaadin-dialog[opened]"));
-    }
-
 }

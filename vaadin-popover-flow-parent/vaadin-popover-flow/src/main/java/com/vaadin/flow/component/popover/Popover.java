@@ -322,27 +322,6 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
         return getElement().getProperty("withBackdrop", false);
     }
 
-    @Override
-    public void setAriaLabel(String ariaLabel) {
-        getElement().setProperty("accessibleName", ariaLabel);
-    }
-
-    @Override
-    public Optional<String> getAriaLabel() {
-        return Optional.ofNullable(getElement().getProperty("accessibleName"));
-    }
-
-    @Override
-    public void setAriaLabelledBy(String labelledBy) {
-        getElement().setProperty("accessibleNameRef", labelledBy);
-    }
-
-    @Override
-    public Optional<String> getAriaLabelledBy() {
-        return Optional
-                .ofNullable(getElement().getProperty("accessibleNameRef"));
-    }
-
     /**
      * Set {@code true} to make the popover content automatically receive focus
      * after it is opened. Modal popovers use this behavior by default.
