@@ -232,24 +232,42 @@ public class PopoverTest {
     }
 
     @Test
-    public void getOverlayRole_defaultDialog() {
+    public void getRole_defaultDialog() {
+        Popover popover = new Popover();
+
+        Assert.assertEquals("dialog", popover.getRole());
         Assert.assertEquals("dialog", popover.getOverlayRole());
-        Assert.assertEquals("dialog",
-                popover.getElement().getProperty("overlayRole"));
+        Assert.assertEquals("dialog", popover.getElement().getProperty("role"));
     }
 
     @Test
     public void setOverlayRole_getOverlayRole() {
         popover.setOverlayRole("alertdialog");
 
+        Assert.assertEquals("alertdialog", popover.getRole());
         Assert.assertEquals("alertdialog", popover.getOverlayRole());
         Assert.assertEquals("alertdialog",
-                popover.getElement().getProperty("overlayRole"));
+                popover.getElement().getProperty("role"));
     }
 
     @Test(expected = NullPointerException.class)
     public void setOverlayRole_null_throws() {
         popover.setOverlayRole(null);
+    }
+
+    @Test
+    public void setRole_getRole() {
+        popover.setRole("alertdialog");
+
+        Assert.assertEquals("alertdialog", popover.getRole());
+        Assert.assertEquals("alertdialog", popover.getOverlayRole());
+        Assert.assertEquals("alertdialog",
+                popover.getElement().getProperty("role"));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setRole_null_throws() {
+        popover.setRole(null);
     }
 
     @Test
