@@ -3,15 +3,18 @@ import './gridConnector.ts';
 
 window.Vaadin.Flow.treeGridConnector = {};
 window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
-  // Check whether the connector was already initialized for the grid
+  window.Vaadin.Flow.gridConnector.initLazy(grid);
+
   if (grid.$connector) {
     return;
   }
 
-  window.Vaadin.Flow.gridConnector.initLazy(grid);
+  function getViewportRange() {
+    const renderedRows = grid._getRenderedRows();
+    return [renderedRows[0]?.index ?? 0, renderedRows[renderedRows.length - 1]?.index ?? 0];
+  }
 
-  const dataProviderController = grid._dataProviderController;
-  dataProviderController.__loadCachePage = function (cache, page) {
+  grid._dataProviderController.__loadCachePage = function (cache, page) {
     if (grid.__pendingScrollToIndexes) {
       return;
     }
@@ -19,26 +22,16 @@ window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
     Object.getPrototypeOf(this).__loadCachePage.call(this, cache, page);
   };
 
-  function getViewportRange() {
-    const renderedRows = grid._getRenderedRows();
-    return [renderedRows[0]?.index ?? 0, renderedRows[renderedRows.length - 1]?.index ?? 0];
-  }
-
-  function getViewportSize() {
-    const viewportRange = getViewportRange();
-    return viewportRange[1] - viewportRange[0];
-  }
-
   grid.scrollToIndex = async function (...indexes) {
     grid.__pendingScrollToIndexes = indexes;
 
-    if (!grid.clientHeight || !grid._columnTree || dataProviderController.isLoading()) {
+    if (!grid.clientHeight || !grid._columnTree || grid._dataProviderController.isLoading()) {
       return;
     }
 
-    const buffer = Math.floor(getViewportSize() * 1.5);
-    const flatIndex = await grid.$server.setViewportRangeByIndexPath(indexes, buffer);
-
+    const [start, end] = getViewportRange();
+    const padding = Math.floor((end - start) * 1.5);
+    const flatIndex = await grid.$server.setViewportRangeByIndexPath(indexes, padding);
     grid._scrollToFlatIndex(flatIndex);
 
     delete grid.__pendingScrollToIndexes;
