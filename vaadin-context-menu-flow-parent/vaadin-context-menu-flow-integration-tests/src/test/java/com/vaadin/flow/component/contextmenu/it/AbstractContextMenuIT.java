@@ -102,8 +102,4 @@ public abstract class AbstractContextMenuIT extends AbstractComponentIT {
         return wrap(TestBenchElement.class,
                 menu.findElement(By.cssSelector(":scope > [slot='overlay']")));
     }
-
-    protected void openSubMenu(ContextMenuItemElement parentItem) {
-        parentItem.openSubMenu();
-    }
 }

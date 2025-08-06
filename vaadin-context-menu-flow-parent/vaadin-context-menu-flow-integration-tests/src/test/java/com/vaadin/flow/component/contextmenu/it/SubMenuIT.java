@@ -35,115 +35,105 @@ import com.vaadin.testbench.TestBenchElement;
 @TestPath("vaadin-context-menu/sub-menu-test")
 public class SubMenuIT extends AbstractContextMenuIT {
 
+    TestBenchElement target;
+
     @Before
     public void init() {
         open();
-        verifyClosedAndRemoved();
+        target = $("*").id("target");
     }
 
     @Test
     public void addItemToSubMenu_subMenuRendered_clickListenerWorks() {
-        rightClickOn("target");
+        ContextMenuElement menu = ContextMenuElement.openByRightClick(target);
         verifyNumberOfMenus(1);
 
-        openSubMenu(getMenuItems().get(0));
+        ContextMenuElement subMenu = menu.getMenuItems().get(0).openSubMenu();
         verifyNumberOfMenus(2);
 
-        List<ContextMenuElement> menus = getAllMenus();
-        ContextMenuItemElement subItem = getMenuItems(menus.get(1)).get(0);
+        ContextMenuItemElement subItem = subMenu.getMenuItems().get(0);
         Assert.assertEquals("bar", subItem.getText());
 
         subItem.click();
-        verifyClosedAndRemoved();
+        menu.waitUntilClosed();
         assertMessage("bar");
     }
 
     @Test
     public void openAndCloseSubMenu_addContent_contentUpdatedAndFunctional() {
-        rightClickOn("target");
-        openSubMenu(getMenuItems().get(0));
-        verifyNumberOfMenus(2);
+        ContextMenuElement menu = ContextMenuElement.openByRightClick(target);
+        menu.getMenuItems().get(0).openSubMenu();
         clickBody();
-        verifyClosedAndRemoved();
+        menu.waitUntilClosed();
 
         clickElementWithJs("add-item");
         clickElementWithJs("add-item");
 
-        rightClickOn("target");
+        menu = ContextMenuElement.openByRightClick(target);
+        ContextMenuElement subMenu = menu.getMenuItems().get(0).openSubMenu();
 
-        openSubMenu(getMenuItems().get(0));
-        verifyNumberOfMenus(2);
-
-        List<ContextMenuElement> menus = getAllMenus();
-        List<ContextMenuItemElement> subMenuItems = getMenuItems(menus.get(1));
+        List<ContextMenuItemElement> subMenuItems = subMenu.getMenuItems();
         String[] menuItemCaptions = getMenuItemCaptions(subMenuItems);
         Assert.assertArrayEquals(new String[] { "bar", "0", "1" },
                 menuItemCaptions);
 
         subMenuItems.get(1).click();
-        verifyClosedAndRemoved();
+        menu.waitUntilClosed();
         assertMessage("0");
     }
 
     @Test
     public void openAndCloseSubMenu_addSubSubMenu_contentUpdatedAndFunctional() {
-        rightClickOn("target");
-        openSubMenu(getMenuItems().get(0));
+        ContextMenuElement menu = ContextMenuElement.openByRightClick(target);
+        menu.getMenuItems().get(0).openSubMenu();
         clickBody();
-        verifyClosedAndRemoved();
+        menu.waitUntilClosed();
 
         clickElementWithJs("add-sub-sub-menu");
 
-        rightClickOn("target");
+        menu = ContextMenuElement.openByRightClick(target);
+        ContextMenuElement subMenu = menu.getMenuItems().get(0).openSubMenu();
+        ContextMenuElement subSubMenu = subMenu.getMenuItems().get(0)
+                .openSubMenu();
 
-        openSubMenu(getMenuItems().get(0));
-        verifyNumberOfMenus(2);
-
-        openSubMenu(getMenuItems(getAllMenus().get(1)).get(0));
-        verifyNumberOfMenus(3);
-
-        List<ContextMenuElement> menus = getAllMenus();
-        List<ContextMenuItemElement> subMenuItems = getMenuItems(menus.get(2));
-        String[] menuItemCaptions = getMenuItemCaptions(subMenuItems);
+        List<ContextMenuItemElement> subSubMenuItems = subSubMenu
+                .getMenuItems();
+        String[] menuItemCaptions = getMenuItemCaptions(subSubMenuItems);
         Assert.assertArrayEquals(new String[] { "0" }, menuItemCaptions);
 
-        subMenuItems.get(0).click();
-        verifyClosedAndRemoved();
+        subSubMenuItems.get(0).click();
+        menu.waitUntilClosed();
         assertMessage("0");
     }
 
     @Test
     public void openAndCloseSubMenu_removeAll_noSubMenu_stylesUpdated() {
-        rightClickOn("target");
-        ContextMenuItemElement parent = getMenuItems().get(0);
+        ContextMenuElement menu = ContextMenuElement.openByRightClick(target);
+        ContextMenuItemElement parent = menu.getMenuItems().get(0);
         assertHasPopup(parent, true);
 
-        openSubMenu(parent);
+        parent.hover();
         verifyNumberOfMenus(2);
 
         clickBody();
-        verifyClosedAndRemoved();
+        menu.waitUntilClosed();
 
         clickElementWithJs("remove-all");
-        rightClickOn("target");
+        menu = ContextMenuElement.openByRightClick(target);
 
-        parent = getMenuItems().get(0);
+        parent = menu.getMenuItems().get(0);
         assertHasPopup(parent, false);
 
-        openSubMenu(parent);
+        // Should not open a submenu, only the main menu remains
+        parent.hover();
         verifyNumberOfMenus(1);
     }
 
     @Test
     public void componentInsideSubMenu_addComponent_componentIsInSubmenu() {
         findElement(By.id("add-component")).click();
-        rightClickOn("target");
-
-        openSubMenu(getMenuItems().get(0));
-
-        verifyNumberOfMenus(2);
-
-        ContextMenuElement subMenu = getAllMenus().get(1);
+        ContextMenuElement menu = ContextMenuElement.openByRightClick(target);
+        ContextMenuElement subMenu = menu.getMenuItems().get(0).openSubMenu();
 
         WebElement firstItem = getMenuContent(subMenu)
                 .$("vaadin-context-menu-list-box").first()
@@ -157,53 +147,36 @@ public class SubMenuIT extends AbstractContextMenuIT {
     @Test
     public void checkableItemInsideSubMenu_addCheckableItem_itemIsInSubmenu() {
         findElement(By.id("add-checkable-component")).click();
-        rightClickOn("target");
+        ContextMenuElement menu = ContextMenuElement.openByRightClick(target);
+        ContextMenuElement subMenu = menu.getMenuItems().get(0).openSubMenu();
 
-        openSubMenu(getMenuItems().get(0));
-
-        verifyNumberOfMenus(2);
-
-        ContextMenuElement subMenu = getAllMenus().get(1);
-
-        WebElement checkableItem = getMenuContent(subMenu)
-                .$("vaadin-context-menu-list-box").first()
-                .findElements(By.xpath("./*")).get(1);
+        ContextMenuItemElement checkableItem = subMenu.getMenuItem("checkable")
+                .orElseThrow();
 
         // verify checkable item
-        Assert.assertEquals("vaadin-context-menu-item",
-                checkableItem.getTagName().toLowerCase(Locale.ENGLISH));
-        Assert.assertEquals("checkable", checkableItem.getText());
-        Assert.assertEquals("",
-                checkableItem.getDomAttribute("menu-item-checked"));
+        Assert.assertTrue(checkableItem.isChecked());
 
         // uncheck the item
         checkableItem.click();
 
-        verifyClosedAndRemoved();
+        menu.waitUntilClosed();
 
         // We should have a message about selected item:
         assertMessage("Checkable item is false");
 
         // verify that the item is not checked in UI now
-        rightClickOn("target");
+        menu = ContextMenuElement.openByRightClick(target);
+        subMenu = menu.getMenuItems().get(0).openSubMenu();
 
-        openSubMenu(getMenuItems().get(0));
+        checkableItem = subMenu.getMenuItem("checkable").orElseThrow();
 
-        verifyNumberOfMenus(2);
-
-        subMenu = getAllMenus().get(1);
-
-        checkableItem = getMenuContent(subMenu)
-                .$("vaadin-context-menu-list-box").first()
-                .findElements(By.xpath("./*")).get(1);
-
-        Assert.assertNull(checkableItem.getDomAttribute("menu-item-checked"));
+        Assert.assertFalse(checkableItem.isChecked());
     }
 
     @Test
     public void clickParentItem_menuNotClosed() {
-        rightClickOn("target");
-        getMenuItems().get(0).click();
+        ContextMenuElement menu = ContextMenuElement.openByRightClick(target);
+        menu.getMenuItems().get(0).click();
         verifyOpened();
     }
 

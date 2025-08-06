@@ -21,23 +21,28 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.contextmenu.testbench.ContextMenuElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-context-menu/close")
 public class ContextMenuCloseIT extends AbstractContextMenuIT {
 
+    private TestBenchElement target;
+
     @Before
     public void init() {
         open();
+        target = $(TestBenchElement.class).id("context-menu-target");
     }
 
     @Test
     public void closeOnClick_openedChangeListener_isFromClientTrue() {
-        rightClickOn("context-menu-target");
-        verifyOpened();
+        ContextMenuElement contextMenu = ContextMenuElement
+                .openByRightClick(target);
 
         clickBody();
-        verifyClosedAndRemoved();
+        contextMenu.waitUntilClosed();
 
         WebElement message = findElement(By.id("closed-message"));
         Assert.assertEquals("Closed from client: true", message.getText());
@@ -45,11 +50,11 @@ public class ContextMenuCloseIT extends AbstractContextMenuIT {
 
     @Test
     public void closeProgrammatically_openedChangeListener_isFromClientFalse() {
-        rightClickOn("context-menu-target");
-        verifyOpened();
+        ContextMenuElement contextMenu = ContextMenuElement
+                .openByRightClick(target);
 
         leftClickOn("close-menu");
-        verifyClosedAndRemoved();
+        contextMenu.waitUntilClosed();
 
         WebElement message = findElement(By.id("closed-message"));
         Assert.assertEquals("Closed from client: false", message.getText());
@@ -57,17 +62,16 @@ public class ContextMenuCloseIT extends AbstractContextMenuIT {
 
     @Test
     public void reopen_closeOnClick_openedChangeListener_isFromClientTrue() {
-        rightClickOn("context-menu-target");
-        verifyOpened();
+        ContextMenuElement contextMenu = ContextMenuElement
+                .openByRightClick(target);
 
         leftClickOn("close-menu");
-        verifyClosedAndRemoved();
+        contextMenu.waitUntilClosed();
 
-        rightClickOn("context-menu-target");
-        verifyOpened();
+        contextMenu = ContextMenuElement.openByRightClick(target);
 
         clickBody();
-        verifyClosedAndRemoved();
+        contextMenu.waitUntilClosed();
 
         WebElement message = findElement(By.id("closed-message"));
         Assert.assertEquals("Closed from client: true", message.getText());
