@@ -1032,28 +1032,30 @@ public class TreeGrid<T> extends Grid<T>
     }
 
     /**
-     * Sets the viewport range centered on an index specified by a hierarchical
-     * index path e.g. int[] { 0, 1, 1 }. The buffer parameter defines how many
-     * items the range should contain on each side of the index.
+     * Sets the viewport range centered on the item specified by a hierarchical
+     * index path e.g. { 0, 1, 1 }. The {@code padding} parameter specifies how
+     * many items should be added on each side of the center item in the
+     * resulting range.
      * <p>
      * This method has package-private visibility to allow testing.
      *
      * @param path
-     *            the path to the index used as the center of the viewport range
-     * @param buffer
-     *            the number of items to include on each side of the index
+     *            the path to the item to use as the center of the viewport
+     *            range
+     * @param padding
+     *            the number of items to add on each side of the center item
      */
     @ClientCallable
-    int setViewportRangeByIndexPath(int[] path, int buffer) {
+    int setViewportRangeByIndexPath(int[] path, int padding) {
         var pageSize = getPageSize();
         var maxAllowedItems = 10 * Math.max(50, pageSize);
-        if (maxAllowedItems < buffer) {
+        if (maxAllowedItems < padding) {
             throw new IllegalArgumentException(String.format(
                     "Requested viewport size (%d items) "
                             + "exceeds security limit (%d items max). "
                             + "Consider reducing the grid height or increasing "
                             + "the page size to at least %d if it's a valid request.",
-                    buffer, maxAllowedItems, (int) Math.ceil(buffer / 10.0)));
+                    padding, maxAllowedItems, (int) Math.ceil(padding / 10.0)));
         }
 
         var dataCommunicator = (TreeGridDataCommunicator<T>) getDataCommunicator();
@@ -1063,7 +1065,7 @@ public class TreeGrid<T> extends Grid<T>
 
         // Preload items after the resolved flat index traversing
         // the tree forward from the start (from lower to higher indexes).
-        dataCommunicator.preloadRange(flatIndex, +(buffer + pageSize));
+        dataCommunicator.preloadRange(flatIndex, +(padding + pageSize));
 
         // Preload items before the resolved flat index traversing
         // the tree backward from the start (from higher to lower indexes).
@@ -1071,15 +1073,16 @@ public class TreeGrid<T> extends Grid<T>
         // preventing viewport shifts that would otherwise occur when calling
         // setViewportRange which expands items from lower to higher indexes
         // when not found in the cache.
-        dataCommunicator.preloadRange(flatIndex, -(buffer + pageSize));
+        dataCommunicator.preloadRange(flatIndex, -(padding + pageSize));
 
         // Update the flat index after preloading, as it might have changed
         flatIndex = dataCommunicator.resolveIndexPath(path);
 
-        // Calculate the viewport range based on the flat index and buffer size,
+        // Calculate the viewport range based on the flat index and padding
+        // size,
         // aligning the range with page size.
-        var startPage = Math.max(0, (flatIndex - buffer) / pageSize);
-        var endPage = (flatIndex + buffer) / pageSize;
+        var startPage = Math.max(0, (flatIndex - padding) / pageSize);
+        var endPage = (flatIndex + padding) / pageSize;
 
         getDataCommunicator().setViewportRange(startPage * pageSize,
                 (endPage - startPage + 1) * pageSize);
