@@ -42,40 +42,38 @@ public class ContextMenuDemoIT extends AbstractContextMenuIT {
 
     @Test
     public void openAndCloseBasicContextMenu_contentIsRendered() {
-        verifyClosedAndRemoved();
-
-        rightClickOn("basic-context-menu-target");
-        verifyOpened();
+        ContextMenuElement contextMenu = ContextMenuElement
+                .openByRightClick($("*").id("basic-context-menu-target"));
+        List<ContextMenuItemElement> menuItems = contextMenu.getMenuItems();
 
         Assert.assertArrayEquals(new String[] { "First menu item",
                 "Second menu item", "Disabled menu item" },
-                getMenuItemCaptions());
+                getMenuItemCaptions(menuItems));
 
         Assert.assertFalse("The last item is supposed to be disabled",
-                getMenuItems().get(2).isEnabled());
+                menuItems.get(2).isEnabled());
 
-        $("body").first().click();
-        verifyClosedAndRemoved();
+        clickBody();
+        contextMenu.waitUntilClosed();
     }
 
     @Test
     public void openAndCloseContextMenuWithComponents_contentIsRendered() {
-        verifyClosedAndRemoved();
-
-        rightClickOn("context-menu-with-components-target");
-        verifyOpened();
+        ContextMenuElement contextMenu = ContextMenuElement.openByRightClick(
+                $("*").id("context-menu-with-components-target"));
+        List<ContextMenuItemElement> menuItems = contextMenu.getMenuItems();
 
         Assert.assertArrayEquals(new String[] { "First menu item", "Checkbox" },
-                getMenuItemCaptions());
-        Assert.assertTrue(getMenuContent().$("hr").exists());
-        WebElement span = getMenuContent().$("span").first();
+                getMenuItemCaptions(menuItems));
+        Assert.assertTrue(getMenuContent(contextMenu).$("hr").exists());
+        WebElement span = getMenuContent(contextMenu).$("span").first();
         Assert.assertEquals("This is not a menu item", span.getText());
 
-        WebElement checkbox = getMenuItems().get(1)
+        WebElement checkbox = menuItems.get(1)
                 .findElement(By.tagName("vaadin-checkbox"));
         checkbox.click();
-        $("body").first().click();
-        verifyClosedAndRemoved();
+        clickBody();
+        contextMenu.waitUntilClosed();
         WebElement message = findElement(
                 By.id("context-menu-with-components-message"));
         Assert.assertEquals("Clicked on checkbox with value: true",
@@ -84,84 +82,76 @@ public class ContextMenuDemoIT extends AbstractContextMenuIT {
 
     @Test
     public void hierarchicalContextMenu_openSubMenus() {
-        verifyClosedAndRemoved();
-
-        rightClickOn("hierarchical-menu-target");
+        ContextMenuElement contextMenu = ContextMenuElement
+                .openByRightClick($("*").id("hierarchical-menu-target"));
         verifyNumberOfMenus(1);
 
-        openSubMenu(getMenuItems().get(1));
+        ContextMenuElement subMenu = contextMenu.getMenuItems().get(1)
+                .openSubMenu();
         verifyNumberOfMenus(2);
 
-        List<ContextMenuElement> menus = getAllMenus();
-        openSubMenu(getMenuItems(menus.get(1)).get(1));
-
+        ContextMenuElement subSubMenu = subMenu.getMenuItems().get(1)
+                .openSubMenu();
         verifyNumberOfMenus(3);
-        menus = getAllMenus();
-        getMenuItems(menus.get(2)).get(0).click();
+
+        subSubMenu.getMenuItems().get(0).click();
+        contextMenu.waitUntilClosed();
 
         Assert.assertEquals("Clicked on the third item",
                 $("span").id("hierarchical-menu-message").getText());
-
-        verifyClosedAndRemoved();
     }
 
     @Test
     public void checkableMenuItems() {
-        verifyClosedAndRemoved();
+        ContextMenuElement contextMenu = ContextMenuElement
+                .openByRightClick($("*").id("checkable-menu-items-target"));
 
-        rightClickOn("checkable-menu-items-target");
-        verifyOpened();
-
-        List<ContextMenuItemElement> items = getMenuItems();
-        ContextMenuPageIT.assertCheckedInClientSide(items.get(0), false);
-        ContextMenuPageIT.assertCheckedInClientSide(items.get(1), true);
+        List<ContextMenuItemElement> items = contextMenu.getMenuItems();
+        Assert.assertFalse(items.get(0).isChecked());
+        Assert.assertTrue(items.get(1).isChecked());
 
         items.get(1).click();
+        contextMenu.waitUntilClosed();
 
         Assert.assertEquals("Unselected option 2",
                 $("span").id("checkable-menu-items-message").getText());
-        verifyClosedAndRemoved();
 
-        rightClickOn("checkable-menu-items-target");
-        verifyOpened();
+        contextMenu = ContextMenuElement
+                .openByRightClick($("*").id("checkable-menu-items-target"));
 
-        items = getMenuItems();
-        ContextMenuPageIT.assertCheckedInClientSide(items.get(0), false);
-        ContextMenuPageIT.assertCheckedInClientSide(items.get(1), false);
+        items = contextMenu.getMenuItems();
+        Assert.assertFalse(items.get(0).isChecked());
+        Assert.assertFalse(items.get(1).isChecked());
 
         items.get(0).click();
+        contextMenu.waitUntilClosed();
 
         Assert.assertEquals("Selected option 1",
                 $("span").id("checkable-menu-items-message").getText());
-        verifyClosedAndRemoved();
 
-        rightClickOn("checkable-menu-items-target");
-        verifyOpened();
+        contextMenu = ContextMenuElement
+                .openByRightClick($("*").id("checkable-menu-items-target"));
 
-        items = getMenuItems();
-        ContextMenuPageIT.assertCheckedInClientSide(items.get(0), true);
-        ContextMenuPageIT.assertCheckedInClientSide(items.get(1), false);
-
-        items.get(2).click();
-        verifyOpened();
-        ContextMenuPageIT.assertCheckedInClientSide(items.get(2), false);
+        items = contextMenu.getMenuItems();
+        Assert.assertTrue(items.get(0).isChecked());
+        Assert.assertFalse(items.get(1).isChecked());
 
         items.get(2).click();
-        verifyOpened();
-        ContextMenuPageIT.assertCheckedInClientSide(items.get(2), true);
+        Assert.assertTrue(contextMenu.isOpen());
+        Assert.assertFalse(items.get(2).isChecked());
+
+        items.get(2).click();
+        Assert.assertTrue(contextMenu.isOpen());
+        Assert.assertTrue(items.get(2).isChecked());
     }
 
     @Test
     public void subMenuHasComponents_componentsAreNotItems() {
-        verifyClosedAndRemoved();
+        ContextMenuElement contextMenu = ContextMenuElement.openByRightClick(
+                $("*").id("context-menu-with-submenu-components-target"));
+        ContextMenuElement subMenu = contextMenu.getMenuItems().get(1)
+                .openSubMenu();
 
-        rightClickOn("context-menu-with-submenu-components-target");
-        verifyOpened();
-
-        openSubMenu(getMenuItems().get(1));
-        verifyNumberOfMenus(2);
-
-        ContextMenuElement subMenu = getAllMenus().get(1);
         TestBenchElement menuContent = getMenuContent(subMenu);
         TestBenchElement menuListBox = menuContent
                 .$("vaadin-context-menu-list-box").first();
