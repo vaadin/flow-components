@@ -34,7 +34,7 @@ public class CustomGridIT extends AbstractComponentIT {
         Assert.assertFalse(crud.isEditorOpen());
         crud.openRowForEditing(0);
         Assert.assertTrue(crud.isEditorOpen());
-        TextFieldElement lastNameField = crud.getEditor()
+        TextFieldElement lastNameField = crud.getForm()
                 .$(TextFieldElement.class)
                 .withAttribute("editor-role", "last-name").first();
 
@@ -54,7 +54,7 @@ public class CustomGridIT extends AbstractComponentIT {
         Assert.assertFalse(crud.isEditorOpen());
         crud.openRowForEditing(0);
         Assert.assertTrue(crud.isEditorOpen());
-        TextFieldElement lastNameField = crud.getEditor()
+        TextFieldElement lastNameField = crud.getForm()
                 .$(TextFieldElement.class)
                 .withAttribute("editor-role", "last-name").first();
 
