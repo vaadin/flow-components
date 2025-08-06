@@ -26,11 +26,11 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 /**
  * Markdown is a component for rendering Markdown content. It takes Markdown
  * source as input and renders the corresponding HTML.
- * 
+ *
  * @author Vaadin Ltd
  */
 @Tag("vaadin-markdown")
-@NpmPackage(value = "@vaadin/markdown", version = "25.0.0-alpha10")
+@NpmPackage(value = "@vaadin/markdown", version = "25.0.0-alpha12")
 @JsModule("@vaadin/markdown/src/vaadin-markdown.js")
 public class Markdown extends Component implements HasSize {
 
@@ -56,7 +56,7 @@ public class Markdown extends Component implements HasSize {
 
     /**
      * Sets the markdown content.
-     * 
+     *
      * @param content
      *            the markdown content
      */
@@ -67,7 +67,7 @@ public class Markdown extends Component implements HasSize {
 
     /**
      * Appends the markdown content.
-     * 
+     *
      * @param content
      *            the markdown content to append
      */
@@ -80,7 +80,7 @@ public class Markdown extends Component implements HasSize {
 
     /**
      * Gets the markdown content.
-     * 
+     *
      * @return the markdown content
      */
     public String getContent() {

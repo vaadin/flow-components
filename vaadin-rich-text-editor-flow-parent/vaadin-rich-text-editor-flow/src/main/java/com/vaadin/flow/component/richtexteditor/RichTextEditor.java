@@ -61,7 +61,7 @@ import elemental.json.JsonType;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.0.0-alpha10")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.0.0-alpha12")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
