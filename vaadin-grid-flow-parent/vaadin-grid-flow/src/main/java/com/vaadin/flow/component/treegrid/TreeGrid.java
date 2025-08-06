@@ -233,8 +233,12 @@ public class TreeGrid<T> extends Grid<T>
                     uniqueKeyProviderSupplier);
         }
 
-        protected List<T> preloadRange(int start, int length) {
-            return super.preloadRange(start, length);
+        protected List<T> preloadFlatRangeForward(int start, int length) {
+            return super.preloadFlatRangeForward(start, length);
+        }
+
+        protected List<T> preloadFlatRangeBackward(int start, int length) {
+            return super.preloadFlatRangeBackward(start, length);
         }
 
         protected int resolveIndexPath(int... path) {
@@ -1065,7 +1069,7 @@ public class TreeGrid<T> extends Grid<T>
 
         // Preload items after the resolved flat index traversing
         // the tree forward from the start (from lower to higher indexes).
-        dataCommunicator.preloadRange(flatIndex, +(padding + pageSize));
+        dataCommunicator.preloadFlatRangeForward(flatIndex, padding + pageSize);
 
         // Preload items before the resolved flat index traversing
         // the tree backward from the start (from higher to lower indexes).
@@ -1073,14 +1077,14 @@ public class TreeGrid<T> extends Grid<T>
         // preventing viewport shifts that would otherwise occur when calling
         // setViewportRange which expands items from lower to higher indexes
         // when not found in the cache.
-        dataCommunicator.preloadRange(flatIndex, -(padding + pageSize));
+        dataCommunicator.preloadFlatRangeBackward(flatIndex,
+                padding + pageSize);
 
         // Update the flat index after preloading, as it might have changed
         flatIndex = dataCommunicator.resolveIndexPath(path);
 
         // Calculate the viewport range based on the flat index and padding
-        // size,
-        // aligning the range with page size.
+        // size, aligning the range with page size.
         var startPage = Math.max(0, (flatIndex - padding) / pageSize);
         var endPage = (flatIndex + padding) / pageSize;
 
