@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.openqa.selenium.By;
+
 import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
@@ -150,12 +152,36 @@ public class CrudElement extends TestBenchElement {
     }
 
     /**
-     * Gets the open editor overlay
+     * Since v25.0, returns the Crud element itself for backwards compatibility.
      *
-     * @return the open editor overlay
+     * @return the Crud element itself
+     * @deprecated Pre v25.0, this method returned either the editor overlay,
+     *             when the editor was displayed as a dialog, or the Crud
+     *             itself, when the editor was displayed inline. Since v25.0,
+     *             the overlay is not accessible as a separate element anymore,
+     *             and, regardless whether the editor is displayed as a dialog
+     *             or inline, all editor-related controls can be queried through
+     *             the Crud element itself. To specifically access the editor
+     *             fields, use {@link #getForm()} instead. To access the editor
+     *             buttons, use {@link #getEditorSaveButton()},
+     *             {@link #getEditorCancelButton()}, and
+     *             {@link #getEditorDeleteButton()}.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public TestBenchElement getEditor() {
         return this;
+    }
+
+    /**
+     * Gets the form element that contains form fields.
+     *
+     * @return the form element
+     */
+    public TestBenchElement getForm() {
+        // Not using TestBench query here, as it would return the slot element
+        // within its shadow root
+        return wrapElement(findElement(By.cssSelector("[slot='form']")),
+                getCommandExecutor());
     }
 
     /**

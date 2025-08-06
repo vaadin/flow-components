@@ -21,7 +21,6 @@ import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Rectangle;
@@ -235,7 +234,6 @@ public class ContextMenuGridIT extends AbstractComponentIT {
     }
 
     @Test
-    @Ignore
     public void contextClickOnRow_preOpenGetsTargetItemCol0() {
         grid.getCell(23, 0).contextClick();
         assertMessage("pre-open: name=Person 23, colId=Name-Id");
@@ -243,19 +241,18 @@ public class ContextMenuGridIT extends AbstractComponentIT {
         // click another cell, open another context menu
         grid.getCell(28, 1).contextClick();
         waitUntil(driver -> $("span").id("message").getText()
-                .equals("pre-open: name=Person 29, colId=Born-Id"));
+                .equals("pre-open: name=Person 28, colId=Born-Id"));
     }
 
     @Test
-    @Ignore
     public void contextClickOnRow_preOpenGetsTargetItemCol1() {
         grid.getCell(6, 1).contextClick();
         assertMessage("pre-open: name=Person 6, colId=Born-Id");
 
         // click another cell, open another context menu
-        grid.getCell(19, 1).contextClick();
+        grid.getCell(3, 1).contextClick();
         waitUntil(driver -> $("span").id("message").getText()
-                .equals("pre-open: name=Person 19, colId=Born-Id"));
+                .equals("pre-open: name=Person 3, colId=Born-Id"));
     }
 
     private void assertMessage(String expected) {
@@ -277,7 +274,8 @@ public class ContextMenuGridIT extends AbstractComponentIT {
     }
 
     private void verifyClosed() {
-        waitForElementNotPresent(By.cssSelector("vaadin-context-menu[opened]"));
+        waitForElementNotPresent(By.cssSelector(
+                "vaadin-context-menu[opened], vaadin-context-menu[closing]"));
     }
 
 }

@@ -78,7 +78,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
         getElement().setProperty("opened", false);
 
         updateTrigger();
-        setOverlayRole("dialog");
+        setRole("dialog");
     }
 
     /**
@@ -345,25 +345,51 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Sets the ARIA role for the overlay element, used by screen readers.
+     * Sets the ARIA role for the popover element, used by screen readers.
      *
      * @param role
      *            the role to set
      */
-    public void setOverlayRole(String role) {
+    public void setRole(String role) {
         Objects.requireNonNull(role, "Role cannot be null");
 
-        getElement().setProperty("overlayRole", role);
+        getElement().setProperty("role", role);
     }
 
     /**
-     * Gets the ARIA role for the overlay element, used by screen readers.
+     * Sets the ARIA role for the overlay element, used by screen readers.
+     *
+     * @param role
+     *            the role to set
+     * @deprecated Use {@link #setRole(String)} instead
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
+    public void setOverlayRole(String role) {
+        Objects.requireNonNull(role, "Role cannot be null");
+
+        setRole(role);
+    }
+
+    /**
+     * Gets the ARIA role for the popover element, used by screen readers.
      * Defaults to {@code dialog}.
      *
      * @return the role
      */
+    public String getRole() {
+        return getElement().getProperty("role");
+    }
+
+    /**
+     * Gets the ARIA role for the popover element, used by screen readers.
+     * Defaults to {@code dialog}.
+     *
+     * @return the role
+     * @deprecated Use {@link #getRole()} instead
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     public String getOverlayRole() {
-        return getElement().getProperty("overlayRole");
+        return getRole();
     }
 
     /**

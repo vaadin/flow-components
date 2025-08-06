@@ -85,6 +85,7 @@ public class DynamicContextMenuGridIT extends AbstractComponentIT {
     }
 
     private void verifyClosed() {
-        waitForElementNotPresent(By.cssSelector("vaadin-context-menu[opened]"));
+        waitForElementNotPresent(By.cssSelector(
+                "vaadin-context-menu[opened], vaadin-context-menu[closing]"));
     }
 }

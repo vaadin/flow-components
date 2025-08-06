@@ -26,27 +26,31 @@ import com.vaadin.testbench.elementsbase.Element;
  * <code>&lt;vaadin-context-menu-overlay&gt;</code> element.
  *
  * @author Vaadin Ltd
- *
+ * @deprecated Use {@link ContextMenuElement} instead.
  */
-@Element("vaadin-context-menu-overlay")
+@Element("vaadin-context-menu")
+@Deprecated(since = "25.0", forRemoval = true)
 public class ContextMenuOverlayElement extends TestBenchElement {
 
     /**
      * Get the first menu item matching the caption.
      *
      * @return Optional menu item.
+     * @deprecated Use {@link ContextMenuElement#getMenuItem(String)} instead.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public Optional<ContextMenuItemElement> getMenuItem(String caption) {
-        return getMenuItems().stream()
-                .filter(item -> item.getText().equals(caption)).findFirst();
+        return wrap(ContextMenuElement.class).getMenuItem(caption);
     }
 
     /**
      * Get the items of this context menu overlay.
      *
      * @return List of menu items.
+     * @deprecated Use {@link ContextMenuElement#getMenuItems()} instead.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public List<ContextMenuItemElement> getMenuItems() {
-        return $(ContextMenuItemElement.class).all();
+        return wrap(ContextMenuElement.class).getMenuItems();
     }
 }
