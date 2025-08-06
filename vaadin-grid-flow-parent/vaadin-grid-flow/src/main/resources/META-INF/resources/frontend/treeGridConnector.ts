@@ -3,11 +3,11 @@ import './gridConnector.ts';
 
 window.Vaadin.Flow.treeGridConnector = {};
 window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
-  window.Vaadin.Flow.gridConnector.initLazy(grid);
-
   if (grid.$connector) {
     return;
   }
+
+  window.Vaadin.Flow.gridConnector.initLazy(grid);
 
   function getViewportRange() {
     const renderedRows = grid._getRenderedRows();
