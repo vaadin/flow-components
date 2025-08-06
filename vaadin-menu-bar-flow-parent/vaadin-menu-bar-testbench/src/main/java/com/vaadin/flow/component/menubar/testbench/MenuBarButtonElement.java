@@ -17,6 +17,8 @@ package com.vaadin.flow.component.menubar.testbench;
 
 import java.util.List;
 
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.vaadin.testbench.TestBenchElement;
@@ -29,26 +31,48 @@ import com.vaadin.testbench.elementsbase.Element;
 public class MenuBarButtonElement extends TestBenchElement {
 
     /**
-     * Get the sub menu element linked to this menu button.
+     * Open the submenu of this button by clicking it. Returns the submenu.
      *
-     * @return TestBenchElement for the open sub menu.
+     * @return the submenu element
+     * @throws NoSuchElementException
+     *             if no submenu is opened for this button
      */
-    public TestBenchElement getSubMenu() {
-        waitForSubMenu();
-        MenuBarElement menuBar = ((TestBenchElement) getPropertyElement(
-                "parentElement")).wrap(MenuBarElement.class);
-        return menuBar.getSubMenu();
+    public MenuBarSubMenuElement openSubMenu() {
+        click();
+        return getSubMenu();
     }
 
     /**
-     * Get TestBenchElements representing sub menu items under this button.
+     * Gets the submenu currently opened for this button. Note that you must
+     * hover or click this button beforehand for the menu to open.
+     * Alternatively, you can use {@link #openSubMenu()} which both opens and
+     * returns the submenu.
      *
-     * @return List of MenuBarItemElement representing sub menu items.
+     * @return the submenu element
+     * @throws NoSuchElementException
+     *             if no submenu is opened for this button
      */
+    public MenuBarSubMenuElement getSubMenu() {
+        waitForSubMenu();
+        return getParent().getPropertyElement("_subMenu")
+                .wrap(MenuBarSubMenuElement.class);
+    }
+
+    /**
+     * Gets the menu items from the submenu that is currently opened for this
+     * menu item.
+     *
+     * @return the list of menu items in the submenu
+     * @throws NoSuchElementException
+     *             if no submenu is opened for this button
+     * @deprecated use {@link #openSubMenu()} or {@link #getSubMenu()} retrieve
+     *             the submenu for this button, and then use
+     *             {@link MenuBarSubMenuElement#getMenuItems()} to retrieve the
+     *             items.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     public List<MenuBarItemElement> getSubMenuItems() {
-        MenuBarElement menuBar = ((TestBenchElement) getPropertyElement(
-                "parentElement")).wrap(MenuBarElement.class);
-        return menuBar.getSubMenuItems();
+        return getSubMenu().getMenuItems();
     }
 
     /**
@@ -61,8 +85,12 @@ public class MenuBarButtonElement extends TestBenchElement {
     }
 
     private void waitForSubMenu() {
-        waitUntil(ExpectedConditions.attributeToBe(this, "aria-expanded",
-                "true"));
+        try {
+            waitUntil(ExpectedConditions.attributeToBe(this, "aria-expanded",
+                    "true"));
+        } catch (TimeoutException e) {
+            throw new NoSuchElementException(
+                    "No submenu opened for this button.");
+        }
     }
-
 }
