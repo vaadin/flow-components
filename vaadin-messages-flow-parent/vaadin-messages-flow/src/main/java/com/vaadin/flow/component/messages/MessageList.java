@@ -44,7 +44,7 @@ import com.vaadin.flow.internal.JsonUtils;
 @Tag("vaadin-message-list")
 @JsModule("./messageListConnector.js")
 @JsModule("@vaadin/message-list/src/vaadin-message-list.js")
-@NpmPackage(value = "@vaadin/message-list", version = "25.0.0-alpha10")
+@NpmPackage(value = "@vaadin/message-list", version = "25.0.0-alpha12")
 public class MessageList extends Component
         implements HasStyle, HasSize, LocaleChangeObserver {
 
@@ -184,7 +184,7 @@ public class MessageList extends Component
 
     /**
      * Updates the client with the current state of the message list items.
-     * 
+     *
      * @param ui
      *            the UI the component is attached to
      */
@@ -209,7 +209,7 @@ public class MessageList extends Component
 
     /**
      * Handles a full update of the message list items.
-     * 
+     *
      * @param ui
      *            the UI the component is attached to
      */

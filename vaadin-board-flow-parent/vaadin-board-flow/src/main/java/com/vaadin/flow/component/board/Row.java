@@ -29,7 +29,7 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * <p>
  */
 @Tag("vaadin-board-row")
-@NpmPackage(value = "@vaadin/board", version = "25.0.0-alpha10")
+@NpmPackage(value = "@vaadin/board", version = "25.0.0-alpha12")
 @JsModule("@vaadin/board/src/vaadin-board-row.js")
 public class Row extends Component
         implements HasStyle, HasSize, HasOrderedComponents {
