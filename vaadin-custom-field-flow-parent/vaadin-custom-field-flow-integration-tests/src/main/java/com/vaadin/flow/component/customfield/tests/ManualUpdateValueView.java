@@ -41,7 +41,7 @@ public class ManualUpdateValueView extends Div {
         int valueChangeCount = 0;
 
         ManualCustomField() {
-            disableUpdateValueOnChange();
+            super(null, true);
             field1.setId("field1");
             field2.setId("field2");
             add(updateValueCounter, field1, field2);

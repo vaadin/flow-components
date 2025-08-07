@@ -31,7 +31,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
-import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.Element;
 
 /**
@@ -54,8 +53,6 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         InputField<AbstractField.ComponentValueChangeEvent<CustomField<T>, T>, T>,
         HasTheme, HasValidationProperties {
 
-    private final DomListenerRegistration updateValueListener;
-
     /**
      * Default constructor.
      */
@@ -72,10 +69,27 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      * @see AbstractField#AbstractField(Object)
      */
     public CustomField(T defaultValue) {
+        this(defaultValue, false);
+    }
+
+    /**
+     * Constructs a new custom field.
+     *
+     * @param defaultValue
+     *            The initial value for the field. Will also be used by
+     *            {@link #getEmptyValue()}.
+     * @param manualValueChangeTriggering
+     *            {@code true} to disable the value change automatically,
+     *            {@code false} otherwise (default)
+     *
+     * @see AbstractField#AbstractField(Object)
+     */
+    public CustomField(T defaultValue, boolean manualValueChangeTriggering) {
         super(defaultValue);
-        // Force a value update when the change event generated
-        updateValueListener = getElement().addEventListener("change",
-                e -> this.updateValue());
+        if (!manualValueChangeTriggering) {
+            // Force a value update when the change event generated
+            getElement().addEventListener("change", e -> this.updateValue());
+        }
         getElement().setProperty("manualValidation", true);
     }
 
@@ -212,12 +226,4 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
                         .collect(Collectors.toList()));
     }
 
-    /**
-     * Remove the listener that calls {@link #updateValue()} when an inner field
-     * "onchange" event is sent. That means the {@link #updateValue()} needs to
-     * be called programmatically in the implementation of the CustomField
-     */
-    public void disableUpdateValueOnChange() {
-        updateValueListener.remove();
-    }
 }
