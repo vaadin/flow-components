@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.confirmdialog;
 
-import java.util.Collection;
 import java.util.Optional;
 
 import com.vaadin.flow.component.Component;
@@ -703,120 +702,19 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Confirm dialog does not support adding content. Use
-     * {@link #setText(Component)} instead to initialize content as a component.
+     * {@inheritDoc}
      * <p>
-     * This method is inherited from {@link HasComponents} and has been marked
-     * as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
-    @Override
-    public void add(Component... components) {
-        HasComponents.super.add(components);
-    }
-
-    /**
-     * Confirm dialog does not support adding content. Use
-     * {@link #setText(Component)} instead to initialize content as a component.
+     * Removes all components from this component except elements that have slot
+     * attribute, such as header and buttons.
      * <p>
-     * This method is inherited from {@link HasComponents} and has been marked
-     * as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
      */
-    @Deprecated
-    @Override
-    public void add(Collection<Component> components) {
-        HasComponents.super.add(components);
-    }
-
-    /**
-     * Confirm dialog does not support adding content. Use
-     * {@link #setText(String)} instead to initialize content as text.
-     * <p>
-     * This method is inherited from {@link HasComponents} and has been marked
-     * as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
-    @Override
-    public void add(String text) {
-        HasComponents.super.add(text);
-    }
-
-    /**
-     * Confirm dialog does not support removing content.
-     * <p>
-     * This method is inherited from {@link HasComponents} and has been marked
-     * as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
-    @Override
-    public void remove(Component... components) {
-        HasComponents.super.remove(components);
-    }
-
-    /**
-     * Confirm dialog does not support removing content.
-     * <p>
-     * This method is inherited from {@link HasComponents} and has been marked
-     * as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
-    @Override
-    public void remove(Collection<Component> components) {
-        HasComponents.super.remove(components);
-    }
-
-    /**
-     * Confirm dialog does not support removing content.
-     * <p>
-     * This method is inherited from {@link HasComponents} and has been marked
-     * as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
     @Override
     public void removeAll() {
-        HasComponents.super.removeAll();
-    }
-
-    /**
-     * Confirm dialog does not support adding content. Use
-     * {@link #setText(Component)} instead to initialize content as a component.
-     * <p>
-     * This method is inherited from {@link HasComponents} and has been marked
-     * as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
-    @Override
-    public void addComponentAtIndex(int index, Component component) {
-        HasComponents.super.addComponentAtIndex(index, component);
-    }
-
-    /**
-     * Confirm dialog does not support adding content. Use
-     * {@link #setText(Component)} instead to initialize content as a component.
-     * <p>
-     * This method is inherited from {@link HasComponents} and has been marked
-     * as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
-    @Override
-    public void addComponentAsFirst(Component component) {
-        HasComponents.super.addComponentAsFirst(component);
+        getElement().getChildren().forEach(child -> {
+            if (!child.hasAttribute("slot")) {
+                child.removeFromParent();
+            }
+        });
     }
 
     private void setModality(boolean modal) {
