@@ -15,36 +15,19 @@
  */
 package com.vaadin.flow.component.confirmdialog;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.server.VaadinSession;
 
 public class ConfirmDialogChildrenTest {
 
-    private UI ui = new UI();
     private ConfirmDialog dialog;
 
     @Before
     public void setup() {
-        UI.setCurrent(ui);
-
-        VaadinSession session = Mockito.mock(VaadinSession.class);
-        Mockito.when(session.hasLock()).thenReturn(true);
-        ui.getInternals().setSession(session);
-
         dialog = new ConfirmDialog();
-        ui.add(dialog);
-    }
-
-    @After
-    public void tearDown() {
-        UI.setCurrent(null);
     }
 
     @Test
