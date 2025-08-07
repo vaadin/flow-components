@@ -143,10 +143,10 @@ public class MarkdownTest {
         // Set content while attached
         markdown.setContent("**Hello** _World_");
         assertUpdateMarkdownCall(markdown, "**Hello** _World_", false);
-        
+
         // Detach the component
         markdown.removeFromParent();
-        
+
         // Re-attach the component - content should be sent to client again
         ui.add(markdown);
         assertUpdateMarkdownCall(markdown, "**Hello** _World_", false);

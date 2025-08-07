@@ -91,7 +91,6 @@ public class Markdown extends Component implements HasSize {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        // Reset client content to ensure content is sent to client on re-attachment
         if (serverContent != null) {
             clientContent = null;
             scheduleContentUpdate();
