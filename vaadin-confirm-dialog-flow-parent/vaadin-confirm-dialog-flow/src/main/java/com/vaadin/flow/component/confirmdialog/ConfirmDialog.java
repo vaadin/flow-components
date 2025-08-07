@@ -706,7 +706,6 @@ public class ConfirmDialog extends Component
      * <p>
      * Removes all components from this component except elements that have slot
      * attribute, such as header and buttons.
-     * <p>
      */
     @Override
     public void removeAll() {
