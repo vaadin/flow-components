@@ -17,6 +17,7 @@ package com.vaadin.flow.component.markdown;
 
 import java.util.Objects;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
@@ -85,6 +86,15 @@ public class Markdown extends Component implements HasSize {
      */
     public String getContent() {
         return serverContent;
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        if (serverContent != null) {
+            clientContent = null;
+            scheduleContentUpdate();
+        }
     }
 
     private void scheduleContentUpdate() {
