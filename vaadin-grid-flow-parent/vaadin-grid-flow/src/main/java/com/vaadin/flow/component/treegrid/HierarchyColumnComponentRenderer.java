@@ -45,9 +45,6 @@ public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURC
             }
         });
 
-        withProperty("level",
-                item -> grid.getDataCommunicator().getDepth(item));
-
         withProperty("children",
                 item -> grid.getDataCommunicator().hasChildren(item));
     }
@@ -61,7 +58,7 @@ public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURC
         var clickListener = "e => requestAnimationFrame(() => { e.defaultPrevented && onClick(e) })";
 
         return "<vaadin-grid-tree-toggle @click=${" + clickListener
-                + "} class=${item.cssClassName} .leaf=${!item.children} .expanded=${model.expanded} .level=${item.level}>"
+                + "} class=${item.cssClassName} .leaf=${!item.children} .expanded=${model.expanded} .level=${model.level}>"
                 + super.getTemplateExpression() + "</vaadin-grid-tree-toggle>";
     }
 }
