@@ -105,10 +105,10 @@ public class TreeGrid<T> extends Grid<T>
         super(pageSize, dataCommunicatorBuilder);
 
         setUniqueKeyProperty("key");
-        addItemExpandedGenerator();
-        addItemHasChildrenPathGenerator();
+        addTreeDataGenerator();
     }
 
+    @Override
     protected void initConnector() {
         getUI().orElseThrow(() -> new IllegalStateException(
                 "Connector can only be initialized for an attached Grid"))
@@ -121,17 +121,17 @@ public class TreeGrid<T> extends Grid<T>
      * Adds a data generator that produces a value for the <vaadin-grid>'s
      * itemHasChildrenPath property
      */
-    private void addItemHasChildrenPathGenerator() {
+    private void addTreeDataGenerator() {
         addDataGenerator((T item, JsonObject jsonObject) -> {
             if (getDataCommunicator().hasChildren(item)) {
                 jsonObject.put("children", true);
             }
-        });
-    }
 
-    private void addItemExpandedGenerator() {
-        addDataGenerator((T item, JsonObject jsonObject) -> {
-            jsonObject.put("expanded", isExpanded(item));
+            if (getDataCommunicator().isExpanded(item)) {
+                jsonObject.put("expanded", true);
+            }
+
+            jsonObject.put("level", getDataCommunicator().getDepth(item));
         });
     }
 
@@ -203,8 +203,7 @@ public class TreeGrid<T> extends Grid<T>
         super(beanType, dataCommunicatorBuilder, autoCreateColumns);
 
         setUniqueKeyProperty("key");
-        addItemExpandedGenerator();
-        addItemHasChildrenPathGenerator();
+        addTreeDataGenerator();
     }
 
     /**
@@ -233,14 +232,17 @@ public class TreeGrid<T> extends Grid<T>
                     uniqueKeyProviderSupplier);
         }
 
+        @Override
         protected List<T> preloadFlatRangeForward(int start, int length) {
             return super.preloadFlatRangeForward(start, length);
         }
 
+        @Override
         protected List<T> preloadFlatRangeBackward(int start, int length) {
             return super.preloadFlatRangeBackward(start, length);
         }
 
+        @Override
         protected int resolveIndexPath(int... path) {
             return super.resolveIndexPath(path);
         }
