@@ -17,7 +17,6 @@ package com.vaadin.flow.component.virtuallist.tests;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.IntStream;
 
 import org.junit.Assert;
@@ -25,8 +24,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.virtuallist.testbench.VirtualListElement;
@@ -34,7 +31,6 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
-import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonNull;
 import elemental.json.JsonObject;
@@ -114,7 +110,7 @@ public class VirtualListIT extends AbstractComponentIT {
     public void templateFromRendererWithPeople() {
         WebElement list = findElement(By.id("template-renderer-with-people"));
 
-        JsonArray items = getItems(getDriver(), list);
+        JsonArray items = VirtualListHelpers.getItems(getDriver(), list);
         Assert.assertEquals(3, items.length());
         for (int i = 0; i < items.length(); i++) {
             Assert.assertEquals(String.valueOf(i + 1),
@@ -131,7 +127,7 @@ public class VirtualListIT extends AbstractComponentIT {
                 By.id("template-renderer-with-people-update-item"));
 
         scrollIntoViewAndClick(update);
-        items = getItems(getDriver(), list);
+        items = VirtualListHelpers.getItems(getDriver(), list);
         JsonObject person = items.getObject(0);
         Assert.assertEquals("Person 1 Updated",
                 getPropertyString(person, "name"));
@@ -144,7 +140,7 @@ public class VirtualListIT extends AbstractComponentIT {
     public void lazyLoaded() {
         WebElement list = findElement(By.id("lazy-loaded"));
 
-        JsonArray items = getItems(getDriver(), list);
+        JsonArray items = VirtualListHelpers.getItems(getDriver(), list);
         // the items are preallocated in the list, but they are empty
         Assert.assertEquals(100, items.length());
 
@@ -159,9 +155,10 @@ public class VirtualListIT extends AbstractComponentIT {
         }
 
         scrollToBottom(list);
-        waitUntil(driver -> getItems(driver, list).get(0) instanceof JsonNull);
+        waitUntil(driver -> VirtualListHelpers.getItems(driver, list)
+                .get(0) instanceof JsonNull);
 
-        items = getItems(getDriver(), list);
+        items = VirtualListHelpers.getItems(getDriver(), list);
 
         // all the initial items should be empty
         assertItemsAreNotPresent(items, 0, items.length() - lastReceivedKey);
@@ -214,19 +211,22 @@ public class VirtualListIT extends AbstractComponentIT {
         // clicks on the first item to remove it
         WebElement item = findElement(By.id("template-events-item-0"));
         scrollIntoViewAndClick(item);
-        waitUntil(driver -> getItems(driver, list).length() == 2);
+        waitUntil(driver -> VirtualListHelpers.getItems(driver, list)
+                .length() == 2);
         Assert.assertEquals("Clickable item 1 removed", message.getText());
 
         // clicks on the last item to remove it
         item = findElement(By.id("template-events-item-1"));
         scrollIntoViewAndClick(item);
-        waitUntil(driver -> getItems(driver, list).length() == 1);
+        waitUntil(driver -> VirtualListHelpers.getItems(driver, list)
+                .length() == 1);
         Assert.assertEquals("Clickable item 3 removed", message.getText());
 
         // clicks on the first item again to remove it
         item = findElement(By.id("template-events-item-0"));
         scrollIntoViewAndClick(item);
-        waitUntil(driver -> getItems(driver, list).length() == 0);
+        waitUntil(driver -> VirtualListHelpers.getItems(driver, list)
+                .length() == 0);
         Assert.assertEquals("Clickable item 2 removed", message.getText());
     }
 
@@ -384,16 +384,6 @@ public class VirtualListIT extends AbstractComponentIT {
         executeScript("arguments[0].scrollBy(0,10000);", virtualList);
     }
 
-    private void assertItemsArePresent(WebElement list, int length) {
-        JsonArray items = getItems(driver, list);
-        Assert.assertEquals(length, items.length());
-        for (int i = 0; i < items.length(); i++) {
-            JsonObject obj = items.getObject(i);
-            Assert.assertEquals("Person " + (i + 1),
-                    getPropertyString(obj, "label"));
-        }
-    }
-
     private void assertItemsArePresent(JsonArray items, int startingIndex,
             int endingIndex, String itemLabelprefix) {
 
@@ -420,7 +410,7 @@ public class VirtualListIT extends AbstractComponentIT {
             String itemLabelPrefixForFirstSet) {
         WebElement list = findElement(By.id(listId));
 
-        JsonArray items = getItems(getDriver(), list);
+        JsonArray items = VirtualListHelpers.getItems(getDriver(), list);
         Assert.assertEquals(3, items.length());
 
         assertItemsArePresent(items, 0, 3, itemLabelPrefixForFirstSet);
@@ -433,8 +423,9 @@ public class VirtualListIT extends AbstractComponentIT {
         WebElement set2Items = findElement(By.id(buttonIdFor2Items));
 
         scrollIntoViewAndClick(set2Items);
-        waitUntil(driver -> getItems(driver, list).length() == 2);
-        JsonArray items = getItems(getDriver(), list);
+        waitUntil(driver -> VirtualListHelpers.getItems(driver, list)
+                .length() == 2);
+        JsonArray items = VirtualListHelpers.getItems(getDriver(), list);
         for (int i = 0; i < items.length(); i++) {
             Assert.assertEquals(
                     "The label of the initial object at the index " + i
@@ -457,8 +448,9 @@ public class VirtualListIT extends AbstractComponentIT {
         WebElement set3Items = findElement(By.id(buttonIdFor3Items));
 
         scrollIntoViewAndClick(set3Items);
-        waitUntil(driver -> getItems(driver, list).length() == 3);
-        JsonArray items = getItems(getDriver(), list);
+        waitUntil(driver -> VirtualListHelpers.getItems(driver, list)
+                .length() == 3);
+        JsonArray items = VirtualListHelpers.getItems(getDriver(), list);
         for (int i = 0; i < items.length(); i++) {
             Assert.assertEquals(
                     "The label of the updated object at the index " + i
@@ -475,30 +467,7 @@ public class VirtualListIT extends AbstractComponentIT {
 
         WebElement set0Items = findElement(By.id(buttonIdFor0Items));
         scrollIntoViewAndClick(set0Items);
-        waitUntil(driver -> getItems(driver, list).length() == 0);
+        waitUntil(driver -> VirtualListHelpers.getItems(driver, list)
+                .length() == 0);
     }
-
-    public static JsonArray getItems(WebDriver driver, WebElement element) {
-        Object result = ((JavascriptExecutor) driver)
-                .executeScript("return arguments[0].items;", element);
-        JsonArray array = Json.createArray();
-        if (!(result instanceof List)) {
-            return array;
-        }
-        List<Map<String, ?>> list = (List<Map<String, ?>>) result;
-        for (int i = 0; i < list.size(); i++) {
-            Map<String, ?> map = list.get(i);
-            if (map != null) {
-                JsonObject obj = Json.createObject();
-                map.entrySet().forEach(entry -> {
-                    obj.put(entry.getKey(), String.valueOf(entry.getValue()));
-                });
-                array.set(i, obj);
-            } else {
-                array.set(i, Json.createNull());
-            }
-        }
-        return array;
-    }
-
 }
