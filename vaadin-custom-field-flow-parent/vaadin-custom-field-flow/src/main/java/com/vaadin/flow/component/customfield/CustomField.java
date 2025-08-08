@@ -69,9 +69,27 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      * @see AbstractField#AbstractField(Object)
      */
     public CustomField(T defaultValue) {
+        this(defaultValue, false);
+    }
+
+    /**
+     * Constructs a new custom field.
+     *
+     * @param defaultValue
+     *            The initial value for the field. Will also be used by
+     *            {@link #getEmptyValue()}.
+     * @param manualValueChangeTriggering
+     *            {@code true} to disable the value change automatically,
+     *            {@code false} otherwise (default)
+     *
+     * @see AbstractField#AbstractField(Object)
+     */
+    public CustomField(T defaultValue, boolean manualValueChangeTriggering) {
         super(defaultValue);
-        // Force a value update when the change event generated
-        getElement().addEventListener("change", e -> this.updateValue());
+        if (!manualValueChangeTriggering) {
+            // Force a value update when the change event generated
+            getElement().addEventListener("change", e -> this.updateValue());
+        }
         getElement().setProperty("manualValidation", true);
     }
 
@@ -207,4 +225,5 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
                 Stream.of(variants).map(CustomFieldVariant::getVariantName)
                         .collect(Collectors.toList()));
     }
+
 }
