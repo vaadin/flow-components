@@ -45,7 +45,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.select.data.SelectDataView;
 import com.vaadin.flow.component.select.data.SelectListDataView;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
@@ -117,8 +116,8 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
         implements Focusable<Select<T>>, HasAriaLabel,
         HasDataView<T, Void, SelectDataView<T>>, HasItemComponents<T>,
         InputField<AbstractField.ComponentValueChangeEvent<Select<T>, T>, T>,
-        HasListDataView<T, SelectListDataView<T>>, HasOverlayClassName,
-        HasPrefix, HasThemeVariant<SelectVariant>, HasValidationProperties,
+        HasListDataView<T, SelectListDataView<T>>, HasPrefix,
+        HasThemeVariant<SelectVariant>, HasValidationProperties,
         HasValidator<T>, SingleSelect<Select<T>, T>, HasPlaceholder {
 
     public static final String LABEL_ATTRIBUTE = "label";
