@@ -33,7 +33,6 @@ import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.di.Instantiator;
@@ -247,13 +246,6 @@ public class DateTimePickerTest {
 
         picker.setTimeAriaLabel(null);
         Assert.assertTrue(picker.getTimeAriaLabel().isEmpty());
-    }
-
-    @Test
-    public void implementsHasOverlayClassName() {
-        Assert.assertTrue("DateTimePicker should support overlay class name",
-                HasOverlayClassName.class
-                        .isAssignableFrom(new DateTimePicker().getClass()));
     }
 
     @Test
