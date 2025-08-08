@@ -58,7 +58,7 @@ public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURC
         var clickListener = "e => requestAnimationFrame(() => { e.defaultPrevented && onClick(e) })";
 
         return "<vaadin-grid-tree-toggle @click=${" + clickListener
-                + "} class=${item.cssClassName} .leaf=${!item.children} .expanded=${model.expanded} .level=${model.level}>"
+                + "} class=${item.cssClassName} .leaf=${!item.children} .expanded=${live(model.expanded)} .level=${model.level}>"
                 + super.getTemplateExpression() + "</vaadin-grid-tree-toggle>";
     }
 }

@@ -4,9 +4,9 @@ import {
   init,
   setRootItems,
   getBodyCellContent,
-  expandItems,
+  treeGridConnector,
 } from './shared.js';
-import type { FlowGrid, Item } from './shared.js';
+import type { FlowGrid } from './shared.js';
 import type { GridTreeToggle } from '@vaadin/grid/vaadin-grid-tree-toggle.js';
 
 describe('grid connector - tree toggle', () => {
@@ -23,15 +23,12 @@ describe('grid connector - tree toggle', () => {
       </vaadin-grid>
     `);
 
-    init(grid);
+    init(grid, treeGridConnector);
 
-    const rootItems: Item[] = [
-      { key: '0', name: 'foo', children: true },
-      { key: '1', name: 'bar', children: true },
-    ]
-
-    setRootItems(grid.$connector, rootItems);
-    expandItems(grid.$connector, [rootItems[1]]);
+    setRootItems(grid.$connector, [
+      { key: '0', name: 'foo', expanded: false, children: true },
+      { key: '1', name: 'bar', expanded: true, children: true },
+    ]);
 
     await nextFrame();
   });
