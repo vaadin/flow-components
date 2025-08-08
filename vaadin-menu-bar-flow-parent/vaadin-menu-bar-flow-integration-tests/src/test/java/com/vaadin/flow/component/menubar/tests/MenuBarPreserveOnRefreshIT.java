@@ -38,11 +38,10 @@ public class MenuBarPreserveOnRefreshIT extends AbstractComponentIT {
     @Test
     public void preserveOnRefresh_refresh_noClientErrors_clientCodeFunctional() {
         getDriver().navigate().refresh();
-        waitForElementPresent(By.tagName("vaadin-menu-bar"));
+        menuBar = $(MenuBarElement.class).waitForFirst();
         checkLogsForErrors();
 
         // Verify client-code with setVisible functionality:
-        menuBar = $(MenuBarElement.class).first();
         click("toggle-item-2-visibility");
         assertButtonContents("item 1");
     }
