@@ -27,8 +27,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
-import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
-import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 
@@ -304,27 +302,6 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
         public void removeAll() {
             SlotUtils.clearSlot(overlay, slot);
         }
-    }
-
-    /**
-     * Sets the CSS class names of the login overlay element. This method
-     * overwrites any previous set class names.
-     *
-     * @param className
-     *            a space-separated string of class names to set, or
-     *            <code>null</code> to remove all class names
-     */
-    @Override
-    public void setClassName(String className) {
-        getClassNames().clear();
-        if (className != null) {
-            addClassNames(className.split(" "));
-        }
-    }
-
-    @Override
-    public ClassList getClassNames() {
-        return new OverlayClassListProxy(this);
     }
 
     /**
