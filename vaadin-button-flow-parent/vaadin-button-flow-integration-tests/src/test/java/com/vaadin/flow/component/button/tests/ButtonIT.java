@@ -58,6 +58,8 @@ public class ButtonIT extends AbstractComponentIT {
 
         buttonElements = $(ButtonElement.class).withText("nonexistent").all();
         Assert.assertEquals(0, buttonElements.size());
+
+        Assert.fail("Check how the theme looks like");
     }
 
     @Test
