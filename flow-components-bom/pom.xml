@@ -219,11 +219,6 @@
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-flow-components-test-util</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-form-layout-flow</artifactId>
                 <version>${project.version}</version>
             </dependency>
