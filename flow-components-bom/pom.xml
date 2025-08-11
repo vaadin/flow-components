@@ -21,7 +21,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-accordion-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -32,7 +31,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-app-layout-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -43,7 +41,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-avatar-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -54,7 +51,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-board-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -65,7 +61,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-button-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -76,7 +71,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-card-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -92,7 +86,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-charts-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -103,7 +96,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-checkbox-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -114,7 +106,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-combo-box-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -125,7 +116,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-confirm-dialog-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -136,7 +126,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-context-menu-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -147,7 +136,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-cookie-consent-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -158,7 +146,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-crud-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -169,7 +156,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-custom-field-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -180,7 +166,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-dashboard-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -191,7 +176,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-date-picker-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -202,7 +186,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-date-time-picker-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -213,7 +196,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-details-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -224,7 +206,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-dialog-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -240,7 +221,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-flow-components-test-util</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -251,7 +231,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-form-layout-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -267,13 +246,11 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-grid-pro-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-grid-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -284,7 +261,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-icons-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -295,7 +271,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-list-box-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -306,7 +281,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-login-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -322,7 +296,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-map-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -333,7 +306,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-markdown-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -344,7 +316,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-master-detail-layout-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -355,7 +326,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-menu-bar-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -366,7 +336,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-messages-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -377,7 +346,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-notification-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -388,7 +356,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-ordered-layout-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -399,7 +366,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-popover-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -410,7 +376,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-progress-bar-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -421,7 +386,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-radio-button-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -437,7 +401,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-rich-text-editor-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -448,7 +411,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-select-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -459,7 +421,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-side-nav-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -470,7 +431,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-split-layout-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -481,7 +441,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-spreadsheet-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -492,7 +451,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-tabs-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -503,7 +461,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-text-field-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -514,7 +471,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-time-picker-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -525,7 +481,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-upload-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
@@ -536,7 +491,6 @@
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-virtual-list-testbench</artifactId>
                 <version>${project.version}</version>
-                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
