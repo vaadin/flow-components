@@ -228,5 +228,4 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
                 Stream.of(variants).map(CustomFieldVariant::getVariantName)
                         .collect(Collectors.toList()));
     }
-
 }
