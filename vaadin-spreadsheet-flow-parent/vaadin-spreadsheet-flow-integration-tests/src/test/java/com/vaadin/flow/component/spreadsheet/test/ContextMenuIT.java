@@ -38,15 +38,7 @@ public class ContextMenuIT extends AbstractSpreadsheetIT {
         executeScript(
                 "document.documentElement.scrollLeft = 100;document.documentElement.scrollTop = 400;");
 
-        var cell = getSpreadsheet().getCellAt("B2");
-        // Open context menu for the cell
-        cell.contextClick();
-
-        var cellRect = cell.getRect();
-        var overlayRect = findElement(By.className("v-contextmenu")).getRect();
-        // Assert that the overlay is positioned over the cell
-        assertInRange(cellRect.x, overlayRect.x, cellRect.x + cellRect.width);
-        assertInRange(cellRect.y, overlayRect.y, cellRect.y + cellRect.height);
+        Assert.fail("check if there was scrolling");
     }
 
     @Test
