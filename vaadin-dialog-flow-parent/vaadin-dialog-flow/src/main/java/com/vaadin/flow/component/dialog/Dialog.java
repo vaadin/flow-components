@@ -76,7 +76,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/dialog", version = "25.0.0-alpha8")
+@NpmPackage(value = "@vaadin/dialog", version = "25.0.0-alpha12")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
@@ -125,7 +125,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
             setLeft(event.getLeft());
         });
 
-        setOverlayRole("dialog");
+        setRole("dialog");
 
         // Initialize auto-add behavior
         new OverlayAutoAddController<>(this, this::isModal);
@@ -286,8 +286,12 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * {@code opened-changed} event is sent when the overlay opened state
-     * changes.
+     * Event that is fired when the dialog's opened state changes.
+     * <p>
+     * Note that this event fires immediately when the opened property changes,
+     * which, when closing the dialog, is before the closing animation has
+     * finished. To wait for the animation to finish, listen for the
+     * {@link ClosedEvent} event.
      */
     public static class OpenedChangeEvent extends ComponentEvent<Dialog> {
         private final boolean opened;
@@ -299,6 +303,17 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
         public boolean isOpened() {
             return opened;
+        }
+    }
+
+    /**
+     * Event that is fired after the dialog's closing animation has finished.
+     * Can be used to remove a dialog from the UI afterward.
+     */
+    @DomEvent("closed")
+    public static class ClosedEvent extends ComponentEvent<Dialog> {
+        public ClosedEvent(Dialog source, boolean fromClient) {
+            super(source, fromClient);
         }
     }
 
@@ -969,7 +984,12 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Add a lister for event fired by the {@code opened-changed} events.
+     * Add a listener for when the dialog's opened state changes.
+     * <p>
+     * Note that this event fires immediately when the opened property changes,
+     * which, when closing the dialog, is before the closing animation has
+     * finished. To wait for the animation to finish, use
+     * {@link #addClosedListener(ComponentEventListener)}.
      *
      * @param listener
      *            the listener to add
@@ -978,6 +998,19 @@ public class Dialog extends Component implements HasComponents, HasSize,
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
         return addListener(OpenedChangeEvent.class, listener);
+    }
+
+    /**
+     * Add a lister for when the dialog's closing animation has finished. Can be
+     * used to remove the dialog from the UI afterward.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
+     */
+    public Registration addClosedListener(
+            ComponentEventListener<ClosedEvent> listener) {
+        return addListener(ClosedEvent.class, listener);
     }
 
     /**
@@ -996,8 +1029,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * {@inheritDoc}
      * <p>
      * Note: To listen for closing the dialog, you should use
-     * {@link #addOpenedChangeListener(ComponentEventListener)}, as the
-     * component is not necessarily removed from the DOM when closing.
+     * {@link #addClosedListener(ComponentEventListener)}, as the component is
+     * not necessarily removed from the DOM when closing.
      */
     @Override
     public Registration addDetachListener(
@@ -1067,15 +1100,29 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Sets the ARIA role for the overlay element, used by screen readers.
+     * Sets the ARIA role for the dialog element, used by screen readers.
      *
      * @param role
      *            the role to set
      */
+    public void setRole(String role) {
+        Objects.requireNonNull(role, "Role cannot be null");
+
+        getElement().setProperty("role", role);
+    }
+
+    /**
+     * Sets the ARIA role for the overlay element, used by screen readers.
+     *
+     * @param role
+     *            the role to set
+     * @deprecated Use {@link #setRole(String)} instead
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setOverlayRole(String role) {
         Objects.requireNonNull(role, "Role cannot be null");
 
-        getElement().setProperty("overlayRole", role);
+        setRole(role);
     }
 
     /**
@@ -1084,8 +1131,20 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @return the role
      */
+    public String getRole() {
+        return getElement().getProperty("role");
+    }
+
+    /**
+     * Gets the ARIA role for the overlay element, used by screen readers.
+     * Defaults to {@code dialog}.
+     *
+     * @return the role
+     * @deprecated Use {@link #getRole()} instead
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     public String getOverlayRole() {
-        return getElement().getProperty("overlayRole");
+        return getRole();
     }
 
     /**

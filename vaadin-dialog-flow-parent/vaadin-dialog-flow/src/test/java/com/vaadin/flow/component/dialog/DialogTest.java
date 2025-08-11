@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Key;
@@ -34,7 +35,12 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.server.VaadinSession;
+
+import elemental.json.Json;
 
 /**
  * Unit tests for the Dialog.
@@ -187,12 +193,12 @@ public class DialogTest {
     }
 
     @Test
-    public void getOverlayRole_defaultDialog() {
+    public void getRole_defaultDialog() {
         Dialog dialog = new Dialog();
 
+        Assert.assertEquals("dialog", dialog.getRole());
         Assert.assertEquals("dialog", dialog.getOverlayRole());
-        Assert.assertEquals("dialog",
-                dialog.getElement().getProperty("overlayRole"));
+        Assert.assertEquals("dialog", dialog.getElement().getProperty("role"));
     }
 
     @Test
@@ -200,15 +206,33 @@ public class DialogTest {
         Dialog dialog = new Dialog();
         dialog.setOverlayRole("alertdialog");
 
+        Assert.assertEquals("alertdialog", dialog.getRole());
         Assert.assertEquals("alertdialog", dialog.getOverlayRole());
         Assert.assertEquals("alertdialog",
-                dialog.getElement().getProperty("overlayRole"));
+                dialog.getElement().getProperty("role"));
     }
 
     @Test(expected = NullPointerException.class)
     public void setOverlayRole_null_throws() {
         Dialog dialog = new Dialog();
         dialog.setOverlayRole(null);
+    }
+
+    @Test
+    public void setRole_getRole() {
+        Dialog dialog = new Dialog();
+        dialog.setRole("alertdialog");
+
+        Assert.assertEquals("alertdialog", dialog.getRole());
+        Assert.assertEquals("alertdialog", dialog.getOverlayRole());
+        Assert.assertEquals("alertdialog",
+                dialog.getElement().getProperty("role"));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setRole_null_throws() {
+        Dialog dialog = new Dialog();
+        dialog.setRole(null);
     }
 
     @Test
@@ -418,6 +442,23 @@ public class DialogTest {
 
         Assert.assertEquals("10px", dialog.getTop());
         Assert.assertEquals("20px", dialog.getLeft());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void addClosedListener_listenerInvokedOnClose() {
+        Dialog dialog = new Dialog();
+        ComponentEventListener<Dialog.ClosedEvent> listener = Mockito
+                .mock(ComponentEventListener.class);
+        dialog.addClosedListener(listener);
+
+        Element element = dialog.getElement();
+        dialog.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(
+                        new DomEvent(element, "closed", Json.createObject()));
+
+        Mockito.verify(listener, Mockito.times(1))
+                .onComponentEvent(Mockito.any(Dialog.ClosedEvent.class));
     }
 
     private void fakeClientResponse() {

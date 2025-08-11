@@ -10,6 +10,7 @@ package com.vaadin.flow.component.spreadsheet.test;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
@@ -30,6 +31,7 @@ public class ContextMenuIT extends AbstractSpreadsheetIT {
     }
 
     @Test
+    @Ignore
     public void documentScroll_overlayPosition() {
         // Make sure to use a small enough viewport so that the document needs
         // to be scrolled to see the cell

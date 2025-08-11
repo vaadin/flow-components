@@ -29,6 +29,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
+import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
@@ -52,7 +53,7 @@ import elemental.json.JsonObject;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu")
-@NpmPackage(value = "@vaadin/context-menu", version = "25.0.0-alpha8")
+@NpmPackage(value = "@vaadin/context-menu", version = "25.0.0-alpha12")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")
@@ -72,7 +73,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     private Registration targetDetachRegistration;
     private PendingJavaScriptResult targetJsRegistration;
 
-    private boolean autoAddedToTheUi;
+    private OverlayAutoAddController<ContextMenuBase<C, I, S>> overlayAutoAddController;
 
     /**
      * Creates an empty context menu.
@@ -85,13 +86,6 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         // contextMenuConnector.js make a server round-trip first.
         getElement().setProperty("openOn", "none");
 
-        getElement().addEventListener("opened-changed", event -> {
-            if (autoAddedToTheUi && !isOpened()) {
-                getElement().removeFromParent();
-                autoAddedToTheUi = false;
-            }
-        });
-
         getElement().addPropertyChangeListener("opened", event -> {
             fireEvent(new OpenedChangeEvent<>((C) this,
                     event.isUserOriginated()));
@@ -103,6 +97,9 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
             initConnector(appId);
             resetContent();
         });
+
+        overlayAutoAddController = new OverlayAutoAddController<>(this,
+                () -> false);
     }
 
     /**
@@ -267,7 +264,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     /**
      * Removes the given components from the context menu overlay.
-     * 
+     *
      * @param components
      *            the components to remove
      */
@@ -486,32 +483,10 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         boolean shouldOpenMenu = onBeforeOpenMenu(eventDetail);
 
         if (shouldOpenMenu) {
-            addContextMenuToUi();
+            overlayAutoAddController.add();
             target.getElement().callJsFunction(
                     "$contextMenuTargetConnector.openMenu", getElement());
         }
-    }
-
-    private void addContextMenuToUi() {
-        if (getElement().getNode().getParent() == null) {
-            UI ui = getCurrentUI();
-            ui.beforeClientResponse(ui, context -> {
-                ui.addToModalComponent(this);
-                autoAddedToTheUi = true;
-            });
-        }
-    }
-
-    private UI getCurrentUI() {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        return ui;
     }
 
     private void initConnector(String appId) {

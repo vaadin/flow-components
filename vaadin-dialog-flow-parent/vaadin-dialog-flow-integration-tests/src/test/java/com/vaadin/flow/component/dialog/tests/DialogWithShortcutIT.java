@@ -218,6 +218,8 @@ public class DialogWithShortcutIT extends AbstractComponentIT {
 
     private void validateShortcutEvent(int indexFromTop, int eventCounter,
             String eventSourceId) {
+        waitForElementPresent(By.cssSelector("#%s div:nth-child(%d)".formatted(
+                DialogWithShortcutPage.EVENT_LOG, indexFromTop + 1)));
         final WebElement latestEvent = eventLog.findElements(By.tagName("div"))
                 .get(indexFromTop);
         Assert.assertEquals("Invalid latest event",

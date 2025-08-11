@@ -25,7 +25,7 @@ import com.vaadin.flow.component.details.Details;
  * An accordion panel which could be opened or closed.
  */
 @Tag("vaadin-accordion-panel")
-@NpmPackage(value = "@vaadin/accordion", version = "25.0.0-alpha8")
+@NpmPackage(value = "@vaadin/accordion", version = "25.0.0-alpha12")
 @JsModule("@vaadin/accordion/src/vaadin-accordion-panel.js")
 public class AccordionPanel extends Details {
 

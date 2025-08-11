@@ -37,7 +37,6 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.NodeOwner;
@@ -69,9 +68,9 @@ import elemental.json.JsonObject;
  */
 @Tag("vaadin-avatar-group")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "25.0.0-alpha8")
-public class AvatarGroup extends Component implements HasOverlayClassName,
-        HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
+@NpmPackage(value = "@vaadin/avatar-group", version = "25.0.0-alpha12")
+public class AvatarGroup extends Component
+        implements HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
     /**
      * Item to be set as an avatar for the avatar group.
