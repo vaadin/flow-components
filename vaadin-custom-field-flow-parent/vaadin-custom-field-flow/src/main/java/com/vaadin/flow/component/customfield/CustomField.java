@@ -78,16 +78,19 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      * @param defaultValue
      *            The initial value for the field. Will also be used by
      *            {@link #getEmptyValue()}.
-     * @param manualValueChangeTriggering
-     *            {@code true} to disable the value change automatically,
-     *            {@code false} otherwise (default)
+     * @param manualValueUpdate
+     *            when {@code true} the component does not automatically update
+     *            its value when one of the contained fields changes. This
+     *            allows controlling manually when the value is updated, which
+     *            can be done by calling {@link #updateValue()}. {@code false}
+     *            by default.
      *
      * @see AbstractField#AbstractField(Object)
      */
-    public CustomField(T defaultValue, boolean manualValueChangeTriggering) {
+    public CustomField(T defaultValue, boolean manualValueUpdate) {
         super(defaultValue);
-        if (!manualValueChangeTriggering) {
-            // Force a value update when the change event generated
+        if (!manualValueUpdate) {
+            // Automatically update the value when a contained field changes
             getElement().addEventListener("change", e -> this.updateValue());
         }
         getElement().setProperty("manualValidation", true);
