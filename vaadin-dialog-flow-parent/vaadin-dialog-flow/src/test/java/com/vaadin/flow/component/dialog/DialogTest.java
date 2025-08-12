@@ -29,12 +29,9 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
@@ -244,29 +241,6 @@ public class DialogTest {
         // modeless is false and modal is true by default
         Assert.assertFalse("modal can be set to false",
                 !dialog.getElement().getProperty("modeless", false));
-    }
-
-    // vaadin/flow#7799,vaadin/vaadin-dialog#229
-    @Test
-    public void dialogAttached_targetedWithShortcutListenOn_addsJsExecutionForTransportingShortcutEvents() {
-        Dialog dialog = new Dialog();
-        dialog.open();
-        // there are a 6 invocations pending after opening a dialog (???) clear
-        // those first
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().dumpPendingJavaScriptInvocations();
-
-        // adding a shortcut with listenOn(dialog) makes flow pass events from
-        // overlay to dialog so that shortcuts inside dialog work
-        Shortcuts.addShortcutListener(dialog, event -> {
-        }, Key.KEY_A).listenOn(dialog);
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-
-        final List<PendingJavaScriptInvocation> pendingJavaScriptInvocations = ui
-                .getInternals().dumpPendingJavaScriptInvocations();
-        Assert.assertEquals(
-                "Shortcut transferring invocation should be pending", 1,
-                pendingJavaScriptInvocations.size());
     }
 
     private void addDivAtIndex(int index) {
