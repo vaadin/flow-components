@@ -12,6 +12,7 @@
     <name>Vaadin Flow Components Root Project</name>
     <url>https://vaadin.com/components</url>
     <modules>
+        <module>flow-components-bom</module>
         <module>vaadin-renderer-flow-parent</module>
         <module>vaadin-lumo-theme-flow-parent</module>
         <module>vaadin-flow-components-shared-parent</module>
