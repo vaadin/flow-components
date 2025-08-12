@@ -31,7 +31,7 @@ async function computeModules() {
   } else {
     // Read modules from the parent pom.xml
     const parentJs = await xml2js.parseStringPromise(fs.readFileSync(`pom.xml`, 'utf8'));
-    modules = parentJs.project.modules[0].module.filter(m => !/shared-parent/.test(m)).filter(m => !/demo-helpers/.test(m));
+    modules = parentJs.project.modules[0].module.filter(m => !/shared-parent/.test(m)).filter(m => !/bom/.test(m));
   }
 }
 
@@ -218,6 +218,14 @@ async function copySources() {
     // copy java sources
     copyFolderRecursiveSync(`${parent}/${id}-integration-tests/src`, `${itFolder}`);
   });
+
+  // Always copy LumoAppShell, so that merged ITs run with Lumo theme applied. Some ITs do not work property with
+  // base styles alone.
+  fs.mkdirSync(`${itFolder}/src/main/java/com/vaadin/flow/theme/lumo`, { recursive: true });
+  copyFileSync(
+    'vaadin-lumo-theme-flow-parent/vaadin-lumo-theme-flow-integration-tests/src/main/java/com/vaadin/flow/theme/lumo/LumoAppShell.java',
+    `${itFolder}/src/main/java/com/vaadin/flow/theme/lumo/LumoAppShell.java`,
+  );
 }
 
 async function main() {
