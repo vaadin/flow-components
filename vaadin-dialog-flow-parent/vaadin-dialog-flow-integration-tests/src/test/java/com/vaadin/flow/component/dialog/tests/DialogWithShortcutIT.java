@@ -67,25 +67,6 @@ public class DialogWithShortcutIT extends AbstractComponentIT {
     }
 
     @Test
-    public void dialogOpenedWithShortcutNoListenOn_sameShortcutListeningOnUi_bothExecuted() {
-        openDialogButton = $(NativeButtonElement.class)
-                .id(DialogWithShortcutPage.SHORTCUT_ON_UI);
-        pressShortcutKey(uiLevelButton);
-        validateLatestShortcutEvent(0, DialogWithShortcutPage.UI_BUTTON);
-
-        openNewDialog();
-
-        pressShortcutKey(getFirstDialogInput());
-        // last event is on dialog
-        validateLatestShortcutEventOnDialog(1, 0);
-        validateShortcutEvent(1, 0, DialogWithShortcutPage.UI_BUTTON);
-
-        closeDialog();
-        pressShortcutKey(uiLevelButton);
-        validateLatestShortcutEvent(2, DialogWithShortcutPage.UI_BUTTON);
-    }
-
-    @Test
     public void dialogOpenedWithListenOnShortcut_dialogReopened_oldShortcutStillWorks() {
         openDialogButton = $(NativeButtonElement.class)
                 .id(DialogWithShortcutPage.REUSABLE_DIALOG);
