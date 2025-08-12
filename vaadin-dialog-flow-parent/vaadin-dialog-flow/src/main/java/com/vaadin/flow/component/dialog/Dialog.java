@@ -40,8 +40,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
-import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
-import com.vaadin.flow.dom.ClassList;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
 import com.vaadin.flow.dom.ElementDetachEvent;
@@ -1206,27 +1204,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
         setDimension(ElementConstants.STYLE_MAX_WIDTH, maxWidth);
         setDimension(ElementConstants.STYLE_MIN_HEIGHT, minHeight);
         setDimension(ElementConstants.STYLE_MAX_HEIGHT, maxHeight);
-    }
-
-    /**
-     * Sets the CSS class names of the dialog overlay element. This method
-     * overwrites any previous set class names.
-     *
-     * @param className
-     *            a space-separated string of class names to set, or
-     *            <code>null</code> to remove all class names
-     */
-    @Override
-    public void setClassName(String className) {
-        getClassNames().clear();
-        if (className != null) {
-            addClassNames(className.split(" "));
-        }
-    }
-
-    @Override
-    public ClassList getClassNames() {
-        return new OverlayClassListProxy(this);
     }
 
     /**
