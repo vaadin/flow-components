@@ -42,7 +42,8 @@ public class RichTextEditorCustomValueIT extends AbstractComponentIT {
     @Test
     public void setDeltaWithExtraSpaces_htmlHasExtraSpaces() {
         setCustomDeltaValue("[{\"insert\":\"Extra   spaces\"}]");
-        Assert.assertEquals("<p>Extra   spaces</p>", getEditorHtmlValue());
+        Assert.assertEquals("<p>Extra&nbsp;&nbsp; spaces</p>",
+                getEditorHtmlValue());
     }
 
     private String getEditorHtmlValue() {
