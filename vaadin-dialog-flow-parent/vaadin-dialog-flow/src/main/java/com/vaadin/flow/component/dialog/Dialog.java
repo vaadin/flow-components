@@ -32,7 +32,6 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -1088,10 +1087,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
-        // vaadin/flow#7799,vaadin/vaadin-dialog#229
-        // as the locator is stored inside component's attributes, no need to
-        // remove the data as it should live as long as the component does
-        Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
         initHeaderFooterRenderer();
         updateVirtualChildNodeIds();
         registerClientCloseHandler();
