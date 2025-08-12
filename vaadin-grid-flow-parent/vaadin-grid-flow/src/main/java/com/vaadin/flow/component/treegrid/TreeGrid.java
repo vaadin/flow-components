@@ -615,10 +615,8 @@ public class TreeGrid<T> extends Grid<T>
      */
     public Column<T> addHierarchyColumn(ValueProvider<T, ?> valueProvider) {
         Column<T> column = addColumn(LitRenderer.<T> of(
-                "<vaadin-grid-tree-toggle @click=${onClick} .leaf=${!item.children} .expanded=${model.expanded} .level=${model.level}>"
+                "<vaadin-grid-tree-toggle @click=${onClick} .leaf=${!model.hasChildren} .expanded=${model.expanded} .level=${model.level}>"
                         + "${item.name}</vaadin-grid-tree-toggle>")
-                .withProperty("children",
-                        item -> getDataCommunicator().hasChildren(item))
                 .withProperty("name", value -> {
                     Object name = valueProvider.apply(value);
                     return name == null ? "" : String.valueOf(name);
