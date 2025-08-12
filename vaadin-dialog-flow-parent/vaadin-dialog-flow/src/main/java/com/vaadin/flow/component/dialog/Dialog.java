@@ -49,7 +49,7 @@ import com.vaadin.flow.shared.Registration;
 
 /**
  * A Dialog is a small window that can be used to present information and user
- * interface elements in an overlay.
+ * interface elements.
  * <p>
  * Dialogs can be made modal or non-modal. A modal Dialog blocks the user from
  * interacting with the rest of the user interface while the Dialog is open, as
@@ -131,7 +131,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * `vaadin-dialog-close-action` is sent when the user clicks outside the
-     * overlay or presses the escape key.
+     * dialog or presses the escape key.
      */
     @DomEvent("vaadin-dialog-close-action")
     public static class DialogCloseActionEvent extends ComponentEvent<Dialog> {
@@ -141,55 +141,55 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Gets the top position of the overlay.
+     * Gets the top position of the dialog.
      *
-     * @return the top position of the overlay
+     * @return the top position of the dialog
      */
     public String getTop() {
         return getElement().getProperty("top");
     }
 
     /**
-     * Sets the top position of the overlay. If a unitless number is provided,
+     * Sets the top position of the dialog. If a unitless number is provided,
      * pixels are assumed.
      * <p>
-     * Note that the overlay top edge may not be the same as the viewport top
-     * edge (e.g. the "Lumo" theme defines some spacing to prevent the overlay
+     * Note that the dialog top edge may not be the same as the viewport top
+     * edge (e.g. the "Lumo" theme defines some spacing to prevent the dialog
      * from stretching all the way to the top of the viewport).
      *
      * @param top
-     *            the top position of the overlay
+     *            the top position of the dialog
      */
     public void setTop(String top) {
         getElement().setProperty("top", top);
     }
 
     /**
-     * Gets the left position of the overlay.
+     * Gets the left position of the dialog.
      *
-     * @return the left position of the overlay
+     * @return the left position of the dialog
      */
     public String getLeft() {
         return getElement().getProperty("left");
     }
 
     /**
-     * Sets the distance of the overlay from the left of its container. If a
+     * Sets the distance of the dialog from the left of its container. If a
      * unitless number is provided, pixels are assumed.
      * <p>
-     * Note that the overlay left edge may not be the same as the viewport left
-     * edge (e.g. the "Lumo" theme defines some spacing to prevent the overlay
+     * Note that the dialog left edge may not be the same as the viewport left
+     * edge (e.g. the "Lumo" theme defines some spacing to prevent the dialog
      * from stretching all the way to the left of the viewport).
      *
      * @param left
-     *            the left position of the overlay
+     *            the left position of the dialog
      */
     public void setLeft(String left) {
         getElement().setProperty("left", left);
     }
 
     /**
-     * `resize` event is sent when the user finishes resizing the overlay.
+     * `resize` event is sent when the user finishes resizing the dialog.
      */
     @DomEvent("resize")
     public static class DialogResizeEvent extends ComponentEvent<Dialog> {
@@ -212,36 +212,36 @@ public class Dialog extends Component implements HasComponents, HasSize,
         }
 
         /**
-         * Gets the width of the overlay after resize is done
+         * Gets the width of the dialog after resize is done
          *
-         * @return the width in pixels of the overlay
+         * @return the width in pixels of the dialog
          */
         public String getWidth() {
             return width;
         }
 
         /**
-         * Gets the height of the overlay after resize is done
+         * Gets the height of the dialog after resize is done
          *
-         * @return the height in pixels of the overlay
+         * @return the height in pixels of the dialog
          */
         public String getHeight() {
             return height;
         }
 
         /**
-         * Gets the left position of the overlay after resize is done
+         * Gets the left position of the dialog after resize is done
          *
-         * @return the left position in pixels of the overlay
+         * @return the left position in pixels of the dialog
          */
         public String getLeft() {
             return left;
         }
 
         /**
-         * Gets the top position of the overlay after resize is done
+         * Gets the top position of the dialog after resize is done
          *
-         * @return the top position in pixels of the overlay
+         * @return the top position in pixels of the dialog
          */
         public String getTop() {
             return top;
@@ -249,7 +249,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * `dragged` event is sent when the user finishes dragging the overlay.
+     * `dragged` event is sent when the user finishes dragging the dialog.
      */
     @DomEvent("dragged")
     public static class DialogDraggedEvent extends ComponentEvent<Dialog> {
@@ -265,18 +265,18 @@ public class Dialog extends Component implements HasComponents, HasSize,
         }
 
         /**
-         * Gets the left position of the overlay after dragging is done
+         * Gets the left position of the dialog after dragging is done
          *
-         * @return the left position in pixels of the overlay
+         * @return the left position in pixels of the dialog
          */
         public String getLeft() {
             return left;
         }
 
         /**
-         * Gets the top position of the overlay after dragging is done
+         * Gets the top position of the dialog after dragging is done
          *
-         * @return the top position in pixels of the overlay
+         * @return the top position in pixels of the dialog
          */
         public String getTop() {
             return top;
@@ -426,8 +426,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Adds a listener that is called after user finishes resizing the overlay.
-     * It is called only if resizing is enabled (see
+     * Adds a listener that is called after the user finishes resizing the
+     * dialog. It is called only if resizing is enabled (see
      * {@link Dialog#setResizable(boolean)}).
      * <p>
      * Note: By default, the component will sync the width/height and top/left
@@ -443,8 +443,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Adds a listener that is called after user finishes dragging the overlay.
-     * It is called only if dragging is enabled (see
+     * Adds a listener that is called after the user finishes dragging the
+     * dialog. It is called only if dragging is enabled (see
      * {@link Dialog#setDraggable(boolean)}).
      * <p>
      * Note: By default, the component will sync the top/left values after every
@@ -497,10 +497,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * Adds the given components into this dialog.
-     * <p>
-     * The elements in the DOM will not be children of the
-     * {@code <vaadin-dialog>} element, but will be inserted into an overlay
-     * that is attached into the {@code <body>}.
      *
      * @param components
      *            the components to add
@@ -514,10 +510,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * Adds the given component into this dialog at the given index.
-     * <p>
-     * The element in the DOM will not be child of the {@code <vaadin-dialog>}
-     * element, but will be inserted into an overlay that is attached into the
-     * {@code <body>}.
      *
      * @param index
      *            the index, where the component will be added.
@@ -904,9 +896,9 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * listeners delegate to the server-side {@link #handleClientClose()}
      * method. This serves two purposes:
      * <ul>
-     * <li>Prevent the client overlay from closing if a custom close action
+     * <li>Prevent the client dialog from closing if a custom close action
      * listener is registered</li>
-     * <li>Prevent the client overlay from closing if the server-side dialog has
+     * <li>Prevent the client dialog from closing if the server-side dialog has
      * become inert in the meantime, in which case the @ClientCallable call to
      * {@link #handleClientClose()} will never be processed</li>
      * </ul>
@@ -1110,7 +1102,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Sets the ARIA role for the overlay element, used by screen readers.
+     * Sets the ARIA role for the dialog element, used by screen readers.
      *
      * @param role
      *            the role to set
@@ -1124,7 +1116,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Gets the ARIA role for the overlay element, used by screen readers.
+     * Gets the ARIA role for the dialog element, used by screen readers.
      * Defaults to {@code dialog}.
      *
      * @return the role
@@ -1134,7 +1126,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Gets the ARIA role for the overlay element, used by screen readers.
+     * Gets the ARIA role for the dialog element, used by screen readers.
      * Defaults to {@code dialog}.
      *
      * @return the role
@@ -1208,11 +1200,11 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * @throws UnsupportedOperationException
-     *             Dialog does not support adding styles to overlay
+     *             Dialog does not support adding styles
      */
     @Override
     public Style getStyle() {
         throw new UnsupportedOperationException(
-                "Dialog does not support adding styles to overlay");
+                "Dialog does not support adding styles");
     }
 }

@@ -169,16 +169,16 @@ public class ConfirmDialog extends Component
 
     /**
      * @throws UnsupportedOperationException
-     *             ConfirmDialog does not support adding styles to overlay
+     *             ConfirmDialog does not support adding styles
      */
     @Override
     public Style getStyle() {
         throw new UnsupportedOperationException(
-                "ConfirmDialog does not support adding styles to overlay");
+                "ConfirmDialog does not support adding styles");
     }
 
     /**
-     * Sets the `aria-describedby` attribute of the dialog overlay.
+     * Sets the `aria-describedby` attribute of the dialog.
      * <p>
      * By default, all elements inside the message area are linked through the
      * `aria-describedby` attribute. However, there are cases where this can
@@ -197,13 +197,13 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Gets the `aria-describedby` attribute of the dialog overlay.
+     * Gets the `aria-describedby` attribute of the dialog.
      * <p>
      * Note that this will only return a value if
      * {@link #setAriaDescribedBy(String)} was called before.
      *
-     * @return an optional aria-describedby of the dialog overlay, or an empty
-     *         optional if no aria-describedby has been set
+     * @return an optional aria-describedby of the dialog, or an empty optional
+     *         if no aria-describedby has been set
      */
     public Optional<String> getAriaDescribedBy() {
         return Optional.ofNullable(

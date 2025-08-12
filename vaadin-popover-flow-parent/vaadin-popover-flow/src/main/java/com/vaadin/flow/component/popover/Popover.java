@@ -173,7 +173,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * {@code opened-changed} event is sent when the overlay opened state
+     * {@code opened-changed} event is sent when the popover opened state
      * changes.
      */
     @DomEvent("opened-changed")
@@ -355,7 +355,7 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Sets the ARIA role for the overlay element, used by screen readers.
+     * Sets the ARIA role for the popover, used by screen readers.
      *
      * @param role
      *            the role to set
@@ -379,8 +379,8 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Gets the ARIA role for the popover element, used by screen readers.
-     * Defaults to {@code dialog}.
+     * Gets the ARIA role for the popover, used by screen readers. Defaults to
+     * {@code dialog}.
      *
      * @return the role
      * @deprecated Use {@link #getRole()} instead
@@ -752,14 +752,14 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Sets the width of the popover overlay content area.
+     * Sets the width of the popover content area.
      * <p>
      * The width should be in a format understood by the browser, e.g. "100px"
      * or "2.5em" (Using relative unit, such as percentage, will lead to
      * unexpected results).
      * <p>
      * If the provided {@code width} value is {@literal null} then width is
-     * removed, and the popover overlay is auto-sized based on the content.
+     * removed, and the popover is auto-sized based on the content.
      *
      * @param width
      *            the width to set, may be {@code null}
@@ -769,14 +769,14 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     /**
-     * Sets the height of the popover overlay content area.
+     * Sets the height of the popover content area.
      * <p>
      * The height should be in a format understood by the browser, e.g. "100px"
      * or "2.5em" (Using relative unit, such as percentage, will lead to
      * unexpected results).
      * <p>
      * If the provided {@code height} value is {@literal null} then height is
-     * removed, and the popover overlay is auto-sized based on the content.
+     * removed, and the popover is auto-sized based on the content.
      *
      * @param height
      *            the height to set, may be {@code null}
@@ -787,11 +787,11 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
 
     /**
      * @throws UnsupportedOperationException
-     *             Popover does not support adding styles to overlay
+     *             Popover does not support adding styles
      */
     @Override
     public Style getStyle() {
         throw new UnsupportedOperationException(
-                "Popover does not support adding styles to overlay");
+                "Popover does not support adding styles");
     }
 }
