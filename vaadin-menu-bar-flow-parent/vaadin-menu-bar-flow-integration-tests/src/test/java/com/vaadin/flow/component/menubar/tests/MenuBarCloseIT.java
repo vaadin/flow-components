@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
+import com.vaadin.flow.component.menubar.testbench.MenuBarSubMenuElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
@@ -34,12 +35,13 @@ public class MenuBarCloseIT extends AbstractComponentIT {
     @Test
     public void clickingCloseButton_closesSubmenu() {
         MenuBarElement menuBar = $(MenuBarElement.class).first();
-        menuBar.getButtons().get(0).click();
+        MenuBarSubMenuElement subMenu = menuBar.getButtons().get(0)
+                .openSubMenu();
 
-        Assert.assertTrue(menuBar.getSubMenu().getPropertyBoolean("opened"));
+        Assert.assertTrue(subMenu.isOpen());
 
         clickElementWithJs("close-button");
 
-        Assert.assertFalse(menuBar.getSubMenu().getPropertyBoolean("opened"));
+        Assert.assertFalse(subMenu.isOpen());
     }
 }

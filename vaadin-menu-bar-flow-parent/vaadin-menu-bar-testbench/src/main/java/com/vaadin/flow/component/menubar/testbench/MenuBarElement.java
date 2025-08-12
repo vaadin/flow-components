@@ -69,7 +69,12 @@ public class MenuBarElement extends TestBenchElement {
      * menu.
      *
      * @return List of MenuBarItemElement representing sub menu items.
+     * @deprecated use {@link MenuBarButtonElement#openSubMenu()} to open a
+     *             submenu and then use
+     *             {@link MenuBarSubMenuElement#getMenuItems()} to retrieve the
+     *             items.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public List<MenuBarItemElement> getSubMenuItems() {
         return getSubMenuItems(getSubMenu());
     }
@@ -81,7 +86,12 @@ public class MenuBarElement extends TestBenchElement {
      * @param subMenu
      *            The sub menu from which items are being collected.
      * @return List of MenuBarItemElement representing sub menu items.
+     * @deprecated use {@link MenuBarButtonElement#openSubMenu()} or
+     *             {@link MenuBarItemElement#openSubMenu()} to open a submenu
+     *             and then use {@link MenuBarSubMenuElement#getMenuItems()} to
+     *             retrieve the items.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public List<MenuBarItemElement> getSubMenuItems(TestBenchElement subMenu) {
         return subMenu.getPropertyElement("_listBox")
                 .$(MenuBarItemElement.class).all();
@@ -91,18 +101,24 @@ public class MenuBarElement extends TestBenchElement {
      * Get the sub menu element.
      *
      * @return TestBenchElement for the first sub menu in this menu bar
+     * @deprecated use {@link MenuBarButtonElement#openSubMenu()} to open a
+     *             submenu
      */
-    public TestBenchElement getSubMenu() {
-        return getPropertyElement("_subMenu");
+    @Deprecated(since = "25.0", forRemoval = true)
+    public MenuBarSubMenuElement getSubMenu() {
+        return getPropertyElement("_subMenu").wrap(MenuBarSubMenuElement.class);
     }
 
     /**
      * Get all the opened sub menu elements.
      *
      * @return List of TestBenchElements representing all opened sub menus.
+     * @deprecated use {@link MenuBarButtonElement#openSubMenu()} or
+     *             {@link MenuBarItemElement#openSubMenu()} to access submenus
+     *             for specific buttons or items
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public List<TestBenchElement> getAllSubMenus() {
         return $("vaadin-menu-bar-submenu").withAttribute("opened").all();
     }
-
 }
