@@ -262,11 +262,6 @@ public class TreeGridElement extends GridElement {
         }
     }
 
-    @Override
-    protected boolean isLoading() {
-        return super.isLoading();
-    }
-
     /**
      * Gets the total number of rows.
      * <p>
