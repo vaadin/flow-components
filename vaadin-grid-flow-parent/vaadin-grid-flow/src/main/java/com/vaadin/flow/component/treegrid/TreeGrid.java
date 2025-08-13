@@ -58,7 +58,6 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.StateNode;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
@@ -217,13 +216,24 @@ public class TreeGrid<T> extends Grid<T>
 
     private static class TreeGridDataCommunicator<T>
             extends HierarchicalDataCommunicator<T> {
-        public TreeGridDataCommunicator(CompositeDataGenerator<T> dataGenerator,
+        private Element element;
+
+        public TreeGridDataCommunicator(Element element,
+                CompositeDataGenerator<T> dataGenerator,
                 ArrayUpdater arrayUpdater,
                 SerializableConsumer<JsonArray> dataUpdater,
-                StateNode stateNode,
                 SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
-            super(dataGenerator, arrayUpdater, dataUpdater, stateNode,
+            super(dataGenerator, arrayUpdater, dataUpdater, element.getNode(),
                     uniqueKeyProviderSupplier);
+            this.element = element;
+        }
+
+        @Override
+        public void reset() {
+            super.reset();
+            if (element != null) {
+                element.callJsFunction("$connector.reset");
+            }
         }
 
         @Override
@@ -250,11 +260,8 @@ public class TreeGrid<T> extends Grid<T>
                 CompositeDataGenerator<T> dataGenerator,
                 GridArrayUpdater arrayUpdater,
                 SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
-
-            return new TreeGridDataCommunicator<>(dataGenerator, arrayUpdater,
-                    data -> element.callJsFunction("$connector.updateFlatData",
-                            data),
-                    element.getNode(), uniqueKeyProviderSupplier);
+            return new TreeGridDataCommunicator<>(element, dataGenerator,
+                    arrayUpdater, null, uniqueKeyProviderSupplier);
         }
     }
 
