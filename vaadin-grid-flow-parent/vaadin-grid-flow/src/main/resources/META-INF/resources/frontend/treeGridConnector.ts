@@ -39,7 +39,7 @@ window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
 
   grid.__getRowLevel = function (row) {
     return row._item?.level ?? 0;
-  }
+  };
 
   grid._isExpanded = function (item) {
     return !!item?.expanded;
