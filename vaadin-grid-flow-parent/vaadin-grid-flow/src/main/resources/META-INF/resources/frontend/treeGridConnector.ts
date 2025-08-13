@@ -37,14 +37,9 @@ window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
     delete grid.__pendingScrollToIndexes;
   };
 
-  grid.__getRowModel = function (row) {
-    const model = Object.getPrototypeOf(this).__getRowModel.call(this, row);
-    return { ...model, level: model.item?.level ?? 0 };
-  };
-  // FIXME: Use this instead
-  // grid.__getRowLevel = function (row) {
-  //   return row._item?.level ?? 0;
-  // }
+  grid.__getRowLevel = function (row) {
+    return row._item?.level ?? 0;
+  }
 
   grid._isExpanded = function (item) {
     return !!item?.expanded;
