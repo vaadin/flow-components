@@ -169,7 +169,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // or to increase it to make Grid smoother when scrolling
     let buffer = end - start;
     start = Math.max(0, start - buffer);
-    end = Math.min(end + buffer, grid._flatSize);
+    end = Math.min(end + buffer, grid.size);
 
     let pageRange = [Math.floor(start / grid.pageSize), Math.floor(end / grid.pageSize)];
 
@@ -337,22 +337,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   };
 
   /**
-   * Updates all visible grid rows in DOM.
-   */
-  const updateAllGridRowsInDomBasedOnCache = function () {
-    updateGridFlatSize();
-    grid.__updateVisibleRows();
-  };
-
-  /**
-   * Updates the <vaadin-grid>'s internal cache size and flat size.
-   */
-  const updateGridFlatSize = function () {
-    dataProviderController.recalculateFlatSize();
-    grid._flatSize = dataProviderController.flatSize;
-  };
-
-  /**
    * Update the given items in DOM if currently visible.
    *
    * @param array items the items to update in DOM
@@ -399,7 +383,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       }
     }
 
-    grid.requestContentUpdate();
+    grid.__updateVisibleRows();
   };
 
   const itemToCacheLocation = function (item) {
@@ -501,7 +485,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
         items.forEach((item) => grid.closeItemDetails(item));
         delete cache[root][page];
         updateGridCache(page);
-        updateGridItemsInDomBasedOnCache(items);
       }
     }
     let cacheToClear = dataProviderController.rootCache;
@@ -509,7 +492,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     for (let itemIndex = index; itemIndex < endIndex; itemIndex++) {
       delete cacheToClear.items[itemIndex];
     }
-    updateGridFlatSize();
+    grid.__updateVisibleRows();
   };
 
   grid.$connector.reset = function () {
@@ -517,7 +500,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     dataProviderController.clearCache();
     lastRequestedRanges = {};
     rootRequestDebouncer?.cancel();
-    updateAllGridRowsInDomBasedOnCache();
+    grid.__updateVisibleRows();
   };
 
   grid.$connector.updateSize = (newSize) => (grid.size = newSize);
