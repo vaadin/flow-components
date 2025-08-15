@@ -23,22 +23,22 @@ import com.vaadin.flow.router.Route;
 @Route("vaadin-grid/disabled-tree-grid")
 public class DisabledTreeGridPage extends Div {
 
-	public DisabledTreeGridPage() {
-		var treeGrid = new TreeGrid<TestTreeData.Item>();
-		treeGrid.addHierarchyColumn(TestTreeData.Item::getName)
-				.setHeader("Item");
-		treeGrid.setEnabled(false);
-		treeGrid.setTreeData(new TestTreeData(100, 100));
-		add(treeGrid);
+    public DisabledTreeGridPage() {
+        var treeGrid = new TreeGrid<TestTreeData.Item>();
+        treeGrid.addHierarchyColumn(TestTreeData.Item::getName)
+                .setHeader("Item");
+        treeGrid.setEnabled(false);
+        treeGrid.setTreeData(new TestTreeData(100, 100));
+        add(treeGrid);
 
-		var setAllRowsVisible = new NativeButton("Set all rows visible",
-				e -> treeGrid.setAllRowsVisible(true));
-		setAllRowsVisible.setId("set-all-rows-visible");
+        var setAllRowsVisible = new NativeButton("Set all rows visible",
+                e -> treeGrid.setAllRowsVisible(true));
+        setAllRowsVisible.setId("set-all-rows-visible");
 
-		var scrollToEnd = new NativeButton("Scroll to end",
-				e -> treeGrid.scrollToEnd());
-		scrollToEnd.setId("scroll-to-end");
+        var scrollToEnd = new NativeButton("Scroll to end",
+                e -> treeGrid.scrollToEnd());
+        scrollToEnd.setId("scroll-to-end");
 
-		add(setAllRowsVisible, scrollToEnd, treeGrid);
-	}
+        add(setAllRowsVisible, scrollToEnd, treeGrid);
+    }
 }
