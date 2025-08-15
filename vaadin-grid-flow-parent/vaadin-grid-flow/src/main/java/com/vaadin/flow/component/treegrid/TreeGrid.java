@@ -1069,28 +1069,35 @@ public class TreeGrid<T> extends Grid<T>
         // Resolve the flat index from the given index path
         var flatIndex = dataCommunicator.resolveIndexPath(path);
 
-        // Preload items after the resolved flat index traversing
-        // the tree forward from the start (from lower to higher indexes).
+        // Preload items starting at the resolved flat index and moving
+        // forward, from lower to higher indexes (in flat representation).
+        // Page size is added to make sure we never preload fewer items than the
+        // actual viewport range will need after its boundaries are
+        // page-aligned.
         dataCommunicator.preloadFlatRangeForward(flatIndex, padding + pageSize);
 
-        // Preload items before the resolved flat index traversing
-        // the tree backward from the start (from higher to lower indexes).
-        // This strategy ensures that all nearby items are cached ahead of time,
-        // preventing viewport shifts that would otherwise occur when calling
-        // setViewportRange which expands items from lower to higher indexes
-        // when not found in the cache.
+        // Repeat the process backward to preload enough items behing the
+        // resolved flat index. Adding the page size is essential. Without it,
+        // the following call to dataCommunicator.setViewportRange will try to
+        // load uncovered expanded items forward, shifting the range and causing
+        // underscroll.
         dataCommunicator.preloadFlatRangeBackward(flatIndex,
                 padding + pageSize);
 
         // Update the flat index after preloading, as it might have changed
         flatIndex = dataCommunicator.resolveIndexPath(path);
 
-        // Calculate the viewport range based on the flat index and padding
-        // size, aligning the range with page size.
-        var startPage = Math.max(0, (flatIndex - padding) / pageSize);
-        var endPage = (flatIndex + padding) / pageSize;
+        // Calculate the viewport range, placing the flat index in the center
+        // and adding padding around it.
+        var startIndex = flatIndex - padding;
+        var endIndex = flatIndex + padding;
 
-        getDataCommunicator().setViewportRange(startPage * pageSize,
+        // Align the viewport range with page boundaries, as the grid connector
+        // supports only page-aligned ranges, see $connector.clear, for example.
+        var startPage = Math.max(0, startIndex / pageSize);
+        var endPage = endIndex / pageSize;
+
+        dataCommunicator.setViewportRange(startPage * pageSize,
                 (endPage - startPage + 1) * pageSize);
 
         return flatIndex;
