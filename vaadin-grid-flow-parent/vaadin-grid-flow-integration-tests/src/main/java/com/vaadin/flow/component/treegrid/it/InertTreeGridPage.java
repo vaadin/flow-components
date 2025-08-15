@@ -45,6 +45,10 @@ public class InertTreeGridPage extends Div {
                 e -> grid.setAllRowsVisible(true));
         setAllRowsVisible.setId("set-all-rows-visible");
 
-        add(expandFirst, setAllRowsVisible, grid);
+        var scrollToEnd = new NativeButton("Scroll to end",
+                e -> grid.scrollToEnd());
+        scrollToEnd.setId("scroll-to-end");
+
+        add(expandFirst, setAllRowsVisible, scrollToEnd, grid);
     }
 }
