@@ -97,7 +97,6 @@ public class TreeGridElement extends GridElement {
                 && rowIndex <= getLastVisibleRowIndex()))) {
             scrollToFlatRowAndWait(rowIndex);
         }
-        waitUntil(test -> !isLoadingExpandedRows());
 
         GridTRElement row = getRow(rowIndex);
         return row.getCell(column);
@@ -233,25 +232,6 @@ public class TreeGridElement extends GridElement {
     }
 
     /**
-     * Returns a number of expanded rows in the grid element. Notice that
-     * returned number does not mean that grid has yet finished rendering all
-     * visible expanded rows.
-     *
-     * @return the number of expanded rows
-     * @deprecated since 24.9 and will be removed in Vaadin 25 where expanded
-     *             items will no longer be available on the client-side, as
-     *             hierarchy management is being moved to the server-side.
-     *             Instead, it's recommended to assert the actual presence of
-     *             expanded rows in the grid by checking row content.
-     */
-    @Deprecated(since = "24.9", forRemoval = true)
-    public long getNumberOfExpandedRows() {
-        waitUntilLoadingFinished();
-        return (long) executeScript("return arguments[0].expandedItems.length;",
-                this);
-    }
-
-    /**
      * Returns {@code true} if details are open or the given row index.
      *
      * @param rowIndex
@@ -280,28 +260,6 @@ public class TreeGridElement extends GridElement {
         } catch (Exception e) {
             return false;
         }
-    }
-
-    /**
-     * Returns true if grid is loading expanded rows.
-     *
-     * @return <code>true</code> if grid is loading expanded rows,
-     *         <code>false</code> otherwise
-     * @deprecated since 24.9 and will be removed in Vaadin 25 where explicit
-     *             waiting for expanded rows to load will no longer be required,
-     *             as full hierarchy will be returned in a single batch from the
-     *             server.
-     */
-    @Deprecated(since = "24.9", forRemoval = true)
-    public boolean isLoadingExpandedRows() {
-        return (Boolean) executeScript(
-                "return !!arguments[0].$connector ? (arguments[0].$connector.hasEnsureSubCacheQueue() || arguments[0].$connector.hasParentRequestQueue()) : arguments[0]._dataProviderController.isLoading()",
-                this);
-    }
-
-    @Override
-    protected boolean isLoading() {
-        return super.isLoading() || isLoadingExpandedRows();
     }
 
     /**
@@ -334,8 +292,7 @@ public class TreeGridElement extends GridElement {
      * Scrolls the TreeGrid to the end.
      */
     public void scrollToEnd() {
-        executeScript(
-                "arguments[0].scrollToIndex(...Array(10).fill(Infinity));",
+        executeScript("arguments[0].scrollToIndex(...Array(10).fill(-1));",
                 this);
     }
 }
