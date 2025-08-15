@@ -1167,7 +1167,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             case KeyCodes.KEY_BACKSPACE:
             case KeyCodes.KEY_DELETE:
                 checkEditableAndNotify();
-                if (!cellLocked) {
+                if (!isCurrentCellLocked()) {
                     spreadsheetHandler.deleteSelectedCells();
                     formulaBarWidget.setCellPlainValue("");
                 }
@@ -1239,7 +1239,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 }
                 checkEditableAndNotify();
                 if (!sheetWidget.isSelectedCellCustomized() && !inlineEditing
-                        && !cellLocked && !customCellEditorDisplayed) {
+                        && !isCurrentCellLocked()
+                        && !customCellEditorDisplayed) {
                     cachedCellValue = sheetWidget.getSelectedCellLatestValue();
                     formulaBarWidget.cacheFormulaFieldValue();
                     formulaBarEditing = false;
@@ -1258,7 +1259,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 checkEditableAndNotify();
 
                 if (!sheetWidget.isSelectedCellCustomized() && !inlineEditing
-                        && !cellLocked && !customCellEditorDisplayed) {
+                        && !isCurrentCellLocked()
+                        && !customCellEditorDisplayed) {
                     // cache value and start editing cell as empty
                     inlineEditing = true;
                     cachedCellValue = sheetWidget.getSelectedCellLatestValue();
@@ -1330,7 +1332,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
      * Checks if selected cell is locked, and sends an RPC to server if it is.
      */
     private void checkEditableAndNotify() {
-        if (cellLocked) {
+        if (isCurrentCellLocked()) {
 
             if (!okToSendCellProtectRpc) {
                 // don't send just yet
@@ -1767,7 +1769,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                         sheetWidget.removeCustomCellEditor();
                     }
                 } else { // might need to load the custom editor
-                    cellLocked = false;
                     selectionHandler.newSelectedCellSet();
                     if (customCellEditorDisplayed) {
                         // need to update the editor value on client side
