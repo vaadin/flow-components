@@ -35,6 +35,7 @@ import com.vaadin.flow.component.grid.GridArrayUpdater;
 import com.vaadin.flow.component.grid.dataview.GridDataView;
 import com.vaadin.flow.component.grid.dataview.GridLazyDataView;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
+import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.data.binder.PropertyDefinition;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
@@ -1049,7 +1050,8 @@ public class TreeGrid<T> extends Grid<T>
      * @param padding
      *            the number of items to add on each side of the center item
      */
-    @ClientCallable
+    @AllowInert
+    @ClientCallable(DisabledUpdateMode.ALWAYS)
     int setViewportRangeByIndexPath(int[] path, int padding) {
         var pageSize = getPageSize();
         var maxAllowedItems = 10 * Math.max(50, pageSize);

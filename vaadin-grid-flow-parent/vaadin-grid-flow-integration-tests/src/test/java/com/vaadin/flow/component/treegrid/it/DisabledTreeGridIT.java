@@ -18,48 +18,44 @@ package com.vaadin.flow.component.treegrid.it;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-@TestPath("vaadin-grid/inert-tree-grid")
-public class InertTreeGridIT extends AbstractComponentIT {
-
+@TestPath("vaadin-grid/disabled-tree-grid")
+public class DisabledTreeGridIT extends AbstractComponentIT {
     private TreeGridElement treeGrid;
-    private WebElement expandFirstItemButton;
-    private WebElement setAllRowsVisibleButton;
 
     @Before
     public void init() {
         open();
         treeGrid = $(TreeGridElement.class).first();
-        expandFirstItemButton = $("button").id("expand-first");
-        setAllRowsVisibleButton = $("button").id("set-all-rows-visible");
+
+        // Simulate an unauthorized enabling attempt on the client-side
+        treeGrid.getCommandExecutor().executeScript(
+                "arguments[0].removeAttribute('disabled')", treeGrid);
     }
 
     @Test
-    public void setAllRowsVisible_lastParentRowHasData() {
-        setAllRowsVisibleButton.click();
-
-        var cell = treeGrid.getCell(99, 0);
-        Assert.assertEquals("Parent 99", cell.getText());
+    public void triggerSetRequestedRange_serverCallAllowed() {
+        clickElementWithJs("set-all-rows-visible");
+        Assert.assertEquals("Item 99", treeGrid.getCell(99, 0).getText());
     }
 
     @Test
-    public void expandFirst_setAllRowsVisible_lastChildRowHasData() {
-        expandFirstItemButton.click();
-        setAllRowsVisibleButton.click();
-
-        var cell = treeGrid.getCell(100, 0);
-        Assert.assertEquals("Child 0/99", cell.getText());
-    }
-
-    @Test
-    public void scrollToEnd_lastItemRendered() {
+    public void triggerSetRequestedRangeByIndexPath_serverCallAllowed() {
         clickElementWithJs("scroll-to-end");
         Assert.assertEquals(99, treeGrid.getLastVisibleRowIndex());
     }
 
+    @Test
+    public void triggerUpdateExpandedState_serverCallIgnored() {
+        treeGrid.getCell(0, 0).focus();
+        new Actions(getDriver()).sendKeys(Keys.ARROW_LEFT, Keys.ARROW_RIGHT)
+                .perform();
+        Assert.assertEquals("Item 1", treeGrid.getCell(1, 0).getText());
+    }
 }
