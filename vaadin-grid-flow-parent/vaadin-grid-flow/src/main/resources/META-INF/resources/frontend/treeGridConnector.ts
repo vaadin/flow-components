@@ -1,6 +1,31 @@
 // @ts-nocheck
 import './gridConnector.ts';
 
+/**
+ * treeGridConnector is a communication layer between TreeGrid's flow component
+ * (server-side) and web component (client-side).
+ *
+ * TreeGrid does not rely on the web component's built-in features for handling
+ * hierarchical data. Instead, the hierarchy is fully managed on the server side
+ * and sent to the client as a flattened structure. This approach simplifies the
+ * client-side implementation and improves performance by avoiding recursive
+ * requests to the data provider.
+ *
+ * While the data is transferred as a flat list, the connector makes it appear as
+ * a hierarchy by overriding the web component's methods to add indentation based
+ * on information from server-provided fields `item.level`, `item.expanded`, etc.
+ *
+ * The connector overrides the web component's default `scrollToIndex(...indexes)`
+ * implementation, as it by default assumes that the hierarchy is managed on the
+ * client side. Instead, it uses the server-side method to resolve the hierarchical
+ * path and preload the viewport range, all in a single round-trip. As a result,
+ * required data is already loaded on the client-side by the time the scrolling
+ * begins, which allows the scrollToIndex operation to be executed faster.
+ *
+ * The server estimates the viewport range for `scrollToIndex` based on the `padding`
+ * parameter of $server.setViewportRangeByIndexPath, which defines how many items to
+ * include above and below the target item in the range.
+ */
 window.Vaadin.Flow.treeGridConnector = {};
 window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
   if (grid.$connector) {
