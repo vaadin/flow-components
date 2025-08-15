@@ -124,7 +124,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     private boolean inlineEditing;
     private boolean cancelDeferredCommit;
     private boolean selectedCellIsFormulaType;
-    boolean cellLocked;
     boolean customCellEditorDisplayed;
     private boolean sheetProtected;
     private boolean cancelNextSheetRelayout;
@@ -501,7 +500,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
      * the currently selected cell.
      */
     public void loadSelectedCellEditor() {
-        if (!sheetWidget.isSelectedCellCustomized() && !cellLocked
+        if (!sheetWidget.isSelectedCellCustomized() && !isCurrentCellLocked()
                 && customEditorFactory != null && customEditorFactory
                         .hasCustomEditor(sheetWidget.getSelectedCellKey())) {
             Widget customEditor = customEditorFactory
@@ -512,6 +511,15 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 sheetWidget.displayCustomCellEditor(customEditor, false);
             }
         }
+    }
+
+    boolean isCellLocked(int col, int row) {
+        return sheetWidget.isCellLocked(col, row);
+    }
+
+    boolean isCurrentCellLocked() {
+        return isCellLocked(sheetWidget.getSelectedCellColumn(),
+                sheetWidget.getSelectedCellRow());
     }
 
     public void addVisibleCellComment(String key) {
@@ -778,9 +786,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                         sheetWidget.getOriginalCellValue(column, row));
             }
         }
-        cellLocked = sheetWidget.isCellLocked(column, row);
         if (!customCellEditorDisplayed) {
-            formulaBarWidget.setFormulaFieldEnabled(!cellLocked);
+            formulaBarWidget.setFormulaFieldEnabled(!isCellLocked(column, row));
         } else {
             sheetWidget.displayCustomCellEditor(customEditorFactory
                     .getCustomEditor(sheetWidget.getSelectedCellKey()), false);
@@ -1072,7 +1079,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         }
         formulaBarEditing = false;
         checkEditableAndNotify();
-        if (!cellLocked) {
+        if (!isCellLocked(column, row)) {
             if (!inlineEditing && !customCellEditorDisplayed) {
                 inlineEditing = true;
                 sheetWidget.startEditingCell(true, true, value);
