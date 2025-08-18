@@ -27,7 +27,7 @@ public class LockedCellsWithCustomEditorIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void clickRegularCell_navigateToCellWithCustomEditor_customEditorDisplayed() {
+    public void clickRegularCell_navigateVerticallyToCellWithCustomEditor_customEditorDisplayed() {
         clickCell("C4");
         getSpreadsheet().sendKeys(Keys.UP);
         getSpreadsheet().sendKeys(Keys.ENTER);
@@ -35,9 +35,25 @@ public class LockedCellsWithCustomEditorIT extends AbstractSpreadsheetIT {
     }
 
     @Test
-    public void clickLockedCell_navigateToCellWithCustomEditor_customEditorDisplayed() {
+    public void clickRegularCell_navigateHorizontallyToCellWithCustomEditor_customEditorDisplayed() {
+        clickCell("C4");
+        getSpreadsheet().sendKeys(Keys.RIGHT);
+        getSpreadsheet().sendKeys(Keys.ENTER);
+        assertCustomEditorDisplayed();
+    }
+
+    @Test
+    public void clickLockedCell_navigateVerticallyToCellWithCustomEditor_customEditorDisplayed() {
         clickCell("C2");
         getSpreadsheet().sendKeys(Keys.DOWN);
+        getSpreadsheet().sendKeys(Keys.ENTER);
+        assertCustomEditorDisplayed();
+    }
+
+    @Test
+    public void clickLockedCell_navigateHorizontallyToCellWithCustomEditor_customEditorDisplayed() {
+        clickCell("B3");
+        getSpreadsheet().sendKeys(Keys.RIGHT);
         getSpreadsheet().sendKeys(Keys.ENTER);
         assertCustomEditorDisplayed();
     }

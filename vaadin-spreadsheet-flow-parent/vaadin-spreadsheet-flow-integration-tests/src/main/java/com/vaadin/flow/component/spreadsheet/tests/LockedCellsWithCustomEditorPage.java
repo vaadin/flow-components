@@ -61,21 +61,17 @@ public class LockedCellsWithCustomEditorPage extends Div {
                             org.apache.poi.ss.usermodel.Cell cell, int rowIndex,
                             int columnIndex, Spreadsheet spreadsheet,
                             Sheet sheet) {
-
-                        if (spreadsheet.getActiveSheetIndex() == 0
-                                && rowIndex == 2 && columnIndex == 2) {
-                            if (customEditor == null) {
-                                customEditor = new TextField();
-                                customEditor.addValueChangeListener(
-                                        e -> spreadsheet.refreshCells(
-                                                spreadsheet.createCell(rowIndex,
-                                                        columnIndex,
-                                                        e.getValue())));
-                            }
-                            return customEditor;
+                        var shouldHaveCustomEditor = spreadsheet
+                                .getActiveSheetIndex() == 0
+                                && (rowIndex == 2 && columnIndex == 2
+                                        || rowIndex == 3 && columnIndex == 3);
+                        if (!shouldHaveCustomEditor) {
+                            return null;
                         }
-                        return null;
-
+                        if (customEditor == null) {
+                            customEditor = new TextField();
+                        }
+                        return customEditor;
                     }
 
                     @Override
@@ -83,13 +79,8 @@ public class LockedCellsWithCustomEditorPage extends Div {
                             org.apache.poi.ss.usermodel.Cell cell, int rowIndex,
                             int columnIndex, Spreadsheet spreadsheet,
                             Sheet sheet, Component customEditor) {
-                        if (cell == null) {
-                            return;
-                        }
-                        ((TextField) customEditor)
-                                .setValue(cell.getStringCellValue());
+                        // NO-OP
                     }
-
                 });
         spreadsheet.setShowCustomEditorOnFocus(true);
         return spreadsheet;
