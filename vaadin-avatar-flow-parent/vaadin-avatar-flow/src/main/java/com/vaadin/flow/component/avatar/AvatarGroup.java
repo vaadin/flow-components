@@ -68,7 +68,7 @@ import elemental.json.JsonObject;
  */
 @Tag("vaadin-avatar-group")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "25.0.0-alpha14")
+@NpmPackage(value = "@vaadin/avatar-group", version = "25.0.0-alpha15")
 public class AvatarGroup extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
