@@ -227,7 +227,7 @@ public class SideNavItem extends Component implements HasSideNavItems,
     }
 
     private Element createAndAppendLabelElement() {
-        Element element = new Element("span");
+        Element element = Element.createText("");
         getElement().appendChild(element);
         return element;
     }
