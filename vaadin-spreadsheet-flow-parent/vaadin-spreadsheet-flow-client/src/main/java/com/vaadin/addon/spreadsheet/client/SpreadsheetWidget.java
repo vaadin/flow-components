@@ -1079,13 +1079,12 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         }
         formulaBarEditing = false;
         checkEditableAndNotify();
-        if (!isCellLocked(column, row)) {
-            if (!inlineEditing && !customCellEditorDisplayed) {
-                inlineEditing = true;
-                sheetWidget.startEditingCell(true, true, value);
-                formulaBarWidget.setInFullFocus(true);
-                formulaBarWidget.startInlineEdit(true);
-            }
+        if (!isCellLocked(column, row) && !inlineEditing
+                && !customCellEditorDisplayed) {
+            inlineEditing = true;
+            sheetWidget.startEditingCell(true, true, value);
+            formulaBarWidget.setInFullFocus(true);
+            formulaBarWidget.startInlineEdit(true);
         }
     }
 
