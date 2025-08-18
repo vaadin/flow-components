@@ -401,6 +401,8 @@ public class RichTextEditor
         private String superscript;
         private String listOrdered;
         private String listBullet;
+        private String outdent;
+        private String indent;
         private String alignLeft;
         private String alignCenter;
         private String alignRight;
@@ -711,6 +713,48 @@ public class RichTextEditor
          */
         public String getListBullet() {
             return listBullet;
+        }
+
+        /**
+         * Sets the translated word for {@code outdent}.
+         *
+         * @param outdent
+         *            the translated word for outdent
+         * @return this instance for method chaining
+         */
+        public RichTextEditorI18n setOutdent(String outdent) {
+            this.outdent = outdent;
+            return this;
+        }
+
+        /**
+         * Gets the translated word for {@code outdent}
+         *
+         * @return the translated word for outdent
+         */
+        public String getOutdent() {
+            return outdent;
+        }
+
+        /**
+         * Sets the translated word for {@code indent}.
+         *
+         * @param indent
+         *            the translated word for indent
+         * @return this instance for method chaining
+         */
+        public RichTextEditorI18n setIndent(String indent) {
+            this.indent = indent;
+            return this;
+        }
+
+        /**
+         * Gets the translated word for {@code indent}
+         *
+         * @return the translated word for indent
+         */
+        public String getIndent() {
+            return indent;
         }
 
         /**
