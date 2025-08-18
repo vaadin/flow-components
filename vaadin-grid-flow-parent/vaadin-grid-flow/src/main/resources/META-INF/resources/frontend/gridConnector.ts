@@ -846,6 +846,14 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       }
     });
 
+    // If all pending requests have already been resolved (which can happen
+    // for example if the server sent preloaded data while the grid had
+    // already made its own requests), cancel the request debouncer to
+    // prevent further unnecessary calls.
+    if (Object.keys(pendingRequests).length === 0) {
+      rootRequestDebouncer?.cancel();
+    }
+
     // Sanitize last requested range for the root level
     sanitizeLastRequestedRange();
     // Clear current update state
