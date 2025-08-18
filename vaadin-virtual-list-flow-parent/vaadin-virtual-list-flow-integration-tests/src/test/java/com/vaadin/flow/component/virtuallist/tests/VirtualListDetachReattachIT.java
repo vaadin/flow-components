@@ -17,20 +17,16 @@ package com.vaadin.flow.component.virtuallist.tests;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
-import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
@@ -139,7 +135,7 @@ public class VirtualListDetachReattachIT extends AbstractComponentIT {
     }
 
     private void assertItemsArePresent(WebElement list, int length) {
-        JsonArray items = getItems(driver, list);
+        JsonArray items = VirtualListHelpers.getItems(driver, list);
         Assert.assertEquals(length, items.length());
         for (int i = 0; i < items.length(); i++) {
             JsonObject obj = items.getObject(i);
@@ -153,28 +149,4 @@ public class VirtualListDetachReattachIT extends AbstractComponentIT {
                 .filter(key -> key.endsWith(propertyName)).findFirst().get();
         return json.getString(keyForProperty);
     }
-
-    public static JsonArray getItems(WebDriver driver, WebElement element) {
-        Object result = ((JavascriptExecutor) driver)
-                .executeScript("return arguments[0].items;", element);
-        JsonArray array = Json.createArray();
-        if (!(result instanceof List)) {
-            return array;
-        }
-        List<Map<String, ?>> list = (List<Map<String, ?>>) result;
-        for (int i = 0; i < list.size(); i++) {
-            Map<String, ?> map = list.get(i);
-            if (map != null) {
-                JsonObject obj = Json.createObject();
-                map.entrySet().forEach(entry -> {
-                    obj.put(entry.getKey(), String.valueOf(entry.getValue()));
-                });
-                array.set(i, obj);
-            } else {
-                array.set(i, Json.createNull());
-            }
-        }
-        return array;
-    }
-
 }
