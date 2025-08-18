@@ -5112,7 +5112,7 @@ public class SheetWidget extends Panel {
 
     public void displayCustomCellEditor(Widget customEditorWidget,
             boolean focusEditor, Cell editorCell) {
-        customCellEditorDisplayed = true;
+        setCustomCellEditorDisplayed(true);
         jsniUtil.replaceSelector(editedCellFreezeColumnStyle,
                 ".notusedselector", 0);
         this.customEditorWidget = customEditorWidget;
@@ -5210,11 +5210,20 @@ public class SheetWidget extends Panel {
      * does nothing.
      */
     public void removeCustomCellEditor() {
-        if (customCellEditorDisplayed && isShowCustomEditorOnFocus()) {
-            customCellEditorDisplayed = false;
+        if (isCustomCellEditorDisplayed() && isShowCustomEditorOnFocus()) {
+            setCustomCellEditorDisplayed(false);
             removeCustomCellEditor(getSelectedCellKey(), customEditorWidget);
             customEditorWidget = null;
         }
+    }
+
+    boolean isCustomCellEditorDisplayed() {
+        return customCellEditorDisplayed;
+    }
+
+    private void setCustomCellEditorDisplayed(
+            boolean customCellEditorDisplayed) {
+        this.customCellEditorDisplayed = customCellEditorDisplayed;
     }
 
     private Cell getSelectedCell() {
@@ -5486,7 +5495,7 @@ public class SheetWidget extends Panel {
     };
 
     public void updateInputValue(String value) {
-        if (customCellEditorDisplayed) {
+        if (isCustomCellEditorDisplayed()) {
             // Do nothing here because the value ought to come from server side
         } else {
             input.setValue(value);

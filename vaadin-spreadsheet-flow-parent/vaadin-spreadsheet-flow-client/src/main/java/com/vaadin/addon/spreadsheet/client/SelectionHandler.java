@@ -125,8 +125,7 @@ public class SelectionHandler {
 
     public void selectCell(String name, int col, int row, String value,
             boolean formula, boolean locked, boolean initialSelection) {
-        if (spreadsheet.customCellEditorDisplayed) {
-            spreadsheet.customCellEditorDisplayed = false;
+        if (sheetWidget.isCustomCellEditorDisplayed()) {
             sheetWidget.removeCustomCellEditor();
         }
         sheetWidget.setSelectedCell(col, row);
@@ -176,8 +175,7 @@ public class SelectionHandler {
      *            if true, the custom cell editor will be focused
      */
     public void newSelectedCellSet(boolean focusEditor) {
-        if (spreadsheet.customCellEditorDisplayed) {
-            spreadsheet.customCellEditorDisplayed = false;
+        if (sheetWidget.isCustomCellEditorDisplayed()) {
             sheetWidget.removeCustomCellEditor();
         }
 
@@ -189,7 +187,6 @@ public class SelectionHandler {
             Widget customEditor = spreadsheet.customEditorFactory
                     .getCustomEditor(sheetWidget.getSelectedCellKey());
             if (customEditor != null) {
-                spreadsheet.customCellEditorDisplayed = true;
                 spreadsheet.formulaBarWidget.setFormulaFieldEnabled(false);
                 sheetWidget.displayCustomCellEditor(customEditor, focusEditor);
             }

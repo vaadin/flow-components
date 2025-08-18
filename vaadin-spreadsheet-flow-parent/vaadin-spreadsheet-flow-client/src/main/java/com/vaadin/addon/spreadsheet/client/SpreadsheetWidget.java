@@ -124,7 +124,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     private boolean inlineEditing;
     private boolean cancelDeferredCommit;
     private boolean selectedCellIsFormulaType;
-    boolean customCellEditorDisplayed;
     private boolean sheetProtected;
     private boolean cancelNextSheetRelayout;
     private String cachedCellValue;
@@ -506,7 +505,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             Widget customEditor = customEditorFactory
                     .getCustomEditor(sheetWidget.getSelectedCellKey());
             if (customEditor != null) {
-                customCellEditorDisplayed = true;
                 formulaBarWidget.setFormulaFieldEnabled(false);
                 sheetWidget.displayCustomCellEditor(customEditor, false);
             }
@@ -786,7 +784,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                         sheetWidget.getOriginalCellValue(column, row));
             }
         }
-        if (!customCellEditorDisplayed) {
+        if (!sheetWidget.isCustomCellEditorDisplayed()) {
             formulaBarWidget.setFormulaFieldEnabled(!isCellLocked(column, row));
         } else {
             sheetWidget.displayCustomCellEditor(customEditorFactory
@@ -948,8 +946,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             spreadsheetHandler.cellValueEdited(sheetWidget.getSelectedCellRow(),
                     sheetWidget.getSelectedCellColumn(), editedValue);
             cellEditingDone(editedValue, true);
-        } else if (customCellEditorDisplayed) {
-            customCellEditorDisplayed = false;
+        } else if (sheetWidget.isCustomCellEditorDisplayed()) {
             if (isShowCustomEditorOnFocus()) {
                 sheetWidget.removeCustomCellEditor();
             }
@@ -1080,7 +1077,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         formulaBarEditing = false;
         checkEditableAndNotify();
         if (!isCellLocked(column, row) && !inlineEditing
-                && !customCellEditorDisplayed) {
+                && !sheetWidget.isCustomCellEditorDisplayed()) {
             inlineEditing = true;
             sheetWidget.startEditingCell(true, true, value);
             formulaBarWidget.setInFullFocus(true);
@@ -1239,7 +1236,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 checkEditableAndNotify();
                 if (!sheetWidget.isSelectedCellCustomized() && !inlineEditing
                         && !isCurrentCellLocked()
-                        && !customCellEditorDisplayed) {
+                        && !sheetWidget.isCustomCellEditorDisplayed()) {
                     cachedCellValue = sheetWidget.getSelectedCellLatestValue();
                     formulaBarWidget.cacheFormulaFieldValue();
                     formulaBarEditing = false;
@@ -1248,7 +1245,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                             formulaBarWidget.getFormulaFieldValue());
                     formulaBarWidget.setInFullFocus(true);
                     formulaBarWidget.startInlineEdit(true);
-                } else if (customCellEditorDisplayed) {
+                } else if (sheetWidget.isCustomCellEditorDisplayed()) {
                     sheetWidget.focusCustomEditor();
                 }
                 break;
@@ -1259,7 +1256,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
                 if (!sheetWidget.isSelectedCellCustomized() && !inlineEditing
                         && !isCurrentCellLocked()
-                        && !customCellEditorDisplayed) {
+                        && !sheetWidget.isCustomCellEditorDisplayed()) {
                     // cache value and start editing cell as empty
                     inlineEditing = true;
                     cachedCellValue = sheetWidget.getSelectedCellLatestValue();
@@ -1763,13 +1760,12 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             }
             if (loaded) {
                 if (sheetProtected) {
-                    if (customCellEditorDisplayed) {
-                        customCellEditorDisplayed = false;
+                    if (sheetWidget.isCustomCellEditorDisplayed()) {
                         sheetWidget.removeCustomCellEditor();
                     }
                 } else { // might need to load the custom editor
                     selectionHandler.newSelectedCellSet();
-                    if (customCellEditorDisplayed) {
+                    if (sheetWidget.isCustomCellEditorDisplayed()) {
                         // need to update the editor value on client side
                         spreadsheetHandler.cellSelected(
                                 sheetWidget.getSelectedCellRow(),
