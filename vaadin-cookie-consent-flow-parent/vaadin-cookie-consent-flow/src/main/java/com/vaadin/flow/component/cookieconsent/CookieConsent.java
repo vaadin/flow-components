@@ -31,6 +31,8 @@ import com.vaadin.flow.dom.Style;
  * "Learn More" link, the "Dismiss" button, as well as the component’s position.
  *
  * @author Vaadin Ltd
+ * @deprecated CookieConsent is deprecated and will be removed without a
+ *             replacement in Vaadin 25.
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-cookie-consent")
@@ -39,6 +41,7 @@ import com.vaadin.flow.dom.Style;
 @NpmPackage(value = "@vaadin/cookie-consent", version = "24.8.5")
 @JsModule("@vaadin/cookie-consent/src/vaadin-cookie-consent.js")
 @JsModule("./cookieConsentConnector.js")
+@Deprecated(since = "24.9.0", forRemoval = true)
 public class CookieConsent extends Component implements HasStyle {
 
     /**
