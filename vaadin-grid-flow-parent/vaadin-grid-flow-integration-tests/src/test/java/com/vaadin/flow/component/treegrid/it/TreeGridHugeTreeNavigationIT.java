@@ -95,9 +95,7 @@ public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {
 
         // Expand 2 levels
         new Actions(getDriver()).sendKeys(Keys.SPACE).perform();
-        waitUntil(b -> getTreeGrid().getNumberOfExpandedRows() == 1, 1);
         new Actions(getDriver()).sendKeys(Keys.DOWN, Keys.SPACE).perform();
-        waitUntil(b -> getTreeGrid().getNumberOfExpandedRows() == 2, 1);
         waitUntil(b -> getTreeGrid().getRowCount() > 6, 1);
         assertCellTexts(200, 0, "Son 0/0/198");
         // Jump into view
@@ -107,7 +105,6 @@ public class TreeGridHugeTreeNavigationIT extends AbstractTreeGridIT {
 
         // Collapse
         new Actions(getDriver()).sendKeys(Keys.SPACE).perform();
-        waitUntil(b -> getTreeGrid().getNumberOfExpandedRows() == 1, 2);
         Assert.assertEquals(6, getTreeGrid().getRowCount());
 
         // Expand

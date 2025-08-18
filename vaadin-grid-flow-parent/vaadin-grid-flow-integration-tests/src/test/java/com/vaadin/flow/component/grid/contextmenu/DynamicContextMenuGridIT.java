@@ -25,12 +25,11 @@ import org.openqa.selenium.interactions.Actions;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/dynamic-context-menu-grid")
 public class DynamicContextMenuGridIT extends AbstractComponentIT {
-
-    private static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
 
     private GridElement grid;
 
@@ -53,7 +52,7 @@ public class DynamicContextMenuGridIT extends AbstractComponentIT {
         verifyOpened();
 
         Assert.assertEquals("Person 40",
-                $(OVERLAY_TAG).first().getDomProperty("innerText"));
+                getContextMenu().getDomProperty("innerText"));
 
         $("body").first().click();
         verifyClosed();
@@ -74,14 +73,19 @@ public class DynamicContextMenuGridIT extends AbstractComponentIT {
 
         verifyOpened();
         Assert.assertEquals("Person 40",
-                $(OVERLAY_TAG).first().getDomProperty("innerText"));
+                getContextMenu().getDomProperty("innerText"));
+    }
+
+    private TestBenchElement getContextMenu() {
+        return $("vaadin-context-menu").first();
     }
 
     private void verifyOpened() {
-        waitForElementPresent(By.tagName(OVERLAY_TAG));
+        waitForElementPresent(By.cssSelector("vaadin-context-menu[opened]"));
     }
 
     private void verifyClosed() {
-        waitForElementNotPresent(By.tagName(OVERLAY_TAG));
+        waitForElementNotPresent(By.cssSelector(
+                "vaadin-context-menu[opened], vaadin-context-menu[closing]"));
     }
 }

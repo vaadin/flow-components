@@ -208,15 +208,12 @@ public class DatePickerElement extends TestBenchElement
     }
 
     /**
-     * Gets the content of the first date picker overlay on the page Should only
-     * be used with a single date picker at a time, there is no check that the
-     * overlay belongs to this specific date picker
+     * Gets the content of the date picker overlay.
      *
-     * @return
+     * @return the overlay content element
      */
     public OverlayContentElement getOverlayContent() {
-        return this.$("vaadin-date-picker-overlay").onPage().waitForFirst()
-                .$(OverlayContentElement.class).first();
+        return $(OverlayContentElement.class).first();
     }
 
     @Override

@@ -45,7 +45,7 @@ public class EditorButtonsIT extends AbstractComponentIT {
         getTestButton("disable-save-button").click();
         CrudElement crud = getCrud();
         crud.openRowForEditing(0);
-        TextFieldElement lastNameField = crud.getEditor()
+        TextFieldElement lastNameField = crud.getForm()
                 .$(TextFieldElement.class)
                 .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
@@ -60,7 +60,7 @@ public class EditorButtonsIT extends AbstractComponentIT {
         crud.getNewItemButton().get().click();
         assertTrue(crud.isEditorOpen());
 
-        TextFieldElement lastNameField = crud.getEditor()
+        TextFieldElement lastNameField = crud.getForm()
                 .$(TextFieldElement.class)
                 .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
@@ -79,7 +79,7 @@ public class EditorButtonsIT extends AbstractComponentIT {
         ButtonElement saveButton = crud.getEditorSaveButton();
         assertFalse(saveButton.isEnabled());
 
-        TextFieldElement lastNameField = crud.getEditor()
+        TextFieldElement lastNameField = crud.getForm()
                 .$(TextFieldElement.class)
                 .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
@@ -98,7 +98,7 @@ public class EditorButtonsIT extends AbstractComponentIT {
         ButtonElement saveButton = crud.getEditorSaveButton();
         assertFalse("Save button should be disabled", saveButton.isEnabled());
 
-        TextFieldElement lastNameField = crud.getEditor()
+        TextFieldElement lastNameField = crud.getForm()
                 .$(TextFieldElement.class)
                 .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
@@ -122,7 +122,7 @@ public class EditorButtonsIT extends AbstractComponentIT {
         assertFalse("Cancel button should be disabled",
                 cancelButton.isEnabled());
 
-        TextFieldElement lastNameField = crud.getEditor()
+        TextFieldElement lastNameField = crud.getForm()
                 .$(TextFieldElement.class)
                 .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
@@ -146,7 +146,7 @@ public class EditorButtonsIT extends AbstractComponentIT {
         assertFalse("Delete button should be disabled",
                 deleteButton.isEnabled());
 
-        TextFieldElement lastNameField = crud.getEditor()
+        TextFieldElement lastNameField = crud.getForm()
                 .$(TextFieldElement.class)
                 .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Otto");
@@ -167,7 +167,7 @@ public class EditorButtonsIT extends AbstractComponentIT {
 
         getTestButton("add-enter-shortcut-button").click();
 
-        TextFieldElement lastNameField = crud.getEditor()
+        TextFieldElement lastNameField = crud.getForm()
                 .$(TextFieldElement.class)
                 .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue(lastNameExpected);

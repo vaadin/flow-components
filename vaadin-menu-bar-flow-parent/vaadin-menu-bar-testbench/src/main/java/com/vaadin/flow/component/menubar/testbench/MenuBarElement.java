@@ -15,12 +15,8 @@
  */
 package com.vaadin.flow.component.menubar.testbench;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.openqa.selenium.By;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
@@ -30,8 +26,6 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-menu-bar")
 public class MenuBarElement extends TestBenchElement {
-
-    public static final String OVERLAY_TAG = "vaadin-menu-bar-overlay";
 
     /**
      * Gets the button elements wrapping the root level items. This does not
@@ -75,7 +69,12 @@ public class MenuBarElement extends TestBenchElement {
      * menu.
      *
      * @return List of MenuBarItemElement representing sub menu items.
+     * @deprecated use {@link MenuBarButtonElement#openSubMenu()} to open a
+     *             submenu and then use
+     *             {@link MenuBarSubMenuElement#getMenuItems()} to retrieve the
+     *             items.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public List<MenuBarItemElement> getSubMenuItems() {
         return getSubMenuItems(getSubMenu());
     }
@@ -84,41 +83,42 @@ public class MenuBarElement extends TestBenchElement {
      * Get TestBenchElements representing sub menu items under specific sub
      * menu.
      *
-     * @param overlay
-     *            The sub menu overlay from which items are being collected.
+     * @param subMenu
+     *            The sub menu from which items are being collected.
      * @return List of MenuBarItemElement representing sub menu items.
+     * @deprecated use {@link MenuBarButtonElement#openSubMenu()} or
+     *             {@link MenuBarItemElement#openSubMenu()} to open a submenu
+     *             and then use {@link MenuBarSubMenuElement#getMenuItems()} to
+     *             retrieve the items.
      */
-    public List<MenuBarItemElement> getSubMenuItems(TestBenchElement overlay) {
-        return overlay.$(MenuBarItemElement.class).all();
+    @Deprecated(since = "25.0", forRemoval = true)
+    public List<MenuBarItemElement> getSubMenuItems(TestBenchElement subMenu) {
+        return subMenu.getPropertyElement("_listBox")
+                .$(MenuBarItemElement.class).all();
     }
 
     /**
-     * Get the sub menu overlay element.
+     * Get the sub menu element.
      *
-     * @return TestBenchElement for the first open sub menu in this menu bar
+     * @return TestBenchElement for the first sub menu in this menu bar
+     * @deprecated use {@link MenuBarButtonElement#openSubMenu()} to open a
+     *             submenu
      */
-    public TestBenchElement getSubMenu() {
-        var button = $(MenuBarButtonElement.class).withAttribute("expanded")
-                .withCondition(this::isVisible).first();
-        return button != null ? button.getSubMenu() : null;
+    @Deprecated(since = "25.0", forRemoval = true)
+    public MenuBarSubMenuElement getSubMenu() {
+        return getPropertyElement("_subMenu").wrap(MenuBarSubMenuElement.class);
     }
 
     /**
-     * Get all the open sub menu overlay elements.
+     * Get all the opened sub menu elements.
      *
-     * @return List of TestBenchElements representing currently open sub menus.
+     * @return List of TestBenchElements representing all opened sub menus.
+     * @deprecated use {@link MenuBarButtonElement#openSubMenu()} or
+     *             {@link MenuBarItemElement#openSubMenu()} to access submenus
+     *             for specific buttons or items
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public List<TestBenchElement> getAllSubMenus() {
-        waitForSubMenu();
-        List<TestBenchElement> elements = new ArrayList<>();
-        getDriver().findElements(By.tagName(OVERLAY_TAG))
-                .forEach(element -> elements.add((TestBenchElement) element));
-        return elements;
+        return $("vaadin-menu-bar-submenu").withAttribute("opened").all();
     }
-
-    private void waitForSubMenu() {
-        waitUntil(ExpectedConditions
-                .presenceOfElementLocated(By.tagName(OVERLAY_TAG)));
-    }
-
 }

@@ -41,13 +41,13 @@ import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataVi
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.tests.DataProviderListenersTest;
+import com.vaadin.tests.dataprovider.DataProviderListenersTest;
+import com.vaadin.tests.dataprovider.MockUI;
 
 public class RadioButtonGroupTest {
 
@@ -471,7 +471,7 @@ public class RadioButtonGroupTest {
         DataProviderListenersTest
                 .checkOldListenersRemovedOnComponentAttachAndDetach(
                         new RadioButtonGroup<>(), 1, 1, new int[] { 0, 1 },
-                        new DataCommunicatorTest.MockUI());
+                        new MockUI());
     }
 
     @Test

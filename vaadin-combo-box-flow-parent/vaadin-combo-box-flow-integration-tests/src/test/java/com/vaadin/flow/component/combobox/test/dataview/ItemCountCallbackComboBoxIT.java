@@ -47,7 +47,7 @@ public class ItemCountCallbackComboBoxIT extends AbstractItemCountComboBoxIT {
         verifyItemsCount(5800);
 
         scrollToItem(comboBoxElement, 5800);
-        waitUntilTextInContent("Callback Item " + 5799);
+        waitUntilTextInContent(comboBoxElement, "Callback Item " + 5799);
 
         verifyItemsCount(5800);
 

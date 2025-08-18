@@ -38,7 +38,7 @@ import com.vaadin.flow.internal.JsonSerializer;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav")
-@NpmPackage(value = "@vaadin/side-nav", version = "25.0.0-alpha7")
+@NpmPackage(value = "@vaadin/side-nav", version = "25.0.0-alpha14")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav.js")
 public class SideNav extends Component
         implements HasSideNavItems, HasSize, HasStyle {

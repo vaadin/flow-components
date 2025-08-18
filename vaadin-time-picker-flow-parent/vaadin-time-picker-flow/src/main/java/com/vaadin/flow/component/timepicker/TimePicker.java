@@ -43,7 +43,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
@@ -110,7 +109,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/time-picker", version = "25.0.0-alpha7")
+@NpmPackage(value = "@vaadin/time-picker", version = "25.0.0-alpha14")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
@@ -118,8 +117,8 @@ public class TimePicker
         implements Focusable<TimePicker>, HasAllowedCharPattern, HasAriaLabel,
         HasAutoOpen, HasClearButton,
         InputField<AbstractField.ComponentValueChangeEvent<TimePicker, LocalTime>, LocalTime>,
-        HasPrefix, HasOverlayClassName, HasThemeVariant<TimePickerVariant>,
-        HasValidationProperties, HasValidator<LocalTime>, HasPlaceholder {
+        HasPrefix, HasThemeVariant<TimePickerVariant>, HasValidationProperties,
+        HasValidator<LocalTime>, HasPlaceholder {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null

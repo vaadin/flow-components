@@ -47,7 +47,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
@@ -126,7 +125,7 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-picker")
-@NpmPackage(value = "@vaadin/date-picker", version = "25.0.0-alpha7")
+@NpmPackage(value = "@vaadin/date-picker", version = "25.0.0-alpha14")
 @JsModule("@vaadin/date-picker/src/vaadin-date-picker.js")
 @JsModule("./datepickerConnector.js")
 @NpmPackage(value = "date-fns", version = "4.1.0")
@@ -135,8 +134,8 @@ public class DatePicker
         implements Focusable<DatePicker>, HasAllowedCharPattern, HasAriaLabel,
         HasAutoOpen, HasClearButton,
         InputField<AbstractField.ComponentValueChangeEvent<DatePicker, LocalDate>, LocalDate>,
-        HasOverlayClassName, HasPrefix, HasThemeVariant<DatePickerVariant>,
-        HasValidationProperties, HasValidator<LocalDate>, HasPlaceholder {
+        HasPrefix, HasThemeVariant<DatePickerVariant>, HasValidationProperties,
+        HasValidator<LocalDate>, HasPlaceholder {
 
     private DatePickerI18n i18n;
 

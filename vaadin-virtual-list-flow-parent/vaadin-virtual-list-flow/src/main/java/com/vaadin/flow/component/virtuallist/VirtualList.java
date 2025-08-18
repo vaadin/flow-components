@@ -69,7 +69,7 @@ import elemental.json.JsonValue;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/virtual-list", version = "25.0.0-alpha7")
+@NpmPackage(value = "@vaadin/virtual-list", version = "25.0.0-alpha14")
 @JsModule("@vaadin/virtual-list/src/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
@@ -302,8 +302,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     }
 
     @ClientCallable(DisabledUpdateMode.ALWAYS)
-    private void setRequestedRange(int start, int length) {
-        getDataCommunicator().setRequestedRange(start, length);
+    private void setViewportRange(int start, int length) {
+        getDataCommunicator().setViewportRange(start, length);
     }
 
     /**

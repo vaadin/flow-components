@@ -17,8 +17,8 @@ package com.vaadin.flow.component.select.data;
 
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.provider.AbstractListDataView;
-import com.vaadin.flow.data.provider.AbstractListDataViewListenerTest;
 import com.vaadin.flow.data.provider.HasListDataView;
+import com.vaadin.tests.dataprovider.AbstractListDataViewListenerTest;
 
 public class SelectListDataViewTest extends AbstractListDataViewListenerTest {
 

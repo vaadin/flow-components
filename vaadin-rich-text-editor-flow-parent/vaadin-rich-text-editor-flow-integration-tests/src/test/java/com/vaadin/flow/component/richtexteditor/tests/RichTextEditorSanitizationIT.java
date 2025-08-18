@@ -47,7 +47,9 @@ public class RichTextEditorSanitizationIT extends AbstractComponentIT {
         // Server-side sanitization requires a base64 encoded URL
         String value = "<img onload=\"console.log('load')\" onerror=\"console.log('error')\" src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2P4v5ThPwAG7wKklwQ/bwAAAABJRU5ErkJggg==\">"
                 + "<script>console.log('script')</script>";
-        editor.getEditor().setProperty("innerHTML", value);
+
+        executeScript("arguments[0].dangerouslySetHtmlValue(arguments[1])",
+                editor, value);
 
         // Wait for the web component to update the htmlValue property
         waitUntil(driver -> editor.getPropertyString("htmlValue")
@@ -55,7 +57,7 @@ public class RichTextEditorSanitizationIT extends AbstractComponentIT {
 
         editor.dispatchEvent("change");
 
-        String expectedValue = "<p><img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2P4v5ThPwAG7wKklwQ/bwAAAABJRU5ErkJggg==\"></p><p><br></p>";
+        String expectedValue = "<p><img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2P4v5ThPwAG7wKklwQ/bwAAAABJRU5ErkJggg==\">console.log('script')</p>";
         Assert.assertEquals(expectedValue, valueOutput.getText());
     }
 }

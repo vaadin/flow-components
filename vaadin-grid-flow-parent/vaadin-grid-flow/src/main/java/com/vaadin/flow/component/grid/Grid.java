@@ -213,8 +213,8 @@ import elemental.json.JsonValue;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.0.0-alpha7")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha7")
+@NpmPackage(value = "@vaadin/grid", version = "25.0.0-alpha14")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha14")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")
@@ -1375,7 +1375,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         public void initialize() {
             initConnector();
             updateSelectionModeOnClient();
-            setRequestedRange(0, getPageSize());
+            setViewportRange(0, getPageSize());
         }
     }
 
@@ -3063,7 +3063,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         getElement()
                 .executeJs("if (this.$connector) { this.$connector.reset() }");
         getDataCommunicator().setPageSize(pageSize);
-        setRequestedRange(0, pageSize);
+        setViewportRange(0, pageSize);
         getDataCommunicator().reset();
     }
 
@@ -3841,7 +3841,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
     @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
-    private void setRequestedRange(int start, int length) {
+    private void setViewportRange(int start, int length) {
         if (length > 500 && length / getPageSize() > 10 && isAllRowsVisible()) {
             throw new IllegalArgumentException(
                     "Attempted to fetch more items from server than allowed in one go. "
@@ -3852,7 +3852,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
                             + "reason this is not an option, increase the page size of the grid so that rendering "
                             + "every item at once doesn't result in a request for over 10 pages.");
         }
-        getDataCommunicator().setRequestedRange(start, length);
+        getDataCommunicator().setViewportRange(start, length);
     }
 
     @ClientCallable
@@ -5092,7 +5092,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         int preloadedItemsCount = lastIndexPageEndIndex - targetPageStartIndex
                 + 1;
         // Preload the items
-        setRequestedRange(targetPageStartIndex, preloadedItemsCount);
+        setViewportRange(targetPageStartIndex, preloadedItemsCount);
 
         // Scroll to the requested index
         getElement().callJsFunction("scrollToIndex", rowIndex);

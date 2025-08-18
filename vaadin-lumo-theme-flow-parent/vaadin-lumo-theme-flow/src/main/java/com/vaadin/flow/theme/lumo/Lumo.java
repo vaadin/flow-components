@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.slf4j.LoggerFactory;
 
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.theme.AbstractTheme;
@@ -28,13 +29,9 @@ import com.vaadin.flow.theme.AbstractTheme;
 /**
  * Lumo component theme class implementation.
  */
-@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "25.0.0-alpha7")
-@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "25.0.0-alpha7")
-@JsModule("@vaadin/vaadin-lumo-styles/color-global.js")
-@JsModule("@vaadin/vaadin-lumo-styles/typography-global.js")
-@JsModule("@vaadin/vaadin-lumo-styles/sizing.js")
-@JsModule("@vaadin/vaadin-lumo-styles/spacing.js")
-@JsModule("@vaadin/vaadin-lumo-styles/style.js")
+@NpmPackage(value = "@vaadin/vaadin-themable-mixin", version = "25.0.0-alpha14")
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "25.0.0-alpha14")
+@CssImport("@vaadin/vaadin-lumo-styles/lumo.css")
 @JsModule("@vaadin/vaadin-lumo-styles/vaadin-iconset.js")
 public class Lumo implements AbstractTheme {
 
@@ -48,7 +45,7 @@ public class Lumo implements AbstractTheme {
 
     @Override
     public String getThemeUrl() {
-        return "theme/lumo/";
+        return "src/";
     }
 
     @Override

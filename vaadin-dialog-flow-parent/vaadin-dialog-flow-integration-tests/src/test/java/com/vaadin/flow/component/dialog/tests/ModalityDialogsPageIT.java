@@ -25,11 +25,9 @@ import com.vaadin.flow.component.dialog.testbench.DialogElement;
 import com.vaadin.flow.component.html.testbench.DivElement;
 import com.vaadin.flow.component.html.testbench.NativeButtonElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-dialog/dialog-modality")
-public class ModalityDialogsPageIT extends AbstractComponentIT {
+public class ModalityDialogsPageIT extends AbstractDialogIT {
 
     @Before
     public void init() {
@@ -41,49 +39,40 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
     @Test
     public void openNonModalDialog_logButtonClickable() {
         $(NativeButtonElement.class).id("open-non-modal-dialog").click();
-
-        Assert.assertTrue("No dialog opened", $(DialogElement.class).exists());
-        Assert.assertEquals("Only one dialog expected", 1,
-                $(DialogElement.class).all().size());
+        verifyNumberOfDialogs(1);
 
         $(NativeButtonElement.class).id("log").click();
 
-        Assert.assertTrue("Dialog should not have closed",
-                $(DialogElement.class).exists());
+        verifyOpened();
         Assert.assertEquals("Click should have resulted in a log message", 1,
                 $(DivElement.class).id(LOG_ID).$("div").all().size());
 
-        $(DialogElement.class).first().$(NativeButtonElement.class).first()
-                .click();
+        getDialog().$(NativeButtonElement.class).first().click();
 
-        Assert.assertFalse("Dialog should have closed",
-                $(DialogElement.class).exists());
+        verifyClosedAndRemoved();
     }
 
     @Test
     public void openModalDialog_removeBackdrop_logClickNotAccepted() {
         $(NativeButtonElement.class).id("open-modal-dialog").click();
-        final DivElement backdrop = $(TestBenchElement.class).id("overlay")
+        final DivElement backdrop = getDialog().$("*").id("overlay")
                 .$(DivElement.class).id("backdrop");
 
         executeScript("arguments[0].remove()", backdrop);
 
         Assert.assertFalse("Backdrop was not removed from dom",
-                $(TestBenchElement.class).id("overlay").$(DivElement.class)
+                getOverlayComponent(getDialog()).$(DivElement.class)
                         .withAttribute("id", "backdrop").exists());
 
         $(NativeButtonElement.class).id("log").click();
 
-        Assert.assertTrue("Dialog should not have closed",
-                $(DialogElement.class).exists());
+        verifyOpened();
         Assert.assertEquals("Click on button should not generate a log message",
                 0, $(DivElement.class).id(LOG_ID).$("div").all().size());
 
-        $(DialogElement.class).first().$(NativeButtonElement.class).id("close")
-                .click();
+        getDialog().$(NativeButtonElement.class).id("close").click();
 
-        Assert.assertFalse("Dialog should have closed",
-                $(DialogElement.class).exists());
+        verifyClosedAndRemoved();
 
         $(NativeButtonElement.class).id("log").click();
 
@@ -100,8 +89,7 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
 
         // Click anything to close dialog
         $("body").first().click();
-        Assert.assertFalse("Dialog should be hidden",
-                $(DialogElement.class).first().isDisplayed());
+        verifyClosed();
 
         // Now that dialog is closed, verify that click events work
         $(NativeButtonElement.class).id("log").click();
@@ -113,13 +101,12 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
     public void openModalDialog_openNonModalOnTop_nonModalCanBeUsed() {
         $(NativeButtonElement.class).id("open-modal-dialog").click();
 
-        final DialogElement first = $(DialogElement.class).first();
-        first.$(NativeButtonElement.class).id("open-sub").click();
+        final DialogElement dialog = getDialog();
+        dialog.$(NativeButtonElement.class).id("open-sub").click();
 
-        waitUntil(driver -> $(DialogElement.class).all().size() == 2);
+        verifyNumberOfDialogs(2);
 
-        final DialogElement subDialog = $(DialogElement.class).all().stream()
-                .filter(dialog -> !dialog.equals(first)).findFirst().get();
+        final DialogElement subDialog = getDialogs().get(1);
         subDialog.$(NativeButtonElement.class).id("log-sub").click();
 
         Assert.assertEquals("Click should have resulted in a log message", 1,
@@ -127,20 +114,20 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
 
         subDialog.$(NativeButtonElement.class).id("close-sub").click();
 
-        first.$(NativeButtonElement.class).id("close").click();
+        dialog.$(NativeButtonElement.class).id("close").click();
+
+        verifyClosedAndRemoved();
     }
 
     @Test
     public void openModalDialog_hideComponent_logClickAccepted() {
         $(NativeButtonElement.class).id("open-modal-dialog").click();
 
-        $(DialogElement.class).first().$(NativeButtonElement.class).id("hide")
-                .click();
+        getDialog().$(NativeButtonElement.class).id("hide").click();
 
-        Assert.assertTrue("Dialog should not have closed",
-                $(DialogElement.class).exists());
+        verifyOpened();
         Assert.assertFalse("Dialog should be hidden",
-                $(DialogElement.class).first().isDisplayed());
+                getDialog().isDisplayed());
 
         $(NativeButtonElement.class).id("log").click();
 
@@ -149,10 +136,8 @@ public class ModalityDialogsPageIT extends AbstractComponentIT {
 
         $(NativeButtonElement.class).id("show").click();
 
-        $(DialogElement.class).first().$(NativeButtonElement.class).id("close")
-                .click();
+        getDialog().$(NativeButtonElement.class).id("close").click();
 
-        Assert.assertFalse("Dialog should have closed",
-                $(DialogElement.class).exists());
+        verifyClosedAndRemoved();
     }
 }
