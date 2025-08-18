@@ -31,6 +31,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.BeforeEvent;
@@ -216,6 +217,22 @@ public class SideNavItemTest {
 
         assertPath("test-path");
         Assert.assertEquals(prefixComponent, sideNavItem.getPrefixComponent());
+    }
+
+    // TOOLTIP TESTS
+    @Test
+    public void implementsHasTooltip() {
+        sideNavItem = new SideNavItem("Test item", "test-path");
+        Assert.assertTrue(sideNavItem instanceof HasTooltip);
+    }
+
+    @Test
+    public void tooltipTextIsSet() {
+        sideNavItem = new SideNavItem("Test item", "test-path");
+        sideNavItem.setTooltipText("Test tooltip text");
+        Assert.assertNotNull(sideNavItem.getTooltip());
+        Assert.assertEquals("Test tooltip text",
+                sideNavItem.getTooltip().getText());
     }
 
     // EXPAND AND COLLAPSE TESTS

@@ -6,13 +6,11 @@ class SideNavInTemplate extends LitElement {
       <vaadin-side-nav id="sideNav">
         <vaadin-side-nav-item path="/home">
           <span slot="prefix">prefix</span>
-          Home
+          <span>Home</span>
           <span slot="suffix">suffix</span>
         </vaadin-side-nav-item>
         <vaadin-side-nav-item path="/about">
-          About
-          <br />
-          this project
+          <span>About this project</span>
         </vaadin-side-nav-item>
       </vaadin-side-nav>
     `;

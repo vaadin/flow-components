@@ -33,6 +33,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.UrlUtil;
@@ -59,8 +60,8 @@ import elemental.json.JsonArray;
 @Tag("vaadin-side-nav-item")
 @NpmPackage(value = "@vaadin/side-nav", version = "25.0.0-alpha16")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
-public class SideNavItem extends Component
-        implements HasSideNavItems, HasEnabled, HasPrefix, HasSuffix {
+public class SideNavItem extends Component implements HasSideNavItems,
+        HasEnabled, HasPrefix, HasSuffix, HasTooltip {
 
     private Element labelElement;
 
@@ -226,7 +227,7 @@ public class SideNavItem extends Component
     }
 
     private Element createAndAppendLabelElement() {
-        Element element = Element.createText("");
+        Element element = new Element("span");
         getElement().appendChild(element);
         return element;
     }
