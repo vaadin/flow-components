@@ -890,10 +890,9 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Registers event listeners on the dialog's overlay that prevent it from
-     * closing itself on outside click and escape press. Instead, the event
-     * listeners delegate to the server-side {@link #handleClientClose()}
-     * method. This serves two purposes:
+     * Registers a close listener for the dialog's overlay to prevent it from
+     * closing itself. Instead, the event listener delegates to the server-side
+     * {@link #handleClientClose()} method. This serves two purposes:
      * <ul>
      * <li>Prevent the client dialog from closing if a custom close action
      * listener is registered</li>
@@ -903,17 +902,25 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * </ul>
      */
     private void registerClientCloseHandler() {
-        //@formatter:off
-        getElement().executeJs("const listener = (e) => {"
-                + "  if (e.type == 'vaadin-overlay-escape-press' && !this.noCloseOnEsc ||"
-                + "      e.type == 'vaadin-overlay-outside-click' && !this.noCloseOnOutsideClick) {"
-                + "    e.preventDefault();"
-                + "    this.$server.handleClientClose();"
-                + "  }"
-                + "};"
-                + "this.$.overlay.addEventListener('vaadin-overlay-outside-click', listener);"
-                + "this.$.overlay.addEventListener('vaadin-overlay-escape-press', listener);");
-        //@formatter:on
+        // The web component dispatches the close event first on its overlay and
+        // then globally on the document. To allow other tools, such as Copilot,
+        // to prevent closing overlays through a global listener, we first
+        // listen for the close event on the overlay, and then add a one-time
+        // listener on the document. Only if the event was not prevented after
+        // being dispatched on the document, we prevent it ourselves and
+        // delegate closing to the server-side. Do not register the listener on
+        // the document directly, as that would leak memory.
+        getElement().executeJs(
+                """
+                          this.$.overlay.addEventListener('vaadin-overlay-close', () => {
+                            document.addEventListener('vaadin-overlay-close', (e) => {
+                              if (!e.defaultPrevented && e.detail.overlay === this.$.overlay) {
+                                e.preventDefault();
+                                this.$server.handleClientClose();
+                              }
+                            }, { once: true });
+                          });
+                        """);
     }
 
     @ClientCallable
