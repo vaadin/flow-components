@@ -49,7 +49,6 @@ import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.ValidationUtil;
@@ -91,10 +90,9 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
  *            Type of the selection / value of the extending component
  */
 public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, TItem, TValue>, TItem, TValue>
-        extends AbstractSinglePropertyField<TComponent, TValue>
-        implements Focusable<TComponent>, HasAllowedCharPattern, HasAriaLabel,
-        HasAutoOpen, HasClearButton, HasOverlayClassName,
-        HasDataView<TItem, String, ComboBoxDataView<TItem>>,
+        extends AbstractSinglePropertyField<TComponent, TValue> implements
+        Focusable<TComponent>, HasAllowedCharPattern, HasAriaLabel, HasAutoOpen,
+        HasClearButton, HasDataView<TItem, String, ComboBoxDataView<TItem>>,
         InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue>,
         HasLazyDataView<TItem, String, ComboBoxLazyDataView<TItem>>,
         HasListDataView<TItem, ComboBoxListDataView<TItem>>, HasTheme,
@@ -1341,8 +1339,8 @@ public abstract class ComboBoxBase<TComponent extends ComboBoxBase<TComponent, T
      * Called by the client-side connector, delegates to data controller
      */
     @ClientCallable
-    private void setRequestedRange(int start, int length, String filter) {
-        dataController.setRequestedRange(start, length, filter);
+    private void setViewportRange(int start, int length, String filter) {
+        dataController.setViewportRange(start, length, filter);
     }
 
     /**

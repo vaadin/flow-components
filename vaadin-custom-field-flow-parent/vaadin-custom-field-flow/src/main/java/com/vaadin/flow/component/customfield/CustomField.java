@@ -46,7 +46,7 @@ import com.vaadin.flow.dom.Element;
  *            field value type
  */
 @Tag("vaadin-custom-field")
-@NpmPackage(value = "@vaadin/custom-field", version = "25.0.0-alpha7")
+@NpmPackage(value = "@vaadin/custom-field", version = "25.0.0-alpha15")
 @JsModule("@vaadin/custom-field/src/vaadin-custom-field.js")
 public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
         implements Focusable<CustomField<T>>,
@@ -69,9 +69,30 @@ public abstract class CustomField<T> extends AbstractField<CustomField<T>, T>
      * @see AbstractField#AbstractField(Object)
      */
     public CustomField(T defaultValue) {
+        this(defaultValue, false);
+    }
+
+    /**
+     * Constructs a new custom field.
+     *
+     * @param defaultValue
+     *            The initial value for the field. Will also be used by
+     *            {@link #getEmptyValue()}.
+     * @param manualValueUpdate
+     *            when {@code true} the component does not automatically update
+     *            its value when one of the contained fields changes. This
+     *            allows controlling manually when the value is updated, which
+     *            can be done by calling {@link #updateValue()}. {@code false}
+     *            by default.
+     *
+     * @see AbstractField#AbstractField(Object)
+     */
+    public CustomField(T defaultValue, boolean manualValueUpdate) {
         super(defaultValue);
-        // Force a value update when the change event generated
-        getElement().addEventListener("change", e -> this.updateValue());
+        if (!manualValueUpdate) {
+            // Automatically update the value when a contained field changes
+            getElement().addEventListener("change", e -> this.updateValue());
+        }
         getElement().setProperty("manualValidation", true);
     }
 

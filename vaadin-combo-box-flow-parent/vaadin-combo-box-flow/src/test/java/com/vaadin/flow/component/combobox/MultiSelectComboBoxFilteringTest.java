@@ -23,14 +23,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
+import com.vaadin.tests.dataprovider.MockUI;
 
 public class MultiSelectComboBoxFilteringTest {
-    private DataCommunicatorTest.MockUI ui;
+    private MockUI ui;
 
     @Before
     public void setUp() {
-        ui = new DataCommunicatorTest.MockUI();
+        ui = new MockUI();
     }
 
     @Test
@@ -42,14 +42,14 @@ public class MultiSelectComboBoxFilteringTest {
                 IntStream.range(0, 100).mapToObj(i -> "Item " + i).toList());
         comboBox.setItems(items);
 
-        comboBox.getDataController().setRequestedRange(0, 50, "foo");
+        comboBox.getDataController().setViewportRange(0, 50, "foo");
         fakeClientCommunication();
         Assert.assertFalse((Boolean) comboBox.getElement()
                 .getPropertyRaw("_clientSideFilter"));
 
         items.add("foo");
         comboBox.getDataProvider().refreshAll();
-        comboBox.getDataController().setRequestedRange(0, 50, "");
+        comboBox.getDataController().setViewportRange(0, 50, "");
         fakeClientCommunication();
         Assert.assertFalse((Boolean) comboBox.getElement()
                 .getPropertyRaw("_clientSideFilter"));

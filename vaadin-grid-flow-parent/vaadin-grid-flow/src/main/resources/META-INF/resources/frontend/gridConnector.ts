@@ -234,7 +234,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     const delay = grid._hasData ? rootRequestDelay : 0;
 
     rootRequestDebouncer = Debouncer.debounce(rootRequestDebouncer, timeOut.after(delay), () => {
-      grid.$connector.fetchPage((firstIndex, size) => grid.$server.setRequestedRange(firstIndex, size), page, root);
+      grid.$connector.fetchPage((firstIndex, size) => grid.$server.setViewportRange(firstIndex, size), page, root);
     });
   };
 
@@ -407,8 +407,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     });
   };
 
-  grid._updateItem = function (row, item) {
-    Grid.prototype._updateItem.call(grid, row, item);
+  grid.__updateRow = function (row) {
+    Grid.prototype.__updateRow.call(grid, row);
 
     // There might be inactive component renderers on hidden rows that still refer to the
     // same component instance as one of the renderers on a visible row. Making the
@@ -845,6 +845,14 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
         callback([]);
       }
     });
+
+    // If all pending requests have already been resolved (which can happen
+    // for example if the server sent preloaded data while the grid had
+    // already made its own requests), cancel the request debouncer to
+    // prevent further unnecessary calls.
+    if (Object.keys(pendingRequests).length === 0) {
+      rootRequestDebouncer?.cancel();
+    }
 
     // Sanitize last requested range for the root level
     sanitizeLastRequestedRange();

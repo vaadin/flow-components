@@ -106,7 +106,7 @@ fi
 
 echo "Deploying "`echo $modules | wc -w`" Modules from branch=$branch to profile=$profile"
 ## '.' points to the root project, 'vaadin-flow-components-shared-parent' has the common dependencies for components
-build=.,vaadin-flow-components-shared-parent,vaadin-flow-components-shared-parent/vaadin-flow-components-base,vaadin-flow-components-shared-parent/vaadin-flow-components-test-util
+build=.,vaadin-flow-components-shared-parent,vaadin-flow-components-shared-parent/vaadin-flow-components-base,vaadin-flow-components-shared-parent/vaadin-flow-components-test-util,flow-components-bom
 for i in $modules
 do
   if [ -d "$i" -o -d "$i-flow-parent" ]

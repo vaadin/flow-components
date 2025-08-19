@@ -185,7 +185,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     private Element host;
 
-    private HashMap<String, Widget> customEditors = null;
+    private HashMap<String, Slot> customEditors = null;
 
     // spreadsheet: we need the server side proxy
     public <T extends ServerRpc> T getProtectedRpcProxy(Class<T> rpcInterface) {
@@ -461,15 +461,16 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         }
     }
 
-    public HashMap<String, Widget> getCustomEditors() {
+    public HashMap<String, Slot> getCustomEditors() {
         return customEditors;
     }
 
     private void setupCustomEditors() {
         if (getState().cellKeysToEditorIdMap == null) {
-            if (getWidget().isShowCustomEditorOnFocus()) {
+            if (!getWidget().isShowCustomEditorOnFocus()) {
                 getWidget().removeCellCustomEditors(getCustomEditors());
             }
+            customEditors = null;
             getWidget().setCustomEditorFactory(null);
         } else if (getWidget().getCustomEditorFactory() == null) {
             customEditors = new HashMap<>();
@@ -485,20 +486,23 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
                     @Override
                     public Widget getCustomEditor(String key) {
-                        if (customEditors.containsKey(key)) {
-                            return customEditors.get(key);
-                        }
                         String editorId = getState().cellKeysToEditorIdMap
                                 .get(key);
+                        if (customEditors.containsKey(editorId)) {
+                            var slot = customEditors.get(editorId);
+                            slot.getListener().setCellAddress(key);
+                            return slot;
+                        }
                         var editor = SheetJsniUtil.getVirtualChild(editorId,
                                 host.getPropertyString("appId"));
                         Slot slot = new Slot("custom-editor-" + editorId,
                                 editor, host);
-                        customEditors.put(key, slot);
+                        customEditors.put(editorId, slot);
                         CustomEditorEventListener listener = GWT
                                 .create(CustomEditorEventListener.class);
                         listener.setSpreadsheetWidget(getWidget());
                         listener.init(slot, key);
+                        slot.setListener(listener);
 
                         return slot;
                     }

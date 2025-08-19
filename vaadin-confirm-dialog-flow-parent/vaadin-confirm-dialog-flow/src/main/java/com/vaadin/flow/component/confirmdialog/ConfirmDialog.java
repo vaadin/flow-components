@@ -15,28 +15,22 @@
  */
 package com.vaadin.flow.component.confirmdialog;
 
-import java.util.Collection;
 import java.util.Optional;
 
-import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
-import com.vaadin.flow.component.HasOrderedComponents;
+import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
-import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
-import com.vaadin.flow.dom.ClassList;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.shared.Registration;
 
@@ -62,13 +56,19 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "25.0.0-alpha7")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "25.0.0-alpha15")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 public class ConfirmDialog extends Component
-        implements HasSize, HasStyle, HasOrderedComponents {
+        implements HasComponents, HasSize, HasStyle {
 
     /**
-     * `confirm` is sent when the user clicks Confirm button
+     * Event that is fired when the user clicks the Confirm button
+     * <p>
+     * Note that the event is fired before the dialog's closing animation has
+     * finished. When manually adding / removing the dialog to / from the UI,
+     * use the {@link ClosedEvent} to wait with the removal until the animation
+     * has finished. When relying on the auto-add behavior by just calling
+     * {@link #open()} or {@link #setOpened(boolean)}, this is not necessary.
      */
     @DomEvent("confirm")
     public static class ConfirmEvent extends ComponentEvent<ConfirmDialog> {
@@ -78,7 +78,13 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * `reject` is sent when the user clicks Reject button
+     * Event that is fired when the user clicks the Reject button
+     * <p>
+     * Note that the event is fired before the dialog's closing animation has
+     * finished. When manually adding / removing the dialog to / from the UI,
+     * use the {@link ClosedEvent} to wait with the removal until the animation
+     * has finished. When relying on the auto-add behavior by just calling
+     * {@link #open()} or {@link #setOpened(boolean)}, this is not necessary.
      */
     @DomEvent("reject")
     public static class RejectEvent extends ComponentEvent<ConfirmDialog> {
@@ -88,12 +94,29 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * `cancel` is sent when the user clicks Cancel button or presses Escape
-     * key. `cancel` is not sent if Cancel button is hidden
+     * Event that is fired when the user clicks the Cancel button or presses
+     * Escape. The event is not sent if the Cancel button is hidden.
+     * <p>
+     * Note that the event is fired before the dialog's closing animation has
+     * finished. When manually adding / removing the dialog to / from the UI,
+     * use the {@link ClosedEvent} to wait with the removal until the animation
+     * has finished. When relying on the auto-add behavior by just calling
+     * {@link #open()} or {@link #setOpened(boolean)}, this is not necessary.
      */
     @DomEvent("cancel")
     public static class CancelEvent extends ComponentEvent<ConfirmDialog> {
         public CancelEvent(ConfirmDialog source, boolean fromClient) {
+            super(source, fromClient);
+        }
+    }
+
+    /**
+     * Event that is fired after the dialog's closing animation has finished.
+     * Can be used to remove a dialog from the UI afterward.
+     */
+    @DomEvent("closed")
+    public static class ClosedEvent extends ComponentEvent<ConfirmDialog> {
+        public ClosedEvent(ConfirmDialog source, boolean fromClient) {
             super(source, fromClient);
         }
     }
@@ -145,38 +168,17 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets the CSS class names of the dialog overlay element. This method
-     * overwrites any previous set class names.
-     *
-     * @param className
-     *            a space-separated string of class names to set, or
-     *            <code>null</code> to remove all class names
-     */
-    @Override
-    public void setClassName(String className) {
-        getClassNames().clear();
-        if (className != null) {
-            addClassNames(className.split(" "));
-        }
-    }
-
-    @Override
-    public ClassList getClassNames() {
-        return new OverlayClassListProxy(this);
-    }
-
-    /**
      * @throws UnsupportedOperationException
-     *             ConfirmDialog does not support adding styles to overlay
+     *             ConfirmDialog does not support adding styles
      */
     @Override
     public Style getStyle() {
         throw new UnsupportedOperationException(
-                "ConfirmDialog does not support adding styles to overlay");
+                "ConfirmDialog does not support adding styles");
     }
 
     /**
-     * Sets the `aria-describedby` attribute of the dialog overlay.
+     * Sets the `aria-describedby` attribute of the dialog.
      * <p>
      * By default, all elements inside the message area are linked through the
      * `aria-describedby` attribute. However, there are cases where this can
@@ -195,13 +197,13 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Gets the `aria-describedby` attribute of the dialog overlay.
+     * Gets the `aria-describedby` attribute of the dialog.
      * <p>
      * Note that this will only return a value if
      * {@link #setAriaDescribedBy(String)} was called before.
      *
-     * @return an optional aria-describedby of the dialog overlay, or an empty
-     *         optional if no aria-describedby has been set
+     * @return an optional aria-describedby of the dialog, or an empty optional
+     *         if no aria-describedby has been set
      */
     public Optional<String> getAriaDescribedBy() {
         return Optional.ofNullable(
@@ -370,18 +372,6 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets custom Reject button
-     *
-     * @param element
-     *            the element to display instead of default Reject button
-     * @deprecated Usage of Element API at Component level should be avoided
-     */
-    @Deprecated(forRemoval = true)
-    public void setRejectButton(Element element) {
-        SlotUtils.setSlot(this, "reject-button", element);
-    }
-
-    /**
      * Sets Cancel button text and `cancel` event listener. Makes Cancel button
      * visible
      *
@@ -422,18 +412,6 @@ public class ConfirmDialog extends Component
      */
     public void setCancelButton(Component component) {
         SlotUtils.setSlot(this, "cancel-button", component);
-    }
-
-    /**
-     * Sets custom cancel button
-     *
-     * @param element
-     *            the element to display instead of default Cancel button
-     * @deprecated Usage of Element API at Component level should be avoided
-     */
-    @Deprecated(forRemoval = true)
-    public void setCancelButton(Element element) {
-        SlotUtils.setSlot(this, "cancel-button", element);
     }
 
     /**
@@ -479,18 +457,6 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets custom confirm button
-     *
-     * @param element
-     *            the element to display instead of default Confirm button
-     * @deprecated Usage of Element API at Component level should be avoided
-     */
-    @Deprecated(forRemoval = true)
-    public void setConfirmButton(Element element) {
-        SlotUtils.setSlot(this, "confirm-button", element);
-    }
-
-    /**
      * Sets confirmation message text
      */
     public void setText(String message) {
@@ -509,19 +475,6 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Sets custom confirmation message element
-     *
-     * @param element
-     *            the element to display instead of default confirmation text
-     *            node
-     * @deprecated Usage of Element API at Component level should be avoided
-     */
-    @Deprecated(forRemoval = true)
-    public void setText(Element element) {
-        getElement().appendChild(element);
-    }
-
-    /**
      * Sets Confirm button text
      */
     public void setConfirmText(String confirmText) {
@@ -536,7 +489,17 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Adds `confirm` event listener
+     * Adds a listener for when the user clicks the Confirm button.
+     * <p>
+     * Note: The event is fired before the dialog's closing animation has
+     * finished. When manually adding or removing the dialog to or from the UI,
+     * use the {@link ClosedEvent} to wait with the removal until the animation
+     * has finished. When relying on the auto-add behavior by just calling
+     * {@link #open()} or {@link #setOpened(boolean)}, this is not necessary.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
      */
     public Registration addConfirmListener(
             ComponentEventListener<ConfirmEvent> listener) {
@@ -559,7 +522,18 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Adds `cancel` event listener
+     * Adds a listener for when the user clicks the Cancel button or presses
+     * Escape.
+     * <p>
+     * Note: The event is fired before the dialog's closing animation has
+     * finished. When manually adding or removing the dialog to or from the UI,
+     * use the {@link ClosedEvent} to wait with the removal until the animation
+     * has finished. When relying on the auto-add behavior by just calling
+     * {@link #open()} or {@link #setOpened(boolean)}, this is not necessary.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
      */
     public Registration addCancelListener(
             ComponentEventListener<CancelEvent> listener) {
@@ -581,11 +555,34 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Adds `reject` event listener
+     * Adds a listener for when the user clicks the Reject button.
+     * <p>
+     * Note: The event is fired before the dialog's closing animation has
+     * finished. When manually adding or removing the dialog to or from the UI,
+     * use the {@link ClosedEvent} to wait with the removal until the animation
+     * has finished. When relying on the auto-add behavior by just calling
+     * {@link #open()} or {@link #setOpened(boolean)}, this is not necessary.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
      */
     public Registration addRejectListener(
             ComponentEventListener<RejectEvent> listener) {
         return ComponentUtil.addListener(this, RejectEvent.class, listener);
+    }
+
+    /**
+     * Add a lister for when the dialog's closing animation has finished. Can be
+     * used to remove the dialog from the UI afterward.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
+     */
+    public Registration addClosedListener(
+            ComponentEventListener<ClosedEvent> listener) {
+        return ComponentUtil.addListener(this, ClosedEvent.class, listener);
     }
 
     /**
@@ -603,18 +600,6 @@ public class ConfirmDialog extends Component
      */
     public void setHeader(Component component) {
         SlotUtils.setSlot(this, "header", component);
-    }
-
-    /**
-     * Sets confirmation dialog custom header element
-     *
-     * @param element
-     *            the element to display instead of default header text
-     * @deprecated Usage of Element API at Component level should be avoided
-     */
-    @Deprecated(forRemoval = true)
-    public void setHeader(Element element) {
-        SlotUtils.setSlot(this, "header", element);
     }
 
     /**
@@ -694,184 +679,18 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Confirm dialog does not support adding content. Use
-     * {@link #setText(Component)} instead to initialize content as a component.
+     * {@inheritDoc}
      * <p>
-     * This method is inherited from {@link HasOrderedComponents} and has been
-     * marked as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
+     * Removes all components from this component except elements that have slot
+     * attribute, such as header and buttons.
      */
-    @Deprecated
-    @Override
-    public void add(Component... components) {
-        HasOrderedComponents.super.add(components);
-    }
-
-    /**
-     * Confirm dialog does not support adding content. Use
-     * {@link #setText(Component)} instead to initialize content as a component.
-     * <p>
-     * This method is inherited from {@link HasOrderedComponents} and has been
-     * marked as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
-    @Override
-    public void add(Collection<Component> components) {
-        HasOrderedComponents.super.add(components);
-    }
-
-    /**
-     * Confirm dialog does not support adding content. Use
-     * {@link #setText(String)} instead to initialize content as text.
-     * <p>
-     * This method is inherited from {@link HasOrderedComponents} and has been
-     * marked as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
-    @Override
-    public void add(String text) {
-        HasOrderedComponents.super.add(text);
-    }
-
-    /**
-     * Confirm dialog does not support removing content.
-     * <p>
-     * This method is inherited from {@link HasOrderedComponents} and has been
-     * marked as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
-    @Override
-    public void remove(Component... components) {
-        HasOrderedComponents.super.remove(components);
-    }
-
-    /**
-     * Confirm dialog does not support removing content.
-     * <p>
-     * This method is inherited from {@link HasOrderedComponents} and has been
-     * marked as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
-    @Override
-    public void remove(Collection<Component> components) {
-        HasOrderedComponents.super.remove(components);
-    }
-
-    /**
-     * Confirm dialog does not support removing content.
-     * <p>
-     * This method is inherited from {@link HasOrderedComponents} and has been
-     * marked as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
     @Override
     public void removeAll() {
-        HasOrderedComponents.super.removeAll();
-    }
-
-    /**
-     * Confirm dialog does not support adding content. Use
-     * {@link #setText(Component)} instead to initialize content as a component.
-     * <p>
-     * This method is inherited from {@link HasOrderedComponents} and has been
-     * marked as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
-    @Override
-    public void addComponentAtIndex(int index, Component component) {
-        HasOrderedComponents.super.addComponentAtIndex(index, component);
-    }
-
-    /**
-     * Confirm dialog does not support adding content. Use
-     * {@link #setText(Component)} instead to initialize content as a component.
-     * <p>
-     * This method is inherited from {@link HasOrderedComponents} and has been
-     * marked as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
-    @Override
-    public void addComponentAsFirst(Component component) {
-        HasOrderedComponents.super.addComponentAsFirst(component);
-    }
-
-    /**
-     * Confirm dialog does not support replacing content.
-     * <p>
-     * This method is inherited from {@link HasOrderedComponents} and has been
-     * marked as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
-    @Override
-    public void replace(Component oldComponent, Component newComponent) {
-        HasOrderedComponents.super.replace(oldComponent, newComponent);
-    }
-
-    /**
-     * Confirm dialog does not support multiple components.
-     * <p>
-     * This method is inherited from {@link HasOrderedComponents} and has been
-     * marked as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
-    @Override
-    public int indexOf(Component component) {
-        return HasOrderedComponents.super.indexOf(component);
-    }
-
-    /**
-     * Confirm dialog does not support multiple components.
-     * <p>
-     * This method is inherited from {@link HasOrderedComponents} and has been
-     * marked as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
-    @Override
-    public int getComponentCount() {
-        return HasOrderedComponents.super.getComponentCount();
-    }
-
-    /**
-     * Confirm dialog does not support multiple components.
-     * <p>
-     * This method is inherited from {@link HasOrderedComponents} and has been
-     * marked as deprecated to indicate that it is not supported.
-     *
-     * @deprecated since v24.4, not supported
-     */
-    @Deprecated
-    @Override
-    public Component getComponentAt(int index) {
-        return HasOrderedComponents.super.getComponentAt(index);
-    }
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-
-        // Same as https://github.com/vaadin/flow-components/pull/725
-        Shortcuts.setShortcutListenOnElement("this._overlayElement", this);
+        getElement().getChildren().forEach(child -> {
+            if (!child.hasAttribute("slot")) {
+                child.removeFromParent();
+            }
+        });
     }
 
     private void setModality(boolean modal) {

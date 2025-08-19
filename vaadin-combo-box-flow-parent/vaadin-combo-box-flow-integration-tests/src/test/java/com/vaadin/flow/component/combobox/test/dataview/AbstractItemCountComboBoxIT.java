@@ -57,7 +57,7 @@ public abstract class AbstractItemCountComboBoxIT extends AbstractComboBoxIT {
     protected void doScroll(int itemToScroll, int expectedItems,
             String expectedItemText, RangeLog... rangeLogs) {
         scrollToItem(comboBoxElement, itemToScroll);
-        waitUntilTextInContent(expectedItemText);
+        waitUntilTextInContent(comboBoxElement, expectedItemText);
         verifyFetchForUndefinedItemCountCallback(rangeLogs);
         verifyItemsCount(expectedItems);
     }

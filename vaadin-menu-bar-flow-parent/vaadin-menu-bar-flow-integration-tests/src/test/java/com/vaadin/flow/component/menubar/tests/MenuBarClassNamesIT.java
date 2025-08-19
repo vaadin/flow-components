@@ -25,13 +25,12 @@ import org.openqa.selenium.By;
 import com.vaadin.flow.component.menubar.testbench.MenuBarButtonElement;
 import com.vaadin.flow.component.menubar.testbench.MenuBarElement;
 import com.vaadin.flow.component.menubar.testbench.MenuBarItemElement;
+import com.vaadin.flow.component.menubar.testbench.MenuBarSubMenuElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-menu-bar/menu-bar-class-names")
 public class MenuBarClassNamesIT extends AbstractComponentIT {
-
-    public static final String OVERLAY_TAG = "vaadin-menu-bar-overlay";
 
     private MenuBarElement menuBar;
 
@@ -105,13 +104,10 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
         verifySubMenuItemClassNames(true,
                 MenuBarClassNamesPage.SUB_ITEM_FIRST_CLASS_NAME);
 
-        closeSubMenu();
         click("remove-sub-item-class-name");
 
         verifySubMenuItemClassNames(false,
                 MenuBarClassNamesPage.SUB_ITEM_FIRST_CLASS_NAME);
-
-        closeSubMenu();
     }
 
     @Test
@@ -122,21 +118,17 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
                 MenuBarClassNamesPage.SUB_ITEM_FIRST_CLASS_NAME,
                 MenuBarClassNamesPage.SUB_ITEM_SECOND_CLASS_NAME);
 
-        closeSubMenu();
         click("add-remove-multiple-sub-item-classes");
 
         verifySubMenuItemClassNames(false,
                 MenuBarClassNamesPage.SUB_ITEM_FIRST_CLASS_NAME,
                 MenuBarClassNamesPage.SUB_ITEM_SECOND_CLASS_NAME);
 
-        closeSubMenu();
         click("add-remove-multiple-sub-item-classes");
 
         verifySubMenuItemClassNames(true,
                 MenuBarClassNamesPage.SUB_ITEM_FIRST_CLASS_NAME,
                 MenuBarClassNamesPage.SUB_ITEM_SECOND_CLASS_NAME);
-
-        closeSubMenu();
     }
 
     @Test
@@ -146,13 +138,10 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
         verifySubMenuItemClassNames(false,
                 MenuBarClassNamesPage.SUB_ITEM_FIRST_CLASS_NAME);
 
-        closeSubMenu();
         click("toggle-sub-item-class-name");
 
         verifySubMenuItemClassNames(true,
                 MenuBarClassNamesPage.SUB_ITEM_FIRST_CLASS_NAME);
-
-        closeSubMenu();
     }
 
     @Test
@@ -162,13 +151,10 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
         verifySubMenuItemClassNames(false,
                 MenuBarClassNamesPage.SUB_ITEM_FIRST_CLASS_NAME);
 
-        closeSubMenu();
         click("set-unset-sub-item-class-name");
 
         verifySubMenuItemClassNames(true,
                 MenuBarClassNamesPage.SUB_ITEM_FIRST_CLASS_NAME);
-
-        closeSubMenu();
     }
 
     @Test
@@ -178,8 +164,9 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
         waitForResizeObserver();
         menuBar.getOverflowButton().click();
         click("change-item2-class-name");
-        menuBar.getOverflowButton().click();
-        MenuBarItemElement menuItem = menuBar.getSubMenuItems().get(0);
+        MenuBarSubMenuElement subMenu = menuBar.getOverflowButton()
+                .openSubMenu();
+        MenuBarItemElement menuItem = subMenu.getMenuItems().get(0);
         Assert.assertEquals(
                 Set.of(MenuBarClassNamesPage.MENU_ITEM_SECOND_CLASS_NAME),
                 menuItem.getClassNames());
@@ -190,10 +177,11 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
         click("set-width");
         click("set-item2-class-name");
         waitForResizeObserver();
-        menuBar.getOverflowButton().click();
+        menuBar.getOverflowButton().openSubMenu();
         click("remove-item2-class-name");
-        menuBar.getOverflowButton().click();
-        MenuBarItemElement menuItem = menuBar.getSubMenuItems().get(0);
+        MenuBarSubMenuElement subMenu = menuBar.getOverflowButton()
+                .openSubMenu();
+        MenuBarItemElement menuItem = subMenu.getMenuItems().get(0);
         Assert.assertEquals(Set.of(), menuItem.getClassNames());
     }
 
@@ -220,24 +208,6 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
         findElement(By.id(id)).click();
     }
 
-    public void closeSubMenu() {
-        $("body").first().click();
-        verifyClosed();
-    }
-
-    private void openSubMenu() {
-        menuBar.getButtons().get(0).click();
-        verifyOpened();
-    }
-
-    public void verifyClosed() {
-        waitForElementNotPresent(By.tagName(OVERLAY_TAG));
-    }
-
-    public void verifyOpened() {
-        waitForElementPresent(By.tagName(OVERLAY_TAG));
-    }
-
     private void waitForResizeObserver() {
         getCommandExecutor().getDriver().executeAsyncScript(
                 "var callback = arguments[arguments.length - 1];"
@@ -246,9 +216,10 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
 
     private void verifySubMenuItemClassNames(boolean containsClassNames,
             String... classNames) {
-        openSubMenu();
-        MenuBarItemElement subMenuItem = menuBar.getSubMenuItems().get(2);
-        var subMenuItemClassNames = subMenuItem.getClassNames();
+        MenuBarSubMenuElement subMenu = menuBar.getButtons().get(0)
+                .openSubMenu();
+        MenuBarItemElement subMenuItem = subMenu.getMenuItems().get(2);
+        Set<String> subMenuItemClassNames = subMenuItem.getClassNames();
         for (String className : classNames) {
             if (containsClassNames) {
                 Assert.assertTrue(subMenuItemClassNames.contains(className));
@@ -256,5 +227,7 @@ public class MenuBarClassNamesIT extends AbstractComponentIT {
                 Assert.assertFalse(subMenuItemClassNames.contains(className));
             }
         }
+        $("body").first().click();
+        subMenu.waitUntilClosed();
     }
 }

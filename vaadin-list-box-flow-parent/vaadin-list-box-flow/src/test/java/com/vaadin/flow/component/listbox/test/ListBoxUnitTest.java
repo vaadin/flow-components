@@ -29,8 +29,8 @@ import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
-import com.vaadin.tests.DataProviderListenersTest;
+import com.vaadin.tests.dataprovider.DataProviderListenersTest;
+import com.vaadin.tests.dataprovider.MockUI;
 
 public class ListBoxUnitTest {
 
@@ -187,7 +187,7 @@ public class ListBoxUnitTest {
         DataProviderListenersTest
                 .checkOldListenersRemovedOnComponentAttachAndDetach(
                         new ListBox<>(), 1, 1, new int[] { 0, 1 },
-                        new DataCommunicatorTest.MockUI());
+                        new MockUI());
     }
 
     @Test

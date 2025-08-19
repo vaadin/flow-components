@@ -26,10 +26,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 
 /**
  * Unit tests for the ContextMenu.
@@ -215,13 +215,6 @@ public class ContextMenuTest {
         out.writeObject(menu);
     }
 
-    @Test
-    public void implementsHasOverlayClassName() {
-        Assert.assertTrue("ContextMenu should support overlay class name",
-                HasOverlayClassName.class
-                        .isAssignableFrom(new ContextMenu().getClass()));
-    }
-
     private void addDivAtIndex(int index) {
         ContextMenu contextMenu = new ContextMenu();
 
@@ -246,8 +239,10 @@ public class ContextMenuTest {
             e.unregisterListener();
         });
 
-        contextMenu.getElement().setProperty("opened", true);
-        contextMenu.getElement().setProperty("opened", false);
+        ComponentUtil.fireEvent(contextMenu,
+                new ContextMenuBase.OpenedChangeEvent<>(contextMenu, false));
+        ComponentUtil.fireEvent(contextMenu,
+                new ContextMenuBase.OpenedChangeEvent<>(contextMenu, false));
 
         Assert.assertEquals(1, listenerInvokedCount.get());
     }

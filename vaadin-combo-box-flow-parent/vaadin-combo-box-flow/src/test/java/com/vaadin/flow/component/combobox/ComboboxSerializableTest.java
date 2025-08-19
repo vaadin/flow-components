@@ -33,20 +33,20 @@ public class ComboboxSerializableTest extends ClassesSerializableTest {
     }
 
     @Test
-    public void setItems_callSetRequestedRange_comboBoxSerializable()
+    public void setItems_callSetViewportRange_comboBoxSerializable()
             throws Throwable {
         final ComboBox<String> comboBox = new ComboBox<>();
         comboBox.setItems(List.of("Item 1", "Item 2"));
-        callSetRequestedRange(comboBox, 0, 2, "");
+        callSetViewportRange(comboBox, 0, 2, "");
         serializeAndDeserialize(comboBox);
     }
 
-    private void callSetRequestedRange(ComboBox<String> comboBox, int start,
+    private void callSetViewportRange(ComboBox<String> comboBox, int start,
             int length, String filter)
             throws NoSuchMethodException, IllegalAccessException,
             IllegalArgumentException, InvocationTargetException {
-        Method method = ComboBoxBase.class.getDeclaredMethod(
-                "setRequestedRange", int.class, int.class, String.class);
+        Method method = ComboBoxBase.class.getDeclaredMethod("setViewportRange",
+                int.class, int.class, String.class);
         method.setAccessible(true);
         method.invoke(comboBox, start, length, filter);
     }

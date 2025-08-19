@@ -15,16 +15,12 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.combobox.testbench.MultiSelectComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.ElementQuery;
-import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-multi-select-combo-box/lit-renderer")
@@ -47,16 +43,9 @@ public class MultiSelectComboBoxLitRendererIT extends AbstractComponentIT {
     }
 
     private void assertOverlayHasItem(String name) {
-        var items = getMultiSelectComboOverlayItems();
+        var items = readOnlyComboBox.$("vaadin-multi-select-combo-box-item")
+                .all();
         Assert.assertTrue(
                 items.stream().anyMatch(text -> text.getText().contains(name)));
-    }
-
-    private List<TestBenchElement> getMultiSelectComboOverlayItems() {
-        TestBenchElement overlay = $("vaadin-multi-select-combo-box-overlay")
-                .first();
-        ElementQuery<TestBenchElement> items = overlay
-                .$("vaadin-multi-select-combo-box-item");
-        return items.all();
     }
 }
