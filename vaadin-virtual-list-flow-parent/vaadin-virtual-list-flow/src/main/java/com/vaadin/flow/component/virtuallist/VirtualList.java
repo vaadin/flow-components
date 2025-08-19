@@ -30,6 +30,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.component.virtuallist.paging.PagelessDataCommunicator;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.provider.ArrayUpdater;
@@ -301,6 +302,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         setRenderer(renderer);
     }
 
+    @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
     private void setViewportRange(int start, int length) {
         getDataCommunicator().setViewportRange(start, length);
