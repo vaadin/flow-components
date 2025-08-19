@@ -99,7 +99,7 @@
 
         <!-- spreadsheet -->
         <poi.version>5.4.1</poi.version>
-        <javaparser.version>3.26.3</javaparser.version>
+        <javaparser.version>3.27.0</javaparser.version>
     </properties>
     <dependencyManagement>
         <dependencies>
