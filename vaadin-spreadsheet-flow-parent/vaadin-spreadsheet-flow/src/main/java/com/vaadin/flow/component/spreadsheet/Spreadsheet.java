@@ -3775,12 +3775,11 @@ public class Spreadsheet extends Component
             final short col = selectedCellReference.getCol();
             final int row = selectedCellReference.getRow();
             final String key = SpreadsheetUtil.toKey(col + 1, row + 1);
-            HashMap<String, String> cellKeysToEditorIdMap = new HashMap<>(
-                    getCellKeysToEditorIdMap());
-            if (cellKeysToEditorIdMap != null
-                    && cellKeysToEditorIdMap.containsKey(key)
+            var currentCellKeysToEditorIdMap = getCellKeysToEditorIdMap();
+            if (currentCellKeysToEditorIdMap != null
+                    && currentCellKeysToEditorIdMap.containsKey(key)
                     && customComponents != null) {
-                String componentId = cellKeysToEditorIdMap.get(key);
+                String componentId = currentCellKeysToEditorIdMap.get(key);
                 for (Component c : customComponents) {
                     if (getComponentNodeId(c).equals(componentId)) {
                         customComponentFactory.onCustomEditorDisplayed(
@@ -3790,7 +3789,8 @@ public class Spreadsheet extends Component
                     }
                 }
             }
-            setCellKeysToEditorIdMap(cellKeysToEditorIdMap);
+            setCellKeysToEditorIdMap(currentCellKeysToEditorIdMap == null ? null
+                    : new HashMap<>(currentCellKeysToEditorIdMap));
         }
     }
 
