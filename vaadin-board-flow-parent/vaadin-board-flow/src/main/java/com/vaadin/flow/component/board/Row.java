@@ -26,11 +26,13 @@ import com.vaadin.flow.component.dependency.NpmPackage;
  * taking one column each, or fewer components with multiple columns each as
  * long as sum of columns stays less than or equal to four.
  *
- * <p>
+ * @deprecated Board Row is deprecated and will be removed in Vaadin 26.
+ *             Consider using Dashboard as an alternative.
  */
 @Tag("vaadin-board-row")
 @NpmPackage(value = "@vaadin/board", version = "25.0.0-alpha15")
 @JsModule("@vaadin/board/src/vaadin-board-row.js")
+@Deprecated(since = "25.0.0", forRemoval = true)
 public class Row extends Component
         implements HasStyle, HasSize, HasOrderedComponents {
 
