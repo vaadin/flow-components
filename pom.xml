@@ -53,7 +53,6 @@
         <module>vaadin-board-flow-parent</module>
         <module>vaadin-charts-flow-parent</module>
         <module>vaadin-confirm-dialog-flow-parent</module>
-        <module>vaadin-cookie-consent-flow-parent</module>
         <module>vaadin-crud-flow-parent</module>
         <module>vaadin-grid-pro-flow-parent</module>
         <module>vaadin-map-flow-parent</module>
