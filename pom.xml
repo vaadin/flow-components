@@ -75,7 +75,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <jetty.version>12.0.23</jetty.version>
+        <jetty.version>12.0.25</jetty.version>
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
         <karaf-maven-plugin.version>4.4.8</karaf-maven-plugin.version>
@@ -96,7 +96,7 @@
         <cvdlName/>
         <jakarta.servlet.api.version>5.0.0</jakarta.servlet.api.version>
         <jakarta.web.api.version>10.0.0</jakarta.web.api.version>
-        <spring-data-commons.version>4.0.0-M4</spring-data-commons.version>
+        <spring-data-commons.version>4.0.0-M5</spring-data-commons.version>
 
         <!-- spreadsheet -->
         <poi.version>5.4.1</poi.version>
