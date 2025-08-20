@@ -931,7 +931,7 @@
           if ((cache[root] && cache[root][page]) || page < lastRequestedRange[0] || +page > lastRequestedRangeEnd) {
             delete rootPageCallbacks[page];
 
-            if (cache[root][page]) {
+            if (cache[root] && cache[root][page]) {
               // Cached data is available, resolve the callback
               callback(cache[root][page]);
             } else {
