@@ -353,31 +353,31 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
   };
 
-  grid.$connector.set = function (index, items) {
-    if (index % grid.pageSize != 0) {
-      throw 'Got new data to index ' + index + ' which is not aligned with the page size of ' + grid.pageSize;
-    }
-    const firstPage = index / grid.pageSize;
+  grid.$connector.set = function (startIndex, items) {
+    // if (index % grid.pageSize != 0) {
+    //   throw 'Got new data to index ' + index + ' which is not aligned with the page size of ' + grid.pageSize;
+    // }
+    const firstPage = Math.floor(startIndex / grid.pageSize);
     const updatedPageCount = Math.ceil(items.length / grid.pageSize);
 
     // For root cache, remember the range of pages that were set during an update
-    currentUpdateSetRange = [firstPage, firstPage + updatedPageCount - 1];
+    // currentUpdateSetRange = [firstPage, firstPage + updatedPageCount - 1];
 
-    for (let i = 0; i < updatedPageCount; i++) {
-      let page = firstPage + i;
-      let slice = items.slice(i * grid.pageSize, (i + 1) * grid.pageSize);
-      cache[page] = slice;
-
-      grid.$connector.doSelection(slice.filter((item) => item.selected));
-      grid.$connector.doDeselection(slice.filter((item) => !item.selected && selectedKeys[item.key]));
+    items.forEach((item, i) => {
+      const index = startIndex + i;
+      const page = Math.floor(index / grid.pageSize);
+      const pageIndex = index % grid.pageSize;
+      cache[page] ??= [];
+      cache[page][pageIndex] = item;
 
       const updatedItems = updateGridCache(page);
       if (updatedItems) {
         itemsUpdated(updatedItems);
       }
-    }
+    });
 
-    grid.__updateVisibleRows();
+    grid.$connector.doSelection(items.filter((item) => item.selected));
+    grid.$connector.doDeselection(items.filter((item) => !item.selected && selectedKeys[item.key]));
   };
 
   const itemToCacheLocation = function (item) {
@@ -482,7 +482,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     for (let itemIndex = index; itemIndex < endIndex; itemIndex++) {
       delete cacheToClear.items[itemIndex];
     }
-    grid.__updateVisibleRows();
   };
 
   grid.$connector.reset = function () {
@@ -533,6 +532,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // Clear current update state
     currentUpdateSetRange = null;
     currentUpdateClearRange = null;
+
+    grid.__updateVisibleRows();
 
     // Let server know we're done
     grid.$server.confirmUpdate(id);

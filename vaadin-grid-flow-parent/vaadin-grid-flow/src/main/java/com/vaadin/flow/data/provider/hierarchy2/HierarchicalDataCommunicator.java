@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.data.provider.hierarchy2;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -85,7 +86,7 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
     private final DataGenerator<T> dataGenerator;
     private final SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier;
 
-    private boolean pendingFlush = false;
+    private FlushRequest<T> flushRequest = null;
     private Range viewportRange = Range.withLength(0, 0);
     private int nextUpdateId = 0;
 
@@ -126,17 +127,18 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
         stateNode.addAttachListener(this::requestFlush);
     }
 
-    private void requestFlush() {
-        if (pendingFlush) {
-            return;
+    private FlushRequest<T> requestFlush() {
+        if (flushRequest != null) {
+            return flushRequest;
         }
 
-        pendingFlush = true;
+        flushRequest = new FlushRequest<>();
         stateNode.runWhenAttached(ui -> ui.getInternals().getStateTree()
                 .beforeClientResponse(stateNode, (context) -> {
                     flush(context);
-                    pendingFlush = false;
+                    flushRequest = null;
                 }));
+        return flushRequest;
     }
 
     /**
@@ -154,12 +156,16 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
     @Override
     public void reset() {
         if (rootCache != null) {
-            rootCache = null;
+            rootCache = createRootCache();
             getKeyMapper().removeAll();
             dataGenerator.destroyAllData();
+
+            if (viewportRange.getStart() >= rootCache.getSize()) {
+                setViewportRange(0, viewportRange.length());
+            }
         }
 
-        requestFlush();
+        requestFlush().invalidateViewport();
     }
 
     @Override
@@ -219,9 +225,10 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
         if (refreshChildren && subCache != null) {
             subCache.clear();
             subCache.setSize(getDataProviderChildCount(item));
+            requestFlush().invalidateViewport();
         }
 
-        requestFlush();
+        requestFlush().invalidateItem(item);
     }
 
     @Override
@@ -315,7 +322,7 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
         if (rootCache != null) {
             rootCache.removeDescendantCacheIf(
                     (cache) -> !isExpanded(cache.getParentItem()));
-            requestFlush();
+            requestFlush().invalidateViewport();
         }
 
         return collapsedItems;
@@ -349,7 +356,7 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
             return expandedItemIds.add(getDataProvider().getId(item));
         }).toList();
 
-        requestFlush();
+        requestFlush().invalidateViewport();
 
         return expandedItems;
     }
@@ -453,8 +460,11 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
 
         var item = cache.getItem(index);
         if (restPath.length > 0 && isExpanded(item)) {
-            var subCache = cache.ensureSubCache(index,
-                    () -> getDataProviderChildCount(item));
+            var subCache = cache.ensureSubCache(index, () -> {
+                requestFlush().invalidateViewport();
+                return getDataProviderChildCount(item);
+            });
+
             resolveIndexPath(subCache, restPath);
         }
     }
@@ -513,8 +523,10 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
             // in the result.
             if (isExpanded(item) && !cache.hasSubCache(index)
                     && result.size() > 0) {
-                var subCache = cache.ensureSubCache(index,
-                        () -> getDataProviderChildCount(item));
+                var subCache = cache.ensureSubCache(index, () -> {
+                    requestFlush().invalidateViewport();
+                    return getDataProviderChildCount(item);
+                });
 
                 // Shift the start index to the end of the created sub-cache to
                 // continue from its last item and maintain the sequential order
@@ -561,8 +573,10 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
 
             var item = cache.getItem(index);
             if (isExpanded(item)) {
-                cache.ensureSubCache(index,
-                        () -> getDataProviderChildCount(item));
+                cache.ensureSubCache(index, () -> {
+                    requestFlush().invalidateViewport();
+                    return getDataProviderChildCount(item);
+                });
             }
 
             start++;
@@ -573,20 +587,25 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
 
     @Override
     public void setViewportRange(int start, int length) {
+        var previousViewportRange = viewportRange;
         viewportRange = computeViewportRange(start, length);
-        requestFlush();
+
+        var partition = viewportRange.partitionWith(previousViewportRange);
+        if (!partition[0].isEmpty()) {
+            requestFlush().invalidateRange(partition[0]);
+        }
+        if (partition[1].isEmpty()) {
+            requestFlush().invalidateViewport();
+        }
+        if (!partition[2].isEmpty()) {
+            requestFlush().invalidateRange(partition[2]);
+        }
     }
 
     private void flush(ExecutionContext context) {
         if (!context.isClientSideInitialized()) {
             reset();
             arrayUpdater.initialize();
-        }
-
-        ensureRootCache();
-
-        if (viewportRange.getStart() >= rootCache.getFlatSize()) {
-            viewportRange = Range.withLength(0, viewportRange.length());
         }
 
         var length = viewportRange.length();
@@ -604,7 +623,16 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
         if (end < flatSize) {
             update.clear(end, flatSize - end);
         }
-        update.set(start, result.stream().map(this::generateItemJson).toList());
+        for (int i = 0; i < result.size(); i++) {
+            var item = result.get(i);
+            var index = start + i;
+
+            if (flushRequest.isViewportInvalidated()
+                    || flushRequest.isItemInvalidated(item)
+                    || flushRequest.isIndexInvalidated(index)) {
+                update.set(index, List.of(generateItemJson(item)));
+            }
+        }
         update.commit(nextUpdateId++);
     }
 
@@ -635,20 +663,55 @@ public class HierarchicalDataCommunicator<T> extends DataCommunicator<T> {
         return count;
     }
 
+    private RootCache<T> createRootCache() {
+        return new RootCache<>(getDataProviderChildCount(null),
+                getDataProvider()::getId) {
+            @Override
+            void removeItemContext(T item) {
+                super.removeItemContext(item);
+
+                getKeyMapper().remove(item);
+                dataGenerator.destroyData(item);
+            }
+        };
+    }
+
     private RootCache<T> ensureRootCache() {
         if (rootCache == null) {
-            rootCache = new RootCache<>(getDataProviderChildCount(null),
-                    getDataProvider()::getId) {
-                @Override
-                void removeItemContext(T item) {
-                    super.removeItemContext(item);
-
-                    getKeyMapper().remove(item);
-                    dataGenerator.destroyData(item);
-                }
-            };
+            rootCache = createRootCache();
         }
         return rootCache;
+    }
+
+    private static class FlushRequest<T> {
+        private boolean viewportInvalidated = false;
+        private Set<T> invalidatedItems = new HashSet<>();
+        private Set<Range> invalidatedRanges = new HashSet<>();
+
+        public void invalidateItem(T item) {
+            invalidatedItems.add(item);
+        }
+
+        public boolean isItemInvalidated(T item) {
+            return invalidatedItems.contains(item);
+        }
+
+        public void invalidateRange(Range range) {
+            invalidatedRanges.add(range);
+        }
+
+        public boolean isIndexInvalidated(int index) {
+            return invalidatedRanges.stream()
+                    .anyMatch(range -> range.contains(index));
+        }
+
+        public void invalidateViewport() {
+            viewportInvalidated = true;
+        }
+
+        public boolean isViewportInvalidated() {
+            return viewportInvalidated;
+        }
     }
 
     /**
