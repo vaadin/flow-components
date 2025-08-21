@@ -94,7 +94,7 @@
         <cvdlName/>
         <jakarta.servlet.api.version>5.0.0</jakarta.servlet.api.version>
         <jakarta.web.api.version>10.0.0</jakarta.web.api.version>
-        <spring-data-commons.version>3.4.8</spring-data-commons.version>
+        <spring-data-commons.version>3.4.9</spring-data-commons.version>
 
         <!-- spreadsheet -->
         <poi.version>5.4.0</poi.version>
