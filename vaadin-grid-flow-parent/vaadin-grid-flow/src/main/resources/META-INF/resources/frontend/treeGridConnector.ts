@@ -40,8 +40,8 @@ window.Vaadin.Flow.treeGridConnector.initLazy = function (grid) {
   }
 
   grid._dataProviderController._shouldLoadCachePage = function (cache, page) {
-    // `$server.setViewportRangeByIndexPath` sets a preloaded viewport range based on
-    // the provided index path and `padding` parameter. Setting the new range clears
+    // `$server.setViewportRangeByIndexPath` sends a preloaded viewport range based on
+    // the provided index path and `padding` parameter. Applying the new range clears
     // the old range, which is still visible because the actual scroll happens only
     // after all connector calls in that update are processed. This check prevents
     // the old range from being unnecessarily re-requested while the new range is
