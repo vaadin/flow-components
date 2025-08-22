@@ -92,6 +92,7 @@ public class GridTooltipIT extends AbstractComponentIT {
         scrollToElement(grid);
         // set grid tooltip
         clickElementWithJs("set-grid-tooltip-button");
+        flushScrolling(grid);
         // check column has grid's tooltip
         showTooltip(grid.getCell(1, 1));
         Assert.assertEquals("Grid's tooltip! Jill", getActiveTooltipText());
