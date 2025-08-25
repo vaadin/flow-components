@@ -364,18 +364,14 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     currentUpdateSetRange = [firstPage, firstPage + updatedPageCount - 1];
 
     for (let i = 0; i < updatedPageCount; i++) {
-      let page = firstPage + i;
-      let slice = items.slice(i * grid.pageSize, (i + 1) * grid.pageSize);
-      cache[page] = slice;
-
-      grid.$connector.doSelection(slice.filter((item) => item.selected));
-      grid.$connector.doDeselection(slice.filter((item) => !item.selected && selectedKeys[item.key]));
-
-      const updatedItems = updateGridCache(page);
-      if (updatedItems) {
-        itemsUpdated(updatedItems);
-      }
+      const page = firstPage + i;
+      cache[page] = items.slice(i * grid.pageSize, (i + 1) * grid.pageSize);
+      updateGridCache(page);
     }
+
+    itemsUpdated(items);
+    grid.$connector.doSelection(items.filter((item) => item.selected));
+    grid.$connector.doDeselection(items.filter((item) => !item.selected && selectedKeys[item.key]));
 
     grid.__updateVisibleRows();
   };
@@ -476,11 +472,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
         delete cache[page];
         updateGridCache(page);
       }
-    }
-    let cacheToClear = dataProviderController.rootCache;
-    const endIndex = index + updatedPageCount * grid.pageSize;
-    for (let itemIndex = index; itemIndex < endIndex; itemIndex++) {
-      delete cacheToClear.items[itemIndex];
     }
     grid.__updateVisibleRows();
   };
