@@ -32,7 +32,7 @@ import org.openqa.selenium.Keys;
 import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-date-time-picker/validation/binder")
-public class BinderValidationIT extends BaseValidationIT {
+public class BinderValidationIT extends AbstractDateTimePickerValidationIT {
 
     @Test
     public void fieldIsInitiallyValid() {

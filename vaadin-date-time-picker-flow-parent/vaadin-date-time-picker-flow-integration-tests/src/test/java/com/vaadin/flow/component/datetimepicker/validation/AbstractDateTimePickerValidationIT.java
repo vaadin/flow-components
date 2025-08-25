@@ -22,7 +22,7 @@ import com.vaadin.flow.component.datetimepicker.testbench.DateTimePickerElement;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.validation.AbstractValidationIT;
 
-abstract class BaseValidationIT
+public abstract class AbstractDateTimePickerValidationIT
         extends AbstractValidationIT<DateTimePickerElement> {
     private TestBenchElement dateInput;
     private TestBenchElement timeInput;
