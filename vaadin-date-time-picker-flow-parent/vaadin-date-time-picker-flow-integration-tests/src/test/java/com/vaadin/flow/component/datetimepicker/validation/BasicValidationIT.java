@@ -25,348 +25,219 @@ import static com.vaadin.flow.component.datetimepicker.validation.BasicValidatio
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.REQUIRED_BUTTON;
 import static com.vaadin.flow.component.datetimepicker.validation.BasicValidationPage.REQUIRED_ERROR_MESSAGE;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import com.vaadin.flow.component.datetimepicker.testbench.DateTimePickerElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.validation.AbstractValidationIT;
 
 @TestPath("vaadin-date-time-picker/validation/basic")
-public class BasicValidationIT
-        extends AbstractValidationIT<DateTimePickerElement> {
-    private TestBenchElement dateInput;
-    private TestBenchElement timeInput;
-
-    @Before
-    public void init() {
-        super.init();
-        dateInput = testField.$("input").first();
-        timeInput = testField.$("input").last();
-    }
+public class BasicValidationIT extends BaseValidationIT {
 
     @Test
     public void fieldIsInitiallyValid() {
-        assertClientValid();
-        assertServerValid();
+        assertValid();
         assertErrorMessage(null);
     }
 
     @Test
     public void triggerBlur_assertValidity() {
-        dateInput.sendKeys(Keys.TAB);
-        timeInput.sendKeys(Keys.TAB);
-        assertServerValid();
-        assertClientValid();
-        assertErrorMessage(null);
-        assertValidationCount(0);
+        getDateInput().sendKeys(Keys.TAB);
+        getTimeInput().sendKeys(Keys.TAB);
+        assertValid();
+        assertNoValidation(null);
     }
 
     @Test
     public void required_triggerBlur_assertValidity() {
-        $("button").id(REQUIRED_BUTTON).click();
+        clickElementWithJs(REQUIRED_BUTTON);
 
-        dateInput.sendKeys(Keys.TAB);
-        timeInput.sendKeys(Keys.TAB);
-        assertServerValid();
-        assertClientValid();
-        assertErrorMessage(null);
-        assertValidationCount(0);
+        getDateInput().sendKeys(Keys.TAB);
+        getTimeInput().sendKeys(Keys.TAB);
+        assertValid();
+        assertNoValidation(null);
     }
 
     @Test
     public void required_changeInputTemporarily_triggerBlur_assertValidity() {
-        $("button").id(REQUIRED_BUTTON).click();
-        dateInput.sendKeys("1", Keys.BACK_SPACE, Keys.ENTER);
-        dateInput.sendKeys(Keys.TAB);
-        timeInput.sendKeys(Keys.TAB);
-        assertServerValid();
-        assertClientValid();
-        assertErrorMessage(null);
-        assertValidationCount(0);
+        clickElementWithJs(REQUIRED_BUTTON);
+        getDateInput().sendKeys("1", Keys.BACK_SPACE, Keys.ENTER);
+        getDateInput().sendKeys(Keys.TAB);
+        getTimeInput().sendKeys(Keys.TAB);
+        assertValid();
+        assertNoValidation(null);
     }
 
     @Test
     public void required_changeAndClearValueWithoutBlur_triggerBlur_assertValidity() {
-        $("button").id(REQUIRED_BUTTON).click();
-        dateInput.sendKeys("1/1/2000", Keys.ENTER);
-        dateInput.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
-        dateInput.sendKeys(Keys.TAB);
-        timeInput.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
-        assertValidationCount(1);
+        clickElementWithJs(REQUIRED_BUTTON);
+        getDateInput().sendKeys("1/1/2000", Keys.ENTER);
+        getDateInput().sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME),
+                Keys.BACK_SPACE);
+        getDateInput().sendKeys(Keys.TAB);
+        getTimeInput().sendKeys(Keys.TAB);
+        assertValidation(false, REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
     public void required_changeValue_assertValidity() {
-        $("button").id(REQUIRED_BUTTON).click();
+        clickElementWithJs(REQUIRED_BUTTON);
 
         setValue("1/1/2000", "12:00");
-        assertServerValid();
-        assertClientValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        assertValidation(true, "");
 
-        setInputValue(timeInput, "");
-        assertServerInvalid();
-        assertServerInvalid();
-        assertErrorMessage(INCOMPLETE_INPUT_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "");
+        assertValidation(false, INCOMPLETE_INPUT_ERROR_MESSAGE);
 
-        setInputValue(dateInput, "");
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getDateInput(), "");
+        assertValidation(false, REQUIRED_ERROR_MESSAGE);
 
-        setInputValue(timeInput, "");
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
-        assertValidationCount(0);
+        setInputValue(getTimeInput(), "");
+        assertInvalid();
+        assertNoValidation(REQUIRED_ERROR_MESSAGE);
 
-        setInputValue(timeInput, "INVALID");
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "INVALID");
+        assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
 
-        setInputValue(timeInput, "");
-        timeInput.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "");
+        getTimeInput().sendKeys(Keys.TAB);
+        assertValidation(false, REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
     public void min_changeValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
 
-        setInputValue(dateInput, "1/1/2000");
-        assertClientInvalid();
-        assertServerInvalid();
-        assertErrorMessage(MIN_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getDateInput(), "1/1/2000");
+        assertValidation(false, MIN_ERROR_MESSAGE);
 
-        setInputValue(timeInput, "11:00");
-        assertClientInvalid();
-        assertServerInvalid();
-        assertErrorMessage(MIN_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "11:00");
+        assertValidation(false, MIN_ERROR_MESSAGE);
 
-        setInputValue(dateInput, "2/2/2000");
-        assertClientInvalid();
-        assertServerInvalid();
-        assertErrorMessage(MIN_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getDateInput(), "2/2/2000");
+        assertValidation(false, MIN_ERROR_MESSAGE);
 
-        setInputValue(timeInput, "12:00");
-        assertClientValid();
-        assertServerValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "12:00");
+        assertValidation(true, "");
 
-        setInputValue(timeInput, "13:00");
-        assertClientValid();
-        assertServerValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "13:00");
+        assertValidation(true, "");
 
-        setInputValue(dateInput, "3/3/2000");
-        assertClientValid();
-        assertServerValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        setInputValue(getDateInput(), "3/3/2000");
+        assertValidation(true, "");
 
-        setInputValue(timeInput, "11:00");
-        assertClientValid();
-        assertServerValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "11:00");
+        assertValidation(true, "");
     }
 
     @Test
     public void max_changeDateInputValue_assertValidity() {
         $("input").id(MAX_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
 
-        setInputValue(dateInput, "3/3/2000");
-        assertClientInvalid();
-        assertServerInvalid();
-        assertErrorMessage(MAX_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getDateInput(), "3/3/2000");
+        assertValidation(false, MAX_ERROR_MESSAGE);
 
-        setInputValue(timeInput, "12:00");
-        assertClientInvalid();
-        assertServerInvalid();
-        assertErrorMessage(MAX_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "12:00");
+        assertValidation(false, MAX_ERROR_MESSAGE);
 
-        setInputValue(dateInput, "2/2/2000");
-        assertServerValid();
-        assertClientValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        setInputValue(getDateInput(), "2/2/2000");
+        assertValidation(true, "");
 
-        setInputValue(timeInput, "13:00");
-        assertClientInvalid();
-        assertServerInvalid();
-        assertErrorMessage(MAX_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "13:00");
+        assertValidation(false, MAX_ERROR_MESSAGE);
 
-        setInputValue(timeInput, "12:00");
-        assertClientValid();
-        assertServerValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "12:00");
+        assertValidation(true, "");
 
-        setInputValue(timeInput, "11:00");
-        assertClientValid();
-        assertServerValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "11:00");
+        assertValidation(true, "");
 
-        setInputValue(dateInput, "1/1/2000");
-        assertClientValid();
-        assertServerValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        setInputValue(getDateInput(), "1/1/2000");
+        assertValidation(true, "");
 
-        setInputValue(timeInput, "13:00");
-        assertClientValid();
-        assertServerValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "13:00");
+        assertValidation(true, "");
     }
 
     @Test
     public void setValue_clearValue_assertValidity() {
         setValue("1/1/2000", "10:00");
-        assertServerValid();
-        assertClientValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        assertValidation(true, "");
 
-        $("button").id(CLEAR_VALUE_BUTTON).click();
-        assertServerValid();
-        assertClientValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        clickElementWithJs(CLEAR_VALUE_BUTTON);
+        assertValidation(true, "");
     }
 
     @Test
     public void badInput_changeValue_assertValidity() {
         setValue("1/1/2000", "INVALID");
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
-        assertValidationCount(1);
+        assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
 
-        setInputValue(timeInput, "10:00");
-        assertServerValid();
-        assertClientValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "10:00");
+        assertValidation(true, "");
 
-        setInputValue(dateInput, "INVALID");
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getDateInput(), "INVALID");
+        assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
     }
 
     @Test
     public void badInput_setDateInputValue_blur_assertValidity() {
-        setInputValue(dateInput, "INVALID");
-        dateInput.sendKeys(Keys.TAB);
-        timeInput.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getDateInput(), "INVALID");
+        getDateInput().sendKeys(Keys.TAB);
+        getTimeInput().sendKeys(Keys.TAB);
+        assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
     }
 
     @Test
     public void badInput_setTimeInputValue_blur_assertValidity() {
-        setInputValue(timeInput, "INVALID");
-        timeInput.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "INVALID");
+        getTimeInput().sendKeys(Keys.TAB);
+        assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
     }
 
     @Test
     public void badInput_setValue_clearValue_assertValidity() {
-        setInputValue(dateInput, "INVALID");
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getDateInput(), "INVALID");
+        assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
 
-        $("button").id(CLEAR_VALUE_BUTTON).click();
-        assertServerValid();
-        assertClientValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        clickElementWithJs(CLEAR_VALUE_BUTTON);
+        assertValidation(true, "");
     }
 
     @Test
     public void badInput_setDateInputValue_blur_clearValue_assertValidity() {
-        setInputValue(dateInput, "INVALID");
-        dateInput.sendKeys(Keys.TAB);
-        timeInput.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getDateInput(), "INVALID");
+        getDateInput().sendKeys(Keys.TAB);
+        getTimeInput().sendKeys(Keys.TAB);
+        assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
 
-        $("button").id(CLEAR_VALUE_BUTTON).click();
-        assertServerValid();
-        assertClientValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        clickElementWithJs(CLEAR_VALUE_BUTTON);
+        assertValidation(true, "");
     }
 
     @Test
     public void badInput_setTimeInputValue_blur_clearValue_assertValidity() {
-        setInputValue(timeInput, "INVALID");
-        timeInput.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "INVALID");
+        getTimeInput().sendKeys(Keys.TAB);
+        assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
 
-        $("button").id(CLEAR_VALUE_BUTTON).click();
-        assertServerValid();
-        assertClientValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        clickElementWithJs(CLEAR_VALUE_BUTTON);
+        assertValidation(true, "");
     }
 
     @Test
     public void incompleteInput_assertValidity() {
-        setInputValue(dateInput, "1/1/2000");
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(INCOMPLETE_INPUT_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getDateInput(), "1/1/2000");
+        getDateInput().sendKeys(Keys.chord(Keys.SHIFT, Keys.TAB));
+        assertValidation(false, INCOMPLETE_INPUT_ERROR_MESSAGE);
     }
 
     @Test
     public void incompleteInput_changeToValidValue_assertValidity() {
-        setInputValue(dateInput, "1/1/2000");
+        setInputValue(getDateInput(), "1/1/2000");
         resetValidationCount();
 
-        setInputValue(timeInput, "10:00");
-        assertServerValid();
-        assertClientValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "10:00");
+        assertValidation(true, "");
     }
 
     @Test
@@ -374,87 +245,64 @@ public class BasicValidationIT
         setValue("1/1/2001", "10:00");
         resetValidationCount();
 
-        setInputValue(timeInput, "");
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(INCOMPLETE_INPUT_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "");
+        getTimeInput().sendKeys(Keys.TAB);
+        assertValidation(false, INCOMPLETE_INPUT_ERROR_MESSAGE);
     }
 
     @Test
     public void incompleteInput_setDateInputValue_blur_assertValidity() {
-        setInputValue(dateInput, "1/1/2000");
-        dateInput.sendKeys(Keys.TAB);
-        timeInput.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(INCOMPLETE_INPUT_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getDateInput(), "1/1/2000");
+        getDateInput().sendKeys(Keys.TAB);
+        getTimeInput().sendKeys(Keys.TAB);
+        assertValidation(false, INCOMPLETE_INPUT_ERROR_MESSAGE);
     }
 
     @Test
     public void incompleteInput_setTimeInputValue_blur_assertValidity() {
-        setInputValue(timeInput, "10:00");
-        timeInput.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
-        assertErrorMessage(INCOMPLETE_INPUT_ERROR_MESSAGE);
-        assertValidationCount(1);
+        setInputValue(getTimeInput(), "10:00");
+        getTimeInput().sendKeys(Keys.TAB);
+        assertValidation(false, INCOMPLETE_INPUT_ERROR_MESSAGE);
     }
 
     @Test
     public void incompleteInput_setValue_clearValue_assertValidity() {
-        setInputValue(dateInput, "1/1/2000");
-        timeInput.sendKeys(Keys.ENTER);
+        setInputValue(getDateInput(), "1/1/2000");
+        getTimeInput().sendKeys(Keys.ENTER);
         resetValidationCount();
 
-        $("button").id(CLEAR_VALUE_BUTTON).click();
-        assertServerValid();
-        assertClientValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
-    }
-
-    @Override
-    protected void assertValidationCount(int expected) {
-        super.assertValidationCount(expected);
+        clickElementWithJs(CLEAR_VALUE_BUTTON);
+        assertValidation(true, "");
     }
 
     @Test
     public void incompleteInput_setDateInputValue_blur_clearValue_assertValidity() {
-        setInputValue(dateInput, "1/1/2000");
-        dateInput.sendKeys(Keys.TAB);
-        timeInput.sendKeys(Keys.TAB);
+        setInputValue(getDateInput(), "1/1/2000");
+        getDateInput().sendKeys(Keys.TAB);
+        getTimeInput().sendKeys(Keys.TAB);
         resetValidationCount();
 
-        $("button").id(CLEAR_VALUE_BUTTON).click();
-        assertServerValid();
-        assertClientValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        clickElementWithJs(CLEAR_VALUE_BUTTON);
+        assertValidation(true, "");
     }
 
     @Test
     public void incompleteInput_setTimeInputValue_blur_clearValue_assertValidity() {
-        setInputValue(timeInput, "10:00");
-        timeInput.sendKeys(Keys.TAB);
+        setInputValue(getTimeInput(), "10:00");
+        getTimeInput().sendKeys(Keys.TAB);
         resetValidationCount();
 
-        $("button").id(CLEAR_VALUE_BUTTON).click();
-        assertServerValid();
-        assertClientValid();
-        assertErrorMessage("");
-        assertValidationCount(1);
+        clickElementWithJs(CLEAR_VALUE_BUTTON);
+        assertValidation(true, "");
     }
 
     @Test
     public void detach_attach_preservesInvalidState() {
-        setInputValue(dateInput, "INVALID");
+        setInputValue(getDateInput(), "INVALID");
 
         detachAndReattachField();
 
-        assertServerInvalid();
-        assertClientInvalid();
+        assertInvalid();
     }
 
     @Test
@@ -462,8 +310,7 @@ public class BasicValidationIT
         detachField();
         attachAndInvalidateField();
 
-        assertServerInvalid();
-        assertClientInvalid();
+        assertInvalid();
     }
 
     @Test
@@ -473,31 +320,15 @@ public class BasicValidationIT
         attachField();
         showAndInvalidateField();
 
-        assertServerInvalid();
-        assertClientInvalid();
+        assertInvalid();
     }
 
     @Test
     public void clientSideInvalidStateIsNotPropagatedToServer() {
-        setInputValue(dateInput, "INVALID");
+        setInputValue(getDateInput(), "INVALID");
 
         executeScript("arguments[0].invalid = false", testField);
 
         assertServerInvalid();
-    }
-
-    protected DateTimePickerElement getTestField() {
-        return $(DateTimePickerElement.class).first();
-    }
-
-    private void setValue(String dateValue, String timeValue) {
-        setInputValue(dateInput, dateValue);
-        setInputValue(timeInput, timeValue);
-    }
-
-    private void setInputValue(TestBenchElement input, String value) {
-        input.focus();
-        input.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
-        input.sendKeys(value, Keys.ENTER);
     }
 }
