@@ -366,10 +366,17 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     for (let i = 0; i < updatedPageCount; i++) {
       let page = firstPage + i;
       let slice = items.slice(i * grid.pageSize, (i + 1) * grid.pageSize);
-      cache[page] = slice;
+      cache[page] ??= [];
 
-      grid.$connector.doSelection(slice.filter((item) => item.selected));
-      grid.$connector.doDeselection(slice.filter((item) => !item.selected && selectedKeys[item.key]));
+      for (let j = 0; j < slice.length; j++) {
+        const item = slice[j];
+        if (item != null) {
+          cache[page][j] = item;
+        }
+      }
+
+      grid.$connector.doSelection(slice.filter((item) => item != null && item.selected));
+      grid.$connector.doDeselection(slice.filter((item) => item != null && !item.selected && selectedKeys[item.key]));
 
       const updatedItems = updateGridCache(page);
       if (updatedItems) {
