@@ -55,13 +55,11 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableComparator;
-import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 /**
@@ -222,9 +220,8 @@ public class TreeGrid<T> extends Grid<T>
         public TreeGridDataCommunicator(Element element,
                 CompositeDataGenerator<T> dataGenerator,
                 ArrayUpdater arrayUpdater,
-                SerializableConsumer<JsonArray> dataUpdater,
                 SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
-            super(dataGenerator, arrayUpdater, dataUpdater, element.getNode(),
+            super(dataGenerator, arrayUpdater, element.getNode(),
                     uniqueKeyProviderSupplier);
             this.element = element;
         }
@@ -262,7 +259,7 @@ public class TreeGrid<T> extends Grid<T>
                 GridArrayUpdater arrayUpdater,
                 SerializableSupplier<ValueProvider<T, String>> uniqueKeyProviderSupplier) {
             return new TreeGridDataCommunicator<>(element, dataGenerator,
-                    arrayUpdater, null, uniqueKeyProviderSupplier);
+                    arrayUpdater, uniqueKeyProviderSupplier);
         }
     }
 
