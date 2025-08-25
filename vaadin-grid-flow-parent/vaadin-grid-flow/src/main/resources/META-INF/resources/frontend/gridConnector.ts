@@ -318,8 +318,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
    * @returns an array of the updated items for the page, or undefined if no items were cached for the page
    */
   const updateGridCache = function (page) {
-    const items = cache[page];
-
     let gridCache = dataProviderController.rootCache;
 
     // Force update unless there's a callback waiting
@@ -327,10 +325,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       // Update the items in the grid cache or set an array of undefined items
       // to remove the page from the grid cache if there are no corresponding items
       // in the connector cache.
-      gridCache.setPage(page, items || Array.from({ length: grid.pageSize }));
+      gridCache.setPage(page, cache[page] || Array.from({ length: grid.pageSize }));
     }
-
-    return items;
   };
 
   /**
