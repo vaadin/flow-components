@@ -119,6 +119,7 @@ public class DateTimePicker
     private LocalDateTime min;
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDateTime>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
+    private boolean validationDeferredUntilInputComplete;
 
     private final Validator<LocalDateTime> defaultValidator = (value,
             context) -> {
@@ -152,7 +153,7 @@ public class DateTimePicker
         }
 
         // Report error if only one of the pickers has a value
-        if (isInputIncomplete()) {
+        if (!validationDeferredUntilInputComplete && isInputIncomplete()) {
             return ValidationResult.error(getI18nErrorMessage(
                     DateTimePickerI18n::getIncompleteInputErrorMessage));
         }
@@ -348,7 +349,20 @@ public class DateTimePicker
     }
 
     private void addValidationListeners() {
-        addValueChangeListener(e -> validate());
+        addValueChangeListener(e -> {
+            if (isInputIncomplete()) {
+                validationDeferredUntilInputComplete = true;
+                return;
+            }
+            validationDeferredUntilInputComplete = false;
+            validate();
+        });
+        getElement().addEventListener("change", e -> {
+            if (validationDeferredUntilInputComplete) {
+                validationDeferredUntilInputComplete = false;
+                validate(true);
+            }
+        });
         getElement().addEventListener("unparsable-change", e -> validate(true));
         // Add listeners to invalidate a required DateTimePicker when:
         // 1. It's initially empty
