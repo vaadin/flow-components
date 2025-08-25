@@ -121,6 +121,27 @@ public class ConfirmDialog extends Component
         }
     }
 
+    /**
+     * Event that is fired when the dialog's opened state changes.
+     * <p>
+     * Note that this event fires immediately when the opened property changes,
+     * which, when closing the dialog, is before the closing animation has
+     * finished. To wait for the animation to finish, listen for the
+     * {@link ClosedEvent} event.
+     */
+    public static class OpenedChangeEvent extends ComponentEvent<ConfirmDialog> {
+        private final boolean opened;
+
+        public OpenedChangeEvent(ConfirmDialog source, boolean fromClient) {
+            super(source, fromClient);
+            this.opened = source.isOpened();
+        }
+
+        public boolean isOpened() {
+            return opened;
+        }
+    }
+
     @Override
     public String getWidth() {
         return getElement().getProperty("width");
@@ -222,8 +243,9 @@ public class ConfirmDialog extends Component
         // as that would cause the auto add controller to remove the dialog from
         // the UI before other event listeners (confirm, reject, cancel) are
         // fired.
-        getElement().addEventListener("opened-changed", event -> close())
-                .setFilter("event.detail.value === false");
+        getElement().addEventListener("opened-changed", event ->
+                        handleClientSideOpenedStateChange(event.getEventData().getBoolean("event.detail.value")))
+                .addEventData("event.detail.value");
     }
 
     /**
@@ -586,6 +608,23 @@ public class ConfirmDialog extends Component
     }
 
     /**
+     * Add a listener for when the confirm dialog's opened state changes.
+     * <p>
+     * Note that this event fires immediately when the opened property changes,
+     * which, when closing the dialog, is before the closing animation has
+     * finished. To wait for the animation to finish, use
+     * {@link #addClosedListener(ComponentEventListener)}.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
+     */
+    public Registration addOpenedChangeListener(
+            ComponentEventListener<OpenedChangeEvent> listener) {
+        return addListener(OpenedChangeEvent.class, listener);
+    }
+
+    /**
      * Sets confirmation dialog header text
      */
     public void setHeader(String header) {
@@ -649,8 +688,21 @@ public class ConfirmDialog extends Component
      *            close it
      */
     public void setOpened(boolean opened) {
+        if (isOpened() != opened) {
+            doSetOpened(opened, false);
+        }
+    }
+
+    protected void handleClientSideOpenedStateChange(boolean opened) {
+        if (isOpened() != opened) {
+            doSetOpened(opened, true);
+        }
+    }
+
+    private void doSetOpened(boolean opened, boolean fromClient) {
         setModality(opened);
         getElement().setProperty("opened", opened);
+        fireEvent(new OpenedChangeEvent(this, fromClient));
     }
 
     /**
