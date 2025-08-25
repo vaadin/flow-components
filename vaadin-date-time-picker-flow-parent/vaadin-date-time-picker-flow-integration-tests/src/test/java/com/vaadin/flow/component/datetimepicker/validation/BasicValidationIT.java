@@ -257,13 +257,7 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
         setValue("1/1/2001", "10:00");
         resetValidationCount();
 
-        getDateInput().sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME),
-                Keys.BACK_SPACE);
-        getDateInput().sendKeys(Keys.ENTER);
-        getDateInput().sendKeys(Keys.TAB);
-        getTimeInput().sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME),
-                Keys.BACK_SPACE);
-        getTimeInput().sendKeys(Keys.ENTER);
+        setValue("", "");
         getTimeInput().sendKeys(Keys.TAB);
 
         assertValidation(true, "");
