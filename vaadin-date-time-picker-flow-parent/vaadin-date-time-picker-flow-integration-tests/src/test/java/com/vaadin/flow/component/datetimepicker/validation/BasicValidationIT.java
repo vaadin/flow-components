@@ -32,7 +32,6 @@ import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-date-time-picker/validation/basic")
 public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
-
     @Test
     public void fieldIsInitiallyValid() {
         assertValid();
