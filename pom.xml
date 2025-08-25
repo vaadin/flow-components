@@ -60,6 +60,7 @@
         <module>vaadin-spreadsheet-flow-parent</module>
         <module>vaadin-field-highlighter-flow-parent</module>
         <module>vaadin-side-nav-flow-parent</module>
+        <module>vaadin-stepper-flow-parent</module>
         <module>vaadin-master-detail-layout-flow-parent</module>
     </modules>
     <scm>
