@@ -84,9 +84,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-text-area")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.5")
+@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.6")
 @JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/text-area", version = "24.8.5")
+@NpmPackage(value = "@vaadin/text-area", version = "24.8.6")
 @JsModule("@vaadin/text-area/src/vaadin-text-area.js")
 public class TextArea extends TextFieldBase<TextArea, String>
         implements HasAllowedCharPattern, HasThemeVariant<TextAreaVariant> {
