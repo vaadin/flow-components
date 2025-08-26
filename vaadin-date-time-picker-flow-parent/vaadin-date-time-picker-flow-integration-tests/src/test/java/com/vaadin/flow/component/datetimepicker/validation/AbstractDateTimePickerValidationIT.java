@@ -68,16 +68,6 @@ public abstract class AbstractDateTimePickerValidationIT
         assertValidationCount(0);
     }
 
-    void assertValid() {
-        assertClientValid();
-        assertServerValid();
-    }
-
-    void assertInvalid() {
-        assertClientInvalid();
-        assertServerInvalid();
-    }
-
     TestBenchElement getDateInput() {
         return dateInput;
     }

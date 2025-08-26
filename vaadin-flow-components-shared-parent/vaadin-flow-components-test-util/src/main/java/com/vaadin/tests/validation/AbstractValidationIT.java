@@ -81,6 +81,16 @@ public abstract class AbstractValidationIT<T extends HasValidation>
                 isServerValid());
     }
 
+    protected void assertValid() {
+        assertClientValid();
+        assertServerValid();
+    }
+
+    protected void assertInvalid() {
+        assertClientInvalid();
+        assertServerInvalid();
+    }
+
     private boolean isServerValid() {
         $("button").id(SERVER_VALIDITY_STATE_BUTTON).click();
 
