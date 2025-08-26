@@ -315,22 +315,20 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
    * Updates the cache for the given page for grid or tree-grid.
    *
    * @param page index of the page to update
-   * @returns an array of the updated items for the page, or undefined if no items were cached for the page
    */
   const updateGridCache = function (page) {
-    const items = cache[page];
+    const { rootCache } = dataProviderController;
 
-    let gridCache = dataProviderController.rootCache;
-
-    // Force update unless there's a callback waiting
-    if (gridCache && !gridCache.pendingRequests[page]) {
-      // Update the items in the grid cache or set an array of undefined items
-      // to remove the page from the grid cache if there are no corresponding items
-      // in the connector cache.
-      gridCache.setPage(page, items || Array.from({ length: grid.pageSize }));
+    // Force update unless there's a callback waiting.
+    if (cache[page] && rootCache.pendingRequests[page]) {
+      return;
     }
 
-    return items;
+    for (let i = 0; i < grid.pageSize; i++) {
+      const index = page * grid.pageSize + i;
+      const item = cache[page]?.[i];
+      rootCache.items[index] = item;
+    }
   };
 
   /**
@@ -364,18 +362,14 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     currentUpdateSetRange = [firstPage, firstPage + updatedPageCount - 1];
 
     for (let i = 0; i < updatedPageCount; i++) {
-      let page = firstPage + i;
-      let slice = items.slice(i * grid.pageSize, (i + 1) * grid.pageSize);
-      cache[page] = slice;
-
-      grid.$connector.doSelection(slice.filter((item) => item.selected));
-      grid.$connector.doDeselection(slice.filter((item) => !item.selected && selectedKeys[item.key]));
-
-      const updatedItems = updateGridCache(page);
-      if (updatedItems) {
-        itemsUpdated(updatedItems);
-      }
+      const page = firstPage + i;
+      cache[page] = items.slice(i * grid.pageSize, (i + 1) * grid.pageSize);
+      updateGridCache(page);
     }
+
+    grid.$connector.doSelection(items.filter((item) => item.selected));
+    grid.$connector.doDeselection(items.filter((item) => !item.selected && selectedKeys[item.key]));
+    itemsUpdated(items);
 
     grid.__updateVisibleRows();
   };
@@ -476,11 +470,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
         delete cache[page];
         updateGridCache(page);
       }
-    }
-    let cacheToClear = dataProviderController.rootCache;
-    const endIndex = index + updatedPageCount * grid.pageSize;
-    for (let itemIndex = index; itemIndex < endIndex; itemIndex++) {
-      delete cacheToClear.items[itemIndex];
     }
     grid.__updateVisibleRows();
   };
