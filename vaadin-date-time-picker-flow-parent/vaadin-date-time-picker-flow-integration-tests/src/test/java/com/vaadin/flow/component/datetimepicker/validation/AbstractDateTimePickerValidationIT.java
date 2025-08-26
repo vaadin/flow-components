@@ -40,24 +40,24 @@ public abstract class AbstractDateTimePickerValidationIT
         return $(DateTimePickerElement.class).first();
     }
 
-    void setValue(String dateValue, String timeValue) {
+    protected void setValue(String dateValue, String timeValue) {
         setInputValue(dateInput, dateValue);
         setInputValue(timeInput, timeValue);
     }
 
-    void setDateInputValue(String dateValue) {
+    protected void setDateInputValue(String dateValue) {
         setInputValue(dateInput, dateValue);
     }
 
-    void setTimeInputValue(String timeValue) {
+    protected void setTimeInputValue(String timeValue) {
         setInputValue(timeInput, timeValue);
     }
 
-    TestBenchElement getDateInput() {
+    protected TestBenchElement getDateInput() {
         return dateInput;
     }
 
-    TestBenchElement getTimeInput() {
+    protected TestBenchElement getTimeInput() {
         return timeInput;
     }
 
