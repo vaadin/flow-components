@@ -51,20 +51,6 @@ public abstract class AbstractDateTimePickerValidationIT
         input.sendKeys(value, Keys.ENTER);
     }
 
-    void assertValidation(boolean valid, String errorMessage) {
-        if (valid) {
-            assertValid();
-        } else {
-            assertInvalid();
-        }
-        assertErrorMessage(errorMessage);
-        assertValidationCount(1);
-    }
-
-    void assertNoValidation() {
-        assertValidationCount(0);
-    }
-
     TestBenchElement getDateInput() {
         return dateInput;
     }

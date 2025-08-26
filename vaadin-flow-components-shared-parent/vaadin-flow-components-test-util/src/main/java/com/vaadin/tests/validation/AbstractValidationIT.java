@@ -91,6 +91,20 @@ public abstract class AbstractValidationIT<T extends HasValidation>
         assertServerInvalid();
     }
 
+    protected void assertValidation(boolean valid, String errorMessage) {
+        if (valid) {
+            assertValid();
+        } else {
+            assertInvalid();
+        }
+        assertErrorMessage(errorMessage);
+        assertValidationCount(1);
+    }
+
+    protected void assertNoValidation() {
+        assertValidationCount(0);
+    }
+
     private boolean isServerValid() {
         $("button").id(SERVER_VALIDITY_STATE_BUTTON).click();
 
