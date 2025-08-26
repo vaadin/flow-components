@@ -45,10 +45,12 @@ public abstract class AbstractDateTimePickerValidationIT
         setInputValue(timeInput, timeValue);
     }
 
-    void setInputValue(TestBenchElement input, String value) {
-        input.focus();
-        input.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
-        input.sendKeys(value, Keys.ENTER);
+    void setDateInputValue(String dateValue) {
+        setInputValue(dateInput, dateValue);
+    }
+
+    void setTimeInputValue(String timeValue) {
+        setInputValue(timeInput, timeValue);
     }
 
     TestBenchElement getDateInput() {
@@ -57,5 +59,11 @@ public abstract class AbstractDateTimePickerValidationIT
 
     TestBenchElement getTimeInput() {
         return timeInput;
+    }
+
+    private void setInputValue(TestBenchElement input, String value) {
+        input.focus();
+        input.sendKeys(Keys.chord(Keys.SHIFT, Keys.HOME), Keys.BACK_SPACE);
+        input.sendKeys(value, Keys.ENTER);
     }
 }

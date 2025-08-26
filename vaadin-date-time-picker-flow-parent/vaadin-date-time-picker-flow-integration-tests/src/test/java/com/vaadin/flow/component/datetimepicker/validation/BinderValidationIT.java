@@ -75,16 +75,16 @@ public class BinderValidationIT extends AbstractDateTimePickerValidationIT {
         setValue("1/1/2000", "12:00");
         assertValidation(true, "");
 
-        setInputValue(getDateInput(), "");
+        setDateInputValue("");
         assertValidation(false, INCOMPLETE_INPUT_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "");
+        setTimeInputValue("");
         assertValidation(false, REQUIRED_ERROR_MESSAGE);
 
-        setInputValue(getDateInput(), "INVALID");
+        setDateInputValue("INVALID");
         assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
 
-        setInputValue(getDateInput(), "");
+        setDateInputValue("");
         getTimeInput().sendKeys(Keys.TAB);
         assertValidation(false, REQUIRED_ERROR_MESSAGE);
     }
@@ -95,25 +95,25 @@ public class BinderValidationIT extends AbstractDateTimePickerValidationIT {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-03-03T11:00",
                 Keys.ENTER);
 
-        setInputValue(getDateInput(), "1/1/2000");
+        setDateInputValue("1/1/2000");
         assertValidation(false, MIN_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "10:00");
+        setTimeInputValue("10:00");
         assertValidation(false, MIN_ERROR_MESSAGE);
 
-        setInputValue(getDateInput(), "2/2/2000");
+        setDateInputValue("2/2/2000");
         assertValidation(false, MIN_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "12:00");
+        setTimeInputValue("12:00");
         assertValidation(false, UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "13:00");
+        setTimeInputValue("13:00");
         assertValidation(false, UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        setInputValue(getDateInput(), "3/3/2000");
+        setDateInputValue("3/3/2000");
         assertValidation(false, UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "11:00");
+        setTimeInputValue("11:00");
         assertValid();
         assertValidationCount(1);
     }
@@ -124,25 +124,25 @@ public class BinderValidationIT extends AbstractDateTimePickerValidationIT {
         $("input").id(EXPECTED_VALUE_INPUT).sendKeys("2000-01-01T13:00",
                 Keys.ENTER);
 
-        setInputValue(getDateInput(), "3/3/2000");
+        setDateInputValue("3/3/2000");
         assertValidation(false, MAX_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "13:00");
+        setTimeInputValue("13:00");
         assertValidation(false, MAX_ERROR_MESSAGE);
 
-        setInputValue(getDateInput(), "2/2/2000");
+        setDateInputValue("2/2/2000");
         assertValidation(false, MAX_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "12:00");
+        setTimeInputValue("12:00");
         assertValidation(false, UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "11:00");
+        setTimeInputValue("11:00");
         assertValidation(false, UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        setInputValue(getDateInput(), "1/1/2000");
+        setDateInputValue("1/1/2000");
         assertValidation(false, UNEXPECTED_VALUE_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "13:00");
+        setTimeInputValue("13:00");
         assertValid();
         assertValidationCount(1);
     }
@@ -167,19 +167,19 @@ public class BinderValidationIT extends AbstractDateTimePickerValidationIT {
         setValue("1/1/2000", "INVALID");
         assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "10:00");
+        setTimeInputValue("10:00");
         assertValidation(true, "");
 
-        setInputValue(getDateInput(), "INVALID");
+        setDateInputValue("INVALID");
         assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
     }
 
     @Test
     public void badInput_setValue_clearValue_assertValidity() {
-        setInputValue(getDateInput(), "INVALID");
+        setDateInputValue("INVALID");
         assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "INVALID");
+        setTimeInputValue("INVALID");
         assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
 
         clickElementWithJs(CLEAR_VALUE_BUTTON);

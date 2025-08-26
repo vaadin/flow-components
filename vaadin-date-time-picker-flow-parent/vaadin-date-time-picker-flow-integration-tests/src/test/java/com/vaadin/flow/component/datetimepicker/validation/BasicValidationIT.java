@@ -88,21 +88,21 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
         setValue("1/1/2000", "12:00");
         assertValidation(true, "");
 
-        setInputValue(getTimeInput(), "");
+        setTimeInputValue("");
         assertValidation(false, INCOMPLETE_INPUT_ERROR_MESSAGE);
 
-        setInputValue(getDateInput(), "");
+        setDateInputValue("");
         assertValidation(false, REQUIRED_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "");
+        setTimeInputValue("");
         assertInvalid();
         assertErrorMessage(REQUIRED_ERROR_MESSAGE);
         assertNoValidation();
 
-        setInputValue(getTimeInput(), "INVALID");
+        setTimeInputValue("INVALID");
         assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "");
+        setTimeInputValue("");
         getTimeInput().sendKeys(Keys.TAB);
         assertValidation(false, REQUIRED_ERROR_MESSAGE);
     }
@@ -111,25 +111,25 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
     public void min_changeValue_assertValidity() {
         $("input").id(MIN_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
 
-        setInputValue(getDateInput(), "1/1/2000");
+        setDateInputValue("1/1/2000");
         assertValidation(false, MIN_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "11:00");
+        setTimeInputValue("11:00");
         assertValidation(false, MIN_ERROR_MESSAGE);
 
-        setInputValue(getDateInput(), "2/2/2000");
+        setDateInputValue("2/2/2000");
         assertValidation(false, MIN_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "12:00");
+        setTimeInputValue("12:00");
         assertValidation(true, "");
 
-        setInputValue(getTimeInput(), "13:00");
+        setTimeInputValue("13:00");
         assertValidation(true, "");
 
-        setInputValue(getDateInput(), "3/3/2000");
+        setDateInputValue("3/3/2000");
         assertValidation(true, "");
 
-        setInputValue(getTimeInput(), "11:00");
+        setTimeInputValue("11:00");
         assertValidation(true, "");
     }
 
@@ -137,28 +137,28 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
     public void max_changeDateInputValue_assertValidity() {
         $("input").id(MAX_INPUT).sendKeys("2000-02-02T12:00", Keys.ENTER);
 
-        setInputValue(getDateInput(), "3/3/2000");
+        setDateInputValue("3/3/2000");
         assertValidation(false, MAX_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "12:00");
+        setTimeInputValue("12:00");
         assertValidation(false, MAX_ERROR_MESSAGE);
 
-        setInputValue(getDateInput(), "2/2/2000");
+        setDateInputValue("2/2/2000");
         assertValidation(true, "");
 
-        setInputValue(getTimeInput(), "13:00");
+        setTimeInputValue("13:00");
         assertValidation(false, MAX_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "12:00");
+        setTimeInputValue("12:00");
         assertValidation(true, "");
 
-        setInputValue(getTimeInput(), "11:00");
+        setTimeInputValue("11:00");
         assertValidation(true, "");
 
-        setInputValue(getDateInput(), "1/1/2000");
+        setDateInputValue("1/1/2000");
         assertValidation(true, "");
 
-        setInputValue(getTimeInput(), "13:00");
+        setTimeInputValue("13:00");
         assertValidation(true, "");
     }
 
@@ -176,16 +176,16 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
         setValue("1/1/2000", "INVALID");
         assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
 
-        setInputValue(getTimeInput(), "10:00");
+        setTimeInputValue("10:00");
         assertValidation(true, "");
 
-        setInputValue(getDateInput(), "INVALID");
+        setDateInputValue("INVALID");
         assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
     }
 
     @Test
     public void badInput_setDateInputValue_blur_assertValidity() {
-        setInputValue(getDateInput(), "INVALID");
+        setDateInputValue("INVALID");
         getDateInput().sendKeys(Keys.TAB);
         getTimeInput().sendKeys(Keys.TAB);
         assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
@@ -193,14 +193,14 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
 
     @Test
     public void badInput_setTimeInputValue_blur_assertValidity() {
-        setInputValue(getTimeInput(), "INVALID");
+        setTimeInputValue("INVALID");
         getTimeInput().sendKeys(Keys.TAB);
         assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
     }
 
     @Test
     public void badInput_setValue_clearValue_assertValidity() {
-        setInputValue(getDateInput(), "INVALID");
+        setDateInputValue("INVALID");
         assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
 
         clickElementWithJs(CLEAR_VALUE_BUTTON);
@@ -209,7 +209,7 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
 
     @Test
     public void badInput_setDateInputValue_blur_clearValue_assertValidity() {
-        setInputValue(getDateInput(), "INVALID");
+        setDateInputValue("INVALID");
         getDateInput().sendKeys(Keys.TAB);
         getTimeInput().sendKeys(Keys.TAB);
         assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
@@ -220,7 +220,7 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
 
     @Test
     public void badInput_setTimeInputValue_blur_clearValue_assertValidity() {
-        setInputValue(getTimeInput(), "INVALID");
+        setTimeInputValue("INVALID");
         getTimeInput().sendKeys(Keys.TAB);
         assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
 
@@ -230,17 +230,17 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
 
     @Test
     public void incompleteInput_assertValidity() {
-        setInputValue(getDateInput(), "1/1/2000");
+        setDateInputValue("1/1/2000");
         getDateInput().sendKeys(Keys.chord(Keys.SHIFT, Keys.TAB));
         assertValidation(false, INCOMPLETE_INPUT_ERROR_MESSAGE);
     }
 
     @Test
     public void incompleteInput_changeToValidValue_assertValidity() {
-        setInputValue(getDateInput(), "1/1/2000");
+        setDateInputValue("1/1/2000");
         resetValidationCount();
 
-        setInputValue(getTimeInput(), "10:00");
+        setTimeInputValue("10:00");
         assertValidation(true, "");
     }
 
@@ -249,14 +249,14 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
         setValue("1/1/2001", "10:00");
         resetValidationCount();
 
-        setInputValue(getTimeInput(), "");
+        setTimeInputValue("");
         getTimeInput().sendKeys(Keys.TAB);
         assertValidation(false, INCOMPLETE_INPUT_ERROR_MESSAGE);
     }
 
     @Test
     public void incompleteInput_setDateInputValue_blur_assertValidity() {
-        setInputValue(getDateInput(), "1/1/2000");
+        setDateInputValue("1/1/2000");
         getDateInput().sendKeys(Keys.TAB);
         getTimeInput().sendKeys(Keys.TAB);
         assertValidation(false, INCOMPLETE_INPUT_ERROR_MESSAGE);
@@ -264,14 +264,14 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
 
     @Test
     public void incompleteInput_setTimeInputValue_blur_assertValidity() {
-        setInputValue(getTimeInput(), "10:00");
+        setTimeInputValue("10:00");
         getTimeInput().sendKeys(Keys.TAB);
         assertValidation(false, INCOMPLETE_INPUT_ERROR_MESSAGE);
     }
 
     @Test
     public void incompleteInput_setValue_clearValue_assertValidity() {
-        setInputValue(getDateInput(), "1/1/2000");
+        setDateInputValue("1/1/2000");
         getTimeInput().sendKeys(Keys.ENTER);
         resetValidationCount();
 
@@ -281,7 +281,7 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
 
     @Test
     public void incompleteInput_setDateInputValue_blur_clearValue_assertValidity() {
-        setInputValue(getDateInput(), "1/1/2000");
+        setDateInputValue("1/1/2000");
         getDateInput().sendKeys(Keys.TAB);
         getTimeInput().sendKeys(Keys.TAB);
         resetValidationCount();
@@ -292,7 +292,7 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
 
     @Test
     public void incompleteInput_setTimeInputValue_blur_clearValue_assertValidity() {
-        setInputValue(getTimeInput(), "10:00");
+        setTimeInputValue("10:00");
         getTimeInput().sendKeys(Keys.TAB);
         resetValidationCount();
 
@@ -302,7 +302,7 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
 
     @Test
     public void detach_attach_preservesInvalidState() {
-        setInputValue(getDateInput(), "INVALID");
+        setDateInputValue("INVALID");
 
         detachAndReattachField();
 
@@ -329,7 +329,7 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
 
     @Test
     public void clientSideInvalidStateIsNotPropagatedToServer() {
-        setInputValue(getDateInput(), "INVALID");
+        setDateInputValue("INVALID");
 
         executeScript("arguments[0].invalid = false", testField);
 
