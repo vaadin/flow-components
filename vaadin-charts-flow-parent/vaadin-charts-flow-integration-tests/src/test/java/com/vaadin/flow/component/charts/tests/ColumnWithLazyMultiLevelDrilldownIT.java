@@ -36,7 +36,7 @@ public class ColumnWithLazyMultiLevelDrilldownIT extends AbstractTBTest {
         getFirstDrilldownPoint(chart).click();
         assertLogText("DrilldownEvent: Costa Rica");
 
-        getDrillUpButton(chart).click();
+        getDrillUpButton(chart, "Latin America and Caribbean").click();
         assertLogText("ChartDrillupEvent");
     }
 
@@ -44,8 +44,15 @@ public class ColumnWithLazyMultiLevelDrilldownIT extends AbstractTBTest {
         return getElementFromShadowRoot(chart, ".highcharts-drilldown-point");
     }
 
-    private WebElement getDrillUpButton(ChartElement chart) {
-        return getElementFromShadowRoot(chart, "button");
+    private WebElement getDrillUpButton(ChartElement chart, String label) {
+        var elements = getElementsFromShadowRoot(chart,
+                ".highcharts-button.highcharts-breadcrumbs-button.highcharts-button-normal");
+        for (TestBenchElement drillupButton : elements) {
+            if (drillupButton.getText().contains(label)) {
+                return drillupButton;
+            }
+        }
+        return null;
     }
 
     private void assertLogText(String text) {
