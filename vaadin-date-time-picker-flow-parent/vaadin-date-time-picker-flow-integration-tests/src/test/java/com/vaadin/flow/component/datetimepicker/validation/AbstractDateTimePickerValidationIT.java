@@ -53,11 +53,9 @@ public abstract class AbstractDateTimePickerValidationIT
 
     void assertValidation(boolean valid, String errorMessage) {
         if (valid) {
-            assertClientValid();
-            assertServerValid();
+            assertValid();
         } else {
-            assertClientInvalid();
-            assertServerInvalid();
+            assertInvalid();
         }
         assertErrorMessage(errorMessage);
         assertValidationCount(1);
