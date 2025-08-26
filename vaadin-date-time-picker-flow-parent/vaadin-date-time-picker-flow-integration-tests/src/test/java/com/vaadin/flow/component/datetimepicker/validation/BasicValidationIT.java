@@ -44,7 +44,8 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
         getDateInput().sendKeys(Keys.TAB);
         getTimeInput().sendKeys(Keys.TAB);
         assertValid();
-        assertNoValidation(null);
+        assertErrorMessage(null);
+        assertNoValidation();
     }
 
     @Test
@@ -54,7 +55,8 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
         getDateInput().sendKeys(Keys.TAB);
         getTimeInput().sendKeys(Keys.TAB);
         assertValid();
-        assertNoValidation(null);
+        assertErrorMessage(null);
+        assertNoValidation();
     }
 
     @Test
@@ -64,7 +66,8 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
         getDateInput().sendKeys(Keys.TAB);
         getTimeInput().sendKeys(Keys.TAB);
         assertValid();
-        assertNoValidation(null);
+        assertErrorMessage(null);
+        assertNoValidation();
     }
 
     @Test
@@ -93,7 +96,8 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
 
         setInputValue(getTimeInput(), "");
         assertInvalid();
-        assertNoValidation(REQUIRED_ERROR_MESSAGE);
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
+        assertNoValidation();
 
         setInputValue(getTimeInput(), "INVALID");
         assertValidation(false, BAD_INPUT_ERROR_MESSAGE);

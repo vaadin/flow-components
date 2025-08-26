@@ -45,14 +45,16 @@ public class BinderValidationIT extends AbstractDateTimePickerValidationIT {
         getDateInput().sendKeys(Keys.TAB);
         getTimeInput().sendKeys(Keys.TAB);
         assertValid();
-        assertNoValidation(null);
+        assertErrorMessage(null);
+        assertNoValidation();
     }
 
     @Test
     public void required_triggerTimeInputBlur_assertValidity() {
         getTimeInput().sendKeys(Keys.TAB);
         assertValid();
-        assertNoValidation(null);
+        assertErrorMessage(null);
+        assertNoValidation();
     }
 
     @Test

@@ -61,8 +61,7 @@ public abstract class AbstractDateTimePickerValidationIT
         assertValidationCount(1);
     }
 
-    void assertNoValidation(String errorMessage) {
-        assertErrorMessage(errorMessage);
+    void assertNoValidation() {
         assertValidationCount(0);
     }
 
