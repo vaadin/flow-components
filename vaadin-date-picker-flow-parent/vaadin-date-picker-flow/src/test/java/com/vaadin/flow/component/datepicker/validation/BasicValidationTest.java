@@ -22,10 +22,9 @@ import org.junit.Test;
 
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
-
-import elemental.json.Json;
 
 public class BasicValidationTest
         extends AbstractBasicValidationTest<DatePicker, LocalDate> {
@@ -141,7 +140,7 @@ public class BasicValidationTest
 
     private void fireUnparsableChangeDomEvent() {
         DomEvent unparsableChangeDomEvent = new DomEvent(testField.getElement(),
-                "unparsable-change", Json.createObject());
+                "unparsable-change", JacksonUtils.createObjectNode());
         testField.getElement().getNode().getFeature(ElementListenerMap.class)
                 .fireEvent(unparsableChangeDomEvent);
     }

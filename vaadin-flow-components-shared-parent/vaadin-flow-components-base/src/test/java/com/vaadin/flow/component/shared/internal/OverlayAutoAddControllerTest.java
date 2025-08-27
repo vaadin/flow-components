@@ -28,12 +28,12 @@ import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementUtil;
 import com.vaadin.flow.function.SerializableSupplier;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.router.BeforeLeaveEvent;
 import com.vaadin.flow.router.internal.BeforeLeaveHandler;
 import com.vaadin.flow.server.VaadinSession;
 
-import elemental.json.Json;
 import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
@@ -351,8 +351,9 @@ public class OverlayAutoAddControllerTest {
 
     private void fireClosedEvent(Component component) {
         Element element = component.getElement();
-        element.getNode().getFeature(ElementListenerMap.class).fireEvent(
-                new DomEvent(element, "closed", Json.createObject()));
+        element.getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(new DomEvent(element, "closed",
+                        JacksonUtils.createObjectNode()));
     }
 
     @Tag("test")
