@@ -30,6 +30,7 @@ import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.commands.TestBenchCommandExecutor;
 import com.vaadin.tests.AbstractComponentIT;
+import org.openqa.selenium.Keys;
 
 /**
  * Integration tests for the {@link DateTimePickerPage}.
@@ -77,6 +78,7 @@ public class DateTimePickerIT extends AbstractComponentIT {
                 message.getText().contains("1987-04-10 14:42"));
 
         picker.setDate(null);
+        picker.sendKeys(Keys.chord(Keys.SHIFT, Keys.TAB));
         Assert.assertEquals("No date is selected", message.getText());
     }
 
