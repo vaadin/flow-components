@@ -354,8 +354,10 @@ public class DateTimePicker
             // client side "change" event:
             // 1. The input is still incomplete but the component is blurred
             // 2. Both pickers are cleared after an incomplete state
-            if (!isEmpty() && (isInputIncomplete()
-                    || datePicker.isEmpty() && timePicker.isEmpty())) {
+            var isValueEmpty = isEmpty();
+            var shouldBeEmpty = isInputIncomplete()
+                    || (datePicker.isEmpty() && timePicker.isEmpty());
+            if (!isValueEmpty && shouldBeEmpty) {
                 // Called with the flag "fromClient" set "false" in order to
                 // differentiate the state from when the user is still
                 // interacting with the component.
