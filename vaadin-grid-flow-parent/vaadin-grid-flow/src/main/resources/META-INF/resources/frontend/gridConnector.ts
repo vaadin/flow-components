@@ -349,13 +349,13 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   };
 
   grid.$connector.set = function (startIndex, items) {
-    const firstPage = startIndex / grid.pageSize;
+    const firstPage = Math.floor(startIndex / grid.pageSize);
     const updatedPageCount = Math.ceil(items.length / grid.pageSize);
 
     for (let i = 0; i < updatedPageCount; i++) {
       const page = firstPage + i;
       for (let j = 0; j < grid.pageSize; j++) {
-        const item = items[page * grid.pageSize + j];
+        const item = items[i * grid.pageSize + j];
         if (item) {
           cache[page] ??= [];
           cache[page][j] = item;
@@ -367,7 +367,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     grid.$connector.doSelection(items.filter((item) => item.selected));
     grid.$connector.doDeselection(items.filter((item) => !item.selected && selectedKeys[item.key]));
     itemsUpdated(items);
-
     grid.__updateVisibleRows(startIndex, startIndex + (items.length - 1));
   };
 
