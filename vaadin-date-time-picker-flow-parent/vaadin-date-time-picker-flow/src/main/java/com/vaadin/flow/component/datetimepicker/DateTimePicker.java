@@ -119,7 +119,6 @@ public class DateTimePicker
     private LocalDateTime min;
 
     private final CopyOnWriteArrayList<ValidationStatusChangeListener<LocalDateTime>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
-    private boolean validationDeferredUntilInputComplete;
 
     private final Validator<LocalDateTime> defaultValidator = (value,
             context) -> {
@@ -153,7 +152,7 @@ public class DateTimePicker
         }
 
         // Report error if only one of the pickers has a value
-        if (!validationDeferredUntilInputComplete && isInputIncomplete()) {
+        if (isInputIncomplete()) {
             return ValidationResult.error(getI18nErrorMessage(
                     DateTimePickerI18n::getIncompleteInputErrorMessage));
         }
@@ -349,18 +348,18 @@ public class DateTimePicker
     }
 
     private void addValidationListeners() {
-        addValueChangeListener(e -> {
-            if (isInputIncomplete()) {
-                validationDeferredUntilInputComplete = true;
-                return;
-            }
-            validationDeferredUntilInputComplete = false;
-            validate();
-        });
+        addValueChangeListener(e -> validate());
         getElement().addEventListener("change", e -> {
-            if (validationDeferredUntilInputComplete) {
-                validationDeferredUntilInputComplete = false;
-                validate(true);
+            // There are two cases that require clearing the value explicitly on
+            // client side "change" event:
+            // 1. The input is still incomplete but the component is blurred
+            // 2. Both pickers are cleared after an incomplete state
+            if (!isEmpty() && (isInputIncomplete()
+                    || datePicker.isEmpty() && timePicker.isEmpty())) {
+                // Called with the flag "fromClient" set "false" in order to
+                // differentiate the state from when the user is still
+                // interacting with the component.
+                setModelValue(getEmptyValue(), false);
             }
         });
         getElement().addEventListener("unparsable-change", e -> validate(true));
@@ -417,6 +416,25 @@ public class DateTimePicker
         if (shouldFireValidationStatusChangeEvent) {
             validate(true);
         }
+    }
+
+    @Override
+    protected void setModelValue(LocalDateTime newModelValue,
+            boolean fromClient) {
+        // Handle cases regarding incomplete input
+        if (!isEmpty() && Objects.equals(newModelValue, getEmptyValue())
+                && isInputIncomplete()) {
+            // Do not validate or clear the value when the value is incomplete
+            // but the user is still interacting with the component.
+            if (fromClient) {
+                return;
+            }
+            // In order to differentiate whether the value should be cleared,
+            // "fromClient" is set to "true" when "setModelValue" is called from
+            // the client side "change" event listener.
+            fromClient = true;
+        }
+        super.setModelValue(newModelValue, fromClient);
     }
 
     /**

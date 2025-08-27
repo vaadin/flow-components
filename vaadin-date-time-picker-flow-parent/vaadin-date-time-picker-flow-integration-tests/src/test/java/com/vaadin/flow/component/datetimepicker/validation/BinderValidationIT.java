@@ -18,7 +18,6 @@ package com.vaadin.flow.component.datetimepicker.validation;
 import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.BAD_INPUT_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.CLEAR_VALUE_BUTTON;
 import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.EXPECTED_VALUE_INPUT;
-import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.INCOMPLETE_INPUT_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.MAX_ERROR_MESSAGE;
 import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.MAX_INPUT;
 import static com.vaadin.flow.component.datetimepicker.validation.BinderValidationPage.MIN_ERROR_MESSAGE;
@@ -76,7 +75,7 @@ public class BinderValidationIT extends AbstractDateTimePickerValidationIT {
         assertValidation(true, "");
 
         setDateInputValue("");
-        assertValidation(false, INCOMPLETE_INPUT_ERROR_MESSAGE);
+        assertNoValidation();
 
         setTimeInputValue("");
         assertValidation(false, REQUIRED_ERROR_MESSAGE);

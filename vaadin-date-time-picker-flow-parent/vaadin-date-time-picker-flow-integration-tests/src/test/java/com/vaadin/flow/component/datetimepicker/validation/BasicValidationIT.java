@@ -88,14 +88,11 @@ public class BasicValidationIT extends AbstractDateTimePickerValidationIT {
         setValue("1/1/2000", "12:00");
         assertValidation(true, "");
 
-        setTimeInputValue("");
-        assertNoValidation();
-
         setDateInputValue("");
-        assertValidation(false, REQUIRED_ERROR_MESSAGE);
+        assertNoValidation();
 
         setTimeInputValue("");
-        assertNoValidation();
+        assertValidation(false, REQUIRED_ERROR_MESSAGE);
 
         setTimeInputValue("INVALID");
         assertValidation(false, BAD_INPUT_ERROR_MESSAGE);
