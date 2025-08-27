@@ -102,6 +102,9 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.pro.licensechecker.BuildType;
+import com.vaadin.pro.licensechecker.Capabilities;
+import com.vaadin.pro.licensechecker.Capability;
 import com.vaadin.pro.licensechecker.LicenseChecker;
 
 import elemental.json.JsonValue;
@@ -143,7 +146,9 @@ public class Spreadsheet extends Component
         if (service != null) {
             if (!service.getDeploymentConfiguration().isProductionMode()) {
                 LicenseChecker.checkLicenseFromStaticBlock(
-                        "vaadin-spreadsheet-flow", version);
+                        "vaadin-spreadsheet-flow", version,
+                        BuildType.DEVELOPMENT,
+                        Capabilities.of(Capability.PRE_TRIAL));
             }
         }
     }
@@ -1488,7 +1493,7 @@ public class Spreadsheet extends Component
      * is defined for a cell, then it is displayed on that cell. This behavior
      * can be changed by setting this property to true, which makes the custom
      * editor visible when the cell is focused.
-     * 
+     *
      * @param showCustomEditorOnFocus
      *            a boolean indicating whether the custom editor should be
      *            visible on focus (true) or not (false)
