@@ -348,16 +348,19 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
   };
 
-  grid.$connector.set = function (index, items) {
-    if (index % grid.pageSize != 0) {
-      throw 'Got new data to index ' + index + ' which is not aligned with the page size of ' + grid.pageSize;
-    }
-    const firstPage = index / grid.pageSize;
+  grid.$connector.set = function (startIndex, items) {
+    const firstPage = startIndex / grid.pageSize;
     const updatedPageCount = Math.ceil(items.length / grid.pageSize);
 
     for (let i = 0; i < updatedPageCount; i++) {
       const page = firstPage + i;
-      cache[page] = items.slice(i * grid.pageSize, (i + 1) * grid.pageSize);
+      for (let j = 0; j < grid.pageSize; j++) {
+        const item = items[page * grid.pageSize + j];
+        if (item) {
+          cache[page] ??= [];
+          cache[page][j] = item;
+        }
+      }
       updateGridCache(page);
     }
 
@@ -365,7 +368,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     grid.$connector.doDeselection(items.filter((item) => !item.selected && selectedKeys[item.key]));
     itemsUpdated(items);
 
-    grid.__updateVisibleRows();
+    grid.__updateVisibleRows(startIndex, startIndex + (items.length - 1));
   };
 
   const itemToCacheLocation = function (item) {
