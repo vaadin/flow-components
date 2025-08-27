@@ -20,11 +20,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
@@ -142,7 +142,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
 
     protected void updateListenOnAttribute() {
         var target = getTarget();
-        getElement().executeJs("$0.listenOn=$1;", this, target == null ? this : target);
+        getElement().executeJs("$0.listenOn=$1;", this,
+                target == null ? this : target);
     }
 
     /**
