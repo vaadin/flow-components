@@ -51,7 +51,6 @@ describe('grid connector', () => {
         { key: '2', name: 'baz' }
       ]);
       await nextFrame();
-      await aTimeout(0);
     });
 
     it('should re-render changed items', async () => {
