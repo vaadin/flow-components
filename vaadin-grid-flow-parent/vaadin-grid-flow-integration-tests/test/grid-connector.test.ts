@@ -63,7 +63,7 @@ describe('grid connector', () => {
       expect(getBodyCellText(grid, 2, 0)).to.equal('baz refreshed');
     });
 
-    it.only('should not re-render unchanged items', async () => {
+    it('should not re-render unchanged items', async () => {
       const rendererSpy = sinon.spy();
       grid.querySelector('vaadin-grid-column')!.renderer = rendererSpy;
       rendererSpy.resetHistory();
