@@ -350,7 +350,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   grid.$connector.set = function (startIndex, items) {
     items.forEach((item, i) => {
-
       const index = startIndex + i;
       const page = Math.floor(index / grid.pageSize);
       cache[page] ??= [];
