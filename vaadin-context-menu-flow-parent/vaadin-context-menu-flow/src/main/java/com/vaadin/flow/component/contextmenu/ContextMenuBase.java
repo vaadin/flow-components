@@ -15,21 +15,16 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Synchronize;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
@@ -96,6 +91,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
             String appId = event.getUI().getInternals().getAppId();
             initConnector(appId);
             resetContent();
+            updateListenOnAttribute();
         });
 
         overlayAutoAddController = new OverlayAutoAddController<>(this,
@@ -123,9 +119,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         }
 
         this.target = target;
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, context -> ui.getPage()
-                        .executeJs("$0.listenOn=$1", this, target)));
+        updateListenOnAttribute();
 
         if (target == null) {
             return;
@@ -144,6 +138,12 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
                 .addEventListener("vaadin-context-menu-before-open",
                         this::beforeOpenHandler)
                 .addEventData(EVENT_DETAIL);
+    }
+
+    protected void updateListenOnAttribute() {
+        var target = getTarget();
+        getElement().executeJs("$0.listenOn=$1;", this,
+                target == null ? this : target);
     }
 
     /**
@@ -306,6 +306,31 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     }
 
     /**
+     * Sets position of the context menu with respect to its {@code target}.
+     * When null is passed, resets to default behaviour of opening context menu
+     * at the location of the click.
+     *
+     * @param position
+     *            the position to set
+     * @see #setTarget(Component)
+     */
+    public void setPosition(ContextMenuPosition position) {
+        getElement().setProperty("position", position.getPosition());
+    }
+
+    /**
+     * Gets position of the context menu with respect to its {@code target}.
+     *
+     * @return the position
+     */
+    public ContextMenuPosition getPosition() {
+        String positionString = getElement().getProperty("position");
+        return Arrays.stream(ContextMenuPosition.values())
+                .filter(p -> p.getPosition().equals(positionString)).findFirst()
+                .orElse(null);
+    }
+
+    /**
      * Gets the child components of this component. This includes components
      * added with {@link #addComponent(Component...)} and the {@link MenuItem}
      * components created with {@link #addItem(String)} and its overload
@@ -429,6 +454,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     private void onTargetAttach(UI ui) {
         ui.getInternals().addComponentDependencies(ContextMenu.class);
         requestTargetJsExecutions();
+        updateListenOnAttribute();
     }
 
     /*
