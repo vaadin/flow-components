@@ -115,8 +115,8 @@ async function createPom() {
 // copy a file
 function copyFileSync(source, target, replaceCall) {
   var targetFile = target;
-  // ignore app shells, instead the merged ITs will use LumoAppShell
-  if (/AppShell.java$/.test(source)) {
+  // ignore app shells from individual IT modules, instead the merged ITs will use LumoAppShell
+  if (/TestAppShell.java$/.test(source)) {
     return;
   }
   // if target is a directory a new file with the same name will be created
