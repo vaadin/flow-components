@@ -21,9 +21,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   let lastRequestedRange = [0, 0];
 
-  let currentUpdateClearRange = null;
-  let currentUpdateSetRange = null;
-
   const validSelectionModes = ['SINGLE', 'NONE', 'MULTI'];
   let selectedKeys = {};
   let selectionMode = 'SINGLE';
@@ -351,27 +348,25 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
   };
 
-  grid.$connector.set = function (index, items) {
-    if (index % grid.pageSize != 0) {
-      throw 'Got new data to index ' + index + ' which is not aligned with the page size of ' + grid.pageSize;
-    }
-    const firstPage = index / grid.pageSize;
+  grid.$connector.set = function (startIndex, items) {
+    items.forEach((item, i) => {
+      const index = startIndex + i;
+      const page = Math.floor(index / grid.pageSize);
+      cache[page] ??= [];
+      cache[page][index % grid.pageSize] = item;
+    });
+
+    const firstPage = Math.floor(startIndex / grid.pageSize);
     const updatedPageCount = Math.ceil(items.length / grid.pageSize);
-
-    // For root cache, remember the range of pages that were set during an update
-    currentUpdateSetRange = [firstPage, firstPage + updatedPageCount - 1];
-
     for (let i = 0; i < updatedPageCount; i++) {
-      const page = firstPage + i;
-      cache[page] = items.slice(i * grid.pageSize, (i + 1) * grid.pageSize);
-      updateGridCache(page);
+      updateGridCache(firstPage + i);
     }
 
     grid.$connector.doSelection(items.filter((item) => item.selected));
     grid.$connector.doDeselection(items.filter((item) => !item.selected && selectedKeys[item.key]));
     itemsUpdated(items);
 
-    grid.__updateVisibleRows();
+    grid.__updateVisibleRows(startIndex, startIndex + (items.length - 1));
   };
 
   const itemToCacheLocation = function (item) {
@@ -411,42 +406,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     updateGridItemsInDomBasedOnCache(updatedItems);
   };
 
-  /**
-   * Ensures that the last requested page range does not include pages for data that has been cleared.
-   * The last requested range is used in `fetchPage` to skip requests to the server if the page range didn't
-   * change. However, if some pages of that range have been cleared by data communicator, we need to clear the
-   * range to ensure the pages get loaded again. This can happen for example when changing the requested range
-   * on the server (e.g. preload of items on scroll to index), which can cause data communicator to clear pages
-   * that the connector assumes are already loaded.
-   */
-  const sanitizeLastRequestedRange = function () {
-    // Range may not be set yet, or nothing was cleared
-    if (!lastRequestedRange || !currentUpdateClearRange) {
-      return;
-    }
-
-    // Determine all pages that were cleared
-    const numClearedPages = currentUpdateClearRange[1] - currentUpdateClearRange[0] + 1;
-    const clearedPages = Array.from({ length: numClearedPages }, (_, i) => currentUpdateClearRange[0] + i);
-
-    // Remove pages that have been set in same update
-    if (currentUpdateSetRange) {
-      const [first, last] = currentUpdateSetRange;
-      for (let page = first; page <= last; page++) {
-        const index = clearedPages.indexOf(page);
-        if (index >= 0) {
-          clearedPages.splice(index, 1);
-        }
-      }
-    }
-
-    // Clear the last requested range if it includes any of the cleared pages
-    if (clearedPages.some((page) => page >= lastRequestedRange[0] && page <= lastRequestedRange[1])) {
-      lastRequestedRange[0] = -1;
-      lastRequestedRange[1] = -1;
-    }
-  };
-
   grid.$connector.clear = function (index, length) {
     if (!cache || Object.keys(cache).length === 0) {
       return;
@@ -457,9 +416,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
     let firstPage = Math.floor(index / grid.pageSize);
     let updatedPageCount = Math.ceil(length / grid.pageSize);
-
-    // For root cache, remember the range of pages that were cleared during an update
-    currentUpdateClearRange = [firstPage, firstPage + updatedPageCount - 1];
 
     for (let i = 0; i < updatedPageCount; i++) {
       let page = firstPage + i;
@@ -515,13 +471,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     // prevent further unnecessary calls.
     if (Object.keys(pendingRequests).length === 0) {
       rootRequestDebouncer?.cancel();
+      lastRequestedRange = [-1, -1];
     }
-
-    // Sanitize last requested range for the root level
-    sanitizeLastRequestedRange();
-    // Clear current update state
-    currentUpdateSetRange = null;
-    currentUpdateClearRange = null;
 
     // Let server know we're done
     grid.$server.confirmUpdate(id);

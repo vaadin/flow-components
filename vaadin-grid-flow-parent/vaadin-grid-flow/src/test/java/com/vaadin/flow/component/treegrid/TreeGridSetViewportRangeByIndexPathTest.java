@@ -45,10 +45,6 @@ public class TreeGridSetViewportRangeByIndexPathTest {
 
     private Update arrayUpdate = Mockito.mock(Update.class);
 
-    @SuppressWarnings("unchecked")
-    private ArgumentCaptor<List<JsonValue>> updateItemsCaptor = ArgumentCaptor
-            .forClass(List.class);
-
     private TreeGrid<String> treeGrid = new TreeGrid<>() {
         @Override
         protected GridArrayUpdater createDefaultArrayUpdater() {
@@ -201,12 +197,16 @@ public class TreeGridSetViewportRangeByIndexPathTest {
         });
     }
 
+    @SuppressWarnings("unchecked")
     private LinkedList<String> captureViewportRange() {
-        Mockito.verify(arrayUpdate).set(Mockito.anyInt(),
-                updateItemsCaptor.capture());
+        ArgumentCaptor<List<JsonValue>> itemsCaptor = ArgumentCaptor
+                .forClass(List.class);
 
-        return updateItemsCaptor.getValue().stream().map(
-                (jsonObject) -> ((JsonObject) jsonObject).getString("name"))
+        Mockito.verify(arrayUpdate, Mockito.atLeastOnce()).set(Mockito.anyInt(),
+                itemsCaptor.capture());
+
+        return itemsCaptor.getAllValues().stream().flatMap(List::stream)
+                .map((jsonValue) -> ((JsonObject) jsonValue).getString("name"))
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
