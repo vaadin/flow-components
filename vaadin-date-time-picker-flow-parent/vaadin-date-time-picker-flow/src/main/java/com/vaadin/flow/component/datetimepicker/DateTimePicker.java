@@ -361,7 +361,8 @@ public class DateTimePicker
                 // Called with the flag "fromClient" set "false" in order to
                 // differentiate the state from when the user is still
                 // interacting with the component.
-                setModelValue(getEmptyValue(), false);
+                var fromClient = !isInputIncomplete();
+                setModelValue(getEmptyValue(), fromClient);
             }
         });
         getElement().addEventListener("unparsable-change", e -> validate(true));
