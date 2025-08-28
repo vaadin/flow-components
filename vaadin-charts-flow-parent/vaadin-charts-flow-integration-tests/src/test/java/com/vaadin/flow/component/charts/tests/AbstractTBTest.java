@@ -8,6 +8,8 @@
  */
 package com.vaadin.flow.component.charts.tests;
 
+import java.util.List;
+
 import com.vaadin.flow.component.charts.examples.AbstractChartExample;
 import com.vaadin.flow.component.charts.testbench.ChartElement;
 import com.vaadin.flow.component.charts.ui.MainView;
@@ -30,6 +32,11 @@ public abstract class AbstractTBTest extends AbstractParallelTest {
     protected TestBenchElement getElementFromShadowRoot(
             TestBenchElement shadowRootOwner, String selector) {
         return shadowRootOwner.$(selector).first();
+    }
+
+    protected List<TestBenchElement> getElementsFromShadowRoot(
+            TestBenchElement shadowRootOwner, String selector) {
+        return shadowRootOwner.$(selector).all();
     }
 
     protected TestBenchElement getElementFromShadowRoot(
