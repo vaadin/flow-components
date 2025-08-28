@@ -27,6 +27,7 @@ public class Drilldown extends AbstractConfigurationObject {
     private Boolean animation;
     private DrillUpButton drillUpButton;
     private List<Series> series = new ArrayList<>();
+    private Breadcrumbs breadcrumbs;
 
     @JsonIgnore
     private Configuration configuration;
@@ -116,8 +117,32 @@ public class Drilldown extends AbstractConfigurationObject {
     }
 
     /**
+     * Returns the breadcrumbs navigation options for drilldown levels.
+     *
+     * @return Breadcrumbs navigation options
+     */
+    public Breadcrumbs getBreadcrumbs() {
+        if (breadcrumbs == null) {
+            breadcrumbs = new Breadcrumbs();
+        }
+        return breadcrumbs;
+    }
+
+    /**
+     * Options for the breadcrumbs, the navigation at the top leading the way up
+     * through the drilldown levels.
+     *
+     * @param breadcrumbs
+     *            the Breadcrumbs configuration
+     */
+    public void setBreadcrumbs(Breadcrumbs breadcrumbs) {
+        this.breadcrumbs = breadcrumbs;
+    }
+
+    /**
      * @see Drilldown#setDrillUpButton(DrillUpButton)
-     * @return
+     * @return the {@link DrillUpButton} configuration
+     * @deprecated Since V25. Use {@link #setBreadcrumbs(Breadcrumbs)} instead.
      */
     public DrillUpButton getDrillUpButton() {
         if (drillUpButton == null) {
@@ -132,6 +157,7 @@ public class Drilldown extends AbstractConfigurationObject {
      * {@link Lang#setDrillUpText(String)}.
      *
      * @param drillUpButton
+     * @deprecated Since Use {@link #setBreadcrumbs(Breadcrumbs)} instead.
      */
     public void setDrillUpButton(DrillUpButton drillUpButton) {
         this.drillUpButton = drillUpButton;
