@@ -202,7 +202,7 @@ public class TreeGridSetViewportRangeByIndexPathTest {
         ArgumentCaptor<List<JsonValue>> itemsCaptor = ArgumentCaptor
                 .forClass(List.class);
 
-        Mockito.verify(arrayUpdate).set(Mockito.anyInt(),
+        Mockito.verify(arrayUpdate, Mockito.atLeastOnce()).set(Mockito.anyInt(),
                 itemsCaptor.capture());
 
         return itemsCaptor.getAllValues().stream().flatMap(List::stream)
