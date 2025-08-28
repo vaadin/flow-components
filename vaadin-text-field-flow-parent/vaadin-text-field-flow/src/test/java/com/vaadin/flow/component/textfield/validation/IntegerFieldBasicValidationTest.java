@@ -22,10 +22,9 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
-
-import elemental.json.Json;
 
 public class IntegerFieldBasicValidationTest
         extends AbstractBasicValidationTest<IntegerField, Integer> {
@@ -141,7 +140,8 @@ public class IntegerFieldBasicValidationTest
 
     private void fakeClientDomEvent(Component component, String eventName) {
         Element element = component.getElement();
-        DomEvent event = new DomEvent(element, eventName, Json.createObject());
+        DomEvent event = new DomEvent(element, eventName,
+                JacksonUtils.createObjectNode());
         element.getNode().getFeature(ElementListenerMap.class).fireEvent(event);
     }
 

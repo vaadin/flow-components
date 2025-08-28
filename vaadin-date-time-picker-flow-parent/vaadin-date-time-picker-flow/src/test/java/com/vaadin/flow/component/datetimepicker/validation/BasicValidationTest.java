@@ -30,10 +30,9 @@ import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.tests.validation.AbstractBasicValidationTest;
-
-import elemental.json.Json;
 
 public class BasicValidationTest
         extends AbstractBasicValidationTest<DateTimePicker, LocalDateTime> {
@@ -269,7 +268,8 @@ public class BasicValidationTest
     }
 
     private void fireDomEvent(String eventType, Element element) {
-        var domEvent = new DomEvent(element, eventType, Json.createObject());
+        var domEvent = new DomEvent(element, eventType,
+                JacksonUtils.createObjectNode());
         element.getNode().getFeature(ElementListenerMap.class)
                 .fireEvent(domEvent);
     }

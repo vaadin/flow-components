@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.provider.DataGenerator;
@@ -33,15 +34,14 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.JsonSerializer;
-import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelMap;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
 /**
@@ -74,7 +74,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
     private final String propertyNamespace;
 
     private final Map<String, ValueProvider<SOURCE, ?>> valueProviders = new HashMap<>();
-    private final Map<String, SerializableBiConsumer<SOURCE, JsonArray>> clientCallables = new HashMap<>();
+    private final Map<String, SerializableBiConsumer<SOURCE, ArrayNode>> clientCallables = new HashMap<>();
 
     private final String ALPHANUMERIC_REGEX = "^[a-zA-Z0-9]+$";
 
@@ -159,7 +159,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
 
     private void setElementRenderer(Element container, String rendererName,
             String templateExpression, ReturnChannelRegistration returnChannel,
-            JsonArray clientCallablesArray, String propertyNamespace) {
+            ArrayNode clientCallablesArray, String propertyNamespace) {
         assert container.getNode().isAttached() : "Container must be attached";
 
         String appId = getElementUI(container).getInternals().getAppId();
@@ -195,11 +195,11 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                 .getFeature(ReturnChannelMap.class)
                 .registerChannel(arguments -> {
                     // Invoked when the client calls one of the client callables
-                    String handlerName = arguments.getString(0);
-                    String itemKey = arguments.getString(1);
-                    JsonArray args = arguments.getArray(2);
+                    String handlerName = arguments.get(0).asText();
+                    String itemKey = arguments.get(1).asText();
+                    ArrayNode args = (ArrayNode) arguments.get(2);
 
-                    SerializableBiConsumer<SOURCE, JsonArray> handler = clientCallables
+                    SerializableBiConsumer<SOURCE, ArrayNode> handler = clientCallables
                             .get(handlerName);
                     SOURCE item = keyMapper.get(itemKey);
                     if (item != null) {
@@ -207,7 +207,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                     }
                 });
 
-        JsonArray clientCallablesArray = JsonUtils
+        ArrayNode clientCallablesArray = JacksonUtils
                 .listToJson(new ArrayList<>(clientCallables.keySet()));
 
         List<Registration> registrations = new ArrayList<>();
@@ -381,7 +381,7 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
      *      "https://lit.dev/docs/templates/expressions/#event-listener-expressions">https://lit.dev/docs/templates/expressions/#event-listener-expressions</a>
      */
     public LitRenderer<SOURCE> withFunction(String functionName,
-            SerializableBiConsumer<SOURCE, JsonArray> handler) {
+            SerializableBiConsumer<SOURCE, ArrayNode> handler) {
         Objects.requireNonNull(functionName);
         Objects.requireNonNull(handler);
 

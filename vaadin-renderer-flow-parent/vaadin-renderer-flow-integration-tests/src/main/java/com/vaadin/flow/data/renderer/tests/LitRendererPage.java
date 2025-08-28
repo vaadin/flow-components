@@ -113,12 +113,12 @@ public class LitRendererPage extends Div {
                 }).withFunction("keyPressed", (item, args) -> {
                     getElement().executeJs(
                             "console.warn(`event: keyPressed, item: " + item
-                                    + ", key: " + args.getString(0) + "`)");
+                                    + ", key: " + args.get(0).asText() + "`)");
                 }).withFunction("dragged", (item, args) -> {
                     getElement()
                             .executeJs("console.warn(`event: dragged, item: "
-                                    + item + ", argument count: "
-                                    + args.length() + "`)");
+                                    + item + ", argument count: " + args.size()
+                                    + "`)");
                 }));
     }
 

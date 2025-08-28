@@ -20,8 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.dom.DomEvent;
-
-import elemental.json.Json;
+import com.vaadin.flow.internal.JacksonUtils;
 
 public class ManualValueUpdateTest {
 
@@ -69,7 +68,7 @@ public class ManualValueUpdateTest {
 
     private void fireChangeEvent(CustomField<?> field) {
         DomEvent changeEvent = new DomEvent(field.getElement(), "change",
-                Json.createObject());
+                JacksonUtils.createObjectNode());
         field.getElement().getNode().getFeature(
                 com.vaadin.flow.internal.nodefeature.ElementListenerMap.class)
                 .fireEvent(changeEvent);

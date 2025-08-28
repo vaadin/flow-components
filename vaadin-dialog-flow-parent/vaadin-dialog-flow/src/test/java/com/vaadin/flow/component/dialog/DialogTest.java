@@ -34,10 +34,9 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.server.VaadinSession;
-
-import elemental.json.Json;
 
 /**
  * Unit tests for the Dialog.
@@ -428,8 +427,8 @@ public class DialogTest {
 
         Element element = dialog.getElement();
         dialog.getElement().getNode().getFeature(ElementListenerMap.class)
-                .fireEvent(
-                        new DomEvent(element, "closed", Json.createObject()));
+                .fireEvent(new DomEvent(element, "closed",
+                        JacksonUtils.createObjectNode()));
 
         Mockito.verify(listener, Mockito.times(1))
                 .onComponentEvent(Mockito.any(Dialog.ClosedEvent.class));
