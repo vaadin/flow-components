@@ -14,7 +14,11 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for the {@code vaadin-map} component.
  */
 public enum MapVariant implements ThemeVariant {
-    NO_BORDER("no-border");
+    /**
+     * @deprecated Use {@link #NO_BORDER} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
+    BORDERLESS("no-border"), NO_BORDER("no-border");
 
     private final String variant;
 
