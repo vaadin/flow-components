@@ -9,6 +9,7 @@ import {
   GRID_CONNECTOR_ROOT_REQUEST_DELAY
 } from './shared.js';
 import type { FlowGrid } from './shared.js';
+import sinon from 'sinon';
 
 describe('grid connector', () => {
   let grid: FlowGrid;
@@ -40,6 +41,40 @@ describe('grid connector', () => {
 
     expect(getBodyRowCount(grid)).to.equal(1);
     expect(getBodyCellText(grid, 0, 0)).to.equal('foo');
+  });
+
+  describe('multiple set calls', () => {
+    beforeEach(async () => {
+      setRootItems(grid.$connector, [
+        { key: '0', name: 'foo' },
+        { key: '1', name: 'bar' },
+        { key: '2', name: 'baz' }
+      ]);
+      await nextFrame();
+    });
+
+    it('should re-render changed items', async () => {
+      grid.$connector.set(1, [{ key: '1', name: 'bar refreshed' }]);
+      grid.$connector.set(2, [{ key: '2', name: 'baz refreshed' }]);
+      await nextFrame();
+      expect(getBodyCellText(grid, 0, 0)).to.equal('foo');
+      expect(getBodyCellText(grid, 1, 0)).to.equal('bar refreshed');
+      expect(getBodyCellText(grid, 2, 0)).to.equal('baz refreshed');
+    });
+
+    it('should not re-render unchanged items', async () => {
+      const rendererSpy = sinon.spy();
+      grid.querySelector('vaadin-grid-column')!.renderer = rendererSpy;
+      rendererSpy.resetHistory();
+
+      grid.$connector.set(1, [{ key: '1', name: 'bar refreshed' }]);
+      await nextFrame();
+
+      rendererSpy.args.forEach(([_root, _column, model]) => {
+        expect(model.item.name).to.not.equal('foo');
+        expect(model.item.name).to.not.equal('baz');
+      });
+    });
   });
 
   it('should cancel debounced requests if all data has already been received', async () => {
