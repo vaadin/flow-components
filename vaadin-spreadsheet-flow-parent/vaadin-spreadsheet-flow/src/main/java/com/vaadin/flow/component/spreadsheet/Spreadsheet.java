@@ -658,7 +658,8 @@ public class Spreadsheet extends Component
     void onPopupButtonClick(int row, int column) {
         PopupButton popup = sheetPopupButtons
                 .get(SpreadsheetUtil.relativeToAbsolute(this,
-                        new CellReference(row - 1, column - 1)));
+                        new CellReference(getActiveSheet().getSheetName(),
+                                row - 1, column - 1, false, false)));
         if (popup != null) {
             popup.openPopup();
         }
@@ -667,7 +668,8 @@ public class Spreadsheet extends Component
     void onPopupClose(int row, int column) {
         PopupButton popup = sheetPopupButtons
                 .get(SpreadsheetUtil.relativeToAbsolute(this,
-                        new CellReference(row - 1, column - 1)));
+                        new CellReference(getActiveSheet().getSheetName(),
+                                row - 1, column - 1, false, false)));
 
         if (popup != null) {
             popup.closePopup();
@@ -2835,16 +2837,14 @@ public class Spreadsheet extends Component
                     getHiddenRowIndexes());
             if (row == null) {
                 valueManager.updateDeletedRowsInClientCache(rowIndex, rowIndex);
-                if (_hiddenRowIndexes.contains(rowIndex)) {
-                    _hiddenRowIndexes.remove(rowIndex);
-                }
+                _hiddenRowIndexes.remove(rowIndex);
                 for (int c = 0; c < getCols(); c++) {
                     styler.clearCellStyle(r, c);
                 }
             } else {
                 if (row.getZeroHeight()) {
                     _hiddenRowIndexes.add(rowIndex);
-                } else if (_hiddenRowIndexes.contains(rowIndex)) {
+                } else {
                     _hiddenRowIndexes.remove(rowIndex);
                 }
                 for (int c = 0; c < getCols(); c++) {
@@ -2963,7 +2963,8 @@ public class Spreadsheet extends Component
                 } else if (numberOfRowsAboveWasChanged(row, last, first)) {
                     int newRow = cell.getRow() + n;
                     int col = cell.getCol();
-                    CellReference newCell = new CellReference(newRow, col, true,
+                    CellReference newCell = new CellReference(
+                            getActiveSheet().getSheetName(), newRow, col, true,
                             true);
                     pbutton.setCellReference(newCell);
                     updated.put(newCell, pbutton);
@@ -4911,7 +4912,8 @@ public class Spreadsheet extends Component
      *            removes the pop-up button for the target cell.
      */
     public void setPopup(int row, int col, PopupButton popupButton) {
-        setPopup(new CellReference(row, col), popupButton);
+        setPopup(new CellReference(getActiveSheet().getSheetName(), row, col,
+                false, false), popupButton);
     }
 
     /**
@@ -5181,15 +5183,15 @@ public class Spreadsheet extends Component
      */
     public abstract static class ValueChangeEvent
             extends ComponentEvent<Component> {
-        private final Set<CellReference> changedCells;
+        private final CellSet changedCells;
 
         public ValueChangeEvent(Component source,
                 Set<CellReference> changedCells) {
             super(source, false);
-            this.changedCells = changedCells;
+            this.changedCells = new CellSet(changedCells);
         }
 
-        public Set<CellReference> getChangedCells() {
+        public CellSet getChangedCells() {
             return changedCells;
         }
     }
@@ -5313,10 +5315,10 @@ public class Spreadsheet extends Component
          * @return A combination of all selected cells, regardless of selection
          *         mode. Doesn't contain duplicates.
          */
-        public Set<CellReference> getAllSelectedCells() {
-            return Spreadsheet.getAllSelectedCells(selectedCellReference,
-                    individualSelectedCells, cellRangeAddresses);
-
+        public CellSet getAllSelectedCells() {
+            return new CellSet(
+                    Spreadsheet.getAllSelectedCells(selectedCellReference,
+                            individualSelectedCells, cellRangeAddresses));
         }
     }
 
@@ -5324,10 +5326,7 @@ public class Spreadsheet extends Component
             CellReference selectedCellReference,
             List<CellReference> individualSelectedCells,
             List<CellRangeAddress> cellRangeAddresses) {
-        Set<CellReference> cells = new HashSet<CellReference>();
-        for (CellReference r : individualSelectedCells) {
-            cells.add(r);
-        }
+        Set<CellReference> cells = new HashSet<>(individualSelectedCells);
         cells.add(selectedCellReference);
 
         if (cellRangeAddresses != null) {
@@ -5335,7 +5334,9 @@ public class Spreadsheet extends Component
 
                 for (int x = a.getFirstColumn(); x <= a.getLastColumn(); x++) {
                     for (int y = a.getFirstRow(); y <= a.getLastRow(); y++) {
-                        cells.add(new CellReference(y, x));
+                        cells.add(new CellReference(
+                                selectedCellReference.getSheetName(), y, x,
+                                false, false));
                     }
                 }
             }
@@ -5531,10 +5532,9 @@ public class Spreadsheet extends Component
     public Set<CellReference> getSelectedCellReferences() {
         SelectionChangeEvent event = selectionManager.getLatestSelectionEvent();
         if (event == null) {
-            return new HashSet<CellReference>();
-        } else {
-            return event.getAllSelectedCells();
+            return new HashSet<>();
         }
+        return event.getAllSelectedCells().getCells();
     }
 
     /**
