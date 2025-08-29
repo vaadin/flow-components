@@ -413,7 +413,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                         .getLastColumn(); col++) {
                     Cell cell = spreadsheet.getCell(row, col);
                     if (cell != null) {
-                        if (spreadsheet.isCellLocked(cell)) {
+                        if (spreadsheet.isCellLocked(cell.getAddress())) {
                             protectedCellWriteAttempted();
                             return;
                         }
@@ -428,7 +428,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                 .getSelectedCellReference();
         Cell cell = spreadsheet.getCell(reference.getRow(), reference.getCol());
         if (cell != null) {
-            if (spreadsheet.isCellLocked(cell)) {
+            if (spreadsheet.isCellLocked(cell.getAddress())) {
                 protectedCellWriteAttempted();
                 return;
             }

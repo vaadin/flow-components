@@ -1590,16 +1590,10 @@ public class Spreadsheet extends Component
     protected boolean isRangeEditable(int row1, int col1, int row2, int col2) {
         if (isActiveSheetProtected()) {
             for (int r = row1; r <= row2; r++) {
-                final Row row = getActiveSheet().getRow(r);
-                if (row != null) {
-                    for (int c = col1; c <= col2; c++) {
-                        final Cell cell = row.getCell(c);
-                        if (isCellLocked(cell)) {
-                            return false;
-                        }
+                for (int c = col1; c <= col2; c++) {
+                    if (isCellLocked(new CellAddress(r, c))) {
+                        return false;
                     }
-                } else {
-                    return false;
                 }
             }
         }
@@ -4751,7 +4745,7 @@ public class Spreadsheet extends Component
                                 .put(getComponentNodeId(customComponent), key);
                         newCustomComponents.add(customComponent);
                         rowsWithComponents.add(r);
-                    } else if (!isCellLocked(cell)) {
+                    } else if (!isCellLocked(new CellAddress(r, c))) {
                         // no custom component and not locked, check if
                         // the cell has a custom editor
                         Component customEditor = customComponentFactory

@@ -35,7 +35,7 @@ public class LockCellFixture implements SpreadsheetFixture {
                         cellRef.getCol(), "");
             }
 
-            boolean wasLocked = spreadsheet.isCellLocked(cell);
+            boolean wasLocked = spreadsheet.isCellLocked(cell.getAddress());
 
             CellStyle cellStyle = wb.createCellStyle();
             // Toggle cell locked state
