@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -167,7 +169,7 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
     }
 
     @Override
-    public void generateData(T item, JsonObject jsonObject) {
+    public void generateData(T item, ObjectNode jsonObject) {
         if (isSelected(item)) {
             jsonObject.put("selected", true);
         }

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -32,8 +33,6 @@ import com.vaadin.flow.data.binder.PropertySet;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonObject;
 
 /**
  * Implementation of {@code Editor} interface.
@@ -179,7 +178,7 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
     }
 
     @Override
-    public void generateData(T item, JsonObject jsonObject) {
+    public void generateData(T item, ObjectNode jsonObject) {
         if (item != null && item.equals(edited)) {
             jsonObject.put(EDITING, true);
         } else {

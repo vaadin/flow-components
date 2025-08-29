@@ -15,10 +15,10 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -27,9 +27,9 @@ import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.data.renderer.ClickableRenderer.ItemClickListener;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiConsumer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.Json;
 import elemental.json.JsonObject;
 
 public class NativeButtonRendererTest {
@@ -47,21 +47,21 @@ public class NativeButtonRendererTest {
         DataGenerator<String> dataGenerator = rendering.getDataGenerator()
                 .get();
 
-        JsonObject json = Json.createObject();
+        ObjectNode json = JacksonUtils.createObjectNode();
         dataGenerator.generateData("something", json);
 
         // Find the mapped key for "disabled" property
-        var keyForDisabled = Arrays.stream(json.keys())
+        var keyForDisabled = JacksonUtils.getKeys(json).stream()
                 .filter(key -> key.endsWith("disabled")).findFirst().get();
         Assert.assertFalse("The button shouldn't be disabled",
-                json.getBoolean(keyForDisabled));
+                json.get(keyForDisabled).booleanValue());
 
         mockDisabled(container);
 
-        json = Json.createObject();
+        json = JacksonUtils.createObjectNode();
         dataGenerator.generateData("something", json);
         Assert.assertTrue("The button should be disabled",
-                json.getBoolean(keyForDisabled));
+                json.get(keyForDisabled).booleanValue());
     }
 
     @Test

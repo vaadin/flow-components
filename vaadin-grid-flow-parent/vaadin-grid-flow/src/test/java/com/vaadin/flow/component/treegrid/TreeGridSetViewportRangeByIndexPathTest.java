@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,9 +34,6 @@ import com.vaadin.flow.component.grid.GridArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.tests.dataprovider.MockUI;
-
-import elemental.json.JsonObject;
-import elemental.json.JsonValue;
 
 public class TreeGridSetViewportRangeByIndexPathTest {
     private MockUI ui;
