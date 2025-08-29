@@ -15,9 +15,9 @@
  */
 package com.vaadin.flow.data.renderer;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.data.provider.AbstractComponentDataGenerator;

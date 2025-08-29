@@ -35,12 +35,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
@@ -1693,8 +1693,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     private void generateUniqueKeyData(T item, ObjectNode jsonObject) {
-        if (uniqueKeyProperty != null
-                && !jsonObject.has(uniqueKeyProperty)) {
+        if (uniqueKeyProperty != null && !jsonObject.has(uniqueKeyProperty)) {
             jsonObject.put(uniqueKeyProperty, getUniqueKey(item));
         }
     }
@@ -1926,8 +1925,8 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     /**
      * Adds a new text column to this {@link Grid} with a value provider and
      * sorting properties.The value is converted to a JSON value by using
-     * {@link JacksonSerializer#toJson(Object)}. The sorting properties are used to
-     * configure backend sorting for this column. In-memory sorting is
+     * {@link JacksonSerializer#toJson(Object)}. The sorting properties are used
+     * to configure backend sorting for this column. In-memory sorting is
      * automatically configured using the return type of the given
      * {@link ValueProvider}.
      *
@@ -3333,8 +3332,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         }
         ArrayNode jsonArray = JacksonUtils.createArrayNode();
         for (T item : items) {
-            JsonNode jsonObject = item != null
-                    ? generateJsonForSelection(item)
+            JsonNode jsonObject = item != null ? generateJsonForSelection(item)
                     : null;
             jsonArray.add(jsonObject);
         }
@@ -4011,7 +4009,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         ArrayNode directions = JacksonUtils.createArrayNode();
 
-        for (GridSortOrder<T> gridSortOrder: order) {
+        for (GridSortOrder<T> gridSortOrder : order) {
             ObjectNode direction = JacksonUtils.createObjectNode();
 
             String columnId = gridSortOrder.getSorted().getInternalId();
