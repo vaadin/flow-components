@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -38,10 +39,10 @@ import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 
@@ -532,7 +533,7 @@ public class GridPro<E> extends Grid<E> {
         return column;
     }
 
-    private void generateCellEditableData(E item, JsonObject jsonObject) {
+    private void generateCellEditableData(E item, ObjectNode jsonObject) {
         // Get edit columns with cell editable providers
         List<EditColumn<E>> editColumns = getColumns().stream()
                 .filter(column -> column instanceof EditColumn<E> editColumn
@@ -546,7 +547,7 @@ public class GridPro<E> extends Grid<E> {
         }
 
         // Generate data for each column
-        JsonObject cellEditableData = Json.createObject();
+        ObjectNode cellEditableData = JacksonUtils.createObjectNode();
         editColumns.forEach(column -> {
             boolean cellEditable = column.cellEditableProvider.test(item);
             cellEditableData.put(column.getInternalId(), cellEditable);

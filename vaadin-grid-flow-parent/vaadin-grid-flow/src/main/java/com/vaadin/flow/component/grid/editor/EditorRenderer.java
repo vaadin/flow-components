@@ -17,6 +17,7 @@ package com.vaadin.flow.component.grid.editor;
 
 import java.util.Optional;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Span;
@@ -30,13 +31,11 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.ExecutionContext;
 
-import elemental.json.JsonObject;
-
 /**
  * Renderer and DataGenerator used by {@link Column} to control the state of the
  * editor components.
  * <p>
- * Components are created during the {@link #generateData(Object, JsonObject)}
+ * Components are created during the {@link #generateData(Object, ObjectNode)}
  * calls, and the proper data is sent to the client-side to be rendered.
  *
  * @author Vaadin Ltd.
@@ -87,7 +86,7 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
     }
 
     @Override
-    public void generateData(T item, JsonObject jsonObject) {
+    public void generateData(T item, ObjectNode jsonObject) {
         if (editor.isOpen() && component != null) {
             int nodeId = getComponentNodeId(component);
             jsonObject.put("_" + columnInternalId + "_editor", nodeId);

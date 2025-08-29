@@ -28,14 +28,12 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.GridArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.tests.dataprovider.MockUI;
-
-import elemental.json.JsonObject;
-import elemental.json.JsonValue;
 
 public class TreeGridSetViewportRangeByIndexPathTest {
     private MockUI ui;
@@ -199,14 +197,14 @@ public class TreeGridSetViewportRangeByIndexPathTest {
 
     @SuppressWarnings("unchecked")
     private LinkedList<String> captureViewportRange() {
-        ArgumentCaptor<List<JsonValue>> itemsCaptor = ArgumentCaptor
+        ArgumentCaptor<List<JsonNode>> itemsCaptor = ArgumentCaptor
                 .forClass(List.class);
 
         Mockito.verify(arrayUpdate, Mockito.atLeastOnce()).set(Mockito.anyInt(),
                 itemsCaptor.capture());
 
         return itemsCaptor.getAllValues().stream().flatMap(List::stream)
-                .map((jsonValue) -> ((JsonObject) jsonValue).getString("name"))
+                .map((jsonValue) -> jsonValue.get("name").asText())
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 

@@ -28,6 +28,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -44,8 +45,6 @@ import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonObject;
 
 /**
  * Abstract implementation of a GridMultiSelectionModel.
@@ -365,7 +364,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     }
 
     @Override
-    public void generateData(T item, JsonObject jsonObject) {
+    public void generateData(T item, ObjectNode jsonObject) {
         if (isSelected(item)) {
             jsonObject.put("selected", true);
         }
