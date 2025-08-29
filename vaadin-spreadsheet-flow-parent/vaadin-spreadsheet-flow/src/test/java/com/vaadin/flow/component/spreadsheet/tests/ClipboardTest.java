@@ -110,6 +110,59 @@ public class ClipboardTest {
     }
 
     @Test
+    public void lockedSheet_pasteIntoNonExistingCell_cellNotCreated() {
+        lockSheet();
+        spreadsheet.setSelection("A1");
+        // Try pasting the value to a non-existing cell in a locked sheet
+        paste("['A1']");
+        Assert.assertNull(spreadsheet.getCell("A1"));
+    }
+
+    @Test
+    public void lockedSheet_unlockRow_shouldAllowPaste() {
+        lockSheet();
+
+        // Unlock a row
+        var workbook = spreadsheet.getActiveSheet().getWorkbook();
+        var unlockedRowStyle = workbook.createCellStyle();
+        unlockedRowStyle.setLocked(false);
+
+        var row = spreadsheet.getActiveSheet().createRow(5);
+        row.setRowStyle(unlockedRowStyle);
+
+        // Try pasting to a cell in the unlocked row
+        spreadsheet.setSelection("A6");
+        paste("['test data']");
+        Assert.assertEquals("test data", getCellValue("A6"));
+
+        // Try pasting again after cell has been created
+        paste("['new data']");
+        Assert.assertEquals("new data", getCellValue("A6"));
+    }
+
+    @Test
+    public void lockedSheet_unlockColumn_shouldAllowPaste() {
+        lockSheet();
+
+        // Unlock a column
+        var workbook = spreadsheet.getActiveSheet().getWorkbook();
+        var unlockedColumnStyle = workbook.createCellStyle();
+        unlockedColumnStyle.setLocked(false);
+
+        spreadsheet.getActiveSheet().setDefaultColumnStyle(1,
+                unlockedColumnStyle);
+
+        // Try pasting to a cell in the unlocked column
+        spreadsheet.setSelection("B10");
+        paste("['test data']");
+        Assert.assertEquals("test data", getCellValue("B10"));
+
+        // Try pasting again after cell has been created
+        paste("['new data']");
+        Assert.assertEquals("new data", getCellValue("B10"));
+    }
+
+    @Test
     public void paste_selectionUpdated() {
         spreadsheet.setSelection("A1:A2");
         paste("['A1\tB1']");
@@ -250,8 +303,12 @@ public class ClipboardTest {
                 "[]");
     }
 
-    private void lockCell(String cellAddress) {
+    private void lockSheet() {
         spreadsheet.setSheetProtected(0, "password");
+    }
+
+    private void lockCell(String cellAddress) {
+        lockSheet();
         spreadsheet.createCell(0, 0, "locked");
         var lockedCellStyle = spreadsheet.getActiveSheet().getWorkbook()
                 .createCellStyle();

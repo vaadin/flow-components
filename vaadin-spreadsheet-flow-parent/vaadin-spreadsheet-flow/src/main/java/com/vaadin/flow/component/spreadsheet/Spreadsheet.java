@@ -41,6 +41,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.BaseFormulaEvaluator;
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
 import org.apache.poi.ss.usermodel.Comment;
@@ -3888,7 +3889,11 @@ public class Spreadsheet extends Component
      * @param cell
      *            The cell to check
      * @return true if the cell is locked, false otherwise
+     * @deprecated Due to requiring a cell instance, this method can not
+     *             determine the locked state of cells that have not been
+     *             created yet. Use {@link #isCellLocked(CellAddress)} instead.
      */
+    @Deprecated(since = "24.9.0", forRemoval = true)
     public boolean isCellLocked(Cell cell) {
         if (isActiveSheetProtected()) {
             if (cell != null) {
@@ -3906,6 +3911,41 @@ public class Spreadsheet extends Component
         } else {
             return false;
         }
+    }
+
+    /**
+     * Returns whether or not the cell at the given address in the active sheet
+     * is locked.
+     *
+     * @param cellAddress
+     *            The address of the cell to check
+     * @return true if the cell is locked, false otherwise
+     */
+    public boolean isCellLocked(CellAddress cellAddress) {
+        // Locking cells only works if the sheet is protected
+        if (!isActiveSheetProtected()) {
+            return false;
+        }
+
+        Sheet sheet = getActiveSheet();
+        Row row = sheet.getRow(cellAddress.getRow());
+        Cell cell = row != null ? row.getCell(cellAddress.getColumn()) : null;
+
+        // If there is a cell with a custom cell style, return its locked state
+        if (cell != null) {
+            if (cell.getCellStyle().getIndex() != 0) {
+                return cell.getCellStyle().getLocked();
+            }
+        }
+
+        // Otherwise inherit locked state from row or column styles
+        // If neither is unlocked, the locked state is inherited from the sheet
+        CellStyle rowStyle = row != null ? row.getRowStyle() : null;
+        CellStyle columnStyle = sheet.getColumnStyle(cellAddress.getColumn());
+        boolean rowLocked = rowStyle == null || rowStyle.getLocked();
+        boolean columnLocked = columnStyle == null || columnStyle.getLocked();
+
+        return rowLocked && columnLocked;
     }
 
     /**
