@@ -15,20 +15,20 @@
  */
 package com.vaadin.flow.component.confirmdialog.tests;
 
-import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
+
 @TestPath("vaadin-confirm-dialog/open-change")
 public class OpenChangeListenerIT extends AbstractComponentIT {
 
     private ConfirmDialogElement dialog;
-
 
     @Before
     public void init() {
@@ -46,7 +46,6 @@ public class OpenChangeListenerIT extends AbstractComponentIT {
         Assert.assertEquals("The open state of the dialog is false",
                 message.getText());
 
-
         findElement(By.id("dialog-open")).click();
         verifyOpened();
         dialog = $(ConfirmDialogElement.class).first();
@@ -58,7 +57,9 @@ public class OpenChangeListenerIT extends AbstractComponentIT {
         Assert.assertEquals("The event came from server",
                 eventSourceMessage.getText());
 
-        Assert.assertEquals("There is an opened change listener for this dialog", dialog.getMessageText());
+        Assert.assertEquals(
+                "There is an opened change listener for this dialog",
+                dialog.getMessageText());
 
         dialog.getCancelButton().click();
         verifyClosed();
@@ -84,8 +85,8 @@ public class OpenChangeListenerIT extends AbstractComponentIT {
     }
 
     protected void verifyClosed() {
-        waitForElementNotPresent(By.cssSelector("vaadin-confirm-dialog[opened], vaadin-confirm-dialog[closing]"));
+        waitForElementNotPresent(By.cssSelector(
+                "vaadin-confirm-dialog[opened], vaadin-confirm-dialog[closing]"));
     }
-
 
 }

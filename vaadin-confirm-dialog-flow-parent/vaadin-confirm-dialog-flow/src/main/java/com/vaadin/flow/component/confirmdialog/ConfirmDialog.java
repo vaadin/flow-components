@@ -122,14 +122,15 @@ public class ConfirmDialog extends Component
     }
 
     /**
-     * Event that is fired when the dialog's opened state changes.
+     * Event that is fired when the confirm dialog's opened state changes.
      * <p>
      * Note that this event fires immediately when the opened property changes,
-     * which, when closing the dialog, is before the closing animation has
-     * finished. To wait for the animation to finish, listen for the
+     * which, when closing the confirm dialog, is before the closing animation
+     * has finished. To wait for the animation to finish, listen for the
      * {@link ClosedEvent} event.
      */
-    public static class OpenedChangeEvent extends ComponentEvent<ConfirmDialog> {
+    public static class OpenedChangeEvent
+            extends ComponentEvent<ConfirmDialog> {
         private final boolean opened;
 
         public OpenedChangeEvent(ConfirmDialog source, boolean fromClient) {
@@ -243,8 +244,9 @@ public class ConfirmDialog extends Component
         // as that would cause the auto add controller to remove the dialog from
         // the UI before other event listeners (confirm, reject, cancel) are
         // fired.
-        getElement().addEventListener("opened-changed", event ->
-                        handleClientSideOpenedStateChange(event.getEventData().getBoolean("event.detail.value")))
+        getElement().addEventListener("opened-changed",
+                event -> handleClientSideOpenedStateChange(
+                        event.getEventData().getBoolean("event.detail.value")))
                 .addEventData("event.detail.value");
     }
 
@@ -611,8 +613,8 @@ public class ConfirmDialog extends Component
      * Add a listener for when the confirm dialog's opened state changes.
      * <p>
      * Note that this event fires immediately when the opened property changes,
-     * which, when closing the dialog, is before the closing animation has
-     * finished. To wait for the animation to finish, use
+     * which, when closing the confirm dialog, is before the closing animation
+     * has finished. To wait for the animation to finish, use
      * {@link #addClosedListener(ComponentEventListener)}.
      *
      * @param listener
