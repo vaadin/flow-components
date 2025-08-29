@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -29,9 +30,7 @@ import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
-
-import elemental.json.Json;
-import elemental.json.JsonObject;
+import com.vaadin.flow.internal.JacksonUtils;
 
 public class ComponentRendererTest {
 
@@ -83,12 +82,12 @@ public class ComponentRendererTest {
                 .runWhenAttached(ui2 -> ui2.getInternals().getStateTree()
                         .beforeClientResponse(containerParent.getNode(),
                                 context -> {
-                                    JsonObject value = Json.createObject();
+                                    ObjectNode value = JacksonUtils.createObjectNode();
                                     rendering.getDataGenerator().get()
                                             .generateData("item", value);
                                     Assert.assertEquals(
                                             "generateData should add one element in the jsonobject",
-                                            1, value.keys().length);
+                                            1, JacksonUtils.getKeys(value).size());
                                 }));
 
         // attach the parent (ex: grid) before the child (ex: column)
@@ -118,12 +117,12 @@ public class ComponentRendererTest {
                 .runWhenAttached(ui2 -> ui2.getInternals().getStateTree()
                         .beforeClientResponse(containerParent.getNode(),
                                 context -> {
-                                    JsonObject value = Json.createObject();
+                                    ObjectNode value = JacksonUtils.createObjectNode();
                                     rendering.getDataGenerator().get()
                                             .generateData("item", value);
                                     Assert.assertEquals(
                                             "generateData should add one element in the jsonobject",
-                                            1, value.keys().length);
+                                            1, JacksonUtils.getKeys(value).size());
                                 }));
         // attach the child (ex: container) before the parent (ex: grid)
         attachElement(ui, container);

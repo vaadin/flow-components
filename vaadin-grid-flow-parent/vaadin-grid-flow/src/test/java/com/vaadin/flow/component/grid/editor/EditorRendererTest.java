@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.grid.editor;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,9 +24,7 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.grid.Person;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.Element;
-
-import elemental.json.Json;
-import elemental.json.JsonObject;
+import com.vaadin.flow.internal.JacksonUtils;
 
 public class EditorRendererTest {
 
@@ -56,10 +55,10 @@ public class EditorRendererTest {
 
         renderer.render(container, null);
         renderer.refreshData(item);
-        JsonObject object = Json.createObject();
+        ObjectNode object = JacksonUtils.createObjectNode();
         renderer.generateData(item, object);
 
-        Assert.assertEquals(42, (int) object.getNumber("_col_editor"));
+        Assert.assertEquals(42, object.get("_col_editor").intValue());
         Mockito.verify(renderer, Mockito.times(1)).getComponentNodeId(span);
 
         Assert.assertEquals(1, editorContainer.getChildCount());
@@ -76,10 +75,10 @@ public class EditorRendererTest {
 
         renderer.render(container, null);
         renderer.refreshData(item);
-        JsonObject object = Json.createObject();
+        ObjectNode object = JacksonUtils.createObjectNode();
         renderer.generateData(item, object);
 
-        Assert.assertFalse(object.hasKey("_col_editor"));
+        Assert.assertFalse(object.has("_col_editor"));
         Assert.assertEquals(0, editorContainer.getChildCount());
     }
 
@@ -92,10 +91,10 @@ public class EditorRendererTest {
 
         renderer.render(container, null);
         renderer.refreshData(item);
-        JsonObject object = Json.createObject();
+        ObjectNode object = JacksonUtils.createObjectNode();
         renderer.generateData(item, object);
 
-        Assert.assertTrue(object.hasKey("_col_editor"));
+        Assert.assertTrue(object.has("_col_editor"));
         Assert.assertEquals(1, editorContainer.getChildCount());
         Assert.assertNull(editorContainer.getChild(0).getProperty("innerHTML"));
     }

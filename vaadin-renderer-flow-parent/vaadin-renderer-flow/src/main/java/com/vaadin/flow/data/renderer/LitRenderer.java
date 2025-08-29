@@ -25,6 +25,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.data.provider.DataGenerator;
@@ -33,6 +35,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.JsonUtils;
 import com.vaadin.flow.internal.StateTree;
@@ -42,7 +45,6 @@ import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
-import elemental.json.JsonObject;
 
 /**
  * LitRenderer is a {@link Renderer} that uses a Lit-based template literal to
@@ -245,16 +247,16 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
         // see https://github.com/vaadin/flow-components/issues/6256
         return new DataGenerator<SOURCE>() {
             @Override
-            public void generateData(SOURCE item, JsonObject jsonObject) {
+            public void generateData(SOURCE item, ObjectNode jsonObject) {
                 valueProviders.forEach((key, provider) -> {
-                    jsonObject.put(
+                    jsonObject.set(
                             // Prefix the property name with a LitRenderer
                             // instance specific namespace to avoid property
                             // name clashes.
                             // Fixes https://github.com/vaadin/flow/issues/8629
                             // in LitRenderer
                             propertyNamespace + key,
-                            JsonSerializer.toJson(provider.apply(item)));
+                            JacksonSerializer.toJson(provider.apply(item)));
                 });
             }
         };

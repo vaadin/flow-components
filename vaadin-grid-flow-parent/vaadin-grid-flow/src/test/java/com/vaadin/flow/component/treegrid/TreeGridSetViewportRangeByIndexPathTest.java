@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,9 +34,6 @@ import com.vaadin.flow.component.grid.GridArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.tests.dataprovider.MockUI;
-
-import elemental.json.JsonObject;
-import elemental.json.JsonValue;
 
 public class TreeGridSetViewportRangeByIndexPathTest {
     private MockUI ui;
@@ -199,14 +197,14 @@ public class TreeGridSetViewportRangeByIndexPathTest {
 
     @SuppressWarnings("unchecked")
     private LinkedList<String> captureViewportRange() {
-        ArgumentCaptor<List<JsonValue>> itemsCaptor = ArgumentCaptor
+        ArgumentCaptor<List<JsonNode>> itemsCaptor = ArgumentCaptor
                 .forClass(List.class);
 
         Mockito.verify(arrayUpdate, Mockito.atLeastOnce()).set(Mockito.anyInt(),
                 itemsCaptor.capture());
 
         return itemsCaptor.getAllValues().stream().flatMap(List::stream)
-                .map((jsonValue) -> ((JsonObject) jsonValue).getString("name"))
+                .map((jsonValue) -> jsonValue.get("name").asText())
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 

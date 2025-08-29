@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.provider.ArrayUpdater;
@@ -26,9 +28,7 @@ import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
-import com.vaadin.flow.internal.JsonUtils;
-
-import elemental.json.JsonValue;
+import com.vaadin.flow.internal.JacksonUtils;
 
 public class LitRendererTestComponentWrapper extends Div
         implements HasDataProvider<String> {
@@ -45,10 +45,10 @@ public class LitRendererTestComponentWrapper extends Div
                 }
 
                 @Override
-                public void set(int start, List<JsonValue> items) {
+                public void set(int start, List<JsonNode> items) {
                     getChildren().forEach((component) -> {
                         component.getElement().executeJs("this.items = $0",
-                                items.stream().collect(JsonUtils.asArray()));
+                                items.stream().collect(JacksonUtils.asArray()));
                     });
                 }
 
