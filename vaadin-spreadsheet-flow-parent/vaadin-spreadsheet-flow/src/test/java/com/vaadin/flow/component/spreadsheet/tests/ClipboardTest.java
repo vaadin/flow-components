@@ -110,7 +110,7 @@ public class ClipboardTest {
     }
 
     @Test
-    public void lockedSheet_pasteIntoNonExistingCell_cellNotCreated() {
+    public void lockSheet_pasteIntoNonExistingCell_cellNotCreated() {
         lockSheet();
         spreadsheet.setSelection("A1");
         // Try pasting the value to a non-existing cell in a locked sheet
@@ -119,7 +119,19 @@ public class ClipboardTest {
     }
 
     @Test
-    public void lockedSheet_unlockRow_shouldAllowPaste() {
+    public void createCell_lockSheet_pasteIntoExistingCell_cellValueNotUpdated() {
+        spreadsheet.createCell(9, 1, "initial");
+
+        lockSheet();
+
+        // Try pasting after locking
+        spreadsheet.setSelection("B10");
+        paste("['new data']");
+        Assert.assertEquals("initial", getCellValue("B10"));
+    }
+
+    @Test
+    public void lockSheet_unlockRow_shouldAllowPaste() {
         lockSheet();
 
         // Unlock a row
@@ -141,7 +153,7 @@ public class ClipboardTest {
     }
 
     @Test
-    public void lockedSheet_unlockColumn_shouldAllowPaste() {
+    public void lockSheet_unlockColumn_shouldAllowPaste() {
         lockSheet();
 
         // Unlock a column
