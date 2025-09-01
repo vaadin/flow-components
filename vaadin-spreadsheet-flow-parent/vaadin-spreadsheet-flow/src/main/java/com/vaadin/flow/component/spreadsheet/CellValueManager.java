@@ -47,6 +47,7 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -217,7 +218,7 @@ public class CellValueManager implements Serializable {
         cellData.col = cell.getColumnIndex() + 1;
         CellStyle cellStyle = cell.getCellStyle();
         cellData.cellStyle = "cs" + cellStyle.getIndex();
-        cellData.locked = spreadsheet.isCellLocked(cell);
+        cellData.locked = spreadsheet.isCellLocked(cell.getAddress());
         try {
             if (!spreadsheet.isCellHidden(cell)) {
                 if (cell.getCellType() == CellType.FORMULA) {
@@ -807,7 +808,8 @@ public class CellValueManager implements Serializable {
         if (selectedCellReference != null) {
             Row row = activeSheet.getRow(selectedCellReference.getRow());
             if (row != null && spreadsheet.isCellLocked(
-                    row.getCell(selectedCellReference.getCol()))) {
+                    new CellAddress(selectedCellReference.getRow(),
+                            selectedCellReference.getCol()))) {
                 return;
             }
         }
@@ -815,8 +817,8 @@ public class CellValueManager implements Serializable {
                 .getIndividualSelectedCells();
         for (CellReference cr : individualSelectedCells) {
             final Row row = activeSheet.getRow(cr.getRow());
-            if (row != null
-                    && spreadsheet.isCellLocked(row.getCell(cr.getCol()))) {
+            if (row != null && spreadsheet
+                    .isCellLocked(new CellAddress(cr.getRow(), cr.getCol()))) {
                 return;
             }
         }
