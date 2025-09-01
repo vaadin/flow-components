@@ -298,7 +298,7 @@ public class MultiSelectComboBox<TItem>
         }
 
         model.stream().map(multiSelectComboBox::generateJson)
-                .forEach(jsonObject -> array.set(array.size(), jsonObject));
+                .forEach(array::add);
 
         return array;
     }

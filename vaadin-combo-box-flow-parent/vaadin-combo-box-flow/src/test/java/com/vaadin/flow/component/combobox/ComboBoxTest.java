@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
@@ -37,8 +38,6 @@ import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
-
-import elemental.json.JsonObject;
 
 public class ComboBoxTest extends ComboBoxBaseTest {
     private enum Category {
@@ -82,7 +81,7 @@ public class ComboBoxTest extends ComboBoxBaseTest {
 
         Assert.assertEquals("foo", comboBox.getValue());
         // should refresh web components selectedItem property
-        JsonObject jsonObject = (JsonObject) comboBox.getElement()
+        ObjectNode jsonObject = (ObjectNode) comboBox.getElement()
                 .getPropertyRaw("selectedItem");
         Assert.assertNotNull(jsonObject);
     }
