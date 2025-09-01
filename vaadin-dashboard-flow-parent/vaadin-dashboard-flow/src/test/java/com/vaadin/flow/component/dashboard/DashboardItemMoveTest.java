@@ -315,7 +315,7 @@ public class DashboardItemMoveTest extends DashboardTestBase {
             JsonNode currentItem = initialArray.get(i);
             newArray.add(currentItem);
         }
-        newArray.set(finalIndex, itemToMove);
+        newArray.add(itemToMove);
         for (int i = finalIndex; i < initialArray.size(); i++) {
             JsonNode currentItem = initialArray.get(i);
             newArray.add(currentItem);

@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
@@ -39,8 +40,6 @@ import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.internal.JacksonUtils;
-
-import elemental.json.JsonArray;
 
 /**
  * Form Layout allows you to build responsive forms with multiple columns and to
@@ -583,13 +582,13 @@ public class FormLayout extends Component
      * @return the list of {@link ResponsiveStep}s used to configure this layout
      */
     public List<ResponsiveStep> getResponsiveSteps() {
-        JsonArray stepsJsonArray = (JsonArray) getElement()
+        ArrayNode stepsJsonArray = (ArrayNode) getElement()
                 .getPropertyRaw("responsiveSteps");
         if (stepsJsonArray == null) {
             return Collections.emptyList();
         }
         List<ResponsiveStep> steps = new ArrayList<>();
-        for (int i = 0; i < stepsJsonArray.length(); i++) {
+        for (int i = 0; i < stepsJsonArray.size(); i++) {
             steps.add(new ResponsiveStep(null, 0)
                     .readJson(stepsJsonArray.get(i)));
         }
