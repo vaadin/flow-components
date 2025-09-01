@@ -41,6 +41,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.BaseFormulaEvaluator;
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
 import org.apache.poi.ss.usermodel.Comment;
@@ -1488,7 +1489,7 @@ public class Spreadsheet extends Component
      * is defined for a cell, then it is displayed on that cell. This behavior
      * can be changed by setting this property to true, which makes the custom
      * editor visible when the cell is focused.
-     * 
+     *
      * @param showCustomEditorOnFocus
      *            a boolean indicating whether the custom editor should be
      *            visible on focus (true) or not (false)
@@ -1584,16 +1585,10 @@ public class Spreadsheet extends Component
     protected boolean isRangeEditable(int row1, int col1, int row2, int col2) {
         if (isActiveSheetProtected()) {
             for (int r = row1; r <= row2; r++) {
-                final Row row = getActiveSheet().getRow(r);
-                if (row != null) {
-                    for (int c = col1; c <= col2; c++) {
-                        final Cell cell = row.getCell(c);
-                        if (isCellLocked(cell)) {
-                            return false;
-                        }
+                for (int c = col1; c <= col2; c++) {
+                    if (isCellLocked(new CellAddress(r, c))) {
+                        return false;
                     }
-                } else {
-                    return false;
                 }
             }
         }
@@ -3904,6 +3899,39 @@ public class Spreadsheet extends Component
     }
 
     /**
+     * Returns whether or not the cell at the given address in the active sheet
+     * is locked.
+     *
+     * @param cellAddress
+     *            The address of the cell to check
+     * @return true if the cell is locked, false otherwise
+     */
+    public boolean isCellLocked(CellAddress cellAddress) {
+        // Locking cells only works if the sheet is protected
+        if (!isActiveSheetProtected()) {
+            return false;
+        }
+
+        Sheet sheet = getActiveSheet();
+        Row row = sheet.getRow(cellAddress.getRow());
+        Cell cell = row != null ? row.getCell(cellAddress.getColumn()) : null;
+
+        // If there is a cell with a custom cell style, return its locked state
+        if (cell != null && cell.getCellStyle().getIndex() != 0) {
+            return cell.getCellStyle().getLocked();
+        }
+
+        // Otherwise inherit locked state from row or column styles
+        // If neither is unlocked, the locked state is inherited from the sheet
+        CellStyle rowStyle = row != null ? row.getRowStyle() : null;
+        CellStyle columnStyle = sheet.getColumnStyle(cellAddress.getColumn());
+        boolean rowLocked = rowStyle == null || rowStyle.getLocked();
+        boolean columnLocked = columnStyle == null || columnStyle.getLocked();
+
+        return rowLocked && columnLocked;
+    }
+
+    /**
      * Gets the RPC proxy for communication to the client side.
      *
      * @return Client RPC proxy instance
@@ -4706,7 +4734,7 @@ public class Spreadsheet extends Component
                                 .put(getComponentNodeId(customComponent), key);
                         newCustomComponents.add(customComponent);
                         rowsWithComponents.add(r);
-                    } else if (!isCellLocked(cell)) {
+                    } else if (!isCellLocked(new CellAddress(r, c))) {
                         // no custom component and not locked, check if
                         // the cell has a custom editor
                         Component customEditor = customComponentFactory
