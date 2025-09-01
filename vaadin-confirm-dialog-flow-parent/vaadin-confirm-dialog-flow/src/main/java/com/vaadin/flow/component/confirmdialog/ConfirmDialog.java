@@ -25,6 +25,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -239,15 +240,12 @@ public class ConfirmDialog extends Component
         // Initialize auto-add behavior
         new OverlayAutoAddController<>(this, () -> true);
 
-        // Listen specifically for the client dialog closing to close it on the
-        // server as well. Not using synchronization for the `opened` property
-        // as that would cause the auto add controller to remove the dialog from
-        // the UI before other event listeners (confirm, reject, cancel) are
-        // fired.
-        getElement().addEventListener("opened-changed",
-                event -> handleClientSideOpenedStateChange(
-                        event.getEventData().getBoolean("event.detail.value")))
-                .addEventData("event.detail.value");
+        setOpened(false);
+
+        getElement().addPropertyChangeListener("opened", event -> {
+            setModality(isOpened());
+            fireEvent(new OpenedChangeEvent(this, event.isUserOriginated()));
+        });
     }
 
     /**
@@ -669,6 +667,7 @@ public class ConfirmDialog extends Component
         setOpened(false);
     }
 
+    @Synchronize(property = "opened", value = "opened-changed")
     public boolean isOpened() {
         return getElement().getProperty("opened", false);
     }
@@ -690,21 +689,7 @@ public class ConfirmDialog extends Component
      *            close it
      */
     public void setOpened(boolean opened) {
-        if (isOpened() != opened) {
-            doSetOpened(opened, false);
-        }
-    }
-
-    protected void handleClientSideOpenedStateChange(boolean opened) {
-        if (isOpened() != opened) {
-            doSetOpened(opened, true);
-        }
-    }
-
-    private void doSetOpened(boolean opened, boolean fromClient) {
-        setModality(opened);
         getElement().setProperty("opened", opened);
-        fireEvent(new OpenedChangeEvent(this, fromClient));
     }
 
     /**
