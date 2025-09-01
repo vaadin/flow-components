@@ -1489,7 +1489,7 @@ public class Spreadsheet extends Component
      * is defined for a cell, then it is displayed on that cell. This behavior
      * can be changed by setting this property to true, which makes the custom
      * editor visible when the cell is focused.
-     * 
+     *
      * @param showCustomEditorOnFocus
      *            a boolean indicating whether the custom editor should be
      *            visible on focus (true) or not (false)
@@ -3878,11 +3878,7 @@ public class Spreadsheet extends Component
      * @param cell
      *            The cell to check
      * @return true if the cell is locked, false otherwise
-     * @deprecated Due to requiring a cell instance, this method can not
-     *             determine the locked state of cells that have not been
-     *             created yet. Use {@link #isCellLocked(CellAddress)} instead.
      */
-    @Deprecated(since = "24.9.0", forRemoval = true)
     public boolean isCellLocked(Cell cell) {
         if (isActiveSheetProtected()) {
             if (cell != null) {
