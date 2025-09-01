@@ -54,4 +54,53 @@ public interface HasThemeVariant<TVariantEnum extends ThemeVariant>
                 .removeAll(Stream.of(variants).map(TVariantEnum::getVariantName)
                         .collect(Collectors.toList()));
     }
+
+    /**
+     * Sets or removes the given theme variant for this component.
+     *
+     * @param variant
+     *            the theme variant to set or remove, not <code>null</code>
+     * @param set
+     *            <code>true</code> to set the theme variant, <code>false</code> to
+     *            remove it
+     */
+    default void setThemeVariant(TVariantEnum variant, boolean set) {
+        if (set) {
+            addThemeVariants(variant);
+        } else {
+            removeThemeVariants(variant);
+        }
+    }
+
+    /**
+     * Sets the theme variants of this component. This method overwrites any
+     * previous set theme variants.
+     *
+     * @param variants
+     *            the theme variants to add, or
+     *            <code>null</code> to remove all class names
+     */
+    default void setThemeVariants(TVariantEnum... variants) {
+        getThemeNames().clear();
+        addThemeVariants(variants);
+    }
+
+
+    /**
+     * Sets or removes the given theme variants for this component.
+     *
+     * @param set
+     *            <code>true</code> to set the theme variant, <code>false</code> to
+     *            remove it
+     * @param variants
+     *            the theme variants to add, or
+     *            <code>null</code> to remove all class names
+     */
+    default void setThemeVariants(boolean set, TVariantEnum... variants) {
+        if (set) {
+            addThemeVariants(variants);
+        } else {
+            removeThemeVariants(variants);
+        }
+    }
 }
