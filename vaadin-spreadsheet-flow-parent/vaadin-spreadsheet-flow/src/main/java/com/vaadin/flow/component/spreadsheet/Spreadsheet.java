@@ -3926,10 +3926,8 @@ public class Spreadsheet extends Component
         Cell cell = row != null ? row.getCell(cellAddress.getColumn()) : null;
 
         // If there is a cell with a custom cell style, return its locked state
-        if (cell != null) {
-            if (cell.getCellStyle().getIndex() != 0) {
-                return cell.getCellStyle().getLocked();
-            }
+        if (cell != null && cell.getCellStyle().getIndex() != 0) {
+            return cell.getCellStyle().getLocked();
         }
 
         // Otherwise inherit locked state from row or column styles
