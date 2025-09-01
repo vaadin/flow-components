@@ -15,22 +15,20 @@
  */
 package com.vaadin.flow.component.confirmdialog;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.internal.nodefeature.ElementPropertyMap;
+import com.vaadin.flow.internal.nodefeature.PropertyChangeDeniedException;
 import com.vaadin.flow.server.VaadinSession;
 
 public class ConfirmDialogOpenedChangeListenerTest {
     private final UI ui = new UI();
     private ConfirmDialog dialog;
-    private AtomicReference<ConfirmDialog.OpenedChangeEvent> event;
     private ComponentEventListener<ConfirmDialog.OpenedChangeEvent> mockListener;
 
     @SuppressWarnings("unchecked")
@@ -43,8 +41,6 @@ public class ConfirmDialogOpenedChangeListenerTest {
         ui.getInternals().setSession(session);
 
         dialog = new ConfirmDialog();
-        event = new AtomicReference<>();
-        dialog.addOpenedChangeListener(event::set);
 
         mockListener = Mockito.mock(ComponentEventListener.class);
         dialog.addOpenedChangeListener(mockListener);
@@ -58,69 +54,67 @@ public class ConfirmDialogOpenedChangeListenerTest {
     @Test
     public void open() {
         dialog.open();
+        assertEventFired(true, false);
 
-        Assert.assertFalse(event.get().isFromClient());
-        Assert.assertTrue(event.get().isOpened());
-        assertListenerCalls(1);
-
-        clearCapturedData();
-        dialog.open();
-        Assert.assertNull(event.get());
-        assertListenerCalls(0);
+        resetMock();
+        syncOpenedFromClient(true);
+        assertNoEventFired();
     }
 
     @Test
     public void close() {
         dialog.open();
-        clearCapturedData();
+        resetMock();
 
         dialog.close();
-        Assert.assertFalse(event.get().isFromClient());
-        Assert.assertFalse(event.get().isOpened());
-        assertListenerCalls(1);
+        assertEventFired(false, false);
 
-        clearCapturedData();
-        dialog.close();
-        Assert.assertNull(event.get());
-        assertListenerCalls(0);
-    }
-
-    @Test
-    public void openFromClient() {
-        dialog.handleClientSideOpenedStateChange(true);
-        Assert.assertTrue(event.get().isFromClient());
-        Assert.assertTrue(event.get().isOpened());
-        assertListenerCalls(1);
-
-        clearCapturedData();
-        dialog.handleClientSideOpenedStateChange(true);
-        Assert.assertNull(event.get());
-        assertListenerCalls(0);
+        resetMock();
+        syncOpenedFromClient(false);
+        assertNoEventFired();
     }
 
     @Test
     public void closeFromClient() {
         dialog.open();
-        clearCapturedData();
+        resetMock();
 
-        dialog.handleClientSideOpenedStateChange(false);
-        Assert.assertTrue(event.get().isFromClient());
-        Assert.assertFalse(event.get().isOpened());
-        assertListenerCalls(1);
+        syncOpenedFromClient(false);
+        assertEventFired(false, true);
 
-        clearCapturedData();
-        dialog.handleClientSideOpenedStateChange(false);
-        Assert.assertNull(event.get());
-        assertListenerCalls(0);
+        resetMock();
+        dialog.close();
+        assertNoEventFired();
     }
 
-    private void assertListenerCalls(int expectedCount) {
-        Mockito.verify(mockListener, Mockito.times(expectedCount))
+    @Test
+    public void noInitialEvent() {
+        syncOpenedFromClient(false);
+        assertNoEventFired();
+    }
+
+    private void syncOpenedFromClient(boolean opened) {
+        try {
+            dialog.getElement().getNode().getFeature(ElementPropertyMap.class)
+                    .deferredUpdateFromClient("opened", opened).run();
+        } catch (PropertyChangeDeniedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void assertNoEventFired() {
+        Mockito.verify(mockListener, Mockito.never())
                 .onComponentEvent(Mockito.any());
     }
 
-    private void clearCapturedData() {
-        event.set(null);
+    private void assertEventFired(boolean opened, boolean fromClient) {
+        Mockito.verify(mockListener, Mockito.times(1)).onComponentEvent(
+                Mockito.argThat(event -> event.isOpened() == opened
+                        && event.isFromClient() == fromClient));
+    }
+
+    @SuppressWarnings("unchecked")
+    private void resetMock() {
         Mockito.reset(mockListener);
     }
 }
