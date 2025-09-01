@@ -28,12 +28,14 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.GridArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.tests.dataprovider.MockUI;
+
+import elemental.json.JsonObject;
+import elemental.json.JsonValue;
 
 public class TreeGridSetViewportRangeByIndexPathTest {
     private MockUI ui;
@@ -42,10 +44,6 @@ public class TreeGridSetViewportRangeByIndexPathTest {
             .mock(GridArrayUpdater.class);
 
     private Update arrayUpdate = Mockito.mock(Update.class);
-
-    @SuppressWarnings("unchecked")
-    private ArgumentCaptor<List<JsonNode>> updateItemsCaptor = ArgumentCaptor
-            .forClass(List.class);
 
     private TreeGrid<String> treeGrid = new TreeGrid<>() {
         @Override
@@ -199,12 +197,16 @@ public class TreeGridSetViewportRangeByIndexPathTest {
         });
     }
 
+    @SuppressWarnings("unchecked")
     private LinkedList<String> captureViewportRange() {
-        Mockito.verify(arrayUpdate).set(Mockito.anyInt(),
-                updateItemsCaptor.capture());
+        ArgumentCaptor<List<JsonValue>> itemsCaptor = ArgumentCaptor
+                .forClass(List.class);
 
-        return updateItemsCaptor.getValue().stream()
-                .map((jsonObject) -> jsonObject.get("name").asText())
+        Mockito.verify(arrayUpdate, Mockito.atLeastOnce()).set(Mockito.anyInt(),
+                itemsCaptor.capture());
+
+        return itemsCaptor.getAllValues().stream().flatMap(List::stream)
+                .map((jsonValue) -> ((JsonObject) jsonValue).getString("name"))
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
