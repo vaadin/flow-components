@@ -21,8 +21,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
@@ -37,11 +38,9 @@ import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
+import com.vaadin.flow.internal.JacksonUtils;
 
-import elemental.json.Json;
 import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-import elemental.json.JsonValue;
 
 /**
  * Form Layout allows you to build responsive forms with multiple columns and to
@@ -255,8 +254,8 @@ public class FormLayout extends Component
         }
 
         @Override
-        public JsonObject toJson() {
-            JsonObject json = Json.createObject();
+        public ObjectNode toJson() {
+            ObjectNode json = JacksonUtils.createObjectNode();
             if (minWidth != null && !minWidth.trim().isEmpty()) {
                 json.put(MIN_WIDTH_JSON_KEY, minWidth);
             }
@@ -268,19 +267,19 @@ public class FormLayout extends Component
         }
 
         @Override
-        public ResponsiveStep readJson(JsonObject value) {
-            JsonValue minWidthValue = value.get(MIN_WIDTH_JSON_KEY);
+        public ResponsiveStep readJson(JsonNode value) {
+            JsonNode minWidthValue = value.get(MIN_WIDTH_JSON_KEY);
             if (minWidthValue != null) {
-                minWidth = minWidthValue.asString();
+                minWidth = minWidthValue.textValue();
             } else {
                 minWidth = null;
             }
 
-            columns = (int) value.getNumber(COLUMNS_JSON_KEY);
+            columns = (int) value.get(COLUMNS_JSON_KEY).numberValue();
 
-            JsonValue labelsPositionValue = value.get(LABELS_POSITION_JSON_KEY);
+            JsonNode labelsPositionValue = value.get(LABELS_POSITION_JSON_KEY);
             if (labelsPositionValue != null) {
-                String labelsPositionString = labelsPositionValue.asString();
+                String labelsPositionString = labelsPositionValue.textValue();
                 if ("aside".equals(labelsPositionString)) {
                     labelsPosition = LabelsPosition.ASIDE;
                 } else if ("top".equals(labelsPositionString)) {
@@ -615,18 +614,8 @@ public class FormLayout extends Component
      *            list of {@link ResponsiveStep}s to set
      */
     public void setResponsiveSteps(List<ResponsiveStep> steps) {
-        AtomicInteger index = new AtomicInteger();
-        getElement().setPropertyJson("responsiveSteps",
-                steps.stream().map(ResponsiveStep::toJson).collect(
-                        Json::createArray,
-                        (arr, value) -> arr.set(index.getAndIncrement(), value),
-                        (arr, arrOther) -> {
-                            int startIndex = arr.length();
-                            for (int i = 0; i < arrOther.length(); i++) {
-                                JsonValue value = arrOther.get(i);
-                                arr.set(startIndex + i, value);
-                            }
-                        }));
+        getElement().setPropertyJson("responsiveSteps", steps.stream()
+                .map(ResponsiveStep::toJson).collect(JacksonUtils.asArray()));
     }
 
     /**

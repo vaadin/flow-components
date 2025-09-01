@@ -44,9 +44,6 @@ import com.vaadin.flow.internal.nodefeature.ReturnChannelMap;
 import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-
 /**
  * LitRenderer is a {@link Renderer} that uses a Lit-based template literal to
  * render given model objects in the components that support the JS renderer

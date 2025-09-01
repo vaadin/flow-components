@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
@@ -44,13 +46,9 @@ import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.Json;
-import elemental.json.JsonObject;
-import elemental.json.JsonValue;
 
 /**
  * Virtual List allows you to render a long list of items inside a scrollable
@@ -85,9 +83,9 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         }
 
         @Override
-        public void set(int start, List<JsonValue> items) {
+        public void set(int start, List<JsonNode> items) {
             enqueue("$connector.set", start,
-                    items.stream().collect(JsonUtils.asArray()));
+                    items.stream().collect(JacksonUtils.asArray()));
         }
 
         @Override
@@ -149,7 +147,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
                         getElement());
     }
 
-    private void generateItemAccessibleName(T item, JsonObject jsonObject) {
+    private void generateItemAccessibleName(T item, ObjectNode jsonObject) {
         var accessibleName = this.itemAccessibleNameGenerator.apply(item);
         if (accessibleName != null) {
             jsonObject.put("accessibleName", accessibleName);
@@ -256,7 +254,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         this.placeholderItem = placeholderItem;
 
         runBeforeClientResponse(() -> {
-            var json = Json.createObject();
+            var json = JacksonUtils.createObjectNode();
 
             if (placeholderItem != null) {
                 // Use the renderer's data generator to create the final

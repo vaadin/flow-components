@@ -15,13 +15,12 @@
  */
 package com.vaadin.flow.component.virtuallist.paging;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.StateNode;
-
-import elemental.json.JsonArray;
 
 /**
  * DataCommunicator implementation which disables the paging and does not allow
@@ -34,7 +33,7 @@ public class PagelessDataCommunicator<T> extends DataCommunicator<T> {
 
     public PagelessDataCommunicator(DataGenerator<T> dataGenerator,
             ArrayUpdater arrayUpdater,
-            SerializableConsumer<JsonArray> dataUpdater, StateNode stateNode) {
+            SerializableConsumer<ArrayNode> dataUpdater, StateNode stateNode) {
         super(dataGenerator, arrayUpdater, dataUpdater, stateNode);
         /*
          * Since VirtualList does not support pages, this forces the data
