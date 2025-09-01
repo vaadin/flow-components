@@ -36,12 +36,13 @@ public enum TestFixtures {
                                                                                                                                                                     SheetsFixture.class), CustomEditor(
                                                                                                                                                                             SimpleCustomEditorFixture.class), Styles(
                                                                                                                                                                                     StylesFixture.class), LockCell(
-                                                                                                                                                                                            LockCellFixture.class), CustomComponent(
-                                                                                                                                                                                                    CustomComponentFixture.class), Action(
-                                                                                                                                                                                                            ActionFixture.class), InsertRow(
-                                                                                                                                                                                                                    InsertRowFixture.class), DeleteRow(
-                                                                                                                                                                                                                            DeleteRowFixture.class), RowHeaderDoubleClick(
-                                                                                                                                                                                                                                    RowHeaderDoubleClickFixture.class);
+                                                                                                                                                                                            LockCellFixture.class), LockSheet(
+                                                                                                                                                                                                    LockSheetFixture.class), CustomComponent(
+                                                                                                                                                                                                            CustomComponentFixture.class), Action(
+                                                                                                                                                                                                                    ActionFixture.class), InsertRow(
+                                                                                                                                                                                                                            InsertRowFixture.class), DeleteRow(
+                                                                                                                                                                                                                                    DeleteRowFixture.class), RowHeaderDoubleClick(
+                                                                                                                                                                                                                                            RowHeaderDoubleClickFixture.class);
 
     public final SpreadsheetFixtureFactory factory;
 
