@@ -15,7 +15,7 @@
  */
 package com.vaadin.flow.component.contextmenu.it;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.dom.Element;
@@ -39,7 +39,7 @@ public class OverrideOnBeforeOpenContextMenuPage extends Div {
 
         ContextMenu contextMenu = new ContextMenu(target) {
             @Override
-            protected boolean onBeforeOpenMenu(JsonNode eventDetail) {
+            protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {
                 // ensure context menu will not open
                 return false;
             }
@@ -56,7 +56,7 @@ public class OverrideOnBeforeOpenContextMenuPage extends Div {
 
         ContextMenu contextMenu = new ContextMenu(target) {
             @Override
-            protected boolean onBeforeOpenMenu(JsonNode eventDetail) {
+            protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {
                 removeAll();
 
                 addItem("Dynamic Item");

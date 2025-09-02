@@ -19,7 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -417,7 +417,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * @return {@code true} if the context menu should be opened, {@code false}
      *         otherwise.
      */
-    protected boolean onBeforeOpenMenu(JsonNode eventDetail) {
+    protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {
         return true;
     }
 
@@ -454,7 +454,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     }
 
     private void beforeOpenHandler(DomEvent event) {
-        JsonNode eventDetail = event.getEventData().get(EVENT_DETAIL);
+        ObjectNode eventDetail = (ObjectNode) event.getEventData()
+                .get(EVENT_DETAIL);
 
         boolean shouldOpenMenu = onBeforeOpenMenu(eventDetail);
 

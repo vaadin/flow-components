@@ -17,7 +17,7 @@ package com.vaadin.flow.component.grid.contextmenu;
 
 import java.util.Optional;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -253,7 +253,7 @@ public class GridContextMenu<T> extends
      * {@inheritDoc}
      */
     @Override
-    protected boolean onBeforeOpenMenu(JsonNode eventDetail) {
+    protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {
         Grid<T> grid = (Grid<T>) getTarget();
         String key = eventDetail.get("key").asText();
 
