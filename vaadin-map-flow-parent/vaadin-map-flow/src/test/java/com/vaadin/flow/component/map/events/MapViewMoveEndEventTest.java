@@ -11,24 +11,23 @@ package com.vaadin.flow.component.map.events;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.map.Map;
-
-import elemental.json.Json;
-import elemental.json.JsonArray;
+import com.vaadin.flow.internal.JacksonUtils;
 
 public class MapViewMoveEndEventTest {
 
     @Test
     public void create() {
         Map map = new Map();
-        JsonArray coordinates = Json.createArray();
-        coordinates.set(0, 10);
-        coordinates.set(1, 20);
-        JsonArray extent = Json.createArray();
-        extent.set(0, 30);
-        extent.set(1, 40);
-        extent.set(2, 50);
-        extent.set(3, 60);
+        ArrayNode coordinates = JacksonUtils.createArrayNode();
+        coordinates.add(10);
+        coordinates.add(20);
+        ArrayNode extent = JacksonUtils.createArrayNode();
+        extent.add(30);
+        extent.add(40);
+        extent.add(50);
+        extent.add(60);
 
         MapViewMoveEndEvent event = new MapViewMoveEndEvent(map, true, 0, 0,
                 coordinates, extent);
@@ -46,14 +45,14 @@ public class MapViewMoveEndEventTest {
     @Test
     public void createFromInvalidCoordinates_usesFallback() {
         Map map = new Map();
-        JsonArray coordinates = Json.createArray();
-        coordinates.set(0, Json.createNull());
-        coordinates.set(1, Json.createNull());
-        JsonArray extent = Json.createArray();
-        extent.set(0, Json.createNull());
-        extent.set(1, Json.createNull());
-        extent.set(2, Json.createNull());
-        extent.set(3, Json.createNull());
+        ArrayNode coordinates = JacksonUtils.createArrayNode();
+        coordinates.add(JacksonUtils.nullNode());
+        coordinates.add(JacksonUtils.nullNode());
+        ArrayNode extent = JacksonUtils.createArrayNode();
+        extent.add(JacksonUtils.nullNode());
+        extent.add(JacksonUtils.nullNode());
+        extent.add(JacksonUtils.nullNode());
+        extent.add(JacksonUtils.nullNode());
 
         MapViewMoveEndEvent event = new MapViewMoveEndEvent(map, true, 0, 0,
                 coordinates, extent);

@@ -26,9 +26,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.flow.internal.JacksonUtils;
 
 public class BeanGridSortingTest {
 
@@ -265,15 +265,15 @@ public class BeanGridSortingTest {
 
     private void callSortersChanged(String columnId, String direction) {
         try {
-            JsonObject json = Json.createObject();
+            ObjectNode json = JacksonUtils.createObjectNode();
             json.put("path", grid.getColumnByKey(columnId).getInternalId());
             json.put("direction", direction);
 
-            JsonArray array = Json.createArray();
-            array.set(0, json);
+            ArrayNode array = JacksonUtils.createArrayNode();
+            array.add(json);
 
             Method method = Grid.class.getDeclaredMethod("sortersChanged",
-                    JsonArray.class);
+                    ArrayNode.class);
             method.setAccessible(true);
             method.invoke(grid, array);
         } catch (NoSuchMethodException | SecurityException
