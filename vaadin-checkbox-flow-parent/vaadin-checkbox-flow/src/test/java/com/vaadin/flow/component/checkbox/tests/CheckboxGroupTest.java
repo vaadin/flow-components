@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
@@ -52,11 +53,9 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
-
-import elemental.json.Json;
-import elemental.json.JsonArray;
 
 public class CheckboxGroupTest {
 
@@ -146,16 +145,16 @@ public class CheckboxGroupTest {
         String enabledKey = keys.get(0);
         String disabledKey = keys.get(1);
 
-        JsonArray array = Json.createArray();
-        array.set(0, disabledKey);
+        ArrayNode array = JacksonUtils.createArrayNode();
+        array.add(disabledKey);
 
         group.getElement().setPropertyJson("value", array);
         Assert.assertTrue("Group value should be empty",
                 group.getValue().isEmpty());
         Assert.assertTrue(events.isEmpty());
 
-        array = Json.createArray();
-        array.set(0, enabledKey);
+        array = JacksonUtils.createArrayNode();
+        array.add(enabledKey);
 
         group.getElement().setPropertyJson("value", array);
         Assert.assertEquals(Collections.singleton("enabled"), group.getValue());
@@ -385,8 +384,8 @@ public class CheckboxGroupTest {
     @Test
     public void elementHasValue_wrapIntoField_propertyIsNotSetToInitialValue() {
         Element element = new Element("vaadin-checkbox-group");
-        JsonArray array = Json.createArray();
-        array.set(0, "foo");
+        ArrayNode array = JacksonUtils.createArrayNode();
+        array.add("foo");
         element.setPropertyJson("value", array);
         UI ui = new UI();
         UI.setCurrent(ui);
@@ -402,10 +401,10 @@ public class CheckboxGroupTest {
         Mockito.when(instantiator.createComponent(CheckboxGroup.class))
                 .thenAnswer(invocation -> new CheckboxGroup());
         CheckboxGroup field = Component.from(element, CheckboxGroup.class);
-        JsonArray propertyValue = (JsonArray) field.getElement()
+        ArrayNode propertyValue = (ArrayNode) field.getElement()
                 .getPropertyRaw("value");
-        Assert.assertEquals(1, propertyValue.length());
-        Assert.assertEquals("foo", propertyValue.getString(0));
+        Assert.assertEquals(1, propertyValue.size());
+        Assert.assertEquals("foo", propertyValue.get(0).asText());
     }
 
     @Test
@@ -752,8 +751,8 @@ public class CheckboxGroupTest {
         // Simulate selecting an item from the client side via key
         String itemKey = group.getChildren().skip(1).findFirst().orElseThrow()
                 .getElement().getProperty("value");
-        JsonArray selection = Json.createArray();
-        selection.set(0, itemKey);
+        ArrayNode selection = JacksonUtils.createArrayNode();
+        selection.add(itemKey);
         group.getElement().setPropertyJson("value", selection);
 
         Assert.assertEquals("updated",

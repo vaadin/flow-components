@@ -11,21 +11,20 @@ package com.vaadin.flow.component.map.events;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.map.Map;
-
-import elemental.json.Json;
-import elemental.json.JsonArray;
+import com.vaadin.flow.internal.JacksonUtils;
 
 public class MapClickEventTest {
 
     @Test
     public void create() {
         Map map = new Map();
-        JsonArray coordinates = Json.createArray();
-        coordinates.set(0, 10);
-        coordinates.set(1, 20);
-        JsonArray featureIds = Json.createArray();
-        JsonArray layerIds = Json.createArray();
+        ArrayNode coordinates = JacksonUtils.createArrayNode();
+        coordinates.add(10);
+        coordinates.add(20);
+        ArrayNode featureIds = JacksonUtils.createArrayNode();
+        ArrayNode layerIds = JacksonUtils.createArrayNode();
 
         MapClickEvent event = new MapClickEvent(map, true, coordinates,
                 featureIds, layerIds, 0, 0, false, false, false, false, 0);
@@ -38,11 +37,11 @@ public class MapClickEventTest {
     @Test
     public void createFromInvalidCoordinates_usesFallback() {
         Map map = new Map();
-        JsonArray coordinates = Json.createArray();
-        coordinates.set(0, Json.createNull());
-        coordinates.set(1, Json.createNull());
-        JsonArray featureIds = Json.createArray();
-        JsonArray layerIds = Json.createArray();
+        ArrayNode coordinates = JacksonUtils.createArrayNode();
+        coordinates.add(JacksonUtils.nullNode());
+        coordinates.add(JacksonUtils.nullNode());
+        ArrayNode featureIds = JacksonUtils.createArrayNode();
+        ArrayNode layerIds = JacksonUtils.createArrayNode();
 
         MapClickEvent event = new MapClickEvent(map, true, coordinates,
                 featureIds, layerIds, 0, 0, false, false, false, false, 0);
