@@ -27,8 +27,6 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.router.Route;
 
-import elemental.json.JsonArray;
-
 /**
  * View for {@link Upload} tests.
  *
@@ -79,8 +77,8 @@ public class UploadView extends Div {
                 e -> {
                     upload.getElement().executeJs("return this.files")
                             .then(jsonValue -> {
-                                fileCount.setText(String.valueOf(
-                                        ((JsonArray) jsonValue).length()));
+                                fileCount.setText(
+                                        String.valueOf(jsonValue.size()));
                             });
                 });
 

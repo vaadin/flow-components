@@ -71,6 +71,7 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -107,8 +108,6 @@ import com.vaadin.pro.licensechecker.BuildType;
 import com.vaadin.pro.licensechecker.Capabilities;
 import com.vaadin.pro.licensechecker.Capability;
 import com.vaadin.pro.licensechecker.LicenseChecker;
-
-import elemental.json.JsonValue;
 
 /**
  * Vaadin Spreadsheet is a component which allows displaying and interacting
@@ -689,11 +688,11 @@ public class Spreadsheet extends Component
     public static class SpreadsheetEvent extends ComponentEvent<Spreadsheet> {
 
         private final String type;
-        private final JsonValue data;
+        private final JsonNode data;
 
         public SpreadsheetEvent(Spreadsheet source, boolean fromClient,
                 @EventData("event.detail.type") String type,
-                @EventData("event.detail.data") JsonValue data) {
+                @EventData("event.detail.data") JsonNode data) {
             super(source, fromClient);
             this.type = type;
             this.data = data;
@@ -703,7 +702,7 @@ public class Spreadsheet extends Component
             return type;
         }
 
-        public JsonValue getData() {
+        public JsonNode getData() {
             return data;
         }
     }

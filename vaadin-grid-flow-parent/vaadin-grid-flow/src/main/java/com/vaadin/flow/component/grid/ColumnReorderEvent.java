@@ -19,11 +19,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
-
-import elemental.json.JsonArray;
 
 /**
  * Event fired when the columns in the Grid are reordered.
@@ -59,7 +58,7 @@ public class ColumnReorderEvent<T> extends ComponentEvent<Grid<T>> {
      *
      */
     public ColumnReorderEvent(Grid<T> source, boolean fromClient,
-            @EventData("event.detail.columns") JsonArray columnIDs) {
+            @EventData("event.detail.columns") ArrayNode columnIDs) {
         this(source, fromClient,
                 getSortedByIds(source.getColumns(), columnIDs));
     }
@@ -94,11 +93,11 @@ public class ColumnReorderEvent<T> extends ComponentEvent<Grid<T>> {
     }
 
     private static <T> List<Grid.Column<T>> getSortedByIds(
-            List<Grid.Column<T>> currentColumns, JsonArray columnIDs) {
+            List<Grid.Column<T>> currentColumns, ArrayNode columnIDs) {
         final List<Grid.Column<T>> columns = new ArrayList<>(
                 currentColumns.size());
-        for (int i = 0; i < columnIDs.length(); i++) {
-            final String columnID = columnIDs.getString(i);
+        for (int i = 0; i < columnIDs.size(); i++) {
+            final String columnID = columnIDs.get(i).asText();
             columns.add(findByColumnId(currentColumns, columnID));
         }
         return columns;
