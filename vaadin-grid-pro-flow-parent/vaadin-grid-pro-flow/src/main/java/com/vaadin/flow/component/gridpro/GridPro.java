@@ -44,7 +44,6 @@ import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.JsonArray;
-import elemental.json.JsonObject;
 
 @Tag("vaadin-grid-pro")
 @NpmPackage(value = "@vaadin/grid-pro", version = "25.0.0-alpha16")
@@ -120,7 +119,7 @@ public class GridPro<E> extends Grid<E> {
                 column.getItemUpdater().accept(e.getItem(), null);
             } else {
                 column.getItemUpdater().accept(e.getItem(),
-                        e.getSourceItem().get(e.getPath()).asString());
+                        e.getSourceItem().get(e.getPath()).asText());
             }
 
             if (!column.isManualRefresh()) {
@@ -584,11 +583,11 @@ public class GridPro<E> extends Grid<E> {
          *            item subproperty that was changed
          */
         public CellEditStartedEvent(GridPro<E> source, boolean fromClient,
-                @EventData("event.detail.item") JsonObject item,
+                @EventData("event.detail.item") ObjectNode item,
                 @EventData("event.detail.path") String path) {
             super(source, fromClient);
             this.item = source.getDataCommunicator().getKeyMapper()
-                    .get(item.getString("key"));
+                    .get(item.get("key").asText());
             this.path = path;
         }
 
@@ -636,7 +635,7 @@ public class GridPro<E> extends Grid<E> {
             extends ComponentEvent<GridPro<E>> {
 
         private E item;
-        private JsonObject sourceItem;
+        private ObjectNode sourceItem;
         private String path;
 
         /**
@@ -654,12 +653,12 @@ public class GridPro<E> extends Grid<E> {
          *            item subproperty that was changed
          */
         public ItemPropertyChangedEvent(GridPro<E> source, boolean fromClient,
-                @EventData("event.detail.item") JsonObject item,
+                @EventData("event.detail.item") ObjectNode item,
                 @EventData("event.detail.path") String path) {
             super(source, fromClient);
             this.sourceItem = item;
             this.item = source.getDataCommunicator().getKeyMapper()
-                    .get(item.getString("key"));
+                    .get(item.get("key").asText());
             this.path = path;
         }
 
@@ -677,7 +676,7 @@ public class GridPro<E> extends Grid<E> {
          *
          * @return the instance of edited item
          */
-        private JsonObject getSourceItem() {
+        private ObjectNode getSourceItem() {
             return sourceItem;
         }
 
