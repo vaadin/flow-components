@@ -12,14 +12,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.MapBase;
 import com.vaadin.flow.component.map.configuration.Coordinate;
-
-import elemental.json.JsonArray;
 
 /**
  * Representing OpenLayers' @code{click} event
@@ -32,9 +31,9 @@ public class MapClickEvent extends ComponentEvent<MapBase> {
     private final MouseEventDetails details;
 
     public MapClickEvent(Map source, boolean fromClient,
-            @EventData("event.detail.coordinate") JsonArray coordinate,
-            @EventData("event.detail.features.map(feature => feature.feature.id)") JsonArray featureIds,
-            @EventData("event.detail.features.map(feature => feature.layer.id)") JsonArray layerIds,
+            @EventData("event.detail.coordinate") ArrayNode coordinate,
+            @EventData("event.detail.features.map(feature => feature.feature.id)") ArrayNode featureIds,
+            @EventData("event.detail.features.map(feature => feature.layer.id)") ArrayNode layerIds,
             @EventData("event.detail.originalEvent.pageX") int pageX,
             @EventData("event.detail.originalEvent.pageY") int pageY,
             @EventData("event.detail.originalEvent.altKey") boolean altKey,
@@ -47,9 +46,9 @@ public class MapClickEvent extends ComponentEvent<MapBase> {
         this.coordinate = MapEventUtil.getCoordinate(coordinate);
 
         List<FeatureEventDetails> features = new ArrayList<>();
-        for (int i = 0; i < featureIds.length(); i++) {
-            String featureId = featureIds.getString(i);
-            String layerId = layerIds.getString(i);
+        for (int i = 0; i < featureIds.size(); i++) {
+            String featureId = featureIds.get(i).asText();
+            String layerId = layerIds.get(i).asText();
             FeatureEventDetails featureEventDetails = MapEventUtil
                     .getFeatureEventDetails(source.getRawConfiguration(),
                             layerId, featureId);
