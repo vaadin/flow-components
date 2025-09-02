@@ -40,6 +40,7 @@ import org.springframework.data.domain.Pageable;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
@@ -134,10 +135,6 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
-
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
 
 /**
  * Grid is a component for showing tabular data. A basic Grid uses plain text to
@@ -3865,18 +3862,18 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
     }
 
     @ClientCallable
-    private void sortersChanged(JsonArray sorters) {
+    private void sortersChanged(ArrayNode sorters) {
         GridSortOrderBuilder<T> sortOrderBuilder = new GridSortOrderBuilder<>();
-        for (int i = 0; i < sorters.length(); ++i) {
-            JsonObject sorter = sorters.getObject(i);
-            Column<T> column = idToColumnMap.get(sorter.getString("path"));
+        for (int i = 0; i < sorters.size(); ++i) {
+            JsonNode sorter = sorters.get(i);
+            Column<T> column = idToColumnMap.get(sorter.get("path").asText());
             if (column == null) {
                 throw new IllegalArgumentException(
                         "Received a sorters changed call from the client for a non-existent column");
             }
-            if (sorter.hasKey("direction")
-                    && sorter.get("direction").getType() == JsonType.STRING) {
-                switch (sorter.getString("direction")) {
+            if (sorter.has("direction") && sorter.get("direction")
+                    .getNodeType() == JsonNodeType.STRING) {
+                switch (sorter.get("direction").asText()) {
                 case "asc":
                     sortOrderBuilder.thenAsc(column);
                     break;
@@ -4153,7 +4150,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         Objects.requireNonNull(valueProvider);
 
         return addDataGenerator(
-                (item, data) -> data.put(property, JacksonSerializer
+                (item, data) -> data.set(property, JacksonSerializer
                         .toJson(applyValueProvider(valueProvider, item))));
     }
 
@@ -4449,7 +4446,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         });
 
         if (!JacksonUtils.getKeys(tooltips).isEmpty()) {
-            jsonObject.put("gridtooltips", tooltips);
+            jsonObject.set("gridtooltips", tooltips);
         }
     }
 
@@ -4865,8 +4862,7 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
 
         ArrayNode types = JacksonUtils.createArrayNode();
 
-        this.dragDataGenerators.keySet()
-                .forEach(t -> types.set(types.size(), t));
+        this.dragDataGenerators.keySet().forEach(types::add);
         this.getElement().setPropertyJson("__dragDataTypes", types);
         getDataCommunicator().reset();
     }
