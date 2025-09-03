@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -30,6 +31,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.listbox.ListBox;
@@ -40,8 +43,6 @@ import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
-
-import elemental.json.JsonArray;
 
 public class MultiSelectListBoxTest {
 
@@ -438,12 +439,12 @@ public class MultiSelectListBoxTest {
     }
 
     private void assertSelectedValuesProperty(int... indices) {
-        JsonArray selectedValues = (JsonArray) listBox.getElement()
+        ArrayNode selectedValues = (ArrayNode) listBox.getElement()
                 .getPropertyRaw("selectedValues");
         Set<Integer> actualIndices = jsonArrayToSet(selectedValues);
         Assert.assertEquals(
                 "The selectedValues property had different length than expected.",
-                selectedValues.length(), indices.length);
+                selectedValues.size(), indices.length);
         for (int index : indices) {
             Assert.assertTrue(
                     "The selectedValues property didn't contain expected value.",
@@ -459,17 +460,12 @@ public class MultiSelectListBoxTest {
     }
 
     private <T> Set<T> createSet(T... items) {
-        Set<T> set = new HashSet<>();
-        Arrays.stream(items).forEach(set::add);
-        return set;
+        return new HashSet<>(Arrays.asList(items));
     }
 
-    private Set<Integer> jsonArrayToSet(JsonArray jsonArray) {
-        Set<Integer> set = new HashSet<>();
-        IntStream.range(0, jsonArray.length()).forEach(i -> {
-            set.add((int) jsonArray.getNumber(i));
-        });
-        return set;
+    private Set<Integer> jsonArrayToSet(ArrayNode jsonArray) {
+        return jsonArray.valueStream().map(JsonNode::asInt)
+                .collect(Collectors.toSet());
     }
 
     public static class Item {

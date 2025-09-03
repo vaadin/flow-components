@@ -41,6 +41,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.BaseFormulaEvaluator;
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
 import org.apache.poi.ss.usermodel.Comment;
@@ -70,6 +71,7 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -102,9 +104,10 @@ import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.pro.licensechecker.BuildType;
+import com.vaadin.pro.licensechecker.Capabilities;
+import com.vaadin.pro.licensechecker.Capability;
 import com.vaadin.pro.licensechecker.LicenseChecker;
-
-import elemental.json.JsonValue;
 
 /**
  * Vaadin Spreadsheet is a component which allows displaying and interacting
@@ -143,7 +146,9 @@ public class Spreadsheet extends Component
         if (service != null) {
             if (!service.getDeploymentConfiguration().isProductionMode()) {
                 LicenseChecker.checkLicenseFromStaticBlock(
-                        "vaadin-spreadsheet-flow", version);
+                        "vaadin-spreadsheet-flow", version,
+                        BuildType.DEVELOPMENT,
+                        Capabilities.of(Capability.PRE_TRIAL));
             }
         }
     }
@@ -683,11 +688,11 @@ public class Spreadsheet extends Component
     public static class SpreadsheetEvent extends ComponentEvent<Spreadsheet> {
 
         private final String type;
-        private final JsonValue data;
+        private final JsonNode data;
 
         public SpreadsheetEvent(Spreadsheet source, boolean fromClient,
                 @EventData("event.detail.type") String type,
-                @EventData("event.detail.data") JsonValue data) {
+                @EventData("event.detail.data") JsonNode data) {
             super(source, fromClient);
             this.type = type;
             this.data = data;
@@ -697,7 +702,7 @@ public class Spreadsheet extends Component
             return type;
         }
 
-        public JsonValue getData() {
+        public JsonNode getData() {
             return data;
         }
     }
@@ -1488,7 +1493,7 @@ public class Spreadsheet extends Component
      * is defined for a cell, then it is displayed on that cell. This behavior
      * can be changed by setting this property to true, which makes the custom
      * editor visible when the cell is focused.
-     * 
+     *
      * @param showCustomEditorOnFocus
      *            a boolean indicating whether the custom editor should be
      *            visible on focus (true) or not (false)
@@ -1584,16 +1589,10 @@ public class Spreadsheet extends Component
     protected boolean isRangeEditable(int row1, int col1, int row2, int col2) {
         if (isActiveSheetProtected()) {
             for (int r = row1; r <= row2; r++) {
-                final Row row = getActiveSheet().getRow(r);
-                if (row != null) {
-                    for (int c = col1; c <= col2; c++) {
-                        final Cell cell = row.getCell(c);
-                        if (isCellLocked(cell)) {
-                            return false;
-                        }
+                for (int c = col1; c <= col2; c++) {
+                    if (isCellLocked(new CellAddress(r, c))) {
+                        return false;
                     }
-                } else {
-                    return false;
                 }
             }
         }
@@ -3883,7 +3882,11 @@ public class Spreadsheet extends Component
      * @param cell
      *            The cell to check
      * @return true if the cell is locked, false otherwise
+     * @deprecated Due to requiring a cell instance, this method can not
+     *             determine the locked state of cells that have not been
+     *             created yet. Use {@link #isCellLocked(CellAddress)} instead.
      */
+    @Deprecated(since = "24.9.0", forRemoval = true)
     public boolean isCellLocked(Cell cell) {
         if (isActiveSheetProtected()) {
             if (cell != null) {
@@ -3901,6 +3904,39 @@ public class Spreadsheet extends Component
         } else {
             return false;
         }
+    }
+
+    /**
+     * Returns whether or not the cell at the given address in the active sheet
+     * is locked.
+     *
+     * @param cellAddress
+     *            The address of the cell to check
+     * @return true if the cell is locked, false otherwise
+     */
+    public boolean isCellLocked(CellAddress cellAddress) {
+        // Locking cells only works if the sheet is protected
+        if (!isActiveSheetProtected()) {
+            return false;
+        }
+
+        Sheet sheet = getActiveSheet();
+        Row row = sheet.getRow(cellAddress.getRow());
+        Cell cell = row != null ? row.getCell(cellAddress.getColumn()) : null;
+
+        // If there is a cell with a custom cell style, return its locked state
+        if (cell != null && cell.getCellStyle().getIndex() != 0) {
+            return cell.getCellStyle().getLocked();
+        }
+
+        // Otherwise inherit locked state from row or column styles
+        // If neither is unlocked, the locked state is inherited from the sheet
+        CellStyle rowStyle = row != null ? row.getRowStyle() : null;
+        CellStyle columnStyle = sheet.getColumnStyle(cellAddress.getColumn());
+        boolean rowLocked = rowStyle == null || rowStyle.getLocked();
+        boolean columnLocked = columnStyle == null || columnStyle.getLocked();
+
+        return rowLocked && columnLocked;
     }
 
     /**
@@ -4706,7 +4742,7 @@ public class Spreadsheet extends Component
                                 .put(getComponentNodeId(customComponent), key);
                         newCustomComponents.add(customComponent);
                         rowsWithComponents.add(r);
-                    } else if (!isCellLocked(cell)) {
+                    } else if (!isCellLocked(new CellAddress(r, c))) {
                         // no custom component and not locked, check if
                         // the cell has a custom editor
                         Component customEditor = customComponentFactory

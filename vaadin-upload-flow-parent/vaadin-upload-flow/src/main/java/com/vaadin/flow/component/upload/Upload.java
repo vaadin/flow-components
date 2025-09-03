@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -39,7 +42,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.streams.UploadCompleteEvent;
 import com.vaadin.flow.internal.streams.UploadStartEvent;
 import com.vaadin.flow.server.NoInputStreamException;
@@ -52,10 +55,8 @@ import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
 
 import elemental.json.Json;
-import elemental.json.JsonArray;
 import elemental.json.JsonNull;
 import elemental.json.JsonObject;
-import elemental.json.JsonType;
 
 /**
  * Upload is a component for uploading one or more files. It shows the upload
@@ -65,7 +66,7 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/upload", version = "25.0.0-alpha16")
+@NpmPackage(value = "@vaadin/upload", version = "25.0.0-alpha17")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
@@ -112,16 +113,16 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         final String eventDetailFileName = "event.detail.file.name";
 
         getElement().addEventListener("file-reject", event -> {
-            String detailError = event.getEventData()
-                    .getString(eventDetailError);
+            String detailError = event.getEventData().get(eventDetailError)
+                    .asText();
             String detailFileName = event.getEventData()
-                    .getString(eventDetailFileName);
+                    .get(eventDetailFileName).asText();
             fireEvent(new FileRejectedEvent(this, detailError, detailFileName));
         }).addEventData(eventDetailError).addEventData(eventDetailFileName);
 
         getElement().addEventListener("file-remove", event -> {
             String detailFileName = event.getEventData()
-                    .getString(eventDetailFileName);
+                    .get(eventDetailFileName).asText();
             fireEvent(new FileRemovedEvent(this, detailFileName));
         }).addEventData(eventDetailFileName);
 
@@ -133,13 +134,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
         final String elementFiles = "element.files";
         DomEventListener allFinishedListener = e -> {
-            JsonArray files = e.getEventData().getArray(elementFiles);
+            ArrayNode files = (ArrayNode) e.getEventData().get(elementFiles);
 
-            boolean isUploading = IntStream.range(0, files.length())
+            boolean isUploading = IntStream.range(0, files.size())
                     .anyMatch(index -> {
                         final String KEY = "uploading";
-                        JsonObject object = files.getObject(index);
-                        return object.hasKey(KEY) && object.getBoolean(KEY);
+                        JsonNode object = files.get(index);
+                        return object.has(KEY)
+                                && object.get(KEY).booleanValue();
                     });
 
             if (this.uploading && !isUploading) {
@@ -767,11 +769,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     }
 
     private void setI18nWithJS() {
-        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
-
-        // Remove null values so that we don't overwrite existing WC
-        // translations with empty ones
-        deeplyRemoveNullValuesFromJsonObject(i18nJson);
+        ObjectNode i18nJson = JacksonUtils.beanToJson(this.i18n);
 
         // Assign new I18N object to WC, by deeply merging the existing
         // WC I18N, and the values from the new UploadI18N instance,
@@ -800,16 +798,6 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         // Element state is not persisted across attach/detach
         if (this.i18n != null) {
             setI18nWithJS();
-        }
-    }
-
-    private void deeplyRemoveNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.OBJECT) {
-                deeplyRemoveNullValuesFromJsonObject(jsonObject.get(key));
-            } else if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
-            }
         }
     }
 

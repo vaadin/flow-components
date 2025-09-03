@@ -25,6 +25,7 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -56,7 +57,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-confirm-dialog")
-@NpmPackage(value = "@vaadin/confirm-dialog", version = "25.0.0-alpha16")
+@NpmPackage(value = "@vaadin/confirm-dialog", version = "25.0.0-alpha17")
 @JsModule("@vaadin/confirm-dialog/src/vaadin-confirm-dialog.js")
 public class ConfirmDialog extends Component
         implements HasComponents, HasSize, HasStyle {
@@ -118,6 +119,28 @@ public class ConfirmDialog extends Component
     public static class ClosedEvent extends ComponentEvent<ConfirmDialog> {
         public ClosedEvent(ConfirmDialog source, boolean fromClient) {
             super(source, fromClient);
+        }
+    }
+
+    /**
+     * Event that is fired when the confirm dialog's opened state changes.
+     * <p>
+     * Note that this event fires immediately when the opened property changes,
+     * which, when closing the confirm dialog, is before the closing animation
+     * has finished. To wait for the animation to finish, listen for the
+     * {@link ClosedEvent} event.
+     */
+    public static class OpenedChangeEvent
+            extends ComponentEvent<ConfirmDialog> {
+        private final boolean opened;
+
+        public OpenedChangeEvent(ConfirmDialog source, boolean fromClient) {
+            super(source, fromClient);
+            this.opened = source.isOpened();
+        }
+
+        public boolean isOpened() {
+            return opened;
         }
     }
 
@@ -217,13 +240,12 @@ public class ConfirmDialog extends Component
         // Initialize auto-add behavior
         new OverlayAutoAddController<>(this, () -> true);
 
-        // Listen specifically for the client dialog closing to close it on the
-        // server as well. Not using synchronization for the `opened` property
-        // as that would cause the auto add controller to remove the dialog from
-        // the UI before other event listeners (confirm, reject, cancel) are
-        // fired.
-        getElement().addEventListener("opened-changed", event -> close())
-                .setFilter("event.detail.value === false");
+        setOpened(false);
+
+        getElement().addPropertyChangeListener("opened", event -> {
+            setModality(isOpened());
+            fireEvent(new OpenedChangeEvent(this, event.isUserOriginated()));
+        });
     }
 
     /**
@@ -586,6 +608,23 @@ public class ConfirmDialog extends Component
     }
 
     /**
+     * Add a listener for when the confirm dialog's opened state changes.
+     * <p>
+     * Note that this event fires immediately when the opened property changes,
+     * which, when closing the confirm dialog, is before the closing animation
+     * has finished. To wait for the animation to finish, use
+     * {@link #addClosedListener(ComponentEventListener)}.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
+     */
+    public Registration addOpenedChangeListener(
+            ComponentEventListener<OpenedChangeEvent> listener) {
+        return addListener(OpenedChangeEvent.class, listener);
+    }
+
+    /**
      * Sets confirmation dialog header text
      */
     public void setHeader(String header) {
@@ -628,6 +667,7 @@ public class ConfirmDialog extends Component
         setOpened(false);
     }
 
+    @Synchronize(property = "opened", value = "opened-changed")
     public boolean isOpened() {
         return getElement().getProperty("opened", false);
     }
@@ -649,7 +689,6 @@ public class ConfirmDialog extends Component
      *            close it
      */
     public void setOpened(boolean opened) {
-        setModality(opened);
         getElement().setProperty("opened", opened);
     }
 
