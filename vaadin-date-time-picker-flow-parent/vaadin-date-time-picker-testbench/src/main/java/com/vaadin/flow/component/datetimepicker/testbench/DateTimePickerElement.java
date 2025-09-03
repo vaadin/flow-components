@@ -142,6 +142,7 @@ public class DateTimePickerElement extends TestBenchElement
      */
     private void setValue(String value) {
         setProperty(VALUE_PROPERTY, value);
+        triggerChange(this);
     }
 
     /**
@@ -209,7 +210,7 @@ public class DateTimePickerElement extends TestBenchElement
 
     /**
      * This is needed when simulating user input by explicitly setting the value
-     * property of inner inputs.
+     * property.
      */
     private void triggerChange(TestBenchElement pickerElement) {
         executeScript(

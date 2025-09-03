@@ -196,6 +196,7 @@ public class DateTimePicker
      */
     public DateTimePicker() {
         this((LocalDateTime) null);
+        setSynchronizedEvent("change");
     }
 
     /**
@@ -349,22 +350,6 @@ public class DateTimePicker
 
     private void addValidationListeners() {
         addValueChangeListener(e -> validate());
-        getElement().addEventListener("change", e -> {
-            // There are two cases that require clearing the value explicitly on
-            // client side "change" event:
-            // 1. The input is still incomplete but the component is blurred
-            // 2. Both pickers are cleared after an incomplete state
-            var isValueEmpty = isEmpty();
-            var shouldBeEmpty = isInputIncomplete()
-                    || (datePicker.isEmpty() && timePicker.isEmpty());
-            if (!isValueEmpty && shouldBeEmpty) {
-                // Called with the flag "fromClient" set "false" in order to
-                // differentiate the state from when the user is still
-                // interacting with the component.
-                var fromClient = !isInputIncomplete();
-                setModelValue(getEmptyValue(), fromClient);
-            }
-        });
         getElement().addEventListener("unparsable-change", e -> validate(true));
         // Add listeners to invalidate a required DateTimePicker when:
         // 1. It's initially empty
@@ -419,25 +404,6 @@ public class DateTimePicker
         if (shouldFireValidationStatusChangeEvent) {
             validate(true);
         }
-    }
-
-    @Override
-    protected void setModelValue(LocalDateTime newModelValue,
-            boolean fromClient) {
-        // Handle cases regarding incomplete input
-        if (!isEmpty() && Objects.equals(newModelValue, getEmptyValue())
-                && isInputIncomplete()) {
-            // Do not validate or clear the value when the value is incomplete
-            // but the user is still interacting with the component.
-            if (fromClient) {
-                return;
-            }
-            // In order to differentiate whether the value should be cleared,
-            // "fromClient" is set to "true" when "setModelValue" is called from
-            // the client side "change" event listener.
-            fromClient = true;
-        }
-        super.setModelValue(newModelValue, fromClient);
     }
 
     /**
