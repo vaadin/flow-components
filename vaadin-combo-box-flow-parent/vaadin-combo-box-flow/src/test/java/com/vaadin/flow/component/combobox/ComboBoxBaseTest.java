@@ -36,11 +36,10 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.tests.dataprovider.DataProviderListenersTest;
 import com.vaadin.tests.dataprovider.MockUI;
-
-import elemental.json.Json;
 
 /**
  * Suite of basic tests that apply to both, ComboBox and MultiSelectComboBox
@@ -244,7 +243,8 @@ public abstract class ComboBoxBaseTest {
         comboBox.setItemLabelGenerator(obj -> null);
         comboBox.setItems(Arrays.asList("foo", "bar"));
 
-        comboBox.getDataGenerator().generateData("foo", Json.createObject());
+        comboBox.getDataGenerator().generateData("foo",
+                JacksonUtils.createObjectNode());
     }
 
     @Test

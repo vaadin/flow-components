@@ -61,7 +61,7 @@ import elemental.json.JsonType;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.0.0-alpha16")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.0.0-alpha17")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
@@ -1231,9 +1231,9 @@ public class RichTextEditor
                 // HTML value, which will eventually trigger a server-side value
                 // change event on the component
                 RichTextEditor.this.getElement()
-                        .executeJs("return this.htmlValue").then(jsonValue -> {
+                        .executeJs("return this.htmlValue").then(jsonNode -> {
                             isHtmlValueSync = true;
-                            RichTextEditor.this.setValue(jsonValue.asString());
+                            RichTextEditor.this.setValue(jsonNode.asText());
                             isHtmlValueSync = false;
                         });
 

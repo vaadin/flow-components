@@ -28,6 +28,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.data.event.SortEvent;
@@ -36,10 +38,7 @@ import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.provider.SortOrder;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.function.SerializableComparator;
-
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
+import com.vaadin.flow.internal.JacksonUtils;
 
 public class GridSortingTest {
 
@@ -206,7 +205,7 @@ public class GridSortingTest {
     public void sort_event_not_sent_for_same_data() {
         Assert.assertEquals("Sort event list should have been empty at start.",
                 0, testSortListener.events.size());
-        callSortersChanged(Json.createArray());
+        callSortersChanged(JacksonUtils.createArrayNode());
         Assert.assertEquals(
                 "No sort event should have been fired for empty initial sort.",
                 0, testSortListener.events.size());
@@ -237,9 +236,9 @@ public class GridSortingTest {
     public void changing_sorters() {
         setTestSorting();
 
-        JsonArray secondSortersArray = Json.createArray();
-        secondSortersArray.set(0,
-                createSortObject(getColumnId(nameColumn), "desc"));
+        ArrayNode secondSortersArray = JacksonUtils.createArrayNode();
+        secondSortersArray
+                .add(createSortObject(getColumnId(nameColumn), "desc"));
         callSortersChanged(secondSortersArray);
 
         Assert.assertEquals(2, testSortListener.events.size());
@@ -253,8 +252,8 @@ public class GridSortingTest {
         Column<Person> column = grid.addColumn(LitRenderer.<Person> of("")
                 .withProperty("address", Person::getAddress))
                 .setSortProperty("address");
-        JsonArray sortersArray = Json.createArray();
-        sortersArray.set(0, createSortObject(getColumnId(column), "asc"));
+        ArrayNode sortersArray = JacksonUtils.createArrayNode();
+        sortersArray.add(createSortObject(getColumnId(column), "asc"));
         callSortersChanged(sortersArray);
 
         // No in-memory sorting applied
@@ -335,18 +334,17 @@ public class GridSortingTest {
     }
 
     private void setTestSorting() {
-        JsonArray sortersArray = Json.createArray();
-        sortersArray.set(0, createSortObject(getColumnId(nameColumn), "asc"));
-        sortersArray.set(1, createSortObject(getColumnId(ageColumn), "desc"));
-        sortersArray.set(2,
-                createSortObject(getColumnId(templateColumn), "asc"));
+        ArrayNode sortersArray = JacksonUtils.createArrayNode();
+        sortersArray.add(createSortObject(getColumnId(nameColumn), "asc"));
+        sortersArray.add(createSortObject(getColumnId(ageColumn), "desc"));
+        sortersArray.add(createSortObject(getColumnId(templateColumn), "asc"));
         callSortersChanged(sortersArray);
     }
 
-    private void callSortersChanged(JsonArray json) {
+    private void callSortersChanged(ArrayNode json) {
         try {
             Method method = Grid.class.getDeclaredMethod("sortersChanged",
-                    JsonArray.class);
+                    ArrayNode.class);
             method.setAccessible(true);
             method.invoke(grid, json);
         } catch (NoSuchMethodException | SecurityException
@@ -360,8 +358,8 @@ public class GridSortingTest {
         return column.getInternalId();
     }
 
-    private JsonObject createSortObject(String columnId, String direction) {
-        JsonObject json = Json.createObject();
+    private ObjectNode createSortObject(String columnId, String direction) {
+        ObjectNode json = JacksonUtils.createObjectNode();
         json.put("path", columnId);
         json.put("direction", direction);
         return json;

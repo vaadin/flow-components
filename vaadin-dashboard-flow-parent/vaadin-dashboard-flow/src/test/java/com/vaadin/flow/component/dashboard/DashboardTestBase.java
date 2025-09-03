@@ -17,14 +17,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.mockito.Mockito;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
-
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
 
 public class DashboardTestBase {
 
@@ -56,24 +55,23 @@ public class DashboardTestBase {
         });
     }
 
-    protected static JsonArray getItemsArray(
+    protected static ArrayNode getItemsArray(
             List<Component> rootLevelComponents) {
-        JsonArray itemsArray = Json.createArray();
+        ArrayNode itemsArray = JacksonUtils.createArrayNode();
         rootLevelComponents.forEach(child -> {
-            JsonObject rootLevelItem = Json.createObject();
+            ObjectNode rootLevelItem = JacksonUtils.createObjectNode();
             rootLevelItem.put("id", child.getElement().getNode().getId());
             if (child instanceof DashboardSection section) {
-                JsonArray sectionItemsArray = Json.createArray();
+                ArrayNode sectionItemsArray = JacksonUtils.createArrayNode();
                 section.getWidgets().forEach(widget -> {
-                    JsonObject sectionItem = Json.createObject();
+                    ObjectNode sectionItem = JacksonUtils.createObjectNode();
                     sectionItem.put("id",
                             widget.getElement().getNode().getId());
-                    sectionItemsArray.set(sectionItemsArray.length(),
-                            sectionItem);
+                    sectionItemsArray.add(sectionItem);
                 });
-                rootLevelItem.put("items", sectionItemsArray);
+                rootLevelItem.set("items", sectionItemsArray);
             }
-            itemsArray.set(itemsArray.length(), rootLevelItem);
+            itemsArray.add(rootLevelItem);
         });
         return itemsArray;
     }

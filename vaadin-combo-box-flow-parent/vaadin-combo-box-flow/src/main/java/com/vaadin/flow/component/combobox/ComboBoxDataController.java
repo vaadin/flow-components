@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
@@ -51,10 +52,8 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
-import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonValue;
 
 /**
  * Internal class that encapsulates the data communication logic with the web
@@ -89,9 +88,9 @@ class ComboBoxDataController<TItem>
         }
 
         @Override
-        public void set(int start, List<JsonValue> items) {
+        public void set(int start, List<JsonNode> items) {
             enqueue("$connector.set", start,
-                    items.stream().collect(JsonUtils.asArray()),
+                    items.stream().collect(JacksonUtils.asArray()),
                     ComboBoxDataController.this.lastFilter);
         }
 

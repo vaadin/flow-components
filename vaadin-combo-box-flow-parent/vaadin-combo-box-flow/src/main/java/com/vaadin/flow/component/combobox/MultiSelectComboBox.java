@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -38,11 +40,10 @@ import com.vaadin.flow.data.provider.IdentifierProviderChangeEvent;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonType;
 
@@ -100,7 +101,7 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.0.0-alpha16")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.0.0-alpha17")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
@@ -134,7 +135,7 @@ public class MultiSelectComboBox<TItem>
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public MultiSelectComboBox(int pageSize) {
-        super("selectedItems", new LinkedHashSet<>(), JsonArray.class,
+        super("selectedItems", new LinkedHashSet<>(), ArrayNode.class,
                 MultiSelectComboBox::presentationToModel,
                 MultiSelectComboBox::modelToPresentation);
 
@@ -273,7 +274,7 @@ public class MultiSelectComboBox<TItem>
 
     private static <T> Set<T> presentationToModel(
             MultiSelectComboBox<T> multiSelectComboBox,
-            JsonArray presentation) {
+            ArrayNode presentation) {
 
         DataKeyMapper<T> keyMapper = multiSelectComboBox.getKeyMapper();
 
@@ -282,28 +283,28 @@ public class MultiSelectComboBox<TItem>
         }
 
         Set<T> set = new LinkedHashSet<>();
-        for (int i = 0; i < presentation.length(); i++) {
-            String key = presentation.getObject(i).getString("key");
+        for (int i = 0; i < presentation.size(); i++) {
+            String key = presentation.get(i).get("key").asText();
             set.add(keyMapper.get(key));
         }
         return set;
     }
 
-    private static <T> JsonArray modelToPresentation(
+    private static <T> ArrayNode modelToPresentation(
             MultiSelectComboBox<T> multiSelectComboBox, Set<T> model) {
-        JsonArray array = Json.createArray();
+        ArrayNode array = JacksonUtils.createArrayNode();
         if (model == null || model.isEmpty()) {
             return array;
         }
 
         model.stream().map(multiSelectComboBox::generateJson)
-                .forEach(jsonObject -> array.set(array.length(), jsonObject));
+                .forEach(array::add);
 
         return array;
     }
 
-    private JsonObject generateJson(TItem item) {
-        JsonObject jsonObject = Json.createObject();
+    private ObjectNode generateJson(TItem item) {
+        ObjectNode jsonObject = JacksonUtils.createObjectNode();
         jsonObject.put("key", getKeyMapper().key(item));
         getDataGenerator().generateData(item, jsonObject);
         return jsonObject;
@@ -409,7 +410,7 @@ public class MultiSelectComboBox<TItem>
         if (value == null || value.isEmpty()) {
             return;
         }
-        JsonArray selectedItems = modelToPresentation(this, value);
+        ArrayNode selectedItems = modelToPresentation(this, value);
         getElement().setPropertyJson("selectedItems", selectedItems);
     }
 

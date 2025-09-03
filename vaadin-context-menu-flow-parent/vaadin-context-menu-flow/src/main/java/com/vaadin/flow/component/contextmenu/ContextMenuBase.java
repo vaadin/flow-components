@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -33,8 +34,6 @@ import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonObject;
 
 /**
  * Base functionality for server-side components based on
@@ -53,7 +52,7 @@ import elemental.json.JsonObject;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu")
-@NpmPackage(value = "@vaadin/context-menu", version = "25.0.0-alpha16")
+@NpmPackage(value = "@vaadin/context-menu", version = "25.0.0-alpha17")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")
@@ -418,7 +417,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * @return {@code true} if the context menu should be opened, {@code false}
      *         otherwise.
      */
-    protected boolean onBeforeOpenMenu(JsonObject eventDetail) {
+    protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {
         return true;
     }
 
@@ -455,7 +454,8 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     }
 
     private void beforeOpenHandler(DomEvent event) {
-        JsonObject eventDetail = event.getEventData().getObject(EVENT_DETAIL);
+        ObjectNode eventDetail = (ObjectNode) event.getEventData()
+                .get(EVENT_DETAIL);
 
         boolean shouldOpenMenu = onBeforeOpenMenu(eventDetail);
 

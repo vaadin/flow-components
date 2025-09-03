@@ -24,9 +24,8 @@ import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasValidation;
 import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
-
-import elemental.json.Json;
 
 /**
  * An abstract class that provides tests verifying that a component correctly
@@ -93,7 +92,7 @@ public abstract class AbstractBasicValidationTest<C extends AbstractField<C, V> 
 
     private void fireUnparsableChangeDomEvent() {
         DomEvent unparsableChangeDomEvent = new DomEvent(testField.getElement(),
-                "unparsable-change", Json.createObject());
+                "unparsable-change", JacksonUtils.createObjectNode());
         testField.getElement().getNode().getFeature(ElementListenerMap.class)
                 .fireEvent(unparsableChangeDomEvent);
     }

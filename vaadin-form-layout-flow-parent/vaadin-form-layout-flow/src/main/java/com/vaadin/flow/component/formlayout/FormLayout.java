@@ -21,8 +21,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
@@ -37,11 +39,7 @@ import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
-
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-import elemental.json.JsonValue;
+import com.vaadin.flow.internal.JacksonUtils;
 
 /**
  * Form Layout allows you to build responsive forms with multiple columns and to
@@ -172,7 +170,7 @@ import elemental.json.JsonValue;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-form-layout")
-@NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha16")
+@NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha17")
 @JsModule("@vaadin/form-layout/src/vaadin-form-layout.js")
 public class FormLayout extends Component
         implements HasSize, HasStyle, HasComponents, ClickNotifier<FormLayout> {
@@ -255,8 +253,8 @@ public class FormLayout extends Component
         }
 
         @Override
-        public JsonObject toJson() {
-            JsonObject json = Json.createObject();
+        public ObjectNode toJson() {
+            ObjectNode json = JacksonUtils.createObjectNode();
             if (minWidth != null && !minWidth.trim().isEmpty()) {
                 json.put(MIN_WIDTH_JSON_KEY, minWidth);
             }
@@ -268,19 +266,16 @@ public class FormLayout extends Component
         }
 
         @Override
-        public ResponsiveStep readJson(JsonObject value) {
-            JsonValue minWidthValue = value.get(MIN_WIDTH_JSON_KEY);
-            if (minWidthValue != null) {
-                minWidth = minWidthValue.asString();
-            } else {
-                minWidth = null;
-            }
+        public ResponsiveStep readJson(JsonNode value) {
+            minWidth = value.has(MIN_WIDTH_JSON_KEY)
+                    ? value.get(MIN_WIDTH_JSON_KEY).asText()
+                    : null;
 
-            columns = (int) value.getNumber(COLUMNS_JSON_KEY);
+            columns = value.get(COLUMNS_JSON_KEY).asInt();
 
-            JsonValue labelsPositionValue = value.get(LABELS_POSITION_JSON_KEY);
+            JsonNode labelsPositionValue = value.get(LABELS_POSITION_JSON_KEY);
             if (labelsPositionValue != null) {
-                String labelsPositionString = labelsPositionValue.asString();
+                String labelsPositionString = labelsPositionValue.asText();
                 if ("aside".equals(labelsPositionString)) {
                     labelsPosition = LabelsPosition.ASIDE;
                 } else if ("top".equals(labelsPositionString)) {
@@ -301,7 +296,7 @@ public class FormLayout extends Component
      * @author Vaadin Ltd
      */
     @Tag("vaadin-form-item")
-    @NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha16")
+    @NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha17")
     @JsModule("@vaadin/form-layout/src/vaadin-form-item.js")
     public static class FormItem extends Component
             implements HasComponents, HasStyle, ClickNotifier<FormItem> {
@@ -407,7 +402,7 @@ public class FormLayout extends Component
      * @author Vaadin Ltd
      */
     @Tag("vaadin-form-row")
-    @NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha16")
+    @NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha17")
     @JsModule("@vaadin/form-layout/src/vaadin-form-row.js")
     public static class FormRow extends Component implements HasComponents {
 
@@ -584,13 +579,13 @@ public class FormLayout extends Component
      * @return the list of {@link ResponsiveStep}s used to configure this layout
      */
     public List<ResponsiveStep> getResponsiveSteps() {
-        JsonArray stepsJsonArray = (JsonArray) getElement()
+        ArrayNode stepsJsonArray = (ArrayNode) getElement()
                 .getPropertyRaw("responsiveSteps");
         if (stepsJsonArray == null) {
             return Collections.emptyList();
         }
         List<ResponsiveStep> steps = new ArrayList<>();
-        for (int i = 0; i < stepsJsonArray.length(); i++) {
+        for (int i = 0; i < stepsJsonArray.size(); i++) {
             steps.add(new ResponsiveStep(null, 0)
                     .readJson(stepsJsonArray.get(i)));
         }
@@ -615,18 +610,8 @@ public class FormLayout extends Component
      *            list of {@link ResponsiveStep}s to set
      */
     public void setResponsiveSteps(List<ResponsiveStep> steps) {
-        AtomicInteger index = new AtomicInteger();
-        getElement().setPropertyJson("responsiveSteps",
-                steps.stream().map(ResponsiveStep::toJson).collect(
-                        Json::createArray,
-                        (arr, value) -> arr.set(index.getAndIncrement(), value),
-                        (arr, arrOther) -> {
-                            int startIndex = arr.length();
-                            for (int i = 0; i < arrOther.length(); i++) {
-                                JsonValue value = arrOther.get(i);
-                                arr.set(startIndex + i, value);
-                            }
-                        }));
+        getElement().setPropertyJson("responsiveSteps", steps.stream()
+                .map(ResponsiveStep::toJson).collect(JacksonUtils.asArray()));
     }
 
     /**

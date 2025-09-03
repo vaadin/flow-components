@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -38,15 +39,14 @@ import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.Json;
 import elemental.json.JsonArray;
-import elemental.json.JsonObject;
 
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/grid-pro", version = "25.0.0-alpha16")
+@NpmPackage(value = "@vaadin/grid-pro", version = "25.0.0-alpha17")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -119,7 +119,7 @@ public class GridPro<E> extends Grid<E> {
                 column.getItemUpdater().accept(e.getItem(), null);
             } else {
                 column.getItemUpdater().accept(e.getItem(),
-                        e.getSourceItem().get(e.getPath()).asString());
+                        e.getSourceItem().get(e.getPath()).asText());
             }
 
             if (!column.isManualRefresh()) {
@@ -532,7 +532,7 @@ public class GridPro<E> extends Grid<E> {
         return column;
     }
 
-    private void generateCellEditableData(E item, JsonObject jsonObject) {
+    private void generateCellEditableData(E item, ObjectNode jsonObject) {
         // Get edit columns with cell editable providers
         List<EditColumn<E>> editColumns = getColumns().stream()
                 .filter(column -> column instanceof EditColumn<E> editColumn
@@ -546,7 +546,7 @@ public class GridPro<E> extends Grid<E> {
         }
 
         // Generate data for each column
-        JsonObject cellEditableData = Json.createObject();
+        ObjectNode cellEditableData = JacksonUtils.createObjectNode();
         editColumns.forEach(column -> {
             boolean cellEditable = column.cellEditableProvider.test(item);
             cellEditableData.put(column.getInternalId(), cellEditable);
@@ -583,11 +583,11 @@ public class GridPro<E> extends Grid<E> {
          *            item subproperty that was changed
          */
         public CellEditStartedEvent(GridPro<E> source, boolean fromClient,
-                @EventData("event.detail.item") JsonObject item,
+                @EventData("event.detail.item") ObjectNode item,
                 @EventData("event.detail.path") String path) {
             super(source, fromClient);
             this.item = source.getDataCommunicator().getKeyMapper()
-                    .get(item.getString("key"));
+                    .get(item.get("key").asText());
             this.path = path;
         }
 
@@ -635,7 +635,7 @@ public class GridPro<E> extends Grid<E> {
             extends ComponentEvent<GridPro<E>> {
 
         private E item;
-        private JsonObject sourceItem;
+        private ObjectNode sourceItem;
         private String path;
 
         /**
@@ -653,12 +653,12 @@ public class GridPro<E> extends Grid<E> {
          *            item subproperty that was changed
          */
         public ItemPropertyChangedEvent(GridPro<E> source, boolean fromClient,
-                @EventData("event.detail.item") JsonObject item,
+                @EventData("event.detail.item") ObjectNode item,
                 @EventData("event.detail.path") String path) {
             super(source, fromClient);
             this.sourceItem = item;
             this.item = source.getDataCommunicator().getKeyMapper()
-                    .get(item.getString("key"));
+                    .get(item.get("key").asText());
             this.path = path;
         }
 
@@ -676,7 +676,7 @@ public class GridPro<E> extends Grid<E> {
          *
          * @return the instance of edited item
          */
-        private JsonObject getSourceItem() {
+        private ObjectNode getSourceItem() {
             return sourceItem;
         }
 

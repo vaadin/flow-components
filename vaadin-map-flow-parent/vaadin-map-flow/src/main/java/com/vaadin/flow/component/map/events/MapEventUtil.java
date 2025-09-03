@@ -14,16 +14,14 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.map.configuration.Configuration;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Extent;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
-
-import elemental.json.JsonArray;
-import elemental.json.JsonType;
-import elemental.json.JsonValue;
 
 class MapEventUtil {
 
@@ -47,30 +45,26 @@ class MapEventUtil {
                 maybeSource.orElse(null), maybeLayer.orElse(null));
     }
 
-    static Coordinate getCoordinate(JsonArray jsonCoordinates) {
-        JsonValue xValue = jsonCoordinates.get(0);
-        JsonValue yValue = jsonCoordinates.get(1);
+    static Coordinate getCoordinate(ArrayNode jsonCoordinates) {
+        JsonNode xValue = jsonCoordinates.get(0);
+        JsonNode yValue = jsonCoordinates.get(1);
 
-        double x = xValue.getType() == JsonType.NULL ? 0 : xValue.asNumber();
-        double y = yValue.getType() == JsonType.NULL ? 0 : yValue.asNumber();
+        double x = xValue.isNull() ? 0 : xValue.asDouble();
+        double y = yValue.isNull() ? 0 : yValue.asDouble();
 
         return new Coordinate(x, y);
     }
 
-    static Extent getExtent(JsonArray jsonExtend) {
-        JsonValue minXValue = jsonExtend.get(0);
-        JsonValue minYValue = jsonExtend.get(1);
-        JsonValue maxXValue = jsonExtend.get(2);
-        JsonValue maxYValue = jsonExtend.get(3);
+    static Extent getExtent(ArrayNode jsonExtend) {
+        JsonNode minXValue = jsonExtend.get(0);
+        JsonNode minYValue = jsonExtend.get(1);
+        JsonNode maxXValue = jsonExtend.get(2);
+        JsonNode maxYValue = jsonExtend.get(3);
 
-        double minX = minXValue.getType() == JsonType.NULL ? 0
-                : minXValue.asNumber();
-        double minY = minYValue.getType() == JsonType.NULL ? 0
-                : minYValue.asNumber();
-        double maxX = maxXValue.getType() == JsonType.NULL ? 0
-                : maxXValue.asNumber();
-        double maxY = maxYValue.getType() == JsonType.NULL ? 0
-                : maxYValue.asNumber();
+        double minX = minXValue.isNull() ? 0 : minXValue.asDouble();
+        double minY = minYValue.isNull() ? 0 : minYValue.asDouble();
+        double maxX = maxXValue.isNull() ? 0 : maxXValue.asDouble();
+        double maxY = maxYValue.isNull() ? 0 : maxYValue.asDouble();
 
         return new Extent(minX, minY, maxX, maxY);
     }
