@@ -30,7 +30,6 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.PropertyChangeListener;
-import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
@@ -197,7 +196,8 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * @see LoginI18n#createDefault()
      */
     public void setI18n(LoginI18n i18n) {
-        BaseJsonNode jsonNode = JacksonUtils.beanToJson(i18n);
+        BaseJsonNode jsonNode = i18n != null ? JacksonUtils.beanToJson(i18n)
+                : JacksonUtils.nullNode();
         getElement().setPropertyJson("i18n", jsonNode);
     }
 
@@ -216,7 +216,7 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
         if (json == null || json.isNull()) {
             return null;
         }
-        return JacksonSerializer.toObject(LoginI18n.class, json);
+        return JacksonUtils.readToObject(json, LoginI18n.class);
     }
 
     /**
