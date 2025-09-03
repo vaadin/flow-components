@@ -348,11 +348,6 @@ public class DateTimePicker
         setLocale(locale);
     }
 
-    @Override
-    protected final void setSynchronizedEvent(String event) {
-        super.setSynchronizedEvent(event);
-    }
-
     private void addValidationListeners() {
         addValueChangeListener(e -> validate());
         getElement().addEventListener("unparsable-change", e -> validate(true));
