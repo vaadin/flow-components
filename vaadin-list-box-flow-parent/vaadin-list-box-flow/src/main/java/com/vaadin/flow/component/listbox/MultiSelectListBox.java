@@ -22,9 +22,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.data.provider.DataChangeEvent;
@@ -33,10 +33,8 @@ import com.vaadin.flow.data.provider.DataViewUtils;
 import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.Json;
-import elemental.json.JsonArray;
 
 /**
  * Server-side component for the {@code vaadin-list-box} element with
@@ -58,7 +56,7 @@ public class MultiSelectListBox<T>
      * Creates a new list box component with multi-selection.
      */
     public MultiSelectListBox() {
-        super("selectedValues", JsonArray.class, Collections.emptySet(),
+        super("selectedValues", ArrayNode.class, Collections.emptySet(),
                 MultiSelectListBox::presentationToModel,
                 MultiSelectListBox::modelToPresentation);
         getElement().setProperty("multiple", true);
@@ -99,17 +97,16 @@ public class MultiSelectListBox<T>
     }
 
     private static <T> Set<T> presentationToModel(MultiSelectListBox<T> listBox,
-            JsonArray presentation) {
-        Set<T> modelValue = IntStream.range(0, presentation.length())
-                .map(idx -> (int) presentation.getNumber(idx))
-                .mapToObj(index -> listBox.getItems().get(index))
+            ArrayNode presentation) {
+        Set<T> modelValue = presentation.valueStream()
+                .map(node -> listBox.getItems().get(node.asInt()))
                 .collect(Collectors.toSet());
         return Collections.unmodifiableSet(modelValue);
     }
 
-    private static <T> JsonArray modelToPresentation(
+    private static <T> ArrayNode modelToPresentation(
             MultiSelectListBox<T> listBox, Set<T> model) {
-        JsonArray array = Json.createArray();
+        ArrayNode array = JacksonUtils.createArrayNode();
 
         AtomicInteger idx = new AtomicInteger(0);
         listBox.getItems().forEach(item -> {
@@ -118,8 +115,7 @@ public class MultiSelectListBox<T>
             model.stream()
                     .filter(selectedItem -> itemId
                             .equals(listBox.getItemId(selectedItem)))
-                    .findFirst()
-                    .ifPresent(ignored -> array.set(array.length(), index));
+                    .findFirst().ifPresent(ignored -> array.add(index));
         });
 
         return array;

@@ -22,9 +22,8 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
-
-import elemental.json.Json;
 
 public class ConfirmDialogTest {
 
@@ -79,8 +78,8 @@ public class ConfirmDialogTest {
 
         Element element = dialog.getElement();
         dialog.getElement().getNode().getFeature(ElementListenerMap.class)
-                .fireEvent(
-                        new DomEvent(element, "closed", Json.createObject()));
+                .fireEvent(new DomEvent(element, "closed",
+                        JacksonUtils.createObjectNode()));
 
         Mockito.verify(listener, Mockito.times(1))
                 .onComponentEvent(Mockito.any(ConfirmDialog.ClosedEvent.class));

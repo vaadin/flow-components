@@ -26,6 +26,7 @@ import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 
@@ -270,14 +271,12 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
 
         // Check for protected cells at target
         for (int i = 0; i < pasteHeight; i++) {
-            Row row = activesheet.getRow(rowIndex + i);
-            if (row != null) {
-                for (int j = 0; j < pasteWidth; j++) {
-                    Cell cell = row.getCell(colIndex + j);
-                    if (spreadsheet.isCellLocked(cell)) {
-                        protectedCellWriteAttempted();
-                        return;
-                    }
+            for (int j = 0; j < pasteWidth; j++) {
+                CellAddress cellAddress = new CellAddress(rowIndex + i,
+                        colIndex + j);
+                if (spreadsheet.isCellLocked(cellAddress)) {
+                    protectedCellWriteAttempted();
+                    return;
                 }
             }
         }
@@ -414,7 +413,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                         .getLastColumn(); col++) {
                     Cell cell = spreadsheet.getCell(row, col);
                     if (cell != null) {
-                        if (spreadsheet.isCellLocked(cell)) {
+                        if (spreadsheet.isCellLocked(cell.getAddress())) {
                             protectedCellWriteAttempted();
                             return;
                         }
@@ -429,7 +428,7 @@ public class SpreadsheetHandlerImpl implements SpreadsheetServerRpc {
                 .getSelectedCellReference();
         Cell cell = spreadsheet.getCell(reference.getRow(), reference.getCol());
         if (cell != null) {
-            if (spreadsheet.isCellLocked(cell)) {
+            if (spreadsheet.isCellLocked(cell.getAddress())) {
                 protectedCellWriteAttempted();
                 return;
             }
