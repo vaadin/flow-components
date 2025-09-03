@@ -15,7 +15,9 @@
  */
 package com.vaadin.flow.component.upload.tests;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -23,15 +25,12 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.component.upload.testbench.UploadElement;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.testutil.TestPath;
-
-import elemental.json.Json;
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
-import elemental.json.JsonValue;
 
 @TestPath("vaadin-upload/i18n")
 public class UploadI18nIT extends AbstractUploadIT {
@@ -64,11 +63,12 @@ public class UploadI18nIT extends AbstractUploadIT {
         open();
 
         UploadElement upload = $(UploadElement.class).id("upload-full-i18n");
-        JsonObject i18nJson = getUploadI18nPropertyAsJson(upload);
+        ObjectNode i18nJson = getUploadI18nPropertyAsJson(upload);
         Map<String, String> translationMap = jsonToMap(i18nJson);
 
         UploadI18N expected = UploadTestsI18N.RUSSIAN_FULL;
-        JsonObject expectedJson = (JsonObject) JsonSerializer.toJson(expected);
+        ObjectNode expectedJson = JacksonUtils.getMapper()
+                .valueToTree(expected);
         deeplyRemoveNullValuesFromJsonObject(expectedJson);
         Map<String, String> expectedMap = jsonToMap(expectedJson);
 
@@ -106,11 +106,11 @@ public class UploadI18nIT extends AbstractUploadIT {
         open();
 
         UploadElement upload = $(UploadElement.class).id("upload-partial-i18n");
-        JsonObject i18nJson = getUploadI18nPropertyAsJson(upload);
+        ObjectNode i18nJson = getUploadI18nPropertyAsJson(upload);
         Map<String, String> translationMap = jsonToMap(i18nJson);
 
         UploadI18N fullTranslation = UploadTestsI18N.RUSSIAN_FULL;
-        JsonObject fullTranslationJson = (JsonObject) JsonSerializer
+        ObjectNode fullTranslationJson = (ObjectNode) JacksonSerializer
                 .toJson(fullTranslation);
         deeplyRemoveNullValuesFromJsonObject(fullTranslationJson);
         Map<String, String> fullTranslationMap = jsonToMap(fullTranslationJson);
@@ -161,70 +161,63 @@ public class UploadI18nIT extends AbstractUploadIT {
     private void assertTranslationMapsHaveSameKeys(Map<String, String> expected,
             Map<String, String> actual) {
         expected.keySet().forEach(expectedKey -> {
-            // Cancel was removed in
-            // https://github.com/vaadin/web-components/pull/2723
-            if (!"cancel".equals(expectedKey)) {
-                Assert.assertTrue("Missing translation key: " + expectedKey,
-                        actual.containsKey(expectedKey));
-            }
+            Assert.assertTrue("Missing translation key: " + expectedKey,
+                    actual.containsKey(expectedKey));
         });
     }
 
     private void assertTranslationMapHasNoMissingTranslations(
             Map<String, String> map) {
         map.keySet().forEach(key -> {
-            // Cancel was removed in
-            // https://github.com/vaadin/web-components/pull/2723
-            if (!"cancel".equals(key)) {
-                String value = map.get(key);
-                Assert.assertNotNull("Missing translation value: " + key,
-                        value);
-            }
+            String value = map.get(key);
+            Assert.assertNotNull("Missing translation value: " + key, value);
         });
     }
 
     /**
-     * Converts a deeply nested JsonObject into a Map of key / value pairs,
+     * Converts a deeply nested ObjectNode into a Map of key / value pairs,
      * where the key is the path through the object to the property, and the
      * value is the string value of the property, or null if the property was
      * null
      */
-    private Map<String, String> jsonToMap(JsonObject jsonObject) {
-        return jsonToMap(new HashMap<>(), "", jsonObject);
+    private Map<String, String> jsonToMap(ObjectNode jsonNode) {
+        return jsonToMap(new HashMap<>(), "", jsonNode);
     }
 
     private Map<String, String> jsonToMap(Map<String, String> output,
-            String path, JsonObject node) {
-        for (String key : node.keys()) {
-            JsonValue jsonValue = node.get(key);
+            String path, ObjectNode node) {
+        node.forEachEntry((key, value) -> {
             String subPath = path.isEmpty() ? key : path + "." + key;
 
-            if (jsonValue.getType() == JsonType.OBJECT) {
-                jsonToMap(output, subPath, (JsonObject) jsonValue);
-            } else if (jsonValue.getType() == JsonType.NULL) {
+            if (value.isObject()) {
+                jsonToMap(output, subPath, (ObjectNode) value);
+            } else if (value.isNull()) {
                 output.put(subPath, null);
             } else {
-                String stringValue = jsonValue.asString();
+                String stringValue = value.asText();
                 output.put(subPath, stringValue);
             }
-        }
+        });
         return output;
     }
 
-    private JsonObject getUploadI18nPropertyAsJson(UploadElement upload) {
+    private ObjectNode getUploadI18nPropertyAsJson(UploadElement upload) {
         String i18nJsonString = (String) upload.getCommandExecutor()
                 .executeScript("return JSON.stringify(arguments[0].i18n)",
                         upload);
-        return Json.parse(i18nJsonString);
+        return JacksonUtils.readTree(i18nJsonString);
     }
 
-    private void deeplyRemoveNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.OBJECT) {
-                deeplyRemoveNullValuesFromJsonObject(jsonObject.get(key));
-            } else if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
+    private void deeplyRemoveNullValuesFromJsonObject(ObjectNode jsonObject) {
+        List<String> keysToRemove = new ArrayList<>();
+        jsonObject.forEachEntry((key, value) -> {
+            if (value.isObject()) {
+                deeplyRemoveNullValuesFromJsonObject((ObjectNode) value);
             }
-        }
+            if (value.isNull()) {
+                keysToRemove.add(key);
+            }
+        });
+        keysToRemove.forEach(jsonObject::remove);
     }
 }

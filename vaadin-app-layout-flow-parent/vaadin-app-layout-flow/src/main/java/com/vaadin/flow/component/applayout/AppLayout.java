@@ -19,6 +19,8 @@ import java.io.Serializable;
 import java.util.Locale;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
@@ -32,11 +34,8 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.router.RouterLayout;
-
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
 
 /**
  * App Layout is a component for building common application layouts.
@@ -96,11 +95,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
     }
 
     private void setI18nWithJS() {
-        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
-
-        // Remove properties with null values to prevent errors in web
-        // component
-        removeNullValuesFromJsonObject(i18nJson);
+        ObjectNode i18nJson = JacksonUtils.beanToJson(i18n);
 
         // Assign new I18N object to WC, by merging the existing
         // WC I18N, and the values from the new AppLayoutI18n instance,
@@ -116,14 +111,6 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
         // Element state is not persisted across attach/detach
         if (this.i18n != null) {
             setI18nWithJS();
-        }
-    }
-
-    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
-            }
         }
     }
 
@@ -358,6 +345,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
     /**
      * The internationalization properties for {@link AppLayout}
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class AppLayoutI18n implements Serializable {
         private String drawer;
 
