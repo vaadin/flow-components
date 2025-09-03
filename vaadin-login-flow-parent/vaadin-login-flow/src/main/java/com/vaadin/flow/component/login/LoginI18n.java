@@ -23,7 +23,6 @@ import org.apache.commons.io.IOUtils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.JacksonUtils;
 
 /**
@@ -60,7 +59,7 @@ public class LoginI18n implements Serializable {
      * @return a new instance with the default messages
      */
     public static LoginI18n createDefault() {
-        return JacksonSerializer.toObject(LoginI18n.class, DEFAULT_I18N);
+        return JacksonUtils.readToObject(DEFAULT_I18N, LoginI18n.class);
     }
 
     /**
