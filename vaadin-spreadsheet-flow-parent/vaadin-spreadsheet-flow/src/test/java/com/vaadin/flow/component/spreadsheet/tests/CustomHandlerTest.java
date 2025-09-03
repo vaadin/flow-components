@@ -1,13 +1,22 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests;
+
+import static org.mockito.Mockito.*;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 import com.vaadin.flow.component.ComponentEventBus;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.SpreadsheetHandlerImpl;
-import org.junit.Assert;
-import org.junit.Test;
-
-import static org.mockito.Mockito.*;
 
 public class CustomHandlerTest {
 
@@ -27,18 +36,20 @@ public class CustomHandlerTest {
             }
         };
 
-        var activeListeners = spreadsheet.getEventBus().getListeners(Spreadsheet.SpreadsheetEvent.class);
+        var activeListeners = spreadsheet.getEventBus()
+                .getListeners(Spreadsheet.SpreadsheetEvent.class);
         Assert.assertEquals(1, activeListeners.size());
 
         // Mock spreadsheet event to trigger the original handler
         var spreadsheetEvent = mock(Spreadsheet.SpreadsheetEvent.class);
         when(spreadsheetEvent.getType()).thenReturn("onConnectorInit");
-        
+
         verify(originalHandler, times(0)).onConnectorInit();
-        ComponentUtil.fireEvent(spreadsheet, spreadsheetEvent); // Fire spreadsheet event
+        ComponentUtil.fireEvent(spreadsheet, spreadsheetEvent); // Fire
+                                                                // spreadsheet
+                                                                // event
         verify(originalHandler).onConnectorInit();
     }
-
 
     @Test
     public void newCustomHandlerOverridesOriginal() {
@@ -59,7 +70,8 @@ public class CustomHandlerTest {
 
         spreadsheet.setSpreadsheetHandler(newHandler);
 
-        var activeListeners = spreadsheet.getEventBus().getListeners(Spreadsheet.SpreadsheetEvent.class);
+        var activeListeners = spreadsheet.getEventBus()
+                .getListeners(Spreadsheet.SpreadsheetEvent.class);
         Assert.assertEquals(1, activeListeners.size());
 
         // Mock spreadsheet event to trigger the new handler
@@ -67,10 +79,11 @@ public class CustomHandlerTest {
         when(spreadsheetEvent.getType()).thenReturn("onConnectorInit");
 
         verify(newHandler, times(0)).onConnectorInit();
-        ComponentUtil.fireEvent(spreadsheet, spreadsheetEvent); // Fire spreadsheet event
+        ComponentUtil.fireEvent(spreadsheet, spreadsheetEvent); // Fire
+                                                                // spreadsheet
+                                                                // event
         verify(originalHandler, times(0)).onConnectorInit();
         verify(newHandler).onConnectorInit();
     }
-
 
 }
