@@ -99,7 +99,8 @@ public class ColumnWithLazyMultiLevelDrilldownCallbackTestsIT
                 .findFirst();
         if (button.isEmpty()) {
             throw new AssertionError(
-                    "Couldn't find drill up button with label '" + label + "'");
+                    "Couldn't find breadcrumb button with label '%s'"
+                            .formatted(label));
         }
         return button.get();
     }
