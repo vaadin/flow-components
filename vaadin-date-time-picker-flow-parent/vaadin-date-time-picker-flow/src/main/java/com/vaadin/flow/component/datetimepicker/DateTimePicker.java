@@ -196,7 +196,6 @@ public class DateTimePicker
      */
     public DateTimePicker() {
         this((LocalDateTime) null);
-        setSynchronizedEvent("change");
     }
 
     /**
@@ -236,6 +235,7 @@ public class DateTimePicker
      */
     public DateTimePicker(LocalDateTime initialDateTime) {
         super("value", null, String.class, PARSER, FORMATTER);
+        setSynchronizedEvent("change");
         if (initialDateTime != null) {
             initialDateTime = sanitizeValue(initialDateTime);
             setPresentationValue(initialDateTime);
