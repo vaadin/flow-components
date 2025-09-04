@@ -18,6 +18,7 @@ package com.vaadin.flow.component.sidenav;
 import java.io.Serializable;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -26,7 +27,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 
 /**
  * A side navigation menu with support for hierarchical and flat menus.
@@ -174,12 +175,13 @@ public class SideNav extends Component
         Objects.requireNonNull(i18n,
                 "The i18N properties object should not be null");
         this.i18n = i18n;
-        getElement().setPropertyJson("i18n", JsonSerializer.toJson(i18n));
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
     }
 
     /**
      * The internationalization properties for {@link SideNav}.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class SideNavI18n implements Serializable {
         private String toggle;
 

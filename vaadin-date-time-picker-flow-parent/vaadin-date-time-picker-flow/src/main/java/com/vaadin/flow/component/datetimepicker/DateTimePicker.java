@@ -25,6 +25,8 @@ import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Function;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Focusable;
@@ -47,10 +49,8 @@ import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.function.SerializableFunction;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonObject;
 
 @Tag("vaadin-date-picker")
 class DateTimePickerDatePicker
@@ -956,7 +956,7 @@ public class DateTimePicker
     private void updateI18n() {
         DateTimePickerI18n i18nObject = i18n != null ? i18n
                 : new DateTimePickerI18n();
-        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(i18nObject);
+        ObjectNode i18nJson = JacksonUtils.beanToJson(i18nObject);
 
         if (dateAriaLabel != null) {
             i18nJson.put("dateLabel", dateAriaLabel);
@@ -965,13 +965,6 @@ public class DateTimePicker
         if (timeAriaLabel != null) {
             i18nJson.put("timeLabel", timeAriaLabel);
         }
-
-        // Remove the error message properties because they aren't used on
-        // the client-side.
-        i18nJson.remove("badInputErrorMessage");
-        i18nJson.remove("requiredErrorMessage");
-        i18nJson.remove("minErrorMessage");
-        i18nJson.remove("maxErrorMessage");
 
         getElement().setPropertyJson("i18n", i18nJson);
     }
@@ -1072,6 +1065,7 @@ public class DateTimePicker
          *
          * @return the error message or {@code null} if not set
          */
+        @JsonIgnore // Not used on the client side
         public String getBadInputErrorMessage() {
             return badInputErrorMessage;
         }
@@ -1099,6 +1093,7 @@ public class DateTimePicker
          *
          * @return the error message or {@code null} if not set
          */
+        @JsonIgnore // Not used on the client side
         public String getIncompleteInputErrorMessage() {
             return incompleteInputErrorMessage;
         }
@@ -1129,6 +1124,7 @@ public class DateTimePicker
          * @see DateTimePicker#isRequiredIndicatorVisible()
          * @see DateTimePicker#setRequiredIndicatorVisible(boolean)
          */
+        @JsonIgnore // Not used on the client side
         public String getRequiredErrorMessage() {
             return requiredErrorMessage;
         }
@@ -1160,6 +1156,7 @@ public class DateTimePicker
          * @see DateTimePicker#getMin()
          * @see DateTimePicker#setMin(LocalDateTime)
          */
+        @JsonIgnore // Not used on the client side
         public String getMinErrorMessage() {
             return minErrorMessage;
         }
@@ -1191,6 +1188,7 @@ public class DateTimePicker
          * @see DateTimePicker#getMax()
          * @see DateTimePicker#setMax(LocalDateTime)
          */
+        @JsonIgnore // Not used on the client side
         public String getMaxErrorMessage() {
             return maxErrorMessage;
         }

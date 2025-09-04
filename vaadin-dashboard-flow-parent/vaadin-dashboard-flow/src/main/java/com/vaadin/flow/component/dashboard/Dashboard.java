@@ -22,8 +22,10 @@ import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -34,11 +36,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
 
 /**
  * Dashboard is a responsive layout component that allows users to organize
@@ -622,25 +621,13 @@ public class Dashboard extends Component
     }
 
     private void setI18nWithJS() {
-        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(i18n);
-
-        // Remove properties with null values to prevent errors in web
-        // component
-        removeNullValuesFromJsonObject(i18nJson);
+        ObjectNode i18nJson = JacksonUtils.beanToJson(i18n);
 
         // Assign new I18N object to WC, by merging the existing
         // WC I18N, and the values from the new DashboardI18n instance,
         // into an empty object
         getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
                 i18nJson);
-    }
-
-    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
-            }
-        }
     }
 
     private static String getWidgetRepresentation(DashboardWidget widget,
@@ -830,6 +817,7 @@ public class Dashboard extends Component
     /**
      * The internationalization properties for {@link Dashboard}.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class DashboardI18n implements Serializable {
 
         private String selectSection;
