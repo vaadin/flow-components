@@ -17,6 +17,7 @@ import com.vaadin.flow.component.charts.model.style.Color;
 public class ContextButton extends AbstractConfigurationObject {
 
     private HorizontalAlign align;
+    private int buttonSpacing;
     private Boolean enabled;
     private Number height;
     private ContextButtonMenuItem[] menuItems;
@@ -55,6 +56,25 @@ public class ContextButton extends AbstractConfigurationObject {
 
     public ContextButton(Boolean enabled) {
         this.enabled = enabled;
+    }
+
+    /**
+     * Gets the spacing between the context button and other exporting buttons.
+     * 
+     * @return the button spacing
+     */
+    public int getButtonSpacing() {
+        return buttonSpacing;
+    }
+
+    /**
+     * Sets the spacing between the context button and other exporting buttons.
+     * 
+     * @param buttonSpacing
+     *            the spacing value
+     */
+    public void setButtonSpacing(int buttonSpacing) {
+        this.buttonSpacing = buttonSpacing;
     }
 
     /**
