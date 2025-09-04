@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -34,11 +35,9 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.Json;
-import elemental.json.JsonArray;
 
 /**
  * Popover is a component for creating overlays that are positioned next to
@@ -646,18 +645,18 @@ public class Popover extends Component implements HasAriaLabel, HasComponents,
     }
 
     private void updateTrigger() {
-        JsonArray trigger = Json.createArray();
+        ArrayNode trigger = JacksonUtils.createArrayNode();
 
         if (isOpenOnClick()) {
-            trigger.set(trigger.length(), "click");
+            trigger.add("click");
         }
 
         if (isOpenOnHover()) {
-            trigger.set(trigger.length(), "hover");
+            trigger.add("hover");
         }
 
         if (isOpenOnFocus()) {
-            trigger.set(trigger.length(), "focus");
+            trigger.add("focus");
         }
 
         getElement().setPropertyJson("trigger", trigger);
