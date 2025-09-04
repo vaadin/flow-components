@@ -15,11 +15,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.BaseJsonNode;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.StreamRegistration;
@@ -28,7 +27,6 @@ import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
 import elemental.json.JsonValue;
-import elemental.json.impl.JreJsonFactory;
 
 /**
  * Custom JSON serializer for the map component using a Jackson
@@ -36,43 +34,34 @@ import elemental.json.impl.JreJsonFactory;
  */
 public class MapSerializer implements Serializable {
 
-    private final ObjectWriter writer;
+    private final ObjectMapper mapper;
 
     public MapSerializer() {
-        // Add map-instance specific serializer to handle Flow stream resources
-        SimpleModule module = new SimpleModule().addSerializer(
+        // Add map-instance specific serializers to handle Flow stream resources
+        SimpleModule streamResourceModule = new SimpleModule().addSerializer(
                 StreamResource.class, new StreamResourceSerializer());
-        // Add map-instance specific serializer to handle Flow stream resources
-        SimpleModule downloadModule = new SimpleModule().addSerializer(
+        SimpleModule downloadHandlerModule = new SimpleModule().addSerializer(
                 DownloadHandler.class, new DownloadHandlerSerializer());
 
         ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(module);
-        mapper.registerModule(downloadModule);
-        writer = mapper.writer();
+        mapper.registerModule(streamResourceModule);
+        mapper.registerModule(downloadHandlerModule);
+        this.mapper = mapper;
     }
 
     /**
-     * Serializes a map configuration object to JSON using a Jackson
-     * {@link ObjectMapper}, and returns the value as a {@link JsonValue} to
-     * provide it in a type that is compatible with Flow.
-     * <p>
-     * Throws a runtime exception if the object can not be serialized to JSON.
+     * Serializes a map configuration object to JSON using a custom Jackson
+     * {@link ObjectMapper} that handles Flow {@link StreamResource} and
+     * {@link DownloadHandler} to serialize those into URLs.
      *
      * @param value
      *            the map configuration object to be serialized into JSON
      * @return a {@link JsonValue} representing the configuration object as JSON
+     * @throws IllegalArgumentException
+     *             if the object can not be serialized to JSON
      */
-    public JsonValue toJson(Object value) {
-        String json;
-        try {
-            json = writer.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error while serializing "
-                    + value.getClass().getSimpleName(), e);
-        }
-
-        return new JreJsonFactory().parse(json);
+    public BaseJsonNode toJson(Object value) {
+        return mapper.valueToTree(value);
     }
 
     /**
