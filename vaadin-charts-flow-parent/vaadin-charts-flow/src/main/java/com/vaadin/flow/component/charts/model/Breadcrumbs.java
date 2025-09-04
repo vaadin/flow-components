@@ -23,7 +23,7 @@ public class Breadcrumbs extends AbstractConfigurationObject {
     private String format;
     private String _fn_formatter;
     private BreadcrumbsPosition position;
-    private DrillUpButtonRelativeTo relativeTo;
+    private ButtonRelativeTo relativeTo;
     private Boolean rtl;
     private Separator separator;
     private Boolean showFullPath;
@@ -124,14 +124,14 @@ public class Breadcrumbs extends AbstractConfigurationObject {
     /**
      * @return What box to align the breadcrumbs to.
      */
-    public DrillUpButtonRelativeTo getRelativeTo() {
+    public ButtonRelativeTo getRelativeTo() {
         return relativeTo;
     }
 
     /**
      * Sets what box to align the breadcrumbs to.
      */
-    public void setRelativeTo(DrillUpButtonRelativeTo relativeTo) {
+    public void setRelativeTo(ButtonRelativeTo relativeTo) {
         this.relativeTo = relativeTo;
     }
 
