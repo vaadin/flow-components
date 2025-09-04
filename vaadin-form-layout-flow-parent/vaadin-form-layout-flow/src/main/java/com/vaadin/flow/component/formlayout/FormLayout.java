@@ -170,7 +170,7 @@ import com.vaadin.flow.internal.JacksonUtils;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-form-layout")
-@NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha16")
+@NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha17")
 @JsModule("@vaadin/form-layout/src/vaadin-form-layout.js")
 public class FormLayout extends Component
         implements HasSize, HasStyle, HasComponents, ClickNotifier<FormLayout> {
@@ -296,7 +296,7 @@ public class FormLayout extends Component
      * @author Vaadin Ltd
      */
     @Tag("vaadin-form-item")
-    @NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha16")
+    @NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha17")
     @JsModule("@vaadin/form-layout/src/vaadin-form-item.js")
     public static class FormItem extends Component
             implements HasComponents, HasStyle, ClickNotifier<FormItem> {
@@ -402,7 +402,7 @@ public class FormLayout extends Component
      * @author Vaadin Ltd
      */
     @Tag("vaadin-form-row")
-    @NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha16")
+    @NpmPackage(value = "@vaadin/form-layout", version = "25.0.0-alpha17")
     @JsModule("@vaadin/form-layout/src/vaadin-form-row.js")
     public static class FormRow extends Component implements HasComponents {
 

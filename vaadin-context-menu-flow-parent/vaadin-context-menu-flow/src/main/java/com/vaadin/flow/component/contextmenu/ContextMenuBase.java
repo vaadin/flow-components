@@ -52,7 +52,7 @@ import com.vaadin.flow.shared.Registration;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu")
-@NpmPackage(value = "@vaadin/context-menu", version = "25.0.0-alpha16")
+@NpmPackage(value = "@vaadin/context-menu", version = "25.0.0-alpha17")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")

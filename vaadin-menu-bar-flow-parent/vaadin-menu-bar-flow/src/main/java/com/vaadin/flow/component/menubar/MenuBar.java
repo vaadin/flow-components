@@ -55,8 +55,8 @@ import com.vaadin.flow.internal.JacksonUtils;
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "25.0.0-alpha16")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha16")
+@NpmPackage(value = "@vaadin/menu-bar", version = "25.0.0-alpha17")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha17")
 public class MenuBar extends Component implements HasEnabled, HasMenuItems,
         HasSize, HasStyle, HasThemeVariant<MenuBarVariant> {
 

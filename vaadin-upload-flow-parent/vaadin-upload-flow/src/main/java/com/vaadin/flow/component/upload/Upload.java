@@ -66,7 +66,7 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/upload", version = "25.0.0-alpha16")
+@NpmPackage(value = "@vaadin/upload", version = "25.0.0-alpha17")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 

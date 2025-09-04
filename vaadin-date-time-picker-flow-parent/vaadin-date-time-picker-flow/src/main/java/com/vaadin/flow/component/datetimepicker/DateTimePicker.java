@@ -88,7 +88,7 @@ class DateTimePickerTimePicker
  * @author Vaadin Ltd
  */
 @Tag("vaadin-date-time-picker")
-@NpmPackage(value = "@vaadin/date-time-picker", version = "25.0.0-alpha16")
+@NpmPackage(value = "@vaadin/date-time-picker", version = "25.0.0-alpha17")
 @JsModule("@vaadin/date-time-picker/src/vaadin-date-time-picker.js")
 public class DateTimePicker
         extends AbstractSinglePropertyField<DateTimePicker, LocalDateTime>
@@ -235,6 +235,7 @@ public class DateTimePicker
      */
     public DateTimePicker(LocalDateTime initialDateTime) {
         super("value", null, String.class, PARSER, FORMATTER);
+        setSynchronizedEvent("change");
         if (initialDateTime != null) {
             initialDateTime = sanitizeValue(initialDateTime);
             setPresentationValue(initialDateTime);
