@@ -43,7 +43,10 @@ public class Time extends AbstractConfigurationObject {
 
     /**
      * @see #setUseUTC(Boolean)
+     * @deprecated Since V25. This property is deprecated and should not be used
+     *             in new code.
      */
+    @Deprecated(from = "25")
     public Boolean getUseUTC() {
         return useUTC;
     }
@@ -56,7 +59,11 @@ public class Time extends AbstractConfigurationObject {
      * when correct Daylight Saving Time transitions are required.
      * <p>
      * Defaults to: true
+     * 
+     * @deprecated Since V25. This property is deprecated and should not be used
+     *             in new code.
      */
+    @Deprecated(from = "25")
     public void setUseUTC(Boolean useUTC) {
         this.useUTC = useUTC;
     }
