@@ -59,9 +59,8 @@ public class ColumnWithZooming extends AbstractChartExample {
         add(chart);
 
         for (var dimension : Dimension.values()) {
-                var button = new NativeButton(
-                                "Enable zooming in " + dimension.name(),
-                                    e -> {
+            var button = new NativeButton(
+                    "Enable zooming in " + dimension.name(), e -> {
                         zooming.setType(dimension);
                         zooming.getMouseWheel().setType(dimension);
                         chart.drawChart();
