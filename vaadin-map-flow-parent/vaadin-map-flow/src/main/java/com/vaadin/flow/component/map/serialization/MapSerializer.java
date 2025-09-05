@@ -26,8 +26,6 @@ import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
-import elemental.json.JsonValue;
-
 /**
  * Custom JSON serializer for the map component using a Jackson
  * {@link ObjectMapper}
@@ -56,7 +54,8 @@ public class MapSerializer implements Serializable {
      *
      * @param value
      *            the map configuration object to be serialized into JSON
-     * @return a {@link JsonValue} representing the configuration object as JSON
+     * @return a {@link BaseJsonNode} representing the configuration object as
+     *         JSON
      * @throws IllegalArgumentException
      *             if the object can not be serialized to JSON
      */
