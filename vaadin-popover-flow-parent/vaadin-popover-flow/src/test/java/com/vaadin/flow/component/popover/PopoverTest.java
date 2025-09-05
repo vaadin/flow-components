@@ -28,11 +28,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.server.VaadinService;
-
-import elemental.json.JsonArray;
 
 /**
  * @author Vaadin Ltd.
@@ -173,41 +172,41 @@ public class PopoverTest {
 
     @Test
     public void getTriggerProperty_defaultValue_click() {
-        JsonArray jsonArray = (JsonArray) popover.getElement()
+        var jsonArray = (ArrayNode) popover.getElement()
                 .getPropertyRaw("trigger");
-        Assert.assertEquals(1, jsonArray.length());
-        Assert.assertEquals("click", jsonArray.get(0).asString());
+        Assert.assertEquals(1, jsonArray.size());
+        Assert.assertEquals("click", jsonArray.get(0).asText());
     }
 
     @Test
     public void setOpenOnClick_triggerPropertyUpdated() {
         popover.setOpenOnClick(false);
 
-        JsonArray jsonArray = (JsonArray) popover.getElement()
+        var jsonArray = (ArrayNode) popover.getElement()
                 .getPropertyRaw("trigger");
-        Assert.assertEquals(0, jsonArray.length());
+        Assert.assertEquals(0, jsonArray.size());
     }
 
     @Test
     public void setOpenOnFocus_triggerPropertyUpdated() {
         popover.setOpenOnFocus(true);
 
-        JsonArray jsonArray = (JsonArray) popover.getElement()
+        var jsonArray = (ArrayNode) popover.getElement()
                 .getPropertyRaw("trigger");
-        Assert.assertEquals(2, jsonArray.length());
-        Assert.assertEquals("click", jsonArray.get(0).asString());
-        Assert.assertEquals("focus", jsonArray.get(1).asString());
+        Assert.assertEquals(2, jsonArray.size());
+        Assert.assertEquals("click", jsonArray.get(0).asText());
+        Assert.assertEquals("focus", jsonArray.get(1).asText());
     }
 
     @Test
     public void setOpenOnHover_triggerPropertyUpdated() {
         popover.setOpenOnHover(true);
 
-        JsonArray jsonArray = (JsonArray) popover.getElement()
+        var jsonArray = (ArrayNode) popover.getElement()
                 .getPropertyRaw("trigger");
-        Assert.assertEquals(2, jsonArray.length());
-        Assert.assertEquals("click", jsonArray.get(0).asString());
-        Assert.assertEquals("hover", jsonArray.get(1).asString());
+        Assert.assertEquals(2, jsonArray.size());
+        Assert.assertEquals("click", jsonArray.get(0).asText());
+        Assert.assertEquals("hover", jsonArray.get(1).asText());
     }
 
     @Test
