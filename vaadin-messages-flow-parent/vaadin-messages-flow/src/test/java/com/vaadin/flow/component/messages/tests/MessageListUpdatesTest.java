@@ -23,14 +23,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
-import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.VaadinSession;
-
-import elemental.json.impl.JreJsonArray;
 
 public class MessageListUpdatesTest {
 
@@ -203,10 +202,11 @@ public class MessageListUpdatesTest {
                 .contains("setItems"));
 
         // Expect the parameters to equal the items in the message list
-        var parameterItems = (JreJsonArray) invocation.getInvocation()
+        var parameterItems = (ArrayNode) invocation.getInvocation()
                 .getParameters().get(0);
-        var expectedItems = JsonUtils.listToJson(messageList.getItems());
-        Assert.assertTrue(JsonUtils.jsonEquals(expectedItems, parameterItems));
+        var expectedItems = JacksonUtils.listToJson(messageList.getItems());
+        Assert.assertTrue(
+                JacksonUtils.jsonEquals(expectedItems, parameterItems));
     }
 
     private List<PendingJavaScriptInvocation> getPendingJavaScriptInvocations() {

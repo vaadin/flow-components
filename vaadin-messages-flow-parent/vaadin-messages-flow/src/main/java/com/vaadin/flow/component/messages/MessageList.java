@@ -31,7 +31,7 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
-import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.JacksonUtils;
 
 /**
  * Message List allows you to show a list of messages, for example, a chat log.
@@ -217,7 +217,7 @@ public class MessageList extends Component
         // Sync clientText for items
         items.forEach(item -> item.clientText = item.getText());
 
-        var itemsJson = JsonUtils.listToJson(items);
+        var itemsJson = JacksonUtils.listToJson(items);
         getElement().executeJs(CONNECTOR_OBJECT + ".setItems(this, $0, $1)",
                 itemsJson, ui.getLocale().toLanguageTag());
     }
@@ -261,7 +261,7 @@ public class MessageList extends Component
         // Sync clientText for new items
         newItems.forEach(item -> item.clientText = item.getText());
 
-        var newItemsJson = JsonUtils.listToJson(newItems);
+        var newItemsJson = JacksonUtils.listToJson(newItems);
         // Call the connector function to add items
         getElement().executeJs(CONNECTOR_OBJECT + ".addItems(this, $0, $1)",
                 newItemsJson, ui.getLocale().toLanguageTag());
