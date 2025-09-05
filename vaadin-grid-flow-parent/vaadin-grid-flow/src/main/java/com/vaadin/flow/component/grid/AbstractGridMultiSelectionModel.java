@@ -101,7 +101,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
     protected void remove() {
         super.remove();
         deselectAll();
-        if (selectionColumn.getElement().getNode().isAttached()) {
+
+        var parentNode = selectionColumn.getElement().getNode().getParent();
+        var gridNode = getGrid().getElement().getNode();
+        if (gridNode.equals(parentNode)) {
             getGrid().getElement().removeChild(selectionColumn.getElement());
         }
     }
