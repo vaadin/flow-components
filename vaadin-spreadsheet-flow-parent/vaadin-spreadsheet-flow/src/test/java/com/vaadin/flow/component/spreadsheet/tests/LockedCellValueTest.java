@@ -38,22 +38,23 @@ public class LockedCellValueTest {
     }
 
     @Test
-    public void lockSheet_receiveCellValueEditedEvent_firesProtectedEditEvent() {
-        spreadsheet.createCell(1, 1, "Initial value");
+    public void lockSheet_receiveCellValueEditedEvent_preventsEdit() {
+        var cell = spreadsheet.createCell(1, 1, "Initial value");
         lockSheet();
         var protectedEditEvent = new AtomicReference<ProtectedEditEvent>();
         spreadsheet.addProtectedEditListener(protectedEditEvent::set);
         var cellValueChangeEvent = new AtomicReference<Spreadsheet.CellValueChangeEvent>();
         spreadsheet.addCellValueChangeListener(cellValueChangeEvent::set);
         spreadsheet.setSelection("B2");
-        fireCellValueEditedEvent(1, 1, "Value");
+        fireCellValueEditedEvent(2, 2, "Updated value");
         Assert.assertNotNull(protectedEditEvent.get());
         Assert.assertNull(cellValueChangeEvent.get());
+        Assert.assertEquals("Initial value", cell.getStringCellValue());
     }
 
     @Test
-    public void lockSheet_unlockCell_receiveCellValueEditedEvent_doesNotFireProtectedEditEvent() {
-        spreadsheet.createCell(1, 1, "Initial value");
+    public void lockSheet_unlockCell_receiveCellValueEditedEvent_allowsEdit() {
+        var cell = spreadsheet.createCell(1, 1, "Initial value");
         lockSheet();
         unlockCell("B2");
         var protectedEditEvent = new AtomicReference<ProtectedEditEvent>();
@@ -61,9 +62,10 @@ public class LockedCellValueTest {
         var cellValueChangeEvent = new AtomicReference<Spreadsheet.CellValueChangeEvent>();
         spreadsheet.addCellValueChangeListener(cellValueChangeEvent::set);
         spreadsheet.setSelection("B2");
-        fireCellValueEditedEvent(1, 1, "Value");
+        fireCellValueEditedEvent(2, 2, "Updated value");
         Assert.assertNull(protectedEditEvent.get());
         Assert.assertNotNull(cellValueChangeEvent.get());
+        Assert.assertEquals("Updated value", cell.getStringCellValue());
     }
 
     private void fireCellValueEditedEvent(int row, int col, String value) {
