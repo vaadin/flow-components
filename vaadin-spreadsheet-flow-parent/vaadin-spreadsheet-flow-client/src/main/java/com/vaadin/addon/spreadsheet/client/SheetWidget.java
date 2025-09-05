@@ -2195,6 +2195,10 @@ public class SheetWidget extends Panel {
         return cd == null ? "" : cd.value;
     }
 
+    void setCachedCellsLocked(boolean locked) {
+        cachedCellData.values().forEach(cellData -> cellData.locked = locked);
+    }
+
     public boolean isCellLocked(int column, int row) {
         CellData cd = getCellData(column, row);
         return cd == null

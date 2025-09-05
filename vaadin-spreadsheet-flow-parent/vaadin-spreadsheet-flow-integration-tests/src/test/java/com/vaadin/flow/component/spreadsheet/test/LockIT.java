@@ -50,4 +50,25 @@ public class LockIT extends AbstractSpreadsheetIT {
         Assert.assertEquals("value", spreadsheet.getCellAt("C3").getValue());
     }
 
+    @Test
+    public void updateCellValue_lockSheet_updatedCellIsLocked() {
+        var cellAddress = "C3";
+        setCellValue(cellAddress, "value");
+        loadTestFixture(TestFixtures.LockSheet);
+        selectCell(cellAddress);
+        getSpreadsheet().getCellAt(cellAddress).doubleClick();
+        Assert.assertFalse(getSpreadsheet().getCellValueInput().isDisplayed());
+    }
+
+    @Test
+    public void updateCellValue_lockSheet_unlockCell_updatedCellIsUnlocked() {
+        var cellAddress = "C3";
+        setCellValue(cellAddress, "value");
+        loadTestFixture(TestFixtures.LockSheet);
+        selectRegion(cellAddress, cellAddress);
+        loadTestFixture(TestFixtures.LockCell);
+        Assert.assertEquals("unlocked", getCellValue(cellAddress));
+        setCellValue(cellAddress, "new value");
+        Assert.assertEquals("new value", getCellValue(cellAddress));
+    }
 }

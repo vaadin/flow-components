@@ -1777,6 +1777,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                         startDelayedSendingTimer();
                     }
                 }
+                sheetWidget.setCachedCellsLocked(sheetProtected);
             }
         }
     }
