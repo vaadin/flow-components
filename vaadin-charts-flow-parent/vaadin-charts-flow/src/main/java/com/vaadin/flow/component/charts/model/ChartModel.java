@@ -60,6 +60,7 @@ public class ChartModel extends AbstractConfigurationObject {
     private String typeDescription;
     private Number width;
     private Dimension zoomType;
+    private Zooming zooming;
 
     public ChartModel() {
     }
@@ -860,7 +861,11 @@ public class ChartModel extends AbstractConfigurationObject {
 
     /**
      * @see #setZoomType(Dimension)
+     * @deprecated Use {@link #getZooming()} instead. The zooming configuration
+     *             provides more comprehensive zoom options including mouse
+     *             wheel support.
      */
+    @Deprecated(since = "25.0")
     public Dimension getZoomType() {
         return zoomType;
     }
@@ -868,9 +873,35 @@ public class ChartModel extends AbstractConfigurationObject {
     /**
      * Decides in what dimensions the user can zoom by dragging the mouse. Can
      * be one of <code>x</code>, <code>y</code> or <code>xy</code>.
+     *
+     * @deprecated Use {@link #setZooming(Zooming)} instead. The zooming
+     *             configuration provides more comprehensive zoom options
+     *             including mouse wheel support.
      */
+    @Deprecated(since = "25.0")
     public void setZoomType(Dimension zoomType) {
         this.zoomType = zoomType;
+    }
+
+    /**
+     * @see #setZooming(Zooming)
+     */
+    public Zooming getZooming() {
+        if (zooming == null) {
+            zooming = new Zooming();
+        }
+        return zooming;
+    }
+
+    /**
+     * Options for zooming configuration. This enables zooming in on plots and
+     * provides options for controlling zoom behavior including mouse wheel
+     * support. Mouse wheel zooming requires Highcharts 11.1 or higher.
+     *
+     * @param zooming
+     */
+    public void setZooming(Zooming zooming) {
+        this.zooming = zooming;
     }
 
     /**
