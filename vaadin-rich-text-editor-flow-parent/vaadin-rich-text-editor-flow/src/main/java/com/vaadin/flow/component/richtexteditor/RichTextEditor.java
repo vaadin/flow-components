@@ -38,6 +38,7 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
@@ -354,7 +355,7 @@ public class RichTextEditor
     public void setColorOptions(List<String> colorOptions) {
         Objects.requireNonNull(colorOptions, "Color options must not be null");
         getElement().setPropertyJson("colorOptions",
-                JsonSerializer.toJson(colorOptions));
+                JacksonSerializer.toJson(colorOptions));
     }
 
     static String sanitize(String html) {

@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasEnabled;
@@ -35,6 +36,7 @@ import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.internal.UrlUtil;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -395,7 +397,8 @@ public class SideNavItem extends Component implements HasSideNavItems,
         if (pathAliases == null || pathAliases.isEmpty()) {
             getElement().removeProperty("pathAliases");
         } else {
-            JsonArray aliasesAsJson = JsonSerializer.toJson(pathAliases.stream()
+            ArrayNode aliasesAsJson = JacksonSerializer.toJson(pathAliases
+                    .stream()
                     .map(alias -> Objects.requireNonNull(alias,
                             "Alias to set cannot be null"))
                     .map(this::updateQueryParameters).map(this::sanitizePath)

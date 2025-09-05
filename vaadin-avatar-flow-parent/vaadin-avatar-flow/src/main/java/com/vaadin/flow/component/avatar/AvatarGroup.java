@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
@@ -51,10 +52,6 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
 
 /**
  * Avatar Group is used to group multiple Avatars together. It can be used, for
@@ -613,10 +610,10 @@ public class AvatarGroup extends Component
         }
     }
 
-    private JsonArray createItemsJsonArray(Collection<AvatarGroupItem> items) {
-        JsonArray jsonItems = Json.createArray();
+    private ArrayNode createItemsJsonArray(Collection<AvatarGroupItem> items) {
+        ArrayNode jsonItems = JacksonUtils.createArrayNode();
         for (AvatarGroupItem item : items) {
-            JsonObject jsonItem = Json.createObject();
+            ObjectNode jsonItem = JacksonUtils.createObjectNode();
             if (item.getName() != null) {
                 jsonItem.put("name", item.getName());
             }
@@ -637,7 +634,7 @@ public class AvatarGroup extends Component
                 jsonItem.put("className", item.getClassName());
             }
 
-            jsonItems.set(jsonItems.length(), jsonItem);
+            jsonItems.add(jsonItem);
         }
 
         return jsonItems;
