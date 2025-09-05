@@ -17,6 +17,8 @@ package com.vaadin.flow.component.login;
 
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.BaseJsonNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -28,11 +30,8 @@ import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.PropertyChangeListener;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonNull;
-import elemental.json.JsonValue;
 
 /**
  * Abstract component for the {@code <vaadin-login-overlay>} and
@@ -197,7 +196,9 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * @see LoginI18n#createDefault()
      */
     public void setI18n(LoginI18n i18n) {
-        getElement().setPropertyJson("i18n", JsonSerializer.toJson(i18n));
+        BaseJsonNode jsonNode = i18n != null ? JacksonUtils.beanToJson(i18n)
+                : JacksonUtils.nullNode();
+        getElement().setPropertyJson("i18n", jsonNode);
     }
 
     /**
@@ -211,11 +212,11 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * @return currently set {@link LoginI18n} or null if none was set.
      */
     LoginI18n getI18n() {
-        final JsonValue json = (JsonValue) getElement().getPropertyRaw("i18n");
-        if (json == null || json instanceof JsonNull) {
+        final JsonNode json = (JsonNode) getElement().getPropertyRaw("i18n");
+        if (json == null || json.isNull()) {
             return null;
         }
-        return JsonSerializer.toObject(LoginI18n.class, json);
+        return JacksonUtils.readToObject(json, LoginI18n.class);
     }
 
     /**
