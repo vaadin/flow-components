@@ -49,4 +49,5 @@ public class LockIT extends AbstractSpreadsheetIT {
         setCellValue("C3", "value");
         Assert.assertEquals("value", spreadsheet.getCellAt("C3").getValue());
     }
+
 }
