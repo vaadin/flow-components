@@ -12,8 +12,9 @@ package com.vaadin.flow.component.charts.model;
  * Options for the drill up button that appears when drilling down on a series.
  * The text for the button is defined in {@link Lang#setDrillUpText(String)}.
  *
- * @deprecated Since V25. Use {@link Breadcrumbs} instead.
+ * @deprecated Use {@link Breadcrumbs} instead.
  */
+@Deprecated(since = "25.0", forRemoval = true)
 public class DrillUpButton extends AbstractConfigurationObject {
 
     private ButtonPosition position;

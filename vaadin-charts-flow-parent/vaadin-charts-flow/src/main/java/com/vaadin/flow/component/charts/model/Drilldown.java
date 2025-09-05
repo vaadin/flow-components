@@ -142,8 +142,9 @@ public class Drilldown extends AbstractConfigurationObject {
     /**
      * @see Drilldown#setDrillUpButton(DrillUpButton)
      * @return the {@link DrillUpButton} configuration
-     * @deprecated Since V25. Use {@link #setBreadcrumbs(Breadcrumbs)} instead.
+     * @deprecated Use {@link #setBreadcrumbs(Breadcrumbs)} instead.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public DrillUpButton getDrillUpButton() {
         if (drillUpButton == null) {
             drillUpButton = new DrillUpButton();
@@ -159,6 +160,7 @@ public class Drilldown extends AbstractConfigurationObject {
      * @param drillUpButton
      * @deprecated Since Use {@link #setBreadcrumbs(Breadcrumbs)} instead.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setDrillUpButton(DrillUpButton drillUpButton) {
         this.drillUpButton = drillUpButton;
     }
