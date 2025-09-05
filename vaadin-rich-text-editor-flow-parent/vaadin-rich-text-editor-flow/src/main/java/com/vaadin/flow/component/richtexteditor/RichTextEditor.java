@@ -16,6 +16,7 @@ import java.util.Objects;
 import org.jsoup.nodes.Document;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -38,11 +39,9 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonArray;
 
 /**
  * Rich Text Editor is an input field for entering rich text. It allows you to
@@ -338,8 +337,8 @@ public class RichTextEditor
      * @return an unmodifiable list of colors options
      */
     public List<String> getColorOptions() {
-        List options = JsonSerializer.toObjects(String.class,
-                (JsonArray) getElement().getPropertyRaw("colorOptions"));
+        List<String> options = JacksonSerializer.toObjects(String.class,
+                (ArrayNode) getElement().getPropertyRaw("colorOptions"));
         return Collections.unmodifiableList(options);
     }
 
@@ -354,7 +353,7 @@ public class RichTextEditor
     public void setColorOptions(List<String> colorOptions) {
         Objects.requireNonNull(colorOptions, "Color options must not be null");
         getElement().setPropertyJson("colorOptions",
-                JsonSerializer.toJson(colorOptions));
+                JacksonSerializer.toJson(colorOptions));
     }
 
     static String sanitize(String html) {
