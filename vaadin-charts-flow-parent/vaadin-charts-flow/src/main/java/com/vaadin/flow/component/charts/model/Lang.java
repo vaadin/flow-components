@@ -152,7 +152,11 @@ public class Lang extends AbstractConfigurationObject {
 
     /**
      * @see #setDrillUpText(String)
+     *
+     * @deprecated Use {@link Breadcrumbs} instead. The new feature doesn't
+     *             require defining a text for the buttons.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public String getDrillUpText() {
         return drillUpText;
     }
@@ -163,7 +167,11 @@ public class Lang extends AbstractConfigurationObject {
      * <code>{series.name}</code>.
      * <p>
      * Defaults to: Back to {series.name}
+     *
+     * @deprecated Use {@link Breadcrumbs} instead. The new feature doesn't
+     *             require defining a text for the buttons.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setDrillUpText(String drillUpText) {
         this.drillUpText = drillUpText;
     }
