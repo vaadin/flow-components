@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
@@ -27,8 +28,6 @@ import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
-
-import elemental.json.JsonArray;
 
 /**
  * Tests for the {@link RichTextEditor}.
@@ -246,9 +245,9 @@ public class RichTextEditorTest {
         RichTextEditor rte = new RichTextEditor();
         rte.setColorOptions(
                 List.of("#000000", "#0066cc", "#008a00", "#e60000"));
-        JsonArray jsonArray = (JsonArray) rte.getElement()
+        var jsonArray = (ArrayNode) rte.getElement()
                 .getPropertyRaw("colorOptions");
-        Assert.assertEquals(4, jsonArray.length());
+        Assert.assertEquals(4, jsonArray.size());
     }
 
     @Test
