@@ -896,7 +896,7 @@ public class ChartModel extends AbstractConfigurationObject {
     /**
      * Options for zooming configuration. This enables zooming in on plots and
      * provides options for controlling zoom behavior including mouse wheel
-     * support. Mouse wheel zooming requires Highcharts 11.1 or higher.
+     * support.
      *
      * @param zooming
      */
