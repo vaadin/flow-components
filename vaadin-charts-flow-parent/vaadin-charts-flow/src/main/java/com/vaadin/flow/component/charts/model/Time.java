@@ -15,6 +15,7 @@ package com.vaadin.flow.component.charts.model;
  */
 public class Time extends AbstractConfigurationObject {
 
+    private String timezone;
     private Number timezoneOffset;
     private Boolean useUTC;
 
@@ -22,8 +23,39 @@ public class Time extends AbstractConfigurationObject {
     }
 
     /**
-     * @see #setTimezoneOffset(Number)
+     * @see #setTimezone(String)
      */
+    public String getTimezone() {
+        return timezone;
+    }
+
+    /**
+     * A named time zone. Supported time zone names rely on the browser
+     * implementations, as described in the <a href=
+     * "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#timezone">mdn
+     * docs</a>. If the given time zone is not recognized by the browser,
+     * Highcharts provides a warning and falls back to returning a 0 offset,
+     * corresponding to the UTC time zone.
+     * <p>
+     * The time zone affects axis scaling, tickmark placement and time display
+     * in <code>Highcharts.dateFormat</code>.
+     * <p>
+     * Setting timezone to {@code null} falls back to the default browser
+     * timezone setting. Setting it to {@code "UTC"} is equivalent to setting
+     * {@link #setUseUTC(Boolean) useUTC} to true.
+     *
+     * @param timezone
+     */
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
+    }
+
+    /**
+     * @see #setTimezoneOffset(Number)
+     * @deprecated This property is deprecated and should not be used in new
+     *             code. Use {@link #setTimezone(String)} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     public Number getTimezoneOffset() {
         return timezoneOffset;
     }
@@ -36,7 +68,11 @@ public class Time extends AbstractConfigurationObject {
      * predefined time zone.
      * <p>
      * Defaults to: 0
+     *
+     * @deprecated This property is deprecated and should not be used in new
+     *             code. Use {@link #setTimezone(String)} instead.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setTimezoneOffset(Number timezoneOffset) {
         this.timezoneOffset = timezoneOffset;
     }
@@ -44,7 +80,7 @@ public class Time extends AbstractConfigurationObject {
     /**
      * @see #setUseUTC(Boolean)
      * @deprecated This property is deprecated and should not be used in new
-     *             code.
+     *             code. Use {@link #setTimezone(String)} instead.
      */
     @Deprecated(since = "25.0", forRemoval = true)
     public Boolean getUseUTC() {
@@ -61,7 +97,7 @@ public class Time extends AbstractConfigurationObject {
      * Defaults to: true
      * 
      * @deprecated This property is deprecated and should not be used in new
-     *             code.
+     *             code. Use {@link #setTimezone(String)} instead.
      */
     @Deprecated(since = "25.0", forRemoval = true)
     public void setUseUTC(Boolean useUTC) {
