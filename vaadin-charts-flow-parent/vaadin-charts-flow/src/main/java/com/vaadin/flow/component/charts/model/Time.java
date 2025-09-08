@@ -43,10 +43,10 @@ public class Time extends AbstractConfigurationObject {
 
     /**
      * @see #setUseUTC(Boolean)
-     * @deprecated Since V25. This property is deprecated and should not be used
-     *             in new code.
+     * @deprecated This property is deprecated and should not be used in new
+     *             code.
      */
-    @Deprecated(from = "25")
+    @Deprecated(since = "25.0", forRemoval = true)
     public Boolean getUseUTC() {
         return useUTC;
     }
@@ -60,10 +60,10 @@ public class Time extends AbstractConfigurationObject {
      * <p>
      * Defaults to: true
      * 
-     * @deprecated Since V25. This property is deprecated and should not be used
-     *             in new code.
+     * @deprecated This property is deprecated and should not be used in new
+     *             code.
      */
-    @Deprecated(from = "25")
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setUseUTC(Boolean useUTC) {
         this.useUTC = useUTC;
     }
