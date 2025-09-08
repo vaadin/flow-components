@@ -3760,7 +3760,7 @@ public class Spreadsheet extends Component
      *             determine the locked state of cells that have not been
      *             created yet. Use {@link #isCellLocked(CellAddress)} instead.
      */
-    @Deprecated(since = "24.9.0", forRemoval = true)
+    @Deprecated(since = "23.6", forRemoval = true)
     public boolean isCellLocked(Cell cell) {
         if (isActiveSheetProtected()) {
             if (cell != null) {
