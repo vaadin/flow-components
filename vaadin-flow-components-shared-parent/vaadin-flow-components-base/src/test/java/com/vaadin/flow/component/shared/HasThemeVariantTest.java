@@ -29,9 +29,9 @@ public class HasThemeVariantTest {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
 
-        Set<String> themeNames = component.getThemeNames();
-        Assert.assertTrue(themeNames
-                .contains(TestComponentVariant.TEST_VARIANT.getVariantName()));
+        Assert.assertEquals(
+                Set.of(TestComponentVariant.TEST_VARIANT.getVariantName()),
+                component.getThemeNames());
     }
 
     @Test
@@ -40,30 +40,26 @@ public class HasThemeVariantTest {
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
         component.removeThemeVariants(TestComponentVariant.TEST_VARIANT);
 
-        Set<String> themeNames = component.getThemeNames();
-        Assert.assertFalse(themeNames
-                .contains(TestComponentVariant.TEST_VARIANT.getVariantName()));
+        Assert.assertTrue(component.getThemeNames().isEmpty());
     }
 
     @Test
-    public void setThemeVariant_setTrueContainsThemeVariant() {
+    public void setThemeVariant_setTrue_addsThemeVariant() {
         TestComponent component = new TestComponent();
         component.setThemeVariant(TestComponentVariant.TEST_VARIANT, true);
 
-        Set<String> themeNames = component.getThemeNames();
-        Assert.assertTrue(themeNames
-                .contains(TestComponentVariant.TEST_VARIANT.getVariantName()));
+        Assert.assertEquals(
+                Set.of(TestComponentVariant.TEST_VARIANT.getVariantName()),
+                component.getThemeNames());
     }
 
     @Test
-    public void setThemeVariant_setFalseDoesNotContainsThemeVariant() {
+    public void setThemeVariant_setFalse_removesThemeVariant() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
         component.setThemeVariant(TestComponentVariant.TEST_VARIANT, false);
 
-        Set<String> themeNames = component.getThemeNames();
-        Assert.assertFalse(themeNames
-                .contains(TestComponentVariant.TEST_VARIANT.getVariantName()));
+        Assert.assertTrue(component.getThemeNames().isEmpty());
     }
 
     @Test
@@ -73,31 +69,37 @@ public class HasThemeVariantTest {
         component.setThemeVariants(TestComponentVariant.TEST_VARIANT_2,
                 TestComponentVariant.TEST_VARIANT_3);
 
-        Set<String> themeNames = component.getThemeNames();
-        Assert.assertFalse(themeNames
-                .contains(TestComponentVariant.TEST_VARIANT.getVariantName()));
-        Assert.assertTrue(themeNames.contains(
-                TestComponentVariant.TEST_VARIANT_2.getVariantName()));
-        Assert.assertTrue(themeNames.contains(
-                TestComponentVariant.TEST_VARIANT_3.getVariantName()));
+        Assert.assertEquals(
+                Set.of(TestComponentVariant.TEST_VARIANT_2.getVariantName(),
+                        TestComponentVariant.TEST_VARIANT_3.getVariantName()),
+                component.getThemeNames());
     }
 
     @Test
-    public void setThemeVariants_setTrueContainsThemeVariantDoesntOverrideExisting() {
+    public void setThemeVariants_withoutArgs_clearsThemeVariants() {
+        TestComponent component = new TestComponent();
+        component.addThemeVariants(TestComponentVariant.TEST_VARIANT);
+        component.setThemeVariants();
+
+        Assert.assertTrue(component.getThemeNames().isEmpty());
+    }
+
+    @Test
+    public void setThemeVariants_setTrue_addsThemeVariants() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT_3);
         component.setThemeVariants(true, TestComponentVariant.TEST_VARIANT,
                 TestComponentVariant.TEST_VARIANT_2);
 
-        Set<String> themeNames = component.getThemeNames();
-        Assert.assertTrue(themeNames
-                .contains(TestComponentVariant.TEST_VARIANT.getVariantName()));
-        Assert.assertTrue(themeNames.contains(
-                TestComponentVariant.TEST_VARIANT_2.getVariantName()));
+        Assert.assertEquals(
+                Set.of(TestComponentVariant.TEST_VARIANT.getVariantName(),
+                        TestComponentVariant.TEST_VARIANT_2.getVariantName(),
+                        TestComponentVariant.TEST_VARIANT_3.getVariantName()),
+                component.getThemeNames());
     }
 
     @Test
-    public void setThemeVariants_setFalseContainsThemeVariantDoesntOverrideExisting() {
+    public void setThemeVariants_setFalse_removesThemeVariants() {
         TestComponent component = new TestComponent();
         component.addThemeVariants(TestComponentVariant.TEST_VARIANT,
                 TestComponentVariant.TEST_VARIANT_2,
@@ -105,13 +107,9 @@ public class HasThemeVariantTest {
         component.setThemeVariants(false, TestComponentVariant.TEST_VARIANT,
                 TestComponentVariant.TEST_VARIANT_2);
 
-        Set<String> themeNames = component.getThemeNames();
-        Assert.assertFalse(themeNames
-                .contains(TestComponentVariant.TEST_VARIANT.getVariantName()));
-        Assert.assertFalse(themeNames.contains(
-                TestComponentVariant.TEST_VARIANT_2.getVariantName()));
-        Assert.assertTrue(themeNames.contains(
-                TestComponentVariant.TEST_VARIANT_3.getVariantName()));
+        Assert.assertEquals(
+                Set.of(TestComponentVariant.TEST_VARIANT_3.getVariantName()),
+                component.getThemeNames());
     }
 
     private enum TestComponentVariant implements ThemeVariant {
