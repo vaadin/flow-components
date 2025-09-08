@@ -22,8 +22,8 @@ public class LockCellFixture implements SpreadsheetFixture {
 
     @Override
     public void loadFixture(Spreadsheet spreadsheet) {
-
-        spreadsheet.setActiveSheetProtected("pwd");
+        // Sheet already needs to be locked for this fixture to work
+        // See LockSheetFixture
         Cell cell = spreadsheet.createCell(0, 0, "");
         Workbook wb = cell.getSheet().getWorkbook();
 
@@ -35,7 +35,7 @@ public class LockCellFixture implements SpreadsheetFixture {
                         cellRef.getCol(), "");
             }
 
-            boolean wasLocked = spreadsheet.isCellLocked(cell);
+            boolean wasLocked = spreadsheet.isCellLocked(cell.getAddress());
 
             CellStyle cellStyle = wb.createCellStyle();
             // Toggle cell locked state
