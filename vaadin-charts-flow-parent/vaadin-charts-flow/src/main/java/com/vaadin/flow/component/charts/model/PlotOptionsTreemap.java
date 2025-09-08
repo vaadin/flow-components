@@ -23,6 +23,8 @@ import com.vaadin.flow.component.charts.model.style.Color;
 public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     private Boolean allowDrillToNode;
+    private Breadcrumbs breadcrumbs;
+    private Boolean allowTraversingTree;
     private Boolean allowPointSelect;
     private Boolean alternateStartingDirection;
     private Boolean animation;
@@ -78,7 +80,9 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     /**
      * @see #setAllowDrillToNode(Boolean)
+     * @deprecated Use {@link #setAllowTraversingTree(Boolean)} instead.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public Boolean getAllowDrillToNode() {
         return allowDrillToNode;
     }
@@ -88,7 +92,10 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      * on its children.
      * <p>
      * Defaults to: false
+     *
+     * @deprecated Use {@link #setAllowTraversingTree(Boolean)} instead.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setAllowDrillToNode(Boolean allowDrillToNode) {
         this.allowDrillToNode = allowDrillToNode;
     }
@@ -108,6 +115,24 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      */
     public void setAllowPointSelect(Boolean allowPointSelect) {
         this.allowPointSelect = allowPointSelect;
+    }
+
+    /**
+     * {@see #setAllowTraversingTree(Boolean)}
+     */
+    public Boolean getAllowTraversingTree() {
+
+        return allowTraversingTree;
+    }
+
+    /**
+     * When enabled the user can click on a point which is a parent and zoom in
+     * on its children.
+     * <p>
+     * Defaults to: false
+     */
+    public void setAllowTraversingTree(Boolean allowTraversingTree) {
+        this.allowTraversingTree = allowTraversingTree;
     }
 
     /**
@@ -203,6 +228,23 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
+    }
+
+    /**
+     * {@see #setBreadcrumbs(Breadcrumbs)}
+     */
+    public Breadcrumbs getBreadcrumbs() {
+        return breadcrumbs;
+    }
+
+    /**
+     * Options for the breadcrumbs, the navigation at the top leading the way up
+     * through the traversed levels.
+     * 
+     * @param breadcrumbs
+     */
+    public void setBreadcrumbs(Breadcrumbs breadcrumbs) {
+        this.breadcrumbs = breadcrumbs;
     }
 
     /**
