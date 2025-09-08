@@ -18,6 +18,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.fasterxml.jackson.databind.node.BaseJsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.map.Assets;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
@@ -27,10 +29,6 @@ import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.ElementRequestHandler;
-
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-import elemental.json.JsonValue;
 
 public class MapSerializerTest {
 
@@ -79,17 +77,19 @@ public class MapSerializerTest {
         options.setOpaque(false);
         options.setCrossOrigin("custom-cors");
         options.setAttributions(List.of("Custom map service"));
-        JsonValue jsonValue = mapSerializer.toJson(new OSMSource(options));
+        BaseJsonNode jsonValue = mapSerializer.toJson(new OSMSource(options));
 
         Assert.assertTrue("Result should be JSON object",
-                jsonValue instanceof JsonObject);
+                jsonValue instanceof ObjectNode);
 
-        JsonObject jsonSource = (JsonObject) jsonValue;
+        ObjectNode jsonSource = (ObjectNode) jsonValue;
 
-        Assert.assertEquals("https://example.com", jsonSource.getString("url"));
-        Assert.assertFalse(jsonSource.getBoolean("opaque"));
-        Assert.assertEquals("custom-cors", jsonSource.getString("crossOrigin"));
-        Assert.assertTrue(jsonSource.get("attributions") instanceof JsonArray);
+        Assert.assertEquals("https://example.com",
+                jsonSource.get("url").asText());
+        Assert.assertFalse(jsonSource.get("opaque").asBoolean());
+        Assert.assertEquals("custom-cors",
+                jsonSource.get("crossOrigin").asText());
+        Assert.assertTrue(jsonSource.get("attributions").isArray());
     }
 
     @Test

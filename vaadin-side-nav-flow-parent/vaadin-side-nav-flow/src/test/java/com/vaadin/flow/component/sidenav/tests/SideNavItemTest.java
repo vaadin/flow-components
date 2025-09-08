@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.html.Div;
@@ -45,9 +46,6 @@ import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.Router;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
-
-import elemental.json.JsonArray;
-import elemental.json.impl.JsonUtil;
 
 public class SideNavItemTest {
 
@@ -795,13 +793,12 @@ public class SideNavItemTest {
             Assert.assertFalse(
                     sideNavItem.getElement().hasProperty("pathAliases"));
         } else {
-            String aliasesProperty = sideNavItem.getElement()
-                    .getProperty("pathAliases");
-            Assert.assertNotNull(aliasesProperty);
-            JsonArray actualAliasesArray = JsonUtil.parse(aliasesProperty);
+            ArrayNode actualAliasesArray = (ArrayNode) sideNavItem.getElement()
+                    .getPropertyRaw("pathAliases");
+            Assert.assertNotNull(actualAliasesArray);
             Set<String> actualAliasesSet = new HashSet<>();
-            for (int i = 0; i < actualAliasesArray.length(); i++) {
-                actualAliasesSet.add(actualAliasesArray.getString(i));
+            for (int i = 0; i < actualAliasesArray.size(); i++) {
+                actualAliasesSet.add(actualAliasesArray.get(i).asText());
             }
             Assert.assertEquals(expectedAliases, actualAliasesSet);
         }

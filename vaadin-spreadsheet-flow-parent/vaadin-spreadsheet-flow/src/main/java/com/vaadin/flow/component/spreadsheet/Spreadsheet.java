@@ -247,6 +247,8 @@ public class Spreadsheet extends Component
 
     private Locale locale;
 
+    private Registration spreadsheetHandlerRegistration;
+
     int getCols() {
         return cols;
     }
@@ -1180,7 +1182,7 @@ public class Spreadsheet extends Component
         valueManager = createCellValueManager();
         sheetOverlays = new HashSet<SheetOverlayWrapper>();
         tables = new HashSet<SpreadsheetTable>();
-        registerRpc(new SpreadsheetHandlerImpl(this));
+        setSpreadsheetHandler(createDefaultHandler());
         defaultActionHandler = new SpreadsheetDefaultActionHandler();
         hyperlinkCellClickHandler = new DefaultHyperlinkCellClickHandler(this);
         addActionHandler(defaultActionHandler);
@@ -1194,9 +1196,28 @@ public class Spreadsheet extends Component
         });
     }
 
-    private void registerRpc(SpreadsheetHandlerImpl spreadsheetHandler) {
-        addListener(SpreadsheetEvent.class,
+    /**
+     * Register a Spreadsheet handler to listen to Spreadsheet Events. Removes
+     * the default / previously set spreadsheet handler.
+     *
+     * @param spreadsheetHandler
+     */
+    public void setSpreadsheetHandler(
+            SpreadsheetHandlerImpl spreadsheetHandler) {
+        if (this.spreadsheetHandlerRegistration != null) {
+            spreadsheetHandlerRegistration.remove();
+        }
+        spreadsheetHandlerRegistration = addListener(SpreadsheetEvent.class,
                 new SpreadsheetEventListener(spreadsheetHandler));
+    }
+
+    /**
+     * Create the default Spreadsheet handler.
+     * 
+     * @return SpreadsheetHandlerImpl
+     */
+    protected SpreadsheetHandlerImpl createDefaultHandler() {
+        return new SpreadsheetHandlerImpl(this);
     }
 
     /**
