@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
@@ -41,10 +43,7 @@ import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableRunnable;
-import com.vaadin.flow.internal.JsonSerializer;
-
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
+import com.vaadin.flow.internal.JacksonUtils;
 
 /**
  * Menu Bar is a horizontal button bar with hierarchical drop-down menus. Menu
@@ -56,8 +55,8 @@ import elemental.json.JsonType;
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "25.0.0-alpha17")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha17")
+@NpmPackage(value = "@vaadin/menu-bar", version = "25.0.0-alpha18")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha18")
 public class MenuBar extends Component implements HasEnabled, HasMenuItems,
         HasSize, HasStyle, HasThemeVariant<MenuBarVariant> {
 
@@ -436,11 +435,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
     }
 
     private void setI18nWithJS() {
-        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
-
-        // Remove properties with null values to prevent errors in web
-        // component
-        removeNullValuesFromJsonObject(i18nJson);
+        ObjectNode i18nJson = JacksonUtils.beanToJson(i18n);
 
         // Assign new I18N object to WC, by merging the existing
         // WC I18N, and the values from the new MenuBarI18n instance,
@@ -456,14 +451,6 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
         // Element state is not persisted across attach/detach
         if (this.i18n != null) {
             setI18nWithJS();
-        }
-    }
-
-    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
-            }
         }
     }
 
@@ -501,6 +488,7 @@ public class MenuBar extends Component implements HasEnabled, HasMenuItems,
     /**
      * The internationalization properties for {@link MenuBar}
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class MenuBarI18n implements Serializable {
         private String moreOptions;
 

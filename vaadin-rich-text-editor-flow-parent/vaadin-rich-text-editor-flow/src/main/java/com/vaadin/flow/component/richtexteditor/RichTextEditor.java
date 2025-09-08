@@ -15,6 +15,9 @@ import java.util.Objects;
 
 import org.jsoup.nodes.Document;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEvent;
@@ -36,12 +39,9 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
 
 /**
  * Rich Text Editor is an input field for entering rich text. It allows you to
@@ -61,7 +61,7 @@ import elemental.json.JsonType;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.0.0-alpha17")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.0.0-alpha18")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
@@ -106,25 +106,13 @@ public class RichTextEditor
     }
 
     private void setI18nWithJS() {
-        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
-
-        // Remove properties with null values to prevent errors in web
-        // component
-        removeNullValuesFromJsonObject(i18nJson);
+        ObjectNode i18nJson = JacksonUtils.beanToJson(i18n);
 
         // Assign new I18N object to WC, by merging the existing
         // WC I18N, and the values from the new RichTextEditorI18n instance,
         // into an empty object
         getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
                 i18nJson);
-    }
-
-    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
-            }
-        }
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
@@ -349,8 +337,8 @@ public class RichTextEditor
      * @return an unmodifiable list of colors options
      */
     public List<String> getColorOptions() {
-        List options = JsonSerializer.toObjects(String.class,
-                (JsonArray) getElement().getPropertyRaw("colorOptions"));
+        List<String> options = JacksonSerializer.toObjects(String.class,
+                (ArrayNode) getElement().getPropertyRaw("colorOptions"));
         return Collections.unmodifiableList(options);
     }
 
@@ -365,7 +353,7 @@ public class RichTextEditor
     public void setColorOptions(List<String> colorOptions) {
         Objects.requireNonNull(colorOptions, "Color options must not be null");
         getElement().setPropertyJson("colorOptions",
-                JsonSerializer.toJson(colorOptions));
+                JacksonSerializer.toJson(colorOptions));
     }
 
     static String sanitize(String html) {
@@ -385,6 +373,7 @@ public class RichTextEditor
     /**
      * The internationalization properties for {@link RichTextEditor}.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class RichTextEditorI18n implements Serializable {
         private String undo;
         private String redo;

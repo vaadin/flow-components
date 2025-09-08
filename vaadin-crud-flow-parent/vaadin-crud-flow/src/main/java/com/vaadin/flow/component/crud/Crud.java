@@ -34,7 +34,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -47,7 +47,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/crud", version = "25.0.0-alpha17")
+@NpmPackage(value = "@vaadin/crud", version = "25.0.0-alpha18")
 @JsModule("@vaadin/crud/src/vaadin-crud.js")
 @JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
@@ -525,7 +525,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
     }
 
     private void setI18n(CrudI18n i18n, boolean fireEvent) {
-        getElement().setPropertyJson("i18n", JsonSerializer.toJson(i18n));
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
         if (fireEvent) {
             ComponentUtil.fireEvent(this.grid,
                     new CrudI18nUpdatedEvent(this, false, i18n));

@@ -87,7 +87,7 @@ import com.vaadin.flow.internal.JacksonUtils;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-combo-box")
-@NpmPackage(value = "@vaadin/combo-box", version = "25.0.0-alpha17")
+@NpmPackage(value = "@vaadin/combo-box", version = "25.0.0-alpha18")
 @JsModule("@vaadin/combo-box/src/vaadin-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")

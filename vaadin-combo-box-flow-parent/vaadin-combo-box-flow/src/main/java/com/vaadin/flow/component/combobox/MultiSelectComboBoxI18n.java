@@ -15,9 +15,13 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * Class for localization of the {@link MultiSelectComboBox}
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MultiSelectComboBoxI18n implements ComboBoxBaseI18n {
     private String cleared;
     private String focused;
@@ -33,6 +37,7 @@ public class MultiSelectComboBoxI18n implements ComboBoxBaseI18n {
      * @see MultiSelectComboBox#isRequiredIndicatorVisible()
      * @see MultiSelectComboBox#setRequiredIndicatorVisible(boolean)
      */
+    @JsonIgnore // Not used in client side
     public String getRequiredErrorMessage() {
         return requiredErrorMessage;
     }

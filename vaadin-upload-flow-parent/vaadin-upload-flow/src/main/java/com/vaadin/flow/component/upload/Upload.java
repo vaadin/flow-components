@@ -26,6 +26,7 @@ import java.util.stream.IntStream;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -41,7 +42,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.streams.UploadCompleteEvent;
 import com.vaadin.flow.internal.streams.UploadStartEvent;
 import com.vaadin.flow.server.NoInputStreamException;
@@ -53,11 +54,6 @@ import com.vaadin.flow.server.streams.UploadEvent;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.Json;
-import elemental.json.JsonNull;
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
-
 /**
  * Upload is a component for uploading one or more files. It shows the upload
  * progression and status of each file. Files can be uploaded using the Upload
@@ -66,7 +62,7 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/upload", version = "25.0.0-alpha17")
+@NpmPackage(value = "@vaadin/upload", version = "25.0.0-alpha18")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
 public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
@@ -769,11 +765,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     }
 
     private void setI18nWithJS() {
-        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
-
-        // Remove null values so that we don't overwrite existing WC
-        // translations with empty ones
-        deeplyRemoveNullValuesFromJsonObject(i18nJson);
+        ObjectNode i18nJson = JacksonUtils.beanToJson(this.i18n);
 
         // Assign new I18N object to WC, by deeply merging the existing
         // WC I18N, and the values from the new UploadI18N instance,
@@ -805,16 +797,6 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         }
     }
 
-    private void deeplyRemoveNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.OBJECT) {
-                deeplyRemoveNullValuesFromJsonObject(jsonObject.get(key));
-            } else if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
-            }
-        }
-    }
-
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
@@ -832,38 +814,11 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         return i18n;
     }
 
-    private String getStringObject(String propertyName, String subName) {
-        String result = null;
-        JsonObject json = (JsonObject) getElement()
-                .getPropertyRaw(propertyName);
-        if (json != null && json.hasKey(subName)
-                && !(json.get(subName) instanceof JsonNull)) {
-            result = json.getString(subName);
-        }
-        return result;
-    }
-
-    private String getStringObject(String propertyName, String object,
-            String subName) {
-        String result = null;
-        JsonObject json = (JsonObject) getElement()
-                .getPropertyRaw(propertyName);
-        if (json != null && json.hasKey(object)
-                && !(json.get(object) instanceof JsonNull)) {
-            json = json.getObject(object);
-            if (json != null && json.hasKey(subName)
-                    && !(json.get(subName) instanceof JsonNull)) {
-                result = json.getString(subName);
-            }
-        }
-        return result;
-    }
-
     /**
      * Clear the list of files being processed, or already uploaded.
      */
     public void clearFileList() {
-        getElement().setPropertyJson("files", Json.createArray());
+        getElement().setPropertyJson("files", JacksonUtils.createArrayNode());
     }
 
     private static class DefaultStreamVariable implements StreamVariable {

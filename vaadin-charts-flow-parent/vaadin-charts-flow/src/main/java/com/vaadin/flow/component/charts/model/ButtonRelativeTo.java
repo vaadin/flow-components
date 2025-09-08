@@ -11,12 +11,11 @@ package com.vaadin.flow.component.charts.model;
 /**
  * What box to align the button to.
  */
-@Deprecated(since = "25.0", forRemoval = true)
-public enum DrillUpButtonRelativeTo implements ChartEnum {
+public enum ButtonRelativeTo implements ChartEnum {
 
     PLOTBOX("plotBox"), SPACINGBOX("spacingBox");
 
-    DrillUpButtonRelativeTo(String box) {
+    ButtonRelativeTo(String box) {
         this.box = box;
     }
 
