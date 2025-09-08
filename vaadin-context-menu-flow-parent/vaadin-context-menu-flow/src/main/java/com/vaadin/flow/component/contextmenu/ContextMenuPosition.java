@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.contextmenu;
 
 /**
- * Popover position in relation to the target element.
+ * Context menu position in relation to the target element.
  */
 public enum ContextMenuPosition {
     TOP_START("top-start"),

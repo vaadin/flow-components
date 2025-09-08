@@ -252,7 +252,7 @@ public class ContextMenuTest {
         var targetDiv = new Div();
         var contextMenu = new ContextMenu(targetDiv);
         contextMenu.setPosition(ContextMenuPosition.END);
-        Assert.assertEquals("end",
+        Assert.assertEquals(ContextMenuPosition.END.getPosition(),
                 contextMenu.getElement().getProperty("position"));
         Assert.assertEquals(ContextMenuPosition.END, contextMenu.getPosition());
     }
@@ -262,6 +262,6 @@ public class ContextMenuTest {
         var targetDiv = new Div();
         var contextMenu = new ContextMenu(targetDiv);
 
-        Assert.assertEquals(null, contextMenu.getPosition());
+        Assert.assertNull(contextMenu.getPosition());
     }
 }
