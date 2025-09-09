@@ -95,6 +95,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
             String appId = event.getUI().getInternals().getAppId();
             initConnector(appId);
             resetContent();
+            updateListenOn();
         });
 
         overlayAutoAddController = new OverlayAutoAddController<>(this,
@@ -122,9 +123,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         }
 
         this.target = target;
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, context -> ui.getPage()
-                        .executeJs("$0.listenOn=$1", this, target)));
+        updateListenOn();
 
         if (target == null) {
             return;
@@ -143,6 +142,12 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
                 .addEventListener("vaadin-context-menu-before-open",
                         this::beforeOpenHandler)
                 .addEventData(EVENT_DETAIL);
+    }
+
+    private void updateListenOn() {
+        var target = getTarget();
+        getElement().executeJs("this.listenOn=$0;",
+                target == null ? this : target);
     }
 
     /**
@@ -428,6 +433,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     private void onTargetAttach(UI ui) {
         ui.getInternals().addComponentDependencies(ContextMenu.class);
         requestTargetJsExecutions();
+        updateListenOn();
     }
 
     /*
