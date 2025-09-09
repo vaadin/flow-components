@@ -8,8 +8,6 @@
  */
 package com.vaadin.flow.component.charts.model.style;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 
@@ -19,8 +17,7 @@ public class ButtonTheme extends AbstractConfigurationObject {
     @JsonProperty("stroke-width")
     private Number strokeWidth;
     private Style style;
-    @JsonInclude(Include.NON_DEFAULT)
-    private Number width = 32;
+    private Number width;
 
     public Color getFill() {
         return fill;
