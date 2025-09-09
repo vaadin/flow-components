@@ -41,11 +41,7 @@ import com.vaadin.flow.data.selection.MultiSelect;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
 
 /**
  * MultiSelectComboBox allows the user to select one or more values from a
@@ -101,7 +97,7 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.0.0-alpha16")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.0.0-alpha18")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
@@ -615,29 +611,13 @@ public class MultiSelectComboBox<TItem>
      * settings of the web component.
      */
     private void updateI18n() {
-        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(getI18n());
-
-        // Remove null values so that we don't overwrite existing WC
-        // translations with empty ones
-        removeNullValuesFromJsonObject(i18nJson);
-
-        // Remove the error message properties because they aren't used on
-        // the client-side.
-        i18nJson.remove("requiredErrorMessage");
+        ObjectNode i18nJson = JacksonUtils.beanToJson(getI18n());
 
         // Assign new I18N object to WC, by merging the existing
         // WC I18N, and the values from the new I18n instance,
         // into an empty object
         getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
                 i18nJson);
-    }
-
-    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
-            }
-        }
     }
 
     /**

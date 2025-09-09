@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import java.util.Arrays;
+
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -79,6 +81,34 @@ public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
     public MenuItem addItem(Component component,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
         return getMenuManager().addItem(component, clickListener);
+    }
+
+    /**
+     * Gets position of the context menu with respect to its {@code target}.
+     *
+     * @return the position
+     */
+    public ContextMenuPosition getPosition() {
+        String positionString = getElement().getProperty("position");
+        return Arrays.stream(ContextMenuPosition.values())
+                .filter(p -> p.getPosition().equals(positionString)).findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Sets position of the context menu with respect to its target. When null
+     * is passed, resets to default behaviour of opening context menu at the
+     * location of the click.
+     * <p>
+     * By default, no position is set and the context menu opens at the location
+     * of the click.
+     *
+     * @param position
+     *            the position to set
+     * @see #setTarget(Component)
+     */
+    public void setPosition(ContextMenuPosition position) {
+        getElement().setProperty("position", position.getPosition());
     }
 
     @Override

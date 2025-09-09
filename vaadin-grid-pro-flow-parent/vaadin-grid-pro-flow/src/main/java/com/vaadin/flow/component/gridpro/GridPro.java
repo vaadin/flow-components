@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -39,14 +40,12 @@ import com.vaadin.flow.data.renderer.Rendering;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.JacksonUtils;
-import com.vaadin.flow.internal.JsonSerializer;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonArray;
-
 @Tag("vaadin-grid-pro")
-@NpmPackage(value = "@vaadin/grid-pro", version = "25.0.0-alpha16")
+@NpmPackage(value = "@vaadin/grid-pro", version = "25.0.0-alpha18")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro.js")
 @JsModule("@vaadin/grid-pro/src/vaadin-grid-pro-edit-column.js")
 @JsModule("./gridProConnector.js")
@@ -287,7 +286,7 @@ public class GridPro<E> extends Grid<E> {
          */
         protected EditColumn<T> setOptions(List<String> options) {
             getElement().setPropertyJson("editorOptions",
-                    JsonSerializer.toJson(options));
+                    JacksonSerializer.toJson(options));
             return this;
         }
 
@@ -298,8 +297,8 @@ public class GridPro<E> extends Grid<E> {
          */
         @Synchronize("editor-options-changed")
         protected List<String> getOptions() {
-            return JsonSerializer.toObjects(String.class,
-                    (JsonArray) getElement().getPropertyRaw("editorOptions"));
+            return JacksonSerializer.toObjects(String.class,
+                    (ArrayNode) getElement().getPropertyRaw("editorOptions"));
         }
 
         public ValueProvider<T, ?> getValueProvider() {

@@ -18,6 +18,8 @@ package com.vaadin.flow.component.avatar;
 import java.io.Serializable;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -25,13 +27,11 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.AbstractStreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
-
-import elemental.json.JsonObject;
 
 /**
  * Avatar is a graphical representation of an object or entity, for example a
@@ -57,13 +57,14 @@ import elemental.json.JsonObject;
  */
 @Tag("vaadin-avatar")
 @JsModule("@vaadin/avatar/src/vaadin-avatar.js")
-@NpmPackage(value = "@vaadin/avatar", version = "25.0.0-alpha16")
+@NpmPackage(value = "@vaadin/avatar", version = "25.0.0-alpha18")
 public class Avatar extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarVariant> {
 
     /**
      * The internationalization properties for {@link AvatarGroup}.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class AvatarI18n implements Serializable {
         private String anonymous;
 
@@ -152,7 +153,7 @@ public class Avatar extends Component
     public void setI18n(AvatarI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
-        JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
+        ObjectNode i18nObject = JacksonUtils.beanToJson(i18n);
         getElement().setPropertyJson("i18n", i18nObject);
     }
 
