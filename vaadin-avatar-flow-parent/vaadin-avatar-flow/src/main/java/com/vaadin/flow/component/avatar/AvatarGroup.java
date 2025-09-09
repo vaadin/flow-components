@@ -31,6 +31,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonIncludeProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
@@ -52,10 +55,6 @@ import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-
 /**
  * Avatar Group is used to group multiple Avatars together. It can be used, for
  * example, to show that there are multiple users viewing the same page or for
@@ -70,7 +69,7 @@ import elemental.json.JsonObject;
  */
 @Tag("vaadin-avatar-group")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "25.0.0-alpha17")
+@NpmPackage(value = "@vaadin/avatar-group", version = "25.0.0-alpha18")
 public class AvatarGroup extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
@@ -79,6 +78,9 @@ public class AvatarGroup extends Component
      *
      * @author Vaadin Ltd
      */
+    // Explicitly whitelist properties to send to the client
+    @JsonIncludeProperties({ "name", "abbr", "img", "colorIndex", "className" })
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class AvatarGroupItem implements Serializable {
         private String name;
         private String abbr;
@@ -160,6 +162,7 @@ public class AvatarGroup extends Component
          *
          * @return the abbreviation
          */
+        @JsonProperty("abbr")
         public String getAbbreviation() {
             return abbr;
         }
@@ -185,6 +188,7 @@ public class AvatarGroup extends Component
          *
          * @return the image url
          */
+        @JsonProperty("img")
         public String getImage() {
             return img;
         }
@@ -606,41 +610,13 @@ public class AvatarGroup extends Component
             pendingUpdate = true;
             getElement().getNode().runWhenAttached(
                     ui -> ui.beforeClientResponse(this, ctx -> {
-                        getElement().setPropertyJson("items",
-                                createItemsJsonArray(items));
+                        ArrayNode jsonItems = items.stream()
+                                .map(JacksonUtils::beanToJson)
+                                .collect(JacksonUtils.asArray());
+                        getElement().setPropertyJson("items", jsonItems);
                         pendingUpdate = false;
                     }));
         }
-    }
-
-    private JsonArray createItemsJsonArray(Collection<AvatarGroupItem> items) {
-        JsonArray jsonItems = Json.createArray();
-        for (AvatarGroupItem item : items) {
-            JsonObject jsonItem = Json.createObject();
-            if (item.getName() != null) {
-                jsonItem.put("name", item.getName());
-            }
-
-            if (item.getAbbreviation() != null) {
-                jsonItem.put("abbr", item.getAbbreviation());
-            }
-
-            if (item.getImage() != null) {
-                jsonItem.put("img", item.getImage());
-            }
-
-            if (item.getColorIndex() != null) {
-                jsonItem.put("colorIndex", item.getColorIndex());
-            }
-
-            if (item.getClassName() != null) {
-                jsonItem.put("className", item.getClassName());
-            }
-
-            jsonItems.set(jsonItems.length(), jsonItem);
-        }
-
-        return jsonItems;
     }
 
     /**

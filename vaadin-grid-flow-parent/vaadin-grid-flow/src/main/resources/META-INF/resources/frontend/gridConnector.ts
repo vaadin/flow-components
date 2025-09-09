@@ -427,7 +427,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
         updateGridCache(page);
       }
     }
-    grid.__updateVisibleRows();
+    grid.__updateVisibleRows(index, index + length - 1);
   };
 
   grid.$connector.reset = function () {
