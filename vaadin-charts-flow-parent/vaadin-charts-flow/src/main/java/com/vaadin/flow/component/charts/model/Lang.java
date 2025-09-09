@@ -30,7 +30,6 @@ public class Lang extends AbstractConfigurationObject {
     private String downloadPDF;
     private String downloadPNG;
     private String downloadSVG;
-    private String drillUpText;
     private String invalidDate;
     private String loading;
     private String[] months;
@@ -148,32 +147,6 @@ public class Lang extends AbstractConfigurationObject {
      */
     public void setDownloadSVG(String downloadSVG) {
         this.downloadSVG = downloadSVG;
-    }
-
-    /**
-     * @see #setDrillUpText(String)
-     *
-     * @deprecated Use {@link Breadcrumbs} instead. The new feature doesn't
-     *             require defining a text for the buttons.
-     */
-    @Deprecated(since = "25.0", forRemoval = true)
-    public String getDrillUpText() {
-        return drillUpText;
-    }
-
-    /**
-     * The text for the button that appears when drilling down, linking back to
-     * the parent series. The parent series' name is inserted for
-     * <code>{series.name}</code>.
-     * <p>
-     * Defaults to: Back to {series.name}
-     *
-     * @deprecated Use {@link Breadcrumbs} instead. The new feature doesn't
-     *             require defining a text for the buttons.
-     */
-    @Deprecated(since = "25.0", forRemoval = true)
-    public void setDrillUpText(String drillUpText) {
-        this.drillUpText = drillUpText;
     }
 
     /**
