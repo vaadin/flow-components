@@ -80,7 +80,6 @@ public class TreeGridHugeTreeIT extends AbstractTreeGridIT {
     }
 
     @Test
-    @Ignore
     public void root_keys_dropped_from_keymapper_properly() {
         open();
         setupTreeGrid();
