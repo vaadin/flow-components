@@ -16,7 +16,6 @@
 package com.vaadin.flow.component.treegrid.it;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
