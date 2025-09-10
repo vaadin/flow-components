@@ -447,8 +447,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.$connector.updateUniqueItemIdPath = (path) => (grid.itemIdPath = path);
 
   grid.$connector.confirm = function (id) {
-    flushRowUpdates();
-
     // We're done applying changes from this batch, resolve pending
     // callbacks
     const { pendingRequests } = dataProviderController.rootCache;
@@ -470,6 +468,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
         callback([]);
       }
     });
+
+    flushRowUpdates();
 
     // If all pending requests have already been resolved (which can happen
     // for example if the server sent preloaded data while the grid had
