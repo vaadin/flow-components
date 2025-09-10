@@ -9,7 +9,7 @@
 package com.vaadin.flow.component.charts.model;
 
 /**
- * Positioning options for {@link DrillUpButton}
+ * Positioning options for buttons
  */
 public class ButtonPosition extends AbstractConfigurationObject {
     private VerticalAlign verticalAlign;
