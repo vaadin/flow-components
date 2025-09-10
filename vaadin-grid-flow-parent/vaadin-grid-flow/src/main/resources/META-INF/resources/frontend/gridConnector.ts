@@ -30,6 +30,27 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.size = 0; // To avoid NaN here and there before we get proper data
   grid.itemIdPath = 'key';
 
+  const pendingRowUpdates = [];
+
+  function scheduleRowUpdates(range) {
+    pendingRowUpdates.push(range);
+  }
+
+  function flushRowUpdates() {
+    if (pendingRowUpdates.length > 0) {
+      const minIndex = Math.min(...pendingRowUpdates.map((r) => r[0]));
+      const maxIndex = Math.max(...pendingRowUpdates.map((r) => r[1]));
+      pendingRowUpdates = [];
+      grid.__updateVisibleRows(minIndex, maxIndex);
+    }
+  }
+
+  grid.__updateVisibleRows = function (...args) {
+    if (pendingRowUpdates.length === 0) {
+      Object.getPrototypeOf(grid).__updateVisibleRows.call(grid, ...args);
+    }
+  };
+
   grid.$connector = {};
 
   grid.$connector.hasRootRequestQueue = () => {
@@ -328,27 +349,9 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
   };
 
-  /**
-   * Update the given items in DOM if currently visible.
-   *
-   * @param array items the items to update in DOM
-   */
-  const updateGridItemsInDomBasedOnCache = function (items) {
-    if (!items || !grid.$ || grid.$.items.childElementCount === 0) {
-      return;
-    }
-
-    const itemKeys = items.map((item) => item.key);
-    const indexes = grid
-      ._getRenderedRows()
-      .filter((row) => row._item && itemKeys.includes(row._item.key))
-      .map((row) => row.index);
-    if (indexes.length > 0) {
-      grid.__updateVisibleRows(indexes[0], indexes[indexes.length - 1]);
-    }
-  };
-
   grid.$connector.set = function (startIndex, items) {
+    scheduleRowUpdates([startIndex, startIndex + items.length - 1]);
+
     items.forEach((item, i) => {
       const index = startIndex + i;
       const page = Math.floor(index / grid.pageSize);
@@ -365,8 +368,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     grid.$connector.doSelection(items.filter((item) => item.selected));
     grid.$connector.doDeselection(items.filter((item) => !item.selected && selectedKeys[item.key]));
     itemsUpdated(items);
-
-    grid.__updateVisibleRows(startIndex, startIndex + (items.length - 1));
   };
 
   const itemToCacheLocation = function (item) {
@@ -399,11 +400,13 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
         if (rootCache.items[index]) {
           rootCache.items[index] = updatedItems[i];
         }
+
+        scheduleRowUpdates([index, index]);
       }
     }
     itemsUpdated(updatedItems);
 
-    updateGridItemsInDomBasedOnCache(updatedItems);
+    flushRowUpdates();
   };
 
   grid.$connector.clear = function (index, length) {
@@ -413,6 +416,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     if (index % grid.pageSize != 0) {
       throw 'Got cleared data for index ' + index + ' which is not aligned with the page size of ' + grid.pageSize;
     }
+
+    scheduleRowUpdates([index, index + length - 1]);
 
     let firstPage = Math.floor(index / grid.pageSize);
     let updatedPageCount = Math.ceil(length / grid.pageSize);
@@ -427,7 +432,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
         updateGridCache(page);
       }
     }
-    grid.__updateVisibleRows(index, index + length - 1);
   };
 
   grid.$connector.reset = function () {
@@ -443,6 +447,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.$connector.updateUniqueItemIdPath = (path) => (grid.itemIdPath = path);
 
   grid.$connector.confirm = function (id) {
+    flushRowUpdates();
+
     // We're done applying changes from this batch, resolve pending
     // callbacks
     const { pendingRequests } = dataProviderController.rootCache;
