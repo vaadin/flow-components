@@ -41,6 +41,14 @@ import com.vaadin.flow.shared.Registration;
 /**
  * TabSheet consists of a set of tabs and the content area. The content area
  * displays a component associated with the selected tab.
+ * <p>
+ * When switching between tabs, the content component of the previously selected
+ * tab is hidden and disabled. When switching back to that tab, its content
+ * component is revealed again and re-enabled.
+ * <p>
+ * To avoid re-enabling components that should remain disabled, wrap the tab
+ * content inside a container element such as {@code Div} or
+ * {@code VerticalLayout}, instead of adding them directly to the TabSheet.
  *
  * @author Vaadin Ltd.
  */

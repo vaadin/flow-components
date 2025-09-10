@@ -110,6 +110,33 @@ describe('grid connector', () => {
     });
   });
 
+  describe('clear', () => {
+    beforeEach(async () => {
+      grid.pageSize = 2;
+      setRootItems(grid.$connector, [
+        { key: '0', name: 'foo' },
+        { key: '1', name: 'bar' },
+        { key: '2', name: 'baz' },
+        { key: '3', name: 'qux' }
+      ]);
+      await nextFrame();
+    });
+
+    it('should re-render only cleared items', async () => {
+      const rendererSpy = sinon.spy();
+      grid.querySelector('vaadin-grid-column')!.renderer = rendererSpy;
+      rendererSpy.resetHistory();
+
+      grid.$connector.clear(2, 2);
+      await nextFrame();
+
+      rendererSpy.args.forEach(([_root, _column, model]) => {
+        expect(model.item.name).to.not.equal('foo');
+        expect(model.item.name).to.not.equal('bar');
+      });
+    });
+  });
+
   // A setup where the grid has requested items, and the server has successfully
   // responded with a full item set.
   describe('grid with a requested data range', () => {
