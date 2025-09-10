@@ -30,7 +30,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.size = 0; // To avoid NaN here and there before we get proper data
   grid.itemIdPath = 'key';
 
-  const pendingRowUpdates = [];
+  let pendingRowUpdates = [];
 
   function scheduleRowUpdates(range) {
     pendingRowUpdates.push(range);
