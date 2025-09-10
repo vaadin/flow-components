@@ -4,6 +4,7 @@ import { timeOut, animationFrame } from '@vaadin/component-base/src/async.js';
 import { Grid } from '@vaadin/grid/src/vaadin-grid.js';
 import { isFocusable } from '@vaadin/grid/src/vaadin-grid-active-item-mixin.js';
 import { GridFlowSelectionColumn } from './vaadin-grid-flow-selection-column.js';
+import { GridViewportUpdateDebouncer } from './GridViewportUpdateDebouncer.js';
 
 window.Vaadin.Flow.gridConnector = {};
 window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
@@ -13,6 +14,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   }
 
   const dataProviderController = grid._dataProviderController;
+
+  const viewportUpdateDebouncer = new GridViewportUpdateDebouncer(grid);
 
   let cache = {};
 
@@ -29,27 +32,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
 
   grid.size = 0; // To avoid NaN here and there before we get proper data
   grid.itemIdPath = 'key';
-
-  let pendingRowUpdates = [];
-
-  function scheduleRowUpdates(range) {
-    pendingRowUpdates.push(range);
-  }
-
-  function flushRowUpdates() {
-    if (pendingRowUpdates.length > 0) {
-      const minIndex = Math.min(...pendingRowUpdates.map((r) => r[0]));
-      const maxIndex = Math.max(...pendingRowUpdates.map((r) => r[1]));
-      pendingRowUpdates = [];
-      grid.__updateVisibleRows(minIndex, maxIndex);
-    }
-  }
-
-  grid.__updateVisibleRows = function (...args) {
-    if (pendingRowUpdates.length === 0) {
-      Object.getPrototypeOf(grid).__updateVisibleRows.call(grid, ...args);
-    }
-  };
 
   grid.$connector = {};
 
@@ -350,7 +332,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   };
 
   grid.$connector.set = function (startIndex, items) {
-    scheduleRowUpdates([startIndex, startIndex + items.length - 1]);
+    viewportUpdateDebouncer.debounce();
 
     items.forEach((item, i) => {
       const index = startIndex + i;
@@ -400,13 +382,12 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
         if (rootCache.items[index]) {
           rootCache.items[index] = updatedItems[i];
         }
-
-        scheduleRowUpdates([index, index]);
+        viewportUpdateDebouncer.debounce();
       }
     }
     itemsUpdated(updatedItems);
 
-    flushRowUpdates();
+    viewportUpdateDebouncer.flush();
   };
 
   grid.$connector.clear = function (index, length) {
@@ -417,7 +398,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       throw 'Got cleared data for index ' + index + ' which is not aligned with the page size of ' + grid.pageSize;
     }
 
-    scheduleRowUpdates([index, index + length - 1]);
+    viewportUpdateDebouncer.debounce();
 
     let firstPage = Math.floor(index / grid.pageSize);
     let updatedPageCount = Math.ceil(length / grid.pageSize);
@@ -439,7 +420,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     dataProviderController.clearCache();
     lastRequestedRange = [-1, -1];
     rootRequestDebouncer?.cancel();
-    grid.__updateVisibleRows();
+    viewportUpdateDebouncer.debounce();
   };
 
   grid.$connector.updateSize = (newSize) => (grid.size = newSize);
@@ -469,7 +450,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       }
     });
 
-    flushRowUpdates();
+    viewportUpdateDebouncer.flush();
 
     // If all pending requests have already been resolved (which can happen
     // for example if the server sent preloaded data while the grid had
