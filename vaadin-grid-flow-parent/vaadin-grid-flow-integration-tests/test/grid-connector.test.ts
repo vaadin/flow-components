@@ -5,7 +5,6 @@ import {
   getBodyRowCount,
   getBodyCellText,
   setRootItems,
-  clear,
   GRID_CONNECTOR_ROOT_REQUEST_DELAY
 } from './shared.js';
 import type { FlowGrid } from './shared.js';
@@ -56,7 +55,7 @@ describe('grid connector', () => {
     it('should re-render changed items', async () => {
       grid.$connector.set(1, [{ key: '1', name: 'bar refreshed' }]);
       grid.$connector.set(2, [{ key: '2', name: 'baz refreshed' }]);
-      grid.$connector.confirm(0);
+      grid.$connector.confirm(-1);
       await nextFrame();
       expect(getBodyCellText(grid, 0, 0)).to.equal('foo');
       expect(getBodyCellText(grid, 1, 0)).to.equal('bar refreshed');
@@ -69,7 +68,7 @@ describe('grid connector', () => {
       rendererSpy.resetHistory();
 
       grid.$connector.set(1, [{ key: '1', name: 'bar refreshed' }]);
-      grid.$connector.confirm(0);
+      grid.$connector.confirm(-1);
       await nextFrame();
 
       rendererSpy.args.forEach(([_root, _column, model]) => {
@@ -130,7 +129,7 @@ describe('grid connector', () => {
       rendererSpy.resetHistory();
 
       grid.$connector.clear(2, 2);
-      grid.$connector.confirm(0);
+      grid.$connector.confirm(-1);
       await nextFrame();
 
       rendererSpy.args.forEach(([_root, _column, model]) => {
@@ -158,7 +157,8 @@ describe('grid connector', () => {
     describe('last requested range is in viewport', () => {
       beforeEach(async () => {
         // Request a range of items at the top
-        clear(grid.$connector, 0, 30);
+        grid.$connector.clear(0, 30);
+        grid.$connector.confirm(-1);
         await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
         expect(grid.$server.setViewportRange).to.be.calledOnceWith(0, 30);
         setRootItems(grid.$connector, items, 0, 30);
@@ -167,7 +167,7 @@ describe('grid connector', () => {
 
       it('should request new items after incomplete confirm', async () => {
         // Clear the items again
-        clear(grid.$connector, 0, 30);
+        grid.$connector.clear(0, 30);
 
         // Add the first page items back before the request timeout (partial/incomplete preload)
         setRootItems(grid.$connector, items, 0, grid.pageSize);
@@ -179,7 +179,7 @@ describe('grid connector', () => {
 
       it('should not request for new items after complete confirm', async () => {
         // Clear the items again
-        clear(grid.$connector, 0, 100);
+        grid.$connector.clear(0, 100);
 
         // Add all the items back before the request timeout
         setRootItems(grid.$connector, items);
@@ -193,7 +193,8 @@ describe('grid connector', () => {
     describe('last requested range is not in viewport', () => {
       beforeEach(async () => {
         // Request a range of items further down
-        clear(grid.$connector, 50, 50);
+        grid.$connector.clear(50, 50);
+        grid.$connector.confirm(-1);
         grid.scrollToIndex(50);
         await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
         expect(grid.$server.setViewportRange).to.have.been.calledOnceWith(30, 50);
@@ -206,8 +207,8 @@ describe('grid connector', () => {
         // - Scroll to top
         // - Clear last requested range partially
         // - Preload first two pages so that grid doesn't need to request a new range yet
-        grid.scrollToIndex(0);
-        clear(grid.$connector, 40, grid.pageSize);
+        grid.scrollToIndex(-1);
+        grid.$connector.clear(40, grid.pageSize);
         setRootItems(grid.$connector, items, 0, 30);
         await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
         expect(grid.$server.setViewportRange).to.not.have.been.called;
@@ -223,8 +224,8 @@ describe('grid connector', () => {
         // - Scroll to top
         // - Clear data outside the requested range
         // - Preload first two pages so that grid doesn't need to request a new range yet
-        grid.scrollToIndex(0);
-        clear(grid.$connector, 70, grid.pageSize);
+        grid.scrollToIndex(-1);
+        grid.$connector.clear(70, grid.pageSize);
         grid.$connector.confirm(-1);
         await aTimeout(GRID_CONNECTOR_ROOT_REQUEST_DELAY);
         expect(grid.$server.setViewportRange).to.not.have.been.called;

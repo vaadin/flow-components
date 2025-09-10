@@ -169,10 +169,3 @@ export function setRootItems(gridConnector: GridConnector, items: Item[], index 
   gridConnector.set(index, itemSlice);
   gridConnector.confirm(0);
 }
-
-/**
- * Clears the given range of the given parent's children.
- */
-export function clear(gridConnector: GridConnector, index: number, length: number): void {
-  gridConnector.clear(index, length);
-}
