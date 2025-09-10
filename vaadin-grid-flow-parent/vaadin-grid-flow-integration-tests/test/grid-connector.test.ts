@@ -56,6 +56,7 @@ describe('grid connector', () => {
     it('should re-render changed items', async () => {
       grid.$connector.set(1, [{ key: '1', name: 'bar refreshed' }]);
       grid.$connector.set(2, [{ key: '2', name: 'baz refreshed' }]);
+      grid.$connector.confirm(0);
       await nextFrame();
       expect(getBodyCellText(grid, 0, 0)).to.equal('foo');
       expect(getBodyCellText(grid, 1, 0)).to.equal('bar refreshed');
@@ -68,6 +69,7 @@ describe('grid connector', () => {
       rendererSpy.resetHistory();
 
       grid.$connector.set(1, [{ key: '1', name: 'bar refreshed' }]);
+      grid.$connector.confirm(0);
       await nextFrame();
 
       rendererSpy.args.forEach(([_root, _column, model]) => {
@@ -128,6 +130,7 @@ describe('grid connector', () => {
       rendererSpy.resetHistory();
 
       grid.$connector.clear(2, 2);
+      grid.$connector.confirm(0);
       await nextFrame();
 
       rendererSpy.args.forEach(([_root, _column, model]) => {
