@@ -234,6 +234,9 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      * {@see #setBreadcrumbs(Breadcrumbs)}
      */
     public Breadcrumbs getBreadcrumbs() {
+        if (breadcrumbs == null) {
+            breadcrumbs = new Breadcrumbs();
+        }
         return breadcrumbs;
     }
 
