@@ -3,13 +3,15 @@ import { Debouncer } from '@vaadin/component-base/src/debounce.js';
 import { microTask } from '@vaadin/component-base/src/async.js';
 
 export class GridViewportUpdateDebouncer {
-  #grid: HTMLElement;
-  #debouncer: Debouncer;
+  #grid;
+  #debouncer;
+  #queue = [];
 
-  constructor(grid: HTMLElement) {
+  constructor(grid) {
     this.#grid = grid;
     this.#grid.__updateVisibleRows = (...args) => {
-      if (this.#debouncer?.isActive()) {
+      if (this.#queue.length > 0) {
+        this.debounce(...args);
         return;
       }
 
@@ -17,9 +19,18 @@ export class GridViewportUpdateDebouncer {
     };
   }
 
-  debounce() {
+  debounce(startIndex = 0, endIndex = this.#grid.size - 1) {
+    this.#queue.push([startIndex, endIndex]);
+
     this.#debouncer = Debouncer.debounce(this.#debouncer, microTask, () => {
-      this.#grid.__updateVisibleRows();
+      if (this.#queue.length === 0) {
+        return;
+      }
+
+      const start = Math.min(...this.#queue.map((args) => args[0]));
+      const end = Math.max(...this.#queue.map((args) => args[1]));
+      this.#queue = [];
+      this.#grid.__updateVisibleRows(start, end);
     });
   }
 

@@ -332,7 +332,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   };
 
   grid.$connector.set = function (startIndex, items) {
-    viewportUpdateDebouncer.debounce();
+    viewportUpdateDebouncer.debounce(startIndex, startIndex + items.length - 1);
 
     items.forEach((item, i) => {
       const index = startIndex + i;
@@ -382,7 +382,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
         if (rootCache.items[index]) {
           rootCache.items[index] = updatedItems[i];
         }
-        viewportUpdateDebouncer.debounce();
+        viewportUpdateDebouncer.debounce(index, index);
       }
     }
     itemsUpdated(updatedItems);
@@ -398,7 +398,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       throw 'Got cleared data for index ' + index + ' which is not aligned with the page size of ' + grid.pageSize;
     }
 
-    viewportUpdateDebouncer.debounce();
+    viewportUpdateDebouncer.debounce(index, index + length - 1);
 
     let firstPage = Math.floor(index / grid.pageSize);
     let updatedPageCount = Math.ceil(length / grid.pageSize);
@@ -420,7 +420,7 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     dataProviderController.clearCache();
     lastRequestedRange = [-1, -1];
     rootRequestDebouncer?.cancel();
-    viewportUpdateDebouncer.debounce();
+    viewportUpdateDebouncer.debounce(0, grid.size - 1);
   };
 
   grid.$connector.updateSize = (newSize) => (grid.size = newSize);
