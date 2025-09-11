@@ -155,6 +155,11 @@ public class Spreadsheet extends Component
     }
 
     @Override
+    public Optional<String> getId() {
+        return Optional.ofNullable(getElement().getProperty("id"));
+    }
+
+    @Override
     public void setId(String id) {
         getElement().setProperty("id", id);
     }
