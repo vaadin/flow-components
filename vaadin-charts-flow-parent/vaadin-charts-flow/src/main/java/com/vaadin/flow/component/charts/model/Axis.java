@@ -138,6 +138,11 @@ public abstract class Axis extends AbstractConfigurationObject {
     /**
      * The minimum and maximum value of the axis as Instant.
      *
+     * @param min
+     *            Minimum value as Instant.
+     * @param max
+     *            Maximum value as Instant.
+     *
      * @see #setExtremes(Number, Number)
      */
     public void setExtremes(Instant min, Instant max) {
@@ -170,6 +175,13 @@ public abstract class Axis extends AbstractConfigurationObject {
 
     /**
      * The minimum and maximum value of the axis as Instant.
+     * 
+     * @param min
+     *            Minimum value as Instant.
+     * @param max
+     *            Maximum value as Instant.
+     * @param redraw
+     *            Whether or not to redraw the chart.
      *
      * @see #setExtremes(Number, Number, boolean)
      */
@@ -211,6 +223,15 @@ public abstract class Axis extends AbstractConfigurationObject {
 
     /**
      * The minimum and maximum value of the axis as Instant.
+     *
+     * @param minimum
+     *            New minimum value as Instant.
+     * @param maximum
+     *            New maximum value as Instant.
+     * @param redraw
+     *            Whether or not to redraw the chart.
+     * @param animate
+     *            Whether or not to animate the rescaling.
      *
      * @see #setExtremes(Number, Number, boolean, boolean)
      */
