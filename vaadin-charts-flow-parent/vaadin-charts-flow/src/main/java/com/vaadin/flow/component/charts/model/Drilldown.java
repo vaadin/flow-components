@@ -25,8 +25,8 @@ public class Drilldown extends AbstractConfigurationObject {
     private Style activeDataLabelStyle;
     private Boolean allowPointDrilldown;
     private Boolean animation;
-    private DrillUpButton drillUpButton;
     private List<Series> series = new ArrayList<>();
+    private Breadcrumbs breadcrumbs;
 
     @JsonIgnore
     private Configuration configuration;
@@ -116,25 +116,26 @@ public class Drilldown extends AbstractConfigurationObject {
     }
 
     /**
-     * @see Drilldown#setDrillUpButton(DrillUpButton)
-     * @return
+     * Returns the breadcrumbs navigation options for drilldown levels.
+     *
+     * @return Breadcrumbs navigation options
      */
-    public DrillUpButton getDrillUpButton() {
-        if (drillUpButton == null) {
-            drillUpButton = new DrillUpButton();
+    public Breadcrumbs getBreadcrumbs() {
+        if (breadcrumbs == null) {
+            breadcrumbs = new Breadcrumbs();
         }
-        return drillUpButton;
+        return breadcrumbs;
     }
 
     /**
-     * Options for the drill up button that appears when drilling down on a
-     * series. The text for the button is defined in
-     * {@link Lang#setDrillUpText(String)}.
+     * Options for the breadcrumbs, the navigation at the top leading the way up
+     * through the drilldown levels.
      *
-     * @param drillUpButton
+     * @param breadcrumbs
+     *            the Breadcrumbs configuration
      */
-    public void setDrillUpButton(DrillUpButton drillUpButton) {
-        this.drillUpButton = drillUpButton;
+    public void setBreadcrumbs(Breadcrumbs breadcrumbs) {
+        this.breadcrumbs = breadcrumbs;
     }
 
     /**

@@ -237,35 +237,6 @@ public class Details extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Sets the component content
-     *
-     * @see #getContent()
-     * @param content
-     *            the content of the component to set, or <code>null</code> to
-     *            remove any previously set content
-     * @deprecated since v24.2, use {@link #removeAll()} and
-     *             {@link #add(Component...)} instead.
-     */
-    @Deprecated
-    public void setContent(Component content) {
-        removeAll();
-        add(content);
-    }
-
-    /**
-     * Adds components to the content section
-     *
-     * @see #getContent()
-     * @param components
-     *            the components to add
-     * @deprecated since v24.2, use {@link #add(Component...)} instead.
-     */
-    @Deprecated
-    public void addContent(Component... components) {
-        add(components);
-    }
-
-    /**
      * Adds components to the content section
      *
      * @see #getContent()

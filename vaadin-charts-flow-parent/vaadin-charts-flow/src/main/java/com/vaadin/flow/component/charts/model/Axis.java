@@ -136,10 +136,25 @@ public abstract class Axis extends AbstractConfigurationObject {
     }
 
     /**
-     * The minimum and maximum value of the axis as Date.
+     * The minimum and maximum value of the axis as Instant.
+     *
+     * @param min
+     *            Minimum value as Instant.
+     * @param max
+     *            Maximum value as Instant.
      *
      * @see #setExtremes(Number, Number)
      */
+    public void setExtremes(Instant min, Instant max) {
+        this.setExtremes(min, max, true, true);
+    }
+
+    /**
+     * The minimum and maximum value of the axis as Date.
+     *
+     * @deprecated Use {@link #setExtremes(Instant, Instant)} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setExtremes(Date min, Date max) {
         this.setExtremes(min, max, true, true);
     }
@@ -159,10 +174,27 @@ public abstract class Axis extends AbstractConfigurationObject {
     }
 
     /**
-     * The minimum and maximum value of the axis as Date.
+     * The minimum and maximum value of the axis as Instant.
+     * 
+     * @param min
+     *            Minimum value as Instant.
+     * @param max
+     *            Maximum value as Instant.
+     * @param redraw
+     *            Whether or not to redraw the chart.
      *
      * @see #setExtremes(Number, Number, boolean)
      */
+    public void setExtremes(Instant min, Instant max, boolean redraw) {
+        this.setExtremes(min, max, redraw, true);
+    }
+
+    /**
+     * The minimum and maximum value of the axis as Date.
+     *
+     * @deprecated Use {@link #setExtremes(Instant, Instant, boolean)} instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setExtremes(Date min, Date max, boolean redraw) {
         this.setExtremes(min, max, redraw, true);
     }
@@ -190,10 +222,35 @@ public abstract class Axis extends AbstractConfigurationObject {
     }
 
     /**
-     * The minimum and maximum value of the axis as Date.
+     * The minimum and maximum value of the axis as Instant.
+     *
+     * @param minimum
+     *            New minimum value as Instant.
+     * @param maximum
+     *            New maximum value as Instant.
+     * @param redraw
+     *            Whether or not to redraw the chart.
+     * @param animate
+     *            Whether or not to animate the rescaling.
      *
      * @see #setExtremes(Number, Number, boolean, boolean)
      */
+    public void setExtremes(Instant minimum, Instant maximum, boolean redraw,
+            boolean animate) {
+        setMin(minimum);
+        setMax(maximum);
+        if (configuration != null) {
+            configuration.fireAxesRescaled(this, min, max, redraw, animate);
+        }
+    }
+
+    /**
+     * The minimum and maximum value of the axis as Date.
+     *
+     * @deprecated Use {@link #setExtremes(Instant, Instant, boolean, boolean)}
+     *             instead.
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setExtremes(Date minimum, Date maximum, boolean redraw,
             boolean animate) {
         setMin(minimum);

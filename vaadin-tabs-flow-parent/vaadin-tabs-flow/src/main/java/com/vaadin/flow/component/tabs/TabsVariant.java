@@ -21,12 +21,6 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-tabs} component.
  */
 public enum TabsVariant implements ThemeVariant {
-    /**
-     * @deprecated Use {@code TabVariant.LUMO_ICON_ON_TOP} on individual
-     *             {@code Tab} instances instead.
-     */
-    @Deprecated
-    LUMO_ICON_ON_TOP("icon-on-top"),
     LUMO_CENTERED("centered"),
     LUMO_SMALL("small"),
     LUMO_MINIMAL("minimal"),
