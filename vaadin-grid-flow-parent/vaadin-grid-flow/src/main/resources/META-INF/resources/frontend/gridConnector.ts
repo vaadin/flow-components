@@ -258,26 +258,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
   grid.__updateRow = function (row) {
     Grid.prototype.__updateRow.call(grid, row);
 
-    // There might be inactive component renderers on hidden rows that still refer to the
-    // same component instance as one of the renderers on a visible row. Making the
-    // inactive/hidden renderer attach the component might steal it from a visible/active one.
-    if (!row.hidden) {
-      // make sure that component renderers are updated
-      Array.from(row.children).forEach((cell) => {
-        Array.from(cell?._content?.__templateInstance?.children || []).forEach((content) => {
-          if (content._attachRenderedComponentIfAble) {
-            content._attachRenderedComponentIfAble();
-          }
-          // In hierarchy column of tree grid, the component renderer is inside its content,
-          // this updates it renderer from innerContent
-          Array.from(content?.children || []).forEach((innerContent) => {
-            if (innerContent._attachRenderedComponentIfAble) {
-              innerContent._attachRenderedComponentIfAble();
-            }
-          });
-        });
-      });
-    }
     // since no row can be selected when selection mode is NONE
     // if selectionMode is set to NONE, remove aria-selected attribute from the row
     if (selectionMode === validSelectionModes[1]) {
