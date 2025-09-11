@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.charts.model;
 
 import java.time.Instant;
-import java.util.Date;
 
 import com.vaadin.flow.component.charts.util.Util;
 
@@ -92,26 +91,10 @@ public class Breaks extends AbstractConfigurationObject {
     }
 
     /**
-     * @deprecated as of 4.0. Use {@link #setPointStart(Instant)}
-     */
-    @Deprecated
-    public void setFrom(Date date) {
-        this.from = Util.toHighchartsTS(date);
-    }
-
-    /**
      * @see #setFrom(Number)
      */
     public void setFrom(Instant instant) {
         this.from = Util.toHighchartsTS(instant);
-    }
-
-    /**
-     * @deprecated as of 4.0. Use {@link #setPointStart(Instant)}
-     */
-    @Deprecated
-    public void setTo(Date date) {
-        this.to = Util.toHighchartsTS(date);
     }
 
     /**

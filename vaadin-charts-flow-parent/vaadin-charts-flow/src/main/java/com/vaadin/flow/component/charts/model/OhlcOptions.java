@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.charts.model;
 
 import java.time.Instant;
-import java.util.Date;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 
@@ -742,12 +741,6 @@ public abstract class OhlcOptions extends AbstractPlotOptions {
      * @see #setZones(Zones...)
      */
     public abstract void removeZone(Zones zone);
-
-    /**
-     * @deprecated as of 4.0. Use {@link #setPointStart(Instant)}
-     */
-    @Deprecated
-    public abstract void setPointStart(Date date);
 
     /**
      * @see #setPointStart(Number)

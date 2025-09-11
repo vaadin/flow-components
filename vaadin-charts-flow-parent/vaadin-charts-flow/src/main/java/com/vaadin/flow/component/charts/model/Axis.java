@@ -57,18 +57,6 @@ public abstract class Axis extends AbstractConfigurationObject {
     }
 
     /**
-     * The minimum value of the axis as Date.
-     *
-     * @param min
-     * @see #setMin(Number)
-     * @deprecated use setMin(Instant) instead
-     */
-    @Deprecated
-    public void setMin(Date min) {
-        this.min = Util.toHighchartsTS(min);
-    }
-
-    /**
      * The minimum value of the axis as Instant.
      *
      * @param min
@@ -96,18 +84,6 @@ public abstract class Axis extends AbstractConfigurationObject {
      */
     public void setMax(Number max) {
         this.max = max;
-    }
-
-    /**
-     * The maximum value of the axis as Date.
-     *
-     * @param max
-     * @see #setMax(Number)
-     * @deprecated use setMax(Instant) instead
-     */
-    @Deprecated
-    public void setMax(Date max) {
-        this.max = Util.toHighchartsTS(max);
     }
 
     /**
@@ -232,8 +208,8 @@ public abstract class Axis extends AbstractConfigurationObject {
     @Deprecated(since = "25.0", forRemoval = true)
     public void setExtremes(Date minimum, Date maximum, boolean redraw,
             boolean animate) {
-        setMin(minimum);
-        setMax(maximum);
+        setMin(minimum.toInstant());
+        setMax(maximum.toInstant());
         if (configuration != null) {
             configuration.fireAxesRescaled(this, min, max, redraw, animate);
         }
