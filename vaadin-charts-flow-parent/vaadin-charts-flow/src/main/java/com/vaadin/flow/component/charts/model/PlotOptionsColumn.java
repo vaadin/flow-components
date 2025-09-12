@@ -11,7 +11,6 @@ package com.vaadin.flow.component.charts.model;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.util.Util;
@@ -1414,14 +1413,6 @@ public class PlotOptionsColumn extends ColumnOptions {
      */
     public void setShowInNavigator(Boolean showInNavigator) {
         this.showInNavigator = showInNavigator;
-    }
-
-    /**
-     * @deprecated as of 4.0. Use {@link #setPointStart(Instant)}
-     */
-    @Deprecated
-    public void setPointStart(Date date) {
-        this.pointStart = Util.toHighchartsTS(date);
     }
 
     /**
