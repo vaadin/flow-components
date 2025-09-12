@@ -481,7 +481,7 @@ public class ApplicationConnection implements HasHandlers {
     }
 
     private void addVariableToQueue(String connectorId, String variableName,
-                                    Object value, boolean immediate) {
+            Object value, boolean immediate) {
     }
 
     /**
@@ -510,7 +510,7 @@ public class ApplicationConnection implements HasHandlers {
      *            true if the update is to be sent as soon as possible
      */
     public void updateVariable(String paintableId, String variableName,
-                               ServerConnector newValue, boolean immediate) {
+            ServerConnector newValue, boolean immediate) {
         addVariableToQueue(paintableId, variableName, newValue, immediate);
     }
 
@@ -533,7 +533,7 @@ public class ApplicationConnection implements HasHandlers {
      */
 
     public void updateVariable(String paintableId, String variableName,
-                               String newValue, boolean immediate) {
+            String newValue, boolean immediate) {
         addVariableToQueue(paintableId, variableName, newValue, immediate);
     }
 
@@ -556,7 +556,7 @@ public class ApplicationConnection implements HasHandlers {
      */
 
     public void updateVariable(String paintableId, String variableName,
-                               int newValue, boolean immediate) {
+            int newValue, boolean immediate) {
         addVariableToQueue(paintableId, variableName, newValue, immediate);
     }
 
@@ -579,7 +579,7 @@ public class ApplicationConnection implements HasHandlers {
      */
 
     public void updateVariable(String paintableId, String variableName,
-                               long newValue, boolean immediate) {
+            long newValue, boolean immediate) {
         addVariableToQueue(paintableId, variableName, newValue, immediate);
     }
 
@@ -602,7 +602,7 @@ public class ApplicationConnection implements HasHandlers {
      */
 
     public void updateVariable(String paintableId, String variableName,
-                               float newValue, boolean immediate) {
+            float newValue, boolean immediate) {
         addVariableToQueue(paintableId, variableName, newValue, immediate);
     }
 
@@ -625,7 +625,7 @@ public class ApplicationConnection implements HasHandlers {
      */
 
     public void updateVariable(String paintableId, String variableName,
-                               double newValue, boolean immediate) {
+            double newValue, boolean immediate) {
         addVariableToQueue(paintableId, variableName, newValue, immediate);
     }
 
@@ -648,7 +648,7 @@ public class ApplicationConnection implements HasHandlers {
      */
 
     public void updateVariable(String paintableId, String variableName,
-                               boolean newValue, boolean immediate) {
+            boolean newValue, boolean immediate) {
         addVariableToQueue(paintableId, variableName, newValue, immediate);
     }
 
@@ -670,7 +670,7 @@ public class ApplicationConnection implements HasHandlers {
      *            true if the update is to be sent as soon as possible
      */
     public void updateVariable(String paintableId, String variableName,
-                               Map<String, Object> map, boolean immediate) {
+            Map<String, Object> map, boolean immediate) {
         addVariableToQueue(paintableId, variableName, map, immediate);
     }
 
@@ -693,7 +693,7 @@ public class ApplicationConnection implements HasHandlers {
      *            true if the update is to be sent as soon as possible
      */
     public void updateVariable(String paintableId, String variableName,
-                               String[] values, boolean immediate) {
+            String[] values, boolean immediate) {
         addVariableToQueue(paintableId, variableName, values, immediate);
     }
 
@@ -716,7 +716,7 @@ public class ApplicationConnection implements HasHandlers {
      *            true if the update is to be sent as soon as possible
      */
     public void updateVariable(String paintableId, String variableName,
-                               Object[] values, boolean immediate) {
+            Object[] values, boolean immediate) {
         addVariableToQueue(paintableId, variableName, values, immediate);
     }
 
@@ -809,7 +809,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return A new ServerConnector of the given type
      */
     private ServerConnector createAndRegisterConnector(String connectorId,
-                                                       int connectorType) {
+            int connectorType) {
         Profiler.enter("ApplicationConnection.createAndRegisterConnector");
 
         // Create and register a new connector with the given type
@@ -947,7 +947,7 @@ public class ApplicationConnection implements HasHandlers {
      */
     @Deprecated
     public boolean hasEventListeners(ComponentConnector connector,
-                                     String eventIdentifier) {
+            String eventIdentifier) {
         return connector.hasEventListener(eventIdentifier);
     }
 
@@ -1005,7 +1005,7 @@ public class ApplicationConnection implements HasHandlers {
      */
     @Deprecated
     public boolean updateComponent(Widget component, UIDL uidl,
-                                   boolean manageCaption) {
+            boolean manageCaption) {
         ComponentConnector connector = getConnectorMap()
                 .getConnector(component);
         if (!AbstractComponentConnector.isRealUpdate(uidl)) {

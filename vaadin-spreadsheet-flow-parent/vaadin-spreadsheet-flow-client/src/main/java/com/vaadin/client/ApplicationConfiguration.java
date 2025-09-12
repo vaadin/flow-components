@@ -437,7 +437,7 @@ public class ApplicationConfiguration implements EntryPoint {
     }
 
     private static native JsoConfiguration init(String appId,
-                                                JsoConfiguration jsoConfiguration, Element rootElement)
+            JsoConfiguration jsoConfiguration, Element rootElement)
     /*-{
         if (!$wnd.vaadin) {
             $wnd.vaadin = {};
@@ -450,17 +450,17 @@ public class ApplicationConfiguration implements EntryPoint {
         jsoConfiguration.getConfig = function(name) {
             return this[name];
         }
-
+    
         jsoConfiguration.rootElement = rootElement;
-
+    
         jsoConfiguration.versionInfo = {
             vaadinVersion: '8.0.0'
         };
-
+    
         jsoConfiguration.theme = 'valo';
-
+    
         $wnd.vaadin.clients = {};
-
+    
         $wnd.vaadin.gwtStatsEvents = false;
      }-*/;
 
@@ -564,7 +564,7 @@ public class ApplicationConfiguration implements EntryPoint {
 
     // spreadsheet
     public static ApplicationConfiguration getConfigFromJson(String appId,
-                                                             String json, Element rootElement) {
+            String json, Element rootElement) {
         ApplicationConfiguration conf = new ApplicationConfiguration();
         conf.setAppId(appId);
         conf.loadFromJson(appId, json, rootElement);
