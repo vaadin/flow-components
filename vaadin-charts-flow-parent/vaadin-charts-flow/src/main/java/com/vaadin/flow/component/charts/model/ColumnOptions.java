@@ -8,6 +8,7 @@
  */
 package com.vaadin.flow.component.charts.model;
 
+import java.time.Instant;
 import java.util.Date;
 
 import com.vaadin.flow.component.charts.model.style.Color;
@@ -565,7 +566,13 @@ public abstract class ColumnOptions extends AbstractPlotOptions {
     public abstract void removeZone(Zones zone);
 
     /**
+     * @deprecated Use {@link #setPointStart(Instant)} instead.
+     */
+    @Deprecated(since = "24.9", forRemoval = true)
+    public abstract void setPointStart(Date date);
+
+    /**
      * @see #setPointStart(Number)
      */
-    public abstract void setPointStart(Date date);
+    public abstract void setPointStart(Instant instant);
 }
