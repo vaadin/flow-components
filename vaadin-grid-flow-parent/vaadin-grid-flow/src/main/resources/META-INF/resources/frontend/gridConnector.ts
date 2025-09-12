@@ -255,24 +255,22 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     });
   };
 
-  {
-    let active = 0;
+  let preventUpdateVisibleRowsActive = 0;
 
-    function preventUpdateVisibleRows(callback) {
-      try {
-        active++;
-        callback();
-      } finally {
-        active--;
-      }
-    }
-
-    grid.__updateVisibleRows = function (...args) {
-      if (active === 0) {
-        Grid.prototype.__updateVisibleRows.call(grid, ...args);
-      }
+  function preventUpdateVisibleRows(callback) {
+    try {
+      preventUpdateVisibleRowsActive++;
+      callback();
+    } finally {
+      preventUpdateVisibleRowsActive--;
     }
   }
+
+  grid.__updateVisibleRows = function (...args) {
+    if (preventUpdateVisibleRowsActive === 0) {
+      Grid.prototype.__updateVisibleRows.call(grid, ...args);
+    }
+  };
 
   grid.__updateRow = function (row) {
     Grid.prototype.__updateRow.call(grid, row);
