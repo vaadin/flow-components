@@ -255,6 +255,23 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     });
   };
 
+  let preventUpdateVisibleRowsActive = 0;
+
+  function preventUpdateVisibleRows(callback) {
+    try {
+      preventUpdateVisibleRowsActive++;
+      callback();
+    } finally {
+      preventUpdateVisibleRowsActive--;
+    }
+  }
+
+  grid.__updateVisibleRows = function (...args) {
+    if (preventUpdateVisibleRowsActive === 0) {
+      Grid.prototype.__updateVisibleRows.call(grid, ...args);
+    }
+  };
+
   grid.__updateRow = function (row) {
     Grid.prototype.__updateRow.call(grid, row);
 
@@ -308,26 +325,6 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
     }
   };
 
-  /**
-   * Update the given items in DOM if currently visible.
-   *
-   * @param array items the items to update in DOM
-   */
-  const updateGridItemsInDomBasedOnCache = function (items) {
-    if (!items || !grid.$ || grid.$.items.childElementCount === 0) {
-      return;
-    }
-
-    const itemKeys = items.map((item) => item.key);
-    const indexes = grid
-      ._getRenderedRows()
-      .filter((row) => row._item && itemKeys.includes(row._item.key))
-      .map((row) => row.index);
-    if (indexes.length > 0) {
-      grid.__updateVisibleRows(indexes[0], indexes[indexes.length - 1]);
-    }
-  };
-
   grid.$connector.set = function (startIndex, items) {
     items.forEach((item, i) => {
       const index = startIndex + i;
@@ -342,11 +339,13 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       updateGridCache(firstPage + i);
     }
 
-    grid.$connector.doSelection(items.filter((item) => item.selected));
-    grid.$connector.doDeselection(items.filter((item) => !item.selected && selectedKeys[item.key]));
-    itemsUpdated(items);
+    preventUpdateVisibleRows(() => {
+      grid.$connector.doSelection(items.filter((item) => item.selected));
+      grid.$connector.doDeselection(items.filter((item) => !item.selected && selectedKeys[item.key]));
+      itemsUpdated(items);
+    });
 
-    grid.__updateVisibleRows(startIndex, startIndex + (items.length - 1));
+    grid.__updateVisibleRows(startIndex, startIndex + items.length - 1);
   };
 
   const itemToCacheLocation = function (item) {
@@ -366,6 +365,8 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
    * @param updatedItems the updated items array
    */
   grid.$connector.updateFlatData = function (updatedItems) {
+    const updatedIndexes = [];
+
     // update (flat) caches
     for (let i = 0; i < updatedItems.length; i++) {
       let cacheLocation = itemToCacheLocation(updatedItems[i]);
@@ -379,11 +380,15 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
         if (rootCache.items[index]) {
           rootCache.items[index] = updatedItems[i];
         }
+        updatedIndexes.push(index);
       }
     }
-    itemsUpdated(updatedItems);
 
-    updateGridItemsInDomBasedOnCache(updatedItems);
+    preventUpdateVisibleRows(() => {
+      itemsUpdated(updatedItems);
+    });
+
+    updatedIndexes.forEach((index) => grid.__updateVisibleRows(index, index));
   };
 
   grid.$connector.clear = function (index, length) {
@@ -401,12 +406,15 @@ window.Vaadin.Flow.gridConnector.initLazy = (grid) => {
       let page = firstPage + i;
       let items = cache[page];
       if (items) {
-        grid.$connector.doDeselection(items.filter((item) => selectedKeys[item.key]));
-        items.forEach((item) => grid.closeItemDetails(item));
+        preventUpdateVisibleRows(() => {
+          grid.$connector.doDeselection(items.filter((item) => selectedKeys[item.key]));
+          items.forEach((item) => grid.closeItemDetails(item));
+        });
         delete cache[page];
         updateGridCache(page);
       }
     }
+
     grid.__updateVisibleRows(index, index + length - 1);
   };
 
