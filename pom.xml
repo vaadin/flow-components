@@ -478,6 +478,7 @@
                     <version>${flow.version}</version>
                     <configuration>
                         <pnpmEnable>${vaadin.pnpm.enable}</pnpmEnable>
+                        <frontendDirectory>./frontend</frontendDirectory>
                     </configuration>
                     <executions>
                         <execution>
@@ -617,6 +618,9 @@
                         <plugin>
                             <groupId>com.vaadin</groupId>
                             <artifactId>flow-maven-plugin</artifactId>
+                            <configuration>
+                                <frontendDirectory>./frontend</frontendDirectory>
+                            </configuration>
                             <executions>
                                 <execution>
                                     <goals>
