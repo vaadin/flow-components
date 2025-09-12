@@ -97,7 +97,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.0.0-alpha18")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.0.0-alpha19")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")

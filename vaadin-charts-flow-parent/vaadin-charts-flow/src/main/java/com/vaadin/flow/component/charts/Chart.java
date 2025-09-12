@@ -88,7 +88,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-chart")
-@NpmPackage(value = "@vaadin/charts", version = "25.0.0-alpha18")
+@NpmPackage(value = "@vaadin/charts", version = "25.0.0-alpha19")
 @JsModule("@vaadin/charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
