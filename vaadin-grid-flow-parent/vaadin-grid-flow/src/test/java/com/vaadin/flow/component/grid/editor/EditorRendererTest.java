@@ -20,7 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.grid.Person;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.Element;

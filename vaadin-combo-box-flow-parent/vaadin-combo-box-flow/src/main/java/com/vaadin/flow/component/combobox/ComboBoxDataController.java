@@ -24,7 +24,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;

@@ -16,8 +16,8 @@ import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -551,7 +551,7 @@ public class GridPro<E> extends Grid<E> {
             cellEditableData.put(column.getInternalId(), cellEditable);
         });
 
-        jsonObject.put("cellEditable", cellEditableData);
+        jsonObject.set("cellEditable", cellEditableData);
     }
 
     /**
