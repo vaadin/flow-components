@@ -58,7 +58,7 @@ import com.vaadin.flow.shared.Registration;
 @Tag("vaadin-dashboard")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "25.0.0-alpha18")
+@NpmPackage(value = "@vaadin/dashboard", version = "25.0.0-alpha19")
 public class Dashboard extends Component
         implements HasWidgets, HasSize, HasThemeVariant<DashboardVariant> {
 
