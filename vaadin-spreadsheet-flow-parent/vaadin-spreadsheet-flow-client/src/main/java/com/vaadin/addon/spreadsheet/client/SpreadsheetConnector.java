@@ -202,11 +202,10 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         super.init();
         getWidget().setId(getConnectorId());
         registerRpc(SpreadsheetClientRpc.class, clientRPC);
-        getWidget().setCommsTrigger(new CommsTrigger() {
-
-            @Override
-            public void sendUpdates() {
-                getConnection().sendPendingVariableChanges();
+        getWidget().setCommsTrigger(() -> {
+            var queue = getConnection().getServerRpcQueue();
+            if (queue != null) {
+                queue.flush();
             }
         });
 
