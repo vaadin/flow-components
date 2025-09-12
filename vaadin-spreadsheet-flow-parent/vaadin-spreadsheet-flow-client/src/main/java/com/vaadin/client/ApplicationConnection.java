@@ -24,7 +24,9 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.event.shared.HasHandlers;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetOverlay;
 import com.vaadin.client.ApplicationConfiguration.ErrorMessage;
 import com.vaadin.client.communication.ConnectionStateHandler;
@@ -34,12 +36,15 @@ import com.vaadin.client.communication.MessageSender;
 import com.vaadin.client.communication.RpcManager;
 import com.vaadin.client.communication.ServerRpcQueue;
 import com.vaadin.client.metadata.ConnectorBundleLoader;
+import com.vaadin.client.ui.AbstractComponentConnector;
+import com.vaadin.client.ui.AbstractConnector;
 import com.vaadin.client.ui.Icon;
 import com.vaadin.client.ui.VContextMenu;
 import com.vaadin.client.ui.VNotification;
 import com.vaadin.client.ui.VOverlay;
 import com.vaadin.client.ui.ui.UIConnector;
 import com.vaadin.shared.Version;
+import com.vaadin.shared.util.SharedUtil;
 
 /**
  * This is the client side communication "engine", managing client-server
@@ -56,6 +61,21 @@ import com.vaadin.shared.Version;
  * Entry point classes (widgetsets) define <code>onModuleLoad()</code>.
  */
 public class ApplicationConnection implements HasHandlers {
+
+    @Deprecated
+    public static final String MODIFIED_CLASSNAME = StyleConstants.MODIFIED;
+
+    @Deprecated
+    public static final String DISABLED_CLASSNAME = StyleConstants.DISABLED;
+
+    @Deprecated
+    public static final String REQUIRED_CLASSNAME = StyleConstants.REQUIRED;
+
+    @Deprecated
+    public static final String REQUIRED_CLASSNAME_EXT = StyleConstants.REQUIRED_EXT;
+
+    @Deprecated
+    public static final String ERROR_CLASSNAME_EXT = StyleConstants.ERROR_EXT;
 
     /**
      * A string that, if found in a non-JSON response to a UIDL request, will
@@ -278,7 +298,7 @@ public class ApplicationConnection implements HasHandlers {
 
     public void init(WidgetSet widgetSet, ApplicationConfiguration cnf) {
         getLogger().info("Starting application " + cnf.getRootPanelId());
-        getLogger().info("Using theme: " + uIConnector.getActiveTheme());
+        getLogger().info("Using theme: " + cnf.getThemeName());
 
         getLogger().info("Vaadin application servlet version: "
                 + cnf.getServletVersion());
@@ -324,6 +344,31 @@ public class ApplicationConnection implements HasHandlers {
      */
     public void start() {
 
+    }
+
+    /**
+     * Requests an analyze of layouts, to find inconsistencies. Exclusively used
+     * for debugging during development.
+     *
+     * @deprecated as of 7.1. Replaced by {@link UIConnector#analyzeLayouts()}
+     */
+    @Deprecated
+    public void analyzeLayouts() {
+        getUIConnector().analyzeLayouts();
+    }
+
+    /**
+     * Sends a request to the server to print details to console that will help
+     * the developer to locate the corresponding server-side connector in the
+     * source code.
+     *
+     * @param serverConnector
+     * @deprecated as of 7.1. Replaced by
+     *             {@link UIConnector#showServerDebugInfo(ServerConnector)}
+     */
+    @Deprecated
+    void highlightConnector(ServerConnector serverConnector) {
+        getUIConnector().showServerDebugInfo(serverConnector);
     }
 
     int cssWaits = 0;
@@ -423,8 +468,28 @@ public class ApplicationConnection implements HasHandlers {
         return null;
     }
 
+    /**
+     * Determines whether or not the loading indicator is showing.
+     *
+     * @return true if the loading indicator is visible
+     * @deprecated As of 7.1. Use {@link #getLoadingIndicator()} and
+     *             {@link VLoadingIndicator#isVisible()}.isVisible() instead.
+     */
+    @Deprecated
+    public boolean isLoadingIndicatorVisible() {
+        return false;
+    }
+
     private void addVariableToQueue(String connectorId, String variableName,
-            Object value, boolean immediate) {
+                                    Object value, boolean immediate) {
+    }
+
+    /**
+     * @deprecated as of 7.6, use {@link ServerRpcQueue#flush()}
+     */
+    @Deprecated
+    public void sendPendingVariableChanges() {
+
     }
 
     /**
@@ -445,7 +510,7 @@ public class ApplicationConnection implements HasHandlers {
      *            true if the update is to be sent as soon as possible
      */
     public void updateVariable(String paintableId, String variableName,
-            ServerConnector newValue, boolean immediate) {
+                               ServerConnector newValue, boolean immediate) {
         addVariableToQueue(paintableId, variableName, newValue, immediate);
     }
 
@@ -468,7 +533,7 @@ public class ApplicationConnection implements HasHandlers {
      */
 
     public void updateVariable(String paintableId, String variableName,
-            String newValue, boolean immediate) {
+                               String newValue, boolean immediate) {
         addVariableToQueue(paintableId, variableName, newValue, immediate);
     }
 
@@ -491,7 +556,7 @@ public class ApplicationConnection implements HasHandlers {
      */
 
     public void updateVariable(String paintableId, String variableName,
-            int newValue, boolean immediate) {
+                               int newValue, boolean immediate) {
         addVariableToQueue(paintableId, variableName, newValue, immediate);
     }
 
@@ -514,7 +579,7 @@ public class ApplicationConnection implements HasHandlers {
      */
 
     public void updateVariable(String paintableId, String variableName,
-            long newValue, boolean immediate) {
+                               long newValue, boolean immediate) {
         addVariableToQueue(paintableId, variableName, newValue, immediate);
     }
 
@@ -537,7 +602,7 @@ public class ApplicationConnection implements HasHandlers {
      */
 
     public void updateVariable(String paintableId, String variableName,
-            float newValue, boolean immediate) {
+                               float newValue, boolean immediate) {
         addVariableToQueue(paintableId, variableName, newValue, immediate);
     }
 
@@ -560,7 +625,7 @@ public class ApplicationConnection implements HasHandlers {
      */
 
     public void updateVariable(String paintableId, String variableName,
-            double newValue, boolean immediate) {
+                               double newValue, boolean immediate) {
         addVariableToQueue(paintableId, variableName, newValue, immediate);
     }
 
@@ -583,7 +648,7 @@ public class ApplicationConnection implements HasHandlers {
      */
 
     public void updateVariable(String paintableId, String variableName,
-            boolean newValue, boolean immediate) {
+                               boolean newValue, boolean immediate) {
         addVariableToQueue(paintableId, variableName, newValue, immediate);
     }
 
@@ -605,7 +670,7 @@ public class ApplicationConnection implements HasHandlers {
      *            true if the update is to be sent as soon as possible
      */
     public void updateVariable(String paintableId, String variableName,
-            Map<String, Object> map, boolean immediate) {
+                               Map<String, Object> map, boolean immediate) {
         addVariableToQueue(paintableId, variableName, map, immediate);
     }
 
@@ -628,7 +693,7 @@ public class ApplicationConnection implements HasHandlers {
      *            true if the update is to be sent as soon as possible
      */
     public void updateVariable(String paintableId, String variableName,
-            String[] values, boolean immediate) {
+                               String[] values, boolean immediate) {
         addVariableToQueue(paintableId, variableName, values, immediate);
     }
 
@@ -651,8 +716,18 @@ public class ApplicationConnection implements HasHandlers {
      *            true if the update is to be sent as soon as possible
      */
     public void updateVariable(String paintableId, String variableName,
-            Object[] values, boolean immediate) {
+                               Object[] values, boolean immediate) {
         addVariableToQueue(paintableId, variableName, values, immediate);
+    }
+
+    /**
+     * Does absolutely nothing. Replaced by {@link LayoutManager}.
+     *
+     * @param container
+     * @deprecated As of 7.0, serves no purpose
+     */
+    @Deprecated
+    public void runDescendentsLayout(HasWidgets container) {
     }
 
     /**
@@ -663,6 +738,38 @@ public class ApplicationConnection implements HasHandlers {
         Duration duration = new Duration();
 
         getLogger().info("forceLayout in " + duration.elapsedMillis() + " ms");
+    }
+
+    /**
+     * Returns false
+     *
+     * @param paintable
+     * @return false, always
+     * @deprecated As of 7.0, serves no purpose
+     */
+    @Deprecated
+    private boolean handleComponentRelativeSize(ComponentConnector paintable) {
+        return false;
+    }
+
+    /**
+     * Returns false.
+     *
+     * @param widget
+     * @return false, always
+     * @deprecated As of 7.0, serves no purpose
+     */
+    @Deprecated
+    public boolean handleComponentRelativeSize(Widget widget) {
+        return handleComponentRelativeSize(connectorMap.getConnector(widget));
+
+    }
+
+    @Deprecated
+    public ComponentConnector getPaintable(UIDL uidl) {
+        // Non-component connectors shouldn't be painted from legacy connectors
+        return (ComponentConnector) getConnector(uidl.getId(),
+                Integer.parseInt(uidl.getTag()));
     }
 
     /**
@@ -702,7 +809,7 @@ public class ApplicationConnection implements HasHandlers {
      * @return A new ServerConnector of the given type
      */
     private ServerConnector createAndRegisterConnector(String connectorId,
-            int connectorType) {
+                                                       int connectorType) {
         Profiler.enter("ApplicationConnection.createAndRegisterConnector");
 
         // Create and register a new connector with the given type
@@ -792,6 +899,19 @@ public class ApplicationConnection implements HasHandlers {
     private ConnectorMap connectorMap = GWT.create(ConnectorMap.class);
 
     /**
+     * Use to notify that the given component's caption has changed; layouts may
+     * have to be recalculated.
+     *
+     * @param widget
+     *            The Widget whose caption has changed
+     * @deprecated As of 7.0.2, has not had any effect for a long time
+     */
+    @Deprecated
+    public void captionSizeUpdated(Widget widget) {
+        // This doesn't do anything, it's just kept here for compatibility
+    }
+
+    /**
      * Gets the main view.
      *
      * @return the main view
@@ -811,11 +931,114 @@ public class ApplicationConnection implements HasHandlers {
     }
 
     /**
+     * Checks if there is a registered server side listener for the event. The
+     * list of events which has server side listeners is updated automatically
+     * before the component is updated so the value is correct if called from
+     * updatedFromUIDL.
+     *
+     * @param connector
+     *            The connector to register event listeners for
+     * @param eventIdentifier
+     *            The identifier for the event
+     * @return true if at least one listener has been registered on server side
+     *         for the event identified by eventIdentifier.
+     * @deprecated As of 7.0. Use
+     *             {@link AbstractConnector#hasEventListener(String)} instead
+     */
+    @Deprecated
+    public boolean hasEventListeners(ComponentConnector connector,
+                                     String eventIdentifier) {
+        return connector.hasEventListener(eventIdentifier);
+    }
+
+    /**
+     * Adds the get parameters to the uri and returns the new uri that contains
+     * the parameters.
+     *
+     * @param uri
+     *            The uri to which the parameters should be added.
+     * @param extraParams
+     *            One or more parameters in the format "a=b" or "c=d&amp;e=f".
+     *            An empty string is allowed but will not modify the url.
+     * @return The modified URI with the get parameters in extraParams added.
+     * @deprecated Use {@link SharedUtil#addGetParameters(String,String)}
+     *             instead
+     */
+    @Deprecated
+    public static String addGetParameters(String uri, String extraParams) {
+        return SharedUtil.addGetParameters(uri, extraParams);
+    }
+
+    ConnectorMap getConnectorMap() {
+        return connectorMap;
+    }
+
+    /**
+     * @deprecated As of 7.0. No longer serves any purpose.
+     */
+    @Deprecated
+    public void unregisterPaintable(ServerConnector p) {
+        getLogger().info("unregisterPaintable (unnecessarily) called for "
+                + Util.getConnectorString(p));
+    }
+
+    /**
      * Get VTooltip instance related to application connection.
      *
      * @return VTooltip instance
      */
     public VTooltip getVTooltip() {
+        return null;
+    }
+
+    /**
+     * Method provided for backwards compatibility. Duties previously done by
+     * this method is now handled by the state change event handler in
+     * AbstractComponentConnector. The only function this method has is to
+     * return true if the UIDL is a "cached" update.
+     *
+     * @param component
+     * @param uidl
+     * @param manageCaption
+     * @deprecated As of 7.0, no longer serves any purpose
+     * @return
+     */
+    @Deprecated
+    public boolean updateComponent(Widget component, UIDL uidl,
+                                   boolean manageCaption) {
+        ComponentConnector connector = getConnectorMap()
+                .getConnector(component);
+        if (!AbstractComponentConnector.isRealUpdate(uidl)) {
+            return true;
+        }
+
+        if (!manageCaption) {
+            getLogger().warning(Util.getConnectorString(connector)
+                    + " called updateComponent with manageCaption=false. The parameter was ignored - override delegateCaption() to return false instead. It is however not recommended to use caption this way at all.");
+        }
+        return false;
+    }
+
+    /**
+     * @deprecated As of 7.0. Use
+     *             {@link AbstractComponentConnector#hasEventListener(String)}
+     *             instead
+     */
+    @Deprecated
+    public boolean hasEventListeners(Widget widget, String eventIdentifier) {
+        ComponentConnector connector = getConnectorMap().getConnector(widget);
+        if (connector == null) {
+            /*
+             * No connector will exist in cases where Vaadin widgets have been
+             * re-used without implementing server<->client communication.
+             */
+            return false;
+        }
+
+        return hasEventListeners(connector, eventIdentifier);
+    }
+
+    LayoutManager getLayoutManager() {
         return null;
     }
 
