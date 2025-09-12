@@ -278,7 +278,7 @@ public class ApplicationConnection implements HasHandlers {
 
     public void init(WidgetSet widgetSet, ApplicationConfiguration cnf) {
         getLogger().info("Starting application " + cnf.getRootPanelId());
-        getLogger().info("Using theme: " + cnf.getThemeName());
+        getLogger().info("Using theme: " + uIConnector.getActiveTheme());
 
         getLogger().info("Vaadin application servlet version: "
                 + cnf.getServletVersion());
