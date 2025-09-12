@@ -12,8 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 class Serializer {
     private final static ObjectMapper objectMapper;
@@ -21,14 +22,15 @@ class Serializer {
             .getLogger(Serializer.class);
 
     static {
-        objectMapper = new ObjectMapper();
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
+        objectMapper = JsonMapper.builder().changeDefaultPropertyInclusion(
+                incl -> incl.withValueInclusion(
+                        JsonInclude.Include.NON_DEFAULT)).build();
     }
 
     static String serialize(Object value) {
         try {
             return value == null ? "" : objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             LOGGER.error("Error when serializating to JSON\n value: " + value,
                     e);
             return null;

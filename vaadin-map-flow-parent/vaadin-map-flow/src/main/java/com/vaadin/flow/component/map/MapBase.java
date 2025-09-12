@@ -13,7 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.node.BaseJsonNode;
+import tools.jackson.databind.node.BaseJsonNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;

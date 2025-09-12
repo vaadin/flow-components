@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Unit;

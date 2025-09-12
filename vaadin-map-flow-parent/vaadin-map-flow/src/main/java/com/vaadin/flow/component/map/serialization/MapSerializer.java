@@ -8,18 +8,19 @@
  */
 package com.vaadin.flow.component.map.serialization;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.node.BaseJsonNode;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.node.BaseJsonNode;
+import tools.jackson.databind.ser.std.StdSerializer;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResource;
@@ -41,9 +42,9 @@ public class MapSerializer implements Serializable {
         SimpleModule downloadHandlerModule = new SimpleModule().addSerializer(
                 DownloadHandler.class, new DownloadHandlerSerializer());
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(streamResourceModule);
-        mapper.registerModule(downloadHandlerModule);
+        ObjectMapper mapper = JsonMapper.builder()
+                .addModule(streamResourceModule)
+                .addModule(downloadHandlerModule).build();
         this.mapper = mapper;
     }
 
@@ -81,7 +82,7 @@ public class MapSerializer implements Serializable {
 
         @Override
         public void serialize(StreamResource value, JsonGenerator gen,
-                SerializerProvider provider) throws IOException {
+                SerializationContext provider) throws JacksonException {
             if (value == null) {
                 gen.writeNull();
                 return;
@@ -121,7 +122,7 @@ public class MapSerializer implements Serializable {
 
         @Override
         public void serialize(DownloadHandler value, JsonGenerator gen,
-                SerializerProvider provider) throws IOException {
+                SerializationContext provider) throws JacksonException {
             if (value == null) {
                 gen.writeNull();
                 return;

@@ -11,7 +11,7 @@ package com.vaadin.flow.component.map.events;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.internal.JacksonUtils;
 
