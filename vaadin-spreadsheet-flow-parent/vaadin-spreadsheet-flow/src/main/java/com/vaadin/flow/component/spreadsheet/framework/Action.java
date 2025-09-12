@@ -111,14 +111,6 @@ public class Action implements Serializable {
          * @since 8.0
          */
         public Registration addShortcutListener(ShortcutEventListener shortcut);
-
-        /**
-         * @deprecated As of 8.0, replaced by {@link Registration#remove()} in
-         *             the registration object returned from
-         *             {@link #addShortcutListener(ShortcutEventListener)}.
-         */
-        @Deprecated
-        public void removeShortcutListener(ShortcutEventListener shortcut);
     }
 
     /**
