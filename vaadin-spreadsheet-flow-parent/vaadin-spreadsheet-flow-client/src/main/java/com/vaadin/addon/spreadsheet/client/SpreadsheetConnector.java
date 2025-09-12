@@ -60,8 +60,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
         @Override
         public void showSelectedCell(String name, int col, int row,
-                String value, boolean formula, boolean locked,
-                boolean initialSelection) {
+                                     String value, boolean formula, boolean locked,
+                                     boolean initialSelection) {
             getWidget().selectCell(name, col, row, value, formula, locked,
                     initialSelection);
         }
@@ -122,7 +122,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
         @Override
         public void setSelectedCellAndRange(String name, int col, int row,
-                int c1, int c2, int r1, int r2, boolean scroll) {
+                                            int c1, int c2, int r1, int r2, boolean scroll) {
             getWidget().selectCellRange(name, col, row, c1, c2, r1, r2, scroll);
         }
 
@@ -202,10 +202,11 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         super.init();
         getWidget().setId(getConnectorId());
         registerRpc(SpreadsheetClientRpc.class, clientRPC);
-        getWidget().setCommsTrigger(() -> {
-            var queue = getConnection().getServerRpcQueue();
-            if (queue != null) {
-                queue.flush();
+        getWidget().setCommsTrigger(new CommsTrigger() {
+
+            @Override
+            public void sendUpdates() {
+                getConnection().sendPendingVariableChanges();
             }
         });
 
@@ -216,7 +217,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
             @Override
             public void cellContextMenu(NativeEvent event, int column,
-                    int row) {
+                                        int row) {
                 if (getState().hasActions) {
                     latestCellContextMenuEvent = event;
                     latestHeaderContextMenuEvent = null;
@@ -227,7 +228,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
             @Override
             public void rowHeaderContextMenu(NativeEvent nativeEvent,
-                    int rowIndex) {
+                                             int rowIndex) {
                 if (getState().hasActions) {
                     latestHeaderContextMenuEvent = nativeEvent;
                     latestCellContextMenuEvent = null;
@@ -238,7 +239,7 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
             @Override
             public void columnHeaderContextMenu(NativeEvent nativeEvent,
-                    int columnIndex) {
+                                                int columnIndex) {
                 if (getState().hasActions) {
                     latestHeaderContextMenuEvent = nativeEvent;
                     latestCellContextMenuEvent = null;
@@ -328,9 +329,9 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     || stateChangeEvent.hasPropertyChanged("rows")
                     || stateChangeEvent.hasPropertyChanged("cols")
                     || stateChangeEvent
-                            .hasPropertyChanged("verticalSplitPosition")
+                    .hasPropertyChanged("verticalSplitPosition")
                     || stateChangeEvent
-                            .hasPropertyChanged("horizontalSplitPosition")) {
+                    .hasPropertyChanged("horizontalSplitPosition")) {
                 widget.relayoutSheet();
                 getWidget().updateMergedRegions(getState().mergedRegions);
             } else if (stateChangeEvent.hasPropertyChanged("mergedRegions")) {
@@ -434,16 +435,16 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
 
     private void addOverlay(String id, OverlayInfo overlayInfo) {
         switch (overlayInfo.type) {
-        case IMAGE:
-            getWidget().addOverlay(id, new Image(getResourceUrl(id)),
-                    overlayInfo);
-            break;
-        case COMPONENT:
-            var element = SheetJsniUtil.getVirtualChild(id,
-                    host.getPropertyString("appId"));
-            var slot = new Slot("overlay-component-" + id, element, host);
-            getWidget().addOverlay(id, slot, overlayInfo);
-            break;
+            case IMAGE:
+                getWidget().addOverlay(id, new Image(getResourceUrl(id)),
+                        overlayInfo);
+                break;
+            case COMPONENT:
+                var element = SheetJsniUtil.getVirtualChild(id,
+                        host.getPropertyString("appId"));
+                var slot = new Slot("overlay-component-" + id, element, host);
+                getWidget().addOverlay(id, slot, overlayInfo);
+                break;
         }
     }
 
