@@ -13,10 +13,10 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectWriter;
+import tools.jackson.databind.ser.BeanSerializerModifier;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.serializers.AxisListSerializer;
 import com.vaadin.flow.component.charts.model.serializers.ChartEnumSerializer;
@@ -100,7 +100,7 @@ public class ChartSerialization implements Serializable {
     public static String toJSON(AbstractConfigurationObject object) {
         try {
             return jsonWriter.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             e.printStackTrace();
             throw new RuntimeException("Error while serializing "
                     + object.getClass().getSimpleName(), e);
