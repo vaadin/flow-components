@@ -13,8 +13,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Handler;
-import java.util.logging.Logger;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -22,26 +20,13 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.ScriptInjector;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.logging.client.LogConfiguration;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
-import com.vaadin.client.debug.internal.ErrorNotificationHandler;
-import com.vaadin.client.debug.internal.HierarchySection;
-import com.vaadin.client.debug.internal.InfoSection;
-import com.vaadin.client.debug.internal.LogSection;
-import com.vaadin.client.debug.internal.NetworkSection;
-import com.vaadin.client.debug.internal.ProfilerSection;
-import com.vaadin.client.debug.internal.Section;
-import com.vaadin.client.debug.internal.TestBenchSection;
-import com.vaadin.client.debug.internal.VDebugWindow;
-import com.vaadin.client.debug.internal.theme.DebugWindowStyles;
 import com.vaadin.client.metadata.NoDataException;
 import com.vaadin.client.metadata.TypeData;
 import com.vaadin.client.ui.UnknownComponentConnector;
 import com.vaadin.client.ui.UnknownExtensionConnector;
-import com.vaadin.client.ui.ui.UIConnector;
 import com.vaadin.shared.ApplicationConstants;
 import com.vaadin.shared.ui.ui.UIConstants;
 
@@ -259,12 +244,9 @@ public class ApplicationConfiguration implements EntryPoint {
     private Map<Integer, Class<? extends ServerConnector>> classes = new HashMap<>();
 
     private boolean widgetsetVersionSent = false;
-    private static boolean moduleLoaded = false;
 
     static// TODO consider to make this hashmap per application
     List<Command> callbacks = new LinkedList<>();
-
-    private static int dependenciesLoading;
 
     private static List<ApplicationConnection> runningApplications = new ArrayList<>();
 
@@ -327,16 +309,6 @@ public class ApplicationConfiguration implements EntryPoint {
      */
     public String getContextRootUrl() {
         return contextRootUrl;
-    }
-
-    /**
-     * @return the theme name used when initializing the application
-     * @deprecated as of 7.3. Use {@link UIConnector#getActiveTheme()} to get
-     *             the theme currently in use
-     */
-    @Deprecated
-    public String getThemeName() {
-        return getJsoConfiguration(id).getConfigString("theme");
     }
 
     /**
@@ -702,122 +674,21 @@ public class ApplicationConfiguration implements EntryPoint {
         return tagToServerSideClassName.get(tag);
     }
 
-    String getUnknownServerClassNameByTag(int tag) {
-        if (unknownComponents != null) {
-            String className = unknownComponents.get(tag);
-            if (className == null) {
-                className = "unknown class with id " + tag;
-            }
-            return className;
-        }
-        return null;
-    }
-
     /**
-     * Runs the given command when all pending dependencies have been loaded, or
-     * immediately if no dependencies are being loaded.
+     * Runs the given command immediately.
      *
      * @since 7.6
      * @param command
      *            the command to run
      */
     public static void runWhenDependenciesLoaded(Command command) {
-        if (dependenciesLoading == 0) {
-            command.execute();
-        } else {
-            callbacks.add(command);
-        }
-    }
-
-    static void startDependencyLoading() {
-        dependenciesLoading++;
-    }
-
-    static void endDependencyLoading() {
-        dependenciesLoading--;
-        if (dependenciesLoading == 0 && !callbacks.isEmpty()) {
-            for (Command cmd : callbacks) {
-                cmd.execute();
-            }
-            callbacks.clear();
-        }
-    }
-
-    private boolean vaadinBootstrapLoaded() {
-        Element window = ScriptInjector.TOP_WINDOW.cast();
-        return window.getPropertyJSO("vaadin") != null;
+        command.execute();
     }
 
     @Override
     public void onModuleLoad() {
         // Spreadsheet does not need anything from bootstrap
     }
-
-    private static void initDebugWindow() {
-        /*
-         * XXX Lots of implementation details here right now. This should be
-         * cleared up when an API for extending the debug window is implemented.
-         */
-        VDebugWindow window = VDebugWindow.get();
-
-        if (LogConfiguration.loggingIsEnabled()) {
-            window.addSection((Section) GWT.create(LogSection.class));
-        }
-        window.addSection((Section) GWT.create(InfoSection.class));
-        window.addSection((Section) GWT.create(HierarchySection.class));
-        window.addSection((Section) GWT.create(NetworkSection.class));
-        window.addSection((Section) GWT.create(TestBenchSection.class));
-        if (Profiler.isEnabled()) {
-            window.addSection((Section) GWT.create(ProfilerSection.class));
-        }
-
-        if (isQuietDebugMode()) {
-            window.close();
-        } else {
-            DebugWindowStyles dws = GWT.create(DebugWindowStyles.class);
-            dws.css().ensureInjected();
-
-            window.init();
-        }
-
-        // Connect to the legacy API
-        VConsole.setImplementation(window);
-
-        Handler errorNotificationHandler = GWT
-                .create(ErrorNotificationHandler.class);
-        Logger.getLogger("").addHandler(errorNotificationHandler);
-    }
-
-    /**
-     * Fix to iOS6 failing when comparing with 0 directly after the kind of
-     * comparison done by GWT when a double or float is cast to an int. Forcing
-     * another trivial operation (other than a compare to 0) after the dangerous
-     * comparison makes the issue go away. See #10460.
-     */
-    private static native void enableIOS6castFix()
-    /*-{
-          Math.max = function(a,b) {return (a > b === 1 < 2)? a : b}
-          Math.min = function(a,b) {return (a < b === 1 < 2)? a : b}
-    }-*/;
-
-    /**
-     * Make Metro versions of IE suggest switching to the desktop when
-     * window.prompt is called.
-     */
-    private static native void enableIEPromptFix()
-    /*-{
-        var prompt = $wnd.prompt;
-        $wnd.prompt = function () {
-            var result = prompt.apply($wnd, Array.prototype.slice.call(arguments));
-            if (result === undefined) {
-                // force the browser to suggest desktop mode
-                showModalDialog();
-                return null;
-            } else {
-                return result;
-            }
-        };
-    }-*/;
 
     /**
      * Registers that callback that the bootstrap javascript uses to start
@@ -893,10 +764,6 @@ public class ApplicationConfiguration implements EntryPoint {
      */
     public void setWidgetsetVersionSent() {
         widgetsetVersionSent = true;
-    }
-
-    private static final Logger getLogger() {
-        return Logger.getLogger(ApplicationConfiguration.class.getName());
     }
 
     /**
