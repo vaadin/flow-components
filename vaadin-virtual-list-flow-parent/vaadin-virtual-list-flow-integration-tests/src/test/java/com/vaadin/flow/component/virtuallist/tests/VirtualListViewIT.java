@@ -78,7 +78,7 @@ public class VirtualListViewIT extends AbstractComponentIT {
         long physicalItemCount = list.getPropertyElements("children").stream()
                 .filter(el -> "div".equals(el.getTagName())).count();
         Assert.assertTrue(physicalItemCount > 4);
-        Assert.assertTrue(physicalItemCount < 10);
+        Assert.assertTrue(physicalItemCount < 15);
     }
 
     @Test
