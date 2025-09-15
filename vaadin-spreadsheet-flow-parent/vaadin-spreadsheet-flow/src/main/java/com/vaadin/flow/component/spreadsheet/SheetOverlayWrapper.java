@@ -18,7 +18,6 @@ import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
-import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
 @SuppressWarnings("serial")
@@ -276,17 +275,6 @@ public abstract class SheetOverlayWrapper implements Serializable {
      */
     public ClientAnchor getAnchor() {
         return anchor;
-    }
-
-    /**
-     * Gets the resource containing this image
-     *
-     * @return Image resource
-     * @deprecated use {@link #getResourceHandler()} instead
-     */
-    @Deprecated(since = "24.8", forRemoval = true)
-    public StreamResource getResource() {
-        return null;
     }
 
     /**
