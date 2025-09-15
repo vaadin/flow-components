@@ -3595,7 +3595,11 @@ public class Spreadsheet extends Component
      * com.vaadin.server.Resource)
      *
      * Provides package visibility.
+     *
+     * @deprecated Use #setResource(java.lang.String,
+     * com.vaadin.flow.server.streams.DownloadHandler) instead.
      */
+    @Deprecated(since = "24.9.0", forRemoval = true)
     protected void setResource(String key, StreamResource resource) {
         if (resource == null) {
             resources.remove(key);
