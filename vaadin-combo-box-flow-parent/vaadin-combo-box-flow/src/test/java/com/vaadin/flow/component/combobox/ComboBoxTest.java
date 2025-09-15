@@ -24,7 +24,6 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
@@ -38,6 +37,8 @@ import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
+
+import tools.jackson.databind.node.ObjectNode;
 
 public class ComboBoxTest extends ComboBoxBaseTest {
     private enum Category {

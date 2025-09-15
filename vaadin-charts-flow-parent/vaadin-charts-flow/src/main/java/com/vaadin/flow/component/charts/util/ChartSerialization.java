@@ -13,10 +13,6 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.ObjectWriter;
-import tools.jackson.databind.ser.BeanSerializerModifier;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.serializers.AxisListSerializer;
 import com.vaadin.flow.component.charts.model.serializers.ChartEnumSerializer;
@@ -29,6 +25,11 @@ import com.vaadin.flow.component.charts.model.serializers.PaneListSerializer;
 import com.vaadin.flow.component.charts.model.serializers.SolidColorSerializer;
 import com.vaadin.flow.component.charts.model.serializers.StopSerializer;
 import com.vaadin.flow.component.charts.model.serializers.TimeUnitMultiplesSerializer;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectWriter;
+import tools.jackson.databind.ser.BeanSerializerModifier;
 
 /**
  * Util class that handles the configuration needed for the model classes to be

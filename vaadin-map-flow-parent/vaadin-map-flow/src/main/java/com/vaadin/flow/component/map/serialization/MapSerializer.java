@@ -13,6 +13,12 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.server.StreamRegistration;
+import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.streams.DownloadHandler;
+
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.ObjectMapper;
@@ -21,11 +27,6 @@ import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.module.SimpleModule;
 import tools.jackson.databind.node.BaseJsonNode;
 import tools.jackson.databind.ser.std.StdSerializer;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.server.StreamRegistration;
-import com.vaadin.flow.server.StreamResource;
-import com.vaadin.flow.server.StreamResourceRegistry;
-import com.vaadin.flow.server.streams.DownloadHandler;
 
 /**
  * Custom JSON serializer for the map component using a Jackson

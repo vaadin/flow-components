@@ -13,7 +13,6 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import tools.jackson.databind.node.BaseJsonNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -34,6 +33,8 @@ import com.vaadin.flow.component.map.serialization.MapSerializer;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.BaseJsonNode;
 
 /**
  * Base class for the map component. Contains all base functionality for the map

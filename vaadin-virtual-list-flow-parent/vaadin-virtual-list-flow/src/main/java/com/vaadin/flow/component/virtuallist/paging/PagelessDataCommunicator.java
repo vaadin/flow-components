@@ -15,12 +15,13 @@
  */
 package com.vaadin.flow.component.virtuallist.paging;
 
-import tools.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.StateNode;
+
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * DataCommunicator implementation which disables the paging and does not allow

@@ -17,7 +17,6 @@ package com.vaadin.flow.component.grid.editor;
 
 import java.util.Optional;
 
-import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.html.Span;
@@ -30,6 +29,8 @@ import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.ExecutionContext;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Renderer and DataGenerator used by {@link Column} to control the state of the

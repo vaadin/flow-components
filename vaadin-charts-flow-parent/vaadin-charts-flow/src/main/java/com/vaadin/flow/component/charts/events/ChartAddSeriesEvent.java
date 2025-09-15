@@ -8,11 +8,12 @@
  */
 package com.vaadin.flow.component.charts.events;
 
-import tools.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.charts.Chart;
+
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * The ChartAddSeriesEvent class stores data about new series added to an

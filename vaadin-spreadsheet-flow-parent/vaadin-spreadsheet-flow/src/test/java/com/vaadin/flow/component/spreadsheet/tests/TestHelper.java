@@ -12,11 +12,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import tools.jackson.core.JacksonException;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.SpreadsheetEvent;
 import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.core.JacksonException;
 
 public class TestHelper {
 

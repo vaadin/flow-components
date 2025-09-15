@@ -28,11 +28,12 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import tools.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.shared.InputField;
+
+import tools.jackson.databind.node.ArrayNode;
 
 public class MultiSelectComboBoxTest extends ComboBoxBaseTest {
     @Override

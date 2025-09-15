@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
@@ -22,9 +23,10 @@ class Serializer {
             .getLogger(Serializer.class);
 
     static {
-        objectMapper = JsonMapper.builder().changeDefaultPropertyInclusion(
-                incl -> incl.withValueInclusion(
-                        JsonInclude.Include.NON_DEFAULT)).build();
+        objectMapper = JsonMapper.builder()
+                .changeDefaultPropertyInclusion(incl -> incl
+                        .withValueInclusion(JsonInclude.Include.NON_DEFAULT))
+                .build();
     }
 
     static String serialize(Object value) {
