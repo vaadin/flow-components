@@ -15,8 +15,9 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.IOUtils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import tools.jackson.databind.JsonNode;
 import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.JsonNode;
 
 /**
  * Internationalization object for customizing the component UI texts. An

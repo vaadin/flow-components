@@ -15,11 +15,12 @@
  */
 package com.vaadin.flow.component.contextmenu.it;
 
-import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * @author Vaadin Ltd

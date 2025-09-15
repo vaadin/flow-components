@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import tools.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.shared.SelectionPreservationHandler;
 import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.data.provider.DataChangeEvent;
@@ -35,6 +34,8 @@ import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Server-side component for the {@code vaadin-list-box} element with

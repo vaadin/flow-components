@@ -18,13 +18,14 @@ package com.vaadin.flow.component.combobox;
 import java.util.HashSet;
 import java.util.Set;
 
-import tools.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.StateNode;
+
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Customized data communicator that uses a custom key mapper for preserving

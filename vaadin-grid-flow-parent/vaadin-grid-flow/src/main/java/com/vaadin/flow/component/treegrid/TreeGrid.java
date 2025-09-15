@@ -24,7 +24,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -60,6 +59,8 @@ import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Tree Grid is a component for displaying hierarchical tabular data grouped

@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
-import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -34,6 +33,8 @@ import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Base functionality for server-side components based on

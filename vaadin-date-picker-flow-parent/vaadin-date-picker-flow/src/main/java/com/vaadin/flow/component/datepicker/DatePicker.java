@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -68,6 +67,8 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Date Picker is an input field that allows the user to enter a date by typing

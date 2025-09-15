@@ -28,7 +28,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -45,6 +44,8 @@ import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Abstract implementation of a GridMultiSelectionModel.

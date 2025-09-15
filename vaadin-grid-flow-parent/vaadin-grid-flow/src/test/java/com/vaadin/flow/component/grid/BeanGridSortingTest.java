@@ -26,9 +26,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.internal.JacksonUtils;
+
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
-import com.vaadin.flow.internal.JacksonUtils;
 
 public class BeanGridSortingTest {
 

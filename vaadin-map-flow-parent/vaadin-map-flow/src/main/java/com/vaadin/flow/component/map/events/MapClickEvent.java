@@ -12,13 +12,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import tools.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.MapBase;
 import com.vaadin.flow.component.map.configuration.Coordinate;
+
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Representing OpenLayers' @code{click} event

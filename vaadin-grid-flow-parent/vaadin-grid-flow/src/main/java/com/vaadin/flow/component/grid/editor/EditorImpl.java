@@ -24,7 +24,6 @@ import java.util.Objects;
 
 import org.slf4j.LoggerFactory;
 
-import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.AbstractGridExtension;
 import com.vaadin.flow.component.grid.ItemClickEvent;
@@ -33,6 +32,8 @@ import com.vaadin.flow.data.binder.PropertySet;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Implementation of {@code Editor} interface.

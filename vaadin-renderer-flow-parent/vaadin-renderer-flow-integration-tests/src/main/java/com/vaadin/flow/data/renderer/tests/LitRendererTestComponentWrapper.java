@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import tools.jackson.databind.JsonNode;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.provider.ArrayUpdater;
@@ -28,6 +27,8 @@ import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.JsonNode;
 
 public class LitRendererTestComponentWrapper extends Div
         implements HasDataProvider<String> {

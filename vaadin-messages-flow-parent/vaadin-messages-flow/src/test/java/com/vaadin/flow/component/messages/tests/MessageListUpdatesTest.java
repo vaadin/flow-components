@@ -23,13 +23,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import tools.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.VaadinSession;
+
+import tools.jackson.databind.node.ArrayNode;
 
 public class MessageListUpdatesTest {
 

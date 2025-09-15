@@ -16,8 +16,6 @@ import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
 
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -43,6 +41,9 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JacksonSerializer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 @Tag("vaadin-grid-pro")
 @NpmPackage(value = "@vaadin/grid-pro", version = "25.0.0-alpha19")

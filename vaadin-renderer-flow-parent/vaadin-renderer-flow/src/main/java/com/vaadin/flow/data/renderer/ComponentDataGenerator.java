@@ -17,12 +17,13 @@ package com.vaadin.flow.data.renderer;
 
 import org.slf4j.LoggerFactory;
 
-import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.data.provider.AbstractComponentDataGenerator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * A {@link com.vaadin.flow.data.provider.DataGenerator DataGenerator} that

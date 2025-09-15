@@ -21,7 +21,6 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import tools.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
@@ -44,6 +43,8 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Menu Bar is a horizontal button bar with hierarchical drop-down menus. Menu

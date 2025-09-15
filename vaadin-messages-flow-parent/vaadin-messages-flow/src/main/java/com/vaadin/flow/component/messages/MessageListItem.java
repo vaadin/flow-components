@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import tools.jackson.databind.annotation.JsonSerialize;
-import tools.jackson.databind.ser.std.ToStringSerializer;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.internal.NodeOwner;
 import com.vaadin.flow.internal.StateTree;
@@ -41,6 +39,9 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.AbstractDownloadHandler;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.ser.std.ToStringSerializer;
 
 /**
  * Item to render as a message component inside a {@link MessageList}.
