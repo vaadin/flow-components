@@ -211,8 +211,8 @@ import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
  *
  */
 @Tag("vaadin-grid")
-@NpmPackage(value = "@vaadin/grid", version = "25.0.0-alpha18")
-@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha18")
+@NpmPackage(value = "@vaadin/grid", version = "25.0.0-alpha19")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha19")
 @JsModule("@vaadin/grid/src/vaadin-grid.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-column.js")
 @JsModule("@vaadin/grid/src/vaadin-grid-sorter.js")

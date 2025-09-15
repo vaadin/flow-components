@@ -9,7 +9,6 @@
 package com.vaadin.flow.component.charts.model;
 
 import java.time.Instant;
-import java.util.Date;
 
 /**
  * A DataSeriesItem implementation suitable for <a
@@ -64,21 +63,6 @@ public class OhlcItem extends DataSeriesItem {
             Number close) {
         this();
         setX(instant);
-        setOpen(open);
-        setLow(low);
-        setHigh(high);
-        setClose(close);
-    }
-
-    /**
-     * @deprecated as of 4.0. Use
-     *             {@link #OhlcItem(Instant, Number, Number, Number, Number)}
-     */
-    @Deprecated
-    public OhlcItem(Date date, Number open, Number high, Number low,
-            Number close) {
-        this();
-        setX(date);
         setOpen(open);
         setLow(low);
         setHigh(high);

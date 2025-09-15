@@ -61,7 +61,7 @@ import com.vaadin.flow.shared.Registration;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.0.0-alpha18")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.0.0-alpha19")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>

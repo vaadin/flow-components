@@ -141,6 +141,9 @@
                     <plugin>
                         <groupId>com.vaadin</groupId>
                         <artifactId>flow-maven-plugin</artifactId>
+                        <configuration>
+                            <frontendDirectory>./frontend</frontendDirectory>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
