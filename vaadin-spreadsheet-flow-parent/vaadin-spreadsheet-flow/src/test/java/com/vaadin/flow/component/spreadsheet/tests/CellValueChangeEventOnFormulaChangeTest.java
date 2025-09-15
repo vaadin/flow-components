@@ -14,7 +14,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.vaadin.flow.component.spreadsheet.CellSet;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -23,6 +22,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.spreadsheet.CellSet;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 /**
