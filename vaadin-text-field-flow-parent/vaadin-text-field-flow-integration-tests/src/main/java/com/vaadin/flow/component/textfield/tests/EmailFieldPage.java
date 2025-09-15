@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -44,14 +44,6 @@ public class EmailFieldPage extends Div {
         button.addClickListener(
                 event -> emailField.setReadOnly(!emailField.isReadOnly()));
         add(button);
-
-        NativeButton required = new NativeButton(
-                "Set/unset field required property");
-        required.setId("required");
-        required.addClickListener(
-                event -> emailField.setRequiredIndicatorVisible(
-                        !emailField.isRequiredIndicatorVisible()));
-        add(required);
 
         NativeButton enabled = new NativeButton(
                 "Set/unset field enabled property");

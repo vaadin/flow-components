@@ -31,7 +31,7 @@ async function computeModules() {
   } else {
     // Read modules from the parent pom.xml
     const parentJs = await xml2js.parseStringPromise(fs.readFileSync(`pom.xml`, 'utf8'));
-    modules = parentJs.project.modules[0].module.filter(m => !/shared-parent/.test(m)).filter(m => !/demo-helpers/.test(m));
+    modules = parentJs.project.modules[0].module.filter(m => !/shared-parent/.test(m)).filter(m => !/bom/.test(m));
   }
 }
 
@@ -115,6 +115,10 @@ async function createPom() {
 // copy a file
 function copyFileSync(source, target, replaceCall) {
   var targetFile = target;
+  // ignore app shells from individual IT modules, instead the merged ITs will use LumoAppShell
+  if (/TestAppShell.java$/.test(source)) {
+    return;
+  }
   // if target is a directory a new file with the same name will be created
   if (fs.existsSync(target)) {
     if (fs.lstatSync(target).isDirectory()) {
@@ -169,8 +173,7 @@ function copyFolderRecursiveSync(source, target, replaceCall) {
   }
 }
 
-// Create an index.html. Useful for monkey patching
-async function createFrontendIndex() {
+async function createProjectFiles() {
   if (/^14/.test(version)) {
     const javaFolder = `${itFolder}/src/main/java/com/vaadin`;
     const servicesFolder = `${itFolder}/src/main/resources/META-INF/services`
@@ -182,6 +185,7 @@ async function createFrontendIndex() {
     const frontendFolder = `${itFolder}/frontend`;
     fs.mkdirSync(frontendFolder, { recursive: true });
     copyFileSync(`${templateDir}/index.html`, `${frontendFolder}`);
+    copyFileSync(`${templateDir}/vite.config.ts`, `${itFolder}`);
   }
 }
 
@@ -216,17 +220,23 @@ async function copySources() {
     // copy frontend sources
     copyFolderRecursiveSync(`${parent}/${id}-integration-tests/frontend`, `${itFolder}`);
     // copy java sources
-    copyFolderRecursiveSync(`${parent}/${id}-integration-tests/src`, `${itFolder}`, (source, target, content) => {
-      return /\n\s*@Theme.*Material/.test(content) ? []: [target, content];
-    });
+    copyFolderRecursiveSync(`${parent}/${id}-integration-tests/src`, `${itFolder}`);
   });
+
+  // Always copy LumoAppShell, so that merged ITs run with Lumo theme applied. Some ITs do not work property with
+  // base styles alone.
+  fs.mkdirSync(`${itFolder}/src/main/java/com/vaadin/flow/theme/lumo`, { recursive: true });
+  copyFileSync(
+    'vaadin-lumo-theme-flow-parent/vaadin-lumo-theme-flow-integration-tests/src/main/java/com/vaadin/flow/theme/lumo/LumoAppShell.java',
+    `${itFolder}/src/main/java/com/vaadin/flow/theme/lumo/LumoAppShell.java`,
+  );
 }
 
 async function main() {
   await computeVersion();
   await computeModules();
   await copySources();
-  await createFrontendIndex();
+  await createProjectFiles();
   await createPom();
 }
 

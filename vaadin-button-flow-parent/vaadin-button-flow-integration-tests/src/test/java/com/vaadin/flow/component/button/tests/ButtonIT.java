@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,10 +15,8 @@
  */
 package com.vaadin.flow.component.button.tests;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchTestCase;
-import com.vaadin.tests.AbstractComponentIT;
+import java.time.Duration;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -29,7 +27,10 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.Duration;
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchTestCase;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the ButtonView.
@@ -47,6 +48,75 @@ public class ButtonIT extends AbstractComponentIT {
     }
 
     @Test
+    public void textMatches() {
+        List<ButtonElement> buttonElements = $(ButtonElement.class)
+                .withText("Vaadin button").all();
+        Assert.assertEquals(1, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class).withText("").all();
+        Assert.assertEquals(2, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class).withText("nonexistent").all();
+        Assert.assertEquals(0, buttonElements.size());
+    }
+
+    @Test
+    public void textContains() {
+        List<ButtonElement> buttonElements = $(ButtonElement.class)
+                .withTextContaining("Vaadin").all();
+        Assert.assertEquals(1, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class).withTextContaining("button")
+                .all();
+        Assert.assertEquals(3, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class)
+                .withTextContaining("nonexistent").all();
+        Assert.assertEquals(0, buttonElements.size());
+    }
+
+    @Test
+    public void textBiPredicate() {
+        List<ButtonElement> buttonElements = $(ButtonElement.class)
+                .withText("Vaadin", String::startsWith).all();
+        Assert.assertEquals(1, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class)
+                .withText("button", String::endsWith).all();
+        Assert.assertEquals(2, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class)
+                .withText("button", ButtonIT::containsIgnoreCase).all();
+        Assert.assertEquals(3, buttonElements.size());
+    }
+
+    @Test
+    public void captionMatches() {
+        List<ButtonElement> buttonElements = $(ButtonElement.class)
+                .withCaption("Vaadin button").all();
+        Assert.assertEquals(1, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class).withCaption("nonexistent")
+                .all();
+        Assert.assertEquals(0, buttonElements.size());
+    }
+
+    @Test
+    public void captionContains() {
+        List<ButtonElement> buttonElements = $(ButtonElement.class)
+                .withCaptionContaining("Vaadin").all();
+        Assert.assertEquals(1, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class).withCaptionContaining("button")
+                .all();
+        Assert.assertEquals(3, buttonElements.size());
+
+        buttonElements = $(ButtonElement.class)
+                .withCaptionContaining("nonexistent").all();
+        Assert.assertEquals(0, buttonElements.size());
+    }
+
+    @Test
     public void clickOnDefaultButton_textIsDisplayed() {
         WebElement button = layout.findElement(By.id("default-button"));
 
@@ -58,21 +128,21 @@ public class ButtonIT extends AbstractComponentIT {
     public void clickOnIconButtons_textIsDisplayed() {
         WebElement leftButton = layout.findElement(By.id("left-icon-button"));
         WebElement icon = leftButton.findElement(By.tagName("vaadin-icon"));
-        Assert.assertEquals("vaadin:arrow-left", icon.getAttribute("icon"));
+        Assert.assertEquals("vaadin:arrow-left", icon.getDomAttribute("icon"));
 
         // the icon is before the text
         Assert.assertTrue(getCenterX(leftButton) > getCenterX(icon));
 
         WebElement rightButton = layout.findElement(By.id("right-icon-button"));
         icon = rightButton.findElement(By.tagName("vaadin-icon"));
-        Assert.assertEquals("vaadin:arrow-right", icon.getAttribute("icon"));
+        Assert.assertEquals("vaadin:arrow-right", icon.getDomAttribute("icon"));
 
         // the icon is after the text
         Assert.assertTrue(getCenterX(rightButton) < getCenterX(icon));
 
         WebElement thumbButton = layout.findElement(By.id("thumb-icon-button"));
         icon = thumbButton.findElement(By.tagName("vaadin-icon"));
-        Assert.assertEquals("vaadin:thumbs-up", icon.getAttribute("icon"));
+        Assert.assertEquals("vaadin:thumbs-up", icon.getDomAttribute("icon"));
 
         scrollIntoViewAndClick(leftButton);
         waitUntilMessageIsChangedForClickedButton("Left");
@@ -89,11 +159,10 @@ public class ButtonIT extends AbstractComponentIT {
         WebElement button = layout.findElement(By.id("image-button"));
 
         WebElement img = button.findElement(By.tagName("img"));
-        img.getAttribute("href");
+        img.getDomAttribute("href");
 
-        Assert.assertEquals(getRootURL() + "/img/vaadin-logo.svg",
-                img.getAttribute("src"));
-        Assert.assertEquals("Vaadin logo", img.getAttribute("alt"));
+        Assert.assertEquals("img/vaadin-logo.svg", img.getDomAttribute("src"));
+        Assert.assertEquals("Vaadin logo", img.getDomAttribute("alt"));
 
         scrollIntoViewAndClick(button);
         waitUntilMessageIsChangedForClickedButton("with image");
@@ -102,7 +171,7 @@ public class ButtonIT extends AbstractComponentIT {
     @Test
     public void clickOnAccessibleButton_textIsDisplayed() {
         WebElement button = layout.findElement(By.id("accessible-button"));
-        Assert.assertEquals("Click me", button.getAttribute("aria-label"));
+        Assert.assertEquals("Click me", button.getDomAttribute("aria-label"));
 
         scrollIntoViewAndClick(button);
         waitUntilMessageIsChangedForClickedButton("Accessible");
@@ -111,11 +180,11 @@ public class ButtonIT extends AbstractComponentIT {
     @Test
     public void clickOnTabIndexButtons_textIsDisplayed() {
         WebElement button1 = layout.findElement(By.id("button-tabindex-1"));
-        Assert.assertEquals("1", button1.getAttribute("tabindex"));
+        Assert.assertEquals("1", button1.getDomAttribute("tabindex"));
         WebElement button2 = layout.findElement(By.id("button-tabindex-2"));
-        Assert.assertEquals("2", button2.getAttribute("tabindex"));
+        Assert.assertEquals("2", button2.getDomAttribute("tabindex"));
         WebElement button3 = layout.findElement(By.id("button-tabindex-3"));
-        Assert.assertEquals("3", button3.getAttribute("tabindex"));
+        Assert.assertEquals("3", button3.getDomAttribute("tabindex"));
 
         scrollIntoViewAndClick(button3);
         waitUntilMessageIsChangedForClickedButton("3");
@@ -129,10 +198,10 @@ public class ButtonIT extends AbstractComponentIT {
 
     @Test
     public void clickOnDisabledButton_nothingIsDisplayed() {
-        WebElement button = layout.findElement(By.id("disabled-button"));
-        Assert.assertTrue("The button should contain the 'disabled' attribute",
-                button.getAttribute("disabled").equals("")
-                        || button.getAttribute("disabled").equals("true"));
+        ButtonElement button = layout.$(ButtonElement.class)
+                .id("disabled-button");
+        Assert.assertFalse("The button should contain the 'disabled' attribute",
+                button.isEnabled());
 
         // valo theme adds the pointer-events: none CSS property, which makes
         // the button unclickable by selenium.
@@ -151,11 +220,11 @@ public class ButtonIT extends AbstractComponentIT {
 
     @Test
     public void clickDisableOnClickButton_newClickNotRegistered() {
-        WebElement button = layout
-                .findElement(By.id("disable-on-click-button"));
+        ButtonElement button = layout.$(ButtonElement.class)
+                .id("disable-on-click-button");
         Assert.assertTrue(
                 "The button should not contain the 'disabled' attribute",
-                button.getAttribute("disabled") == null);
+                button.isEnabled());
 
         scrollToElement(button);
         executeScript(
@@ -163,10 +232,9 @@ public class ButtonIT extends AbstractComponentIT {
                 button);
 
         // Check that button is disabled
-        String disabled = button.getAttribute("disabled");
-        Assert.assertTrue(
+        Assert.assertFalse(
                 "The button should contain the 'disabled' attribute after click",
-                disabled != null);
+                button.isEnabled());
 
         String singleClick = "Button Disabled on click was clicked and enabled state was changed to false receiving 1 clicks";
         Assert.assertEquals(
@@ -190,13 +258,14 @@ public class ButtonIT extends AbstractComponentIT {
             // Enable button from server side.
             layout.findElement(By.id("enable-button")).click();
 
-            button = layout.findElement(By.id("disable-on-click-button"));
+            button = layout.$(ButtonElement.class)
+                    .id("disable-on-click-button");
 
             // Check that button is not disabled anymore
             Assert.assertTrue(
                     "The button should not contain the 'disabled' attribute after server side clearing (iteration: "
                             + i + ")",
-                    button.getAttribute("disabled") == null);
+                    button.isEnabled());
 
             Assert.assertEquals(
                     "Button re-enabled message should be the latest message (iteration: "
@@ -207,11 +276,10 @@ public class ButtonIT extends AbstractComponentIT {
             button.click();
 
             // Assert that button gets disabled again on click
-            disabled = button.getAttribute("disabled");
-            Assert.assertTrue(
+            Assert.assertFalse(
                     "The button should contain the 'disabled' attribute after click (iteration: "
                             + i + ")",
-                    disabled != null);
+                    button.isEnabled());
 
             Assert.assertEquals(
                     "Button should have gotten 1 click and become disabled.",
@@ -220,60 +288,82 @@ public class ButtonIT extends AbstractComponentIT {
         }
     }
 
-    @Test // https://github.com/vaadin/vaadin-button-flow/issues/115
-    public void disableButtonOnClick_canBeEnabled() {
-        getCommandExecutor().disableWaitForVaadin();
-        ButtonElement button = $(ButtonElement.class)
-                .id("temporarily-disabled-button");
-
-        for (int i = 0; i < 3; i++) {
-            button.click();
-
-            Assert.assertFalse("button should be disabled", button.isEnabled());
-            waitUntil(ExpectedConditions.elementToBeClickable(
-                    $(ButtonElement.class).id("temporarily-disabled-button")),
-                    2000);
-
-            Assert.assertTrue("button should be enabled again",
-                    button.isEnabled());
-        }
-
-        getCommandExecutor().enableWaitForVaadin();
-    }
-
     @Test
-    public void removeDisabled_buttonWorksNormally() {
-        WebElement button = layout
-                .findElement(By.id("disable-on-click-button"));
+    public void removeDisableOnClick_buttonWorksNormally() {
+        ButtonElement button = layout.$(ButtonElement.class)
+                .id("disable-on-click-button");
         Assert.assertTrue(
                 "The button should not contain the 'disabled' attribute",
-                button.getAttribute("disabled") == null);
+                button.isEnabled());
 
         scrollIntoViewAndClick(button);
 
         // Check that button is disabled
-        String disabled = button.getAttribute("disabled");
-        Assert.assertTrue(
+        Assert.assertFalse(
                 "The button should contain the 'disabled' attribute after click",
-                disabled != null);
+                button.isEnabled());
 
         layout.findElement(By.id("enable-button")).click();
         layout.findElement(By.id("toggle-button")).click();
 
-        button = layout.findElement(By.id("disable-on-click-button"));
+        button = layout.$(ButtonElement.class).id("disable-on-click-button");
 
         button.click();
         button.click();
 
-        Assert.assertNull(
-                "The button should not be disabled after " + "click anymore.",
-                button.getAttribute("disabled"));
+        Assert.assertTrue(
+                "The button should not be disabled after click anymore.",
+                button.isEnabled());
 
         String singleClick = "Button Disabled on click was clicked and enabled state was changed to true receiving 2 clicks";
         Assert.assertEquals("Button didn't get expected amount of clicks.",
                 singleClick,
                 layout.findElement(By.id("disabled-message")).getText());
 
+    }
+
+    @Test
+    public void disableOnClick_enableInSameRoundTrip_clientSideButtonIsEnabled() {
+        var itemId = "disable-on-click-re-enable-button";
+        getCommandExecutor().disableWaitForVaadin();
+        var button = findElement(By.id(itemId));
+        for (int i = 0; i < 3; i++) {
+            button.click();
+            Assert.assertFalse(button.isEnabled());
+            waitUntil(driver -> button.isEnabled());
+        }
+        getCommandExecutor().enableWaitForVaadin();
+    }
+
+    @Test
+    public void disableOnClick_hideWhenDisabled_showWhenEnabled_clientSideButtonIsEnabled() {
+        WebElement button = layout
+                .findElement(By.id("disable-on-click-hidden-button"));
+        for (int i = 0; i < 3; i++) {
+            button.click();
+
+            waitUntil(ExpectedConditions.invisibilityOf(button));
+            waitUntil(ExpectedConditions
+                    .not(ExpectedConditions.elementToBeClickable(button)));
+
+            layout.findElement(By.id("enable-hidden-button")).click();
+            waitUntil(ExpectedConditions.visibilityOf(button));
+            waitUntil(ExpectedConditions.elementToBeClickable(button));
+        }
+    }
+
+    @Test
+    public void disabledAndPointerEventsAuto_disableOnClick_clientSideButtonIsDisabled() {
+        ButtonElement button = layout.$(ButtonElement.class)
+                .id("disable-on-click-pointer-events-auto");
+
+        scrollToElement(button);
+        executeScript("arguments[0].dispatchEvent(new MouseEvent(\"click\"));",
+                button);
+
+        Assert.assertFalse(
+                "The button should contain the 'disabled' attribute after click",
+                button.isEnabled());
     }
 
     @Test
@@ -296,13 +386,13 @@ public class ButtonIT extends AbstractComponentIT {
         firstNameField.sendKeys("text 1");
         lastNamefield.sendKeys("text 2");
 
-        Assert.assertEquals("text 1", firstNameField.getAttribute("value"));
-        Assert.assertEquals("text 2", lastNamefield.getAttribute("value"));
+        Assert.assertEquals("text 1", firstNameField.getDomProperty("value"));
+        Assert.assertEquals("text 2", lastNamefield.getDomProperty("value"));
 
         lastNamefield.sendKeys(Keys.ALT, "l");
 
-        Assert.assertEquals("", firstNameField.getAttribute("value"));
-        Assert.assertEquals("", lastNamefield.getAttribute("value"));
+        Assert.assertEquals("", firstNameField.getDomProperty("value"));
+        Assert.assertEquals("", lastNamefield.getDomProperty("value"));
     }
 
     private void waitUntilMessageIsChangedForClickedButton(
@@ -320,17 +410,12 @@ public class ButtonIT extends AbstractComponentIT {
         });
     }
 
-    @Test
-    public void assertVariants() {
-        WebElement button = findElement(By.id("button-theme-variants"));
-        Assert.assertEquals("small primary", button.getAttribute("theme"));
-
-        findElement(By.id("remove-theme-variant-button")).click();
-        Assert.assertEquals("primary", button.getAttribute("theme"));
-    }
-
     private int getCenterX(WebElement element) {
         return element.getLocation().getX() + element.getSize().getWidth() / 2;
+    }
+
+    private static boolean containsIgnoreCase(String a, String b) {
+        return a.toUpperCase().contains(b.toUpperCase());
     }
 
     @Override

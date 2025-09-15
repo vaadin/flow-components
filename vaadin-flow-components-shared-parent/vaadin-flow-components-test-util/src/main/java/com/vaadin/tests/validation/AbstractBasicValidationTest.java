@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,10 +20,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasValidation;
-import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
-import com.vaadin.flow.component.shared.HasClientValidation.ClientValidatedEvent;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 
 /**
  * An abstract class that provides tests verifying that a component correctly
@@ -38,6 +40,12 @@ public abstract class AbstractBasicValidationTest<C extends AbstractField<C, V> 
     }
 
     @Test
+    public void webComponentManualValidationEnabled() {
+        Assert.assertTrue(
+                testField.getElement().getProperty("manualValidation", false));
+    }
+
+    @Test
     public void setRequired_setManualValidation_fireValueChangeEvent_noValidation() {
         testField.setRequiredIndicatorVisible(true);
         testField.setManualValidation(true);
@@ -48,12 +56,11 @@ public abstract class AbstractBasicValidationTest<C extends AbstractField<C, V> 
     }
 
     @Test
-    public void setRequired_setManualValidation_fireClientValidatedEvent_noValidation() {
+    public void setRequired_setManualValidation_fireUnparsableChangeEvent_noValidation() {
         testField.setRequiredIndicatorVisible(true);
         testField.setManualValidation(true);
 
-        ComponentUtil.fireEvent(testField,
-                new ClientValidatedEvent(testField, false));
+        fireUnparsableChangeDomEvent();
         Assert.assertFalse(testField.isInvalid());
     }
 
@@ -82,4 +89,11 @@ public abstract class AbstractBasicValidationTest<C extends AbstractField<C, V> 
     }
 
     protected abstract C createTestField();
+
+    private void fireUnparsableChangeDomEvent() {
+        DomEvent unparsableChangeDomEvent = new DomEvent(testField.getElement(),
+                "unparsable-change", JacksonUtils.createObjectNode());
+        testField.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(unparsableChangeDomEvent);
+    }
 }

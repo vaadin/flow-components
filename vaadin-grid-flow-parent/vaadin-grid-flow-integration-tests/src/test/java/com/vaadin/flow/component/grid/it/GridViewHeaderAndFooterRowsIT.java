@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,13 +15,13 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-
-import java.util.List;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
@@ -115,6 +115,7 @@ public class GridViewHeaderAndFooterRowsIT extends AbstractComponentIT {
         return cells.stream()
                 .map(cell -> cell.findElements(By.tagName(componentTag)))
                 .filter(list -> !list.isEmpty()).map(list -> list.get(0))
-                .anyMatch(cell -> text.equals(cell.getAttribute("innerHTML")));
+                .anyMatch(
+                        cell -> text.equals(cell.getDomProperty("innerHTML")));
     }
 }

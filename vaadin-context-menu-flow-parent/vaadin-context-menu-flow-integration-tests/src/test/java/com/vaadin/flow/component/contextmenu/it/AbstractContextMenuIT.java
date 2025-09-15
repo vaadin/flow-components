@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,12 +23,12 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import com.vaadin.tests.AbstractComponentIT;
+import com.vaadin.flow.component.contextmenu.testbench.ContextMenuElement;
+import com.vaadin.flow.component.contextmenu.testbench.ContextMenuItemElement;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 public abstract class AbstractContextMenuIT extends AbstractComponentIT {
-
-    public static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
 
     protected void rightClickOn(String id) {
         Actions action = new Actions(getDriver());
@@ -44,52 +44,62 @@ public abstract class AbstractContextMenuIT extends AbstractComponentIT {
         $("body").first().click();
     }
 
-    protected TestBenchElement getOverlay() {
-        return $(OVERLAY_TAG).first();
+    protected ContextMenuElement getMenu() {
+        return $(ContextMenuElement.class).withAttribute("opened").first();
     }
 
-    protected List<TestBenchElement> getAllOverlays() {
-        return $(OVERLAY_TAG).all();
+    protected List<ContextMenuElement> getAllMenus() {
+        return $(ContextMenuElement.class).withAttribute("opened").all();
     }
 
-    protected void verifyNumOfOverlays(int expected) {
+    protected void verifyNumberOfMenus(int expected) {
         try {
-            waitUntil(driver -> getAllOverlays().size() == expected);
+            waitUntil(driver -> getAllMenus().size() == expected);
         } catch (TimeoutException e) {
-            Assert.assertEquals(
-                    "Unexpected number of overlays opened at a time.", expected,
-                    getAllOverlays().size());
+            Assert.assertEquals("Unexpected number of menus opened at a time.",
+                    expected, getAllMenus().size());
         }
     }
 
     protected void verifyClosed() {
-        waitForElementNotPresent(By.tagName(OVERLAY_TAG));
+        waitForElementNotPresent(By.cssSelector(
+                "vaadin-context-menu[opened], vaadin-context-menu[closing]"));
+    }
+
+    protected void verifyClosedAndRemoved() {
+        waitForElementNotPresent(By.cssSelector("vaadin-context-menu"));
     }
 
     protected void verifyOpened() {
-        waitForElementPresent(By.tagName(OVERLAY_TAG));
+        waitForElementPresent(By.cssSelector("vaadin-context-menu[opened]"));
     }
 
     protected String[] getMenuItemCaptions() {
         return getMenuItemCaptions(getMenuItems());
     }
 
-    protected String[] getMenuItemCaptions(List<TestBenchElement> menuItems) {
-        return menuItems.stream().map(WebElement::getText)
+    protected String[] getMenuItemCaptions(
+            List<ContextMenuItemElement> menuItems) {
+        return menuItems.stream().map(ContextMenuItemElement::getText)
                 .toArray(String[]::new);
     }
 
-    protected List<TestBenchElement> getMenuItems() {
-        return getMenuItems(getOverlay());
+    protected List<ContextMenuItemElement> getMenuItems() {
+        return getMenuItems(getMenu());
     }
 
-    protected List<TestBenchElement> getMenuItems(TestBenchElement overlay) {
-        return overlay.$("vaadin-context-menu-item").all();
+    protected List<ContextMenuItemElement> getMenuItems(
+            ContextMenuElement menu) {
+        TestBenchElement content = getMenuContent(menu);
+        return content.$(ContextMenuItemElement.class).all();
     }
 
-    protected void openSubMenu(TestBenchElement parentItem) {
-        executeScript(
-                "arguments[0].dispatchEvent(new Event('mouseover', {bubbles:true}))",
-                parentItem);
+    protected TestBenchElement getMenuContent() {
+        return getMenuContent(getMenu());
+    }
+
+    protected TestBenchElement getMenuContent(ContextMenuElement menu) {
+        return wrap(TestBenchElement.class,
+                menu.findElement(By.cssSelector(":scope > [slot='overlay']")));
     }
 }

@@ -1,12 +1,21 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.charts.Chart;
@@ -19,15 +28,6 @@ import com.vaadin.flow.component.charts.events.internal.ItemSlicedEvent;
 import com.vaadin.flow.component.charts.events.internal.SeriesAddedEvent;
 import com.vaadin.flow.component.charts.events.internal.SeriesChangedEvent;
 import com.vaadin.flow.component.charts.events.internal.SeriesStateEvent;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * Chart's configuration root object containing all the child objects that are
@@ -61,6 +61,7 @@ public class Configuration extends AbstractConfigurationObject
     private Navigator navigator;
     private Time time;
     private List<AnnotationItem> annotations;
+    private ChartConnectors connectors;
 
     @JsonIgnore
     private final List<ConfigurationChangeListener> changeListeners = new ArrayList<>();
@@ -687,8 +688,7 @@ public class Configuration extends AbstractConfigurationObject
     /**
      * Set settings for range selector.
      * <p>
-     * This is only valid if the chart is configured to use timeline. See
-     * {@link com.vaadin.flow.component.charts.Chart#setTimeline(Boolean)}}
+     * This is only valid if the chart is configured to use timeline mode. See
      *
      * @param rangeSelector
      * @see RangeSelector
@@ -811,6 +811,9 @@ public class Configuration extends AbstractConfigurationObject
      * @see #setTime(Time)
      */
     public Time getTime() {
+        if (time == null) {
+            time = new Time();
+        }
         return time;
     }
 
@@ -1179,5 +1182,29 @@ public class Configuration extends AbstractConfigurationObject
             annotations = List.of(new AnnotationItem());
         }
         return annotations.get(0);
+    }
+
+    /**
+     * @see #setConnectors(ChartConnectors)
+     */
+    public ChartConnectors getConnectors() {
+        return connectors;
+    }
+
+    /**
+     * The Pathfinder module allows you to define connections between any two
+     * points, represented as lines - optionally with markers for the start
+     * and/or end points. Multiple algorithms are available for calculating how
+     * the connecting lines are drawn. In Gantt charts, the connectors are used
+     * to draw dependencies between tasks.
+     * 
+     * Values set here serve as the default values for all connectors in the
+     * chart. Individual style for a connector can be set on each point
+     * dependency (see {@link GanttSeriesItemDependency}).
+     * 
+     * @param connectors
+     */
+    public void setConnectors(ChartConnectors connectors) {
+        this.connectors = connectors;
     }
 }

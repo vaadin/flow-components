@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.treegrid;
 
 import java.util.List;
@@ -29,9 +44,6 @@ public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURC
                 grid.expand(List.of(item), true);
             }
         });
-
-        withProperty("children",
-                item -> grid.getDataCommunicator().hasChildren(item));
     }
 
     @Override
@@ -43,7 +55,7 @@ public class HierarchyColumnComponentRenderer<COMPONENT extends Component, SOURC
         var clickListener = "e => requestAnimationFrame(() => { e.defaultPrevented && onClick(e) })";
 
         return "<vaadin-grid-tree-toggle @click=${" + clickListener
-                + "} class=${item.cssClassName} .leaf=${!item.children} .expanded=${model.expanded} .level=${model.level}>"
+                + "} class=${item.cssClassName} .leaf=${!model.hasChildren} .expanded=${live(model.expanded)} .level=${model.level}>"
                 + super.getTemplateExpression() + "</vaadin-grid-tree-toggle>";
     }
 }

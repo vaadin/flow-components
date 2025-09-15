@@ -1,11 +1,20 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.test;
-
-import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
-import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
+
+import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
+import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-spreadsheet")
 public class MergeIT extends AbstractSpreadsheetIT {
@@ -75,5 +84,17 @@ public class MergeIT extends AbstractSpreadsheetIT {
         loadTestFixture(TestFixtures.MergeCells);
 
         Assert.assertEquals("A1 text", getMergedCellContent("A1"));
+    }
+
+    @Test
+    public void mergeCellsWithText_firstSubCellShouldNotHaveZIndex() {
+        setCellValue("A1", "A1 text");
+        selectRegion("A1", "B1");
+        loadTestFixture(TestFixtures.MergeCells);
+        var cellSelector = ".cell.row1.col1:not(merged-cell)";
+        var element = findElementInShadowRoot(By.cssSelector(cellSelector));
+        var style = element.getDomAttribute("style");
+        var hasZIndex = style != null && style.contains("z-index");
+        Assert.assertFalse(hasZIndex);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -174,8 +174,8 @@ class GridColumnOrderHelper<T> {
 
         // holds the current immediate child columns.
         final Set<AbstractColumn<?>> childColumns = new HashSet<>();
-        column.getChildren().filter(c -> !(c instanceof GridSelectionColumn))
-                .forEach(it -> childColumns.add((AbstractColumn) it));
+        column.getChildren().filter(c -> c instanceof AbstractColumn<?>)
+                .forEach(it -> childColumns.add((AbstractColumn<?>) it));
         // the new order of the children is computed here.
         final List<AbstractColumn<?>> newOrder = new ArrayList<>();
 

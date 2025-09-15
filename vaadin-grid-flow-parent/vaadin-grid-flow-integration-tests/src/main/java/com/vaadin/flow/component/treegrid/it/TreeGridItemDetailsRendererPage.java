@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,7 +16,7 @@
 package com.vaadin.flow.component.treegrid.it;
 
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
@@ -32,9 +32,9 @@ public class TreeGridItemDetailsRendererPage extends Div {
         grid.addHierarchyColumn(String::toString).setHeader("String")
                 .setId("string");
         grid.setItemDetailsRenderer(new ComponentRenderer<>(item -> {
-            Label label = new Label("Details opened! " + item);
-            label.setId("details-label");
-            return label;
+            Span span = new Span("Details opened! " + item);
+            span.setId("details-text");
+            return span;
         }));
 
         TreeData<String> data = new TreeGridStringDataBuilder()

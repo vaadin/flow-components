@@ -1,20 +1,21 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.gridpro.testbench;
 
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.elementsbase.Element;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-grid-pro&gt;</code>
@@ -129,7 +130,7 @@ public class GridProElement extends TestBenchElement {
         List<WebElement> headerCells = headerRows.get(rowIndex)
                 .findElements(By.tagName("th"));
         String slotName = headerCells.get(columnIndex)
-                .findElement(By.tagName("slot")).getAttribute("name");
+                .findElement(By.tagName("slot")).getDomAttribute("name");
 
         return findElement(By.cssSelector(
                 "vaadin-grid-cell-content[slot='" + slotName + "']"));

@@ -1,16 +1,16 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.addon.spreadsheet.client;
 
 import com.google.gwt.dom.client.Element;
-
 import com.google.gwt.dom.client.StyleElement;
+import com.google.gwt.user.client.Event;
 
 public class SheetJsniUtil {
 
@@ -43,7 +43,7 @@ public class SheetJsniUtil {
         }
         this.@com.vaadin.addon.spreadsheet.client.SheetJsniUtil::parsedRow = r;
         this.@com.vaadin.addon.spreadsheet.client.SheetJsniUtil::parsedCol = c;
-
+    
     }-*/;
 
     public int getParsedCol() {
@@ -156,5 +156,15 @@ public class SheetJsniUtil {
           && $wnd.Vaadin.Flow
           && $wnd.Vaadin.Flow.clients[appId]
           && $wnd.Vaadin.Flow.clients[appId].getByNodeId(parseInt(nodeId));
+    }-*/;
+
+    public static native Element[] getComposedPath(Event event)
+    /*-{
+        return event.composedPath();
+    }-*/;
+
+    public static native Element[] getAssignedElements(Element slot)
+    /*-{
+        return slot.assignedElements();
     }-*/;
 }

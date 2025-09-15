@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,36 +22,44 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.shared.InputField;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
-import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.tests.DataProviderListenersTest;
+import com.vaadin.tests.dataprovider.DataProviderListenersTest;
+import com.vaadin.tests.dataprovider.MockUI;
 
 public class RadioButtonGroupTest {
 
-    private static final String OUTER_HTML = "<vaadin-radio-button>\n <label slot=\"label\"><span>%s</span></label>\n</vaadin-radio-button>";
+    private static final String OUTER_HTML = "<vaadin-radio-button><label slot=\"label\"><span>%s</span></label></vaadin-radio-button>";
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
 
     @Test
     public void setReadOnlyRadioGroup_groupIsReadOnly() {
@@ -446,11 +454,24 @@ public class RadioButtonGroupTest {
     }
 
     @Test
+    public void setItemEnabledProvider_nullValue_doesNotThrow() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        group.setItems("Foo", "Bar", "Baz");
+        group.setValue("Foo");
+        group.setItemEnabledProvider(it -> it.equals("Foo"));
+
+        group.getElement().setProperty("value", null);
+
+        ComponentUtil.fireEvent(group,
+                new ComponentValueChangeEvent<>(group, group, "Foo", true));
+    }
+
+    @Test
     public void dataProviderListeners_radioButtonGroupAttachedAndDetached_oldDataProviderListenerRemoved() {
         DataProviderListenersTest
                 .checkOldListenersRemovedOnComponentAttachAndDetach(
                         new RadioButtonGroup<>(), 1, 1, new int[] { 0, 1 },
-                        new DataCommunicatorTest.MockUI());
+                        new MockUI());
     }
 
     @Test
@@ -494,5 +515,119 @@ public class RadioButtonGroupTest {
         RadioButtonGroup<String> field = new RadioButtonGroup<String>();
         Assert.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<RadioButtonGroup<String>, String>, String>);
+    }
+
+    @Test
+    public void discardSelectionOnDataChange_noExtraChangeEventsFired() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        List<HasValue.ValueChangeEvent<String>> events = new ArrayList<>();
+        group.addValueChangeListener(events::add);
+
+        List<String> items = new ArrayList<>(
+                Arrays.asList("Item 1", "Item 2", "Item 3"));
+        group.setItems(items);
+
+        group.setSelectionPreservationMode(SelectionPreservationMode.DISCARD);
+
+        String selectedItem = items.get(0);
+        group.setValue(selectedItem);
+        Assert.assertEquals(selectedItem, group.getValue());
+        Assert.assertEquals(1, events.size());
+        events.clear();
+
+        group.getDataProvider().refreshAll();
+        Assert.assertNull(group.getValue());
+        Assert.assertEquals(1, events.size());
+    }
+
+    @Test
+    public void preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        List<HasValue.ValueChangeEvent<String>> events = new ArrayList<>();
+        group.addValueChangeListener(events::add);
+
+        List<String> items = new ArrayList<>(
+                Arrays.asList("Item 1", "Item 2", "Item 3"));
+        group.setItems(items);
+
+        group.setSelectionPreservationMode(
+                SelectionPreservationMode.PRESERVE_EXISTING);
+
+        String selectedItem = items.get(0);
+        group.setValue(selectedItem);
+        Assert.assertEquals(selectedItem, group.getValue());
+        Assert.assertEquals(1, events.size());
+        events.clear();
+
+        group.getDataProvider().refreshAll();
+        Assert.assertEquals(selectedItem, group.getValue());
+        Assert.assertTrue(events.isEmpty());
+
+        items.remove(items.get(1));
+        group.getDataProvider().refreshAll();
+        Assert.assertEquals(selectedItem, group.getValue());
+        Assert.assertTrue(events.isEmpty());
+
+        items.remove(selectedItem);
+        group.getDataProvider().refreshAll();
+        Assert.assertNull(group.getValue());
+        Assert.assertEquals(1, events.size());
+    }
+
+    @Test
+    public void preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
+        RadioButtonGroup<String> group = new RadioButtonGroup<>();
+        List<HasValue.ValueChangeEvent<String>> events = new ArrayList<>();
+        group.addValueChangeListener(events::add);
+
+        List<String> items = new ArrayList<>(
+                Arrays.asList("Item 1", "Item 2", "Item 3"));
+        group.setItems(items);
+
+        group.setSelectionPreservationMode(
+                SelectionPreservationMode.PRESERVE_ALL);
+
+        String selectedItem = items.get(0);
+        group.setValue(selectedItem);
+        Assert.assertEquals(selectedItem, group.getValue());
+        Assert.assertEquals(1, events.size());
+        events.clear();
+
+        group.getDataProvider().refreshAll();
+        Assert.assertEquals(selectedItem, group.getValue());
+        Assert.assertTrue(events.isEmpty());
+
+        items.remove(items.get(1));
+        group.getDataProvider().refreshAll();
+        Assert.assertEquals(selectedItem, group.getValue());
+        Assert.assertTrue(events.isEmpty());
+
+        items.remove(selectedItem);
+        group.getDataProvider().refreshAll();
+        Assert.assertEquals(selectedItem, group.getValue());
+        Assert.assertTrue(events.isEmpty());
+    }
+
+    @Test
+    public void refreshItem_selectFromClient_valueContainsUpdatedItem() {
+        RadioButtonGroup<CustomItem> group = new RadioButtonGroup<>();
+        RadioButtonGroupListDataView<CustomItem> dataView = group.setItems(
+                new CustomItem(1L, "foo"), new CustomItem(2L, "bar"),
+                new CustomItem(3L, "baz"));
+        dataView.setIdentifierProvider(CustomItem::getId);
+
+        CustomItem updatedItem = new CustomItem(2L, "updated");
+        dataView.refreshItem(updatedItem);
+
+        AtomicReference<CustomItem> selectedItem = new AtomicReference<>();
+        group.addValueChangeListener(e -> selectedItem.set(e.getValue()));
+
+        // Simulate selecting an item from the client side via key
+        String itemKey = group.getChildren().skip(1).findFirst().orElseThrow()
+                .getElement().getProperty("value");
+        group.getElement().setProperty("value", itemKey);
+
+        Assert.assertEquals("updated", selectedItem.get().getName());
+        Assert.assertEquals("updated", group.getValue().getName());
     }
 }

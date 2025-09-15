@@ -1,13 +1,14 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.map.events;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
@@ -15,7 +16,6 @@ import com.vaadin.flow.component.map.MapBase;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Extent;
 import com.vaadin.flow.component.map.configuration.View;
-import elemental.json.JsonArray;
 
 /**
  * Fired when viewport movement has ended.
@@ -31,8 +31,8 @@ public class MapViewMoveEndEvent extends ComponentEvent<MapBase> {
     public MapViewMoveEndEvent(MapBase source, boolean fromClient,
             @EventData("event.detail.rotation") double rotation,
             @EventData("event.detail.zoom") double zoom,
-            @EventData("event.detail.center") JsonArray center,
-            @EventData("event.detail.extent") JsonArray extent) {
+            @EventData("event.detail.center") ArrayNode center,
+            @EventData("event.detail.extent") ArrayNode extent) {
         super(source, fromClient);
         this.rotation = (double) rotation;
         this.zoom = (double) zoom;

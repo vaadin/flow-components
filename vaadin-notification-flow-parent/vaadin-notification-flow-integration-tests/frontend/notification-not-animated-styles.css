@@ -1,0 +1,8 @@
+/*
+ Disable closing animation to avoid local timeouts in `waitForElementNotPresent`.
+ Do NOT disable opening animation as there is an IT that relies on it being used:
+ https://github.com/vaadin/flow-components/pull/4926
+ */
+vaadin-notification-card[closing] {
+  animation: none !important;
+}

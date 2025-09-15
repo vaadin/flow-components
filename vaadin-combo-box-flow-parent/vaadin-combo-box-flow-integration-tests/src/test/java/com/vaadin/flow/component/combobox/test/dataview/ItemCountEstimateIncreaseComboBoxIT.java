@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.combobox.test.dataview;
 
 import org.junit.Test;
@@ -87,7 +86,7 @@ public class ItemCountEstimateIncreaseComboBoxIT
 
         // Open the combo box drop down and scroll again to last item
         scrollToItem(comboBoxElement, unknownCountBackendItemsCount - 1);
-        waitUntilTextInContent(
+        waitUntilTextInContent(comboBoxElement,
                 "Callback Item " + (unknownCountBackendItemsCount - 1));
 
         // since the end was reached, only a reset() to data provider will reset
@@ -96,7 +95,7 @@ public class ItemCountEstimateIncreaseComboBoxIT
         verifyItemsCount(unknownCountBackendItemsCount);
         // Open the combo box drop down and scroll again to last item
         scrollToItem(comboBoxElement, unknownCountBackendItemsCount - 1);
-        waitUntilTextInContent(
+        waitUntilTextInContent(comboBoxElement,
                 "Callback Item " + (unknownCountBackendItemsCount - 1));
     }
 

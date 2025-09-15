@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,15 +15,16 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.testutil.TestPath;
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-combo-box/lazy-loading")
 public class LazyLoadingIT extends AbstractComboBoxIT {
@@ -79,7 +80,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertLoadedItemsCount(
                 "After opening the ComboBox, the first 50 items should be loaded",
                 50, stringBox);
-        assertRendered("Item 10");
+        assertRendered(stringBox, "Item 10");
     }
 
     @Test
@@ -88,18 +89,18 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         stringBox.openPopup();
 
         stringBox.setFilter("Item 11");
-        assertRendered("Item 11");
-        assertNotRendered("Item 2");
+        assertRendered(stringBox, "Item 11");
+        assertNotRendered(stringBox, "Item 2");
 
         stringBox.setFilter("Item 111");
-        assertRendered("Item 111");
-        assertNotRendered("Item 2");
+        assertRendered(stringBox, "Item 111");
+        assertNotRendered(stringBox, "Item 2");
     }
 
     @Test
     public void clickItem_valueChanged() {
         stringBox.openPopup();
-        getItemElements().get(2).click();
+        getItemElements(stringBox).get(2).click();
         assertMessage("Item 2");
     }
 
@@ -112,7 +113,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 "The selected value should be displayed in the ComboBox's TextField",
                 "Item 10", getTextFieldValue(stringBox));
         stringBox.openPopup();
-        assertItemSelected("Item 10");
+        assertItemSelected(stringBox, "Item 10");
     }
 
     @Test
@@ -125,7 +126,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         stringBox.openPopup();
         // Make sure the item is in the viewport / rendered
         scrollToItem(stringBox, 10);
-        assertItemSelected("Item 10");
+        assertItemSelected(stringBox, "Item 10");
     }
 
     @Test
@@ -164,7 +165,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         removeDisabledAttribute(stringBox);
         stringBox.openPopup();
 
-        getItemElements().get(4).click();
+        getItemElements(stringBox).get(4).click();
         assertMessage("");
     }
 
@@ -177,11 +178,11 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
                 180, pagesizeBox);
 
         scrollToItem(pagesizeBox, 200);
-        waitUntilTextInContent("Item 200");
+        waitUntilTextInContent(pagesizeBox, "Item 200");
 
         assertLoadedItemsCount("Expected two pages to be loaded.", 360,
                 pagesizeBox);
-        assertRendered("Item 200");
+        assertRendered(pagesizeBox, "Item 200");
     }
 
     @Test
@@ -191,7 +192,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         clickButton("change-pagesize");
         pagesizeBox.openPopup();
-        waitUntilTextInContent("Item");
+        waitUntilTextInContent(pagesizeBox, "Item");
         assertLoadedItemsCount(
                 "After opening the ComboBox, the first 'pageSize' amount "
                         + "of items should be loaded (with updated pageSize: 100).",
@@ -202,7 +203,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertLoadedItemsCount(
                 "Expected two pages to be loaded (with updated pageSize 100).",
                 200, pagesizeBox);
-        assertRendered("Item 100");
+        assertRendered(pagesizeBox, "Item 100");
     }
 
     @Test
@@ -210,9 +211,9 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         beanBox.openPopup();
         clickButton("item-label-generator");
         beanBox.openPopup();
-        assertRendered("Born 3");
+        assertRendered(beanBox, "Born 3");
 
-        getItemElements().get(5).click();
+        getItemElements(beanBox).get(5).click();
         Assert.assertEquals("Born 5", getTextFieldValue(beanBox));
 
         assertLoadedItemsCount("Only the first page should be loaded.", 50,
@@ -224,7 +225,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         beanBox.openPopup();
         clickButton("component-renderer");
         beanBox.openPopup();
-        assertComponentRendered("<h4>Person 4</h4>");
+        assertComponentRendered(beanBox, "<h4>Person 4</h4>");
         assertLoadedItemsCount("Only the first page should be loaded.", 50,
                 beanBox);
     }
@@ -235,7 +236,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         clickButton("data-provider");
         beanBox.openPopup();
 
-        assertRendered("Changed 6");
+        assertRendered(beanBox, "Changed 6");
         assertLoadedItemsCount("Only the first page should be loaded.", 50,
                 beanBox);
     }
@@ -245,8 +246,8 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         clickButton("item-label-generator");
         clickButton("component-renderer");
         beanBox.openPopup();
-        assertComponentRendered("<h4>Person 4</h4>");
-        getItemElements().get(7).click();
+        assertComponentRendered(beanBox, "<h4>Person 4</h4>");
+        getItemElements(beanBox).get(7).click();
         Assert.assertEquals("Born 7", getTextFieldValue(beanBox));
 
     }
@@ -258,7 +259,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         beanBox.openPopup();
         Assert.assertEquals(
                 "Expected the item to be updated after calling refreshItem().",
-                "Updated", getOverlayContents().get(0));
+                "Updated", getOverlayContents(beanBox).get(0));
     }
 
     @Test
@@ -266,9 +267,9 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         beanBox.openPopup();
         clickButton("remove-item");
         beanBox.openPopup();
-        assertNotRendered("Person 2");
-        assertRendered("Person 1");
-        assertRendered("Person 3");
+        assertNotRendered(beanBox, "Person 2");
+        assertRendered(beanBox, "Person 1");
+        assertRendered(beanBox, "Person 3");
     }
 
     @Test
@@ -276,41 +277,40 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         beanBox.openPopup();
         beanBox.setFilter("person 2");
 
-        waitUntil(driver -> getNonEmptyOverlayContents().size() > 5);
+        waitUntil(driver -> getNonEmptyOverlayContents(beanBox).size() > 5);
 
-        getNonEmptyOverlayContents().forEach(rendered -> {
+        getNonEmptyOverlayContents(beanBox).forEach(rendered -> {
             Assert.assertTrue(rendered.contains("Person 2"));
         });
 
         beanBox.setFilter("oN 330");
 
-        waitUntil(driver -> getOverlayContents().size() == 1);
+        waitUntil(driver -> getOverlayContents(beanBox).size() == 1);
 
         Assert.assertEquals("Unexpected item after filtering.", "Person 330",
-                getNonEmptyOverlayContents().get(0));
+                getNonEmptyOverlayContents(beanBox).get(0));
     }
 
     @Test
     public void customItemFilter() {
         filterBox.openPopup();
-        waitForElementVisible(By.tagName("vaadin-combo-box-overlay"));
 
         filterBox.setFilter("Person");
+        TestBenchElement overlay = filterBox.$("vaadin-combo-box-overlay")
+                .first();
 
-        waitForElementNotPresent(By.tagName("vaadin-combo-box-overlay"));
-
-        Assert.assertEquals(
+        Assert.assertFalse(
                 "None of the items should match the filter "
                         + "and overlay is not displayed",
-                0, $("vaadin-combo-box-overlay").all().size());
+                overlay.getPropertyBoolean("opened"));
 
         filterBox.setFilter("10");
 
-        waitUntil(driver -> getNonEmptyOverlayContents().size() > 0);
+        waitUntil(driver -> getNonEmptyOverlayContents(filterBox).size() > 0);
 
-        getNonEmptyOverlayContents().forEach(rendered -> {
-            Assert.assertThat(rendered,
-                    CoreMatchers.containsString("Born: 10"));
+        getNonEmptyOverlayContents(filterBox).forEach(rendered -> {
+            Assert.assertTrue("Expected rendered to contain 'Born: 10'",
+                    rendered.contains("Born: 10"));
         });
     }
 
@@ -347,7 +347,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertLoadedItemsCount(
                 "After opening the ComboBox, the first 50 items should be loaded",
                 50, callbackBox);
-        assertRendered("Item 0");
+        assertRendered(callbackBox, "Item 0");
 
         // Now backend request should take place to init the data communicator
         Assert.assertEquals("1", lazySizeRequestCountSpan.getText());
@@ -358,7 +358,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertLoadedItemsCount(
                 "There should be 100 items after loading two pages", 100,
                 callbackBox);
-        assertRendered("Item 60");
+        assertRendered(callbackBox, "Item 60");
     }
 
     @Test
@@ -368,9 +368,9 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertLoadedItemsCount(
                 "After opening the ComboBox, the first 50 items should be loaded",
                 50, templateBox);
-        assertRendered("Item 8");
+        assertRendered(templateBox, "Item 8");
 
-        getItemElements().get(8).click();
+        getItemElements(templateBox).get(8).click();
         assertMessage("Item 8");
 
         templateBox.openPopup();
@@ -379,7 +379,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         assertLoadedItemsCount(
                 "There should be 100 items after loading two pages", 100,
                 templateBox);
-        assertRendered("Item 50");
+        assertRendered(templateBox, "Item 50");
     }
 
     @Test // https://github.com/vaadin/vaadin-combo-box-flow/issues/216
@@ -388,7 +388,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
 
         stringBox.openPopup();
         stringBox.setFilter(item);
-        waitUntil(driver -> getNonEmptyOverlayContents().size() == 1);
+        waitUntil(driver -> getNonEmptyOverlayContents(stringBox).size() == 1);
         stringBox.selectByText(item);
 
         clickButton("set-current-value");
@@ -402,7 +402,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         String item = "Item 151";
         stringBox.openPopup();
         stringBox.setFilter(item);
-        waitUntil(driver -> getNonEmptyOverlayContents().size() == 1);
+        waitUntil(driver -> getNonEmptyOverlayContents(stringBox).size() == 1);
         stringBoxAutoOpenDisabled.selectByText(item);
         assertMessage(item);
         Assert.assertEquals(item,
@@ -418,47 +418,47 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         beanBox.openPopup();
 
         scrollToItem(beanBox, 300);
-        waitUntilTextInContent("<h4>Person 300</h4>");
+        waitUntilTextInContent(beanBox, "<h4>Person 300</h4>");
 
         scrollToItem(beanBox, 0);
-        waitUntilTextInContent("<h4>Person 0</h4>");
+        waitUntilTextInContent(beanBox, "<h4>Person 0</h4>");
 
-        assertComponentRendered("<h4>Person 0</h4>");
-        assertComponentRendered("<h4>Person 4</h4>");
-        assertComponentRendered("<h4>Person 7</h4>");
+        assertComponentRendered(beanBox, "<h4>Person 0</h4>");
+        assertComponentRendered(beanBox, "<h4>Person 4</h4>");
+        assertComponentRendered(beanBox, "<h4>Person 7</h4>");
     }
 
     @Test
     public void scrollDown_scrollUp_selectionRetained() {
         beanBox.sendKeys("Person 0");
-        waitUntilTextInContent("Person 0");
+        waitUntilTextInContent(beanBox, "Person 0");
         beanBox.sendKeys(Keys.ENTER);
 
         beanBox.openPopup();
-        waitUntilTextInContent("Person 0");
+        waitUntilTextInContent(beanBox, "Person 0");
 
         int scrollIndex = 600;
         scrollToItem(beanBox, scrollIndex);
-        waitUntilTextInContent("Person " + scrollIndex);
+        waitUntilTextInContent(beanBox, "Person " + scrollIndex);
 
         Assert.assertTrue(
                 "First item should not be loaded after scrolling down enough",
                 getLoadedItems(beanBox).size() < scrollIndex);
 
         scrollToItem(beanBox, 0);
-        waitUntilTextInContent("Person 0");
+        waitUntilTextInContent(beanBox, "Person 0");
 
-        assertItemSelected("Person 0");
+        assertItemSelected(beanBox, "Person 0");
     }
 
     @Test
     public void filtering_filterRetained() {
         beanBox.sendKeys("Person 1");
-        waitUntilTextInContent("Person 1");
+        waitUntilTextInContent(beanBox, "Person 1");
         beanBox.sendKeys(Keys.ENTER);
 
         beanBox.sendKeys("11");
-        waitUntilTextInContent("Person 111");
+        waitUntilTextInContent(beanBox, "Person 111");
 
         String filterText = (String) executeScript(
                 "return arguments[0].focusElement.value", beanBox);
@@ -470,7 +470,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
     public void customPageSize_pageSizePopulatedToDataCommunicator() {
         lazyCustomPageSize.openPopup();
         scrollToItem(lazyCustomPageSize, 100);
-        waitUntilTextInContent("100");
+        waitUntilTextInContent(lazyCustomPageSize, "100");
         // page size should be 42
         assertMessage("42");
 
@@ -478,7 +478,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         lazyCustomPageSize.closePopup();
         lazyCustomPageSize.openPopup();
         scrollToItem(lazyCustomPageSize, 300);
-        waitUntilTextInContent("300");
+        waitUntilTextInContent(lazyCustomPageSize, "300");
         // page size should be 41
         assertMessage("41");
     }
@@ -499,7 +499,7 @@ public class LazyLoadingIT extends AbstractComboBoxIT {
         scrollToItem(disabledLazyLoadingBox, 100);
         assertLoadedItemsCount("Scrolling down should load further pages", 100,
                 disabledLazyLoadingBox);
-        assertRendered("99");
+        assertRendered(disabledLazyLoadingBox, "99");
     }
 
     @Test

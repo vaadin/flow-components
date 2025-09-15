@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,12 +21,12 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-import org.openqa.selenium.WebElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/sorting")
 public class SortingIT extends AbstractComponentIT {
@@ -64,7 +64,7 @@ public class SortingIT extends AbstractComponentIT {
 
         GridElement hiddenGrid = $(GridElement.class).id("hidden-grid");
 
-        waitUntil(driver -> "false".equals(hiddenGrid.getAttribute("loading")));
+        waitUntil(driver -> !hiddenGrid.hasAttribute("loading"));
 
         Assert.assertEquals("B", hiddenGrid.getCell(0, 0).getText());
         Assert.assertEquals("A", hiddenGrid.getCell(1, 0).getText());
@@ -83,9 +83,9 @@ public class SortingIT extends AbstractComponentIT {
         findElement(By.id("sort-by-age")).click();
         List<TestBenchElement> sorters = grid.$("vaadin-grid-sorter").all();
         Assert.assertEquals("Sort by Name",
-                sorters.get(0).getAttribute("aria-label"));
+                sorters.get(0).getDomAttribute("aria-label"));
         Assert.assertEquals("Sort by Age",
-                sorters.get(1).getAttribute("aria-label"));
+                sorters.get(1).getDomAttribute("aria-label"));
     }
 
     @Test
@@ -102,6 +102,24 @@ public class SortingIT extends AbstractComponentIT {
         assertAscendingSorter("Age");
         findElement(By.id("change-header-text-component")).click();
         assertAscendingSorter("Age (updated)");
+    }
+
+    @Test
+    public void setInitialSortOrder_sortByTwoColumns_sortCountIncreases() {
+        findElement(By.id("sort-by-age")).click();
+        WebElement count = findElement(By.id("sort-listener-count"));
+        Assert.assertEquals(count.getText(), "Sort count: 1");
+        findElement(By.id("sort-by-two-columns")).click();
+        Assert.assertEquals(count.getText(), "Sort count: 2");
+    }
+
+    @Test
+    public void setInitialSortOrder_updateTwoColumnHeaders_sortCountDoesNotIncrease() {
+        findElement(By.id("sort-by-age")).click();
+        WebElement count = findElement(By.id("sort-listener-count"));
+        Assert.assertEquals(count.getText(), "Sort count: 1");
+        findElement(By.id("change-two-column-headers")).click();
+        Assert.assertEquals(count.getText(), "Sort count: 1");
     }
 
     @Test
@@ -126,17 +144,17 @@ public class SortingIT extends AbstractComponentIT {
         Assert.assertEquals("asc",
                 sortingGridElement
                         .findElements(By.tagName("vaadin-grid-sorter")).get(0)
-                        .getAttribute("direction"));
+                        .getDomProperty("direction"));
         String sortStateNumberNameColumn = sortingGridElement
                 .findElements(By.tagName("vaadin-grid-sorter")).get(0)
-                .getAttribute("_order");
+                .getDomProperty("_order");
         Assert.assertEquals("asc",
                 sortingGridElement
                         .findElements(By.tagName("vaadin-grid-sorter")).get(1)
-                        .getAttribute("direction"));
+                        .getDomProperty("direction"));
         String sortStateNumberAgeColumn = sortingGridElement
                 .findElements(By.tagName("vaadin-grid-sorter")).get(1)
-                .getAttribute("_order");
+                .getDomProperty("_order");
         // Detach
         btnRemove.click();
         // Reattach
@@ -147,20 +165,20 @@ public class SortingIT extends AbstractComponentIT {
         Assert.assertEquals("asc",
                 sortingGridElement
                         .findElements(By.tagName("vaadin-grid-sorter")).get(0)
-                        .getAttribute("direction"));
+                        .getDomProperty("direction"));
 
         Assert.assertEquals("asc",
                 sortingGridElement
                         .findElements(By.tagName("vaadin-grid-sorter")).get(1)
-                        .getAttribute("direction"));
+                        .getDomProperty("direction"));
 
         String sortStateNumberAgeColumnAfterDetach = sortingGridElement
                 .findElements(By.tagName("vaadin-grid-sorter")).get(1)
-                .getAttribute("_order");
+                .getDomProperty("_order");
 
         String sortStateNumberNameColumnAfterDetach = sortingGridElement
                 .findElements(By.tagName("vaadin-grid-sorter")).get(0)
-                .getAttribute("_order");
+                .getDomProperty("_order");
         String textAgeColumnAfterReattch = sortingGridElement.getCell(0, 1)
                 .getText();
         Assert.assertEquals(textAgeColumnBeforeReattch,
@@ -179,7 +197,7 @@ public class SortingIT extends AbstractComponentIT {
                 1, sorters.size());
         TestBenchElement sorter = sorters.get(0);
         Assert.assertEquals("Expected ascending sort order.", "asc",
-                sorter.getAttribute("direction"));
+                sorter.getDomProperty("direction"));
         Assert.assertTrue(sorter.getText().startsWith(expectedColumnHeader));
     }
 

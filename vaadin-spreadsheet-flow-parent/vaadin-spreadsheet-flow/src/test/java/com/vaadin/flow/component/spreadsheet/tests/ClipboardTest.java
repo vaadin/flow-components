@@ -1,8 +1,17 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests;
 
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,17 +33,22 @@ public class ClipboardTest {
         UI.setCurrent(ui);
     }
 
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
+
     @Test
     public void paste_cellHasValue() {
         spreadsheet.setSelection("A1:A2");
-        paste("['A1']");
+        paste("[\"A1\"]");
         Assert.assertEquals("A1", getCellValue("A1"));
     }
 
     @Test
     public void paste_numeric_cellHasValue() {
         spreadsheet.setSelection("A1:A2");
-        paste("['1']");
+        paste("[\"1\"]");
         Assert.assertEquals(1, spreadsheet.getCell("A1").getNumericCellValue(),
                 0.0);
     }
@@ -42,7 +56,7 @@ public class ClipboardTest {
     @Test
     public void paste_multiRow_cellHasValue() {
         spreadsheet.setSelection("A1:A2");
-        paste("['A1\\nA2']");
+        paste("[\"A1\\nA2\"]");
         Assert.assertEquals("A1", getCellValue("A1"));
         Assert.assertEquals("A2", getCellValue("A2"));
     }
@@ -50,7 +64,7 @@ public class ClipboardTest {
     @Test
     public void paste_multiRowR_cellHasValue() {
         spreadsheet.setSelection("A1:A2");
-        paste("['A1\\rA2']");
+        paste("[\"A1\\rA2\"]");
         Assert.assertEquals("A1", getCellValue("A1"));
         Assert.assertEquals("A2", getCellValue("A2"));
     }
@@ -58,7 +72,7 @@ public class ClipboardTest {
     @Test
     public void paste_multiRowRN_cellHasValue() {
         spreadsheet.setSelection("A1:A2");
-        paste("['A1\\r\\nA2']");
+        paste("[\"A1\\r\\nA2\"]");
         Assert.assertEquals("A1", getCellValue("A1"));
         Assert.assertEquals("A2", getCellValue("A2"));
     }
@@ -66,7 +80,7 @@ public class ClipboardTest {
     @Test
     public void paste_multiRow_multiColumn_cellHasValue() {
         spreadsheet.setSelection("A1:A2");
-        paste("['A1\\tB1\\nA2\\tB2']");
+        paste("[\"A1\\tB1\\nA2\\tB2\"]");
         Assert.assertEquals("A1", getCellValue("A1"));
         Assert.assertEquals("A2", getCellValue("A2"));
         Assert.assertEquals("B1", getCellValue("B1"));
@@ -78,7 +92,7 @@ public class ClipboardTest {
         lockCell("A1");
         spreadsheet.setSelection("A1:A2");
         // Try pasting the value to a locked cell
-        paste("['A1']");
+        paste("[\"A1\"]");
         Assert.assertEquals("locked", getCellValue("A1"));
     }
 
@@ -90,15 +104,80 @@ public class ClipboardTest {
         var event = new AtomicReference<ProtectedEditEvent>();
         spreadsheet.addProtectedEditListener(e -> event.set(e));
 
-        paste("['A1']");
+        paste("[\"A1\"]");
 
         Assert.assertNotNull(event.get());
     }
 
     @Test
+    public void lockSheet_pasteIntoNonExistingCell_cellNotCreated() {
+        lockSheet();
+        spreadsheet.setSelection("A1");
+        // Try pasting the value to a non-existing cell in a locked sheet
+        paste("[\"A1\"]");
+        Assert.assertNull(spreadsheet.getCell("A1"));
+    }
+
+    @Test
+    public void createCell_lockSheet_pasteIntoExistingCell_cellValueNotUpdated() {
+        spreadsheet.createCell(9, 1, "initial");
+
+        lockSheet();
+
+        // Try pasting after locking
+        spreadsheet.setSelection("B10");
+        paste("[\"new data\"]");
+        Assert.assertEquals("initial", getCellValue("B10"));
+    }
+
+    @Test
+    public void lockSheet_unlockRow_shouldAllowPaste() {
+        lockSheet();
+
+        // Unlock a row
+        var workbook = spreadsheet.getActiveSheet().getWorkbook();
+        var unlockedRowStyle = workbook.createCellStyle();
+        unlockedRowStyle.setLocked(false);
+
+        var row = spreadsheet.getActiveSheet().createRow(5);
+        row.setRowStyle(unlockedRowStyle);
+
+        // Try pasting to a cell in the unlocked row
+        spreadsheet.setSelection("A6");
+        paste("[\"test data\"]");
+        Assert.assertEquals("test data", getCellValue("A6"));
+
+        // Try pasting again after cell has been created
+        paste("[\"new data\"]");
+        Assert.assertEquals("new data", getCellValue("A6"));
+    }
+
+    @Test
+    public void lockSheet_unlockColumn_shouldAllowPaste() {
+        lockSheet();
+
+        // Unlock a column
+        var workbook = spreadsheet.getActiveSheet().getWorkbook();
+        var unlockedColumnStyle = workbook.createCellStyle();
+        unlockedColumnStyle.setLocked(false);
+
+        spreadsheet.getActiveSheet().setDefaultColumnStyle(1,
+                unlockedColumnStyle);
+
+        // Try pasting to a cell in the unlocked column
+        spreadsheet.setSelection("B10");
+        paste("[\"test data\"]");
+        Assert.assertEquals("test data", getCellValue("B10"));
+
+        // Try pasting again after cell has been created
+        paste("[\"new data\"]");
+        Assert.assertEquals("new data", getCellValue("B10"));
+    }
+
+    @Test
     public void paste_selectionUpdated() {
         spreadsheet.setSelection("A1:A2");
-        paste("['A1\tB1']");
+        paste("[\"A1\\tB1\"]");
         Assert.assertEquals("A1:B1", spreadsheet.getCellSelectionManager()
                 .getSelectedCellRange().formatAsString());
     }
@@ -109,7 +188,7 @@ public class ClipboardTest {
 
         var event = new AtomicReference<CellValueChangeEvent>();
         spreadsheet.addCellValueChangeListener(e -> event.set(e));
-        paste("['A1']");
+        paste("[\"A1\"]");
 
         Assert.assertNotNull(event.get());
     }
@@ -117,8 +196,8 @@ public class ClipboardTest {
     @Test
     public void paste_emptyCell() {
         spreadsheet.setSelection("A1:A2");
-        paste("['A1\tB1\tC1']");
-        paste("['A1\t\tC1']");
+        paste("[\"A1\\tB1\\tC1\"]");
+        paste("[\"A1\\t\\tC1\"]");
 
         Assert.assertEquals("A1", getCellValue("A1"));
         Assert.assertEquals("", getCellValue("B1"));
@@ -128,8 +207,8 @@ public class ClipboardTest {
     @Test
     public void paste_undo_cellHasOriginalValue() {
         spreadsheet.setSelection("A1:A2");
-        paste("['A1']");
-        paste("['A1_updated']");
+        paste("[\"A1\"]");
+        paste("[\"A1_updated\"]");
         undo();
 
         Assert.assertEquals("A1", getCellValue("A1"));
@@ -139,9 +218,9 @@ public class ClipboardTest {
     public void paste_multiRow_multiColumn_undefinedCell() {
         spreadsheet.setSelection("A1:A2");
         // Paste a 2x2 matrix
-        paste("['A1\\tB1\\nA2\\tB2']");
+        paste("[\"A1\\tB1\\nA2\\tB2\"]");
         // Paste the same matrix but with one cell undefined
-        paste("['A1\\tB1\\nA2']");
+        paste("[\"A1\\tB1\\nA2\"]");
         Assert.assertEquals("A1", getCellValue("A1"));
         Assert.assertEquals("A2", getCellValue("A2"));
         Assert.assertEquals("B1", getCellValue("B1"));
@@ -151,7 +230,7 @@ public class ClipboardTest {
     @Test
     public void cut_clearsSelectedCells() {
         spreadsheet.setSelection("A1:A2");
-        paste("['A1']");
+        paste("[\"A1\"]");
         cut();
         Assert.assertEquals("", getCellValue("A1"));
     }
@@ -212,7 +291,7 @@ public class ClipboardTest {
     @Test
     public void cut_undo_cellHasOriginalValue() {
         spreadsheet.setSelection("A1:A2");
-        paste("['A1']");
+        paste("[\"A1\"]");
         cut();
         undo();
 
@@ -236,8 +315,12 @@ public class ClipboardTest {
                 "[]");
     }
 
-    private void lockCell(String cellAddress) {
+    private void lockSheet() {
         spreadsheet.setSheetProtected(0, "password");
+    }
+
+    private void lockCell(String cellAddress) {
+        lockSheet();
         spreadsheet.createCell(0, 0, "locked");
         var lockedCellStyle = spreadsheet.getActiveSheet().getWorkbook()
                 .createCellStyle();

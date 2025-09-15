@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,6 +14,8 @@
  * the License.
  */
 package com.vaadin.flow.component.combobox.test;
+
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -51,7 +53,7 @@ public class DetachReattachIT extends AbstractComboBoxIT {
     @Test
     public void openComboBox_detach_reattach_open_itemsLoaded() {
         combo.openPopup();
-        assertRendered("foo");
+        assertRendered(combo, "foo");
         clickButton("detach");
         clickButton("attach");
         combo = $(ComboBoxElement.class).first();
@@ -81,6 +83,22 @@ public class DetachReattachIT extends AbstractComboBoxIT {
 
         combo = $(ComboBoxElement.class).first();
         Assert.assertEquals("foo", combo.getInputElementValue());
+    }
+
+    @Test
+    public void withComponentRenderer_renderComponentsInitially_detachAndReattach_componentRenderersRestored() {
+        clickButton("set-component-renderer");
+
+        combo.openPopup();
+        combo.closePopup();
+
+        clickButton("detach-attach");
+
+        combo = $(ComboBoxElement.class).waitForFirst();
+        combo.openPopup();
+
+        List<TestBenchElement> items = combo.$("vaadin-combo-box-item").all();
+        items.forEach(item -> Assert.assertTrue(item.$("span").exists()));
     }
 
     private void assertValueChanges(String... expected) {

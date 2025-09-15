@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.test;
 
 import java.io.IOException;
@@ -86,8 +94,8 @@ public class ChartsIT extends AbstractSpreadsheetIT {
 
         // Get any element from the shadow root of the minimize button
         var shadowRootElement = $("vaadin-button")
-                .attribute("class", "minimize-button").first().$("div")
-                .attribute("class", "vaadin-button-container").first();
+                .withClassName("minimize-button").first().$("div")
+                .withClassName("vaadin-button-container").first();
 
         // Dispatch a mouseover event to the shadow root element
         executeScript(
@@ -104,8 +112,8 @@ public class ChartsIT extends AbstractSpreadsheetIT {
 
         // Get any element from the shadow root of the minimize button
         var shadowRootElement = $("vaadin-button")
-                .attribute("class", "minimize-button").first().$("div")
-                .attribute("class", "vaadin-button-container").first();
+                .withClassName("minimize-button").first().$("div")
+                .withClassName("vaadin-button-container").first();
 
         // Dispatch a dblclick event to the shadow root element
         executeScript(
@@ -142,7 +150,8 @@ public class ChartsIT extends AbstractSpreadsheetIT {
         loadFile("InteractionSample.xlsx");
 
         getChartInShadowRoot(getOverlayElement("B1"))
-                .findElements(By.cssSelector(".highcharts-series-0 > rect"))
+                .findElements(By.cssSelector(
+                        ".highcharts-series-0 > path.highcharts-point"))
                 .get(0).click();
 
         assertSelection("A12", "A13", "A14", "A15", "A16");
@@ -178,7 +187,8 @@ public class ChartsIT extends AbstractSpreadsheetIT {
         loadFile("chart_with_filtered_out_column.xlsx");
 
         getChartInShadowRoot(getOverlayElement("G11"))
-                .findElements(By.cssSelector(".highcharts-series-0 > rect"))
+                .findElements(By.cssSelector(
+                        ".highcharts-series-0 > path.highcharts-point"))
                 .get(0).click();
 
         assertSelection("G4", "H4", "I4", "J4", "K4", "L4", "M4", "N4", "O4");
@@ -203,7 +213,7 @@ public class ChartsIT extends AbstractSpreadsheetIT {
 
     private TestBenchElement getChartInShadowRoot(WebElement overlayElement) {
         var slot = overlayElement.findElement(By.tagName("slot"));
-        var slotName = slot.getAttribute("name");
+        var slotName = slot.getDomAttribute("name");
         var chart = getSpreadsheet().findElement(
                 By.cssSelector("[slot=\"" + slotName + "\"] vaadin-chart"));
         return chart.$(DivElement.class).first();
@@ -211,7 +221,7 @@ public class ChartsIT extends AbstractSpreadsheetIT {
 
     private TestBenchElement getMinimizeButton(WebElement overlayElement) {
         var slot = overlayElement.findElement(By.tagName("slot"));
-        var slotName = slot.getAttribute("name");
+        var slotName = slot.getDomAttribute("name");
         return getSpreadsheet().findElement(
                 By.cssSelector("[slot=\"" + slotName + "\"] .minimize-button"));
     }

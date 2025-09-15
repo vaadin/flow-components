@@ -1,13 +1,19 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.map;
 
+import java.beans.PropertyChangeEvent;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
+
+import com.fasterxml.jackson.databind.node.BaseJsonNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -20,20 +26,14 @@ import com.vaadin.flow.component.map.configuration.Extent;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
-import com.vaadin.flow.component.map.events.MapFeatureClickEvent;
 import com.vaadin.flow.component.map.events.MapClickEvent;
+import com.vaadin.flow.component.map.events.MapFeatureClickEvent;
 import com.vaadin.flow.component.map.events.MapFeatureDropEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
 import com.vaadin.flow.component.map.serialization.MapSerializer;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
-import elemental.json.JsonValue;
-
-import java.beans.PropertyChangeEvent;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * Base class for the map component. Contains all base functionality for the map
@@ -118,7 +118,7 @@ public abstract class MapBase extends Component
         Set<AbstractConfigurationObject> changedObjects = new LinkedHashSet<>();
         configuration.collectChanges(changedObjects::add);
 
-        JsonValue jsonChanges = serializer.toJson(changedObjects);
+        BaseJsonNode jsonChanges = serializer.toJson(changedObjects);
 
         this.getElement().executeJs("this.$connector.synchronize($0)",
                 jsonChanges);

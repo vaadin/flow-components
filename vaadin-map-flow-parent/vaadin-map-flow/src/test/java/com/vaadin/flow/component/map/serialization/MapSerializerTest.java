@@ -1,23 +1,34 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.map.serialization;
 
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.map.Assets;
-import com.vaadin.flow.component.map.configuration.source.OSMSource;
-import com.vaadin.flow.component.map.configuration.style.Icon;
-import com.vaadin.flow.server.StreamRegistration;
-import com.vaadin.flow.server.StreamResourceRegistry;
-import com.vaadin.flow.server.VaadinSession;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-import elemental.json.JsonValue;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.List;
+
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
+import com.fasterxml.jackson.databind.node.BaseJsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.map.Assets;
+import com.vaadin.flow.component.map.configuration.source.OSMSource;
+import com.vaadin.flow.component.map.configuration.style.Icon;
+import com.vaadin.flow.server.AbstractStreamResource;
+import com.vaadin.flow.server.StreamRegistration;
+import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.ElementRequestHandler;
 
 public class MapSerializerTest {
 
@@ -36,10 +47,25 @@ public class MapSerializerTest {
         Mockito.when(ui.getSession()).thenReturn(mockSession);
         Mockito.when(mockSession.getResourceRegistry())
                 .thenReturn(streamResourceRegistryMock);
-        Mockito.when(streamResourceRegistryMock.registerResource(Mockito.any()))
+        Mockito.when(streamResourceRegistryMock
+                .registerResource((AbstractStreamResource) Mockito.any()))
                 .thenReturn(streamRegistrationMock);
         Mockito.when(streamRegistrationMock.getResourceUri())
                 .thenReturn(new URI("https://example.com"));
+
+        StreamRegistration elementStreamResourceMock = Mockito
+                .mock(StreamRegistration.class);
+
+        Mockito.when(streamResourceRegistryMock
+                .registerResource((ElementRequestHandler) Mockito.any()))
+                .thenReturn(elementStreamResourceMock);
+        Mockito.when(elementStreamResourceMock.getResourceUri())
+                .thenReturn(new URI("https://example.com"));
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test
@@ -51,17 +77,19 @@ public class MapSerializerTest {
         options.setOpaque(false);
         options.setCrossOrigin("custom-cors");
         options.setAttributions(List.of("Custom map service"));
-        JsonValue jsonValue = mapSerializer.toJson(new OSMSource(options));
+        BaseJsonNode jsonValue = mapSerializer.toJson(new OSMSource(options));
 
         Assert.assertTrue("Result should be JSON object",
-                jsonValue instanceof JsonObject);
+                jsonValue instanceof ObjectNode);
 
-        JsonObject jsonSource = (JsonObject) jsonValue;
+        ObjectNode jsonSource = (ObjectNode) jsonValue;
 
-        Assert.assertEquals("https://example.com", jsonSource.getString("url"));
-        Assert.assertFalse(jsonSource.getBoolean("opaque"));
-        Assert.assertEquals("custom-cors", jsonSource.getString("crossOrigin"));
-        Assert.assertTrue(jsonSource.get("attributions") instanceof JsonArray);
+        Assert.assertEquals("https://example.com",
+                jsonSource.get("url").asText());
+        Assert.assertFalse(jsonSource.get("opaque").asBoolean());
+        Assert.assertEquals("custom-cors",
+                jsonSource.get("crossOrigin").asText());
+        Assert.assertTrue(jsonSource.get("attributions").isArray());
     }
 
     @Test
@@ -70,7 +98,7 @@ public class MapSerializerTest {
         MapSerializer mapSerializer = new MapSerializer();
 
         Icon.Options options = new Icon.Options();
-        options.setImg(Assets.PIN.getResource());
+        options.setImg(Assets.PIN.getHandler());
         Icon icon = new Icon(options);
 
         mapSerializer.toJson(icon);
@@ -78,6 +106,6 @@ public class MapSerializerTest {
         mapSerializer.toJson(icon);
 
         Mockito.verify(streamResourceRegistryMock, Mockito.times(1))
-                .registerResource(Assets.PIN.getResource());
+                .registerResource(Assets.PIN.getHandler());
     }
 }

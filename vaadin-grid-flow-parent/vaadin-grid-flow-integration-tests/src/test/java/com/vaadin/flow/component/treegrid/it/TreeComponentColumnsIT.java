@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,15 +15,14 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.TreeGridElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Tests for dynamically adding new columns with different renderers after the
@@ -100,20 +99,22 @@ public class TreeComponentColumnsIT extends AbstractComponentIT {
         compThenGrid.expandWithClick(0);
         compThenGrid.expandWithClick(1);
         compThenGrid.scrollToRow(104);
-        for (int i = compThenGrid.getFirstVisibleRowIndex()
-                + 1; i < compThenGrid.getLastVisibleRowIndex(); i++) {
-            Assert.assertEquals(
-                    compThenGrid.getRow(i - 1).getRect().y + rowHeight,
-                    compThenGrid.getRow(i).getRect().y, 1);
+
+        var visibleRows = compThenGrid.getVisibleRows();
+        Assert.assertFalse(visibleRows.isEmpty());
+
+        for (int i = 1; i < visibleRows.size(); i++) {
+            Assert.assertEquals(visibleRows.get(i - 1).getRect().y + rowHeight,
+                    visibleRows.get(i).getRect().y, 1);
             Assert.assertEquals(rowHeight,
-                    compThenGrid.getRow(i).getSize().getHeight());
+                    visibleRows.get(i).getSize().getHeight());
         }
     }
 
     private void assertCellContains(GridElement grid, int rowIndex,
             int colIndex, String expected) {
-        Assert.assertThat(grid.getCell(rowIndex, colIndex).getInnerHTML(),
-                CoreMatchers.containsString(expected));
+        Assert.assertTrue("Expected cell content to contain: " + expected, grid
+                .getCell(rowIndex, colIndex).getInnerHTML().contains(expected));
     }
 
 }

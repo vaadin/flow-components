@@ -1,12 +1,21 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.components.map;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.vaadin.flow.component.map.testbench.MapElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 @TestPath("vaadin-map/change-user-projection")
 public class ChangeUserProjectionIT extends AbstractComponentIT {
@@ -29,8 +38,7 @@ public class ChangeUserProjectionIT extends AbstractComponentIT {
         // https://c.tile.openstreetmap.org/10/575/294.png
         MapElement.LayerReference layer = map.getMapReference().getLayers()
                 .getLayer("background-layer");
-        MapElement.XyzSourceReference source = layer.getSource().asXyzSource();
-        waitUntilMapTileLoaded(source, 10, 575, 294);
+        waitUntilMapTileLoaded(layer, 10, 575, 294);
     }
 
     @Test
@@ -45,8 +53,7 @@ public class ChangeUserProjectionIT extends AbstractComponentIT {
         // (https://a.tile.openstreetmap.org/10/550/335.png)
         MapElement.LayerReference layer = map.getMapReference().getLayers()
                 .getLayer("background-layer");
-        MapElement.XyzSourceReference source = layer.getSource().asXyzSource();
-        waitUntilMapTileLoaded(source, 10, 550, 335);
+        waitUntilMapTileLoaded(layer, 10, 550, 335);
 
         // Check coordinates received server-side
         String[] parts = eventDataDiv.getText().split(";");
@@ -57,8 +64,8 @@ public class ChangeUserProjectionIT extends AbstractComponentIT {
         Assert.assertEquals(6893740.925498, centerY, 0.001);
     }
 
-    private void waitUntilMapTileLoaded(MapElement.XyzSourceReference source,
-            int z, int x, int y) {
-        waitUntil(driver -> source.isTileLoaded(z, x, y));
+    private void waitUntilMapTileLoaded(MapElement.LayerReference layer, int z,
+            int x, int y) {
+        waitUntil(driver -> layer.isTileLoaded(z, x, y));
     }
 }

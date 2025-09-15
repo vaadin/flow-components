@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,9 +19,12 @@ import java.util.List;
 
 import org.openqa.selenium.By;
 
+import com.vaadin.testbench.HasClearButton;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.HasPlaceholder;
 import com.vaadin.testbench.HasSelectByText;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -31,7 +34,8 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-combo-box")
 public class ComboBoxElement extends TestBenchElement
-        implements HasLabel, HasSelectByText, HasHelper {
+        implements HasLabel, HasSelectByText, HasPlaceholder, HasHelper,
+        HasClearButton, HasValidation {
 
     /**
      * Clears the value of the combobox.
@@ -39,6 +43,8 @@ public class ComboBoxElement extends TestBenchElement
     @Override
     public void clear() {
         setValue(null);
+        // Setting value to null is not enough to empty the text input
+        executeScript("arguments[0].clear();", this);
     }
 
     /**

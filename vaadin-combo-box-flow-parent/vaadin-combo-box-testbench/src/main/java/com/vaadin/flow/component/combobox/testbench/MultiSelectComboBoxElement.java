@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,21 +15,25 @@
  */
 package com.vaadin.flow.component.combobox.testbench;
 
-import com.vaadin.testbench.HasHelper;
-import com.vaadin.testbench.HasLabel;
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.elementsbase.Element;
+import java.util.List;
+
 import org.openqa.selenium.By;
 
-import java.util.List;
+import com.vaadin.testbench.HasClearButton;
+import com.vaadin.testbench.HasHelper;
+import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.HasPlaceholder;
+import com.vaadin.testbench.HasValidation;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 /**
  * A TestBench element representing a
  * <code>&lt;vaadin-multi-select-combo-box&gt;</code> element.
  */
 @Element("vaadin-multi-select-combo-box")
-public class MultiSelectComboBoxElement extends TestBenchElement
-        implements HasLabel, HasHelper {
+public class MultiSelectComboBoxElement extends TestBenchElement implements
+        HasLabel, HasPlaceholder, HasHelper, HasClearButton, HasValidation {
 
     public String getInputElementValue() {
         return this.getPropertyString("_inputElementValue");
@@ -72,7 +76,7 @@ public class MultiSelectComboBoxElement extends TestBenchElement
         //@formatter:off
         String script =
                 "const comboBox=arguments[0];" +
-                "return comboBox.$.comboBox.filteredItems.map(item => item.label || '')";
+                "return comboBox.filteredItems.map(item => item.label || '')";
         //@formatter:on
         return (List<String>) executeScript(script, this);
     }
@@ -93,7 +97,7 @@ public class MultiSelectComboBoxElement extends TestBenchElement
         String script =
                 "const combobox = arguments[0];" +
                 "const label = arguments[1];" +
-                "const itemToSelect = combobox.$.comboBox.filteredItems.find(item => item.label === label);" +
+                "const itemToSelect = combobox.filteredItems.find(item => item.label === label);" +
                 "if (!itemToSelect) return false;" +
                 "const isSelected = combobox.selectedItems.some(item => item.key === itemToSelect.key);" +
                 "if (!isSelected) {" +
@@ -177,8 +181,7 @@ public class MultiSelectComboBoxElement extends TestBenchElement
      * Waits until the combo box has finished loading items to show in the popup
      */
     public void waitForLoadingFinished() {
-        waitUntil(
-                driver -> !getInternalComboBox().getPropertyBoolean("loading"));
+        waitUntil(driver -> !getPropertyBoolean("loading"));
     }
 
     /**
@@ -193,9 +196,5 @@ public class MultiSelectComboBoxElement extends TestBenchElement
     @Override
     public void sendKeys(CharSequence... keysToSend) {
         findElement(By.tagName("input")).sendKeys(keysToSend);
-    }
-
-    private TestBenchElement getInternalComboBox() {
-        return $("vaadin-multi-select-combo-box-internal").first();
     }
 }

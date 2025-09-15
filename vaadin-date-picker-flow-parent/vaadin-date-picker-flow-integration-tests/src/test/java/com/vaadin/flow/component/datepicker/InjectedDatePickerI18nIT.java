@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,9 +18,9 @@ package com.vaadin.flow.component.datepicker;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-date-picker/injected-datepicker")
 public class InjectedDatePickerI18nIT extends AbstractComponentIT {
@@ -32,8 +32,10 @@ public class InjectedDatePickerI18nIT extends AbstractComponentIT {
         $("injected-datepicker-i18n").first().$("vaadin-date-picker").first()
                 .$("input").first().click();
 
-        TestBenchElement cancelButton = $("vaadin-date-picker-overlay").first()
-                .$("vaadin-button").attribute("slot", "cancel-button").first();
+        TestBenchElement cancelButton = $("injected-datepicker-i18n").first()
+                .$("vaadin-date-picker-overlay-content").first()
+                .$("vaadin-button").withAttribute("slot", "cancel-button")
+                .first();
 
         Assert.assertEquals("peruuta", cancelButton.getText());
     }

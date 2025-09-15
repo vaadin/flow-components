@@ -1,6 +1,13 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.crud.tests;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -10,16 +17,18 @@ import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.orderedlayout.testbench.VerticalLayoutElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class EventHandlingIT extends AbstractParallelTest {
+@TestPath("vaadin-crud")
+public class EventHandlingIT extends AbstractComponentIT {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-crud");
-        getDriver().get(url);
+        open();
     }
 
     @After
@@ -33,8 +42,8 @@ public class EventHandlingIT extends AbstractParallelTest {
     private void dismissConfirmDialog(CrudElement crud,
             ConfirmDialogType type) {
         final TestBenchElement confirmButton = crud
-                .$(ConfirmDialogElement.class).id(type.getId())
-                .getConfirmButton();
+                .$(ConfirmDialogElement.class)
+                .withAttribute("slot", type.getId()).first().getConfirmButton();
         confirmButton.click();
     }
 
@@ -78,11 +87,11 @@ public class EventHandlingIT extends AbstractParallelTest {
                 "Edit: Person{id=3, firstName='Guille', lastName='Guille'}",
                 getLastEvent());
 
-        Assert.assertEquals("Guille", crud.getEditor().$(TextFieldElement.class)
-                .attribute("editor-role", "first-name").first().getValue());
+        Assert.assertEquals("Guille", crud.getForm().$(TextFieldElement.class)
+                .withAttribute("editor-role", "first-name").first().getValue());
 
-        Assert.assertEquals("Guille", crud.getEditor().$(TextFieldElement.class)
-                .attribute("editor-role", "last-name").first().getValue());
+        Assert.assertEquals("Guille", crud.getForm().$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first().getValue());
     }
 
     @Test
@@ -101,8 +110,8 @@ public class EventHandlingIT extends AbstractParallelTest {
 
         // Ensure editor is marked dirty on edit
         getTestButton("editServerItem").click();
-        crud.getEditor().$(TextFieldElement.class)
-                .attribute("editor-role", "first-name").first()
+        crud.getForm().$(TextFieldElement.class)
+                .withAttribute("editor-role", "first-name").first()
                 .setValue("Vaadin");
 
         dismissDialog();
@@ -140,22 +149,22 @@ public class EventHandlingIT extends AbstractParallelTest {
     public void saveTest() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         crud.openRowForEditing(0);
-        TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
-        Assert.assertTrue(lastNameField.hasAttribute("invalid"));
+        TextFieldElement lastNameField = crud.getForm()
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
+        Assert.assertTrue(lastNameField.isInvalid());
 
         // Invalid input
         lastNameField.setValue("Manolo");
         crud.getEditorSaveButton().click();
-        Assert.assertTrue(lastNameField.hasAttribute("invalid"));
+        Assert.assertTrue(lastNameField.isInvalid());
         Assert.assertTrue(crud.isEditorOpen());
         Assert.assertEquals("Sayo",
                 $(GridElement.class).first().getCell(0, 2).getText());
 
         // Valid input
         lastNameField.setValue("Oladeji");
-        Assert.assertFalse(lastNameField.hasAttribute("invalid"));
+        Assert.assertFalse(lastNameField.isInvalid());
 
         crud.getEditorSaveButton().click();
 
@@ -169,21 +178,21 @@ public class EventHandlingIT extends AbstractParallelTest {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         crud.getNewItemButton().get().click();
 
-        TextFieldElement firstNameField = crud.getEditor()
+        TextFieldElement firstNameField = crud.getForm()
                 .$(TextFieldElement.class)
-                .attribute("editor-role", "first-name").first();
+                .withAttribute("editor-role", "first-name").first();
 
-        Assert.assertFalse(firstNameField.hasAttribute("invalid"));
+        Assert.assertFalse(firstNameField.isInvalid());
 
         // To avoid editor being dirty
-        TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+        TextFieldElement lastNameField = crud.getForm()
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
         lastNameField.setValue("Oladeji");
 
         crud.getEditorSaveButton().click();
 
-        Assert.assertTrue(firstNameField.hasAttribute("invalid"));
+        Assert.assertTrue(firstNameField.isInvalid());
     }
 
     @Test
@@ -191,16 +200,16 @@ public class EventHandlingIT extends AbstractParallelTest {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         crud.openRowForEditing(1);
 
-        TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).attribute("editor-role", "last-name")
-                .first();
+        TextFieldElement lastNameField = crud.getForm()
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
 
-        Assert.assertFalse(lastNameField.hasAttribute("invalid"));
+        Assert.assertFalse(lastNameField.isInvalid());
 
         lastNameField.setValue("Raiden");
         crud.getEditorSaveButton().click();
 
-        Assert.assertTrue(lastNameField.hasAttribute("invalid"));
+        Assert.assertTrue(lastNameField.isInvalid());
     }
 
     @Test
@@ -210,11 +219,11 @@ public class EventHandlingIT extends AbstractParallelTest {
 
         crud.getNewItemButton().get().click();
 
-        TestBenchElement editor = crud.getEditor();
+        TestBenchElement editor = crud.getForm();
         TextFieldElement firstNameField = editor.$(TextFieldElement.class)
-                .attribute("editor-role", "first-name").first();
+                .withAttribute("editor-role", "first-name").first();
         TextFieldElement lastNameField = editor.$(TextFieldElement.class)
-                .attribute("editor-role", "last-name").first();
+                .withAttribute("editor-role", "last-name").first();
 
         Assert.assertEquals("firstName", firstNameField.getValue());
         Assert.assertEquals("lastName", lastNameField.getValue());
@@ -229,20 +238,22 @@ public class EventHandlingIT extends AbstractParallelTest {
         return $(ButtonElement.class).onPage().id(id);
     }
 
+    private String getLastEvent() {
+        return $(VerticalLayoutElement.class).last().$("span").last().getText();
+    }
+
     private boolean isConfirmDialogOpen(CrudElement crud,
             ConfirmDialogType type) {
         ConfirmDialogElement confirmDialog = crud.$(ConfirmDialogElement.class)
-                .id(type.getId());
-        TestBenchElement overlay = ((TestBenchElement) confirmDialog
-                .getContext());
-        return overlay.getPropertyBoolean("opened");
+                .withAttribute("slot", type.getId()).first();
+        return confirmDialog.getPropertyBoolean("opened");
     }
 
     private enum ConfirmDialogType {
         CANCEL, DELETE;
 
         private String getId() {
-            return "confirm" + StringUtils.capitalize(name().toLowerCase());
+            return "confirm-" + name().toLowerCase();
         }
     }
 }

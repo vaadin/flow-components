@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,19 +15,20 @@
  */
 package com.vaadin.flow.component.orderedlayout.tests;
 
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
-import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.orderedlayout.FlexLayout;
 
 public class FlexLayoutTest {
 
     @Test
     public void replace_nullToComponent_appendAsResult() {
         FlexLayout layout = new FlexLayout();
-        layout.add(new Label());
+        layout.add(new Span());
         Div div = new Div();
         layout.replace(null, div);
         Assert.assertEquals(div, layout.getComponentAt(1));
@@ -36,7 +37,7 @@ public class FlexLayoutTest {
     @Test
     public void replace_componentToNull_removeAsResult() {
         FlexLayout layout = new FlexLayout();
-        layout.add(new Label());
+        layout.add(new Span());
         Div div = new Div();
         layout.add(div);
         layout.replace(div, null);
@@ -50,9 +51,9 @@ public class FlexLayoutTest {
         layout.add(div);
         layout.setAlignSelf(Alignment.END, div);
 
-        Label label = new Label();
-        layout.replace(div, label);
-        Assert.assertEquals(Alignment.END, layout.getAlignSelf(label));
+        Span span = new Span();
+        layout.replace(div, span);
+        Assert.assertEquals(Alignment.END, layout.getAlignSelf(span));
     }
 
     @Test
@@ -62,9 +63,9 @@ public class FlexLayoutTest {
         layout.add(div);
         layout.setFlexGrow(1.1d, div);
 
-        Label label = new Label();
-        layout.replace(div, label);
-        Assert.assertEquals(1.1d, layout.getFlexGrow(label), Double.MIN_VALUE);
+        Span span = new Span();
+        layout.replace(div, span);
+        Assert.assertEquals(1.1d, layout.getFlexGrow(span), Double.MIN_VALUE);
     }
 
     @Test

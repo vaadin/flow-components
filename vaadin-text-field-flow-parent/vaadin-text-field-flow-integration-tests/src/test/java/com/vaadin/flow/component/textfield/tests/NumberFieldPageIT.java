@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import static org.junit.Assert.assertFalse;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,12 +25,9 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
-
-import static org.junit.Assert.assertFalse;
-import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
 
 /**
  * Integration tests for {@link NumberField}.
@@ -103,20 +102,6 @@ public class NumberFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertRequired() {
-        NumberFieldElement numberField = $(NumberFieldElement.class).first();
-
-        assertFalse(numberField.hasAttribute("required"));
-
-        WebElement button = findElement(By.id("required"));
-        button.click();
-        waitUntil(attributeToBe(numberField, "required", "true"));
-
-        button.click();
-        waitUntil(attributeToBe(numberField, "required", ""));
-    }
-
-    @Test
     public void assertClearValue() {
         NumberFieldElement field = $(NumberFieldElement.class)
                 .id("clear-number-field");
@@ -125,9 +110,7 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         input.sendKeys("300");
         blur();
 
-        WebElement clearButton = field.$("*")
-                .attributeContains("part", "clear-button").first();
-        clearButton.click();
+        field.clickClearButton();
 
         String value = findElement(By.id("clear-message")).getText();
         Assert.assertEquals("Old value: '300.0'. New value: 'null'.", value);
@@ -138,7 +121,7 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         TestBenchElement field = $("*").id("step-number-field");
 
         WebElement increaseButton = field.$("*")
-                .attributeContains("part", "increase-button").first();
+                .withAttributeContainingWord("part", "increase-button").first();
         increaseButton.click();
 
         String value = findElement(By.id("step-message")).getText();
@@ -152,37 +135,5 @@ public class NumberFieldPageIT extends AbstractComponentIT {
         field.setValue("123.0");
         String message = $("div").id("clear-message").getText();
         Assert.assertEquals("Old value: 'null'. New value: '123.0'.", message);
-    }
-
-    @Test
-    public void dollarFieldHasDollarPrefix() {
-        WebElement dollarField = findElement(By.id("dollar-field"));
-        WebElement span = dollarField.findElement(By.tagName("span"));
-
-        Assert.assertEquals("$", span.getText());
-
-        int spanX = span.getLocation().getX();
-        int middleX = dollarField.getLocation().getX()
-                + dollarField.getSize().getWidth() / 2;
-
-        Assert.assertTrue(
-                "The dollar sign should be located on the left side of the text field",
-                spanX < middleX);
-    }
-
-    @Test
-    public void euroFieldHasEuroSuffix() {
-        WebElement euroField = findElement(By.id("euro-field"));
-        WebElement span = euroField.findElement(By.tagName("span"));
-
-        Assert.assertEquals("€", span.getText());
-
-        int spanX = span.getLocation().getX();
-        int middleX = euroField.getLocation().getX()
-                + euroField.getSize().getWidth() / 2;
-
-        Assert.assertTrue(
-                "The euro sign should be located on the right side of the text field",
-                spanX > middleX);
     }
 }

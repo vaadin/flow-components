@@ -52,7 +52,7 @@ async function getPlatformVersions(branch) {
 
 function computeVersion() {
   if (to == 'HEAD') {
-    const r = /^(.*)(\d+)$/.exec(from);
+    const r = /^(.*?)(\d+)$/.exec(from);
     if (r) {
       version = r[1] + (parseInt(r[2]) + 1);
     }

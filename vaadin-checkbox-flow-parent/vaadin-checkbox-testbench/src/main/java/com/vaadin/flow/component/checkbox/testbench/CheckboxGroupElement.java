@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,12 +22,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.testbench.HasHelper;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 @Element("vaadin-checkbox-group")
 public class CheckboxGroupElement extends TestBenchElement
-        implements HasHelper {
+        implements HasHelper, HasValidation {
 
     /**
      * Gets the labels of checkboxes that are part of this group.
@@ -142,6 +143,6 @@ public class CheckboxGroupElement extends TestBenchElement
      * @return the slotted component or {@code null} if there is no component
      */
     public TestBenchElement getErrorMessageComponent() {
-        return $("div").attributeContains("slot", "error-message").first();
+        return $("div").withAttribute("slot", "error-message").first();
     }
 }

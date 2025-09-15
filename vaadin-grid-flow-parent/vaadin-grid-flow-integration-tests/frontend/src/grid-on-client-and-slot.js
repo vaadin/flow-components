@@ -98,7 +98,7 @@ class GridOnClientAndSlot extends LitElement {
     const item = e.currentTarget.__currentItem;
     const expanded = e.detail.value;
     const itemExpanded = this.expandedItems.includes(item);
-  
+
     if (expanded && !itemExpanded) {
       this.expandedItems = [...this.expandedItems, item];
     } else if (!expanded && itemExpanded) {

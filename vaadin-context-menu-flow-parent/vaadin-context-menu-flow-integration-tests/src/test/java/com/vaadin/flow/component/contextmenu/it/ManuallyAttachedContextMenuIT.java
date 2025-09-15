@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,8 +18,8 @@ package com.vaadin.flow.component.contextmenu.it;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.contextmenu.testbench.ContextMenuItemElement;
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
 
 /**
  * @author Vaadin Ltd
@@ -37,7 +37,7 @@ public class ManuallyAttachedContextMenuIT extends AbstractContextMenuIT {
     public void contextMenuAttachedToThePage_setItemChecked_open_itemChecked() {
         leftClickOn("toggle-checked");
         rightClickOn("target");
-        TestBenchElement item = getMenuItems().get(0);
+        ContextMenuItemElement item = getMenuItems().get(0);
         ContextMenuPageIT.assertCheckedInClientSide(item, true);
     }
 }

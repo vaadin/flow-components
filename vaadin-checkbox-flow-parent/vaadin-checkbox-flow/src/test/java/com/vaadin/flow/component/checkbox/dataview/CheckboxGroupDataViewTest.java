@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.checkbox.dataview;
 
 import java.util.ArrayList;
@@ -22,9 +21,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
-import com.vaadin.flow.data.provider.AbstractComponentDataViewTest;
 import com.vaadin.flow.data.provider.AbstractDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderListener;
@@ -36,9 +38,7 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Mockito;
+import com.vaadin.tests.dataprovider.AbstractComponentDataViewTest;
 
 public class CheckboxGroupDataViewTest extends AbstractComponentDataViewTest {
 

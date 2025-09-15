@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,8 +27,8 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 import elemental.json.JsonObject;
 
@@ -39,8 +39,8 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
         executeScript("arguments[0].removeAttribute('disabled');", element);
     }
 
-    protected void assertItemSelected(String label) {
-        Optional<TestBenchElement> itemElement = getItemElements().stream()
+    protected void assertItemSelected(ComboBoxElement combo, String label) {
+        Optional<TestBenchElement> itemElement = getItemElements(combo).stream()
                 .filter(element -> getItemLabel(element).equals(label))
                 .findFirst();
         Assert.assertTrue(
@@ -73,16 +73,16 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
         return list;
     }
 
-    protected void assertRendered(String innerHTML) {
+    protected void assertRendered(ComboBoxElement comboBox, String innerHTML) {
         try {
             waitUntil(driver -> {
-                List<String> contents = getOverlayContents();
+                List<String> contents = getOverlayContents(comboBox);
                 return contents.size() > 0 && contents.get(0).length() > 0;
             });
         } catch (TimeoutException e) {
             Assert.fail("Timeout: no items with text content rendered.");
         }
-        List<String> overlayContents = getOverlayContents();
+        List<String> overlayContents = getOverlayContents(comboBox);
         Optional<String> matchingItem = overlayContents.stream()
                 .filter(s -> s.equals(innerHTML)).findFirst();
         Assert.assertTrue(
@@ -94,8 +94,9 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
                 matchingItem.isPresent());
     }
 
-    protected void assertNotRendered(String innerHTML) {
-        List<String> overlayContents = getOverlayContents();
+    protected void assertNotRendered(ComboBoxElement comboBox,
+            String innerHTML) {
+        List<String> overlayContents = getOverlayContents(comboBox);
         Optional<String> matchingItem = overlayContents.stream()
                 .filter(s -> s.equals(innerHTML)).findFirst();
         Assert.assertFalse(
@@ -104,19 +105,21 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
                 matchingItem.isPresent());
     }
 
-    protected void assertComponentRendered(String componentHtml) {
-        assertRendered(componentHtml);
+    protected void assertComponentRendered(ComboBoxElement comboBox,
+            String componentHtml) {
+        assertRendered(comboBox, componentHtml);
     }
 
     // Gets the innerHTML of all the actually rendered item elements.
     // There's more items loaded though.
-    protected List<String> getOverlayContents() {
-        return getItemElements().stream().map(this::getItemLabel)
+    protected List<String> getOverlayContents(ComboBoxElement comboBox) {
+        return getItemElements(comboBox).stream().map(this::getItemLabel)
                 .collect(Collectors.toList());
     }
 
-    protected List<String> getNonEmptyOverlayContents() {
-        return getOverlayContents().stream()
+    protected List<String> getNonEmptyOverlayContents(
+            ComboBoxElement comboBox) {
+        return getOverlayContents(comboBox).stream()
                 .filter(rendered -> !rendered.isEmpty())
                 .collect(Collectors.toList());
     }
@@ -126,8 +129,8 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
         return stripComments(innerHtml);
     }
 
-    protected List<TestBenchElement> getItemElements() {
-        return getOverlay().$("vaadin-combo-box-item").all().stream()
+    protected List<TestBenchElement> getItemElements(ComboBoxElement comboBox) {
+        return getScroller(comboBox).$("vaadin-combo-box-item").all().stream()
                 .filter(element -> !element.hasAttribute("hidden"))
                 .collect(Collectors.toList());
     }
@@ -141,15 +144,16 @@ public class AbstractComboBoxIT extends AbstractComponentIT {
                 .executeAsyncScript("requestAnimationFrame(arguments[0])");
     }
 
-    protected void waitUntilTextInContent(String text) {
+    protected void waitUntilTextInContent(ComboBoxElement comboBox,
+            String text) {
         waitUntil(e -> {
-            List<String> overlayContents = getOverlayContents();
+            List<String> overlayContents = getOverlayContents(comboBox);
             return overlayContents.stream().anyMatch(s -> s.contains(text));
         });
     }
 
-    protected TestBenchElement getOverlay() {
-        return $("vaadin-combo-box-overlay").first();
+    protected TestBenchElement getScroller(ComboBoxElement comboBox) {
+        return (TestBenchElement) comboBox.getPropertyElement("_scroller");
     }
 
     protected void clickButton(String id) {

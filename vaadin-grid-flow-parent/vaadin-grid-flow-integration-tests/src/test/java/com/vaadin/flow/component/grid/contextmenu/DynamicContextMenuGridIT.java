@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,22 +15,21 @@
  */
 package com.vaadin.flow.component.grid.contextmenu;
 
-import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.interactions.Actions;
 
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
+
 @TestPath("vaadin-grid/dynamic-context-menu-grid")
 public class DynamicContextMenuGridIT extends AbstractComponentIT {
-
-    private static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
 
     private GridElement grid;
 
@@ -53,7 +52,7 @@ public class DynamicContextMenuGridIT extends AbstractComponentIT {
         verifyOpened();
 
         Assert.assertEquals("Person 40",
-                $(OVERLAY_TAG).first().getAttribute("innerText"));
+                getContextMenu().getDomProperty("innerText"));
 
         $("body").first().click();
         verifyClosed();
@@ -74,14 +73,19 @@ public class DynamicContextMenuGridIT extends AbstractComponentIT {
 
         verifyOpened();
         Assert.assertEquals("Person 40",
-                $(OVERLAY_TAG).first().getAttribute("innerText"));
+                getContextMenu().getDomProperty("innerText"));
+    }
+
+    private TestBenchElement getContextMenu() {
+        return $("vaadin-context-menu").first();
     }
 
     private void verifyOpened() {
-        waitForElementPresent(By.tagName(OVERLAY_TAG));
+        waitForElementPresent(By.cssSelector("vaadin-context-menu[opened]"));
     }
 
     private void verifyClosed() {
-        waitForElementNotPresent(By.tagName(OVERLAY_TAG));
+        waitForElementNotPresent(By.cssSelector(
+                "vaadin-context-menu[opened], vaadin-context-menu[closing]"));
     }
 }

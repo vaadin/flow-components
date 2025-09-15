@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,11 +28,24 @@ public class NumberFieldBasicValidationPage
     public static final String MAX_INPUT = "max-input";
     public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
 
+    public static final String REQUIRED_ERROR_MESSAGE = "Field is required";
+    public static final String BAD_INPUT_ERROR_MESSAGE = "Number has incorrect format";
+    public static final String MIN_ERROR_MESSAGE = "Number is too small";
+    public static final String MAX_ERROR_MESSAGE = "Number is too big";
+    public static final String STEP_ERROR_MESSAGE = "Number does not match the step";
+
     public NumberFieldBasicValidationPage() {
         super();
 
+        testField.setI18n(new NumberField.NumberFieldI18n()
+                .setRequiredErrorMessage(REQUIRED_ERROR_MESSAGE)
+                .setBadInputErrorMessage(BAD_INPUT_ERROR_MESSAGE)
+                .setMinErrorMessage(MIN_ERROR_MESSAGE)
+                .setMaxErrorMessage(MAX_ERROR_MESSAGE)
+                .setStepErrorMessage(STEP_ERROR_MESSAGE));
+
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
-            testField.setRequiredIndicatorVisible(true);
+            testField.setRequired(true);
         }));
 
         add(createInput(STEP_INPUT, "Set step", event -> {
@@ -55,7 +68,14 @@ public class NumberFieldBasicValidationPage
         }));
     }
 
+    @Override
     protected NumberField createTestField() {
-        return new NumberField();
+        return new NumberField() {
+            @Override
+            protected void validate() {
+                super.validate();
+                incrementServerValidationCounter();
+            }
+        };
     }
 }

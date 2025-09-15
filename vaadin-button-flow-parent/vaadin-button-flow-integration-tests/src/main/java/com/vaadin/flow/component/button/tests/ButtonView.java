@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,7 +22,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
@@ -49,7 +48,9 @@ public class ButtonView extends Div {
         createButtonsWithTabIndex();
         createDisabledButton();
         createButtonWithDisableOnClick();
-        addVariantsFeature();
+        createButtonWithDisableOnClickThatEnablesInSameRoundTrip();
+        createButtonWithDisableOnClickThatIsHidden();
+        createButtonWithDisableOnClickAndPointerEventsAuto();
         createButtonsWithShortcuts();
 
         message = new Div();
@@ -136,19 +137,6 @@ public class ButtonView extends Div {
         button.setId("disabled-button");
     }
 
-    private void addVariantsFeature() {
-        Button button = new Button("Button");
-        button.setId("button-theme-variants");
-        button.addThemeVariants(ButtonVariant.LUMO_SMALL,
-                ButtonVariant.LUMO_PRIMARY);
-
-        Button removeVariantButton = new Button("Remove theme variant", e -> {
-            button.removeThemeVariants(ButtonVariant.LUMO_SMALL);
-        });
-        removeVariantButton.setId("remove-theme-variant-button");
-        addCard("Button theme variants", button, removeVariantButton);
-    }
-
     private void createButtonsWithShortcuts() {
         Button button = new Button("Has global Enter-shortcut",
                 this::showButtonClickedMessage);
@@ -204,20 +192,6 @@ public class ButtonView extends Div {
         });
         disableOnClickButton.setDisableOnClick(true);
 
-        Button temporarilyDisabledButton = new Button(
-                "Temporarily disabled button", event -> {
-                    try {
-                        // Blocking the user from clicking the button
-                        // multiple times, due to a long running request that
-                        // is not running asynchronously.
-                        Thread.sleep(1500);
-                        event.getSource().setEnabled(true);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                });
-        temporarilyDisabledButton.setDisableOnClick(true);
-
         final Div disabledMessage = new Div();
         disabledMessage.setId("disabled-message");
 
@@ -237,7 +211,7 @@ public class ButtonView extends Div {
         toggle.setId("toggle-button");
 
         addCard("Button disabled on click", disableOnClickButton, enable,
-                toggle, disabledMessage, new Div(temporarilyDisabledButton));
+                toggle, disabledMessage);
 
         disableOnClickButton.addClickListener(evt -> disabledMessage
                 .setText("Button " + evt.getSource().getText()
@@ -246,8 +220,56 @@ public class ButtonView extends Div {
                         + runCount.incrementAndGet() + " clicks"));
 
         disableOnClickButton.setId("disable-on-click-button");
-        temporarilyDisabledButton.setId("temporarily-disabled-button");
         enable.setId("enable-button");
+    }
+
+    private void createButtonWithDisableOnClickThatEnablesInSameRoundTrip() {
+        Button button = new Button(
+                "Disabled on click and re-enabled in same round-trip",
+                event -> {
+                    try {
+                        // Blocking the user from clicking the button
+                        // multiple times, due to a long-running request that
+                        // is not running asynchronously.
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    } finally {
+                        event.getSource().setEnabled(true);
+                    }
+                });
+        button.setDisableOnClick(true);
+        button.setId("disable-on-click-re-enable-button");
+        addCard("Button disabled on click and re-enabled in same roundtrip",
+                button);
+    }
+
+    private void createButtonWithDisableOnClickThatIsHidden() {
+        Button button = new Button("Disabled on click and hide", event -> {
+            event.getSource().setVisible(false);
+        });
+        button.setDisableOnClick(true);
+        button.setId("disable-on-click-hidden-button");
+
+        Button enableButton = new Button("Enable hidden button and show",
+                event -> {
+                    button.setEnabled(true);
+                    button.setVisible(true);
+                });
+        enableButton.setId("enable-hidden-button");
+
+        addCard("Button disabled on click and hidden", button, enableButton);
+    }
+
+    private void createButtonWithDisableOnClickAndPointerEventsAuto() {
+        Button button = new Button("Disabled and pointer events auto");
+        button.setEnabled(false);
+        button.getStyle().set("pointer-events", "auto");
+        button.setDisableOnClick(true);
+        button.setDisableOnClick(false);
+        button.setId("disable-on-click-pointer-events-auto");
+
+        addCard("Button disabled on click and pointer events auto", button);
     }
 
     private void addCard(String title, Component... components) {

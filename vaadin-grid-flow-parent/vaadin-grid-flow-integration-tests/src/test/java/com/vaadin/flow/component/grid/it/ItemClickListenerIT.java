@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,22 +15,20 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.tests.AbstractComponentIT;
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.Matchers;
+import static com.vaadin.flow.component.grid.it.ItemClickListenerPage.GRID_FILTER_FOCUSABLE_HEADER;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.button.testbench.ButtonElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-import org.openqa.selenium.WebElement;
-
-import static com.vaadin.flow.component.grid.it.ItemClickListenerPage.GRID_FILTER_FOCUSABLE_HEADER;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/item-click-listener")
 public class ItemClickListenerIT extends AbstractComponentIT {
@@ -52,11 +50,13 @@ public class ItemClickListenerIT extends AbstractComponentIT {
 
         String yCoord = getDoubleClickMessage();
 
-        Assert.assertThat(Integer.parseInt(yCoord),
-                CoreMatchers.allOf(
-                        Matchers.greaterThan(firstRow.getLocation().getY()),
-                        Matchers.lessThan(firstRow.getLocation().getY()
-                                + firstRow.getSize().getHeight())));
+        int yCoordInt = Integer.parseInt(yCoord);
+        Assert.assertTrue(
+                "Y coordinate should be greater than first row location",
+                yCoordInt > firstRow.getLocation().getY());
+        Assert.assertTrue("Y coordinate should be less than first row bottom",
+                yCoordInt < firstRow.getLocation().getY()
+                        + firstRow.getSize().getHeight());
     }
 
     @Test

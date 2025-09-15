@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,9 +15,12 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import static com.vaadin.flow.component.combobox.test.FilteringPage.COMBOBOX_WITH_FILTERED_ITEMS_ID;
+import static com.vaadin.flow.component.combobox.test.FilteringPage.SWITCH_TO_IN_MEMORY_ITEMS_BUTTON_ID;
+import static com.vaadin.flow.component.combobox.test.FilteringPage.SWITCH_TO_UNKNOWN_ITEM_COUNT_BUTTON_ID;
+
 import java.util.List;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,10 +28,6 @@ import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
-
-import static com.vaadin.flow.component.combobox.test.FilteringPage.COMBOBOX_WITH_FILTERED_ITEMS_ID;
-import static com.vaadin.flow.component.combobox.test.FilteringPage.SWITCH_TO_IN_MEMORY_ITEMS_BUTTON_ID;
-import static com.vaadin.flow.component.combobox.test.FilteringPage.SWITCH_TO_UNKNOWN_ITEM_COUNT_BUTTON_ID;
 
 @TestPath("vaadin-combo-box/filtering")
 public class FilteringIT extends AbstractComboBoxIT {
@@ -83,7 +82,7 @@ public class FilteringIT extends AbstractComboBoxIT {
         box.openPopup();
         clickButton("add-items");
         box.openPopup();
-        assertRendered("Item 8");
+        assertRendered(box, "Item 8");
         assertClientSideFilter(false);
     }
 
@@ -111,11 +110,11 @@ public class FilteringIT extends AbstractComboBoxIT {
                 + "should be no filtered items until server has responded.", 0,
                 items.size());
 
-        waitUntil(driver -> getNonEmptyOverlayContents().size() == 11);
+        waitUntil(driver -> getNonEmptyOverlayContents(box).size() == 11);
 
-        getNonEmptyOverlayContents().forEach(item -> Assert.assertThat(
-                "Unexpected item found after filtering.", item,
-                CoreMatchers.startsWith("Item 2")));
+        getNonEmptyOverlayContents(box).forEach(item -> Assert.assertTrue(
+                "Unexpected item found after filtering.",
+                item.startsWith("Item 2")));
     }
 
     @Test
@@ -137,23 +136,23 @@ public class FilteringIT extends AbstractComboBoxIT {
         box.openPopup();
         box.setFilter("0");
         box.setFilter("");
-        waitUntil(driver -> getNonEmptyOverlayContents().size() > 0);
-        assertRendered("Item 0");
+        waitUntil(driver -> getNonEmptyOverlayContents(box).size() > 0);
+        assertRendered(box, "Item 0");
     }
 
     @Test
     public void configureFilterInDataProvider_setDataProvider_serverSideFiltering() {
         box = $(ComboBoxElement.class).id("filterable-data-provider");
         box.openPopup();
-        assertRendered("foo");
+        assertRendered(box, "foo");
         List<String> filteredItems = setFilterAndGetImmediateResults("f");
         Assert.assertEquals("Expected server-side filtering, so there "
                 + "should be no filtered items until server has responded.", 0,
                 filteredItems.size());
 
-        waitUntil(driver -> getNonEmptyOverlayContents().size() == 1);
-        waitUntil(driver -> getOverlayContents().get(0).equals("filtered"));
-        assertRendered("filtered");
+        waitUntil(driver -> getNonEmptyOverlayContents(box).size() == 1);
+        waitUntil(driver -> getOverlayContents(box).get(0).equals("filtered"));
+        assertRendered(box, "filtered");
     }
 
     @Test
@@ -164,8 +163,8 @@ public class FilteringIT extends AbstractComboBoxIT {
         assertItemsNotLoaded();
 
         box.setFilter("foo");
-        waitUntil(driver -> getNonEmptyOverlayContents().size() == 1);
-        assertRendered("Item 0");
+        waitUntil(driver -> getNonEmptyOverlayContents(box).size() == 1);
+        assertRendered(box, "Item 0");
 
         box.setFilter("");
         assertItemsNotLoaded();
@@ -254,21 +253,21 @@ public class FilteringIT extends AbstractComboBoxIT {
                     + "Expected the items to be already filtered synchronously in client-side.",
                     expectedCount, items.size());
             items.forEach(item -> {
-                Assert.assertThat(
+                Assert.assertTrue(
                         "Found an item which doesn't match the filter. "
                                 + "Expected the items to be already filtered synchronously in client-side.",
-                        item, CoreMatchers.containsString(filter));
+                        item.contains(filter));
             });
         } else {
             Assert.assertEquals("Expected server-side filtering, so there "
                     + "should be no filtered items until server has responded.",
                     0, items.size());
 
-            waitUntil(driver -> getNonEmptyOverlayContents().size() > 0);
-            getNonEmptyOverlayContents().forEach(rendered -> {
-                Assert.assertThat(
+            waitUntil(driver -> getNonEmptyOverlayContents(box).size() > 0);
+            getNonEmptyOverlayContents(box).forEach(rendered -> {
+                Assert.assertTrue(
                         "Item which doesn't match the filter was found after server-side filtering.",
-                        rendered, CoreMatchers.containsString(filter));
+                        rendered.contains(filter));
             });
         }
     }

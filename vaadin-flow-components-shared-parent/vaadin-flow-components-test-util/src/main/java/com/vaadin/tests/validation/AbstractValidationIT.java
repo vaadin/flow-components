@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,19 +15,24 @@
  */
 package com.vaadin.tests.validation;
 
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractComponentIT;
+import static com.vaadin.tests.validation.AbstractValidationPage.ATTACH_AND_INVALIDATE_FIELD_BUTTON;
+import static com.vaadin.tests.validation.AbstractValidationPage.ATTACH_FIELD_BUTTON;
+import static com.vaadin.tests.validation.AbstractValidationPage.DETACH_FIELD_BUTTON;
+import static com.vaadin.tests.validation.AbstractValidationPage.HIDE_FIELD_BUTTON;
+import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDATION_COUNTER;
+import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDATION_COUNTER_RESET_BUTTON;
+import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
+import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON;
+import static com.vaadin.tests.validation.AbstractValidationPage.SHOW_AND_INVALIDATE_FIELD_BUTTON;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import static com.vaadin.tests.validation.AbstractValidationPage.ATTACH_FIELD_BUTTON;
-import static com.vaadin.tests.validation.AbstractValidationPage.DETACH_FIELD_BUTTON;
-import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE;
-import static com.vaadin.tests.validation.AbstractValidationPage.SERVER_VALIDITY_STATE_BUTTON;
+import com.vaadin.testbench.HasValidation;
+import com.vaadin.tests.AbstractComponentIT;
 
-public abstract class AbstractValidationIT<T extends TestBenchElement>
+public abstract class AbstractValidationIT<T extends HasValidation>
         extends AbstractComponentIT {
     protected T testField;
 
@@ -39,9 +44,21 @@ public abstract class AbstractValidationIT<T extends TestBenchElement>
 
     protected abstract T getTestField();
 
+    protected void assertValidationCount(int expected) {
+        int actual = Integer
+                .parseInt($("div").id(SERVER_VALIDATION_COUNTER).getText());
+        Assert.assertEquals("The field should have validated " + expected
+                + " times on the server-side", expected, actual);
+        resetValidationCount();
+    }
+
+    protected void resetValidationCount() {
+        $("button").id(SERVER_VALIDATION_COUNTER_RESET_BUTTON).click();
+    }
+
     protected void assertErrorMessage(String expected) {
-        Assert.assertEquals(expected,
-                testField.getPropertyString("errorMessage"));
+        expected = expected == null ? "" : expected;
+        Assert.assertEquals(expected, testField.getErrorMessage());
     }
 
     protected void assertClientValid() {
@@ -64,6 +81,30 @@ public abstract class AbstractValidationIT<T extends TestBenchElement>
                 isServerValid());
     }
 
+    protected void assertValid() {
+        assertClientValid();
+        assertServerValid();
+    }
+
+    protected void assertInvalid() {
+        assertClientInvalid();
+        assertServerInvalid();
+    }
+
+    protected void assertValidation(boolean valid, String errorMessage) {
+        if (valid) {
+            assertValid();
+        } else {
+            assertInvalid();
+        }
+        assertErrorMessage(errorMessage);
+        assertValidationCount(1);
+    }
+
+    protected void assertNoValidation() {
+        assertValidationCount(0);
+    }
+
     private boolean isServerValid() {
         $("button").id(SERVER_VALIDITY_STATE_BUTTON).click();
 
@@ -72,33 +113,37 @@ public abstract class AbstractValidationIT<T extends TestBenchElement>
     }
 
     private boolean isClientValid() {
-        return !testField.getPropertyBoolean("invalid");
-    }
-
-    protected void assertWebComponentCanNotModifyInvalidState() {
-        // There is no good integration test for this, as triggering client
-        // validation will also trigger server validation, with the same
-        // validation constraints as the client validation, making it impossible
-        // to test a difference.
-        // Instead, we test that the web component has been properly configured
-        // to prevent itself from changing the invalid state.
-        Assert.assertFalse(shouldSetInvalid(true));
-        Assert.assertFalse(shouldSetInvalid(false));
-    }
-
-    private boolean shouldSetInvalid(boolean invalid) {
-        return (Boolean) getCommandExecutor().executeScript(
-                "const field = arguments[0]; const invalid = arguments[1]; return field._shouldSetInvalid(invalid)",
-                testField, invalid);
+        return !testField.isInvalid();
     }
 
     protected void detachAndReattachField() {
+        detachField();
+        attachField();
+    }
+
+    protected void detachField() {
         $("button").id(DETACH_FIELD_BUTTON).click();
         // Verify element has been removed
         waitUntil(ExpectedConditions.stalenessOf(testField));
+    }
 
+    protected void attachField() {
         $("button").id(ATTACH_FIELD_BUTTON).click();
         // Retrieve new element instance
         testField = getTestField();
+    }
+
+    protected void attachAndInvalidateField() {
+        $("button").id(ATTACH_AND_INVALIDATE_FIELD_BUTTON).click();
+        // Retrieve new element instance
+        testField = getTestField();
+    }
+
+    protected void hideField() {
+        $("button").id(HIDE_FIELD_BUTTON).click();
+    }
+
+    protected void showAndInvalidateField() {
+        $("button").id(SHOW_AND_INVALIDATE_FIELD_BUTTON).click();
     }
 }

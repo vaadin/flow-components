@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasSelectByText;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -31,7 +32,7 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-radio-group")
 public class RadioButtonGroupElement extends TestBenchElement
-        implements HasSelectByText, HasHelper {
+        implements HasSelectByText, HasHelper, HasValidation {
 
     /**
      * Gets a list of all available options.

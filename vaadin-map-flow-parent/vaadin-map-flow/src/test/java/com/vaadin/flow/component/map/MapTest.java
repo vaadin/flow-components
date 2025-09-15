@@ -1,12 +1,21 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.map;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
 import com.vaadin.flow.component.map.configuration.layer.Layer;
 import com.vaadin.flow.component.map.configuration.layer.TileLayer;
 import com.vaadin.flow.component.map.configuration.source.OSMSource;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class MapTest {
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,9 +18,9 @@ package com.vaadin.flow.component.button.tests;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-button/icon-button")
 public class IconForButtonIT extends AbstractComponentIT {
@@ -31,7 +31,7 @@ public class IconForButtonIT extends AbstractComponentIT {
 
         TestBenchElement button = $("vaadin-button").first();
         TestBenchElement icon = button.$("vaadin-icon").first();
-        String slot = icon.getAttribute("slot");
+        String slot = icon.getDomAttribute("slot");
 
         // self check: this is expected in the initialization and not part of
         // the test
@@ -42,7 +42,7 @@ public class IconForButtonIT extends AbstractComponentIT {
         Assert.assertEquals("Updated text", button.getText());
 
         icon = button.$("vaadin-icon").first();
-        slot = icon.getAttribute("slot");
+        slot = icon.getDomAttribute("slot");
         // slot should have the same value after text update
         Assert.assertEquals("prefix", slot);
     }

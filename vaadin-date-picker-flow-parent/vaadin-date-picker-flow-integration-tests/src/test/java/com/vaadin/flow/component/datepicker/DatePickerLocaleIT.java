@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.datepicker;
 
 import java.time.LocalDate;
@@ -10,7 +25,6 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
-import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,8 +33,9 @@ import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
 
 import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-date-picker/date-picker-locale")
 public class DatePickerLocaleIT extends AbstractComponentIT {
@@ -241,6 +256,42 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
         Assert.assertEquals(testDate, picker.getDate());
     }
 
+    @Test
+    public void setLocale_setDate_yearBefore1000_assertDisplayedValue() {
+        applyLocale(Locale.UK);
+
+        picker.setDate(LocalDate.of(900, Month.MARCH, 6));
+        Assert.assertEquals("06/03/0900", picker.getInputValue());
+
+        picker.setDate(LocalDate.of(87, Month.MARCH, 6));
+        Assert.assertEquals("06/03/0087", picker.getInputValue());
+
+        applyLocale(Locale.CHINA);
+
+        picker.setDate(LocalDate.of(900, Month.MARCH, 5));
+        Assert.assertEquals("0900/3/5", picker.getInputValue());
+
+        picker.setDate(LocalDate.of(87, Month.MARCH, 5));
+        Assert.assertEquals("0087/3/5", picker.getInputValue());
+    }
+
+    @Test
+    public void setLocale_setInputValue_yearBefore1000_assertDisplayedValue() {
+        applyLocale(Locale.UK);
+
+        picker.setInputValue("6/3/900");
+        Assert.assertEquals("06/03/0900", picker.getInputValue());
+        Assert.assertEquals(LocalDate.of(900, Month.MARCH, 6),
+                picker.getDate());
+
+        applyLocale(Locale.CHINA);
+
+        picker.setInputValue("900/3/6");
+        Assert.assertEquals("0900/3/6", picker.getInputValue());
+        Assert.assertEquals(LocalDate.of(900, Month.MARCH, 6),
+                picker.getDate());
+    }
+
     private void enterShortYearDate(LocalDate date) {
         String formattedDate = date
                 .format(DateTimeFormatter.ofPattern("MM/dd/yy"));
@@ -270,7 +321,11 @@ public class DatePickerLocaleIT extends AbstractComponentIT {
         return logs.getAll().stream()
                 .filter(log -> log.getLevel().equals(Level.WARNING))
                 .filter(log -> !log.getMessage().contains("deprecated"))
+                .filter(log -> !log.getMessage().contains(
+                        "finalized before a style module was registered"))
                 .filter(log -> !log.getMessage().contains("Lit is in dev mode"))
+                .filter(log -> !log.getMessage()
+                        .contains("React Router Future Flag Warning"))
                 .collect(Collectors.toList());
     }
 

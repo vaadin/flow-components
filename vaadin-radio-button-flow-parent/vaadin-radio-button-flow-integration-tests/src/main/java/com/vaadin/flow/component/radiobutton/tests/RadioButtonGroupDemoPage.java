@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,9 +12,7 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
-
 package com.vaadin.flow.component.radiobutton.tests;
 
 import com.vaadin.flow.component.Component;
@@ -26,7 +24,6 @@ import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.router.Route;
@@ -72,7 +69,6 @@ public class RadioButtonGroupDemoPage extends Div {
         addDisabled();
         addDisabledItems();
         addReadOnlyGroup();
-        addComponentWithThemeVariant();
     }
 
     private void addHelperText() {
@@ -99,20 +95,6 @@ public class RadioButtonGroupDemoPage extends Div {
 
         addCard("Helper text", groupWitHelperText, groupWitHelperComponent,
                 clearHelperText, clearHelperComponent);
-    }
-
-    private void addComponentWithThemeVariant() {
-        RadioButtonGroup<String> group = new RadioButtonGroup<>();
-        group.setId("button-group-theme-variant");
-        group.setItems("foo", "bar", "baz");
-        group.addThemeVariants(RadioGroupVariant.LUMO_VERTICAL);
-
-        NativeButton button = new NativeButton("Remove theme variant",
-                e -> group
-                        .removeThemeVariants(RadioGroupVariant.LUMO_VERTICAL));
-        button.setId("remove-theme-variant-button");
-
-        addCard("Radio Button Theme Variant", group, button);
     }
 
     private void addBasicFeatures() {

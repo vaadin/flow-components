@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,13 +15,13 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.router.Route;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
+
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.router.Route;
 
 @Route("vaadin-combo-box/auto-focus-filter")
 public class AutoFocusFilterPage extends Div {

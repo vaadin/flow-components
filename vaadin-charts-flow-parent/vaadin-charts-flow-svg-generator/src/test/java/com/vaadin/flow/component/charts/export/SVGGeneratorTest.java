@@ -1,12 +1,16 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.export;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +27,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.charts.model.AnnotationItemLabel;
+import com.vaadin.flow.component.charts.model.AnnotationItemLabelPoint;
 import com.vaadin.flow.component.charts.model.AxisType;
 import com.vaadin.flow.component.charts.model.ChartType;
 import com.vaadin.flow.component.charts.model.Configuration;
@@ -38,10 +44,6 @@ import com.vaadin.flow.component.charts.model.Tooltip;
 import com.vaadin.flow.component.charts.model.XAxis;
 import com.vaadin.flow.component.charts.model.YAxis;
 import com.vaadin.flow.component.charts.themes.LumoDarkTheme;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class SVGGeneratorTest {
 
@@ -89,7 +91,7 @@ public class SVGGeneratorTest {
         Path emptyConfigChart = Paths.get("src", "test", "resources",
                 "empty.svg");
         String emptyChartContent = readUtf8File(emptyConfigChart);
-        assertEquals(replaceIds(emptyChartContent), replaceIds(svg));
+        assertEquals(sanitizeSvg(emptyChartContent), sanitizeSvg(svg));
     }
 
     @Test
@@ -99,7 +101,7 @@ public class SVGGeneratorTest {
         String svg = svgGenerator.generate(conf);
         Path pieChartPath = Paths.get("src", "test", "resources", "pie.svg");
         String expectedSVG = readUtf8File(pieChartPath);
-        assertEquals(replaceIds(expectedSVG), replaceIds(svg));
+        assertEquals(sanitizeSvg(expectedSVG), sanitizeSvg(svg));
     }
 
     @Test
@@ -110,7 +112,7 @@ public class SVGGeneratorTest {
         Path pieChartPath = Paths.get("src", "test", "resources",
                 "column-without-title.svg");
         String expectedSVG = readUtf8File(pieChartPath);
-        assertEquals(replaceIds(expectedSVG), replaceIds(svg));
+        assertEquals(sanitizeSvg(expectedSVG), sanitizeSvg(svg));
     }
 
     @Test
@@ -123,7 +125,7 @@ public class SVGGeneratorTest {
         Path pieChartPath = Paths.get("src", "test", "resources",
                 "custom-width.svg");
         String expectedSVG = readUtf8File(pieChartPath);
-        assertEquals(replaceIds(expectedSVG), replaceIds(svg));
+        assertEquals(sanitizeSvg(expectedSVG), sanitizeSvg(svg));
     }
 
     @Test
@@ -136,7 +138,7 @@ public class SVGGeneratorTest {
         Path pieChartPath = Paths.get("src", "test", "resources",
                 "custom-height.svg");
         String expectedSVG = readUtf8File(pieChartPath);
-        assertEquals(replaceIds(expectedSVG), replaceIds(svg));
+        assertEquals(sanitizeSvg(expectedSVG), sanitizeSvg(svg));
     }
 
     @Test
@@ -149,7 +151,7 @@ public class SVGGeneratorTest {
         Path pieChartPath = Paths.get("src", "test", "resources",
                 "lumo-dark.svg");
         String expectedSVG = readUtf8File(pieChartPath);
-        assertEquals(replaceIds(expectedSVG), replaceIds(svg));
+        assertEquals(sanitizeSvg(expectedSVG), sanitizeSvg(svg));
     }
 
     @Test
@@ -163,7 +165,7 @@ public class SVGGeneratorTest {
         Path pieChartPath = Paths.get("src", "test", "resources",
                 "custom-lang.svg");
         String expectedSVG = readUtf8File(pieChartPath);
-        assertEquals(replaceIds(expectedSVG), replaceIds(svg));
+        assertEquals(sanitizeSvg(expectedSVG), sanitizeSvg(svg));
     }
 
     @Test
@@ -185,7 +187,7 @@ public class SVGGeneratorTest {
                 "timeline.svg");
         String expectedSVG = readUtf8File(expectedFilePath);
         String actualSVG = svgGenerator.generate(configuration, options);
-        assertEquals(replaceIds(expectedSVG), replaceIds(actualSVG));
+        assertEquals(sanitizeSvg(expectedSVG), sanitizeSvg(actualSVG));
     }
 
     @Test
@@ -200,7 +202,7 @@ public class SVGGeneratorTest {
         Path expectedResultPath = Paths.get("src", "test", "resources",
                 "enabled-functions.svg");
         String expectedSVG = readUtf8File(expectedResultPath);
-        assertEquals(replaceIds(expectedSVG), replaceIds(actualSVG));
+        assertEquals(sanitizeSvg(expectedSVG), sanitizeSvg(actualSVG));
     }
 
     @Test
@@ -212,6 +214,18 @@ public class SVGGeneratorTest {
         ListSeries series = new ListSeries(data);
         configuration.addSeries(series);
         svgGenerator.generate(configuration);
+    }
+
+    @Test
+    public void exportWithLabel() throws IOException, InterruptedException {
+        var conf = createPieChartConfiguration();
+        var label = new AnnotationItemLabel("Blue");
+        label.setPoint(new AnnotationItemLabelPoint(350, 170));
+        conf.addLabel(label);
+        var svg = svgGenerator.generate(conf);
+        var pieChartPath = Paths.get("src", "test", "resources", "label.svg");
+        var expectedSVG = readUtf8File(pieChartPath);
+        assertEquals(sanitizeSvg(expectedSVG), sanitizeSvg(svg));
     }
 
     private Configuration createPieChartConfiguration() {
@@ -261,8 +275,9 @@ public class SVGGeneratorTest {
 
         XAxis x = new XAxis();
         x.setCategories("January is a long month", "February is rather boring",
-                "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
-                "Dec");
+                "Mar", "Apr", "May", "Jun",
+                "Jul is a month to enjoy really nice weather", "Aug", "Sep",
+                "Oct", "Nov", "Dec");
         configuration.addxAxis(x);
 
         YAxis y = new YAxis();
@@ -342,5 +357,18 @@ public class SVGGeneratorTest {
 
     private String readUtf8File(Path path) throws IOException {
         return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+    }
+
+    private String normalizeFloatingPointCoordinates(String svg) {
+        var pattern = Pattern.compile("(\\d+\\.\\d{10,})");
+        return pattern.matcher(svg).replaceAll(matchResult -> {
+            var value = Double.parseDouble(matchResult.group(1));
+            // Round to 8 decimal places to eliminate precision differences
+            return String.format("%.8f", value);
+        });
+    }
+
+    private String sanitizeSvg(String svg) {
+        return normalizeFloatingPointCoordinates(replaceIds(svg));
     }
 }

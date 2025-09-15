@@ -1,12 +1,15 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.addon.spreadsheet.client;
+
+import static com.vaadin.addon.spreadsheet.client.OverlayInfo.COMPONENT;
+import static com.vaadin.addon.spreadsheet.client.OverlayInfo.IMAGE;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +22,6 @@ import java.util.Set;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Node;
@@ -44,9 +46,6 @@ import com.vaadin.client.ui.layout.ElementResizeListener;
 import com.vaadin.component.spreadsheet.client.js.SpreadsheetServerRpcImpl;
 import com.vaadin.shared.communication.ServerRpc;
 import com.vaadin.shared.communication.SharedState;
-
-import static com.vaadin.addon.spreadsheet.client.OverlayInfo.IMAGE;
-import static com.vaadin.addon.spreadsheet.client.OverlayInfo.COMPONENT;
 
 @SuppressWarnings("serial")
 public class SpreadsheetConnector extends AbstractHasComponentsConnector
@@ -185,6 +184,8 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
     private SpreadsheetServerRpcImpl serverRPC;
 
     private Element host;
+
+    private HashMap<String, Slot> customEditors = null;
 
     // spreadsheet: we need the server side proxy
     public <T extends ServerRpc> T getProtectedRpcProxy(Class<T> rpcInterface) {
@@ -374,9 +375,22 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                 });
             }
             widget.showCellCustomComponents(customWidgetMap);
+            if (!state.showCustomEditorOnFocus) {
+                widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
+            }
         }
         if (stateChangeEvent.hasPropertyChanged("cellKeysToEditorIdMap")) {
             setupCustomEditors();
+            if (!state.showCustomEditorOnFocus) {
+                widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
+            }
+        }
+        if (stateChangeEvent.hasPropertyChanged("showCustomEditorOnFocus")) {
+            if (state.showCustomEditorOnFocus) {
+                widget.removeCellCustomEditors(getCustomEditors());
+            } else {
+                widget.showCellCustomEditors(state.cellKeysToEditorIdMap);
+            }
         }
         if (stateChangeEvent.hasPropertyChanged("cellComments")
                 || stateChangeEvent.hasPropertyChanged("cellCommentAuthors")) {
@@ -447,10 +461,20 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
         }
     }
 
+    public HashMap<String, Slot> getCustomEditors() {
+        return customEditors;
+    }
+
     private void setupCustomEditors() {
         if (getState().cellKeysToEditorIdMap == null) {
+            if (!getWidget().isShowCustomEditorOnFocus()) {
+                getWidget().removeCellCustomEditors(getCustomEditors());
+            }
+            customEditors = null;
             getWidget().setCustomEditorFactory(null);
         } else if (getWidget().getCustomEditorFactory() == null) {
+            customEditors = new HashMap<>();
+
             if (customEditorFactory == null) {
                 customEditorFactory = new SpreadsheetCustomEditorFactory() {
 
@@ -464,10 +488,23 @@ public class SpreadsheetConnector extends AbstractHasComponentsConnector
                     public Widget getCustomEditor(String key) {
                         String editorId = getState().cellKeysToEditorIdMap
                                 .get(key);
+                        if (customEditors.containsKey(editorId)) {
+                            var slot = customEditors.get(editorId);
+                            slot.getListener().setCellAddress(key);
+                            return slot;
+                        }
                         var editor = SheetJsniUtil.getVirtualChild(editorId,
                                 host.getPropertyString("appId"));
-                        return new Slot("custom-editor-" + editorId, editor,
-                                host);
+                        Slot slot = new Slot("custom-editor-" + editorId,
+                                editor, host);
+                        customEditors.put(editorId, slot);
+                        CustomEditorEventListener listener = GWT
+                                .create(CustomEditorEventListener.class);
+                        listener.setSpreadsheetWidget(getWidget());
+                        listener.init(slot, key);
+                        slot.setListener(listener);
+
+                        return slot;
                     }
 
                 };

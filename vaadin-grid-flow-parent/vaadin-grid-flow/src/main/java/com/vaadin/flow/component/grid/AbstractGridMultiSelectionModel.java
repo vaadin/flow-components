@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,6 +28,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -44,8 +45,6 @@ import com.vaadin.flow.data.selection.SelectionEvent;
 import com.vaadin.flow.data.selection.SelectionListener;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonObject;
 
 /**
  * Abstract implementation of a GridMultiSelectionModel.
@@ -75,8 +74,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 this::clientDeselectAll);
         selectAllCheckBoxVisibility = SelectAllCheckboxVisibility.DEFAULT;
 
-        selectionColumn
-                .setSelectAllCheckBoxVisibility(isSelectAllCheckboxVisible());
+        updateSelectAllCheckBoxVisibility();
 
         if (grid.getElement().getNode().isAttached()) {
             this.insertSelectionColumn(grid, selectionColumn);
@@ -87,6 +85,11 @@ public abstract class AbstractGridMultiSelectionModel<T>
                 }
             });
         }
+    }
+
+    void updateSelectAllCheckBoxVisibility() {
+        selectionColumn
+                .setSelectAllCheckBoxVisibility(isSelectAllCheckboxVisible());
     }
 
     private void insertSelectionColumn(Grid<T> grid,
@@ -105,7 +108,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public void selectFromClient(T item) {
-        if (isSelected(item)) {
+        boolean selectable = getGrid().isItemSelectable(item);
+        if (isSelected(item) || !selectable) {
             return;
         }
 
@@ -114,6 +118,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, true));
+
+        ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
+                getGrid(), item, true, selectionColumn.isShiftKeyDown()));
 
         if (!isSelectAllCheckboxVisible()) {
             // Skip changing the state of Select All checkbox if it was
@@ -131,7 +138,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public void deselectFromClient(T item) {
-        if (!isSelected(item)) {
+        boolean selectable = getGrid().isItemSelectable(item);
+        if (!isSelected(item) || !selectable) {
             return;
         }
 
@@ -140,6 +148,9 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
         fireSelectionEvent(new MultiSelectionEvent<>(getGrid(),
                 getGrid().asMultiSelect(), oldSelection, true));
+
+        ComponentUtil.fireEvent(getGrid(), new ClientItemToggleEvent<>(
+                getGrid(), item, false, selectionColumn.isShiftKeyDown()));
 
         long size = getDataProviderSize();
         selectionColumn.setSelectAllCheckboxState(false);
@@ -305,6 +316,15 @@ public abstract class AbstractGridMultiSelectionModel<T>
                         .selectionChange((MultiSelectionEvent) event)));
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Registration addClientItemToggleListener(
+            ComponentEventListener<ClientItemToggleEvent<T>> listener) {
+        Objects.requireNonNull(listener, "listener cannot be null");
+        return ComponentUtil.addListener(getGrid(), ClientItemToggleEvent.class,
+                (ComponentEventListener) listener);
+    }
+
     @Override
     public void setSelectAllCheckboxVisibility(
             SelectAllCheckboxVisibility selectAllCheckBoxVisibility) {
@@ -320,6 +340,10 @@ public abstract class AbstractGridMultiSelectionModel<T>
 
     @Override
     public boolean isSelectAllCheckboxVisible() {
+        if (getGrid().getItemSelectableProvider() != null) {
+            return false;
+        }
+
         switch (selectAllCheckBoxVisibility) {
         case DEFAULT:
             return getGrid().getDataCommunicator().getDataProvider()
@@ -340,7 +364,7 @@ public abstract class AbstractGridMultiSelectionModel<T>
     }
 
     @Override
-    public void generateData(T item, JsonObject jsonObject) {
+    public void generateData(T item, ObjectNode jsonObject) {
         if (isSelected(item)) {
             jsonObject.put("selected", true);
         }
@@ -356,6 +380,16 @@ public abstract class AbstractGridMultiSelectionModel<T>
         return selectionColumn.isFrozen();
     }
 
+    @Override
+    public void setDragSelect(boolean dragSelect) {
+        selectionColumn.setDragSelect(dragSelect);
+    }
+
+    @Override
+    public boolean isDragSelect() {
+        return selectionColumn.isDragSelect();
+    }
+
     /**
      * Method for handling the firing of selection events.
      *
@@ -366,8 +400,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
             SelectionEvent<Grid<T>, T> event);
 
     protected void clientSelectAll() {
+        // ignore call if the checkbox is hidden
         if (!isSelectAllCheckboxVisible()) {
-            // ignore event if the checkBox was meant to be hidden
             return;
         }
         Stream<T> allItemsStream;
@@ -429,8 +463,8 @@ public abstract class AbstractGridMultiSelectionModel<T>
     }
 
     protected void clientDeselectAll() {
+        // ignore call if the checkbox is hidden
         if (!isSelectAllCheckboxVisible()) {
-            // ignore event if the checkBox was meant to be hidden
             return;
         }
         doUpdateSelection(Collections.emptySet(), getSelectedItems(), true);

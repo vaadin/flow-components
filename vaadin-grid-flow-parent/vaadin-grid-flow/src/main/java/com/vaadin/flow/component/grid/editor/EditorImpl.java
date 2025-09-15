@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.grid.editor;
 
-import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.internal.ExecutionContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,15 +24,15 @@ import java.util.Objects;
 
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.AbstractGridExtension;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.PropertySet;
 import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonObject;
 
 /**
  * Implementation of {@code Editor} interface.
@@ -52,7 +50,7 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
     private static final String EDITING = "_editing";
 
     private final Map<Class<?>, List<?>> listeners = new HashMap<>();
-    private SerializableConsumer<ExecutionContext> editItemRequest;
+    private StateTree.ExecutionRegistration editItemRequestRegistration;
     private Binder<T> binder;
     private T edited;
     private boolean isBuffered;
@@ -132,15 +130,16 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
         Objects.requireNonNull(item, "Editor can't edit null");
 
         final T it = item;
-        if (editItemRequest == null) {
-            editItemRequest = context -> {
-                requestEditItem(it);
-                editItemRequest = null;
-            };
-            getGrid().getElement().getNode().runWhenAttached(
-                    ui -> ui.getInternals().getStateTree().beforeClientResponse(
-                            getGrid().getElement().getNode(), editItemRequest));
-        }
+        getGrid().getElement().getNode().runWhenAttached(ui -> {
+            if (this.editItemRequestRegistration != null) {
+                editItemRequestRegistration.remove();
+            }
+            this.editItemRequestRegistration = ui
+                    .beforeClientResponse(getGrid(), context -> {
+                        requestEditItem(it);
+                        this.editItemRequestRegistration = null;
+                    });
+        });
     }
 
     private void requestEditItem(T item) {
@@ -151,7 +150,7 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
 
         refresh(item);
 
-        if (isBuffered()) {
+        if (isBuffered() || item.getClass().isRecord()) {
             binder.readBean(item);
         } else {
             binder.setBean(item);
@@ -179,7 +178,7 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
     }
 
     @Override
-    public void generateData(T item, JsonObject jsonObject) {
+    public void generateData(T item, ObjectNode jsonObject) {
         if (item != null && item.equals(edited)) {
             jsonObject.put(EDITING, true);
         } else {
@@ -215,11 +214,6 @@ public class EditorImpl<T> extends AbstractGridExtension<T>
         if (isBuffered() && edited != null) {
             throw new IllegalStateException("Editing item " + item
                     + " failed. Item editor is already editing item " + edited);
-        }
-
-        if (!getGrid().getDataCommunicator().getKeyMapper().has(item)) {
-            throw new IllegalStateException("The item " + item
-                    + " is not in the backing data provider");
         }
     }
 

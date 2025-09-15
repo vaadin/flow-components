@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
@@ -30,7 +30,6 @@ public class Lang extends AbstractConfigurationObject {
     private String downloadPDF;
     private String downloadPNG;
     private String downloadSVG;
-    private String drillUpText;
     private String invalidDate;
     private String loading;
     private String[] months;
@@ -148,24 +147,6 @@ public class Lang extends AbstractConfigurationObject {
      */
     public void setDownloadSVG(String downloadSVG) {
         this.downloadSVG = downloadSVG;
-    }
-
-    /**
-     * @see #setDrillUpText(String)
-     */
-    public String getDrillUpText() {
-        return drillUpText;
-    }
-
-    /**
-     * The text for the button that appears when drilling down, linking back to
-     * the parent series. The parent series' name is inserted for
-     * <code>{series.name}</code>.
-     * <p>
-     * Defaults to: Back to {series.name}
-     */
-    public void setDrillUpText(String drillUpText) {
-        this.drillUpText = drillUpText;
     }
 
     /**

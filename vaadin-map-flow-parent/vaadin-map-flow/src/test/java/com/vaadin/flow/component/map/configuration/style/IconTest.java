@@ -1,8 +1,17 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.map.configuration.style;
 
-import com.vaadin.flow.component.map.Assets;
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.vaadin.flow.component.map.Assets;
 
 public class IconTest {
 
@@ -22,6 +31,7 @@ public class IconTest {
         Assert.assertNull(icon.getCrossOrigin());
         Assert.assertEquals("test", icon.getSrc());
         Assert.assertNull(icon.getImg());
+        Assert.assertNull(icon.getImgHandler());
         Assert.assertNull(icon.getImgSize());
     }
 
@@ -65,7 +75,7 @@ public class IconTest {
         Assert.assertThrows(IllegalStateException.class, () -> {
             Icon.Options options = new Icon.Options();
             options.setSrc("test");
-            options.setImg(Assets.PIN.getResource());
+            options.setImg(Assets.PIN.getHandler());
             new Icon(options);
         });
     }

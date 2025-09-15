@@ -1,16 +1,17 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
 
-import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * The size of the point shape is determined by its value relative to its
@@ -22,6 +23,8 @@ import java.util.Arrays;
 public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     private Boolean allowDrillToNode;
+    private Breadcrumbs breadcrumbs;
+    private Boolean allowTraversingTree;
     private Boolean allowPointSelect;
     private Boolean alternateStartingDirection;
     private Boolean animation;
@@ -77,7 +80,9 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
 
     /**
      * @see #setAllowDrillToNode(Boolean)
+     * @deprecated Use {@link #setAllowTraversingTree(Boolean)} instead.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public Boolean getAllowDrillToNode() {
         return allowDrillToNode;
     }
@@ -87,7 +92,10 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      * on its children.
      * <p>
      * Defaults to: false
+     *
+     * @deprecated Use {@link #setAllowTraversingTree(Boolean)} instead.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setAllowDrillToNode(Boolean allowDrillToNode) {
         this.allowDrillToNode = allowDrillToNode;
     }
@@ -107,6 +115,24 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      */
     public void setAllowPointSelect(Boolean allowPointSelect) {
         this.allowPointSelect = allowPointSelect;
+    }
+
+    /**
+     * {@see #setAllowTraversingTree(Boolean)}
+     */
+    public Boolean getAllowTraversingTree() {
+
+        return allowTraversingTree;
+    }
+
+    /**
+     * When enabled the user can click on a point which is a parent and zoom in
+     * on its children.
+     * <p>
+     * Defaults to: false
+     */
+    public void setAllowTraversingTree(Boolean allowTraversingTree) {
+        this.allowTraversingTree = allowTraversingTree;
     }
 
     /**
@@ -202,6 +228,26 @@ public class PlotOptionsTreemap extends AbstractPlotOptions {
      */
     public void setBorderWidth(Number borderWidth) {
         this.borderWidth = borderWidth;
+    }
+
+    /**
+     * {@see #setBreadcrumbs(Breadcrumbs)}
+     */
+    public Breadcrumbs getBreadcrumbs() {
+        if (breadcrumbs == null) {
+            breadcrumbs = new Breadcrumbs();
+        }
+        return breadcrumbs;
+    }
+
+    /**
+     * Options for the breadcrumbs, the navigation at the top leading the way up
+     * through the traversed levels.
+     * 
+     * @param breadcrumbs
+     */
+    public void setBreadcrumbs(Breadcrumbs breadcrumbs) {
+        this.breadcrumbs = breadcrumbs;
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,11 +15,11 @@
  */
 package com.vaadin.flow.component.timepicker.tests;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import org.junit.Before;
+import org.junit.Test;
 
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.component.timepicker.TimePickerVariant;
@@ -68,14 +68,6 @@ public class TimePickerVariantTest {
         assertThemeAttribute(null);
         timePicker.addThemeVariants(TimePickerVariant.LUMO_HELPER_ABOVE_FIELD);
         assertThemeAttribute("helper-above-field");
-    }
-
-    @Test
-    public void addMaterialAlwaysFloatLabel_themeAttributeUpdated() {
-        assertThemeAttribute(null);
-        timePicker.addThemeVariants(
-                TimePickerVariant.MATERIAL_ALWAYS_FLOAT_LABEL);
-        assertThemeAttribute("always-float-label");
     }
 
     @Test

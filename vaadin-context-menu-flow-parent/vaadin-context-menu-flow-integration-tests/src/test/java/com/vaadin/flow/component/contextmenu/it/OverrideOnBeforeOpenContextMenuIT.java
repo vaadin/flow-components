@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,22 +35,21 @@ public class OverrideOnBeforeOpenContextMenuIT extends AbstractContextMenuIT {
 
     @Test
     public void shouldNotOpenContextMenuWhenOnBeforeMenuOpenReturnsFalse() {
-        verifyClosed();
+        verifyClosedAndRemoved();
         rightClickOn("no-open-menu-target");
-        verifyClosed();
+        verifyClosedAndRemoved();
     }
 
     @Test
     public void shouldDynamicallyModifyContextMenuItems() {
-        verifyClosed();
+        verifyClosedAndRemoved();
 
         rightClickOn("dynamic-context-menu-target");
         verifyOpened();
 
-        Assert.assertEquals("Dynamic Item",
-                getOverlay().getAttribute("innerText"));
+        Assert.assertEquals("Dynamic Item", getMenu().getText());
 
         clickBody();
-        verifyClosed();
+        verifyClosedAndRemoved();
     }
 }

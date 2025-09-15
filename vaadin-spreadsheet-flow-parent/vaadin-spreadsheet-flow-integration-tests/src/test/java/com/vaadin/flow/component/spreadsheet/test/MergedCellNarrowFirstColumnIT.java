@@ -1,20 +1,25 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.test;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
 
-import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
-import com.vaadin.flow.testutil.TestPath;
-
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 
 @TestPath("vaadin-spreadsheet")
@@ -34,7 +39,7 @@ public class MergedCellNarrowFirstColumnIT extends AbstractSpreadsheetIT {
         String cellText = "123456";
 
         var a2 = spreadsheet.getCellAt("A2");
-        assertThat(a2.getValue(), equalTo(cellText));
+        Assert.assertEquals(cellText, a2.getValue());
 
         String cellSelector = String.format(".col%d.row%d.cell", 1, 2);
         List<WebElement> elements = findElementsInShadowRoot(
@@ -50,10 +55,10 @@ public class MergedCellNarrowFirstColumnIT extends AbstractSpreadsheetIT {
 
         var cellElement = underlyingCell.wrap(SheetCellElement.class);
 
-        assertThat(cellElement.getValue(), equalTo(cellText));
+        Assert.assertEquals(cellText, cellElement.getValue());
 
         String overFlow = cellElement.getCssValue("overflow");
-        assertThat(overFlow, not(equalTo("visible")));
+        Assert.assertNotEquals("visible", overFlow);
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,19 +15,11 @@
  */
 package com.vaadin.flow.component.confirmdialog.testbench;
 
-import org.openqa.selenium.SearchContext;
-
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 @Element("vaadin-confirm-dialog")
 public class ConfirmDialogElement extends TestBenchElement {
-
-    @Override
-    public SearchContext getContext() {
-        return getPropertyElement("$", "dialog", "$", "overlay");
-    }
-
     public TestBenchElement getConfirmButton() {
         return getPropertyElement("_confirmButton");
     }

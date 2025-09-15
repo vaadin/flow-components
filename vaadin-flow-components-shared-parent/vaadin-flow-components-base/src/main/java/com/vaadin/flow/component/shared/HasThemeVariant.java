@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.shared;
 
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.HasTheme;
@@ -37,9 +36,8 @@ public interface HasThemeVariant<TVariantEnum extends ThemeVariant>
      */
     @SuppressWarnings("unchecked")
     default void addThemeVariants(TVariantEnum... variants) {
-        getThemeNames()
-                .addAll(Stream.of(variants).map(TVariantEnum::getVariantName)
-                        .collect(Collectors.toList()));
+        getThemeNames().addAll(
+                Stream.of(variants).map(TVariantEnum::getVariantName).toList());
     }
 
     /**
@@ -50,8 +48,56 @@ public interface HasThemeVariant<TVariantEnum extends ThemeVariant>
      */
     @SuppressWarnings("unchecked")
     default void removeThemeVariants(TVariantEnum... variants) {
-        getThemeNames()
-                .removeAll(Stream.of(variants).map(TVariantEnum::getVariantName)
-                        .collect(Collectors.toList()));
+        getThemeNames().removeAll(
+                Stream.of(variants).map(TVariantEnum::getVariantName).toList());
+    }
+
+    /**
+     * Adds or removes the given theme variant for this component.
+     *
+     * @param variant
+     *            the theme variant to add or remove, not <code>null</code>
+     * @param set
+     *            <code>true</code> to add the theme variant, <code>false</code>
+     *            to remove it
+     */
+    @SuppressWarnings("unchecked")
+    default void setThemeVariant(TVariantEnum variant, boolean set) {
+        if (set) {
+            addThemeVariants(variant);
+        } else {
+            removeThemeVariants(variant);
+        }
+    }
+
+    /**
+     * Sets the theme variants of this component. This method overwrites any
+     * previous set theme variants.
+     *
+     * @param variants
+     *            the theme variants to set
+     */
+    @SuppressWarnings("unchecked")
+    default void setThemeVariants(TVariantEnum... variants) {
+        getThemeNames().clear();
+        addThemeVariants(variants);
+    }
+
+    /**
+     * Adds or removes the given theme variants for this component.
+     *
+     * @param set
+     *            <code>true</code> to add the theme variants,
+     *            <code>false</code> to remove them
+     * @param variants
+     *            the theme variants to add or remove
+     */
+    @SuppressWarnings("unchecked")
+    default void setThemeVariants(boolean set, TVariantEnum... variants) {
+        if (set) {
+            addThemeVariants(variants);
+        } else {
+            removeThemeVariants(variants);
+        }
     }
 }

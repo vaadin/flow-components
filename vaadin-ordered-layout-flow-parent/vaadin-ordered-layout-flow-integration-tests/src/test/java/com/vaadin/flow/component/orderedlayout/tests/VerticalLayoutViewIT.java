@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,15 +15,16 @@
  */
 package com.vaadin.flow.component.orderedlayout.tests;
 
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Tests for the VerticalLayout.
@@ -43,17 +44,17 @@ public class VerticalLayoutViewIT extends AbstractComponentIT {
 
         Assert.assertTrue(
                 "By default layout should contain spacing theme in 'theme' attribute",
-                vlayout.getAttribute("theme").contains("spacing"));
+                vlayout.getDomAttribute("theme").contains("spacing"));
         Assert.assertTrue(
                 "By default layout should contain margin theme in 'theme' attribute",
-                vlayout.getAttribute("theme").contains("margin"));
+                vlayout.getDomAttribute("theme").contains("margin"));
 
         checkThemeChanges(vlayout, "spacing", false);
         checkThemeChanges(vlayout, "margin", false);
 
         Assert.assertNull(
                 "After turning off spacing and padding, layout should not contain 'theme' attribute",
-                vlayout.getAttribute("theme"));
+                vlayout.getDomAttribute("theme"));
 
         checkThemeChanges(vlayout, "margin", true);
 
@@ -61,7 +62,7 @@ public class VerticalLayoutViewIT extends AbstractComponentIT {
 
         Assert.assertNull(
                 "After turning off everything, layout should not contain 'theme' attribute",
-                vlayout.getAttribute("theme"));
+                vlayout.getDomAttribute("theme"));
     }
 
     @Test
@@ -196,11 +197,12 @@ public class VerticalLayoutViewIT extends AbstractComponentIT {
         findElement(By.id(String.format("toggle-vertical-%s", themeName)))
                 .click();
         if (shouldPresent) {
-            waitUntil(dr -> layoutToCheck.getAttribute("theme") != null
-                    && layoutToCheck.getAttribute("theme").contains(themeName));
+            waitUntil(dr -> layoutToCheck.getDomAttribute("theme") != null
+                    && layoutToCheck.getDomAttribute("theme")
+                            .contains(themeName));
         } else {
-            waitUntil(dr -> layoutToCheck.getAttribute("theme") == null
-                    || !layoutToCheck.getAttribute("theme")
+            waitUntil(dr -> layoutToCheck.getDomAttribute("theme") == null
+                    || !layoutToCheck.getDomAttribute("theme")
                             .contains(themeName));
         }
     }

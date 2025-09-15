@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.test;
 
 import org.junit.Assert;
@@ -83,7 +91,7 @@ public class LeadingQuoteIT extends AbstractSpreadsheetIT {
 
     private String getInlineEditorValue(String cell) {
         WebElement cellEditor = getInlineEditor(cell);
-        return cellEditor.getAttribute("value");
+        return cellEditor.getDomProperty("value");
     }
 
     private String getFormulaBarValue(String cell) {

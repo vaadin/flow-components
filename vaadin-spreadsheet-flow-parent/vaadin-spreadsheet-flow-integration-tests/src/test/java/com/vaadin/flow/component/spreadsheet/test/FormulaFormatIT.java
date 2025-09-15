@@ -1,15 +1,23 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.test;
 
 import java.util.Locale;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.openqa.selenium.By;
 
 import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
 import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
 import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
 import com.vaadin.flow.testutil.TestPath;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.openqa.selenium.By;
 
 @TestPath("vaadin-spreadsheet")
 public class FormulaFormatIT extends AbstractSpreadsheetIT {
@@ -18,6 +26,7 @@ public class FormulaFormatIT extends AbstractSpreadsheetIT {
     public void init() {
         open();
         createNewSpreadsheet();
+        suppressInvalidFormulaCommentOverlay();
     }
 
     @Test
@@ -146,10 +155,7 @@ public class FormulaFormatIT extends AbstractSpreadsheetIT {
     @Test
     public void formulaFormatting_addFreezePaneWhileACellHasAnInvalidFormula_cellStillHasInvalidFormulaIndicator()
             throws InterruptedException {
-        createNewSpreadsheet();
-        SheetCellElement a1 = $(SpreadsheetElement.class).first()
-                .getCellAt("A1");
-        a1.setValue("=a");
+        setCellValue("A1", "=a");
 
         addFreezePane(); // Sheet content is reloaded
 

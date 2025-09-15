@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.checkbox.tests;
 
 import com.vaadin.flow.component.Component;
@@ -22,7 +37,6 @@ public class CheckboxDemoPage extends Div {
         addDisabledCheckbox();
         addIndeterminateCheckbox();
         addValueChangeCheckbox();
-        addAccessibleCheckbox();
         addCheckboxImgComponentLabel();
     }
 
@@ -77,13 +91,6 @@ public class CheckboxDemoPage extends Div {
                 message);
         valueChangeCheckbox.setId("value-change-checkbox");
         message.setId("value-change-checkbox-message");
-    }
-
-    private void addAccessibleCheckbox() {
-        Checkbox accessibleCheckbox = new Checkbox("Accessible Checkbox");
-        accessibleCheckbox.setAriaLabel("Click me");
-        addCard("Checkbox with Custom Accessible Label", accessibleCheckbox);
-        accessibleCheckbox.setId("accessible-checkbox");
     }
 
     private void addCheckboxImgComponentLabel() {

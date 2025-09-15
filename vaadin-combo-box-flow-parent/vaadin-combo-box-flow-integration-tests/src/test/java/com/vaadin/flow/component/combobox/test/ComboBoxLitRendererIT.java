@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -63,7 +63,7 @@ public class ComboBoxLitRendererIT extends AbstractComboBoxIT {
     }
 
     private void assertHasItem(String type, String name) {
-        Assert.assertTrue(getOverlayContents().stream().anyMatch(text -> {
+        Assert.assertTrue(getOverlayContents(combo).stream().anyMatch(text -> {
             return text.contains(type) && text.contains(name);
         }));
     }

@@ -1,12 +1,18 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.test;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.testutil.TestPath;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 @TestPath("vaadin-spreadsheet")
 public class MergedCellFrozenIT extends AbstractSpreadsheetIT {
@@ -29,10 +35,10 @@ public class MergedCellFrozenIT extends AbstractSpreadsheetIT {
         String cellText = "Merged cells in frozen area";
 
         var d2 = spreadsheet.getCellAt("D2");
-        assertThat(d2.getValue(), equalTo(cellText));
+        Assert.assertEquals(cellText, d2.getValue());
 
         String left = d2.getCssValue("left");
-        assertThat(left, equalTo("0px"));
+        Assert.assertEquals("0px", left);
 
         testBench().resizeViewPortTo(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 
@@ -43,10 +49,10 @@ public class MergedCellFrozenIT extends AbstractSpreadsheetIT {
         Thread.sleep(1000);
 
         d2 = spreadsheet.getCellAt("D2");
-        assertThat(d2.getValue(), equalTo(cellText));
+        Assert.assertEquals(cellText, d2.getValue());
 
         left = d2.getCssValue("left");
-        assertThat(left, equalTo("0px"));
+        Assert.assertEquals("0px", left);
     }
 
     @Test
@@ -59,7 +65,7 @@ public class MergedCellFrozenIT extends AbstractSpreadsheetIT {
         String cellText = "5";
 
         var e8 = spreadsheet.getCellAt("E8");
-        assertThat(e8.getValue(), equalTo(cellText));
+        Assert.assertEquals(cellText, e8.getValue());
 
         String originalLeft = e8.getCssValue("left");
 
@@ -72,9 +78,9 @@ public class MergedCellFrozenIT extends AbstractSpreadsheetIT {
         Thread.sleep(1000);
 
         e8 = spreadsheet.getCellAt("E8");
-        assertThat(e8.getValue(), equalTo(cellText));
+        Assert.assertEquals(cellText, e8.getValue());
 
-        assertThat(e8.getCssValue("left"), equalTo(originalLeft));
+        Assert.assertEquals(originalLeft, e8.getCssValue("left"));
     }
 
 }

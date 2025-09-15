@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,8 +15,11 @@
  */
 package com.vaadin.flow.component.checkbox.testbench;
 
+import java.util.Collections;
+
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -26,7 +29,7 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-checkbox")
 public class CheckboxElement extends TestBenchElement
-        implements HasLabel, HasHelper {
+        implements HasLabel, HasHelper, HasValidation {
     /**
      * Checks whether the checkbox is checked.
      *
@@ -46,6 +49,7 @@ public class CheckboxElement extends TestBenchElement
      */
     public void setChecked(boolean checked) {
         setProperty("checked", checked);
+        dispatchEvent("change", Collections.singletonMap("bubbles", true));
     }
 
     @Override

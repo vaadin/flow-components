@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -30,8 +31,6 @@ import com.vaadin.flow.data.selection.SingleSelectionEvent;
 import com.vaadin.flow.data.selection.SingleSelectionListener;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonObject;
 
 /**
  * Abstract implementation of a GridSingleSelectionModel.
@@ -60,7 +59,8 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
 
     @Override
     public void selectFromClient(T item) {
-        if (isSelected(item)) {
+        boolean selectable = getGrid().isItemSelectable(item);
+        if (isSelected(item) || !selectable) {
             return;
         }
         doSelect(item, true);
@@ -78,8 +78,9 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
 
     @Override
     public void deselectFromClient(T item) {
-        if (isSelected(item) && isDeselectAllowed()) {
-            selectFromClient(null);
+        boolean selectable = getGrid().isItemSelectable(item);
+        if (isSelected(item) && selectable && isDeselectAllowed()) {
+            doSelect(null, true);
         }
     }
 
@@ -165,7 +166,7 @@ public abstract class AbstractGridSingleSelectionModel<T> extends
     }
 
     @Override
-    public void generateData(T item, JsonObject jsonObject) {
+    public void generateData(T item, ObjectNode jsonObject) {
         if (isSelected(item)) {
             jsonObject.put("selected", true);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.listbox.test.dataview;
 
 import java.util.ArrayList;
@@ -29,7 +28,6 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxDataView;
-import com.vaadin.flow.data.provider.AbstractComponentDataViewTest;
 import com.vaadin.flow.data.provider.AbstractDataProvider;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderListener;
@@ -41,10 +39,11 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.tests.dataprovider.AbstractComponentDataViewTest;
 
 public class ListBoxDataViewTest extends AbstractComponentDataViewTest {
 
-    private static final String OUTER_HTML = "<vaadin-item>\n <span>%s</span>\n</vaadin-item>";
+    private static final String OUTER_HTML = "<vaadin-item><span>%s</span></vaadin-item>";
 
     @Test
     public void getItem_dataViewWithItems_returnsCorrectItem() {

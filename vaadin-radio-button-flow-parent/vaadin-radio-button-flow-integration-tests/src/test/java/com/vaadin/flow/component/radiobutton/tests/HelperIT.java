@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,11 +15,12 @@
  */
 package com.vaadin.flow.component.radiobutton.tests;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
-import org.junit.Assert;
-import org.junit.Test;
 
 @TestPath("vaadin-radio-button/helper")
 public class HelperIT extends AbstractComponentIT {
@@ -34,7 +35,7 @@ public class HelperIT extends AbstractComponentIT {
         TestBenchElement radioGroup = $("vaadin-radio-group").first();
 
         TestBenchElement helperComponent = radioGroup.$("span")
-                .attributeContains("slot", "helper").first();
+                .withAttribute("slot", "helper").first();
         Assert.assertEquals("Helper text", helperComponent.getText());
 
     }

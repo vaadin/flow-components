@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.combobox.test.dataview;
 
 import org.junit.Test;
@@ -51,7 +50,7 @@ public class ItemCountEstimateComboBoxIT extends AbstractItemCountComboBoxIT {
 
         verifyItemsCount(undefinedCountBackendItemsCount);
         scrollToItem(comboBoxElement, undefinedCountBackendItemsCount - 1);
-        waitUntilTextInContent(
+        waitUntilTextInContent(comboBoxElement,
                 "Callback Item " + (undefinedCountBackendItemsCount - 1));
 
         // check that new estimate is not applied after item count is known
@@ -59,7 +58,7 @@ public class ItemCountEstimateComboBoxIT extends AbstractItemCountComboBoxIT {
 
         verifyItemsCount(undefinedCountBackendItemsCount);
         scrollToItem(comboBoxElement, undefinedCountBackendItemsCount - 1);
-        waitUntilTextInContent(
+        waitUntilTextInContent(comboBoxElement,
                 "Callback Item " + (undefinedCountBackendItemsCount - 1));
     }
 

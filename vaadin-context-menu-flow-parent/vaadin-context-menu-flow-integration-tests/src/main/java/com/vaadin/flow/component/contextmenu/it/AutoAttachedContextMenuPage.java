@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,7 +17,7 @@ package com.vaadin.flow.component.contextmenu.it;
 
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 
 /**
@@ -34,11 +34,11 @@ import com.vaadin.flow.router.Route;
 public class AutoAttachedContextMenuPage extends Div {
 
     public AutoAttachedContextMenuPage() {
-        Label target = new Label(
+        Div target = new Div(
                 "Target for context menu which is automatically added to the UI");
         target.setId("target-for-not-attached-context-menu");
         ContextMenu contextMenu = new ContextMenu(target);
-        contextMenu.add(new Label("Auto-attached context menu"));
+        contextMenu.addComponent(new Span("Auto-attached context menu"));
         contextMenu.setId("not-attached-context-menu");
 
         add(target);

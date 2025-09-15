@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -41,7 +41,6 @@ public class TreeGridItemDetailsRendererIT extends AbstractTreeGridIT {
     @Test
     public void treegridItemDetails_openDetailsInDifferentLevels() {
         getTreeGrid().expandWithClick(1);
-        waitUntil(test -> getTreeGrid().getNumberOfExpandedRows() == 2);
 
         getTreeGrid().getCell(1, 0).click();
         Assert.assertTrue(getTreeGrid().isDetailsOpen(1));
@@ -61,7 +60,6 @@ public class TreeGridItemDetailsRendererIT extends AbstractTreeGridIT {
     @Test
     public void treegridItemDetails_collapseRoot_rememberOpenedDetails() {
         getTreeGrid().expandWithClick(1);
-        waitUntil(test -> getTreeGrid().getNumberOfExpandedRows() == 2);
 
         getTreeGrid().getCell(1, 0).click();
         Assert.assertTrue(getTreeGrid().isDetailsOpen(1));
@@ -74,7 +72,6 @@ public class TreeGridItemDetailsRendererIT extends AbstractTreeGridIT {
     @Test
     public void treegridItemDetails_collapseLevel1_rememberOpenedDetails() {
         getTreeGrid().expandWithClick(1);
-        waitUntil(test -> getTreeGrid().getNumberOfExpandedRows() == 2);
 
         getTreeGrid().getCell(2, 0).click();
         Assert.assertTrue(getTreeGrid().isDetailsOpen(2));

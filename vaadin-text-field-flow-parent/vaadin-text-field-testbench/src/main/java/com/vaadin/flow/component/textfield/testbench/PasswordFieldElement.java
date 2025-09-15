@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,10 +17,12 @@ package com.vaadin.flow.component.textfield.testbench;
 
 import org.openqa.selenium.By;
 
+import com.vaadin.testbench.HasClearButton;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
 import com.vaadin.testbench.HasPlaceholder;
 import com.vaadin.testbench.HasStringValueProperty;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -30,7 +32,8 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-password-field")
 public class PasswordFieldElement extends TestBenchElement
-        implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper {
+        implements HasStringValueProperty, HasLabel, HasPlaceholder, HasHelper,
+        HasClearButton, HasValidation {
 
     /**
      * Checks whether the password is shown in clear text or is hidden from
@@ -56,9 +59,13 @@ public class PasswordFieldElement extends TestBenchElement
     }
 
     /**
-     * Emulates the user changing the value, which in practice means setting
-     * {@code value} of the {@code input} element to the given value and then
-     * triggering {@code input} and {@code change} DOM events.
+     * Emulates the user setting the value. This triggers server value change
+     * listeners and validation. The emulation is done by setting the value
+     * property of the input element to the given value and then triggering
+     * synthetic {@code input}, {@code change}, and {@code focusout} DOM events.
+     * <p>
+     * For more complex scenarios that require a full browser simulation of
+     * typing, use {@link #sendKeys(CharSequence...)} instead.
      *
      * @param string
      *            the value to set

@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet;
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo.Type;
 
@@ -90,7 +90,8 @@ public class SheetChartWrapper extends SheetOverlayWrapper
             if (chartCreator != null) {
                 content = chartCreator.createChart(chartXml, spreadsheet);
             } else {
-                Label label = new Label(INTEGRATION_MISSING_TEXT); // , HTML);
+                NativeLabel label = new NativeLabel(INTEGRATION_MISSING_TEXT); // ,
+                                                                               // HTML);
                 label.addClassName("overlay-content");
                 content = new Div(label);
             }

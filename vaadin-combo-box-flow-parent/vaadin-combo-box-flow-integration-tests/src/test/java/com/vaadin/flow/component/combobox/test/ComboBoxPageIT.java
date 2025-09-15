@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import static org.junit.Assert.assertFalse;
+
 import java.util.List;
 
 import org.junit.Assert;
@@ -27,8 +29,6 @@ import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.TestBenchElement;
-
-import static org.junit.Assert.assertFalse;
 
 @TestPath("vaadin-combo-box/combo-box-test")
 public class ComboBoxPageIT extends AbstractComboBoxIT {
@@ -134,7 +134,7 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
         // opens the dropdown
         clickElementWithJs(input);
 
-        WebElement item = getItemElements().get(0);
+        WebElement item = getItemElements(combo).get(0);
         WebElement button = item.findElement(By.cssSelector("button"));
         clickElementWithJs(button);
 
@@ -202,9 +202,7 @@ public class ComboBoxPageIT extends AbstractComboBoxIT {
                 .id("update-on-change-combo");
         combo.openPopup();
 
-        TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
-        ElementQuery<TestBenchElement> items = overlay
-                .$("vaadin-combo-box-item");
+        ElementQuery<TestBenchElement> items = combo.$("vaadin-combo-box-item");
 
         TestBenchElement item1 = items.get(0);
         TestBenchElement item2 = items.get(1);

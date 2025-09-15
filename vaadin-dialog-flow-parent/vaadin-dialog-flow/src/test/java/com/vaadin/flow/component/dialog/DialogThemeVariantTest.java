@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,9 +15,9 @@
  */
 package com.vaadin.flow.component.dialog;
 
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 public class DialogThemeVariantTest {
 
@@ -29,15 +29,6 @@ public class DialogThemeVariantTest {
         dialog.addThemeVariants(DialogVariant.LUMO_NO_PADDING);
         assertThemeAttribute("no-padding");
         dialog.removeThemeVariants(DialogVariant.LUMO_NO_PADDING);
-        assertThemeAttribute(null);
-    }
-
-    @Test
-    public void addAndRemoveMaterialNoPaddingVariant_themeAttributeUpdated() {
-        assertThemeAttribute(null);
-        dialog.addThemeVariants(DialogVariant.MATERIAL_NO_PADDING);
-        assertThemeAttribute("no-padding");
-        dialog.removeThemeVariants(DialogVariant.MATERIAL_NO_PADDING);
         assertThemeAttribute(null);
     }
 

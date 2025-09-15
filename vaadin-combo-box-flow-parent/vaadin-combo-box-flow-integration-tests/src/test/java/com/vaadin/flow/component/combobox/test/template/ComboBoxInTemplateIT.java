@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,9 +20,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-combo-box/combo-box-in-template")
 public class ComboBoxInTemplateIT extends AbstractComponentIT {
@@ -34,7 +34,7 @@ public class ComboBoxInTemplateIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        message = $("label").id("message");
+        message = $("span").id("message");
         box1 = $("wrapper-template").first().$("combo-box-in-a-template")
                 .first().$(ComboBoxElement.class).first();
         box2 = $("wrapper-template").first().$("combo-box-in-a-template2")

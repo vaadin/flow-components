@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,6 +23,7 @@ import java.io.Serializable;
 /**
  * FileOutputStream with a reference to the output file.
  */
+@Deprecated(since = "24.8", forRemoval = true)
 public class UploadOutputStream extends FileOutputStream
         implements Serializable {
     private final File file;

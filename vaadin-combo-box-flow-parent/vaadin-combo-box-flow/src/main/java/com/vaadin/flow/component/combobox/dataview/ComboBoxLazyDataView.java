@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.combobox.dataview;
 
 import java.util.stream.Stream;
@@ -26,6 +25,7 @@ import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.HasLazyDataView;
+import com.vaadin.flow.data.provider.IdentifierProvider;
 import com.vaadin.flow.data.provider.ItemCountChangeEvent;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.shared.Registration;
@@ -72,6 +72,14 @@ public class ComboBoxLazyDataView<T> extends AbstractLazyDataView<T> {
     public void setItemCountCallback(
             CallbackDataProvider.CountCallback<T, String> callback) {
         getDataCommunicator().setCountCallback(callback);
+    }
+
+    @Override
+    public void setIdentifierProvider(
+            IdentifierProvider<T> identifierProvider) {
+        super.setIdentifierProvider(identifierProvider);
+        getDataCommunicator().getKeyMapper()
+                .setIdentifierGetter(identifierProvider);
     }
 
     /**

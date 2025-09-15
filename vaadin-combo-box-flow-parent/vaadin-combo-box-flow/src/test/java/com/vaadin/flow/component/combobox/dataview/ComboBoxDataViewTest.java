@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.combobox.dataview;
 
 import java.util.ArrayList;
@@ -22,7 +21,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.data.provider.CustomInMemoryDataProvider;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -31,9 +29,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.data.provider.AbstractComponentDataViewTest;
 import com.vaadin.flow.data.provider.DataCommunicator;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.DataProviderListener;
@@ -44,11 +40,14 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.tests.dataprovider.AbstractComponentDataViewTest;
+import com.vaadin.tests.dataprovider.CustomInMemoryDataProvider;
+import com.vaadin.tests.dataprovider.MockUI;
 
 public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
 
     private ComboBox<String> comboBox;
-    private DataCommunicatorTest.MockUI ui;
+    private MockUI ui;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -58,7 +57,7 @@ public class ComboBoxDataViewTest extends AbstractComponentDataViewTest {
         items = new ArrayList<>(Arrays.asList("first", "middle", "last"));
         dataProvider = new CustomInMemoryDataProvider<>(items);
         comboBox = getComponent();
-        ui = new DataCommunicatorTest.MockUI();
+        ui = new MockUI();
         ui.add(comboBox);
         dataView = comboBox.setItems(dataProvider, textFilter -> item -> true);
         component = comboBox;

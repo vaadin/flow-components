@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -34,7 +34,7 @@ public class AutoAttachedContextMenuIT extends AbstractContextMenuIT {
     @Before
     public void init() {
         open();
-        waitForElementPresent(By.tagName("label"));
+        waitForElementPresent(By.id(TARGET_ID));
         checkLogsForErrors();
     }
 
@@ -48,7 +48,7 @@ public class AutoAttachedContextMenuIT extends AbstractContextMenuIT {
 
         clickBody();
         waitForElementNotPresent(By.id(MENU_ID));
-        verifyClosed();
+        verifyClosedAndRemoved();
     }
 
     @Test
@@ -58,12 +58,12 @@ public class AutoAttachedContextMenuIT extends AbstractContextMenuIT {
         rightClickOn(TARGET_ID);
         verifyOpened();
         clickBody();
-        verifyClosed();
+        verifyClosedAndRemoved();
         rightClickOn(TARGET_ID);
 
         verifyOpened();
         Assert.assertEquals("Auto-attached context menu",
-                getOverlay().getAttribute("innerText"));
+                getMenu().getDomProperty("innerText"));
 
         checkLogsForErrors();
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,12 +15,10 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
+import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
+
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +27,12 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
-import static com.vaadin.flow.data.value.ValueChangeMode.EAGER;
+import com.vaadin.flow.component.radiobutton.testbench.RadioButtonGroupElement;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for {@link TextField}.
@@ -46,7 +49,7 @@ public class TextFieldPageIT extends AbstractComponentIT {
     public void assertReadOnly() {
         WebElement webComponent = findElement(By.tagName("vaadin-text-field"));
 
-        Assert.assertNull(webComponent.getAttribute("readonly"));
+        Assert.assertNull(webComponent.getDomAttribute("readonly"));
 
         WebElement button = findElement(By.id("read-only"));
         button.click();
@@ -61,17 +64,137 @@ public class TextFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertRequired() {
-        WebElement webComponent = findElement(By.tagName("vaadin-text-field"));
-        Assert.assertNull(webComponent.getAttribute("required"));
-        WebElement button = findElement(By.id("required"));
-        button.click();
-        waitUntil(
-                driver -> "true".equals(getProperty(webComponent, "required")));
+    public void labelMatches() {
+        List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
+                .withLabel("Text field label").all();
+        Assert.assertEquals(2, textFieldElements.size());
 
-        button.click();
-        waitUntil(driver -> "false"
-                .equals(getProperty(webComponent, "required")));
+        textFieldElements = $(TextFieldElement.class).withLabel("").all();
+        Assert.assertEquals(4, textFieldElements.size());
+
+        textFieldElements = $(TextFieldElement.class).withLabel("nonexistent")
+                .all();
+        Assert.assertEquals(0, textFieldElements.size());
+    }
+
+    @Test
+    public void labelContains() {
+        List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
+                .withLabelContaining("should be").all();
+        Assert.assertEquals(2, textFieldElements.size());
+
+        textFieldElements = $(TextFieldElement.class)
+                .withLabelContaining("nonexistent").all();
+        Assert.assertEquals(0, textFieldElements.size());
+    }
+
+    @Test
+    public void labelBiPredicate() {
+        List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
+                .withLabel("Helper", String::startsWith).all();
+        Assert.assertEquals(2, textFieldElements.size());
+
+        textFieldElements = $(TextFieldElement.class)
+                .withLabel("visible", String::endsWith).all();
+        Assert.assertEquals(2, textFieldElements.size());
+
+        textFieldElements = $(TextFieldElement.class)
+                .withLabel("text", TextFieldPageIT::containsIgnoreCase).all();
+        Assert.assertEquals(3, textFieldElements.size());
+    }
+
+    @Test
+    public void placeholderMatches() {
+        List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
+                .withPlaceholder("placeholder text").all();
+        Assert.assertEquals(2, textFieldElements.size());
+
+        textFieldElements = $(TextFieldElement.class).withPlaceholder("").all();
+        Assert.assertEquals(7, textFieldElements.size());
+
+        textFieldElements = $(TextFieldElement.class)
+                .withPlaceholder("nonexistent").all();
+        Assert.assertEquals(0, textFieldElements.size());
+    }
+
+    @Test
+    public void placeholderContains() {
+        List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
+                .withPlaceholderContaining("holder").all();
+        Assert.assertEquals(3, textFieldElements.size());
+
+        textFieldElements = $(TextFieldElement.class)
+                .withPlaceholderContaining("nonexistent").all();
+        Assert.assertEquals(0, textFieldElements.size());
+    }
+
+    @Test
+    public void placeholderBiPredicate() {
+        List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
+                .withPlaceholder("Placeholder", String::startsWith).all();
+        Assert.assertEquals(1, textFieldElements.size());
+
+        textFieldElements = $(TextFieldElement.class)
+                .withPlaceholder("text", String::endsWith).all();
+        Assert.assertEquals(2, textFieldElements.size());
+
+        textFieldElements = $(TextFieldElement.class).withPlaceholder(
+                "placeholder", TextFieldPageIT::containsIgnoreCase).all();
+        Assert.assertEquals(3, textFieldElements.size());
+    }
+
+    @Test
+    public void labelAndPlaceholderMatches() {
+        List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
+                .withLabel("Text field label")
+                .withPlaceholder("placeholder text").all();
+        Assert.assertEquals(2, textFieldElements.size());
+
+        textFieldElements = $(TextFieldElement.class)
+                .withLabel("Press ALT + 1 to focus").withPlaceholder("").all();
+        Assert.assertEquals(1, textFieldElements.size());
+
+        textFieldElements = $(TextFieldElement.class).withLabel("")
+                .withPlaceholder("Placeholder caption").all();
+        Assert.assertEquals(1, textFieldElements.size());
+    }
+
+    @Test
+    public void labelAndPlaceholderContains() {
+        List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
+                .withLabelContaining("Text").withPlaceholderContaining("text")
+                .all();
+        Assert.assertEquals(2, textFieldElements.size());
+    }
+
+    @Test
+    public void captionMatches() {
+        List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
+                .withCaption("Text field label").all();
+        Assert.assertEquals(2, textFieldElements.size());
+
+        textFieldElements = $(TextFieldElement.class)
+                .withCaption("Placeholder caption").all();
+        Assert.assertEquals(1, textFieldElements.size());
+
+        textFieldElements = $(TextFieldElement.class).withCaption("nonexistent")
+                .all();
+        Assert.assertEquals(0, textFieldElements.size());
+    }
+
+    @Test
+    public void captionContains() {
+        List<TextFieldElement> textFieldElements = $(TextFieldElement.class)
+                .withCaptionContaining("should be visible").all();
+        Assert.assertEquals(2, textFieldElements.size());
+
+        textFieldElements = $(TextFieldElement.class)
+                .withCaptionContaining("holder").all();
+        Assert.assertEquals(1, textFieldElements.size());
+
+        textFieldElements = $(TextFieldElement.class)
+                .withCaptionContaining("nonexistent").all();
+        Assert.assertEquals(0, textFieldElements.size());
     }
 
     @Test
@@ -98,8 +221,7 @@ public class TextFieldPageIT extends AbstractComponentIT {
         input.sendKeys("foo");
         blur();
 
-        WebElement clearButton = field.$("div").id("clearButton");
-        clearButton.click();
+        field.clickClearButton();
 
         String value = findElement(By.id("clear-message")).getText();
         Assert.assertEquals("Old value: 'foo'. New value: ''.", value);
@@ -130,25 +252,17 @@ public class TextFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void textFieldHasPlaceholder() {
-        WebElement textField = findElement(
-                By.id("text-field-with-value-change-listener"));
-        Assert.assertEquals(textField.getAttribute("placeholder"),
-                "placeholder text");
-    }
-
-    @Test
     public void assertFocusShortcut() {
-        WebElement shortcutField = findElement(By.id("shortcut-field"));
-        Assert.assertNull(
+        TextFieldElement shortcutField = $(TextFieldElement.class)
+                .id("shortcut-field");
+        Assert.assertFalse(
                 "TextField should not be focused before the shortcut event is triggered.",
-                shortcutField.getAttribute("focused"));
+                shortcutField.hasAttribute("focused"));
 
         SendKeysHelper.sendKeys(driver, Keys.ALT, "1");
         Assert.assertTrue(
                 "TextField should be focused after the shortcut event is triggered.",
-                shortcutField.getAttribute("focused").equals("true")
-                        || shortcutField.getAttribute("focused").equals(""));
+                shortcutField.hasAttribute("focused"));
     }
 
     @Test
@@ -173,7 +287,7 @@ public class TextFieldPageIT extends AbstractComponentIT {
         TextFieldElement textFieldElement = $(TextFieldElement.class)
                 .id("helper-component-field");
         Assert.assertEquals("helper-component",
-                textFieldElement.getHelperComponent().getAttribute("id"));
+                textFieldElement.getHelperComponent().getDomProperty("id"));
     }
 
     @Test
@@ -181,7 +295,7 @@ public class TextFieldPageIT extends AbstractComponentIT {
         TextFieldElement textFieldElement = $(TextFieldElement.class)
                 .id("helper-component-field");
         Assert.assertEquals("helper-component",
-                textFieldElement.getHelperComponent().getAttribute("id"));
+                textFieldElement.getHelperComponent().getDomProperty("id"));
 
         $(TestBenchElement.class).id("clear-helper-component-button").click();
         Assert.assertNull(textFieldElement.getHelperComponent());
@@ -206,5 +320,9 @@ public class TextFieldPageIT extends AbstractComponentIT {
 
     private void waitUntilTextsEqual(String expected, WebElement valueDiv) {
         waitUntil(driver -> expected.equals(valueDiv.getText()));
+    }
+
+    private static boolean containsIgnoreCase(String a, String b) {
+        return a.toUpperCase().contains(b.toUpperCase());
     }
 }

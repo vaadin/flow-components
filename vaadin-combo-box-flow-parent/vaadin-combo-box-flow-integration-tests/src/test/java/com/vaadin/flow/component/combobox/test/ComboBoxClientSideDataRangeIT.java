@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,14 +15,14 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
+import static com.vaadin.flow.component.combobox.test.ComboBoxClientSideDataRangePage.ITEMS_COUNT;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
-
-import static com.vaadin.flow.component.combobox.test.ComboBoxClientSideDataRangePage.ITEMS_COUNT;
 
 @TestPath("vaadin-combo-box/client-side-data-range")
 public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
@@ -67,7 +67,7 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
         // Scroll to the end page by page.
         for (int i = 0; i < ITEMS_COUNT; i += pageSize) {
             scrollToItem(comboBox, i);
-            waitUntilTextInContent("Item " + i);
+            waitUntilTextInContent(comboBox, "Item " + i);
 
             if (i < maxLoadedItemsCount) {
                 int page = i / pageSize;
@@ -85,7 +85,7 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
         // Scroll to the beginning page by page.
         for (int i = ITEMS_COUNT - 1; i >= 0; i -= pageSize) {
             scrollToItem(comboBox, i);
-            waitUntilTextInContent("Item " + i);
+            waitUntilTextInContent(comboBox, "Item " + i);
             assertLoadedItemsCount(String.format(
                     "Should have %s items loaded after scrolling to the index %s from the end",
                     maxLoadedItemsCount, i), maxLoadedItemsCount, comboBox);
@@ -99,7 +99,7 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
         // Scroll to the end.
         int lastIndex = ITEMS_COUNT - 1;
         scrollToItem(comboBox, lastIndex);
-        waitUntilTextInContent("Item " + lastIndex);
+        waitUntilTextInContent(comboBox, "Item " + lastIndex);
         assertLoadedItemsCount(String.format(
                 "Should have %s items loaded after jumping to the end",
                 pageSize), pageSize, comboBox);
@@ -107,7 +107,7 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
         // Scroll to the beginning page by page.
         for (int i = lastIndex; i >= 0; i -= pageSize) {
             scrollToItem(comboBox, i);
-            waitUntilTextInContent("Item " + i);
+            waitUntilTextInContent(comboBox, "Item " + i);
 
             if (lastIndex - i < maxLoadedItemsCount) {
                 int page = (lastIndex - i) / pageSize;
@@ -125,7 +125,7 @@ public class ComboBoxClientSideDataRangeIT extends AbstractComboBoxIT {
         // Scroll to the end page by page.
         for (int i = 0; i < ITEMS_COUNT; i += pageSize) {
             scrollToItem(comboBox, i);
-            waitUntilTextInContent("Item " + i);
+            waitUntilTextInContent(comboBox, "Item " + i);
             assertLoadedItemsCount(String.format(
                     "Should have %s items loaded after scrolling to the index %s from the beginning",
                     maxLoadedItemsCount, i), maxLoadedItemsCount, comboBox);

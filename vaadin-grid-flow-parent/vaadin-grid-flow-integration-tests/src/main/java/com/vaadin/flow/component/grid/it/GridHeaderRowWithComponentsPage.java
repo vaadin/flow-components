@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,14 +15,10 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import java.util.Arrays;
-
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.Grid.Column;
-import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
@@ -33,26 +29,43 @@ import com.vaadin.flow.router.Route;
 public class GridHeaderRowWithComponentsPage extends Div {
 
     public GridHeaderRowWithComponentsPage() {
-        Grid<String> grid = new Grid<>();
-        grid.setId("grid");
-        grid.setItems(Arrays.asList("Item 1", "Item 2", "Item 3"));
-        Column<String> column = grid.addColumn(ValueProvider.identity());
+        var grid = new Grid<String>();
+        grid.setItems("Item 1", "Item 2", "Item 3");
+        var column1 = grid.addColumn(ValueProvider.identity());
+        var column2 = grid.addColumn(ValueProvider.identity());
         add(grid);
 
-        HeaderRow row1 = grid.appendHeaderRow();
-        row1.getCell(column).setComponent(new Label("foo"));
-        HeaderRow row2 = grid.appendHeaderRow();
-        row2.getCell(column).setComponent(new Label("bar"));
+        var headerRow1 = grid.appendHeaderRow();
+        headerRow1.getCell(column1).setComponent(new Span("foo"));
+        var initiallyHiddenHeader1 = new Span("Initially hidden foo");
+        initiallyHiddenHeader1.setVisible(false);
+        headerRow1.getCell(column2).setComponent(initiallyHiddenHeader1);
 
-        NativeButton button = new NativeButton(
+        var headerRow2 = grid.appendHeaderRow();
+        headerRow2.getCell(column1).setComponent(new Span("bar"));
+        var initiallyHiddenHeader2 = new Span("Initially hidden bar");
+        initiallyHiddenHeader2.setVisible(false);
+        headerRow2.getCell(column2).setComponent(initiallyHiddenHeader2);
+
+        var button = new NativeButton(
                 "Prepend header, set first text and then component");
         button.setId("set-both-text-and-component");
         button.addClickListener(event -> {
-            HeaderRow topRow = grid.prependHeaderRow();
-            topRow.getCell(column).setText("this is text");
-            topRow.getCell(column).setComponent(new Label("this is component"));
+            var topRow = grid.prependHeaderRow();
+            topRow.getCell(column1).setText("this is text");
+            topRow.getCell(column1).setComponent(new Span("this is component"));
         });
         add(button);
-    }
 
+        var toggleCol2HeadersVisible = new NativeButton(
+                "Toggle col2 headers visible");
+        toggleCol2HeadersVisible.addClickListener(event -> {
+            initiallyHiddenHeader1
+                    .setVisible(!initiallyHiddenHeader1.isVisible());
+            initiallyHiddenHeader2
+                    .setVisible(!initiallyHiddenHeader2.isVisible());
+        });
+        toggleCol2HeadersVisible.setId("toggle-col-2-headers-visible");
+        add(toggleCol2HeadersVisible);
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,22 +16,15 @@
 package com.vaadin.flow.component.customfield.testbench;
 
 import com.vaadin.testbench.ElementQuery;
-
 import com.vaadin.testbench.HasHelper;
+import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
 @Element("vaadin-custom-field")
-public class CustomFieldElement extends TestBenchElement implements HasHelper {
-
-    public String getLabel() {
-        return getPropertyString("label");
-    }
-
-    public String getErrorMessage() {
-        return getPropertyString("errorMessage");
-    }
-
+public class CustomFieldElement extends TestBenchElement
+        implements HasHelper, HasLabel, HasValidation {
     /**
      * {@inheritDoc}
      */
@@ -40,7 +33,7 @@ public class CustomFieldElement extends TestBenchElement implements HasHelper {
     @Override
     public TestBenchElement getHelperComponent() {
         final ElementQuery<TestBenchElement> query = $(TestBenchElement.class)
-                .attribute("slot", "helper");
+                .withAttribute("slot", "helper");
         if (query.exists()) {
             TestBenchElement last = query.last();
             // To avoid getting the "slot" element, for components with slotted

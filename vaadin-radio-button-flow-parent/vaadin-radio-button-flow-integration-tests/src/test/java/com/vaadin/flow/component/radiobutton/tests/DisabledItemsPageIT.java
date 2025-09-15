@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,12 +17,13 @@ package com.vaadin.flow.component.radiobutton.tests;
 
 import java.util.List;
 
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-radio-button/disabled-items")
 public class DisabledItemsPageIT extends AbstractComponentIT {
@@ -47,7 +48,8 @@ public class DisabledItemsPageIT extends AbstractComponentIT {
         for (WebElement button : group
                 .findElements(By.tagName("vaadin-radio-button"))) {
             Assert.assertEquals("All buttons should be disabled",
-                    Boolean.TRUE.toString(), button.getAttribute("disabled"));
+                    Boolean.TRUE.toString(),
+                    button.getDomAttribute("disabled"));
         }
     }
 
@@ -61,7 +63,7 @@ public class DisabledItemsPageIT extends AbstractComponentIT {
                 .findElements(By.tagName("vaadin-radio-button"))) {
             Assert.assertEquals("All buttons should be disabled",
                     Boolean.TRUE.toString(),
-                    radioButton.getAttribute("disabled"));
+                    radioButton.getDomAttribute("disabled"));
         }
 
         // Click button to enable items
@@ -71,9 +73,10 @@ public class DisabledItemsPageIT extends AbstractComponentIT {
         WebElement firstButton = radioButtons.get(0);
         WebElement secondButton = radioButtons.get(1);
         Assert.assertNull("First button should not be disabled",
-                firstButton.getAttribute("disabled"));
+                firstButton.getDomAttribute("disabled"));
         Assert.assertEquals("Second button should be disabled",
-                Boolean.TRUE.toString(), secondButton.getAttribute("disabled"));
+                Boolean.TRUE.toString(),
+                secondButton.getDomAttribute("disabled"));
     }
 
     @Test
@@ -90,9 +93,10 @@ public class DisabledItemsPageIT extends AbstractComponentIT {
         WebElement firstButton = radioButtons.get(0);
         WebElement secondButton = radioButtons.get(1);
         Assert.assertNull("First button should not be disabled",
-                firstButton.getAttribute("disabled"));
+                firstButton.getDomAttribute("disabled"));
         Assert.assertEquals("Second button should be disabled",
-                Boolean.TRUE.toString(), secondButton.getAttribute("disabled"));
+                Boolean.TRUE.toString(),
+                secondButton.getDomAttribute("disabled"));
     }
 
 }

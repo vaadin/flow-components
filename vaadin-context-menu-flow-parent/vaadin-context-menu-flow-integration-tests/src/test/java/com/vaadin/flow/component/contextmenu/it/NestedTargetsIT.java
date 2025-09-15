@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -31,32 +31,32 @@ public class NestedTargetsIT extends AbstractContextMenuIT {
     @Before
     public void init() {
         open();
-        verifyClosed();
+        verifyClosedAndRemoved();
     }
 
     @Test
     public void nestedTargets_rightClickParentTargetOutsideChildTarget_onlyParentTargetMenuOpened() {
         rightClickOn("not-in-child-target");
-        verifyNumOfOverlays(1);
+        verifyNumberOfMenus(1);
 
         Assert.assertArrayEquals(new String[] { "menu on parent target" },
                 getMenuItemCaptions());
 
         getMenuItems().get(0).click();
-        verifyClosed();
+        verifyClosedAndRemoved();
         Assert.assertEquals("parent", findElement(By.id("messages")).getText());
     }
 
     @Test
     public void nestedTargets_rightClickChildTarget_onlyChildTargetMenuOpened() {
         rightClickOn("child-target");
-        verifyNumOfOverlays(1);
+        verifyNumberOfMenus(1);
 
         Assert.assertArrayEquals(new String[] { "menu on child target" },
                 getMenuItemCaptions());
 
         getMenuItems().get(0).click();
-        verifyClosed();
+        verifyClosedAndRemoved();
         Assert.assertEquals("child", findElement(By.id("messages")).getText());
     }
 }

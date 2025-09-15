@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
@@ -26,6 +26,9 @@ public class Marker extends AbstractConfigurationObject {
     private States states;
     private Number width;
     private MarkerSymbol symbol;
+    private HorizontalAlign align;
+    private VerticalAlign verticalAlign;
+    private Boolean inside;
 
     public Marker() {
     }
@@ -172,5 +175,50 @@ public class Marker extends AbstractConfigurationObject {
 
     public void setSymbol(MarkerSymbol symbol) {
         this.symbol = symbol;
+    }
+
+    /**
+     * @see #setAlign(HorizontalAlign)
+     */
+    public HorizontalAlign getAlign() {
+        return align;
+    }
+
+    /**
+     * Supported only in Gantt charts: Horizontal alignment of the markers
+     * relative to the points. Defaults to "center"
+     */
+    public void setAlign(HorizontalAlign align) {
+        this.align = align;
+    }
+
+    /**
+     * @see #setVerticalAlign(VerticalAlign)
+     */
+    public VerticalAlign getVerticalAlign() {
+        return verticalAlign;
+    }
+
+    /**
+     * Supported only in Gantt charts: Vertical alignment of the markers
+     * relative to the points. Defaults to "middle"
+     */
+    public void setVerticalAlign(VerticalAlign verticalAlign) {
+        this.verticalAlign = verticalAlign;
+    }
+
+    /**
+     * @see #setInside(Boolean)
+     */
+    public Boolean getInside() {
+        return inside;
+    }
+
+    /**
+     * Supported only in Gantt charts: Whether to draw the markers inside the
+     * points. Defaults to false.
+     */
+    public void setInside(Boolean inside) {
+        this.inside = inside;
     }
 }

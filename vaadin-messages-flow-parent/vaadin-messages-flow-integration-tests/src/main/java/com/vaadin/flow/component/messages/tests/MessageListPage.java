@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,6 +26,7 @@ import com.vaadin.flow.component.messages.MessageListItem;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 @Route("vaadin-messages/message-list-test")
 public class MessageListPage extends Div {
@@ -44,7 +45,8 @@ public class MessageListPage extends Div {
         MessageList messageList = new MessageList(foo, bar);
         add(messageList);
 
-        addButton("setText", () -> foo.setText("foo2"));
+        addButton("setText", () -> foo.setText("newfoo"));
+        addButton("appendText", () -> foo.appendText("2"));
         addButton("setTime",
                 () -> foo.setTime(Instant.parse("2000-02-02T12:00:00.00Z")));
         addButton("setUserName", () -> foo.setUserName("sender2"));
@@ -53,9 +55,18 @@ public class MessageListPage extends Div {
         addButton("setUserColorIndex", () -> foo.setUserColorIndex(2));
         addButton("addThemeNames", () -> foo.addThemeNames("foo", "bar"));
         addButton("removeThemeNames", () -> foo.removeThemeNames("foo", "bar"));
+        addButton("addClassNames", () -> foo.addClassNames("urgent", "pinned"));
+        addButton("removeClassNames", () -> foo.removeClassNames("urgent"));
 
         addButton("setItems", () -> messageList
                 .setItems(new MessageListItem(null, null, "sender3")));
+
+        addButton("addItem", () -> messageList
+                .addItem(new MessageListItem("Foo", Instant.now(), "User")));
+        addButton("addTwoItems", () -> {
+            messageList.addItem(new MessageListItem("Foo", "User"));
+            messageList.addItem(new MessageListItem("Bar", "User"));
+        });
 
         addButton("setLocale", () -> UI.getCurrent().setLocale(Locale.ITALIAN));
 
@@ -67,6 +78,14 @@ public class MessageListPage extends Div {
                     () -> getClass().getResourceAsStream(
                             "/META-INF/resources/frontend/images/avatar.png"));
             foo.setUserImageResource(resource);
+        });
+
+        addButton("setImageAsDownloadHandler", () -> {
+            DownloadHandler resource = DownloadHandler.forClassResource(
+                    getClass(),
+                    "/META-INF/resources/frontend/images/avatar.png",
+                    "message-list-img");
+            foo.setUserImageHandler(resource);
         });
 
     }

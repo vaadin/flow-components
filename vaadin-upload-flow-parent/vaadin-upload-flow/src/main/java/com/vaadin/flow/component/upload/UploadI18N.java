@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,9 +19,12 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * The I18N helper file for the upload component.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UploadI18N implements Serializable {
     private DropFiles dropFiles;
     private AddFiles addFiles;
@@ -33,6 +36,7 @@ public class UploadI18N implements Serializable {
     /**
      * Translations for dropping files.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class DropFiles extends SingleMulti implements Serializable {
         @Override
         public DropFiles setOne(String one) {
@@ -50,6 +54,7 @@ public class UploadI18N implements Serializable {
     /**
      * Translations for adding files.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class AddFiles extends SingleMulti implements Serializable {
         @Override
         public AddFiles setOne(String one) {
@@ -67,6 +72,7 @@ public class UploadI18N implements Serializable {
     /**
      * Exception translations.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Error implements Serializable {
         private String tooManyFiles;
         private String fileIsTooBig;
@@ -140,6 +146,7 @@ public class UploadI18N implements Serializable {
     /**
      * Upload time translation strings.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Uploading implements Serializable {
         private Status status;
         private RemainingTime remainingTime;
@@ -211,6 +218,7 @@ public class UploadI18N implements Serializable {
         /**
          * Upload status strings.
          */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         public static class Status implements Serializable {
             private String connecting;
             private String stalled;
@@ -305,6 +313,7 @@ public class UploadI18N implements Serializable {
         /**
          * Time remaining translations.
          */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         public static class RemainingTime implements Serializable {
             private String prefix;
             private String unknown;
@@ -355,6 +364,7 @@ public class UploadI18N implements Serializable {
         /**
          * Communication error translations.
          */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         public static class Error implements Serializable {
             private String serverUnavailable;
             private String unexpectedServerError;
@@ -417,9 +427,12 @@ public class UploadI18N implements Serializable {
     /**
      * unit translations.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Units implements Serializable {
         private List<String> size = Arrays.asList("B", "kB", "MB", "GB", "TB",
                 "PB", "EB", "ZB", "YB");
+
+        private Integer sizeBase;
 
         /**
          * unit translations with default size:
@@ -433,9 +446,22 @@ public class UploadI18N implements Serializable {
         /**
          *
          * @param size
+         *            list of unit translations
          */
         public Units(List<String> size) {
             this.size = size;
+        }
+
+        /**
+         *
+         * @param size
+         *            list of unit translations
+         * @param sizeBase
+         *            units size base
+         */
+        public Units(List<String> size, Integer sizeBase) {
+            this.size = size;
+            this.sizeBase = sizeBase;
         }
 
         /**
@@ -458,11 +484,33 @@ public class UploadI18N implements Serializable {
             this.size = size;
             return this;
         }
+
+        /**
+         * Gets the units size base.
+         *
+         * @return the units size base
+         */
+        public Integer getSizeBase() {
+            return sizeBase;
+        }
+
+        /**
+         * Sets the units size base.
+         *
+         * @param sizeBase
+         *            units size base
+         * @return units
+         */
+        public Units setSizeBase(Integer sizeBase) {
+            this.sizeBase = sizeBase;
+            return this;
+        }
     }
 
     /**
      * file translations.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class File implements Serializable {
         private String retry;
         private String start;
@@ -690,6 +738,20 @@ public class UploadI18N implements Serializable {
      */
     public Units getUnits() {
         return units;
+    }
+
+    /**
+     * Set unit translations.
+     *
+     * @param units
+     *            list of unit translations
+     * @param sizeBase
+     *            units size base
+     * @return i18n translations
+     */
+    public UploadI18N setUnits(List<String> units, int sizeBase) {
+        this.units = new Units(units, sizeBase);
+        return this;
     }
 
     /**

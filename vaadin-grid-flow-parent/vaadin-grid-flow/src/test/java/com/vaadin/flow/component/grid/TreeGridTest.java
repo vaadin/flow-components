@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.grid;
 
 import org.junit.Assert;
@@ -21,14 +20,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.treegrid.TreeGrid;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
 import com.vaadin.flow.data.provider.hierarchy.HierarchicalDataProvider;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
+import com.vaadin.tests.dataprovider.MockUI;
 
 public class TreeGridTest {
 
-    private DataCommunicatorTest.MockUI ui;
+    private MockUI ui;
     private TreeGrid<Item> treeGrid;
 
     @Before
@@ -43,7 +42,7 @@ public class TreeGridTest {
                 treeData);
         treeGrid.setDataProvider(treeDataProvider);
 
-        ui = new DataCommunicatorTest.MockUI();
+        ui = new MockUI();
         ui.add(treeGrid);
     }
 

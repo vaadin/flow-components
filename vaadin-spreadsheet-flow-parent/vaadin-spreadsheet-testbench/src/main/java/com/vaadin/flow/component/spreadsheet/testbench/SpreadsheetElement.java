@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet.testbench;
@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import com.vaadin.testbench.elementsbase.Element;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.NoSuchElementException;
@@ -21,6 +20,7 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 /**
  * This is the base element class for accessing a Vaadin Spreadsheet component
@@ -293,9 +293,10 @@ public class SpreadsheetElement extends TestBenchElement {
     boolean isElementSelected(WebElement element) {
         updateSelectionLocationAndSize();
         Point location = element.getLocation();
-        location.x += element.getSize().getWidth() / 2;
-        location.y += element.getSize().getHeight() / 2;
-        return isInSelection(location) || isNonCoherentlySelected(element);
+        int centerX = location.x + element.getSize().getWidth() / 2;
+        int centerY = location.y + element.getSize().getHeight() / 2;
+        return isInSelection(centerX, centerY)
+                || isNonCoherentlySelected(element);
     }
 
     private void findSelectionOutline() {
@@ -312,7 +313,8 @@ public class SpreadsheetElement extends TestBenchElement {
     private boolean isNonCoherentlySelected(WebElement element) {
         // an element is non-coherently selected if the class attribute
         // contains "cell-range"
-        return element.getAttribute("class").contains("cell-range")
+        return Optional.ofNullable(element.getDomAttribute("class")).orElse("")
+                .contains("cell-range")
                 || "solid".equals(element.getCssValue("outline-style"));
     }
 
@@ -329,15 +331,14 @@ public class SpreadsheetElement extends TestBenchElement {
                 bottomY + bottomH - sLocation.getY());
     }
 
-    private boolean isInSelection(Point location) {
+    private boolean isInSelection(int locationX, int locationY) {
         // Test top left corner
-        if (location.getX() < sLocation.getX()
-                || location.getY() < sLocation.getY()) {
+        if (locationX < sLocation.getX() || locationY < sLocation.getY()) {
             return false;
         }
         // Test lower right corner
-        if (location.getX() - sLocation.getX() > sSize.getWidth()
-                || location.getY() - sLocation.getY() > sSize.getHeight()) {
+        if (locationX - sLocation.getX() > sSize.getWidth()
+                || locationY - sLocation.getY() > sSize.getHeight()) {
             return false;
         }
         // Everything is inside the selection

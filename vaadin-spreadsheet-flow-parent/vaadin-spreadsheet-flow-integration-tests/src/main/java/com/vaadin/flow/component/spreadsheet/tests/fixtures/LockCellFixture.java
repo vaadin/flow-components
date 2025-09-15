@@ -1,20 +1,29 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests.fixtures;
 
-import com.vaadin.flow.component.spreadsheet.Spreadsheet;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 
 public class LockCellFixture implements SpreadsheetFixture {
 
     @Override
     public void loadFixture(Spreadsheet spreadsheet) {
-
-        spreadsheet.setActiveSheetProtected("pwd");
+        // Sheet already needs to be locked for this fixture to work
+        // See LockSheetFixture
         Cell cell = spreadsheet.createCell(0, 0, "");
         Workbook wb = cell.getSheet().getWorkbook();
 
@@ -26,7 +35,7 @@ public class LockCellFixture implements SpreadsheetFixture {
                         cellRef.getCol(), "");
             }
 
-            boolean wasLocked = spreadsheet.isCellLocked(cell);
+            boolean wasLocked = spreadsheet.isCellLocked(cell.getAddress());
 
             CellStyle cellStyle = wb.createCellStyle();
             // Toggle cell locked state

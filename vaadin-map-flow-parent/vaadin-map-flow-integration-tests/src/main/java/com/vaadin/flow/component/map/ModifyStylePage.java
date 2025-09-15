@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.map;
 
 import com.vaadin.flow.component.html.Div;
@@ -53,7 +61,7 @@ public class ModifyStylePage extends Div {
                 Assets.POINT.getWidth(), Assets.POINT.getHeight());
         Icon.Options iconOptions = new Icon.Options();
         iconOptions.setSrc(MarkerFeature.POINT_ICON.getSrc());
-        iconOptions.setImg(Assets.POINT.getResource());
+        iconOptions.setImg(Assets.POINT.getHandler());
         iconOptions.setImgSize(pointImageSize);
         iconOptions.setScale(0.25f);
         iconOptions.setAnchorOrigin(Icon.AnchorOrigin.TOP_LEFT);

@@ -1,5 +1,5 @@
 import { html, LitElement } from 'lit';
-import '@vaadin/checkbox/vaadin-checkbox.js';
+import '@vaadin/checkbox/src/vaadin-checkbox.js';
 
 class InjectCheckbox extends LitElement {
   render() {

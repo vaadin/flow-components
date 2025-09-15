@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,16 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.avatar.tests;
 
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the {@link AvatarPage}.
@@ -46,6 +46,8 @@ public class AvatarIT extends AbstractComponentIT {
         WebElement toggleAbbr = findElement(By.id("toggle-abbr"));
         WebElement toggleName = findElement(By.id("toggle-name"));
         WebElement toggleResource = findElement(By.id("toggle-res"));
+        WebElement toggleResourceHandler = findElement(
+                By.id("toggle-res-handler"));
 
         WebElement imgBlock = findElement(By.id("data-block-img"));
         WebElement abbrBlock = findElement(By.id("data-block-abbr"));
@@ -55,6 +57,12 @@ public class AvatarIT extends AbstractComponentIT {
         toggleImg.click();
         getPropsBtn.click();
         Assert.assertEquals("https://vaadin.com/", imgBlock.getText());
+
+        toggleResourceHandler.click();
+        getPropsBtn.click();
+        Assert.assertTrue("img url contains file name",
+                resourceBlock.getText().contains("user%2B.png"));
+        toggleResourceHandler.click();
 
         toggleAbbr.click();
         getPropsBtn.click();
@@ -78,6 +86,8 @@ public class AvatarIT extends AbstractComponentIT {
         WebElement toggleAbbr = findElement(By.id("toggle-abbr"));
         WebElement toggleName = findElement(By.id("toggle-name"));
         WebElement toggleResource = findElement(By.id("toggle-res"));
+        WebElement toggleResourceHandler = findElement(
+                By.id("toggle-res-handler"));
 
         WebElement imgBlock = findElement(By.id("data-block-img"));
         WebElement abbrBlock = findElement(By.id("data-block-abbr"));
@@ -103,6 +113,11 @@ public class AvatarIT extends AbstractComponentIT {
 
         toggleResource.click();
         toggleResource.click();
+        getPropsBtn.click();
+        Assert.assertEquals("", resourceBlock.getText());
+
+        toggleResourceHandler.click();
+        toggleResourceHandler.click();
         getPropsBtn.click();
         Assert.assertEquals("", resourceBlock.getText());
     }

@@ -3,7 +3,7 @@ import { getBodyCellText, init } from './shared.js';
 import type { Grid } from '@vaadin/grid';
 
 /**
- * These tests target a <vaadin-grid> which is added on a page with gridConnector.js loaded
+ * These tests target a <vaadin-grid> which is added on a page with gridConnector.ts loaded
  * but the grid itself doesn't have a connector. An example of such a scenario is a
  * Flow view built with LitTemplate.
  */

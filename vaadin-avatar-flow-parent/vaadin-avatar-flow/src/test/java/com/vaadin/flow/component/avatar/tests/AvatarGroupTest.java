@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,20 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.avatar.tests;
+
+import java.util.List;
+import java.util.Set;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.vaadin.flow.component.avatar.AvatarGroup;
 import com.vaadin.flow.component.avatar.AvatarGroup.AvatarGroupItem;
 import com.vaadin.flow.component.avatar.AvatarGroupVariant;
 import com.vaadin.flow.component.avatar.AvatarVariant;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.List;
-import java.util.Set;
 
 public class AvatarGroupTest {
 
@@ -63,6 +62,15 @@ public class AvatarGroupTest {
     public void setColorIndex_getColorIndex() {
         avatarGroupItem1.setColorIndex(3);
         Assert.assertEquals(avatarGroupItem1.getColorIndex(), (Integer) 3);
+    }
+
+    @Test
+    public void addClassNames_removeClassNames_getClassNames() {
+        avatarGroupItem1.addClassNames("foo", "bar");
+        Assert.assertEquals(avatarGroupItem1.getClassName(), "foo bar");
+
+        avatarGroupItem1.removeClassNames("foo");
+        Assert.assertEquals(avatarGroupItem1.getClassName(), "bar");
     }
 
     @Test
@@ -156,12 +164,5 @@ public class AvatarGroupTest {
 
         avatarGroup.setI18n(i18n);
         Assert.assertEquals(i18n, avatarGroup.getI18n());
-    }
-
-    @Test
-    public void implementsHasOverlayClassName() {
-        Assert.assertTrue("AvatarGroup should support overlay class name",
-                HasOverlayClassName.class
-                        .isAssignableFrom(new AvatarGroup().getClass()));
     }
 }

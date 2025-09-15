@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,8 +15,10 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.testutil.TestPath;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -25,10 +27,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
+import com.vaadin.flow.testutil.TestPath;
 
 /**
  * Integration tests for the {@link ComboBoxDemoPage}.
@@ -49,6 +49,7 @@ public class ComboBoxIT extends AbstractComboBoxIT {
         ComboBoxElement comboBox = $(ComboBoxElement.class)
                 .id("string-selection-box");
         WebElement message = findElement(By.id("string-selection-message"));
+        Assert.assertEquals("Input browser name", comboBox.getPlaceholder());
 
         comboBox.openPopup();
         executeScript(
@@ -134,14 +135,12 @@ public class ComboBoxIT extends AbstractComboBoxIT {
         items.forEach(item -> {
             Assert.assertNotNull(item.get("key"));
             Assert.assertNotNull(item.get("label"));
-            Assert.assertNotNull(item.get("lr_0_song"));
-            Assert.assertNotNull(item.get("lr_0_artist"));
         });
 
         Map<String, ?> firstItem = items.get(0);
         Assert.assertEquals("A V Club Disagrees", firstItem.get("label"));
-        Assert.assertEquals("A V Club Disagrees", firstItem.get("lr_0_song"));
-        Assert.assertEquals("Haircuts for Men", firstItem.get("lr_0_artist"));
+        Assert.assertEquals("A V Club Disagrees\nHaircuts for Men",
+                $("vaadin-combo-box-item").get(0).getText());
 
         executeScript(
                 "arguments[0].selectedItem = arguments[0].filteredItems[1]",
@@ -172,9 +171,10 @@ public class ComboBoxIT extends AbstractComboBoxIT {
         List<Map<String, ?>> items = (List<Map<String, ?>>) executeScript(
                 "return arguments[0].filteredItems", comboBox);
 
-        Assert.assertEquals("Haircuts for Men",
-                items.get(0).get("lr_0_artist"));
-        Assert.assertEquals("Haywyre", items.get(1).get("lr_0_artist"));
+        Assert.assertEquals("A V Club Disagrees\nHaircuts for Men",
+                $("vaadin-combo-box-item").get(0).getText());
+        Assert.assertEquals("Sculpted\nHaywyre",
+                $("vaadin-combo-box-item").get(1).getText());
     }
 
     @Test
@@ -253,23 +253,23 @@ public class ComboBoxIT extends AbstractComboBoxIT {
         Assert.assertEquals(
                 "First page should be loaded after opening overlay.", 50,
                 getLoadedItems(comboBox).size());
-        assertRendered();
+        assertRendered(comboBox);
 
         scrollToItem(comboBox, 50);
         Assert.assertEquals("Second page should be loaded after scrolling.",
                 100, getLoadedItems(comboBox).size());
     }
 
-    private void assertRendered() {
+    private void assertRendered(ComboBoxElement comboBox) {
         try {
             waitUntil(driver -> {
-                List<String> items = getRenderedItems();
+                List<String> items = getRenderedItems(comboBox);
                 return items.size() > 0 && items.get(0).length() > 0;
             });
         } catch (TimeoutException e) {
             Assert.fail("Timeout: no items with text content rendered.");
         }
-        List<String> items = getRenderedItems();
+        List<String> items = getRenderedItems(comboBox);
         Assert.assertTrue("Expected more than 10 items to be rendered.",
                 items.size() > 10);
         items.forEach(item -> {
@@ -282,8 +282,8 @@ public class ComboBoxIT extends AbstractComboBoxIT {
         });
     }
 
-    private List<String> getRenderedItems() {
-        return getItemElements().stream()
+    private List<String> getRenderedItems(ComboBoxElement comboBox) {
+        return getItemElements(comboBox).stream()
                 .map(element -> element.getPropertyString("innerHTML"))
                 .collect(Collectors.toList());
     }

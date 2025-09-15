@@ -1,19 +1,20 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.map.testbench;
 
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.testbench.elementsbase.Element;
+import java.util.List;
+
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.interactions.Actions;
 
-import java.util.List;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 @Element("vaadin-map")
 public class MapElement extends TestBenchElement {
@@ -106,7 +107,8 @@ public class MapElement extends TestBenchElement {
      * @return attribution container div
      */
     public TestBenchElement getAttributionContainer() {
-        return $("div").attributeContains("class", "ol-attribution").first();
+        return $("div").withAttributeContainingWord("class", "ol-attribution")
+                .first();
     }
 
     /**
@@ -363,6 +365,13 @@ public class MapElement extends TestBenchElement {
         public long getRevision() {
             return getLong("getRevision()");
         }
+
+        public boolean isTileLoaded(int z, int x, int y) {
+            String tileKey = String.format("%s/%s/%s", z, x, y);
+            return getBoolean(
+                    "getRenderer().getTileCache().getKeys().some(key => key.endsWith('%s'))",
+                    tileKey);
+        }
     }
 
     public static class SourceReference extends ConfigurationObjectReference {
@@ -404,11 +413,6 @@ public class MapElement extends TestBenchElement {
         private XyzSourceReference(ExpressionExecutor executor,
                 String expression) {
             super(executor, expression);
-        }
-
-        public boolean isTileLoaded(int z, int x, int y) {
-            String tileKey = String.format("%s/%s/%s", z, x, y);
-            return getBoolean("tileCache.containsKey('%s')", tileKey);
         }
     }
 
@@ -526,6 +530,39 @@ public class MapElement extends TestBenchElement {
         public Coordinate getCoordinates() {
             return new Coordinate(getDouble("getCoordinates()[0]"),
                     getDouble("getCoordinates()[1]"));
+        }
+
+        public Coordinate[][] getPolygonCoordinates() {
+            // Get the coordinates array from OpenLayers
+            Object coordinatesObj = get("getCoordinates()");
+            if (coordinatesObj == null) {
+                return null;
+            }
+
+            // Cast to List of lists (OpenLayers returns polygon as array of
+            // arrays)
+            @SuppressWarnings("unchecked")
+            List<List<List<Number>>> rings = (List<List<List<Number>>>) coordinatesObj;
+
+            // Create result array with the size matching the number of rings
+            Coordinate[][] result = new Coordinate[rings.size()][];
+
+            // Process each ring
+            for (int ringIndex = 0; ringIndex < rings.size(); ringIndex++) {
+                List<List<Number>> ring = rings.get(ringIndex);
+                result[ringIndex] = new Coordinate[ring.size()];
+
+                // Process each coordinate in the ring
+                for (int coordIndex = 0; coordIndex < ring
+                        .size(); coordIndex++) {
+                    List<Number> coord = ring.get(coordIndex);
+                    double x = coord.get(0).doubleValue();
+                    double y = coord.get(1).doubleValue();
+                    result[ringIndex][coordIndex] = new Coordinate(x, y);
+                }
+            }
+
+            return result;
         }
     }
 

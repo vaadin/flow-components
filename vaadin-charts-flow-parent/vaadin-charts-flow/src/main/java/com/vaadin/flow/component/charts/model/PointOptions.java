@@ -1,15 +1,14 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
 
 import java.time.Instant;
-import java.util.Date;
 
 import com.vaadin.flow.component.charts.model.style.Color;
 
@@ -719,12 +718,6 @@ public abstract class PointOptions extends AbstractPlotOptions {
      * values are null to disable, "normal" to stack by value or "percent".
      */
     public abstract void setStacking(Stacking stacking);
-
-    /**
-     * @see #setPointStart(Number)
-     */
-    @Deprecated
-    public abstract void setPointStart(Date date);
 
     /**
      * @see #setPointStart(Number)

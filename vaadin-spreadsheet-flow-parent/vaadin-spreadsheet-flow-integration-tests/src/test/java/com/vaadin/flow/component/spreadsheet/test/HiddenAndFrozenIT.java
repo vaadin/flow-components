@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.test;
 
 import java.util.List;
@@ -24,7 +32,6 @@ public class HiddenAndFrozenIT extends AbstractSpreadsheetIT {
 
     @Test
     public void freezePane_sheetWithHiddenAndFrozenRowsAndColumns_freezePanePositionedCorrectly() {
-        getDriver().manage().window().maximize();
         assertFreezePanePositionedCorrectly("hidden_and_frozen.xlsx", 11, 9,
                 "O15");
     }

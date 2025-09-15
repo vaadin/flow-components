@@ -1,12 +1,15 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.map.configuration.feature;
+
+import java.beans.PropertyChangeListener;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.map.Assets;
@@ -16,8 +19,6 @@ import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.geometry.Point;
 import com.vaadin.flow.component.map.configuration.style.Icon;
 import com.vaadin.flow.component.map.configuration.style.Style;
-
-import java.util.Objects;
 
 /**
  * A convenience class for displaying icons or images, such as markers, at a
@@ -30,13 +31,27 @@ import java.util.Objects;
  */
 public class MarkerFeature extends PointBasedFeature {
 
+    static class StaticIcon extends Icon {
+
+        public StaticIcon(Options options) {
+            super(options);
+        }
+
+        @Override
+        protected void addPropertyChangeListener(
+                PropertyChangeListener listener) {
+            // Do not add listeners to static icons to avoid memory leaks
+        }
+    }
+
     /**
      * The default icon used for markers, which is a pin pointing at a location
-     * on the map
+     * on the map. This is a static icon and does not support customization.
      */
     public static final Icon PIN_ICON;
     /**
-     * An alternative icon that displays a point
+     * An alternative icon that displays a point. This is a static icon and does
+     * not support customization.
      */
     public static final Icon POINT_ICON;
 
@@ -44,24 +59,24 @@ public class MarkerFeature extends PointBasedFeature {
         Icon.ImageSize pinImageSize = new Icon.ImageSize(Assets.PIN.getWidth(),
                 Assets.PIN.getHeight());
         Icon.Options pinIconOptions = new Icon.Options();
-        pinIconOptions.setImg(Assets.PIN.getResource());
+        pinIconOptions.setImg(Assets.PIN.getHandler());
         pinIconOptions.setImgSize(pinImageSize);
         pinIconOptions.setScale(0.5f);
         pinIconOptions.setAnchorOrigin(Icon.AnchorOrigin.BOTTOM_LEFT);
         // Move image slightly downwards to compensate for whitespace at
         // the bottom of the image
         pinIconOptions.setAnchor(new Icon.Anchor(0.5f, 0.12f));
-        PIN_ICON = new Icon(pinIconOptions);
+        PIN_ICON = new StaticIcon(pinIconOptions);
 
         Icon.ImageSize pointImageSize = new Icon.ImageSize(
                 Assets.POINT.getWidth(), Assets.POINT.getHeight());
         Icon.Options pointIconOptions = new Icon.Options();
-        pointIconOptions.setImg(Assets.POINT.getResource());
+        pointIconOptions.setImg(Assets.POINT.getHandler());
         pointIconOptions.setImgSize(pointImageSize);
         pointIconOptions.setScale(0.25f);
         pointIconOptions.setAnchorOrigin(Icon.AnchorOrigin.TOP_LEFT);
         pointIconOptions.setAnchor(new Icon.Anchor(0.5f, 0.5f));
-        POINT_ICON = new Icon(pointIconOptions);
+        POINT_ICON = new StaticIcon(pointIconOptions);
     }
 
     /**

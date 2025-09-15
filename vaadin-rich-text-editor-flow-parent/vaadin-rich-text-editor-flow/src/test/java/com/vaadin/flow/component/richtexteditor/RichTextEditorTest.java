@@ -1,13 +1,25 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.richtexteditor;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
+
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.HasValue.ValueChangeEvent;
@@ -24,6 +36,11 @@ public class RichTextEditorTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
 
     @Test
     public void setValueNull() {
@@ -221,5 +238,32 @@ public class RichTextEditorTest {
 
         RichTextEditor field = Component.from(element, RichTextEditor.class);
         Assert.assertEquals("foo", field.getElement().getPropertyRaw("value"));
+    }
+
+    @Test
+    public void setColorOptions_propertyIsUpdated() {
+        RichTextEditor rte = new RichTextEditor();
+        rte.setColorOptions(
+                List.of("#000000", "#0066cc", "#008a00", "#e60000"));
+        ArrayNode jsonArray = (ArrayNode) rte.getElement()
+                .getPropertyRaw("colorOptions");
+        Assert.assertEquals(4, jsonArray.size());
+        Assert.assertEquals("#000000", jsonArray.get(0).asText());
+        Assert.assertEquals("#0066cc", jsonArray.get(1).asText());
+        Assert.assertEquals("#008a00", jsonArray.get(2).asText());
+        Assert.assertEquals("#e60000", jsonArray.get(3).asText());
+    }
+
+    @Test
+    public void setColorOptions_getColorOptions() {
+        RichTextEditor rte = new RichTextEditor();
+        rte.setColorOptions(
+                List.of("#000000", "#0066cc", "#008a00", "#e60000"));
+        List<String> options = rte.getColorOptions();
+        Assert.assertEquals(4, options.size());
+        Assert.assertEquals("#000000", options.get(0));
+        Assert.assertEquals("#0066cc", options.get(1));
+        Assert.assertEquals("#008a00", options.get(2));
+        Assert.assertEquals("#e60000", options.get(3));
     }
 }

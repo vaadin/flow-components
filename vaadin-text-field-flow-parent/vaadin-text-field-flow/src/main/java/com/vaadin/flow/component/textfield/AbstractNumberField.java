@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,21 +13,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.textfield;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Function;
 
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.Synchronize;
-import com.vaadin.flow.component.shared.ClientValidationUtil;
 import com.vaadin.flow.component.shared.ValidationUtil;
+import com.vaadin.flow.component.shared.internal.ValidationController;
 import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.ValidationStatusChangeEvent;
 import com.vaadin.flow.data.binder.ValidationStatusChangeListener;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.shared.Registration;
 
@@ -40,8 +41,7 @@ import com.vaadin.flow.shared.Registration;
 public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T extends Number>
         extends TextFieldBase<C, T> {
 
-    private boolean required;
-
+    private AbstractNumberFieldI18n i18n;
     /*
      * Note: setters and getters for min/max/step needed to be duplicated in
      * NumberField and IntegerField, because they use primitive double and int
@@ -55,7 +55,62 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     private boolean stepSetByUser;
     private boolean minSetByUser;
 
-    private boolean manualValidationEnabled = false;
+    private DomListenerRegistration inputListenerRegistration;
+
+    private String unparsableValue;
+
+    private final CopyOnWriteArrayList<ValidationStatusChangeListener<T>> validationStatusChangeListeners = new CopyOnWriteArrayList<>();
+
+    private Validator<T> defaultValidator = (value, context) -> {
+        boolean fromComponent = context == null;
+
+        if (unparsableValue != null) {
+            return ValidationResult.error(getI18nErrorMessage(
+                    AbstractNumberFieldI18n::getBadInputErrorMessage));
+        }
+
+        // Do the required check only if the validator is called from the
+        // component, and not from Binder. Binder has its own implementation
+        // of required validation.
+        if (fromComponent) {
+            ValidationResult requiredResult = ValidationUtil
+                    .validateRequiredConstraint(getI18nErrorMessage(
+                            AbstractNumberFieldI18n::getRequiredErrorMessage),
+                            isRequiredIndicatorVisible(), value,
+                            getEmptyValue());
+            if (requiredResult.isError()) {
+                return requiredResult;
+            }
+        }
+
+        Double doubleValue = value != null ? value.doubleValue() : null;
+
+        ValidationResult maxResult = ValidationUtil.validateMaxConstraint(
+                getI18nErrorMessage(
+                        AbstractNumberFieldI18n::getMaxErrorMessage),
+                doubleValue, max);
+        if (maxResult.isError()) {
+            return maxResult;
+        }
+
+        ValidationResult minResult = ValidationUtil.validateMinConstraint(
+                getI18nErrorMessage(
+                        AbstractNumberFieldI18n::getMinErrorMessage),
+                doubleValue, min);
+        if (minResult.isError()) {
+            return minResult;
+        }
+
+        if (!isValidByStep(value)) {
+            return ValidationResult.error(getI18nErrorMessage(
+                    AbstractNumberFieldI18n::getStepErrorMessage));
+        }
+
+        return ValidationResult.ok();
+    };
+
+    private ValidationController<AbstractNumberField<C, T>, T> validationController = new ValidationController<>(
+            this);
 
     /**
      * Sets up the common logic for number fields.
@@ -78,6 +133,8 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
             double absoluteMax) {
         super(null, null, String.class, parser, formatter, true);
 
+        getElement().setProperty("manualValidation", true);
+
         // workaround for https://github.com/vaadin/flow/issues/3496
         setInvalid(false);
 
@@ -91,7 +148,45 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
 
         addValueChangeListener(e -> validate());
 
-        addClientValidatedEventListener(e -> validate());
+        getElement().addEventListener("unparsable-change", e -> {
+            // The unparsable-change event is fired in the following situations:
+            // 1. User modifies input but it remains unparsable
+            // 2. User enters unparsable input in empty field
+            // 3. User clears unparsable input
+            //
+            // In all these cases, ValueChangeEvent isn't fired, so
+            // we call setModelValue manually to trigger validation.
+            setModelValue(getEmptyValue(), true);
+        }).synchronizeProperty("_inputElementValue");
+    }
+
+    @Override
+    public void setValueChangeMode(ValueChangeMode valueChangeMode) {
+        if (inputListenerRegistration != null) {
+            inputListenerRegistration.remove();
+            inputListenerRegistration = null;
+        }
+
+        if (ValueChangeMode.EAGER.equals(valueChangeMode)
+                || ValueChangeMode.LAZY.equals(valueChangeMode)
+                || ValueChangeMode.TIMEOUT.equals(valueChangeMode)) {
+            inputListenerRegistration = getElement().addEventListener("input",
+                    event -> {
+                        setModelValue(getValue(), true);
+                    });
+        }
+
+        super.setValueChangeMode(valueChangeMode);
+
+        getSynchronizationRegistration()
+                .synchronizeProperty("_inputElementValue");
+    }
+
+    @Override
+    void applyChangeTimeout() {
+        super.applyChangeTimeout();
+        ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
+                getValueChangeTimeout(), inputListenerRegistration);
     }
 
     /**
@@ -137,25 +232,55 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     @Override
     public void setValue(T value) {
         T oldValue = getValue();
+        if (oldValue == null && value == null && unparsableValue != null) {
+            // When the value is programmatically cleared while the field
+            // contains an unparsable input, ValueChangeEvent isn't fired,
+            // so we need to call setModelValue manually to clear the bad
+            // input and trigger validation.
+            setModelValue(getEmptyValue(), false);
+            return;
+        }
 
         super.setValue(value);
+    }
 
-        // Clear the input element from possible bad input.
-        if (Objects.equals(oldValue, getEmptyValue())
-                && Objects.equals(value, getEmptyValue())
-                && isInputValuePresent()) {
-            // The check for value presence guarantees that a non-empty value
-            // won't get cleared when setValue(null) and setValue(...) are
-            // subsequently called within one round-trip.
-            // Flow only sends the final component value to the client
-            // when you update the value multiple times during a round-trip
-            // and the final value is sent in place of the first one, so
-            // `executeJs` can end up invoked after a non-empty value is set.
-            getElement()
-                    .executeJs("if (!this.value) this._inputElementValue = ''");
-            getElement().setProperty("_hasInputValue", false);
-            fireEvent(new ClientValidatedEvent(this, false));
+    @Override
+    protected void setModelValue(T newModelValue, boolean fromClient) {
+        T oldModelValue = getValue();
+        String oldUnparsableValue = unparsableValue;
+
+        if (fromClient && newModelValue == null
+                && !getInputElementValue().isEmpty()) {
+            unparsableValue = getInputElementValue();
+        } else {
+            unparsableValue = null;
         }
+
+        boolean isModelValueRemainedEmpty = newModelValue == null
+                && oldModelValue == null;
+
+        // Cases:
+        // - User modifies input but it remains unparsable
+        // - User enters unparsable input in empty field
+        // - User clears unparsable input
+        // - User enters input that is parsable in JavaScript but unparsable in
+        // Java (e.g., integer overflow)
+        if (fromClient && isModelValueRemainedEmpty) {
+            validate();
+            fireValidationStatusChangeEvent();
+            return;
+        }
+
+        // Case: setValue(null) is called on a field with unparsable input
+        if (!fromClient && isModelValueRemainedEmpty
+                && oldUnparsableValue != null) {
+            setInputElementValue("");
+            validate();
+            fireValidationStatusChangeEvent();
+            return;
+        }
+
+        super.setModelValue(newModelValue, fromClient);
     }
 
     /**
@@ -170,7 +295,7 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * Sets the minimum value of the field.
+     * Sets the minimum value for this field.
      *
      * @param min
      *            the double value to set
@@ -182,14 +307,14 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * The minimum value of the field.
+     * Gets the minimum value for this field.
      */
     protected double getMinDouble() {
         return min;
     }
 
     /**
-     * Sets the maximum value of the field.
+     * Sets the maximum value for this field.
      *
      * @param max
      *            the double value to set
@@ -200,14 +325,14 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * The maximum value of the field.
+     * Gets the maximum value for this field.
      */
     protected double getMaxDouble() {
         return max;
     }
 
     /**
-     * Sets the allowed number intervals of the field.
+     * Sets the allowed number intervals for this field.
      *
      * @param step
      *            the double value to set
@@ -219,85 +344,61 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
     }
 
     /**
-     * The allowed number intervals of the field.
+     * Gets the allowed number intervals for this field.
      */
     protected double getStepDouble() {
         return step;
     }
 
-    /**
-     * Returns whether the input element has a value or not.
-     *
-     * @return <code>true</code> if the input element's value is populated,
-     *         <code>false</code> otherwise
-     */
-    @Synchronize(property = "_hasInputValue", value = "has-input-value-changed")
-    private boolean isInputValuePresent() {
-        return getElement().getProperty("_hasInputValue", false);
+    private String getInputElementValue() {
+        return getElement().getProperty("_inputElementValue", "");
+    }
+
+    private void setInputElementValue(String value) {
+        getElement().setProperty("_inputElementValue", value);
     }
 
     @Override
     public Validator<T> getDefaultValidator() {
-        return (value, context) -> checkValidity(value);
+        return defaultValidator;
     }
 
     @Override
     public Registration addValidationStatusChangeListener(
             ValidationStatusChangeListener<T> listener) {
-        return addClientValidatedEventListener(
-                event -> listener.validationStatusChanged(
-                        new ValidationStatusChangeEvent<T>(this,
-                                !isInvalid())));
+        return Registration.addAndRemove(validationStatusChangeListeners,
+                listener);
     }
 
-    private ValidationResult checkValidity(T value) {
-        boolean hasNonParsableValue = Objects.equals(value, getEmptyValue())
-                && isInputValuePresent();
-        if (hasNonParsableValue) {
-            return ValidationResult.error("");
-        }
-
-        Double doubleValue = value != null ? value.doubleValue() : null;
-
-        ValidationResult greaterThanMax = ValidationUtil
-                .checkGreaterThanMax(doubleValue, max);
-        if (greaterThanMax.isError()) {
-            return greaterThanMax;
-        }
-
-        ValidationResult smallerThanMin = ValidationUtil
-                .checkSmallerThanMin(doubleValue, min);
-        if (smallerThanMin.isError()) {
-            return smallerThanMin;
-        }
-
-        if (!isValidByStep(value)) {
-            return ValidationResult.error("");
-        }
-
-        return ValidationResult.ok();
+    /**
+     * Notifies Binder that it needs to revalidate the component since the
+     * component's validity state may have changed. Note, there is no need to
+     * notify Binder separately in the case of a ValueChangeEvent, as Binder
+     * already listens to this event and revalidates automatically.
+     */
+    private void fireValidationStatusChangeEvent() {
+        ValidationStatusChangeEvent<T> event = new ValidationStatusChangeEvent<>(
+                this, !isInvalid());
+        validationStatusChangeListeners
+                .forEach(listener -> listener.validationStatusChanged(event));
     }
 
     @Override
     public void setManualValidation(boolean enabled) {
-        this.manualValidationEnabled = enabled;
+        validationController.setManualValidation(enabled);
     }
 
     /**
-     * Performs server-side validation of the current value. This is needed
-     * because it is possible to circumvent the client-side validation
-     * constraints using browser development tools.
+     * Validates the current value against the constraints and sets the
+     * {@code invalid} property and the {@code errorMessage} property based on
+     * the result. If a custom error message is provided with
+     * {@link #setErrorMessage(String)}, it is used. Otherwise, the error
+     * message defined in the i18n object is used.
+     * <p>
+     * The method does nothing if the manual validation mode is enabled.
      */
     protected void validate() {
-        if (!this.manualValidationEnabled) {
-            T value = getValue();
-
-            final var requiredValidation = ValidationUtil
-                    .checkRequired(required, value, getEmptyValue());
-
-            setInvalid(requiredValidation.isError()
-                    || checkValidity(value).isError());
-        }
+        validationController.validate(getValue());
     }
 
     private boolean isValidByStep(T value) {
@@ -311,7 +412,9 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
         // When min is not defined by user, its value is the absoluteMin
         // provided in constructor. In this case, min should not be considered
         // in the step validation.
-        double stepBasis = minSetByUser ? getMinDouble() : 0.0;
+        double stepBasis = minSetByUser && !Double.isInfinite(getMinDouble())
+                ? getMinDouble()
+                : 0.0;
 
         // (value - stepBasis) % step == 0
         return new BigDecimal(String.valueOf(value))
@@ -320,15 +423,32 @@ public abstract class AbstractNumberField<C extends AbstractNumberField<C, T>, T
                 .compareTo(BigDecimal.ZERO) == 0;
     }
 
-    @Override
-    public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-        super.setRequiredIndicatorVisible(requiredIndicatorVisible);
-        this.required = requiredIndicatorVisible;
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(AbstractNumberFieldI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    protected AbstractNumberFieldI18n getI18n() {
+        return i18n;
     }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        super.onAttach(attachEvent);
-        ClientValidationUtil.preventWebComponentFromModifyingInvalidState(this);
+    /**
+     * Sets the internationalization object for this component.
+     *
+     * @param i18n
+     *            the i18n object, not {@code null}
+     */
+    protected void setI18n(AbstractNumberFieldI18n i18n) {
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+    }
+
+    private String getI18nErrorMessage(
+            Function<AbstractNumberFieldI18n, String> getter) {
+        return Optional.ofNullable(i18n).map(getter).orElse("");
     }
 }

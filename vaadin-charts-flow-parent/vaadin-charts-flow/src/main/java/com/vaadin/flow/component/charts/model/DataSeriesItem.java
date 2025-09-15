@@ -1,18 +1,17 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
 
+import java.time.Instant;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.flow.component.charts.model.style.Color;
-
-import java.time.Instant;
-import java.util.Date;
 
 /**
  * The DataSeriesItem class represents a single entry in a {@link DataSeries}.
@@ -120,15 +119,6 @@ public class DataSeriesItem extends AbstractSeriesItem {
     }
 
     /**
-     * @deprecated as of 4.0. Use {@link #DataSeriesItem(Instant, Number)}
-     */
-    @Deprecated
-    public DataSeriesItem(Date date, Number y) {
-        setX(date);
-        setY(y);
-    }
-
-    /**
      * Constructs a DataSeriesItem with the given instant as X value with min
      * and max values for use in range visualizations.
      *
@@ -141,17 +131,6 @@ public class DataSeriesItem extends AbstractSeriesItem {
      */
     public DataSeriesItem(Instant instant, Number low, Number high) {
         setX(instant);
-        setLow(low);
-        setHigh(high);
-    }
-
-    /**
-     * @deprecated as of 4.0. Use
-     *             {@link #DataSeriesItem(Instant, Number,Number)}
-     */
-    @Deprecated
-    public DataSeriesItem(Date date, Number low, Number high) {
-        setX(date);
         setLow(low);
         setHigh(high);
     }

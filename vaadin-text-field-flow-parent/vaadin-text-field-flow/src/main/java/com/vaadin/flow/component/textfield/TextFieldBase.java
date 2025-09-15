@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,17 +15,20 @@
  */
 package com.vaadin.flow.component.textfield;
 
+import java.util.Optional;
+
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.CompositionNotifier;
 import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.HasHelper;
+import com.vaadin.flow.component.HasPlaceholder;
 import com.vaadin.flow.component.InputNotifier;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.shared.HasClientValidation;
+import com.vaadin.flow.component.shared.HasPrefix;
+import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.shared.SlotUtils;
@@ -34,8 +37,6 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableBiFunction;
 import com.vaadin.flow.function.SerializableFunction;
-
-import java.util.Optional;
 
 /**
  * Internal class that provides base functionality for input field components,
@@ -50,9 +51,8 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
         extends AbstractSinglePropertyField<TComponent, TValue>
         implements CompositionNotifier, Focusable<TComponent>, HasAriaLabel,
         HasAutocapitalize, HasAutocomplete, HasAutocorrect, HasClearButton,
-        HasClientValidation, HasHelper, HasPrefixAndSuffix,
         HasValidationProperties, HasValidator<TValue>, HasValueChangeMode,
-        InputNotifier, KeyNotifier,
+        HasPlaceholder, HasPrefix, HasSuffix, InputNotifier, KeyNotifier,
         InputField<AbstractField.ComponentValueChangeEvent<TComponent, TValue>, TValue> {
 
     private ValueChangeMode currentMode;
@@ -73,7 +73,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
     public void setValueChangeMode(ValueChangeMode valueChangeMode) {
         currentMode = valueChangeMode;
         setSynchronizedEvent(
-                ValueChangeMode.eventForMode(valueChangeMode, "value-changed"));
+                ValueChangeMode.eventForMode(valueChangeMode, "input"));
         applyChangeTimeout();
     }
 
@@ -88,31 +88,9 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
         return valueChangeTimeout;
     }
 
-    private void applyChangeTimeout() {
+    void applyChangeTimeout() {
         ValueChangeMode.applyChangeTimeout(getValueChangeMode(),
                 getValueChangeTimeout(), getSynchronizationRegistration());
-    }
-
-    /**
-     * Sets the placeholder text that should be displayed in the input element,
-     * when the user has not entered a value
-     *
-     * @param placeholder
-     *            the placeholder text
-     */
-    public void setPlaceholder(String placeholder) {
-        getElement().setProperty("placeholder",
-                placeholder == null ? "" : placeholder);
-    }
-
-    /**
-     * The placeholder text that should be displayed in the input element, when
-     * the user has not entered a value
-     *
-     * @return the {@code placeholder} property from the web component
-     */
-    public String getPlaceholder() {
-        return getElement().getProperty("placeholder");
     }
 
     /**
@@ -180,22 +158,51 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
     }
 
     /**
-     * Specifies that the user must fill in a value.
+     * Sets whether the user is required to provide a value. When required, an
+     * indicator appears next to the label and the field invalidates if the
+     * value is cleared.
+     * <p>
+     * NOTE: The required indicator is only visible when the field has a label,
+     * see {@link #setLabel(String)}.
      *
      * @param required
-     *            the boolean value to set
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
      */
-    public void setRequired(boolean required) {
-        getElement().setProperty("required", required);
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
     }
 
     /**
-     * Determines whether the field is marked as input required.
+     * Gets whether the user is required to provide a value.
      *
-     * @return {@code true} if the input is required, {@code false} otherwise
+     * @return {@code true} if the field is required, {@code false} otherwise
+     * @see #setRequiredIndicatorVisible(boolean)
+     */
+    @Override
+    public boolean isRequiredIndicatorVisible() {
+        return super.isRequiredIndicatorVisible();
+    }
+
+    /**
+     * Alias for {@link #setRequiredIndicatorVisible(boolean)}.
+     *
+     * @param required
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
+     */
+    public void setRequired(boolean required) {
+        setRequiredIndicatorVisible(required);
+    }
+
+    /**
+     * Alias for {@link #isRequiredIndicatorVisible()}
+     *
+     * @return {@code true} if the field is required, {@code false} otherwise
      */
     public boolean isRequired() {
-        return getElement().getProperty("required", false);
+        return isRequiredIndicatorVisible();
     }
 
     @Override
@@ -309,7 +316,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if ((getElement().getProperty("value") == null
-                || !isInitialValueOptional) && initialValue != null) {
+                || !isInitialValueOptional)) {
             setPresentationValue(initialValue);
         }
     }
@@ -349,7 +356,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
         super("value", defaultValue, elementPropertyType, presentationToModel,
                 modelToPresentation);
         if ((getElement().getProperty("value") == null
-                || !isInitialValueOptional) && initialValue != null) {
+                || !isInitialValueOptional)) {
             setPresentationValue(initialValue);
         }
     }
@@ -377,7 +384,7 @@ public abstract class TextFieldBase<TComponent extends TextFieldBase<TComponent,
             boolean acceptNullValues, boolean isInitialValueOptional) {
         super("value", defaultValue, acceptNullValues);
         if ((getElement().getProperty("value") == null
-                || !isInitialValueOptional) && initialValue != null) {
+                || !isInitialValueOptional)) {
             setPresentationValue(initialValue);
         }
     }

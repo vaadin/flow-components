@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -43,13 +43,6 @@ public class IntegerFieldPage extends Div {
         toggleReadOnly.addClickListener(
                 event -> integerField.setReadOnly(!integerField.isReadOnly()));
         add(toggleReadOnly);
-
-        NativeButton required = new NativeButton("Toggle required");
-        required.setId("toggle-required");
-        required.addClickListener(
-                event -> integerField.setRequiredIndicatorVisible(
-                        !integerField.isRequiredIndicatorVisible()));
-        add(required);
 
         NativeButton toggleEnabled = new NativeButton("Toggle enabled");
         toggleEnabled.setId("toggle-enabled");

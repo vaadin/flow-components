@@ -1,23 +1,34 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.crud.tests;
 
-import com.vaadin.flow.component.button.testbench.ButtonElement;
-import com.vaadin.flow.component.crud.testbench.CrudElement;
-import com.vaadin.flow.component.grid.testbench.GridElement;
-import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import com.vaadin.testbench.TestBenchElement;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
+import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.crud.testbench.CrudElement;
+import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.orderedlayout.testbench.VerticalLayoutElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class BasicUseIT extends AbstractParallelTest {
+@TestPath("vaadin-crud")
+public class BasicUseIT extends AbstractComponentIT {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-crud");
-        getDriver().get(url);
+        open();
     }
 
     @Test
@@ -49,8 +60,7 @@ public class BasicUseIT extends AbstractParallelTest {
 
     @Test
     public void filterCanBeDisabled() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-crud") + "/nofilter";
+        String url = getRootURL() + getTestPath() + "/nofilter";
         getDriver().get(url);
         Assert.assertTrue($(CrudElement.class).waitForFirst().getFilterFields()
                 .isEmpty());
@@ -81,14 +91,14 @@ public class BasicUseIT extends AbstractParallelTest {
         GridElement grid = $(GridElement.class).waitForFirst();
         Assert.assertEquals("Sort by First Name",
                 grid.getHeaderCellContent(0, 0).$("vaadin-grid-sorter").first()
-                        .getAttribute("aria-label"));
+                        .getDomAttribute("aria-label"));
     }
 
     @Test
     public void filterHasAriaLabel() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         Assert.assertEquals("Filter by First Name",
-                crud.getFilterFields().get(0).getAttribute("aria-label"));
+                crud.getFilterFields().get(0).getDomAttribute("aria-label"));
     }
 
     @Test
@@ -148,22 +158,22 @@ public class BasicUseIT extends AbstractParallelTest {
         CrudElement crud = $(CrudElement.class).waitForFirst();
         GridElement grid = $(GridElement.class).first();
 
-        Assert.assertNotEquals("no-border", crud.getAttribute("theme"));
-        Assert.assertNotEquals("no-border", grid.getAttribute("theme"));
+        Assert.assertNotEquals("no-border", crud.getDomAttribute("theme"));
+        Assert.assertNotEquals("no-border", grid.getDomAttribute("theme"));
 
         getTestButton("toggleBorders").click();
-        Assert.assertEquals("no-border", crud.getAttribute("theme"));
-        Assert.assertEquals("no-border", grid.getAttribute("theme"));
+        Assert.assertEquals("no-border", crud.getDomAttribute("theme"));
+        Assert.assertEquals("no-border", grid.getDomAttribute("theme"));
 
         getTestButton("toggleBorders").click();
-        Assert.assertNotEquals("no-border", crud.getAttribute("theme"));
-        Assert.assertNotEquals("no-border", grid.getAttribute("theme"));
+        Assert.assertNotEquals("no-border", crud.getDomAttribute("theme"));
+        Assert.assertNotEquals("no-border", grid.getDomAttribute("theme"));
     }
 
     @Test
     public void toolbarVisibleByDefault() {
         CrudElement crud = $(CrudElement.class).waitForFirst();
-        Assert.assertNull(crud.getAttribute("no-toolbar"));
+        Assert.assertFalse(crud.hasAttribute("no-toolbar"));
     }
 
     @Test
@@ -194,5 +204,9 @@ public class BasicUseIT extends AbstractParallelTest {
 
     private ButtonElement getTestButton(String id) {
         return $(ButtonElement.class).onPage().id(id);
+    }
+
+    private String getLastEvent() {
+        return $(VerticalLayoutElement.class).last().$("span").last().getText();
     }
 }

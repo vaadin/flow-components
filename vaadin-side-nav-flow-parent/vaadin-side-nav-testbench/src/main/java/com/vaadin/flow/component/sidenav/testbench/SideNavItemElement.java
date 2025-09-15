@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,11 +20,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebElement;
 
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebElement;
 
 /**
  * A TestBench element representing a <code>&lt;vaadin-side-nav-item&gt;</code>
@@ -52,7 +52,7 @@ public class SideNavItemElement extends TestBenchElement {
     }
 
     public String getPath() {
-        return getAttribute("path");
+        return getDomAttribute("path");
     }
 
     public boolean isExpanded() {

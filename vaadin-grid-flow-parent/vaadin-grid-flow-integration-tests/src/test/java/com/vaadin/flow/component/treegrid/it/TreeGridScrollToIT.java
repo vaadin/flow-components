@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,15 +15,16 @@
  */
 package com.vaadin.flow.component.treegrid.it;
 
-import com.vaadin.flow.component.grid.testbench.GridColumnElement;
-import com.vaadin.flow.component.grid.testbench.TreeGridElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
+
+import com.vaadin.flow.component.grid.testbench.TreeGridElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the TreeGridScrollToPage view.
@@ -44,112 +45,73 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
     @Before
     public void init() {
         open();
-        waitUntil(e -> $(TreeGridElement.class).exists(), 2);
         grid = $(TreeGridElement.class).first();
         expandAllButton = $("button").id("expand-all");
         scrollToStartButton = $("button").id("scroll-to-start");
         scrollToEndButton = $("button").id("scroll-to-end");
         scrollToIndexInput = $("input").id("scroll-to-index");
-
     }
 
     @Test
     public void expandAll_scrollToEnd_correctLastVisibleItem() {
         expandAllButton.click();
-
         scrollToEndButton.click();
-
-        waitUntil(e -> {
-            int lastVisibleRow = grid.getLastVisibleRowIndex();
-            return grid.hasRow(lastVisibleRow)
-                    && "Son 49/19/19".equals(getCellContent(lastVisibleRow));
-        }, 2);
+        assertLastVisibleRowContent("Son 49/19/19");
     }
 
     @Test
-    public void smallPageSize_expandAll_correctLastVisibleItem() {
-        $("button").id("change-page-size").click();
+    public void expandAll_scrollToEndFromClient_correctLastVisibleItem() {
         expandAllButton.click();
-
-        int lastVisibleRow = grid.getLastVisibleRowIndex();
-        Assert.assertEquals("Son 0/0/7", getCellContent(lastVisibleRow));
+        grid.scrollToEnd();
+        assertLastVisibleRowContent("Son 49/19/19");
     }
 
     @Test
     public void scrollToEnd_correctLastVisibleItem() {
         scrollToEndButton.click();
-
-        Assert.assertEquals("Granddad 49",
-                getCellContent(grid.getLastVisibleRowIndex()));
+        assertLastVisibleRowContent("Granddad 49");
     }
 
     @Test
     public void scrollToEnd_scrollToStart_correctFirstVisibleItem() {
         scrollToEndButton.click();
-        waitUntil(
-                e -> "Granddad 49"
-                        .equals(getCellContent(grid.getLastVisibleRowIndex())),
-                1);
+        assertLastVisibleRowContent("Granddad 49");
 
         scrollToStartButton.click();
-
-        Assert.assertEquals("Granddad 0",
-                getCellContent(grid.getFirstVisibleRowIndex()));
+        assertFirstVisibleRowContent("Granddad 0");
     }
 
     @Test
     public void expandAll_scrollToIndex30_correctFirstVisibleItem() {
         expandAllButton.click();
-
         scrollToIndexInput.sendKeys("30", Keys.TAB);
-
-        waitUntil(e -> {
-            int firstVisibleRow = grid.getFirstVisibleRowIndex();
-            return grid.hasRow(firstVisibleRow)
-                    && "Granddad 30".equals(getCellContent(firstVisibleRow));
-        }, 2);
+        assertFirstVisibleRowContent("Granddad 30");
     }
 
     @Test
     public void scrollToIndex30_correctFirstVisibleItem() {
         scrollToIndexInput.sendKeys("30", Keys.TAB);
-
-        Assert.assertEquals("Granddad 30",
-                getCellContent(grid.getFirstVisibleRowIndex()));
+        assertFirstVisibleRowContent("Granddad 30");
     }
 
     @Test
     public void expandAll_scrollToIndex30_1_correctFirstVisibleItem() {
         expandAllButton.click();
-
         scrollToIndexInput.sendKeys("30-1", Keys.TAB);
-
-        waitUntil(e -> {
-            int firstVisibleRow = grid.getFirstVisibleRowIndex();
-            return grid.hasRow(firstVisibleRow)
-                    && "Dad 30/1".equals(getCellContent(firstVisibleRow));
-        }, 2);
+        assertFirstVisibleRowContent("Dad 30/1");
     }
 
     @Test
     public void scrollToIndex30_1_correctFirstVisibleItem() {
         scrollToIndexInput.sendKeys("30-1", Keys.TAB);
-
-        Assert.assertEquals("Granddad 30",
-                getCellContent(grid.getFirstVisibleRowIndex()));
+        assertFirstVisibleRowContent("Granddad 30");
     }
 
     @Test
     public void expandAll_scrollToIndex30_1_1_correctFirstVisibleItem() {
         expandAllButton.click();
-
         scrollToIndexInput.sendKeys("30-1-1", Keys.TAB);
-
-        waitUntil(e -> {
-            int firstVisibleRow = grid.getFirstVisibleRowIndex();
-            return grid.hasRow(firstVisibleRow)
-                    && "Son 30/1/1".equals(getCellContent(firstVisibleRow));
-        }, 2);
+        assertFirstVisibleRowContent("Son 30/1/1");
     }
 
     @Test
@@ -159,16 +121,32 @@ public class TreeGridScrollToIT extends AbstractComponentIT {
         // Manual test triggers an infinite loop.
         // The indexes to reproduce this loop depends on the grid height.
         scrollToIndexInput.sendKeys("10-1-1", Keys.TAB);
-
-        waitUntil(e -> {
-            int firstVisibleRow = grid.getFirstVisibleRowIndex();
-            return grid.hasRow(firstVisibleRow)
-                    && "Son 10/1/1".equals(getCellContent(firstVisibleRow));
-        }, 2);
+        assertFirstVisibleRowContent("Son 10/1/1");
     }
 
-    private String getCellContent(int rowIndex) {
-        GridColumnElement gridColumnElement = grid.getVisibleColumns().get(0);
-        return grid.getRow(rowIndex).getCell(gridColumnElement).getText();
+    private void assertFirstVisibleRowContent(String content) {
+        try {
+            waitUntil(driver -> {
+                int rowIndex = grid.getFirstVisibleRowIndex();
+                return grid.hasRow(rowIndex)
+                        && grid.getRow(rowIndex).getText().equals(content);
+            }, 5);
+        } catch (TimeoutException e) {
+            Assert.fail("There was no first row with content '%s'"
+                    .formatted(content));
+        }
+    }
+
+    private void assertLastVisibleRowContent(String content) {
+        try {
+            waitUntil(driver -> {
+                int rowIndex = grid.getLastVisibleRowIndex();
+                return grid.hasRow(rowIndex)
+                        && grid.getRow(rowIndex).getText().equals(content);
+            }, 5);
+        } catch (TimeoutException e) {
+            Assert.fail("There was no last row with content '%s'"
+                    .formatted(content));
+        }
     }
 }

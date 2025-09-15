@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.charts.examples.other;
 
 import com.vaadin.flow.component.charts.Chart;
@@ -19,6 +27,7 @@ public class WaterfallChart extends AbstractChartExample {
     @Override
     public void initDemo() {
         Chart chart = new Chart(ChartType.WATERFALL);
+        chart.setClassName("WaterfallChart");
 
         DataSeries dataSeries = new DataSeries();
 

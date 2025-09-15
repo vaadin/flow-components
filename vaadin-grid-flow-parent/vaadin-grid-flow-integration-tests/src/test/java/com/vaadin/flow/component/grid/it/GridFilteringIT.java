@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,9 +15,11 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import static com.vaadin.flow.component.grid.it.GridFilteringPage.GRID_FILTER_ID;
+import static com.vaadin.flow.component.grid.it.GridFilteringPage.LAZY_FILTERABLE_GRID_ID;
+
 import org.junit.Assert;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
@@ -25,9 +27,6 @@ import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
-
-import static com.vaadin.flow.component.grid.it.GridFilteringPage.GRID_FILTER_ID;
-import static com.vaadin.flow.component.grid.it.GridFilteringPage.LAZY_FILTERABLE_GRID_ID;
 
 @TestPath("vaadin-grid/grid-filtering")
 public class GridFilteringIT extends AbstractComponentIT {
@@ -43,7 +42,7 @@ public class GridFilteringIT extends AbstractComponentIT {
         // Blur input to get value change
         executeScript("arguments[0].blur();", input);
 
-        WebElement grid = findElement(By.id("data-grid"));
+        GridElement grid = $(GridElement.class).id("data-grid");
         // empty Grid content
         Object size = executeScript("return arguments[0].size", grid);
         Assert.assertEquals("0", size.toString());
@@ -56,7 +55,7 @@ public class GridFilteringIT extends AbstractComponentIT {
         waitUntil(driver -> executeScript("return arguments[0].size", grid)
                 .toString().equals("3"));
 
-        waitUntil(driver -> "false".equals(grid.getAttribute("loading")));
+        waitUntil(driver -> !grid.hasAttribute("loading"));
     }
 
     @Test // for https://github.com/vaadin/flow/issues/9988

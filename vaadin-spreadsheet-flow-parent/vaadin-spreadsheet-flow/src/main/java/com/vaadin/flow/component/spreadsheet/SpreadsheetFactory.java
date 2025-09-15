@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet;
@@ -21,8 +21,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.hssf.usermodel.HSSFPatriarch;
 import org.apache.poi.hssf.usermodel.HSSFPicture;
@@ -64,6 +66,8 @@ import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTFilterColumn;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTOutlinePr;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetProtection;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTWorksheet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.spreadsheet.client.MergedRegion;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
@@ -455,9 +459,13 @@ public class SpreadsheetFactory implements Serializable {
         XSSFSheet sheet = (XSSFSheet) spreadsheet.getActiveSheet();
         CTAutoFilter autoFilter = sheet.getCTWorksheet().getAutoFilter();
 
-        if (autoFilter != null) {
+        if (autoFilter != null
+                && !tableForCTAutoFilterAlreadyLoaded(spreadsheet,
+                        autoFilter)) {
             SpreadsheetTable sheetFilterTable = new SpreadsheetFilterTable(
-                    spreadsheet, CellRangeAddress.valueOf(autoFilter.getRef()));
+                    spreadsheet, spreadsheet.getActiveSheet(),
+                    CellRangeAddress.valueOf(autoFilter.getRef()), autoFilter,
+                    null);
 
             spreadsheet.registerTable(sheetFilterTable);
 
@@ -465,12 +473,27 @@ public class SpreadsheetFactory implements Serializable {
         }
 
         for (XSSFTable table : sheet.getTables()) {
-            SpreadsheetTable spreadsheetTable = new SpreadsheetFilterTable(
-                    spreadsheet,
-                    CellRangeAddress.valueOf(table.getCTTable().getRef()));
+            if (!tableForXSSFTableAlreadyLoaded(spreadsheet, table)) {
+                SpreadsheetTable spreadsheetTable = new SpreadsheetFilterTable(
+                        spreadsheet, spreadsheet.getActiveSheet(),
+                        CellRangeAddress.valueOf(table.getCTTable().getRef()),
+                        null, table);
 
-            spreadsheet.registerTable(spreadsheetTable);
+                spreadsheet.registerTable(spreadsheetTable);
+            }
         }
+    }
+
+    private static boolean tableForXSSFTableAlreadyLoaded(
+            Spreadsheet spreadsheet, XSSFTable table) {
+        return spreadsheet.getTables().stream()
+                .anyMatch(it -> it.getXssfTable() == table);
+    }
+
+    private static boolean tableForCTAutoFilterAlreadyLoaded(
+            Spreadsheet spreadsheet, CTAutoFilter autoFilter) {
+        return spreadsheet.getTables().stream()
+                .anyMatch(it -> it.getCtWorksheetAutoFilter() == autoFilter);
     }
 
     private static void markActiveButtons(SpreadsheetTable sheetFilterTable,
@@ -1049,12 +1072,12 @@ public class SpreadsheetFactory implements Serializable {
              * invisible frozen rows/columns are effectively hidden in Excel. We
              * mimic this behavior here.
              */
-            for (int col = 0; col < leftCol; col++) {
-                spreadsheet.setColumnHidden(col, true);
-            }
-            for (int row = 0; row < topRow; row++) {
-                spreadsheet.setRowHidden(row, true);
-            }
+            spreadsheet.setColumnsHidden(
+                    IntStream.range(0, leftCol).boxed().collect(Collectors
+                            .toMap(Function.identity(), index -> true)));
+            spreadsheet.setRowsHidden(
+                    IntStream.range(0, topRow).boxed().collect(Collectors
+                            .toMap(Function.identity(), index -> true)));
         } else {
             spreadsheet.setVerticalSplitPosition(0);
             spreadsheet.setHorizontalSplitPosition(0);
