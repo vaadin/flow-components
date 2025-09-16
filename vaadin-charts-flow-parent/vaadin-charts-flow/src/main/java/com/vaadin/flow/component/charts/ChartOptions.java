@@ -11,15 +11,14 @@ package com.vaadin.flow.component.charts;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.Lang;
 import com.vaadin.flow.component.charts.model.style.Theme;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
-
-import elemental.json.JsonObject;
-import elemental.json.impl.JreJsonFactory;
+import com.vaadin.flow.internal.JacksonUtils;
 
 /**
  * The ChartOptions configures a page local global options like localized texts
@@ -33,16 +32,8 @@ public class ChartOptions extends AbstractConfigurationObject {
     @JsonUnwrapped
     private Theme theme;
     private Lang lang;
-    private transient JreJsonFactory jsonFactory;
 
     protected ChartOptions() {
-    }
-
-    private JreJsonFactory getJsonFactory() {
-        if (jsonFactory == null) {
-            jsonFactory = new JreJsonFactory();
-        }
-        return jsonFactory;
     }
 
     private void updateOptions() {
@@ -52,8 +43,8 @@ public class ChartOptions extends AbstractConfigurationObject {
             return;
         }
 
-        JsonObject configurationNode = getJsonFactory()
-                .parse(ChartSerialization.toJSON(this));
+        final ObjectNode configurationNode = JacksonUtils
+                .readTree(ChartSerialization.toJSON(this));
         ui.getElement().executeJs(
                 "customElements.get('vaadin-chart').__callHighchartsFunction('setOptions',$0,$1)",
                 true, configurationNode);

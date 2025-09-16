@@ -98,7 +98,6 @@ import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.streams.AbstractDownloadHandler;
@@ -165,7 +164,6 @@ public class Spreadsheet extends Component
 
     // from SaredState
 
-    // private Map<String, URLReference> resources = new HashMap<>();
     private Map<String, String> resources = new HashMap<>();
 
     // spreadsheetState
@@ -1808,30 +1806,6 @@ public class Spreadsheet extends Component
     }
 
     /**
-     * See {@link Workbook#setSheetHidden(int, boolean)}.
-     * <p>
-     * Gets the Workbook with {@link #getWorkbook()} and uses its API to access
-     * status on currently visible/hidden/very hidden sheets.
-     *
-     * If the currently active sheet is set hidden, another sheet is set as
-     * active sheet automatically. At least one sheet should be always visible.
-     *
-     * @param hidden
-     *            Visibility state to set: 0-visible, 1-hidden, 2-very hidden.
-     * @param sheetPOIIndex
-     *            Index of the target sheet within the POI model, 0-based
-     * @throws IllegalArgumentException
-     *             If the index or state is invalid, or if trying to hide the
-     *             only visible sheet.
-     * @deprecated use {@link #setSheetHidden(int, SheetVisibility)}
-     */
-    @Deprecated
-    public void setSheetHidden(int sheetPOIIndex, int hidden)
-            throws IllegalArgumentException {
-        setSheetHidden(sheetPOIIndex, SheetVisibility.values()[hidden]);
-    }
-
-    /**
      * Returns an array containing the names of the currently visible sheets.
      * Does not contain the names of hidden or very hidden sheets.
      * <p>
@@ -2850,7 +2824,7 @@ public class Spreadsheet extends Component
                 r = 0;
             }
             Row row = sheet.getRow(r);
-            final Integer rowIndex = new Integer(r + 1);
+            final Integer rowIndex = r + 1;
             ArrayList<Integer> _hiddenRowIndexes = new ArrayList<>(
                     getHiddenRowIndexes());
             if (row == null) {
@@ -3616,27 +3590,6 @@ public class Spreadsheet extends Component
      *
      * Provides package visibility.
      */
-    protected void setResource(String key, StreamResource resource) {
-        if (resource == null) {
-            resources.remove(key);
-            getElement().removeAttribute("resource-" + key);
-        } else {
-            resources.put(key, resource.toString());
-            getElement().setProperty("resources",
-                    Serializer.serialize(new ArrayList<>(resources.keySet())));
-            getElement().setAttribute("resource-" + key, resource);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see
-     * com.vaadin.server.AbstractClientConnector#setResource(java.lang.String,
-     * com.vaadin.server.Resource)
-     *
-     * Provides package visibility.
-     */
     protected void setResource(String key, DownloadHandler resource) {
         if (resource == null) {
             resources.remove(key);
@@ -3900,36 +3853,6 @@ public class Spreadsheet extends Component
      */
     public boolean isCellHidden(Cell cell) {
         return isActiveSheetProtected() && cell.getCellStyle().getHidden();
-    }
-
-    /**
-     * Gets the locked state of the given cell.
-     *
-     * @param cell
-     *            The cell to check
-     * @return true if the cell is locked, false otherwise
-     * @deprecated Due to requiring a cell instance, this method can not
-     *             determine the locked state of cells that have not been
-     *             created yet. Use {@link #isCellLocked(CellAddress)} instead.
-     */
-    @Deprecated(since = "24.9.0", forRemoval = true)
-    public boolean isCellLocked(Cell cell) {
-        if (isActiveSheetProtected()) {
-            if (cell != null) {
-                if (cell.getCellStyle().getIndex() != 0) {
-                    return cell.getCellStyle().getLocked();
-                } else {
-                    return getLockedColumnIndexes()
-                            .contains(cell.getColumnIndex() + 1)
-                            && getLockedRowIndexes()
-                                    .contains(cell.getRowIndex() + 1);
-                }
-            } else {
-                return true;
-            }
-        } else {
-            return false;
-        }
     }
 
     /**
@@ -4364,8 +4287,6 @@ public class Spreadsheet extends Component
 
         if (overlay.getId() != null && overlay.getResourceHandler() != null) {
             setResource(overlay.getId(), overlay.getResourceHandler());
-        } else if (overlay.getId() != null && overlay.getResource() != null) {
-            setResource(overlay.getId(), overlay.getResource());
         }
 
         if (overlay.getId() != null) {
@@ -4394,7 +4315,7 @@ public class Spreadsheet extends Component
                 _overlays.remove(overlay.getId());
                 setOverlays(_overlays);
             }
-            setResource(overlay.getId(), (StreamResource) null);
+            setResource(overlay.getId(), null);
         }
 
         if (overlay.getComponent(false) != null) {
