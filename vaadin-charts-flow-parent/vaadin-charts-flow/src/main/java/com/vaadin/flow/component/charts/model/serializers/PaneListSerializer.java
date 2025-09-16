@@ -8,23 +8,21 @@
  */
 package com.vaadin.flow.component.charts.model.serializers;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.vaadin.flow.component.charts.model.PaneList;
+
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.module.SimpleModule;
 
 /**
  * Serializer for {@link PaneList}
  *
  */
-public class PaneListSerializer extends JsonSerializer<PaneList> {
+public class PaneListSerializer extends ValueSerializer<PaneList> {
 
-    public static Module getModule() {
+    public static JacksonModule getModule() {
         SimpleModule module = new SimpleModule();
         module.addSerializer(PaneList.class, new PaneListSerializer());
         return module;
@@ -32,12 +30,11 @@ public class PaneListSerializer extends JsonSerializer<PaneList> {
 
     @Override
     public void serialize(PaneList value, JsonGenerator gen,
-            SerializerProvider serializers)
-            throws IOException, JsonProcessingException {
+            SerializationContext context) {
         if (value != null && value.getNumberOfPanes() == 1) {
-            gen.writeObject(value.getPane(0));
+            gen.writePOJO(value.getPane(0));
         } else if (value != null) {
-            gen.writeObject(value.getPanes());
+            gen.writePOJO(value.getPanes());
         }
     }
 }

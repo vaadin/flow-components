@@ -8,11 +8,6 @@
  */
 package com.vaadin.flow.component.charts.model.serializers;
 
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializationConfig;
-import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
-import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
 import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.AxisTitle;
 import com.vaadin.flow.component.charts.model.DataProviderSeries;
@@ -20,15 +15,21 @@ import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.LegendTitle;
 import com.vaadin.flow.component.charts.model.Title;
 
+import tools.jackson.databind.BeanDescription;
+import tools.jackson.databind.SerializationConfig;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.ser.ValueSerializerModifier;
+import tools.jackson.databind.ser.bean.BeanSerializerBase;
+
 /**
  * Logic for altering the bean serialization process. Mainly used when
  * serialization needs to be customized with a bean serializer.
  */
-public class DefaultBeanSerializerModifier extends BeanSerializerModifier {
+public class DefaultBeanSerializerModifier extends ValueSerializerModifier {
 
     @Override
-    public JsonSerializer<?> modifySerializer(SerializationConfig config,
-            BeanDescription beanDesc, JsonSerializer<?> serializer) {
+    public ValueSerializer<?> modifySerializer(SerializationConfig config,
+            BeanDescription.Supplier beanDesc, ValueSerializer<?> serializer) {
         if (DataProviderSeries.class
                 .isAssignableFrom(beanDesc.getBeanClass())) {
             return new BeanSerializerDelegator<>(
