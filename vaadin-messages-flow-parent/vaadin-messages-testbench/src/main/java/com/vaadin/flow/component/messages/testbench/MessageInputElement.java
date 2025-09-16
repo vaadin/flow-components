@@ -35,6 +35,15 @@ public class MessageInputElement extends TestBenchElement {
      */
     public void submit(String message) {
         setProperty("value", message);
-        $("vaadin-button").first().click();
+        getSubmitButton().click();
+    }
+
+    /**
+     * Gets the message submit button.
+     *
+     * @return the message submit button
+     */
+    public TestBenchElement getSubmitButton() {
+        return $("vaadin-message-input-button").first();
     }
 }
