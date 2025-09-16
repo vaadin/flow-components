@@ -75,10 +75,10 @@ public class AddingColumnsIT extends AbstractComponentIT {
         // JDK16 adds extra comma after year in en_US
         Assert.assertTrue(
                 TestHelper.stripComments(grid.getCell(0, 0).getInnerHTML())
-                        .matches("January 1, 1980,? 1:20 AM"));
+                        .matches("January 1, 1980,? 1:20[ \\u00A0]AM"));
         Assert.assertTrue(
                 TestHelper.stripComments(grid.getCell(1, 0).getInnerHTML())
-                        .matches("January 1, 1980,? 1:30 AM"));
+                        .matches("January 1, 1980,? 1:30[ \\u00A0]AM"));
     }
 
     @Test
