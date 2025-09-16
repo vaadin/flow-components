@@ -11,8 +11,6 @@ package com.vaadin.flow.component.charts;
 import static com.vaadin.flow.component.charts.util.ChartSerialization.toJSON;
 import static org.junit.Assert.assertEquals;
 
-import java.io.IOException;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,8 +43,7 @@ public class ChartOptionsJSONSerializationTest {
     }
 
     @Test
-    public void toJSON_LangWithFinnishLocale_LocaleSerialized_Months()
-            throws IOException {
+    public void toJSON_LangWithFinnishLocale_LocaleSerialized_Months() {
         final String[] fiMonths = new String[] { "Tammikuu", "Helmikuu",
                 "Maaliskuu", "Huhtikuu", "Toukokuu", "Kesäkuu", "Heinäkuu",
                 "Elokuu", "Syyskuu", "Lokakuu", "Marraskuu", "Joulukuu" };
@@ -62,8 +59,7 @@ public class ChartOptionsJSONSerializationTest {
     }
 
     @Test
-    public void toJSON_LangWithFinnishLocale_LocaleSerialized_ShortMonths()
-            throws IOException {
+    public void toJSON_LangWithFinnishLocale_LocaleSerialized_ShortMonths() {
         final String[] fiShortMonths = new String[] { "Tammi", "Helmi",
                 "Maalis", "Huhti", "Touko", "Kesä", "Heinä", "Elo", "Syys",
                 "Loka", "Marras", "Joulu" };
@@ -79,8 +75,7 @@ public class ChartOptionsJSONSerializationTest {
     }
 
     @Test
-    public void toJSON_LangWithFinnishLocale_LocaleSerialized_Days()
-            throws IOException {
+    public void toJSON_LangWithFinnishLocale_LocaleSerialized_Days() {
         final String[] fiDays = new String[] { "Ma", "Ti", "Ke", "To", "Pe",
                 "La", "Su" };
         final Lang fi = new Lang();
