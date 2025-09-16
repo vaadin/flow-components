@@ -42,8 +42,6 @@ import com.vaadin.tests.AbstractComponentIT;
 
 public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
-    // Should be COMMAND for macOS
-    private Keys metaKey = Keys.CONTROL;
     private SpreadsheetElement spreadsheet;
     private static final String BACKGROUND_COLOR = "background-color";
 
@@ -155,16 +153,13 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
     private void selectElement(WebElement element, boolean ctrl,
             boolean shift) {
+        Keys metaKey = isMac() ? Keys.COMMAND : Keys.CONTROL;
         if (ctrl) {
             new Actions(getDriver()).moveToElement(element).keyDown(metaKey)
                     .click().keyUp(metaKey).build().perform();
         } else if (shift) {
             new Actions(getDriver()).moveToElement(element).keyDown(Keys.SHIFT)
                     .click().keyUp(Keys.SHIFT).build().perform();
-        } else if (ctrl && shift) {
-            new Actions(getDriver()).moveToElement(element).keyDown(Keys.SHIFT)
-                    .keyDown(metaKey).click().keyUp(Keys.SHIFT).keyUp(metaKey)
-                    .build().perform();
         } else {
             new Actions(getDriver()).moveToElement(element).click().build()
                     .perform();
