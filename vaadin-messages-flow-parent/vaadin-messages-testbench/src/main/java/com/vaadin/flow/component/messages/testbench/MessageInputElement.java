@@ -44,6 +44,6 @@ public class MessageInputElement extends TestBenchElement {
      * @return the message submit button
      */
     public TestBenchElement getSubmitButton() {
-        return $("vaadin-message-input-button").first();
+        return $("*").withAttribute("slot", "button").first();
     }
 }
