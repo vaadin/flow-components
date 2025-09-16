@@ -12,10 +12,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.charts.model.Labels;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 public class LabelsSerializationTest {
 
@@ -28,7 +29,7 @@ public class LabelsSerializationTest {
 
     @Test
     public void testRotation_isParsableAsNumber_serializedAsNumber()
-            throws JsonProcessingException {
+            throws JacksonException {
         Labels labels = new Labels();
         labels.setRotation("90");
         String json = objectMapper.writeValueAsString(labels);
@@ -38,7 +39,7 @@ public class LabelsSerializationTest {
 
     @Test
     public void testRotation_isNotParsableAsNumber_serializedAsString()
-            throws JsonProcessingException {
+            throws JacksonException {
         Labels labels = new Labels();
         labels.setRotation("auto");
         String json = objectMapper.writeValueAsString(labels);
@@ -47,8 +48,7 @@ public class LabelsSerializationTest {
     }
 
     @Test
-    public void testRotation_isNull_notSerialized()
-            throws JsonProcessingException {
+    public void testRotation_isNull_notSerialized() throws JacksonException {
         Labels labels = new Labels();
         labels.setRotation((String) null);
         String json = objectMapper.writeValueAsString(labels);

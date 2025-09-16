@@ -20,10 +20,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.model.Lang;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
+
+import tools.jackson.databind.ObjectMapper;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChartOptionsJSONSerializationTest {
