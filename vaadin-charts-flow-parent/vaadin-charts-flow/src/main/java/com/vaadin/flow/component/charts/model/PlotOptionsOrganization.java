@@ -466,8 +466,7 @@ public class PlotOptionsOrganization extends AbstractPlotOptions {
      * The color of the links between nodes.
      * </p>
      *
-     * @deprecated use {@link #getLink()}.{@link Link#setColor(Color)
-     *             setColor(Color)} instead.
+     * @deprecated use {@link #getLink()}.{@link Link#setColor(Color)} instead.
      */
     @Deprecated(since = "25.0", forRemoval = true)
     public void setLinkColor(Color linkColor) {
@@ -511,8 +510,8 @@ public class PlotOptionsOrganization extends AbstractPlotOptions {
      * The line width of the links connecting nodes, in pixels.
      * </p>
      *
-     * @deprecated use {@link #getLink()}.{@link Link#setLineWidth(Number)
-     *             setLineWidth(Number)} instead.
+     * @deprecated use {@link #getLink()}.{@link Link#setLineWidth(Number)}
+     *             instead.
      */
     @Deprecated(since = "25.0", forRemoval = true)
     public void setLinkLineWidth(Number linkLineWidth) {
@@ -548,8 +547,8 @@ public class PlotOptionsOrganization extends AbstractPlotOptions {
      * Radius for the rounded corners of the links between nodes.
      * </p>
      *
-     * @deprecated use {@link #getLink()}.{@link Link#setRadius(Number)
-     *             setRadius(Number)} instead.
+     * @deprecated use {@link #getLink()}.{@link Link#setRadius(Number)}
+     *             instead.
      */
     @Deprecated(since = "25.0", forRemoval = true)
     public void setLinkRadius(Number linkRadius) {
