@@ -17,6 +17,8 @@ package com.vaadin.flow.theme.lumo;
 
 import java.util.Locale;
 
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IconFactory;
 
@@ -33,6 +35,8 @@ import com.vaadin.flow.component.icon.IconFactory;
  *
  * @author Vaadin Ltd
  */
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "25.0.0-alpha19")
+@JsModule("@vaadin/vaadin-lumo-styles/vaadin-iconset.js")
 public enum LumoIcon implements IconFactory {
 
     ALIGN_CENTER,

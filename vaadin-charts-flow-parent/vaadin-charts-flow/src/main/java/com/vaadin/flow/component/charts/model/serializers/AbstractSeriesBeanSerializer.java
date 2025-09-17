@@ -8,12 +8,11 @@
  */
 package com.vaadin.flow.component.charts.model.serializers;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.vaadin.flow.component.charts.model.AbstractSeries;
 import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
+
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
 
 /**
  * Custom bean serializer for {@link AbstractSeries} that adds the type field.
@@ -31,18 +30,17 @@ public class AbstractSeriesBeanSerializer
     @Override
     public void serialize(AbstractSeries bean,
             BeanSerializerDelegator<AbstractSeries> serializer,
-            JsonGenerator jgen, SerializerProvider provider)
-            throws IOException {
+            JsonGenerator jgen, SerializationContext context) {
         AbstractSeries series = bean;
 
         jgen.writeStartObject();
 
         // write other fields as per normal serialization rules
-        serializer.serializeFields(bean, jgen, provider);
+        serializer.serializeProperties(bean, jgen, context);
 
         if (series.getPlotOptions() != null
                 && !(bean.getPlotOptions() instanceof PlotOptionsSeries)) {
-            jgen.writeObjectField("type",
+            jgen.writePOJOProperty("type",
                     series.getPlotOptions().getChartType());
         }
 
