@@ -705,6 +705,17 @@ public class AbstractGridMultiSelectionModelTest {
                 .getProperty("_selectAllHidden", false));
     }
 
+    @Test
+    public void setMultiSelect_removeGrid_setSingleSelect_addGrid_selectionColumnRemoved() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        ui.remove(grid);
+        grid.setSelectionMode(SelectionMode.SINGLE);
+        ui.add(grid);
+        Assert.assertThrows(IllegalStateException.class,
+                () -> getGridSelectionColumn(grid));
+    }
+
     private void verifySelectAllCheckboxVisibilityInMultiSelectMode(
             boolean inMemory, boolean unknownItemCount,
             boolean expectedVisibility,
