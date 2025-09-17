@@ -357,7 +357,9 @@ public class Legend extends AbstractConfigurationObject {
 
     /**
      * @see #setLineHeight(Number)
+     * @deprecated
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public Number getLineHeight() {
         return lineHeight;
     }
@@ -368,7 +370,10 @@ public class Legend extends AbstractConfigurationObject {
      * padding between items using itemMarginTop and itemMarginBottom.
      * <p>
      * Defaults to: 16
+     *
+     * @deprecated Use {@code Style#setLineHeight(String)} instead.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setLineHeight(Number lineHeight) {
         this.lineHeight = lineHeight;
     }
