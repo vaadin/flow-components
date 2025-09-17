@@ -13,10 +13,6 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.serializers.AxisListSerializer;
 import com.vaadin.flow.component.charts.model.serializers.ChartEnumSerializer;
@@ -28,6 +24,13 @@ import com.vaadin.flow.component.charts.model.serializers.PaneListSerializer;
 import com.vaadin.flow.component.charts.model.serializers.SolidColorSerializer;
 import com.vaadin.flow.component.charts.model.serializers.StopSerializer;
 import com.vaadin.flow.component.charts.model.serializers.TimeUnitMultiplesSerializer;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectWriter;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.ser.SerializerFactory;
+import tools.jackson.databind.ser.ValueSerializerModifier;
 
 /**
  * Util class that handles the configuration needed for the model classes to be
@@ -54,24 +57,27 @@ public class ChartSerialization implements Serializable {
     }
 
     public static ObjectMapper createObjectMapper(
-            BeanSerializerModifier modifier) {
-        ObjectMapper mapper = new ObjectMapper()
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                .setVisibility(PropertyAccessor.ALL, Visibility.NONE)
-                .setVisibility(PropertyAccessor.FIELD, Visibility.ANY)
-                .registerModule(ChartEnumSerializer.getModule())
-                .registerModule(StopSerializer.getModule())
-                .registerModule(TimeUnitMultiplesSerializer.getModule())
-                .registerModule(SolidColorSerializer.getModule())
-                .registerModule(GradientColorStopsSerializer.getModule())
-                .registerModule(AxisListSerializer.getModule())
-                .registerModule(PaneListSerializer.getModule())
-                .registerModule(DateSerializer.getModule())
-                .registerModule(InstantSerializer.getModule());
+            ValueSerializerModifier modifier) {
+        JsonMapper.Builder builder = JsonMapper.builder()
+                .changeDefaultPropertyInclusion(incl -> incl
+                        .withValueInclusion(JsonInclude.Include.NON_NULL))
+                .changeDefaultVisibility(handler -> handler
+                        .withVisibility(PropertyAccessor.ALL, Visibility.NONE)
+                        .withVisibility(PropertyAccessor.FIELD, Visibility.ANY))
+                .addModule(ChartEnumSerializer.getModule())
+                .addModule(StopSerializer.getModule())
+                .addModule(TimeUnitMultiplesSerializer.getModule())
+                .addModule(SolidColorSerializer.getModule())
+                .addModule(GradientColorStopsSerializer.getModule())
+                .addModule(AxisListSerializer.getModule())
+                .addModule(PaneListSerializer.getModule())
+                .addModule(DateSerializer.getModule())
+                .addModule(InstantSerializer.getModule());
 
         // serializer modifier used when basic serializer isn't enough
-        return mapper.setSerializerFactory(
-                mapper.getSerializerFactory().withSerializerModifier(modifier));
+        SerializerFactory serializerFactory = builder.serializerFactory()
+                .withSerializerModifier(modifier);
+        return builder.serializerFactory(serializerFactory).build();
     }
 
     /**
@@ -90,7 +96,7 @@ public class ChartSerialization implements Serializable {
     public static String toJSON(AbstractConfigurationObject object) {
         try {
             return jsonWriter.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             e.printStackTrace();
             throw new RuntimeException("Error while serializing "
                     + object.getClass().getSimpleName(), e);
