@@ -13,6 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.BaseJsonNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -32,6 +33,7 @@ import com.vaadin.flow.component.map.events.MapFeatureDropEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
 import com.vaadin.flow.component.map.serialization.MapSerializer;
 import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
@@ -45,12 +47,11 @@ import com.vaadin.flow.shared.Registration;
 public abstract class MapBase extends Component
         implements HasSize, HasStyle, HasThemeVariant<MapVariant> {
     private final Configuration configuration;
-    private final MapSerializer serializer;
+    private transient MapSerializer serializer;
 
     private StateTree.ExecutionRegistration pendingConfigurationSync;
 
     protected MapBase() {
-        this.serializer = new MapSerializer(this);
         this.configuration = new Configuration();
         this.configuration
                 .addPropertyChangeListener(this::configurationPropertyChange);
@@ -118,7 +119,16 @@ public abstract class MapBase extends Component
         Set<AbstractConfigurationObject> changedObjects = new LinkedHashSet<>();
         configuration.collectChanges(changedObjects::add);
 
-        BaseJsonNode jsonChanges = serializer.toJson(changedObjects);
+        // TODO: Once Flow has switched to Jackson 3, we can directly use
+        // JsonNode instead of serializing to string and parsing back
+        String jsonString = getSerializer().toJson(changedObjects).toString();
+        BaseJsonNode jsonChanges;
+        try {
+            jsonChanges = (BaseJsonNode) JacksonUtils.getMapper()
+                    .readTree(jsonString);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         this.getElement().executeJs("this.$connector.synchronize($0)",
                 jsonChanges);
@@ -152,6 +162,13 @@ public abstract class MapBase extends Component
                 event.getFeature().getGeometry().translate(deltaX, deltaY);
             }
         });
+    }
+
+    MapSerializer getSerializer() {
+        if (serializer == null) {
+            serializer = new MapSerializer(this);
+        }
+        return serializer;
     }
 
     /**
