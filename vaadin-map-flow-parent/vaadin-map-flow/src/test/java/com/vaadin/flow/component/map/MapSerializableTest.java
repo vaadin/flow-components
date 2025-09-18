@@ -10,6 +10,9 @@ package com.vaadin.flow.component.map;
 
 import java.util.stream.Stream;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.vaadin.flow.testutil.ClassesSerializableTest;
 
 public class MapSerializableTest extends ClassesSerializableTest {
@@ -19,6 +22,16 @@ public class MapSerializableTest extends ClassesSerializableTest {
                 "com\\.vaadin\\.flow\\.component\\.map\\.Assets",
                 "com\\.vaadin\\.flow\\.component\\.map\\.configuration\\.Coordinate\\$Converters",
                 "com\\.vaadin\\.flow\\.component\\.map\\.configuration\\.Constants",
-                "com\\.vaadin\\.flow\\.component\\.map\\.configuration\\..*\\$.*Options"));
+                "com\\.vaadin\\.flow\\.component\\.map\\.configuration\\..*\\$.*Options",
+                "com\\.vaadin\\.flow\\.component\\.map\\.serialization\\..*"));
+    }
+
+    @Test
+    public void transientMapSerializer_recreatedAfterSerialization()
+            throws Throwable {
+        Map map = new Map();
+        Map deserializedMap = serializeAndDeserialize(map);
+
+        Assert.assertNotNull(deserializedMap.getSerializer());
     }
 }
