@@ -19,7 +19,6 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -153,8 +152,7 @@ public class Avatar extends Component
     public void setI18n(AvatarI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
-        ObjectNode i18nObject = JacksonUtils.beanToJson(i18n);
-        getElement().setPropertyJson("i18n", i18nObject);
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
     }
 
     /**
