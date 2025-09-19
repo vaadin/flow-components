@@ -18,16 +18,19 @@ public class Constants {
     public static final String OL_LAYER_IMAGE = "ol/layer/Image";
     public static final String OL_LAYER_TILE = "ol/layer/Tile";
     public static final String OL_LAYER_VECTOR = "ol/layer/Vector";
+    public static final String OL_LAYER_CLUSTER = "ol/layer/Cluster";
     // Sources
     public static final String OL_SOURCE_XYZ = "ol/source/XYZ";
     public static final String OL_SOURCE_OSM = "ol/source/OSM";
     public static final String OL_SOURCE_VECTOR = "ol/source/Vector";
+    public static final String OL_SOURCE_CLUSTER = "ol/source/Cluster";
     public static final String OL_SOURCE_TILE_WMS = "ol/source/TileWMS";
     public static final String OL_SOURCE_IMAGE_WMS = "ol/source/ImageWMS";
     // Geometry
     public static final String OL_GEOMETRY_POINT = "ol/geom/Point";
     public static final String OL_GEOMETRY_POLYGON = "ol/geom/Polygon";
     // Style
+    public static final String OL_STYLE_CIRCLE = "ol/style/Circle";
     public static final String OL_STYLE_ICON = "ol/style/Icon";
     public static final String OL_STYLE_FILL = "ol/style/Fill";
     public static final String OL_STYLE_STROKE = "ol/style/Stroke";

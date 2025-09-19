@@ -28,7 +28,11 @@ import com.vaadin.flow.component.map.configuration.source.VectorSource;
 public class FeatureLayer extends VectorLayer {
 
     public FeatureLayer() {
-        this.setSource(new VectorSource());
+        setSource(this.createDefaultSource());
+    }
+
+    protected VectorSource createDefaultSource() {
+        return new VectorSource();
     }
 
     /**
