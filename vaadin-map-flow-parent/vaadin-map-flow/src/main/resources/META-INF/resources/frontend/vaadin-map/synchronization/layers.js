@@ -59,6 +59,50 @@ export function synchronizeVectorLayer(target, source, context) {
   return target;
 }
 
+export function synchronizeClusterLayer(target, source, context) {
+  if (!target) {
+    target = new VectorLayer(
+      createOptions({
+        ...source,
+        source: context.lookup.get(source.source),
+        style: undefined
+      })
+    );
+  }
+
+  synchronizeLayer(target, source);
+  target.setSource(context.lookup.get(source.source));
+
+  const style = context.lookup.get(source.style);
+
+  target.setStyle((feature) => {
+    const size = feature.get('features').length;
+
+    // When rendering a single feature, use the feature's style
+    if (size === 1) {
+      const originalFeature = feature.get('features')[0];
+      let originalStyle = originalFeature.getStyle();
+      if (typeof originalStyle === 'function') {
+        originalStyle = originalStyle(originalFeature);
+      }
+      if (originalStyle) {
+        return originalStyle;
+      }
+    }
+
+    // Multiple features indicate a cluster
+    const textStyle = style ? style.getText() : null;
+    if (textStyle) {
+      // Override the text to show the number of features in the cluster
+      textStyle.setText(size.toString());
+    }
+
+    return style;
+  });
+
+  return target;
+}
+
 export function synchronizeImageLayer(target, source, context) {
   if (!target) {
     target = new ImageLayer(
