@@ -82,7 +82,7 @@ public class RangeSeries extends DataSeries {
     /**
      * Sets the numeric data for this series.
      *
-     * @param values
+     * @param data
      *            low-high pairs, or x-low-high triplets
      */
     public void setRangeData(Number[]... data) {

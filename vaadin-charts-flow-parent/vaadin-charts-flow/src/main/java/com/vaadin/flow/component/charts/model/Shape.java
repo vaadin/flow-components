@@ -9,7 +9,7 @@
 package com.vaadin.flow.component.charts.model;
 
 /**
- * The name of a symbol to use for the border around the {@link Datalabels} or
+ * The name of a symbol to use for the border around the {@link DataLabels} or
  * {@link Tooltip}.
  */
 public enum Shape implements ChartEnum {
