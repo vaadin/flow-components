@@ -13,13 +13,17 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.vaadin.flow.component.map.Assets;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
 import com.vaadin.flow.component.map.configuration.feature.PointBasedFeature;
 import com.vaadin.flow.component.map.configuration.source.ClusterSource;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
+import com.vaadin.flow.component.map.configuration.style.Fill;
+import com.vaadin.flow.component.map.configuration.style.Icon;
 import com.vaadin.flow.component.map.configuration.style.Style;
+import com.vaadin.flow.component.map.configuration.style.TextStyle;
 
 /**
  * Layer for rendering clusters of features.
@@ -29,6 +33,10 @@ import com.vaadin.flow.component.map.configuration.style.Style;
  */
 public class ClusterLayer extends FeatureLayer {
     private Style style;
+
+    public ClusterLayer() {
+        setStyle(createDefaultStyle());
+    }
 
     @Override
     protected VectorSource createDefaultSource() {
@@ -100,7 +108,8 @@ public class ClusterLayer extends FeatureLayer {
     }
 
     /**
-     * Sets the style for individual clusters.
+     * Sets the style for individual clusters. By default, uses an image of a
+     * circle.
      *
      * @param style
      *            the new style, not null
@@ -110,5 +119,28 @@ public class ClusterLayer extends FeatureLayer {
         removeChild(this.style);
         this.style = style;
         addChild(style);
+    }
+
+    private static Style createDefaultStyle() {
+        Icon.Options iconOptions = new Icon.Options();
+        iconOptions.setImg(Assets.CLUSTER.getHandler());
+        iconOptions.setImgSize(new Icon.ImageSize(Assets.CLUSTER.getWidth(),
+                Assets.CLUSTER.getHeight()));
+        iconOptions.setScale(0.5f);
+        iconOptions.setAnchorOrigin(Icon.AnchorOrigin.TOP_LEFT);
+        iconOptions.setAnchor(new Icon.Anchor(0.5f, 0.5f));
+        Icon clusterIcon = new Icon(iconOptions);
+
+        TextStyle textStyle = new TextStyle();
+        textStyle.setFont("bold 12px sans-serif");
+        textStyle.setFill(new Fill("#fff"));
+        textStyle.setStroke(null);
+        textStyle.setOffset(0, 0);
+
+        Style style = new Style();
+        style.setImage(clusterIcon);
+        style.setTextStyle(textStyle);
+
+        return style;
     }
 }

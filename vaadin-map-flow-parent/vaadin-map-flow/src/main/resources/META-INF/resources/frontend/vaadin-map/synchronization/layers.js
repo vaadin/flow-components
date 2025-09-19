@@ -10,45 +10,7 @@
 import ImageLayer from 'ol/layer/Image';
 import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
-import Style from 'ol/style/Style';
-import Circle from 'ol/style/Circle';
-import Fill from 'ol/style/Fill';
-import Stroke from 'ol/style/Stroke';
-import Text from 'ol/style/Text';
 import { createOptions } from './util.js';
-
-const defaultClusterStyle = [
-  // Outline circle
-  new Style({
-    image: new Circle({
-      radius: 16,
-      stroke: new Stroke({
-        color: '#00000022',
-        width: 2
-      })
-    })
-  }),
-  // Cluster circle
-  new Style({
-    image: new Circle({
-      radius: 15,
-      stroke: new Stroke({
-        color: '#fff',
-        width: 2
-      }),
-      fill: new Fill({
-        color: '#1676f3'
-      })
-    }),
-    text: new Text({
-      text: '',
-      font: 'bold 12px sans-serif',
-      fill: new Fill({
-        color: '#fff'
-      })
-    })
-  })
-];
 
 function synchronizeLayer(target, source, _context) {
   if (!target) {
@@ -129,19 +91,13 @@ export function synchronizeClusterLayer(target, source, context) {
     }
 
     // Multiple features indicate a cluster
-    // Use custom cluster style if available
-    if (style) {
-      const textStyle = style.getText();
-      if (textStyle) {
-        textStyle.setText(size.toString());
-      }
-      return style;
+    const textStyle = style ? style.getText() : null;
+    if (textStyle) {
+      // Override the text to show the number of features in the cluster
+      textStyle.setText(size.toString());
     }
 
-    // Fallback to default style
-    defaultClusterStyle[1].getText().setText(size.toString());
-
-    return defaultClusterStyle;
+    return style;
   });
 
   return target;
