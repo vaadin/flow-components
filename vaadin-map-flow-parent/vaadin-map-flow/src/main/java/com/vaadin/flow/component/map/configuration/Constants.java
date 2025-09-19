@@ -30,7 +30,6 @@ public class Constants {
     public static final String OL_GEOMETRY_POINT = "ol/geom/Point";
     public static final String OL_GEOMETRY_POLYGON = "ol/geom/Polygon";
     // Style
-    public static final String OL_STYLE_CIRCLE = "ol/style/Circle";
     public static final String OL_STYLE_ICON = "ol/style/Icon";
     public static final String OL_STYLE_FILL = "ol/style/Fill";
     public static final String OL_STYLE_STROKE = "ol/style/Stroke";

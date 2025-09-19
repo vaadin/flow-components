@@ -28,14 +28,7 @@ import {
   synchronizeVectorSource,
   synchronizeXYZSource
 } from './sources.js';
-import {
-  synchronizeCircle,
-  synchronizeIcon,
-  synchronizeFill,
-  synchronizeStroke,
-  synchronizeStyle,
-  synchronizeText
-} from './styles.js';
+import { synchronizeIcon, synchronizeFill, synchronizeStroke, synchronizeStyle, synchronizeText } from './styles.js';
 import { convertToCoordinateArray, convertToGeoJSONCoordinateArray, synchronizeCollection } from './util.js';
 
 /**
@@ -149,7 +142,6 @@ const synchronizerLookup = {
   'ol/geom/Point': synchronizePoint,
   'ol/geom/Polygon': synchronizePolygon,
   // Styles
-  'ol/style/Circle': synchronizeCircle,
   'ol/style/Icon': synchronizeIcon,
   'ol/style/Fill': synchronizeFill,
   'ol/style/Stroke': synchronizeStroke,
