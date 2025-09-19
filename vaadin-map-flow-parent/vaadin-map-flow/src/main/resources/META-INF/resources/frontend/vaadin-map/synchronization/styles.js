@@ -7,7 +7,6 @@
  * See <https://vaadin.com/commercial-license-and-service-terms> for the full
  * license.
  */
-import Circle from 'ol/style/Circle';
 import Fill from 'ol/style/Fill';
 import Stroke from 'ol/style/Stroke';
 import Style from 'ol/style/Style';
@@ -68,27 +67,6 @@ export function synchronizeIcon(target, source, context) {
     );
   }
   synchronizeImageStyle(target, source, context);
-
-  context.connector.forceRender();
-
-  return target;
-}
-
-export function synchronizeCircle(target, source, context) {
-  if (!target) {
-    target = new Circle(
-      createOptions({
-        ...source,
-        radius: source.radius,
-        fill: undefined,
-        stroke: undefined
-      })
-    );
-  }
-  synchronizeImageStyle(target, source, context);
-  target.setRadius(source.radius);
-  target.setFill(source.fill ? context.lookup.get(source.fill) : undefined);
-  target.setStroke(source.stroke ? context.lookup.get(source.stroke) : undefined);
 
   context.connector.forceRender();
 
