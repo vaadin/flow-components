@@ -49,14 +49,14 @@ final class TextFieldValidationSupport implements Serializable {
     }
 
     /**
-     * @see TextField#setMinlength(double)
+     * @see TextField#setMinLength(int)
      */
     void setMinLength(Integer minLength) {
         this.minLength = minLength;
     }
 
     /**
-     * @see TextField#setMaxlength(double)
+     * @see TextField#setMaxLength(int)
      */
     void setMaxLength(Integer maxLength) {
         this.maxLength = maxLength;

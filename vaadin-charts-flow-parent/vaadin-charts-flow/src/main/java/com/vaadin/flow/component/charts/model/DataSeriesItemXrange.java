@@ -129,8 +129,8 @@ public class DataSeriesItemXrange extends DataSeriesItem {
     /**
      * Sets the X2 value of this data item. Defaults to null.
      *
-     * @param x
-     *            X-value of the item.
+     * @param x2
+     *            X2 value of the item.
      */
     public void setX2(Number x2) {
         this.x2 = x2;

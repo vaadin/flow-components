@@ -482,8 +482,6 @@ public class Button extends Component
      * {@code exclusion} array. This includes child components, text content as
      * well as child elements that have been added directly to this component
      * using the {@link Element} API.
-     *
-     * @see Button#removeAll()
      */
     private void removeAll(Element... exclusion) {
         Set<Element> toExclude = Stream.of(exclusion)
