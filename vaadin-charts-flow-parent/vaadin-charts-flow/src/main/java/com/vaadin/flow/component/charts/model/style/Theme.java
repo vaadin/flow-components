@@ -10,13 +10,14 @@ package com.vaadin.flow.component.charts.model.style;
 
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.Credits;
+import com.vaadin.flow.component.charts.themes.LumoLightTheme;
 
 /**
  * Theme class for Chart. This is empty theme, and only defines the structure of
  * Theme. Inherit own Theme class, or use Themes inherited from this class to
  * theme your Charts.
  *
- * @see VaadinTheme
+ * @see LumoLightTheme
  */
 public class Theme extends AbstractConfigurationObject {
     private Color[] colors;
