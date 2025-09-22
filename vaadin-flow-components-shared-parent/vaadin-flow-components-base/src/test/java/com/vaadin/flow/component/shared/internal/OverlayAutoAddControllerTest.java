@@ -22,6 +22,7 @@ import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
+import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.DomEvent;
@@ -244,7 +245,7 @@ public class OverlayAutoAddControllerTest {
         fakeClientResponse();
 
         Mockito.verify(ui, Mockito.times(1)).setChildComponentModal(component,
-                false);
+                ModalityMode.MODELESS);
     }
 
     @Test
@@ -255,7 +256,7 @@ public class OverlayAutoAddControllerTest {
         fakeClientResponse();
 
         Mockito.verify(ui, Mockito.times(1)).setChildComponentModal(component,
-                true);
+                ModalityMode.STRICT);
     }
 
     @Test
@@ -266,7 +267,7 @@ public class OverlayAutoAddControllerTest {
         fakeClientResponse();
 
         Mockito.verify(ui, Mockito.times(1)).setChildComponentModal(component,
-                false);
+                ModalityMode.MODELESS);
     }
 
     @Test

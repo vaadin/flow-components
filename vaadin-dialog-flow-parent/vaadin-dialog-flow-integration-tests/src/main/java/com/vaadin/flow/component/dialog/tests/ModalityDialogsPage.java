@@ -15,6 +15,7 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
+import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
@@ -33,21 +34,27 @@ public class ModalityDialogsPage extends Div {
     private Log log = new Log();
 
     public ModalityDialogsPage() {
-        Dialog modalDialog = createModalDialog();
+        Dialog strictModalDialog = createStrictModalDialog();
+
+        Dialog visualModalDialog = createVisualModalDialog();
 
         Dialog nonModalDialog = setupNonModalDialog();
 
-        NativeButton openModal = new NativeButton("Open modal dialog",
-                event -> modalDialog.open());
-        openModal.setId("open-modal-dialog");
+        NativeButton openModal = new NativeButton("Open STRICT modal dialog",
+                event -> strictModalDialog.open());
+        openModal.setId("open-strict-modal-dialog");
+
+        NativeButton openVisualModal = new NativeButton(
+                "Open VISUAL modal dialog", event -> visualModalDialog.open());
+        openVisualModal.setId("open-visual-modal-dialog");
 
         NativeButton addModal = new NativeButton("Add modal dialog to UI",
-                event -> add(modalDialog));
+                event -> add(strictModalDialog));
         addModal.setId("add-modal-dialog");
 
         NativeButton enableCloseOnOutsideClick = new NativeButton(
                 "Enable close on outside click",
-                event -> modalDialog.setCloseOnOutsideClick(true));
+                event -> strictModalDialog.setCloseOnOutsideClick(true));
         enableCloseOnOutsideClick.setId("enable-close-on-outside-click");
 
         NativeButton openNonModal = new NativeButton("Open non modal dialog",
@@ -58,12 +65,17 @@ public class ModalityDialogsPage extends Div {
                 event -> this.log.log("Clicked"));
         log.setId("log");
 
-        final NativeButton showModal = new NativeButton("Show Hidden Modal",
-                e -> modalDialog.setVisible(true));
-        showModal.setId("show");
+        final NativeButton showStrictModal = new NativeButton(
+                "Show Hidden Modal", e -> strictModalDialog.setVisible(true));
+        showStrictModal.setId("show-strict-modal");
 
-        add(openModal, addModal, enableCloseOnOutsideClick, showModal,
-                openNonModal, log, new Hr(), this.log);
+        final NativeButton showVisualModal = new NativeButton(
+                "Show Visual Modal", e -> visualModalDialog.setVisible(true));
+        showVisualModal.setId("show-visual-modal");
+
+        add(openModal, addModal, enableCloseOnOutsideClick, showStrictModal,
+                openVisualModal, showVisualModal, openNonModal, log, new Hr(),
+                this.log);
     }
 
     private Dialog setupNonModalDialog() {
@@ -73,8 +85,23 @@ public class ModalityDialogsPage extends Div {
         return nonModalDialog;
     }
 
-    private Dialog createModalDialog() {
+    private Dialog createVisualModalDialog() {
+        Dialog visualModalDialog = new Dialog();
+        visualModalDialog.setModalityMode(ModalityMode.VISUAL);
+        visualModalDialog.setCloseOnOutsideClick(false);
+        final NativeButton modalClose = new NativeButton("close",
+                e -> visualModalDialog.close());
+        modalClose.setId("close");
+        final NativeButton hide = new NativeButton("hide",
+                e -> visualModalDialog.setVisible(false));
+        hide.setId("hide");
+        visualModalDialog.add(modalClose, hide);
+        return visualModalDialog;
+    }
+
+    private Dialog createStrictModalDialog() {
         Dialog modalDialog = new Dialog();
+        modalDialog.setModalityMode(ModalityMode.STRICT);
         modalDialog.setCloseOnOutsideClick(false);
         final NativeButton modalClose = new NativeButton("close",
                 e -> modalDialog.close());
@@ -106,7 +133,7 @@ public class ModalityDialogsPage extends Div {
         Dialog nonModalDialog = new Dialog();
 
         nonModalDialog.setCloseOnOutsideClick(false);
-        nonModalDialog.setModal(false);
+        nonModalDialog.setModalityMode(ModalityMode.MODELESS);
 
         return nonModalDialog;
     }

@@ -32,6 +32,7 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -88,6 +89,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
     private String maxHeight;
     private DialogHeader dialogHeader;
     private DialogFooter dialogFooter;
+    private ModalityMode modalityMode = ModalityMode.VISUAL;
 
     /**
      * Creates an empty dialog.
@@ -125,7 +127,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
         setRole("dialog");
 
         // Initialize auto-add behavior
-        new OverlayAutoAddController<>(this, this::isModal);
+        new OverlayAutoAddController<>(this, this::isModal,
+                this::getModalityMode);
     }
 
     /**
@@ -602,7 +605,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * Sets whether component will open modal or modeless dialog.
      * <p>
      * Note: When dialog is set to be modeless, then it's up to you to provide
-     * means for it to be closed (eg. a button that calls
+     * means for it to be closed (e.g. a button that calls
      * {@link Dialog#close()}). The reason being that a modeless dialog allows
      * user to interact with the interface under it and won't be closed by
      * clicking outside or the ESC key.
@@ -610,16 +613,55 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * @param modal
      *            {@code false} to enable dialog to open as modeless modal,
      *            {@code true} otherwise.
+     * @deprecated use {@link #setModalityMode(ModalityMode)} instead
      */
+    @Deprecated
     public void setModal(boolean modal) {
-        getElement().setProperty("modeless", !modal);
-        getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
+        setModalityMode(modal ? ModalityMode.STRICT : ModalityMode.MODELESS);
+    }
+
+    /**
+     * Sets modality mode to make component open with modality curtain or
+     * without it in modeless mode. Following modes are available:
+     * <li>{@link ModalityMode#STRICT}
+     * <li>{@link ModalityMode#VISUAL}
+     * <li>{@link ModalityMode#MODELESS}
+     * <p>
+     * Note: When dialog is set to be {@link ModalityMode#MODELESS}, then it's
+     * up to you to provide means for it to be closed (e.g. a button that calls
+     * {@link Dialog#close()}). The reason being that a modeless dialog allows
+     * user to interact with the interface under it and won't be closed by
+     * clicking outside or the ESC key.
+     *
+     * @param mode
+     *            the modality mode, not null
+     */
+    public void setModalityMode(ModalityMode mode) {
+        this.modalityMode = Objects.requireNonNull(mode,
+                "ModalityMode must not be null");
+        getElement().setProperty("modeless", mode == ModalityMode.MODELESS);
+        getUI().ifPresent(ui -> ui.setChildComponentModal(this, mode));
+    }
+
+    /**
+     * Gets modality mode. Mode makes component open with modality curtain or
+     * without it in modeless mode. {@link ModalityMode#VISUAL} by default.
+     * Following modes are available:
+     * <li>{@link ModalityMode#STRICT}
+     * <li>{@link ModalityMode#VISUAL}
+     * <li>{@link ModalityMode#MODELESS}
+     *
+     * @return the modality mode, not null
+     */
+    public ModalityMode getModalityMode() {
+        return modalityMode;
     }
 
     /**
      * Gets whether component is set as modal or modeless dialog.
      *
      * @return {@code true} if modal dialog (default), {@code false} otherwise.
+     * @deprecated use {@link #getModalityMode()} instead
      */
     public boolean isModal() {
         return !getElement().getProperty("modeless", false);
@@ -885,8 +927,9 @@ public class Dialog extends Component implements HasComponents, HasSize,
     public void setVisible(boolean visible) {
         super.setVisible(visible);
 
-        getUI().ifPresent(
-                ui -> ui.setChildComponentModal(this, visible && isModal()));
+        getUI().ifPresent(ui -> ui.setChildComponentModal(this,
+                visible && isModal() ? getModalityMode()
+                        : ModalityMode.MODELESS));
     }
 
     /**
@@ -975,7 +1018,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     private void setModality(boolean modal) {
         if (isAttached()) {
-            getUI().ifPresent(ui -> ui.setChildComponentModal(this, modal));
+            getUI().ifPresent(ui -> ui.setChildComponentModal(this,
+                    modal ? getModalityMode() : ModalityMode.MODELESS));
         }
     }
 

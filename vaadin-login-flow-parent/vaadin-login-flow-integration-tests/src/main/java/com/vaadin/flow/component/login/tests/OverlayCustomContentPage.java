@@ -31,7 +31,6 @@ public class OverlayCustomContentPage extends Div {
 
         NativeButton open = new NativeButton("Open");
         open.setId("open-overlay-btn");
-        open.addClickListener(e -> login.setOpened(true));
 
         Span footerContent = new Span(FOOTER_CONTENT);
 
@@ -58,5 +57,11 @@ public class OverlayCustomContentPage extends Div {
                 .addClickListener(e -> login.getCustomFormArea().removeAll());
 
         add(open, addFooter, removeFooter, addCustomForm, removeCustomForm);
+
+        open.addClickListener(e -> {
+            login.setOpened(true);
+            login.getFooter().add(addFooter, removeFooter, addCustomForm,
+                    removeCustomForm);
+        });
     }
 }

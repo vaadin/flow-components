@@ -20,6 +20,7 @@ import java.util.Objects;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -63,7 +64,7 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     private void init() {
         // Initialize auto-add behavior
         OverlayAutoAddController<LoginOverlay> autoAddController = new OverlayAutoAddController<>(
-                this);
+                this, null, () -> ModalityMode.STRICT);
         // Skip auto-adding when navigating to a new view before opening.
         // Handles cases where LoginOverlay is used in a login view, in which
         // case it should not be auto-added if the view redirects to a different

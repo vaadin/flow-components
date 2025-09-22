@@ -18,6 +18,7 @@ package com.vaadin.flow.component.shared.internal;
 import java.io.Serializable;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ModalityMode;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.function.SerializableSupplier;
@@ -34,7 +35,7 @@ import com.vaadin.flow.shared.Registration;
 public class OverlayAutoAddController<C extends Component>
         implements Serializable {
     private final C component;
-    private final SerializableSupplier<Boolean> isModalSupplier;
+    private final SerializableSupplier<ModalityMode> modalityModeSupplier;
 
     private boolean skipOnNavigation;
     private boolean autoAdded;
@@ -46,8 +47,21 @@ public class OverlayAutoAddController<C extends Component>
 
     public OverlayAutoAddController(C component,
             SerializableSupplier<Boolean> isModalSupplier) {
+        this(component, isModalSupplier, null);
+    }
+
+    public OverlayAutoAddController(C component,
+            SerializableSupplier<Boolean> isModalSupplier,
+            SerializableSupplier<ModalityMode> modalityModeSupplier) {
         this.component = component;
-        this.isModalSupplier = isModalSupplier;
+        if (modalityModeSupplier != null) {
+            this.modalityModeSupplier = modalityModeSupplier;
+        } else if (isModalSupplier != null) {
+            this.modalityModeSupplier = () -> (isModalSupplier.get()) ? ModalityMode.STRICT
+                    : ModalityMode.MODELESS;
+        } else {
+            throw new IllegalArgumentException("Either isModalSupplier or modalityModeSupplier must be provided");
+        }
 
         // Automatically add the component to the UI when it is opened.
         component.getElement().addPropertyChangeListener("opened", event -> {
@@ -82,7 +96,7 @@ public class OverlayAutoAddController<C extends Component>
         if (!isAttached()) {
             UI ui = getUI();
             ui.addToModalComponent(component);
-            ui.setChildComponentModal(component, isModalSupplier.get());
+            ui.setChildComponentModal(component, modalityModeSupplier.get());
             autoAdded = true;
         }
     }
