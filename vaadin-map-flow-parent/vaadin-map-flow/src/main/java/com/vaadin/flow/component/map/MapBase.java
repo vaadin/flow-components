@@ -51,7 +51,7 @@ public abstract class MapBase extends Component
     private StateTree.ExecutionRegistration pendingConfigurationSync;
 
     protected MapBase() {
-        this.serializer = new MapSerializer();
+        this.serializer = new MapSerializer(this);
         this.configuration = new Configuration();
         this.configuration
                 .addPropertyChangeListener(this::configurationPropertyChange);
