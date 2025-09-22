@@ -655,7 +655,7 @@ public class GridElement extends TestBenchElement {
         if (tfoot == null) {
             return new ArrayList<>();
         }
-        
+
         List<WebElement> footerRows = tfoot.findElements(By.tagName("tr"));
         List<GridFooterRow> rows = new ArrayList<>();
         for (int i = 0; i < footerRows.size(); i++) {
@@ -667,16 +667,18 @@ public class GridElement extends TestBenchElement {
     /**
      * Gets a specific footer row by index.
      *
-     * @param rowIndex the index of the footer row (0-based)
+     * @param rowIndex
+     *            the index of the footer row (0-based)
      * @return the footer row at the given index
-     * @throws IndexOutOfBoundsException if the row index is out of bounds
+     * @throws IndexOutOfBoundsException
+     *             if the row index is out of bounds
      */
     public GridFooterRow getFooterRow(int rowIndex) {
         List<GridFooterRow> rows = getFooterRows();
         if (rowIndex < 0 || rowIndex >= rows.size()) {
-            throw new IndexOutOfBoundsException(
-                    "Footer row index " + rowIndex + " is out of bounds. Grid has " + 
-                    rows.size() + " footer rows.");
+            throw new IndexOutOfBoundsException("Footer row index " + rowIndex
+                    + " is out of bounds. Grid has " + rows.size()
+                    + " footer rows.");
         }
         return rows.get(rowIndex);
     }
@@ -700,8 +702,7 @@ public class GridElement extends TestBenchElement {
      * @return a list of visible footer rows
      */
     public List<GridFooterRow> getVisibleFooterRows() {
-        return getFooterRows().stream()
-                .filter(GridFooterRow::isVisible)
+        return getFooterRows().stream().filter(GridFooterRow::isVisible)
                 .collect(Collectors.toList());
     }
 

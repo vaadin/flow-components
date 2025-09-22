@@ -26,11 +26,11 @@ import org.openqa.selenium.WebElement;
  * Represents a footer row in a Grid component.
  */
 public class GridFooterRow {
-    
+
     private final GridElement grid;
     private final int rowIndex;
     private final WebElement rowElement;
-    
+
     /**
      * Creates a new GridFooterRow instance.
      *
@@ -41,12 +41,13 @@ public class GridFooterRow {
      * @param rowElement
      *            the WebElement representing this row
      */
-    public GridFooterRow(GridElement grid, int rowIndex, WebElement rowElement) {
+    public GridFooterRow(GridElement grid, int rowIndex,
+            WebElement rowElement) {
         this.grid = grid;
         this.rowIndex = rowIndex;
         this.rowElement = rowElement;
     }
-    
+
     /**
      * Gets the index of this footer row.
      *
@@ -55,21 +56,23 @@ public class GridFooterRow {
     public int getRowIndex() {
         return rowIndex;
     }
-    
+
     /**
      * Gets all footer cells in this row.
      *
      * @return list of footer cells
      */
     public List<GridFooterCell> getCells() {
-        List<WebElement> cellElements = rowElement.findElements(By.tagName("td"));
+        List<WebElement> cellElements = rowElement
+                .findElements(By.tagName("td"));
         List<GridFooterCell> cells = new ArrayList<>();
         for (int i = 0; i < cellElements.size(); i++) {
-            cells.add(new GridFooterCell(grid, rowIndex, i, cellElements.get(i)));
+            cells.add(
+                    new GridFooterCell(grid, rowIndex, i, cellElements.get(i)));
         }
         return cells;
     }
-    
+
     /**
      * Gets a specific footer cell by column index.
      *
@@ -78,15 +81,17 @@ public class GridFooterRow {
      * @return the footer cell at the given column index
      */
     public GridFooterCell getCell(int columnIndex) {
-        List<WebElement> cellElements = rowElement.findElements(By.tagName("td"));
+        List<WebElement> cellElements = rowElement
+                .findElements(By.tagName("td"));
         if (columnIndex >= cellElements.size()) {
-            throw new IndexOutOfBoundsException(
-                    "Column index " + columnIndex + " is out of bounds. Row has " + 
-                    cellElements.size() + " cells.");
+            throw new IndexOutOfBoundsException("Column index " + columnIndex
+                    + " is out of bounds. Row has " + cellElements.size()
+                    + " cells.");
         }
-        return new GridFooterCell(grid, rowIndex, columnIndex, cellElements.get(columnIndex));
+        return new GridFooterCell(grid, rowIndex, columnIndex,
+                cellElements.get(columnIndex));
     }
-    
+
     /**
      * Gets the number of cells in this footer row.
      *
@@ -95,7 +100,7 @@ public class GridFooterRow {
     public int getCellCount() {
         return rowElement.findElements(By.tagName("td")).size();
     }
-    
+
     /**
      * Checks if this footer row is visible.
      *
@@ -104,15 +109,14 @@ public class GridFooterRow {
     public boolean isVisible() {
         return rowElement.isDisplayed();
     }
-    
+
     /**
      * Gets all text content from cells in this row.
      *
      * @return list of text content from all cells
      */
     public List<String> getCellTexts() {
-        return getCells().stream()
-                .map(GridFooterCell::getText)
+        return getCells().stream().map(GridFooterCell::getText)
                 .collect(Collectors.toList());
     }
 }
