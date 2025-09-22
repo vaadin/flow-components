@@ -66,6 +66,61 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
+     * Scrolls horizontally to bring the specified column into view. This is
+     * useful when working with grids that have lazy column rendering.
+     *
+     * @param column
+     *            the column to scroll into view
+     */
+    public void scrollToColumn(GridColumnElement column) {
+        executeScript("const grid = arguments[0];"
+                + "const columnId = arguments[1];"
+                + "const col = grid._getColumns().find(c => c.__generatedTbId === columnId);"
+                + "if (col) {"
+                + "  const index = grid._getColumns().indexOf(col);"
+                + "  grid.$.table.scrollToColumn(index);" + "}", this,
+                column.get__generatedId());
+        // Wait a bit for the scrolling to complete
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            // Ignore
+        }
+    }
+
+    /**
+     * Scrolls horizontally to bring the column at the specified index into
+     * view. This is useful when working with grids that have lazy column
+     * rendering.
+     *
+     * @param columnIndex
+     *            the index of the column to scroll into view
+     */
+    public void scrollToColumn(int columnIndex) {
+        GridColumnElement column = getVisibleColumns().get(columnIndex);
+        scrollToColumn(column);
+    }
+
+    /**
+     * Checks if the specified column is currently in the visible viewport.
+     *
+     * @param column
+     *            the column to check
+     * @return {@code true} if the column is visible, {@code false} otherwise
+     */
+    public boolean isColumnInView(GridColumnElement column) {
+        return (Boolean) executeScript("const grid = arguments[0];"
+                + "const columnId = arguments[1];"
+                + "const col = grid._getColumns().find(c => c.__generatedTbId === columnId);"
+                + "if (!col || !col._cells || col._cells.length === 0) return false;"
+                + "const cell = col._cells[0];"
+                + "const cellRect = cell.getBoundingClientRect();"
+                + "const gridRect = grid.getBoundingClientRect();"
+                + "return cellRect.left >= gridRect.left && cellRect.right <= gridRect.right;",
+                this, column.get__generatedId());
+    }
+
+    /**
      * Gets the page size used when fetching data.
      *
      * @return the page size
@@ -120,7 +175,7 @@ public class GridElement extends TestBenchElement {
     /**
      * Gets the grid cell for the given row and column.
      * <p>
-     * Automatically scrolls the given row into view
+     * Automatically scrolls the given row and column into view
      *
      * @param rowIndex
      *            the row index
@@ -131,6 +186,11 @@ public class GridElement extends TestBenchElement {
     public GridTHTDElement getCell(int rowIndex, GridColumnElement column) {
         if (!isRowInView(rowIndex)) {
             scrollToFlatRow(rowIndex);
+        }
+
+        // Also scroll column into view if needed
+        if (!isColumnInView(column)) {
+            scrollToColumn(column);
         }
 
         GridTRElement row = getRow(rowIndex);
