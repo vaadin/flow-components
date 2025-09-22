@@ -380,15 +380,13 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
-     * Finds the cell element for the given row and column
-     * in header.
+     * Finds the cell element for the given row and column in header.
      *
      * @param rowIndex
      *            the index of the row in the header
      * @param columnIndex
      *            the index of the column in the header
-     * @return the GridTHTDElement for the given row and column
-     *         in header.
+     * @return the GridTHTDElement for the given row and column in header.
      */
     public GridTHTDElement getHeaderCell(int rowIndex, int columnIndex) {
         WebElement tfoot = $("*").id("header");
@@ -436,15 +434,13 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
-     * Finds the cell element for the given row and column
-     * in footer.
+     * Finds the cell element for the given row and column in footer.
      *
      * @param rowIndex
      *            the index of the row in the footer
      * @param columnIndex
      *            the index of the column in the footer
-     * @return the GridTHTDElement for the given row and column
-     *         in footer.
+     * @return the GridTHTDElement for the given row and column in footer.
      */
     public GridTHTDElement getFooterCell(int rowIndex, int columnIndex) {
         WebElement tfoot = $("*").id("footer");
