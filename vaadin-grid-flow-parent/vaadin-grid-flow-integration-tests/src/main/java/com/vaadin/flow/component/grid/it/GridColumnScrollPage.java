@@ -20,6 +20,7 @@ import java.util.List;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.grid.ColumnRendering;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.Route;
 
@@ -36,7 +37,7 @@ public class GridColumnScrollPage extends Div {
         grid.setWidth("800px");
 
         // Enable lazy column rendering
-        grid.setColumnRenderingMode(Grid.ColumnRenderingMode.LAZY);
+        grid.setColumnRendering(ColumnRendering.LAZY);
 
         // Add many columns to ensure horizontal scrolling is needed
         for (int i = 0; i < 20; i++) {
