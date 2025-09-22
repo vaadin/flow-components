@@ -620,4 +620,108 @@ public class GridElement extends TestBenchElement {
         List<GridHeaderRow> rows = getHeaderRows();
         return rows.isEmpty() ? null : rows.get(rows.size() - 1);
     }
+
+    /**
+     * Finds the vaadin-grid-cell-content element for the given row and column
+     * in footer.
+     *
+     * @param rowIndex
+     *            the index of the row in the footer
+     * @param columnIndex
+     *            the index of the column in the footer
+     * @return the vaadin-grid-cell-content element for the given row and column
+     *         in footer.
+     */
+    public TestBenchElement getFooterCellContent(int rowIndex,
+            int columnIndex) {
+        WebElement tfoot = $("*").id("footer");
+        List<WebElement> footerRows = tfoot.findElements(By.tagName("tr"));
+        List<WebElement> footerCells = footerRows.get(rowIndex)
+                .findElements(By.tagName("td"));
+        String slotName = footerCells.get(columnIndex)
+                .findElement(By.tagName("slot")).getDomAttribute("name");
+
+        return findElement(By.cssSelector(
+                "vaadin-grid-cell-content[slot='" + slotName + "']"));
+    }
+
+    /**
+     * Gets all footer rows in the grid.
+     *
+     * @return a list of all footer rows
+     */
+    public List<GridFooterRow> getFooterRows() {
+        WebElement tfoot = $("*").id("footer");
+        if (tfoot == null) {
+            return new ArrayList<>();
+        }
+        
+        List<WebElement> footerRows = tfoot.findElements(By.tagName("tr"));
+        List<GridFooterRow> rows = new ArrayList<>();
+        for (int i = 0; i < footerRows.size(); i++) {
+            rows.add(new GridFooterRow(this, i, footerRows.get(i)));
+        }
+        return rows;
+    }
+
+    /**
+     * Gets a specific footer row by index.
+     *
+     * @param rowIndex the index of the footer row (0-based)
+     * @return the footer row at the given index
+     * @throws IndexOutOfBoundsException if the row index is out of bounds
+     */
+    public GridFooterRow getFooterRow(int rowIndex) {
+        List<GridFooterRow> rows = getFooterRows();
+        if (rowIndex < 0 || rowIndex >= rows.size()) {
+            throw new IndexOutOfBoundsException(
+                    "Footer row index " + rowIndex + " is out of bounds. Grid has " + 
+                    rows.size() + " footer rows.");
+        }
+        return rows.get(rowIndex);
+    }
+
+    /**
+     * Gets the number of footer rows in the grid.
+     *
+     * @return the number of footer rows
+     */
+    public int getFooterRowCount() {
+        WebElement tfoot = $("*").id("footer");
+        if (tfoot == null) {
+            return 0;
+        }
+        return tfoot.findElements(By.tagName("tr")).size();
+    }
+
+    /**
+     * Gets only the visible footer rows in the grid.
+     *
+     * @return a list of visible footer rows
+     */
+    public List<GridFooterRow> getVisibleFooterRows() {
+        return getFooterRows().stream()
+                .filter(GridFooterRow::isVisible)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gets the first footer row in the grid.
+     *
+     * @return the first footer row, or null if no footer rows exist
+     */
+    public GridFooterRow getFirstFooterRow() {
+        List<GridFooterRow> rows = getFooterRows();
+        return rows.isEmpty() ? null : rows.get(0);
+    }
+
+    /**
+     * Gets the last footer row in the grid (the bottom-most footer row).
+     *
+     * @return the last footer row, or null if no footer rows exist
+     */
+    public GridFooterRow getLastFooterRow() {
+        List<GridFooterRow> rows = getFooterRows();
+        return rows.isEmpty() ? null : rows.get(rows.size() - 1);
+    }
 }
