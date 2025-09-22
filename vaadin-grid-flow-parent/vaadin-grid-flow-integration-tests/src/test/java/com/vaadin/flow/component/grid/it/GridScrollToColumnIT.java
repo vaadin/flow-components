@@ -47,65 +47,64 @@ public class GridScrollToColumnIT extends AbstractComponentIT {
     public void testScrollToColumn_bringsColumnIntoView() {
         // Assuming grid has many columns and some are out of view
         List<GridColumnElement> columns = grid.getAllColumns();
+        Assert.assertTrue("Grid should have more than 5 columns for this test",
+                columns.size() > 5);
 
-        if (columns.size() > 5) {
-            // Get a column that might be out of view
-            GridColumnElement lastColumn = columns.get(columns.size() - 1);
+        // Get a column that might be out of view
+        GridColumnElement lastColumn = columns.get(columns.size() - 1);
 
-            // Scroll to the last column
-            grid.scrollToColumn(lastColumn);
+        // Scroll to the last column
+        grid.scrollToColumn(lastColumn);
 
-            // Verify the column is now in view
-            Assert.assertTrue("Column should be in view after scrolling",
-                    grid.isColumnInView(lastColumn));
-        }
+        // Verify the column is now in view
+        Assert.assertTrue("Column should be in view after scrolling",
+                grid.isColumnInView(lastColumn));
     }
 
     @Test
     public void testScrollToColumnByIndex_bringsColumnIntoView() {
         List<GridColumnElement> columns = grid.getVisibleColumns();
+        Assert.assertTrue("Grid should have more than 5 columns for this test",
+                columns.size() > 5);
 
-        if (columns.size() > 5) {
-            int lastIndex = columns.size() - 1;
+        int lastIndex = columns.size() - 1;
 
-            // Scroll to the last column by index
-            grid.scrollToColumn(lastIndex);
+        // Scroll to the last column by index
+        grid.scrollToColumn(lastIndex);
 
-            // Verify we can get the cell without it being null
-            GridTHTDElement cell = grid.getCell(0, lastIndex);
-            Assert.assertNotNull(
-                    "Cell should not be null after scrolling to column", cell);
-        }
+        // Verify we can get the cell without it being null
+        GridTHTDElement cell = grid.getCell(0, lastIndex);
+        Assert.assertNotNull(
+                "Cell should not be null after scrolling to column", cell);
     }
 
     @Test
     public void testIsColumnInView_detectsVisibleColumns() {
         List<GridColumnElement> columns = grid.getVisibleColumns();
+        Assert.assertFalse("Grid should have columns", columns.isEmpty());
 
-        if (!columns.isEmpty()) {
-            // First column should typically be in view
-            GridColumnElement firstColumn = columns.get(0);
-            Assert.assertTrue("First column should be in view",
-                    grid.isColumnInView(firstColumn));
-        }
+        // First column should typically be in view
+        GridColumnElement firstColumn = columns.get(0);
+        Assert.assertTrue("First column should be in view",
+                grid.isColumnInView(firstColumn));
     }
 
     @Test
     public void testGetCell_automaticallyScrollsColumnIntoView() {
         List<GridColumnElement> columns = grid.getAllColumns();
+        Assert.assertTrue("Grid should have more than 10 columns for this test",
+                columns.size() > 10);
 
-        if (columns.size() > 10) {
-            // Try to get a cell from a column that's likely out of view
-            GridColumnElement farColumn = columns.get(columns.size() - 1);
+        // Try to get a cell from a column that's likely out of view
+        GridColumnElement farColumn = columns.get(columns.size() - 1);
 
-            // This should automatically scroll the column into view
-            GridTHTDElement cell = grid.getCell(0, farColumn);
+        // This should automatically scroll the column into view
+        GridTHTDElement cell = grid.getCell(0, farColumn);
 
-            Assert.assertNotNull(
-                    "Cell should not be null after automatic scrolling", cell);
-            Assert.assertTrue("Column should be in view after getCell",
-                    grid.isColumnInView(farColumn));
-        }
+        Assert.assertNotNull(
+                "Cell should not be null after automatic scrolling", cell);
+        Assert.assertTrue("Column should be in view after getCell",
+                grid.isColumnInView(farColumn));
     }
 
     @Test
@@ -114,46 +113,47 @@ public class GridScrollToColumnIT extends AbstractComponentIT {
         // When columnRendering is lazy, cells out of view return null
 
         List<GridColumnElement> columns = grid.getAllColumns();
-        if (columns.size() > 5) {
-            // First, try to get cells from the first row
-            for (int i = 0; i < columns.size(); i++) {
-                GridColumnElement column = columns.get(i);
+        Assert.assertTrue("Grid should have more than 5 columns for this test",
+                columns.size() > 5);
 
-                // Ensure column is scrolled into view
-                if (!grid.isColumnInView(column)) {
-                    grid.scrollToColumn(column);
-                }
+        // First, try to get cells from the first row
+        for (int i = 0; i < columns.size(); i++) {
+            GridColumnElement column = columns.get(i);
 
-                // Now the cell should be accessible
-                GridTHTDElement cell = grid.getRow(0).getCell(column);
-                Assert.assertNotNull("Cell at column " + i
-                        + " should not be null after scrolling", cell);
+            // Ensure column is scrolled into view
+            if (!grid.isColumnInView(column)) {
+                grid.scrollToColumn(column);
             }
+
+            // Now the cell should be accessible
+            GridTHTDElement cell = grid.getRow(0).getCell(column);
+            Assert.assertNotNull("Cell at column " + i
+                    + " should not be null after scrolling", cell);
         }
     }
 
     @Test
     public void testScrollToColumn_multipleScrolls() {
         List<GridColumnElement> columns = grid.getVisibleColumns();
+        Assert.assertTrue("Grid should have more than 10 columns for this test",
+                columns.size() > 10);
 
-        if (columns.size() > 10) {
-            // Scroll to last column
-            GridColumnElement lastColumn = columns.get(columns.size() - 1);
-            grid.scrollToColumn(lastColumn);
-            Assert.assertTrue("Last column should be in view",
-                    grid.isColumnInView(lastColumn));
+        // Scroll to last column
+        GridColumnElement lastColumn = columns.get(columns.size() - 1);
+        grid.scrollToColumn(lastColumn);
+        Assert.assertTrue("Last column should be in view",
+                grid.isColumnInView(lastColumn));
 
-            // Scroll back to first column
-            GridColumnElement firstColumn = columns.get(0);
-            grid.scrollToColumn(firstColumn);
-            Assert.assertTrue("First column should be in view",
-                    grid.isColumnInView(firstColumn));
+        // Scroll back to first column
+        GridColumnElement firstColumn = columns.get(0);
+        grid.scrollToColumn(firstColumn);
+        Assert.assertTrue("First column should be in view",
+                grid.isColumnInView(firstColumn));
 
-            // Scroll to middle column
-            GridColumnElement middleColumn = columns.get(columns.size() / 2);
-            grid.scrollToColumn(middleColumn);
-            Assert.assertTrue("Middle column should be in view",
-                    grid.isColumnInView(middleColumn));
-        }
+        // Scroll to middle column
+        GridColumnElement middleColumn = columns.get(columns.size() / 2);
+        grid.scrollToColumn(middleColumn);
+        Assert.assertTrue("Middle column should be in view",
+                grid.isColumnInView(middleColumn));
     }
 }
