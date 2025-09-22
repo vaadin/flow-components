@@ -12,7 +12,7 @@
     <description>Vaadin Charts</description>
     <properties>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
-        <jackson.version>3.0.0-rc9</jackson.version>
+        <jackson.version>3.0.0-rc10</jackson.version>
     </properties>
     <dependencies>
         <dependency>

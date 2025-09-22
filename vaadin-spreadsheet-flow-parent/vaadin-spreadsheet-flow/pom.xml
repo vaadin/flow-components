@@ -13,7 +13,7 @@
     <properties>
         <osgi.bundle.license>https://vaadin.com/commercial-license-and-service-terms</osgi.bundle.license>
         <cvdlName>vaadin-spreadsheet-flow</cvdlName>
-        <jackson.version>3.0.0-rc9</jackson.version>
+        <jackson.version>3.0.0-rc10</jackson.version>
     </properties>
     <dependencies>
         <dependency>
