@@ -51,7 +51,7 @@ public class Inactive extends AbstractConfigurationObject {
 
     /**
      * Enable separate styles for the hovered series to visualize that the user
-     * hovers either the series itself or the legend. .
+     * hovers either the series itself or the legend.
      * <p>
      * Defaults to: true
      */
@@ -64,6 +64,15 @@ public class Inactive extends AbstractConfigurationObject {
      */
     public Number getLineWidth() {
         return lineWidth;
+    }
+
+    /**
+     * Pixel width of the graph line.
+     * <p>
+     * Defaults to: 2
+     */
+    public void setLineWidth(Number lineWidth) {
+        this.lineWidth = lineWidth;
     }
 
     /**
