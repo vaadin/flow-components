@@ -30,7 +30,7 @@ public class States extends AbstractConfigurationObject {
     /**
      * The appearance of the other marker or data point when hover.
      *
-     * @see #setInactive(Hover)
+     * @see #setInactive(Inactive)
      */
     public void setHover(Hover hover) {
         this.hover = hover;
@@ -56,7 +56,7 @@ public class States extends AbstractConfigurationObject {
     }
 
     /**
-     * @see #setInactive(Hover)
+     * @see #setInactive(Inactive)
      */
     public Inactive getInactive() {
         if (inactive == null) {

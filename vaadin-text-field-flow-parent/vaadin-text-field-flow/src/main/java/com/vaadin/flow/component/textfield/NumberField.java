@@ -217,7 +217,7 @@ public class NumberField extends AbstractNumberField<NumberField, Double>
 
     /**
      * Gets the minimum value for this field. The constraint activates only if
-     * the value was explicitly set with {@link #setMin(int)}.
+     * the value was explicitly set with {@link #setMin(double)}.
      *
      * @return the minimum double value
      * @see #setMin(double)
