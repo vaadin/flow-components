@@ -539,4 +539,85 @@ public class GridElement extends TestBenchElement {
                     "No empty state content was found");
         }
     }
+
+    /**
+     * Gets all header rows in the grid.
+     *
+     * @return a list of all header rows
+     */
+    public List<GridHeaderRow> getHeaderRows() {
+        WebElement thead = $("*").id("header");
+        if (thead == null) {
+            return new ArrayList<>();
+        }
+
+        List<WebElement> headerRows = thead.findElements(By.tagName("tr"));
+        List<GridHeaderRow> rows = new ArrayList<>();
+        for (int i = 0; i < headerRows.size(); i++) {
+            rows.add(new GridHeaderRow(this, i, headerRows.get(i)));
+        }
+        return rows;
+    }
+
+    /**
+     * Gets a specific header row by index.
+     *
+     * @param rowIndex
+     *            the index of the header row (0-based)
+     * @return the header row at the given index
+     * @throws IndexOutOfBoundsException
+     *             if the row index is out of bounds
+     */
+    public GridHeaderRow getHeaderRow(int rowIndex) {
+        List<GridHeaderRow> rows = getHeaderRows();
+        if (rowIndex < 0 || rowIndex >= rows.size()) {
+            throw new IndexOutOfBoundsException("Header row index " + rowIndex
+                    + " is out of bounds. Grid has " + rows.size()
+                    + " header rows.");
+        }
+        return rows.get(rowIndex);
+    }
+
+    /**
+     * Gets the number of header rows in the grid.
+     *
+     * @return the number of header rows
+     */
+    public int getHeaderRowCount() {
+        WebElement thead = $("*").id("header");
+        if (thead == null) {
+            return 0;
+        }
+        return thead.findElements(By.tagName("tr")).size();
+    }
+
+    /**
+     * Gets only the visible header rows in the grid.
+     *
+     * @return a list of visible header rows
+     */
+    public List<GridHeaderRow> getVisibleHeaderRows() {
+        return getHeaderRows().stream().filter(GridHeaderRow::isVisible)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gets the first header row in the grid.
+     *
+     * @return the first header row, or null if no header rows exist
+     */
+    public GridHeaderRow getFirstHeaderRow() {
+        List<GridHeaderRow> rows = getHeaderRows();
+        return rows.isEmpty() ? null : rows.get(0);
+    }
+
+    /**
+     * Gets the last header row in the grid (the bottom-most header row).
+     *
+     * @return the last header row, or null if no header rows exist
+     */
+    public GridHeaderRow getLastHeaderRow() {
+        List<GridHeaderRow> rows = getHeaderRows();
+        return rows.isEmpty() ? null : rows.get(rows.size() - 1);
+    }
 }
