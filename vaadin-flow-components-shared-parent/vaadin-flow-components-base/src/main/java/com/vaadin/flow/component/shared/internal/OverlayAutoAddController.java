@@ -19,6 +19,7 @@ import java.io.Serializable;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.function.SerializableSupplier;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
@@ -35,8 +36,9 @@ public class OverlayAutoAddController<C extends Component>
     private final C component;
     private final SerializableSupplier<Boolean> isModalSupplier;
 
+    private boolean skipOnNavigation;
     private boolean autoAdded;
-    private Registration beforeEnterListenerRegistration;
+    private Registration beforeLeaveRegistration;
 
     public OverlayAutoAddController(C component) {
         this(component, () -> false);
@@ -47,50 +49,85 @@ public class OverlayAutoAddController<C extends Component>
         this.component = component;
         this.isModalSupplier = isModalSupplier;
 
+        // Automatically add the component to the UI when it is opened.
         component.getElement().addPropertyChangeListener("opened", event -> {
             if (isOpened()) {
                 handleOpen();
-            } else {
-                handleClose();
             }
         });
+
+        // Automatically remove the component from the UI after the overlay's
+        // closing animation has finished. This way auto-removal works by first
+        // setting `opened` on the client-side to `false` and then waiting for
+        // the `closed` event from the client-side.
+        // The event needs to be allowed for inert components so that closing
+        // from the server still works. This requires double-checking that the
+        // component is actually in a closed state on the server.
+        // Also allow the event on disabled components, as LoginOverlay for
+        // example disables itself on the login event.
+        component.getElement().addEventListener("closed", event -> {
+            if (!isOpened()) {
+                handleClose();
+            }
+        }).allowInert().setDisabledUpdateMode(DisabledUpdateMode.ALWAYS);
+    }
+
+    /**
+     * Adds the component to the UI if it is not already attached, regardless of
+     * the current opened state of the component. Allows components with custom
+     * opening logic, such as ContextMenu, to add themselves to the UI and reuse
+     * the automatic removal logic when the component is closed.
+     */
+    public void add() {
+        if (!isAttached()) {
+            UI ui = getUI();
+            ui.addToModalComponent(component);
+            ui.setChildComponentModal(component, isModalSupplier.get());
+            autoAdded = true;
+        }
+    }
+
+    /**
+     * Force remove the component from the UI in case it was auto-added. Can be
+     * used by components with custom closing logic. For example, Notification
+     * removes itself from the UI whenever it is detached.
+     */
+    public void remove() {
+        handleClose();
+    }
+
+    /**
+     * Sets whether to skip auto-adding when the UI navigates to a new view
+     * before the component is opened.
+     *
+     * @param skipOnNavigation
+     *            whether to skip auto-adding on navigation
+     */
+    public void setSkipOnNavigation(boolean skipOnNavigation) {
+        this.skipOnNavigation = skipOnNavigation;
     }
 
     private void handleOpen() {
         UI ui = getUI();
         StateTree.ExecutionRegistration addToUiRegistration = ui
                 .beforeClientResponse(ui, context -> {
-                    if (isOpened() && !isAttached()) {
-                        ui.addToModalComponent(component);
-                        ui.setChildComponentModal(component,
-                                isModalSupplier.get());
-                        autoAdded = true;
+                    if (isOpened()) {
+                        add();
                     }
-                    if (beforeEnterListenerRegistration != null) {
-                        beforeEnterListenerRegistration.remove();
-                        beforeEnterListenerRegistration = null;
+                    if (beforeLeaveRegistration != null) {
+                        beforeLeaveRegistration.remove();
+                        beforeLeaveRegistration = null;
                     }
                 });
-        if (ui.getSession() != null) {
+
+        if (skipOnNavigation && ui.getSession() != null) {
             // Cancel auto-adding if the current view is navigated away from
-            // before the dialog is added to the UI. This can happen if an
-            // overlay component is opened in a view constructor, and the
-            // view implements a BeforeEnterObserver that forwards to a
-            // different view. However, auto-adding should not be canceled if
-            // the view that was navigated to opens the overlay component.
-            // beforeEnterListener seems to work for this:
-            // - The listener is registered when an overlay opens during view
-            // construction. At that point the before enter event for entering
-            // that view has already been fired on the UI, so it does not
-            // cancel auto-adding.
-            // - If another before enter event is fired, that means that the
-            // view that opened the overlay has forwarded to another view.
-            beforeEnterListenerRegistration = ui
-                    .addBeforeEnterListener(event -> {
-                        addToUiRegistration.remove();
-                        beforeEnterListenerRegistration.remove();
-                        beforeEnterListenerRegistration = null;
-                    });
+            // before the component is added to the UI.
+            beforeLeaveRegistration = ui.addBeforeLeaveListener(event -> {
+                addToUiRegistration.remove();
+                beforeLeaveRegistration.remove();
+                beforeLeaveRegistration = null;
+            });
         }
     }
 

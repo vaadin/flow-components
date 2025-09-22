@@ -24,6 +24,8 @@ import org.mockito.Mockito;
 
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
@@ -344,20 +346,51 @@ public class MasterDetailLayoutTest {
     }
 
     @Test
-    public void setStackThreshold_getStackThreshold() {
-        String threshold = "600px";
-        layout.setStackThreshold(threshold);
-        Assert.assertEquals(threshold, layout.getStackThreshold());
-        Assert.assertEquals(threshold,
-                layout.getElement().getProperty("stackThreshold"));
+    public void setOverlayMode_getOverlayMode() {
+        Assert.assertEquals(MasterDetailLayout.OverlayMode.DRAWER,
+                layout.getOverlayMode());
+
+        layout.setOverlayMode(MasterDetailLayout.OverlayMode.STACK);
+        Assert.assertEquals(MasterDetailLayout.OverlayMode.STACK,
+                layout.getOverlayMode());
+        Assert.assertTrue(
+                layout.getElement().getProperty("stackOverlay", false));
+
+        layout.setOverlayMode(MasterDetailLayout.OverlayMode.DRAWER);
+        Assert.assertEquals(MasterDetailLayout.OverlayMode.DRAWER,
+                layout.getOverlayMode());
+        Assert.assertFalse(
+                layout.getElement().getProperty("stackOverlay", false));
     }
 
     @Test
-    public void setStackThresholdWithUnit_getStackThreshold() {
-        layout.setStackThreshold(30, Unit.EM);
-        Assert.assertEquals("30.0em", layout.getStackThreshold());
-        Assert.assertEquals("30.0em",
-                layout.getElement().getProperty("stackThreshold"));
+    public void addBackdropClickListener_verifyListenerTriggered() {
+        @SuppressWarnings("unchecked")
+        ComponentEventListener<MasterDetailLayout.BackdropClickEvent> listener = Mockito
+                .mock(ComponentEventListener.class);
+
+        layout.addBackdropClickListener(listener);
+
+        MasterDetailLayout.BackdropClickEvent backdropClickEvent = new MasterDetailLayout.BackdropClickEvent(
+                layout, true);
+        ComponentUtil.fireEvent(layout, backdropClickEvent);
+
+        Mockito.verify(listener).onComponentEvent(backdropClickEvent);
+    }
+
+    @Test
+    public void addDetailEscapePressListener_verifyListenerTriggered() {
+        @SuppressWarnings("unchecked")
+        ComponentEventListener<MasterDetailLayout.DetailEscapePressEvent> listener = Mockito
+                .mock(ComponentEventListener.class);
+
+        layout.addDetailEscapePressListener(listener);
+
+        MasterDetailLayout.DetailEscapePressEvent detailEscapePressEvent = new MasterDetailLayout.DetailEscapePressEvent(
+                layout, true);
+        ComponentUtil.fireEvent(layout, detailEscapePressEvent);
+
+        Mockito.verify(listener).onComponentEvent(detailEscapePressEvent);
     }
 
     private void assertMasterContent(Component component) {

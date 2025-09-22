@@ -22,7 +22,11 @@ import java.util.Optional;
 import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
@@ -35,6 +39,7 @@ import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.RouterLayout;
+import com.vaadin.flow.shared.Registration;
 
 /**
  * MasterDetailLayout is a component for building UIs with a master (or primary)
@@ -44,9 +49,7 @@ import com.vaadin.flow.router.RouterLayout;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-master-detail-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha13")
-@NpmPackage(value = "@vaadin/master-detail-layout", version = "24.8.0-alpha13")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
+@NpmPackage(value = "@vaadin/master-detail-layout", version = "25.0.0-alpha19")
 @JsModule("@vaadin/master-detail-layout/src/vaadin-master-detail-layout.js")
 public class MasterDetailLayout extends Component
         implements HasSize, RouterLayout {
@@ -56,6 +59,7 @@ public class MasterDetailLayout extends Component
     private HasElement detail;
     private PendingJavaScriptResult pendingDetailsUpdate;
     private boolean hasInitialized = false;
+    private OverlayMode overlayMode;
 
     /**
      * Supported orientation values for {@link MasterDetailLayout}.
@@ -69,6 +73,20 @@ public class MasterDetailLayout extends Component
      */
     public enum Containment {
         LAYOUT, VIEWPORT
+    }
+
+    /**
+     * Supported overlay mode values for {@link MasterDetailLayout}.
+     */
+    public enum OverlayMode {
+        DRAWER, STACK
+    }
+
+    /**
+     * Creates an empty Master Detail Layout.
+     */
+    public MasterDetailLayout() {
+        setOverlayMode(OverlayMode.DRAWER);
     }
 
     /**
@@ -107,7 +125,9 @@ public class MasterDetailLayout extends Component
     }
 
     /**
-     * Sets the component to be displayed in the detail area.
+     * Sets the component to be displayed in the detail area. The details area
+     * is automatically shown when the detail component is set, and hidden when
+     * the detail component is removed by setting it to {@code null}.
      *
      * @param component
      *            the component to display in the detail area, or {@code null}
@@ -173,7 +193,8 @@ public class MasterDetailLayout extends Component
      * Sets the size of the master area in CSS length units. When specified, it
      * prevents the master area from growing or shrinking. If there is not
      * enough space to show master and detail areas next to each other, the
-     * layout switches to the overlay mode.
+     * details are shown in an overlay, using the mode defined by
+     * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param size
      *            the size of the master area in CSS length units
@@ -186,7 +207,8 @@ public class MasterDetailLayout extends Component
      * Sets the size of the master area in CSS length units. When specified, it
      * prevents the master area from growing or shrinking. If there is not
      * enough space to show master and detail areas next to each other, the
-     * layout switches to the overlay mode.
+     * details are shown in an overlay, using the mode defined by
+     * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param size
      *            the size of the master area
@@ -212,7 +234,8 @@ public class MasterDetailLayout extends Component
      * Sets the minimum size of the master area in CSS length units. When
      * specified, it prevents the master area from shrinking below this size. If
      * there is not enough space to show master and detail areas next to each
-     * other, the layout switches to the overlay mode.
+     * other, the details are shown in an overlay, using the mode defined by
+     * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param minSize
      *            the minimum size of the master area in CSS length units
@@ -225,7 +248,8 @@ public class MasterDetailLayout extends Component
      * Sets the minimum size of the master area in CSS length units. When
      * specified, it prevents the master area from shrinking below this size. If
      * there is not enough space to show master and detail areas next to each
-     * other, the layout switches to the overlay mode.
+     * other, the details are shown in an overlay, using the mode defined by
+     * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param minSize
      *            the minimum size of the master area
@@ -252,7 +276,8 @@ public class MasterDetailLayout extends Component
      * Sets the size of the detail area in CSS length units. When specified, it
      * prevents the detail area from growing or shrinking. If there is not
      * enough space to show master and detail areas next to each other, the
-     * layout switches to the overlay mode.
+     * details are shown in an overlay, using the mode defined by
+     * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param size
      *            the size of the detail area in CSS length units
@@ -265,7 +290,8 @@ public class MasterDetailLayout extends Component
      * Sets the size of the detail area in CSS length units. When specified, it
      * prevents the detail area from growing or shrinking. If there is not
      * enough space to show master and detail areas next to each other, the
-     * layout switches to the overlay mode.
+     * details are shown in an overlay, using the mode defined by
+     * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param size
      *            the size of the detail area
@@ -291,7 +317,8 @@ public class MasterDetailLayout extends Component
      * Sets the minimum size of the detail area in CSS length units. When
      * specified, it prevents the detail area from shrinking below this size. If
      * there is not enough space to show master and detail areas next to each
-     * other, the layout switches to the overlay mode.
+     * other, the details are shown in an overlay, using the mode defined by
+     * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param minSize
      *            the minimum size of the detail area in CSS length units
@@ -304,7 +331,8 @@ public class MasterDetailLayout extends Component
      * Sets the minimum size of the detail area in CSS length units. When
      * specified, it prevents the detail area from shrinking below this size. If
      * there is not enough space to show master and detail areas next to each
-     * other, the layout switches to the overlay mode.
+     * other, the details are shown in an overlay, using the mode defined by
+     * {@link #setOverlayMode(OverlayMode)}.
      *
      * @param minSize
      *            the minimum size of the detail area
@@ -375,7 +403,34 @@ public class MasterDetailLayout extends Component
     }
 
     /**
-     * Gets whether the layout overlay mode is enforced.
+     * Gets the overlay mode of the layout. Defaults to
+     * {@link OverlayMode#DRAWER}.
+     *
+     * @return the overlay mode
+     */
+    public OverlayMode getOverlayMode() {
+        return overlayMode;
+    }
+
+    /**
+     * Sets the overlay mode of the layout. When set to
+     * {@link OverlayMode#DRAWER}, the detail area is positioned on top of
+     * master area and there is a backdrop that covers the remaining part of the
+     * master area. When set to {@link OverlayMode#STACK}, the detail area fully
+     * covers the master area.
+     *
+     * @param mode
+     *            the overlay mode
+     */
+    public void setOverlayMode(OverlayMode mode) {
+        Objects.requireNonNull(mode, "OverlayMode cannot be null");
+        overlayMode = mode;
+        getElement().setProperty("stackOverlay", mode == OverlayMode.STACK);
+    }
+
+    /**
+     * Gets whether the layout overlay mode is enforced. The way how the overlay
+     * is rendered is defined by {@link #setOverlayMode(OverlayMode)}.
      *
      * @return {@code true} if the overlay mode is enforced, {@code false}
      *         otherwise
@@ -385,7 +440,8 @@ public class MasterDetailLayout extends Component
     }
 
     /**
-     * Sets whether the layout overlay mode is enforced.
+     * Sets whether the layout overlay mode is enforced. The way how the overlay
+     * is rendered is defined by {@link #setOverlayMode(OverlayMode)}.
      *
      * @param forceOverlay
      *            {@code true} if the overlay mode is enforced, {@code false}
@@ -416,40 +472,35 @@ public class MasterDetailLayout extends Component
     }
 
     /**
-     * Gets the threshold (in CSS length units) at which the layout switches to
-     * the "stack" mode, making detail area fully cover the master area.
+     * Adds a listener for when the backdrop of the details overlay is clicked.
+     * The backdrop is the area outside the detail area when it is shown in
+     * drawer mode. Can be used to hide the details when the backdrop is
+     * clicked.
      *
-     * @return the stack threshold in CSS length units, or {@code null} if the
-     *         threshold is not set
+     * @param listener
+     *            the listener to add, not {@code null}
+     * @return a registration for removing the listener
      */
-    public String getStackThreshold() {
-        return getElement().getProperty("stackThreshold");
+    public Registration addBackdropClickListener(
+            ComponentEventListener<BackdropClickEvent> listener) {
+        Objects.requireNonNull(listener, "Listener cannot be null");
+        return ComponentUtil.addListener(this, BackdropClickEvent.class,
+                listener);
     }
 
     /**
-     * Sets the threshold (in CSS length units) at which the layout switches to
-     * the "stack" mode, making detail area fully cover the master area.
+     * Adds a listener for when the Escape key is pressed within the details
+     * area. Can be used to hide the details when the Escape key is pressed.
      *
-     * @param threshold
-     *            the stack threshold in CSS length units
+     * @param listener
+     *            the listener to add, not {@code null}
+     * @return a registration for removing the listener
      */
-    public void setStackThreshold(String threshold) {
-        getElement().setProperty("stackThreshold", threshold);
-    }
-
-    /**
-     * Sets the threshold (in CSS length units) at which the layout switches to
-     * the "stack" mode, making detail area fully cover the master area.
-     *
-     * @param threshold
-     *            the stack threshold
-     * @param unit
-     *            the unit
-     */
-    public void setStackThreshold(float threshold, Unit unit) {
-        Objects.requireNonNull(unit, "Unit cannot be null");
-        getElement().setProperty("stackThreshold",
-                HasSize.getCssSize(threshold, unit));
+    public Registration addDetailEscapePressListener(
+            ComponentEventListener<DetailEscapePressEvent> listener) {
+        Objects.requireNonNull(listener, "Listener cannot be null");
+        return ComponentUtil.addListener(this, DetailEscapePressEvent.class,
+                listener);
     }
 
     @Override
@@ -478,6 +529,34 @@ public class MasterDetailLayout extends Component
 
         if (!enabled) {
             throw new ExperimentalFeatureException();
+        }
+    }
+
+    /**
+     * Event that is fired when the backdrop of the details overlay is clicked.
+     * The backdrop is the area outside the detail area when it is shown in
+     * drawer mode. Can be used to hide the details when the backdrop is
+     * clicked.
+     */
+    @DomEvent("backdrop-click")
+    public static class BackdropClickEvent
+            extends ComponentEvent<MasterDetailLayout> {
+        public BackdropClickEvent(MasterDetailLayout source,
+                boolean fromClient) {
+            super(source, fromClient);
+        }
+    }
+
+    /**
+     * Event that is fired when the Escape key is pressed within the details
+     * area. Can be used to hide the details when the Escape key is pressed.
+     */
+    @DomEvent("detail-escape-press")
+    public static class DetailEscapePressEvent
+            extends ComponentEvent<MasterDetailLayout> {
+        public DetailEscapePressEvent(MasterDetailLayout source,
+                boolean fromClient) {
+            super(source, fromClient);
         }
     }
 }

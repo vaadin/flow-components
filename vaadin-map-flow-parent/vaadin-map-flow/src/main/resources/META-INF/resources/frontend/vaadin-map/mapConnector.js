@@ -11,7 +11,7 @@ import Translate from 'ol/interaction/Translate';
 import { setUserProjection as openLayersSetUserProjection } from 'ol/proj';
 import { register as openLayersRegisterProjections } from 'ol/proj/proj4';
 import proj4 from 'proj4';
-import { synchronize } from './synchronization';
+import { synchronize } from './synchronization/index.js';
 import { createLookup, getLayerForFeature } from './util';
 
 // By default, use EPSG:4326 projection for all coordinates passed to, and return from the public API.

@@ -15,13 +15,11 @@
  */
 package com.vaadin.flow.component.contextmenu.it;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.Route;
-
-import elemental.json.JsonObject;
 
 /**
  * @author Vaadin Ltd
@@ -36,12 +34,12 @@ public class OverrideOnBeforeOpenContextMenuPage extends Div {
     }
 
     private void addContextMenuThatDoesNotOpen() {
-        Label target = new Label("Context menu that should not open");
+        Div target = new Div("Context menu that should not open");
         target.setId("no-open-menu-target");
 
         ContextMenu contextMenu = new ContextMenu(target) {
             @Override
-            protected boolean onBeforeOpenMenu(JsonObject eventDetail) {
+            protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {
                 // ensure context menu will not open
                 return false;
             }
@@ -53,12 +51,12 @@ public class OverrideOnBeforeOpenContextMenuPage extends Div {
     }
 
     private void addContextMenuThatDynamicallyChangesItems() {
-        Label target = new Label("Context menu that changes items dynamically");
+        Div target = new Div("Context menu that changes items dynamically");
         target.setId("dynamic-context-menu-target");
 
         ContextMenu contextMenu = new ContextMenu(target) {
             @Override
-            protected boolean onBeforeOpenMenu(JsonObject eventDetail) {
+            protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {
                 removeAll();
 
                 addItem("Dynamic Item");

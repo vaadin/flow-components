@@ -24,7 +24,6 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.GridSortOrderBuilder;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.bean.HierarchicalTestBean;
@@ -156,23 +155,6 @@ public class TreeGridPreloadPage extends VerticalLayout
                 requestCountField, fetchCountField, requestCountResetButton);
         requestCountLayout.setAlignItems(Alignment.END);
 
-        TextArea receivedParentsField = new TextArea(
-                "Parents with received children");
-        receivedParentsField.setReadOnly(true);
-        receivedParentsField.setId("received-parents");
-        receivedParentsField.setHeight("200px");
-        receivedParentsField.setWidth("300px");
-
-        grid.getElement().executeJs(
-                "const confirmParent = this.$connector.confirmParent;"
-                        + "this.$connector.confirmParent = function(id, parentKey, levelSize) {"
-                        + "  confirmParent.call(this.$connector, id, parentKey, levelSize);"
-                        + "  window.receivedParents = window.receivedParents || new Set();"
-                        + "  window.receivedParents.add(parentKey);"
-                        + "  document.getElementById('received-parents').value = [...window.receivedParents].join('\\n');"
-                        + "  document.getElementById('received-parents').helperText = 'Items: (' + window.receivedParents.size + ')';"
-                        + "}");
-
         grid.addHierarchyColumn(HierarchicalTestBean::getId).setHeader("Id");
         grid.addColumn(HierarchicalTestBean::getDepth).setHeader("Depth");
         grid.addColumn(HierarchicalTestBean::getIndex)
@@ -183,6 +165,5 @@ public class TreeGridPreloadPage extends VerticalLayout
 
         add(grid);
         add(requestCountLayout);
-        add(receivedParentsField);
     }
 }

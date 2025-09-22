@@ -52,9 +52,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-details")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha13")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/details", version = "24.8.0-alpha13")
+@NpmPackage(value = "@vaadin/details", version = "25.0.0-alpha19")
 @JsModule("@vaadin/details/src/vaadin-details.js")
 public class Details extends Component implements HasComponents, HasSize,
         HasThemeVariant<DetailsVariant>, HasTooltip {
@@ -236,35 +234,6 @@ public class Details extends Component implements HasComponents, HasSize,
      */
     public String getSummaryText() {
         return summary == null ? "" : summary.getElement().getText();
-    }
-
-    /**
-     * Sets the component content
-     *
-     * @see #getContent()
-     * @param content
-     *            the content of the component to set, or <code>null</code> to
-     *            remove any previously set content
-     * @deprecated since v24.2, use {@link #removeAll()} and
-     *             {@link #add(Component...)} instead.
-     */
-    @Deprecated
-    public void setContent(Component content) {
-        removeAll();
-        add(content);
-    }
-
-    /**
-     * Adds components to the content section
-     *
-     * @see #getContent()
-     * @param components
-     *            the components to add
-     * @deprecated since v24.2, use {@link #add(Component...)} instead.
-     */
-    @Deprecated
-    public void addContent(Component... components) {
-        add(components);
     }
 
     /**

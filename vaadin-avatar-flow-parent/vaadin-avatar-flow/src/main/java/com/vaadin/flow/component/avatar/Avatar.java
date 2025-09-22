@@ -18,6 +18,8 @@ package com.vaadin.flow.component.avatar;
 import java.io.Serializable;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -25,10 +27,11 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.AbstractStreamResource;
-
-import elemental.json.JsonObject;
+import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.streams.AbstractDownloadHandler;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 /**
  * Avatar is a graphical representation of an object or entity, for example a
@@ -53,16 +56,15 @@ import elemental.json.JsonObject;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha13")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar/src/vaadin-avatar.js")
-@NpmPackage(value = "@vaadin/avatar", version = "24.8.0-alpha13")
+@NpmPackage(value = "@vaadin/avatar", version = "25.0.0-alpha19")
 public class Avatar extends Component
         implements HasStyle, HasSize, HasThemeVariant<AvatarVariant> {
 
     /**
      * The internationalization properties for {@link AvatarGroup}.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class AvatarI18n implements Serializable {
         private String anonymous;
 
@@ -151,7 +153,7 @@ public class Avatar extends Component
     public void setI18n(AvatarI18n i18n) {
         this.i18n = Objects.requireNonNull(i18n,
                 "The i18n properties object should not be null");
-        JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
+        ObjectNode i18nObject = JacksonUtils.beanToJson(i18n);
         getElement().setPropertyJson("i18n", i18nObject);
     }
 
@@ -227,9 +229,9 @@ public class Avatar extends Component
      * set.
      * <p>
      * Setting the image with this method resets the image resource provided
-     * with {@link Avatar#setImageResource(AbstractStreamResource)}
+     * with {@link Avatar#setImageHandler(DownloadHandler)}
      *
-     * @see Avatar#setImageResource(AbstractStreamResource)
+     * @see Avatar#setImageHandler(DownloadHandler)
      * @param url
      *            the image url
      */
@@ -252,7 +254,9 @@ public class Avatar extends Component
      * @see Avatar#setImage(String)
      * @param resource
      *            the resource value or {@code null} to remove the resource
+     * @deprecated Use {@link #setImageHandler(DownloadHandler)} instead
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public void setImageResource(AbstractStreamResource resource) {
         imageResource = resource;
         if (resource == null) {
@@ -261,6 +265,38 @@ public class Avatar extends Component
         }
 
         getElement().setAttribute("img", resource);
+    }
+
+    /**
+     * Sets the image for the avatar.
+     * <p>
+     * Setting the image as a resource with this method resets the image URL
+     * that was set with {@link Avatar#setImage(String)}.
+     * <p>
+     * Sets the <code>Content-Disposition</code> header to <code>inline</code>
+     * for pre-defined download handlers, created by factory methods in
+     * {@link DownloadHandler}, as well as for other
+     * {@link AbstractDownloadHandler} implementations.
+     *
+     * @see Avatar#setImage(String)
+     * @param downloadHandler
+     *            the download resource or {@code null} to remove the resource
+     */
+    public void setImageHandler(DownloadHandler downloadHandler) {
+        if (downloadHandler == null) {
+            imageResource = null;
+            getElement().removeAttribute("img");
+            return;
+        }
+        if (downloadHandler instanceof AbstractDownloadHandler<?> handler) {
+            // change disposition to inline in pre-defined handlers,
+            // where it is 'attachment' by default
+            handler.inline();
+        }
+        imageResource = new StreamResourceRegistry.ElementStreamResource(
+                downloadHandler, getElement());
+
+        getElement().setAttribute("img", imageResource);
     }
 
     /**

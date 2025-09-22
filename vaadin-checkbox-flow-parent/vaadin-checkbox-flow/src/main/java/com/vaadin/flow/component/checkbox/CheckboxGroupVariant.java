@@ -21,14 +21,7 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-checkbox-group} component.
  */
 public enum CheckboxGroupVariant implements ThemeVariant {
-    LUMO_VERTICAL("vertical"),
-    LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
-    /**
-     * @deprecated Since 24.7, the Material theme is deprecated and will be
-     *             removed in Vaadin 25.
-     */
-    @Deprecated
-    MATERIAL_VERTICAL("vertical");
+    LUMO_VERTICAL("vertical"), LUMO_HELPER_ABOVE_FIELD("helper-above-field");
 
     private final String variant;
 

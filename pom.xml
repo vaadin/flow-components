@@ -4,17 +4,17 @@
     <parent>
         <groupId>com.vaadin</groupId>
         <artifactId>vaadin-parent</artifactId>
-        <version>2.2.1</version>
+        <version>3.0.0</version>
     </parent>
     <artifactId>vaadin-flow-components</artifactId>
-    <version>24.8-SNAPSHOT</version>
+    <version>25.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Vaadin Flow Components Root Project</name>
     <url>https://vaadin.com/components</url>
     <modules>
+        <module>flow-components-bom</module>
         <module>vaadin-renderer-flow-parent</module>
         <module>vaadin-lumo-theme-flow-parent</module>
-        <module>vaadin-material-theme-flow-parent</module>
         <module>vaadin-flow-components-shared-parent</module>
         <module>vaadin-accordion-flow-parent</module>
         <module>vaadin-avatar-flow-parent</module>
@@ -36,6 +36,7 @@
         <module>vaadin-virtual-list-flow-parent</module>
         <module>vaadin-list-box-flow-parent</module>
         <module>vaadin-login-flow-parent</module>
+        <module>vaadin-markdown-flow-parent</module>
         <module>vaadin-menu-bar-flow-parent</module>
         <module>vaadin-messages-flow-parent</module>
         <module>vaadin-notification-flow-parent</module>
@@ -52,7 +53,6 @@
         <module>vaadin-board-flow-parent</module>
         <module>vaadin-charts-flow-parent</module>
         <module>vaadin-confirm-dialog-flow-parent</module>
-        <module>vaadin-cookie-consent-flow-parent</module>
         <module>vaadin-crud-flow-parent</module>
         <module>vaadin-grid-pro-flow-parent</module>
         <module>vaadin-map-flow-parent</module>
@@ -62,21 +62,26 @@
         <module>vaadin-side-nav-flow-parent</module>
         <module>vaadin-master-detail-layout-flow-parent</module>
     </modules>
+    <scm>
+        <connection>scm:https:https://github.com/vaadin/flow-components.git</connection>
+        <developerConnection>scm:git:git@github.com:vaadin/flow-components.git</developerConnection>
+        <url>https://github.com/vaadin/flow-components</url>
+    </scm>
     <properties>
-        <flow.version>24.8-SNAPSHOT</flow.version>
-        <testbench.version>9.4.0.alpha1</testbench.version>
+        <flow.version>25.0-SNAPSHOT</flow.version>
+        <testbench.version>10.0.0-alpha4</testbench.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <jetty.version>12.0.19</jetty.version>
+        <jetty.version>12.0.23</jetty.version>
         <jetty.http.port>8080</jetty.http.port>
         <jetty.stop.port>9999</jetty.stop.port>
-        <karaf-maven-plugin.version>4.4.7</karaf-maven-plugin.version>
-        <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
-        <maven.failsafe.plugin.version>3.5.3</maven.failsafe.plugin.version>
+        <karaf-maven-plugin.version>4.4.8</karaf-maven-plugin.version>
+        <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
+        <maven.failsafe.plugin.version>3.5.4</maven.failsafe.plugin.version>
         <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
-        <spotless.plugin.version>2.44.3</spotless.plugin.version>
+        <spotless.plugin.version>2.46.1</spotless.plugin.version>
         <spotless.licence-header>${maven.multiModuleProjectDirectory}/scripts/templates/apache2-license-header.txt</spotless.licence-header>
         <spotless.npmExecutable/>
         <spotless.nodeExecutable/>
@@ -88,13 +93,13 @@
         <osgi.bundle.license>http://www.apache.org/licenses/LICENSE-2.0</osgi.bundle.license>
         <osgi.export.package>default</osgi.export.package>
         <cvdlName/>
-        <jakarta.servlet.api.version>5.0.0</jakarta.servlet.api.version>
-        <jakarta.web.api.version>10.0.0</jakarta.web.api.version>
-        <spring-data-commons.version>3.4.5</spring-data-commons.version>
+        <jakarta.servlet.api.version>6.1.0</jakarta.servlet.api.version>
+        <jakarta.web.api.version>11.0.0</jakarta.web.api.version>
+        <spring-data-commons.version>4.0.0-M6</spring-data-commons.version>
 
         <!-- spreadsheet -->
         <poi.version>5.4.1</poi.version>
-        <javaparser.version>3.26.3</javaparser.version>
+        <javaparser.version>3.27.0</javaparser.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -199,7 +204,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.17.0</version>
+                <version>3.18.0</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.poi</groupId>
@@ -220,11 +225,6 @@
                 <groupId>org.apache.poi</groupId>
                 <artifactId>poi-scratchpad</artifactId>
                 <version>${poi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest-all</artifactId>
-                <version>1.3</version>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
@@ -307,7 +307,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.11.2</version>
+                    <version>3.11.3</version>
                     <configuration>
                         <quiet>true</quiet>
                         <doclint>none</doclint>
@@ -478,6 +478,7 @@
                     <version>${flow.version}</version>
                     <configuration>
                         <pnpmEnable>${vaadin.pnpm.enable}</pnpmEnable>
+                        <frontendDirectory>./frontend</frontendDirectory>
                     </configuration>
                     <executions>
                         <execution>
@@ -513,7 +514,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.4.1</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-war-plugin</artifactId>
@@ -524,7 +525,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-gpg-plugin</artifactId>
-                    <version>3.2.7</version>
+                    <version>3.2.8</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
@@ -533,7 +534,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.5.0</version>
+                    <version>3.6.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -573,6 +574,7 @@
                         </excludes>
                         <prettier>
                             <npmExecutable>${spotless.npmExecutable}</npmExecutable>
+                            <npmInstallCache>${maven.multiModuleProjectDirectory}/target/.spotless-npm-install-cache</npmInstallCache>
                             <nodeExecutable>${spotless.nodeExecutable}</nodeExecutable>
                             <configFile>${maven.multiModuleProjectDirectory}/.prettierrc</configFile>
                         </prettier>
@@ -616,6 +618,9 @@
                         <plugin>
                             <groupId>com.vaadin</groupId>
                             <artifactId>flow-maven-plugin</artifactId>
+                            <configuration>
+                                <frontendDirectory>./frontend</frontendDirectory>
+                            </configuration>
                             <executions>
                                 <execution>
                                     <goals>

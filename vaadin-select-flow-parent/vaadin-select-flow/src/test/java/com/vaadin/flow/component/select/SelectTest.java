@@ -42,7 +42,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.data.SelectListDataView;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -268,13 +267,13 @@ public class SelectTest {
         select.setTextRenderer(bean -> "!" + bean.getProperty());
 
         Assert.assertEquals(
-                "<vaadin-select-item value=\"1\">\n <span>!foo</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"1\"><span>!foo</span></vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
         Assert.assertEquals(
-                "<vaadin-select-item value=\"2\">\n <span>!bar</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"2\"><span>!bar</span></vaadin-select-item>",
                 getListBoxChild(1).getOuterHTML());
         Assert.assertEquals(
-                "<vaadin-select-item value=\"3\">\n <span>!baz</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"3\"><span>!baz</span></vaadin-select-item>",
                 getListBoxChild(2).getOuterHTML());
     }
 
@@ -285,21 +284,21 @@ public class SelectTest {
                 (SerializableFunction<String, Span>) Span::new));
 
         Assert.assertEquals(
-                "<vaadin-select-item value=\"1\">\n <span>foo</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"1\"><span>foo</span></vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
         Assert.assertEquals(
-                "<vaadin-select-item value=\"2\">\n <span>bar</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"2\"><span>bar</span></vaadin-select-item>",
                 getListBoxChild(1).getOuterHTML());
         Assert.assertEquals(
-                "<vaadin-select-item value=\"3\">\n <span>baz</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"3\"><span>baz</span></vaadin-select-item>",
                 getListBoxChild(2).getOuterHTML());
 
         select.setItems("1", "2");
         Assert.assertEquals(
-                "<vaadin-select-item value=\"4\">\n <span>1</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"4\"><span>1</span></vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
         Assert.assertEquals(
-                "<vaadin-select-item value=\"5\">\n <span>2</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"5\"><span>2</span></vaadin-select-item>",
                 getListBoxChild(1).getOuterHTML());
     }
 
@@ -310,7 +309,7 @@ public class SelectTest {
                 (SerializableFunction<String, Span>) Span::new));
         select.setItemLabelGenerator(item -> "bar");
         Assert.assertEquals(
-                "<vaadin-select-item value=\"1\" label=\"bar\">\n <span>foo</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"1\" label=\"bar\"><span>foo</span></vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
     }
 
@@ -340,7 +339,7 @@ public class SelectTest {
         select.setEmptySelectionCaption("EMPTY");
 
         Assert.assertEquals(
-                "<vaadin-select-item value>\n EMPTY\n</vaadin-select-item>",
+                "<vaadin-select-item value>EMPTY</vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
 
         validateItem(0, "EMPTY", null, true);
@@ -829,13 +828,6 @@ public class SelectTest {
 
         Assert.assertEquals("Invalid label for select ", "label",
                 select.getElement().getProperty("label"));
-    }
-
-    @Test
-    public void implementsHasOverlayClassName() {
-        Assert.assertTrue("Select should support overlay class name",
-                HasOverlayClassName.class
-                        .isAssignableFrom(new Select().getClass()));
     }
 
     @Test

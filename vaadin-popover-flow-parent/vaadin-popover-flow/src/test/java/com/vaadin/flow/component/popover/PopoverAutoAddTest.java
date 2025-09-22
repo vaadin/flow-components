@@ -39,6 +39,10 @@ public class PopoverAutoAddTest {
         session = Mockito.mock(VaadinSession.class);
         Mockito.when(session.hasLock()).thenReturn(true);
         ui.getInternals().setSession(session);
+        VaadinSession.setCurrent(session);
+        Mockito.when(session.getErrorHandler()).thenReturn(event -> {
+            throw new RuntimeException(event.getThrowable());
+        });
     }
 
     @After
@@ -83,6 +87,19 @@ public class PopoverAutoAddTest {
 
         fakeClientResponse();
         Assert.assertNull(popover.getElement().getParent());
+    }
+
+    @Test
+    public void setTarget_removeAll_noException() {
+        Div target = new Div();
+        Popover popover = new Popover();
+        popover.setTarget(target);
+        ui.add(target);
+
+        ui.removeAll();
+
+        Assert.assertNull(popover.getElement().getParent());
+        Assert.assertEquals(0, ui.getChildren().count());
     }
 
     @Test
@@ -151,6 +168,20 @@ public class PopoverAutoAddTest {
 
         fakeClientResponse();
         Assert.assertEquals(ui.getElement(), popover.getElement().getParent());
+    }
+
+    @Test
+    public void setTarget_openModal_popoverIsAttachedToUi() {
+        Div target = new Div();
+        Popover popover = new Popover();
+        popover.setTarget(target);
+        ui.add(target);
+
+        Div modalElement = new Div();
+        ui.setChildComponentModal(modalElement, true);
+        fakeClientResponse();
+
+        Assert.assertEquals(ui, popover.getParent().orElseThrow());
     }
 
     private void fakeClientResponse() {

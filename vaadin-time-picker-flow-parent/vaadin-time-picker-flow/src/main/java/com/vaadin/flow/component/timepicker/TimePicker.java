@@ -43,8 +43,6 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
 import com.vaadin.flow.component.shared.HasAutoOpen;
 import com.vaadin.flow.component.shared.HasClearButton;
-import com.vaadin.flow.component.shared.HasClientValidation;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
@@ -111,18 +109,16 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-time-picker")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha13")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/time-picker", version = "24.8.0-alpha13")
+@NpmPackage(value = "@vaadin/time-picker", version = "25.0.0-alpha19")
 @JsModule("@vaadin/time-picker/src/vaadin-time-picker.js")
 @JsModule("./vaadin-time-picker/timepickerConnector.js")
 public class TimePicker
         extends AbstractSinglePropertyField<TimePicker, LocalTime>
         implements Focusable<TimePicker>, HasAllowedCharPattern, HasAriaLabel,
-        HasAutoOpen, HasClearButton, HasClientValidation,
+        HasAutoOpen, HasClearButton,
         InputField<AbstractField.ComponentValueChangeEvent<TimePicker, LocalTime>, LocalTime>,
-        HasPrefix, HasOverlayClassName, HasThemeVariant<TimePickerVariant>,
-        HasValidationProperties, HasValidator<LocalTime>, HasPlaceholder {
+        HasPrefix, HasThemeVariant<TimePickerVariant>, HasValidationProperties,
+        HasValidator<LocalTime>, HasPlaceholder {
 
     private static final SerializableFunction<String, LocalTime> PARSER = valueFromClient -> {
         return valueFromClient == null || valueFromClient.isEmpty() ? null
@@ -148,7 +144,7 @@ public class TimePicker
     private Validator<LocalTime> defaultValidator = (value, context) -> {
         boolean fromComponent = context == null;
 
-        if (unparsableValue != null) {
+        if (isInputUnparsable()) {
             return ValidationResult.error(getI18nErrorMessage(
                     TimePickerI18n::getBadInputErrorMessage));
         }
@@ -364,7 +360,7 @@ public class TimePicker
     @Override
     public void setValue(LocalTime value) {
         LocalTime oldValue = getValue();
-        if (oldValue == null && value == null && unparsableValue != null) {
+        if (oldValue == null && value == null && isInputUnparsable()) {
             // When the value is programmatically cleared while the field
             // contains an unparsable input, ValueChangeEvent isn't fired,
             // so we need to call setModelValue manually to clear the bad
@@ -475,13 +471,29 @@ public class TimePicker
     }
 
     /**
+     * For internal use only.
+     * <p>
      * Returns whether the input element has a value or not.
      *
      * @return <code>true</code> if the input element's value is populated,
      *         <code>false</code> otherwise
+     * @deprecated Since v24.8
      */
+    @Deprecated(since = "24.8")
     protected boolean isInputValuePresent() {
         return !getInputElementValue().isEmpty();
+    }
+
+    /**
+     * For internal use only.
+     * <p>
+     * Returns whether the input value is unparsable.
+     *
+     * @return <code>true</code> if the input element's value is populated and
+     *         unparsable, <code>false</code> otherwise
+     */
+    protected final boolean isInputUnparsable() {
+        return unparsableValue != null;
     }
 
     /**

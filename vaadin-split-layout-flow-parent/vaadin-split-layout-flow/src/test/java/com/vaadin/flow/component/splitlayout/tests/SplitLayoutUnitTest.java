@@ -24,7 +24,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.splitlayout.SplitLayout.SplitterDragendEvent;
 
@@ -41,9 +41,8 @@ public class SplitLayoutUnitTest {
     @Test
     public void testAddingSeveralComponents_slotspresent_wrapsInDiv() {
         SplitLayout splitLayout = new SplitLayout();
-        splitLayout.addToPrimary(new Label("1"), new Label("2"),
-                new Label("3"));
-        splitLayout.addToSecondary(new Label("4"), new Label("5"));
+        splitLayout.addToPrimary(new Span("1"), new Span("2"), new Span("3"));
+        splitLayout.addToSecondary(new Span("4"), new Span("5"));
 
         Component primaryComponent = splitLayout.getPrimaryComponent();
 

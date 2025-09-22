@@ -14,11 +14,9 @@ import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
 
-import com.vaadin.flow.internal.JsonSerializer;
-
-import elemental.json.JsonFactory;
-import elemental.json.JsonValue;
-import elemental.json.impl.JreJsonFactory;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.vaadin.flow.internal.JacksonUtils;
 
 /**
  * Internationalization object for customizing the component UI texts. An
@@ -27,9 +25,10 @@ import elemental.json.impl.JreJsonFactory;
  *
  * @see Crud#setI18n(CrudI18n)
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CrudI18n implements Serializable {
 
-    private static final JsonValue DEFAULT_I18N;
+    private static final JsonNode DEFAULT_I18N;
 
     private String newItem;
     private String editItem;
@@ -41,10 +40,10 @@ public class CrudI18n implements Serializable {
 
     static {
         try {
-            final JsonFactory JSON_FACTORY = new JreJsonFactory();
-            DEFAULT_I18N = JSON_FACTORY.parse(
-                    IOUtils.toString(CrudI18n.class.getResource("i18n.json"),
-                            StandardCharsets.UTF_8));
+            String jsonString = IOUtils.toString(
+                    CrudI18n.class.getResource("i18n.json"),
+                    StandardCharsets.UTF_8);
+            DEFAULT_I18N = JacksonUtils.readTree(jsonString);
         } catch (IOException e) {
             throw new IllegalStateException(
                     "Cannot find the default i18n configuration");
@@ -57,7 +56,7 @@ public class CrudI18n implements Serializable {
      * @return a new instance with the default messages
      */
     public static CrudI18n createDefault() {
-        return JsonSerializer.toObject(CrudI18n.class, DEFAULT_I18N);
+        return JacksonUtils.readToObject(DEFAULT_I18N, CrudI18n.class);
     }
 
     /**
@@ -205,6 +204,7 @@ public class CrudI18n implements Serializable {
     /**
      * The confirmation dialogs used in the component
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Confirmations implements Serializable {
 
         private Confirmation delete;
@@ -257,6 +257,7 @@ public class CrudI18n implements Serializable {
         /**
          * Represents texts in the confirmation dialogs
          */
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         public static class Confirmation implements Serializable {
 
             private String content;
@@ -330,6 +331,7 @@ public class CrudI18n implements Serializable {
             /**
              * The confirmation options on a dialog
              */
+            @JsonInclude(JsonInclude.Include.NON_NULL)
             public static class Button implements Serializable {
 
                 private String confirm;

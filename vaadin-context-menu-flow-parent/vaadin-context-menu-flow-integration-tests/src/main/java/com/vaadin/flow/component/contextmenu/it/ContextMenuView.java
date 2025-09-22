@@ -24,8 +24,8 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H5;
 import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
@@ -51,7 +51,7 @@ public class ContextMenuView extends Div {
         Component target = createTargetComponent();
         contextMenu.setTarget(target);
 
-        Label message = new Label("-");
+        Span message = new Span("-");
 
         contextMenu.addItem("First menu item",
                 e -> message.setText("Clicked on the first item"));
@@ -75,7 +75,7 @@ public class ContextMenuView extends Div {
         Component target = createTargetComponent();
         contextMenu.setTarget(target);
 
-        Label message = new Label("-");
+        Span message = new Span("-");
 
         contextMenu.addItem("First menu item",
                 event -> message.setText("Clicked on the first item"));
@@ -101,7 +101,7 @@ public class ContextMenuView extends Div {
         Component target = createTargetComponent();
         contextMenu.setTarget(target);
 
-        Label message = new Label("-");
+        Span message = new Span("-");
 
         MenuItem item1 = contextMenu.addItem("Option 1", event -> {
             if (event.getSource().isChecked()) {
@@ -142,7 +142,7 @@ public class ContextMenuView extends Div {
         Component target = createTargetComponent();
         ContextMenu contextMenu = new ContextMenu(target);
 
-        Label message = new Label("-");
+        Span message = new Span("-");
 
         // Components can be used also inside menu items
         contextMenu.addItem(new H5("First menu item"),
@@ -152,10 +152,12 @@ public class ContextMenuView extends Div {
         contextMenu.addItem(checkbox, e -> message.setText(
                 "Clicked on checkbox with value: " + checkbox.getValue()));
 
+        // Separators can be added between menu items
+        contextMenu.addSeparator();
+
         // Components can also be added to the overlay
         // without creating menu items with add()
-        Component separator = new Hr();
-        contextMenu.add(separator, new Label("This is not a menu item"));
+        contextMenu.addComponent(new Span("This is not a menu item"));
 
         addCard("ContextMenu With Components", target, message);
         target.setId("context-menu-with-components-target");
@@ -167,7 +169,7 @@ public class ContextMenuView extends Div {
         Component target = createTargetComponent();
         ContextMenu contextMenu = new ContextMenu(target);
 
-        Label message = new Label("-");
+        Span message = new Span("-");
 
         contextMenu.addItem(new H5("First menu item"),
                 event -> message.setText("Clicked on the first item"));
@@ -185,7 +187,7 @@ public class ContextMenuView extends Div {
         // Components can also be added to the submenu overlay
         // without creating menu items with add()
         subMenu.addComponentAtIndex(1, new Hr());
-        subMenu.add(new Label("This is not a menu item"));
+        subMenu.addComponent(new Span("This is not a menu item"));
 
         addCard("ContextMenu With Components in Sub Menu", target, message);
         target.setId("context-menu-with-submenu-components-target");

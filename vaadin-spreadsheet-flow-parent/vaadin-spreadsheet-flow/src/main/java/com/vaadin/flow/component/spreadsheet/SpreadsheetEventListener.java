@@ -13,11 +13,9 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.ComponentEventListener;
-
-import elemental.json.JsonArray;
-import elemental.json.JsonNumber;
-import elemental.json.JsonValue;
 
 @SuppressWarnings("serial")
 public class SpreadsheetEventListener
@@ -30,43 +28,43 @@ public class SpreadsheetEventListener
         this.handler = spreadsheetHandler;
     }
 
-    private int toInt(JsonArray o, int pos) {
-        return o == null ? 0 : (int) o.getNumber(pos);
+    private int toInt(ArrayNode o, int pos) {
+        return o == null ? 0 : o.get(pos).intValue();
     }
 
-    private String toStr(JsonArray o, int pos) {
-        return o == null ? null : o.getString(pos);
+    private String toStr(ArrayNode o, int pos) {
+        return o == null ? null : o.get(pos).asText();
     }
 
-    private boolean toBool(JsonArray o, int pos) {
-        return o == null ? null : o.getBoolean(pos);
+    private boolean toBool(ArrayNode o, int pos) {
+        return o == null ? null : o.get(pos).asBoolean();
     }
 
-    private HashMap<Integer, Float> toMapFloat(JsonArray o, int pos) {
+    private HashMap<Integer, Float> toMapFloat(ArrayNode o, int pos) {
         HashMap<Integer, Float> m = new HashMap<>();
         if (o == null) {
             return m;
         }
-        JsonArray jso = o.getArray(pos);
-        for (int i = 0; i < jso.length(); i++) {
-            JsonValue value = jso.get(i);
-            if (value instanceof JsonNumber) {
-                m.put(i, (float) value.asNumber());
+        ArrayNode jso = (ArrayNode) o.get(pos);
+        for (int i = 0; i < jso.size(); i++) {
+            JsonNode value = jso.get(i);
+            if (value.isNumber()) {
+                m.put(i, (float) value.asDouble());
             }
         }
         return m;
     }
 
-    private HashMap<Integer, Integer> toMapInt(JsonArray o, int pos) {
+    private HashMap<Integer, Integer> toMapInt(ArrayNode o, int pos) {
         HashMap<Integer, Integer> m = new HashMap<>();
         if (o == null) {
             return m;
         }
-        JsonArray jso = o.getArray(pos);
-        for (int i = 0; i < jso.length(); i++) {
-            JsonValue value = jso.get(i);
-            if (value instanceof JsonNumber) {
-                m.put(i, (int) value.asNumber());
+        ArrayNode jso = (ArrayNode) o.get(pos);
+        for (int i = 0; i < jso.size(); i++) {
+            JsonNode value = jso.get(i);
+            if (value.isNumber()) {
+                m.put(i, value.asInt());
             }
         }
         return m;
@@ -75,9 +73,9 @@ public class SpreadsheetEventListener
     @Override
     public void onComponentEvent(Spreadsheet.SpreadsheetEvent event) {
         String type = event.getType();
-        JsonArray pars = (JsonArray) event.getData();
+        ArrayNode pars = (ArrayNode) event.getData();
 
-        LOGGER.debug(type + " " + (pars == null ? "null" : pars.toJson()));
+        LOGGER.debug(type + " " + (pars == null ? "null" : pars.toString()));
 
         if ("onConnectorInit".equals(type)) {
             handler.onConnectorInit();

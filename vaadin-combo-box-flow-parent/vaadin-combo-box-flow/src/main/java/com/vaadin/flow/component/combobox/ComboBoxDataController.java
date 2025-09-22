@@ -24,6 +24,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.combobox.dataview.ComboBoxDataView;
@@ -51,10 +52,8 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.function.SerializableSupplier;
-import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonValue;
 
 /**
  * Internal class that encapsulates the data communication logic with the web
@@ -89,9 +88,9 @@ class ComboBoxDataController<TItem>
         }
 
         @Override
-        public void set(int start, List<JsonValue> items) {
+        public void set(int start, List<JsonNode> items) {
             enqueue("$connector.set", start,
-                    items.stream().collect(JsonUtils.asArray()),
+                    items.stream().collect(JacksonUtils.asArray()),
                     ComboBoxDataController.this.lastFilter);
         }
 
@@ -245,7 +244,7 @@ class ComboBoxDataController<TItem>
     void reset() {
         lastFilter = null;
         if (dataCommunicator != null) {
-            dataCommunicator.setRequestedRange(0, 0);
+            dataCommunicator.setViewportRange(0, 0);
             dataCommunicator.reset();
         }
         comboBox.runBeforeClientResponse(ui -> ui.getPage().executeJs(
@@ -269,7 +268,7 @@ class ComboBoxDataController<TItem>
     /**
      * Called when the client-side connector requests data
      */
-    void setRequestedRange(int start, int length, String filter) {
+    void setViewportRange(int start, int length, String filter) {
         // If the filter is null, which indicates that the combo box was closed
         // before, then reset the data communicator to force sending an update
         // to the client connector. This covers an edge-case when using an empty
@@ -283,7 +282,7 @@ class ComboBoxDataController<TItem>
         if (lastFilter == null) {
             dataCommunicator.reset();
         }
-        dataCommunicator.setRequestedRange(start, length);
+        dataCommunicator.setViewportRange(start, length);
         filterSlot.accept(filter);
     }
 
@@ -605,7 +604,7 @@ class ComboBoxDataController<TItem>
             removeLazyOpenRegistration();
             dataCommunicator.setFetchEnabled(true);
             if (!comboBox.isAutoOpen()) {
-                setRequestedRange(0, comboBox.getPageSize(),
+                setViewportRange(0, comboBox.getPageSize(),
                         comboBox.getFilter());
             }
         }

@@ -10,6 +10,7 @@ package com.vaadin.addon.spreadsheet.client;
 
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.StyleElement;
+import com.google.gwt.user.client.Event;
 
 public class SheetJsniUtil {
 
@@ -155,5 +156,15 @@ public class SheetJsniUtil {
           && $wnd.Vaadin.Flow
           && $wnd.Vaadin.Flow.clients[appId]
           && $wnd.Vaadin.Flow.clients[appId].getByNodeId(parseInt(nodeId));
+    }-*/;
+
+    public static native Element[] getComposedPath(Event event)
+    /*-{
+        return event.composedPath();
+    }-*/;
+
+    public static native Element[] getAssignedElements(Element slot)
+    /*-{
+        return slot.assignedElements();
     }-*/;
 }

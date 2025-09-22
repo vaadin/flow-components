@@ -21,8 +21,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
@@ -44,7 +44,7 @@ public class LayoutDefaultsTest {
     @Test
     public void testHorizontalLayout_withJustifyContentModeAndChildren_justifyContentModeIsSet() {
         HorizontalLayout layout = new HorizontalLayout(
-                FlexComponent.JustifyContentMode.END, new Label(),
+                FlexComponent.JustifyContentMode.END, new Span(),
                 new NativeButton());
         Assert.assertEquals("JustifyContentMode should be set by constructor",
                 FlexComponent.JustifyContentMode.END,
@@ -56,7 +56,7 @@ public class LayoutDefaultsTest {
     @Test
     public void testHorizontalLayout_withAlignmentAndChildren_DefaultVerticalAlignmentIsSet() {
         HorizontalLayout layout = new HorizontalLayout(Alignment.STRETCH,
-                new Label(), new NativeButton());
+                new Span(), new NativeButton());
         Assert.assertEquals(
                 "DefaultVerticalAlignment should be set by constructor",
                 Alignment.STRETCH, layout.getAlignItems());
@@ -67,7 +67,7 @@ public class LayoutDefaultsTest {
     @Test
     public void testVerticalLayout_withJustifyContentModeAndChildren_justifyContentModeIsSet() {
         VerticalLayout layout = new VerticalLayout(
-                FlexComponent.JustifyContentMode.END, new Label(),
+                FlexComponent.JustifyContentMode.END, new Span(),
                 new NativeButton());
         Assert.assertEquals("JustifyContentMode should be set by constructor",
                 FlexComponent.JustifyContentMode.END,
@@ -79,7 +79,7 @@ public class LayoutDefaultsTest {
     @Test
     public void testVerticalLayout_withAlignmentAndChildren_DefaultVerticalAlignmentIsSet() {
         VerticalLayout layout = new VerticalLayout(Alignment.STRETCH,
-                new Label(), new NativeButton());
+                new Span(), new NativeButton());
         Assert.assertEquals(
                 "DefaultHorizontalAlignment should be set by constructor",
                 Alignment.STRETCH, layout.getAlignItems());
@@ -130,12 +130,12 @@ public class LayoutDefaultsTest {
     @Test
     public void expandable_Layout() {
         HorizontalLayout horizontalLayout = new HorizontalLayout();
-        horizontalLayout.addAndExpand(new Label("Foo"), new Label("bar"));
+        horizontalLayout.addAndExpand(new Span("Foo"), new Span("bar"));
         testExpandableComponent(horizontalLayout.getWidth(),
                 horizontalLayout.getChildren());
 
         VerticalLayout verticalLayout = new VerticalLayout();
-        verticalLayout.addAndExpand(new Label("Foo"), new Label("bar"));
+        verticalLayout.addAndExpand(new Span("Foo"), new Span("bar"));
         testExpandableComponent(verticalLayout.getHeight(),
                 verticalLayout.getChildren());
     }

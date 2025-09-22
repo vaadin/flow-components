@@ -8,11 +8,9 @@
  */
 package com.vaadin.flow.component.charts.model.serializers;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.BeanSerializerBase;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.bean.BeanSerializerBase;
 
 /**
  * Abstract class for bean serializers. It is called by
@@ -26,5 +24,5 @@ public abstract class BeanSerializationDelegate<T> {
 
     public abstract void serialize(T bean,
             BeanSerializerDelegator<T> serializer, JsonGenerator jgen,
-            SerializerProvider provider) throws IOException;
+            SerializationContext context);
 }

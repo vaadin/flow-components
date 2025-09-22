@@ -19,13 +19,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-dialog/initial-dialog-open")
-public class InitiallyOpenedDialogPageIT extends AbstractComponentIT {
+public class InitiallyOpenedDialogPageIT extends AbstractDialogIT {
 
     @Before
     public void init() {
@@ -34,9 +32,8 @@ public class InitiallyOpenedDialogPageIT extends AbstractComponentIT {
 
     @Test
     public void openDialogDuringPageLoad() {
-        waitForElementPresent(By.tagName(DialogTestPageIT.DIALOG_OVERLAY_TAG));
-        WebElement overlay = findElement(
-                By.tagName(DialogTestPageIT.DIALOG_OVERLAY_TAG));
+        verifyOpened();
+
         Assert.assertTrue(isElementPresent(By.id("nested-component")));
     }
 }

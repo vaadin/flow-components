@@ -15,25 +15,22 @@
  */
 package com.vaadin.flow.component.messages.tests;
 
-import static org.hamcrest.CoreMatchers.startsWith;
-
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.hamcrest.MatcherAssert;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.messages.MessageList;
 import com.vaadin.flow.component.messages.MessageListItem;
-import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.StreamResource;
-
-import elemental.json.JsonType;
-import elemental.json.JsonValue;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
 
 public class MessageListTest {
 
@@ -98,8 +95,9 @@ public class MessageListTest {
         item1.setUserImage("foo/bar");
         item1.setUserImageResource(new StreamResource("message-list-img",
                 () -> getClass().getResourceAsStream("baz/qux")));
-        MatcherAssert.assertThat(item1.getUserImage(),
-                startsWith("VAADIN/dynamic"));
+        String userImage = item1.getUserImage();
+        Assert.assertTrue("User image should start with 'VAADIN/dynamic'",
+                userImage.startsWith("VAADIN/dynamic"));
     }
 
     @Test
@@ -107,6 +105,30 @@ public class MessageListTest {
         UI.setCurrent(new UI());
         item1.setUserImageResource(new StreamResource("message-list-img",
                 () -> getClass().getResourceAsStream("baz/qux")));
+        item1.setUserImage("foo/bar");
+        Assert.assertNull(item1.getUserImageResource());
+    }
+
+    @Test
+    public void setImageHandler_overridesImageUrl() {
+        UI.setCurrent(new UI());
+        item1.setUserImage("foo/bar");
+        item1.setUserImageHandler(
+                DownloadHandler.fromInputStream(data -> new DownloadResponse(
+                        getClass().getResourceAsStream("baz/qux"),
+                        "message-list-img", null, -1)));
+        String userImage = item1.getUserImage();
+        Assert.assertTrue("User image should start with 'VAADIN/dynamic'",
+                userImage.startsWith("VAADIN/dynamic"));
+    }
+
+    @Test
+    public void setImageHandler_streamResourceBecomesNull() {
+        UI.setCurrent(new UI());
+        item1.setUserImageHandler(
+                DownloadHandler.fromInputStream(data -> new DownloadResponse(
+                        getClass().getResourceAsStream("baz/qux"),
+                        "message-list-img", null, -1)));
         item1.setUserImage("foo/bar");
         Assert.assertNull(item1.getUserImageResource());
     }
@@ -149,12 +171,36 @@ public class MessageListTest {
         Assert.assertTrue(item1.hasThemeName("foo"));
     }
 
+    @Test
+    public void unattachedItem_setText_doesNotThrow() {
+        item1.setText("foo");
+    }
+
+    @Test
+    public void setMarkdown_isMarkdown() {
+        Assert.assertFalse(messageList.isMarkdown());
+        messageList.setMarkdown(true);
+        Assert.assertTrue(messageList.isMarkdown());
+    }
+
+    @Test
+    public void setAnnounceMessages_isAnnounceMessages() {
+        Assert.assertFalse(messageList.isAnnounceMessages());
+        Assert.assertFalse(messageList.getElement()
+                .getProperty("announceMessages", false));
+
+        messageList.setAnnounceMessages(true);
+        Assert.assertTrue(messageList.isAnnounceMessages());
+        Assert.assertTrue(messageList.getElement()
+                .getProperty("announceMessages", false));
+    }
+
     private String getSerializedThemeProperty(MessageListItem item) {
-        JsonValue theme = JsonUtils.beanToJson(item).get("theme");
-        if (theme.getType() == JsonType.NULL) {
+        JsonNode theme = JacksonUtils.beanToJson(item).get("theme");
+        if (theme.isNull()) {
             return null;
         } else {
-            return theme.asString();
+            return theme.asText();
         }
     }
 }

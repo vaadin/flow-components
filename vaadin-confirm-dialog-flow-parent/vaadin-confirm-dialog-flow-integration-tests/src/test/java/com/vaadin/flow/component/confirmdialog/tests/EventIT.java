@@ -18,77 +18,70 @@ package com.vaadin.flow.component.confirmdialog.tests;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-confirm-dialog/events")
 public class EventIT extends AbstractComponentIT {
 
-    static final String DIALOG_OVERLAY_TAG = "vaadin-confirm-dialog-overlay";
-
     private ButtonElement openDialogBtn;
-    private ButtonElement toggleCloseOnEscBtn;
+    private ConfirmDialogElement dialog;
 
     @Before
     public void init() {
         open();
         openDialogBtn = $(ButtonElement.class).id("open-dialog");
-        toggleCloseOnEscBtn = $(ButtonElement.class).id("toggle-close-on-esc");
+        dialog = $(ConfirmDialogElement.class).first();
     }
 
     @Test
     public void openDialog_closeOnEsc() {
         openDialogBtn.click();
-        checkDialogIsOpened();
+        Assert.assertTrue("Dialog must be opened",
+                dialog.getPropertyBoolean("opened"));
 
         closeDialogByEscKey();
 
-        checkDialogIsClosed();
-
         Assert.assertFalse("Dialog must be closed after esc key",
-                isElementPresent(By.tagName(DIALOG_OVERLAY_TAG)));
+                dialog.getPropertyBoolean("opened"));
     }
 
     @Test
     public void openDialog_closeOnEscIsDisallowed() {
         openDialogBtn.click();
-        checkDialogIsOpened();
+        Assert.assertTrue("Dialog must be opened",
+                dialog.getPropertyBoolean("opened"));
 
-        toggleCloseOnEscBtn.click();
+        toggleCloseOnEsc();
 
         closeDialogByEscKey();
 
         Assert.assertTrue("Dialog must be open after esc key",
-                isElementPresent(By.tagName(DIALOG_OVERLAY_TAG)));
+                dialog.getPropertyBoolean("opened"));
     }
 
     @Test
     public void testCloseOnEscDialog_closeOnEscIsRestored() {
         openDialogBtn.click();
-        checkDialogIsOpened();
+        Assert.assertTrue("Dialog must be opened",
+                dialog.getPropertyBoolean("opened"));
 
-        toggleCloseOnEscBtn.click();
-        toggleCloseOnEscBtn.click();
+        toggleCloseOnEsc();
+        toggleCloseOnEsc();
 
         closeDialogByEscKey();
 
-        checkDialogIsClosed();
-
         Assert.assertFalse("Dialog must be closed after esc key",
-                isElementPresent(By.tagName(DIALOG_OVERLAY_TAG)));
+                dialog.getPropertyBoolean("opened"));
     }
 
-    private void checkDialogIsClosed() {
-        waitForElementNotPresent(By.tagName(DIALOG_OVERLAY_TAG));
-    }
-
-    private void checkDialogIsOpened() {
-        waitForElementPresent(By.tagName(DIALOG_OVERLAY_TAG));
+    private void toggleCloseOnEsc() {
+        $(ButtonElement.class).id("toggle-close-on-esc").click();
     }
 
     private void closeDialogByEscKey() {

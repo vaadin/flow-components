@@ -151,18 +151,6 @@ public class CheckboxGroupIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertThemeVariant() {
-        CheckboxGroupElement group = $(CheckboxGroupElement.class)
-                .id("checkbox-group-theme-variants");
-
-        scrollToElement(group);
-        Assert.assertEquals("vertical", group.getDomAttribute("theme"));
-
-        findElement(By.id("remove-theme-variant-button")).click();
-        Assert.assertNull(group.getDomAttribute("theme"));
-    }
-
-    @Test
     public void assertHelperText() {
         CheckboxGroupElement group = $(CheckboxGroupElement.class)
                 .id("checkbox-helper-text");

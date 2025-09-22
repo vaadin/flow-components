@@ -22,6 +22,7 @@ import java.io.Serializable;
 /**
  * Class containing file information for upload.
  */
+@Deprecated(since = "24.8", forRemoval = true)
 public class FileData implements Serializable {
     private final String fileName, mimeType;
     private final OutputStream outputBuffer;

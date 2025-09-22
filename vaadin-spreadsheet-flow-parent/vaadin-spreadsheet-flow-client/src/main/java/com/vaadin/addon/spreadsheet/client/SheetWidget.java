@@ -8,6 +8,8 @@
  */
 package com.vaadin.addon.spreadsheet.client;
 
+import static com.vaadin.addon.spreadsheet.client.SheetJsniUtil.getAssignedElements;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,6 +24,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.animation.client.AnimationScheduler;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptException;
@@ -376,6 +379,8 @@ public class SheetWidget extends Panel {
     private int calculatedRowGroupWidth;
     private int calculatedColGroupHeight;
 
+    private boolean showCustomEditorOnFocus;
+
     private String invalidFormulaMessage = null;
 
     private Element host;
@@ -681,6 +686,7 @@ public class SheetWidget extends Panel {
                 updateRowGrouping();
 
                 resetCellContents();
+                relayoutSheet(false);
                 loaded = true;
             }
         });
@@ -757,31 +763,29 @@ public class SheetWidget extends Panel {
             final int rightBound = leftFrozenPanelWidth + scrollLeft
                     + scrollViewWidth + actionHandler.getColumnBufferSize();
 
-            int leftEdgeChange = newFirstColumnPosition - firstColumnPosition;
             int rightEdgeChange = newLastColumnPosition - lastColumnPosition;
             firstColumnPosition = newFirstColumnPosition;
             lastColumnPosition = newLastColumnPosition;
 
             // always call handle scroll left, otherwise
             // expanding groups with layouts does not work
-            handleHorizontalScrollLeft(scrollLeft);
+            handleHorizontalScroll(scrollLeft, hScrollDiff);
             updateCells(0, -1);
 
             if (rightEdgeChange < 0 || hScrollDiff > 0
                     || (lastColumnIndex < actionHandler.getMaxColumns()
                             && lastColumnPosition < rightBound)) {
-                handleHorizontalScrollRight(scrollLeft);
                 updateCells(0, 1);
             }
 
+            handleVerticalScroll(scrollTop, vScrollDiff);
+
             if (topEdgeChange > 0 || vScrollDiff < 0) {
-                handleVerticalScrollUp(scrollTop);
                 updateCells(-1, 0);
             }
             if (bottomEdgeChange != 0 || vScrollDiff > 0
                     || (lastRowIndex < actionHandler.getMaxRows()
                             && lastRowPosition < bottomBound)) {
-                handleVerticalScrollDown(scrollTop);
                 updateCells(1, 0);
             }
             resetRowAndColumnStyles();
@@ -1243,6 +1247,18 @@ public class SheetWidget extends Panel {
                         Event.setCapture(sheet);
                     }
                 }
+            }
+        }
+    }
+
+    public void focusCustomEditor() {
+        var cell = getCell(selectedCellCol, selectedCellRow);
+        var assignedElements = getAssignedElements(
+                cell.getElement().getFirstChildElement());
+        if (assignedElements != null && assignedElements.length == 1) {
+            var assignedElement = assignedElements[0];
+            if (assignedElement.getNodeType() == Node.ELEMENT_NODE) {
+                assignedElement.focus();
             }
         }
     }
@@ -2294,7 +2310,7 @@ public class SheetWidget extends Panel {
 
     private int calculateLeftValueOfScrolledColumns() {
         int left = 0;
-        for (int i = 1; i < (firstColumnIndex - horizontalSplitPosition); i++) {
+        for (int i = horizontalSplitPosition + 1; i < firstColumnIndex; i++) {
             left += actionHandler.getColWidth(i);
         }
         return left;
@@ -2302,7 +2318,7 @@ public class SheetWidget extends Panel {
 
     private int calculateTopValueOfScrolledRows() {
         int top = 0;
-        for (int i = 1; i < (firstRowIndex - verticalSplitPosition); i++) {
+        for (int i = verticalSplitPosition + 1; i < firstRowIndex; i++) {
             top += definedRowHeights[i - 1];
         }
         return top;
@@ -2975,7 +2991,7 @@ public class SheetWidget extends Panel {
      * handler (if needed).
      */
     private void onSheetScroll() {
-        int scrollTop = topFrozenPanelHeight + sheet.getScrollTop();
+        int scrollTop = sheet.getScrollTop();
         int scrollLeft = sheet.getScrollLeft();
         int vScrollDiff = scrollTop - previousScrollTop;
         int hScrollDiff = scrollLeft - previousScrollLeft;
@@ -2990,21 +3006,13 @@ public class SheetWidget extends Panel {
             if (Math.abs(
                     hScrollDiff) > (actionHandler.getColumnBufferSize() / 2)) {
                 previousScrollLeft = scrollLeft;
-                if (hScrollDiff > 0) {
-                    handleHorizontalScrollRight(scrollLeft);
-                } else if (hScrollDiff < 0) {
-                    handleHorizontalScrollLeft(scrollLeft);
-                }
+                handleHorizontalScroll(scrollLeft, hScrollDiff);
             }
 
             if (Math.abs(
                     vScrollDiff) > (actionHandler.getRowBufferSize() / 2)) {
                 previousScrollTop = scrollTop;
-                if (vScrollDiff > 0) {
-                    handleVerticalScrollDown(scrollTop);
-                } else if (vScrollDiff < 0) {
-                    handleVerticalScrollUp(scrollTop);
-                }
+                handleVerticalScroll(scrollTop, vScrollDiff);
             }
             requester.trigger();
         } catch (Throwable t) {
@@ -3293,15 +3301,49 @@ public class SheetWidget extends Panel {
         }
     }
 
-    private void handleHorizontalScrollLeft(int scrollLeft) {
+    /**
+     * Handles horizontal scrolling in the spreadsheet. It calculates the
+     * visible columns and updates the column headers accordingly.
+     * 
+     * The method takes the current scroll position and the difference since the
+     * last update to determine how many columns to display.
+     * 
+     * @param scrollLeft
+     *            the current scroll position from the left
+     * @param scrollDiff
+     *            the difference in scroll position since the last update
+     */
+    private void handleHorizontalScroll(int scrollLeft, int scrollDiff) {
+        if (scrollDiff == 0) {
+            return; // no scroll
+        }
+
         int columnBufferSize = actionHandler.getColumnBufferSize();
         int leftBound = scrollLeft - columnBufferSize;
-        int rightBound = scrollLeft + scrollViewWidth + columnBufferSize;
+        int rightBound = leftFrozenPanelWidth + scrollLeft + scrollViewWidth
+                + columnBufferSize;
 
         if (leftBound < 0) {
             leftBound = 0;
         }
 
+        if (scrollDiff > 0) {
+            handleHorizontalScrollRight(leftBound, rightBound);
+        } else {
+            handleHorizontalScrollLeft(leftBound, rightBound);
+        }
+
+    }
+
+    /**
+     * Handles horizontal scrolling to the left in the sheet.
+     *
+     * @param leftBound
+     *            the left bound of the visible area
+     * @param rightBound
+     *            the right bound of the visible area
+     */
+    private void handleHorizontalScrollLeft(int leftBound, int rightBound) {
         int maxFirstColumn = horizontalSplitPosition + 1; // hSP is 0 when no
         while (firstColumnPosition > leftBound
                 && firstColumnIndex > maxFirstColumn) {
@@ -3338,15 +3380,7 @@ public class SheetWidget extends Panel {
      *
      * @param scrollLeft
      */
-    private void handleHorizontalScrollRight(int scrollLeft) {
-        int columnBufferSize = actionHandler.getColumnBufferSize();
-        int leftBound = scrollLeft - columnBufferSize;
-        int rightBound = scrollLeft + scrollViewWidth + columnBufferSize;
-
-        if (leftBound < 0) {
-            leftBound = 0;
-        }
-
+    private void handleHorizontalScrollRight(int leftBound, int rightBound) {
         final int maximumCols = actionHandler.getMaxColumns();
         while (lastColumnPosition < rightBound
                 && lastColumnIndex < maximumCols) {
@@ -3372,15 +3406,50 @@ public class SheetWidget extends Panel {
         resetColHeaders();
     }
 
-    private void handleVerticalScrollDown(int scrollTop) {
+    /**
+     * Handles vertical scrolling in the spreadsheet. It calculates the visible
+     * rows and updates the row headers accordingly.
+     * 
+     * The method takes the current scroll position and the difference since the
+     * last update to determine how many rows to display.
+     * 
+     * @param scrollTop
+     *            the current scroll position from the top
+     * @param scrollDiff
+     *            the difference in scroll position since the last update
+     */
+    private void handleVerticalScroll(int scrollTop, int scrollDiff) {
+        if (scrollDiff == 0) {
+            return; // no scroll
+        }
+
         int rowBufferSize = actionHandler.getRowBufferSize();
         int topBound = scrollTop - rowBufferSize;
-        int bottomBound = scrollTop + scrollViewHeight + rowBufferSize;
+        int bottomBound = topFrozenPanelHeight + scrollTop + scrollViewHeight
+                + rowBufferSize;
 
         if (topBound < 0) {
             topBound = 0;
         }
 
+        if (scrollDiff > 0) {
+            handleVerticalScrollDown(topBound, bottomBound);
+        } else {
+            handleVerticalScrollUp(topBound, bottomBound);
+        }
+
+    }
+
+    /**
+     * Calculates viewed cells after a scroll down. Runs the escalator for row
+     * headers.
+     *
+     * @param topBound
+     *            the top bound of the visible area
+     * @param bottomBound
+     *            the bottom bound of the visible area
+     */
+    private void handleVerticalScrollDown(int topBound, int bottomBound) {
         final int maximumRows = actionHandler.getMaxRows();
         while (lastRowPosition < bottomBound && lastRowIndex < maximumRows) {
             if ((firstRowPosition + getRowHeight(firstRowIndex)) < topBound) {
@@ -3400,15 +3469,16 @@ public class SheetWidget extends Panel {
         resetRowHeaders();
     }
 
-    private void handleVerticalScrollUp(int scrollTop) {
-        int rowBufferSize = actionHandler.getRowBufferSize();
-        int topBound = scrollTop - rowBufferSize;
-        int bottomBound = scrollTop + scrollViewHeight + rowBufferSize;
-
-        if (topBound < 0) {
-            topBound = 0;
-        }
-
+    /**
+     * Calculates viewed cells after a scroll up. Runs the escalator for row
+     * headers.
+     *
+     * @param topBound
+     *            the top bound of the visible area
+     * @param bottomBound
+     *            the bottom bound of the visible area
+     */
+    private void handleVerticalScrollUp(int topBound, int bottomBound) {
         int maxTopRow = verticalSplitPosition + 1; // vSP is 0 when no split
         while (firstRowPosition > topBound && firstRowIndex > maxTopRow) {
             if ((lastRowPosition - getRowHeight(lastRowIndex)) > bottomBound) {
@@ -4251,6 +4321,7 @@ public class SheetWidget extends Panel {
         Iterator<CellData> i = cellData2.iterator();
         ArrayList<Cell> row = null;
         int rowIndex = -1;
+        var customEditorFactory = getSheetHandler().getCustomEditorFactory();
         while (i.hasNext()) {
             CellData cd = i.next();
             if (cd.row >= r1 && cd.row <= r2 && cd.col >= c1 && cd.col <= c2) {
@@ -4265,8 +4336,12 @@ public class SheetWidget extends Panel {
                         c1 = row.get(0).getCol();
                     }
                 }
-                row.get(cd.col - c1).setValue(cd.value, cd.cellStyle,
-                        cd.needsMeasure);
+                if (!(selectedCellCol == cd.col && selectedCellRow == cd.row
+                        && customEditorFactory != null && customEditorFactory
+                                .hasCustomEditor(toKey(cd.col, cd.row)))) {
+                    row.get(cd.col - c1).setValue(cd.value, cd.cellStyle,
+                            cd.needsMeasure);
+                }
             }
             String key = toKey(cd.col, cd.row);
             setMergedCellValue(key, cd.value, cd.cellStyle, cd.needsMeasure);
@@ -4282,6 +4357,8 @@ public class SheetWidget extends Panel {
     }
 
     public void cellValuesUpdated(ArrayList<CellData> updatedCellData) {
+        var customEditorFactory = getSheetHandler().getCustomEditorFactory();
+        var customEditorFocused = false;
         // can contain cells from any of the panes -> just iterate and access
         for (CellData cd : updatedCellData) {
             String key = toKey(cd.col, cd.row);
@@ -4302,8 +4379,21 @@ public class SheetWidget extends Panel {
                 }
 
                 if (cell != null) {
-                    cell.setValue(cd.value, cd.cellStyle, cd.needsMeasure);
-                    cell.markAsOverflowDirty();
+                    var cellAddress = toKey(cell.getCol(), cell.getRow());
+                    var hasCustomEditor = customEditorFactory != null
+                            && customEditorFactory.hasCustomEditor(cellAddress);
+                    if (hasCustomEditor) {
+                        var customEditor = (Slot) customEditorFactory
+                                .getCustomEditor(cellAddress);
+                        if (customEditor.isElementFocused()) {
+                            customEditorFocused = true;
+                        }
+                    }
+
+                    if (!(hasCustomEditor && !isShowCustomEditorOnFocus())) {
+                        cell.setValue(cd.value, cd.cellStyle, cd.needsMeasure);
+                        cell.markAsOverflowDirty();
+                    }
                 }
                 int j = verticalSplitPosition > 0 ? 0 : firstColumnIndex;
                 for (; j < cd.col; j++) {
@@ -4317,6 +4407,10 @@ public class SheetWidget extends Panel {
 
         // Update cell overflow state
         updateOverflows(false);
+
+        if (!customEditorFocused) {
+            focusSheet();
+        }
     }
 
     /**
@@ -5007,47 +5101,118 @@ public class SheetWidget extends Panel {
         return lastRowIndex;
     }
 
-    public void displayCustomCellEditor(Widget customEditorWidget) {
-        customCellEditorDisplayed = true;
-        jsniUtil.replaceSelector(editedCellFreezeColumnStyle,
-                ".notusedselector", 0);
-        this.customEditorWidget = customEditorWidget;
+    public void displayCustomCellEditor(Widget customEditorWidget,
+            boolean focusEditor) {
         Cell selectedCell = getSelectedCell();
         if (selectedCell == null) {
             return;
         }
-        selectedCell.setValue(null);
+        displayCustomCellEditor(customEditorWidget, focusEditor, selectedCell);
+    }
+
+    public void displayCustomCellEditor(Widget customEditorWidget,
+            boolean focusEditor, Cell editorCell) {
+        customCellEditorDisplayed = true;
+        jsniUtil.replaceSelector(editedCellFreezeColumnStyle,
+                ".notusedselector", 0);
+        this.customEditorWidget = customEditorWidget;
+        editorCell.setValue(null);
 
         Widget parent = customEditorWidget.getParent();
         if (parent != null && !equals(parent)) {
             customEditorWidget.removeFromParent();
         }
-        DivElement element = selectedCell.getElement();
+        DivElement element = editorCell.getElement();
         element.addClassName(CUSTOM_EDITOR_CELL_CLASSNAME);
         element.appendChild(customEditorWidget.getElement());
         if (parent == null || (parent != null && !equals(parent))) {
             adopt(customEditorWidget);
         }
 
-        focusSheet();
+        if (focusEditor && customEditorWidget instanceof Slot) {
+            ((Slot) customEditorWidget).getAssignedElement().focus();
+        } else {
+            focusSheet();
+        }
     }
 
-    public void removeCustomCellEditor() {
-        if (customCellEditorDisplayed) {
-            customCellEditorDisplayed = false;
-            customEditorWidget.getElement()
-                    .removeClassName(CUSTOM_EDITOR_CELL_CLASSNAME);
+    /**
+     * Sets whether the custom editor should be displayed when the cell is
+     * focused.
+     *
+     * @param showCustomEditorOnFocus
+     *            true if the custom editor should be displayed on focus, false
+     *            otherwise
+     */
+    public void setShowCustomEditorOnFocus(boolean showCustomEditorOnFocus) {
+        this.showCustomEditorOnFocus = showCustomEditorOnFocus;
+    }
+
+    /**
+     * Returns whether the custom editor should be displayed when the cell is
+     * focused.
+     *
+     * @return true if the custom editor should be displayed on focus, false
+     *         otherwise
+     */
+    public boolean isShowCustomEditorOnFocus() {
+        return showCustomEditorOnFocus;
+    }
+
+    /**
+     * Removes the custom cell editor widget from the sheet.
+     *
+     * @param address
+     *            the address of the cell for which the custom editor is removed
+     * @param customEditorWidget
+     *            the custom editor widget to be removed
+     */
+    public void removeCustomCellEditor(String address,
+            Widget customEditorWidget) {
+
+        if (customEditorWidget == null || !customEditorWidget.isAttached()) {
+            return;
+        }
+
+        customEditorWidget.getElement()
+                .removeClassName(CUSTOM_EDITOR_CELL_CLASSNAME);
+        // Firefox does not receive a change event if the element is removed
+        // at the same time the event should be fired. Delay the removal of
+        // the custom editor so that the change event is fired.
+        if (BrowserInfo.get().isFirefox()) {
+
+            AnimationScheduler.get().requestAnimationFrame(timestamp -> {
+                orphan(customEditorWidget);
+                customEditorWidget.removeFromParent();
+            });
+        } else {
             orphan(customEditorWidget);
             customEditorWidget.removeFromParent();
+        }
 
-            // the cell value should have been updated
-            if (loaded) {
-                Cell cell = getSelectedCell();
-                if (cell != null) {
-                    CellData cd = cachedCellData.get(getSelectedCellKey());
-                    cell.setValue(cd == null ? null : cd.value);
-                }
+        if (loaded) {
+            var jsniUtil = getSheetJsniUtil();
+            jsniUtil.parseColRow(address);
+
+            Cell cell = getCell(jsniUtil.getParsedCol(),
+                    jsniUtil.getParsedRow());
+            if (cell != null) {
+                CellData cd = cachedCellData.get(address);
+                cell.setValue(cd == null ? null : cd.value);
             }
+
+        }
+    }
+
+    /**
+     * Removes the custom cell editor widget from the selected cell if it is
+     * currently displayed. If the custom editor is not displayed, this method
+     * does nothing.
+     */
+    public void removeCustomCellEditor() {
+        if (customCellEditorDisplayed && isShowCustomEditorOnFocus()) {
+            customCellEditorDisplayed = false;
+            removeCustomCellEditor(getSelectedCellKey(), customEditorWidget);
             customEditorWidget = null;
         }
     }
@@ -5847,7 +6012,7 @@ public class SheetWidget extends Panel {
     // This is for clearing of sheet from custom widgets
     protected Collection<Widget> getCustomWidgetIterator() {
         final List<Widget> emptyList = new ArrayList<Widget>();
-        if (customEditorWidget != null) {
+        if (customEditorWidget != null && customEditorWidget.isAttached()) {
             emptyList.add(customEditorWidget);
         }
         emptyList.addAll(sheetOverlays.values());

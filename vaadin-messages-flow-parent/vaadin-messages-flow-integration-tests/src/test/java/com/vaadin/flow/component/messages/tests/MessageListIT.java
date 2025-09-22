@@ -15,12 +15,10 @@
  */
 package com.vaadin.flow.component.messages.tests;
 
-import static org.hamcrest.CoreMatchers.startsWith;
-
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 
-import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,7 +69,7 @@ public class MessageListIT extends AbstractComponentIT {
          */
 
         clickElementWithJs("setText");
-        Assert.assertEquals("Unexpected text content", "foo2",
+        Assert.assertEquals("Unexpected text content", "newfoo",
                 getFirstMessage(messageList).getText());
 
         clickElementWithJs("setTime");
@@ -113,6 +111,21 @@ public class MessageListIT extends AbstractComponentIT {
     }
 
     @Test
+    public void appendText_messagesUpdated() {
+        clickElementWithJs("appendText");
+        Assert.assertEquals("Unexpected text content", "foo2",
+                getFirstMessage(messageList).getText());
+    }
+
+    @Test
+    public void setText_appendText_messagesUpdated() {
+        clickElementWithJs("setText");
+        clickElementWithJs("appendText");
+        Assert.assertEquals("Unexpected text content", "newfoo2",
+                getFirstMessage(messageList).getText());
+    }
+
+    @Test
     public void changeItemsAfterRendering_messagesUpdated() {
         clickElementWithJs("setItems");
 
@@ -150,9 +163,76 @@ public class MessageListIT extends AbstractComponentIT {
 
     @Test
     public void setImageAsStreamResource_imageLoaded() {
+        getLogEntries(Level.WARNING); // message logs before setting resource
         clickElementWithJs("setImageAsStreamResource");
         String imageUrl = messageList.getMessageElements().get(0).getUserImg();
-        MatcherAssert.assertThat(imageUrl, startsWith("VAADIN/dynamic"));
+        Assert.assertTrue("Image URL should start with 'VAADIN/dynamic'",
+                imageUrl.startsWith("VAADIN/dynamic"));
+        // would fail if the avatar.png image wasn't hosted
+        checkLogsForErrors(message -> message.contains("test.jpg"));
+    }
+
+    @Test
+    public void addItem_itemAdded() {
+        clickElementWithJs("addItem");
+
+        var messages = messageList.getMessageElements();
+        var msg = messages.get(2);
+
+        Assert.assertEquals("User", msg.getUserName());
+        Assert.assertEquals("Foo", msg.getText());
+    }
+
+    @Test
+    public void addItem_setItems() {
+        clickElementWithJs("addItem");
+        clickElementWithJs("setItems");
+
+        var messages = messageList.getMessageElements();
+        Assert.assertEquals("Unexpected items count", 1, messages.size());
+        var msg = messages.get(0);
+
+        Assert.assertEquals("sender3", msg.getUserName());
+    }
+
+    @Test
+    public void addTwoItems_twoItemsAdded() {
+        clickElementWithJs("addTwoItems");
+
+        var messages = messageList.getMessageElements();
+        Assert.assertEquals("Unexpected items count", 4, messages.size());
+        var msg = messages.get(3);
+
+        Assert.assertEquals("Bar", msg.getText());
+    }
+
+    @Test
+    public void changeLocale_addItem_doesNotThrow() {
+        clickElementWithJs("setLocale");
+        clickElementWithJs("addItem");
+
+        checkLogsForErrors(message -> message.contains("test.jpg"));
+    }
+
+    @Test
+    public void changeLocale_addItem_itemTimesFormatted() {
+        clickElementWithJs("setLocale");
+        clickElementWithJs("addItem");
+
+        List<MessageElement> messages = messageList.getMessageElements();
+        Assert.assertTrue("Unexpected time prop",
+                messages.get(0).getTime().matches("1 gen 2021, [0-9]+:[0-9]+"));
+        Assert.assertTrue("Unexpected time format", messages.get(2).getTime()
+                .matches("[0-9]+ [a-z]+ [0-9]{4}, [0-9]+:[0-9]+"));
+    }
+
+    @Test
+    public void setImageAsDownloadResource_imageLoaded() {
+        getLogEntries(Level.WARNING); // message logs before setting resource
+        clickElementWithJs("setImageAsDownloadHandler");
+        String imageUrl = messageList.getMessageElements().get(0).getUserImg();
+        Assert.assertTrue("Image URL should start with 'VAADIN/dynamic'",
+                imageUrl.startsWith("VAADIN/dynamic"));
         checkLogsForErrors(); // would fail if the image wasn't hosted
     }
 

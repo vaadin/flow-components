@@ -65,8 +65,8 @@ import com.vaadin.flow.component.map.configuration.source.XYZSource;
  * using {@link #defineProjection(String, String)}.
  */
 @Tag("vaadin-map")
-@NpmPackage(value = "@vaadin/map", version = "24.8.0-alpha13")
-@NpmPackage(value = "proj4", version = "2.15.0")
+@NpmPackage(value = "@vaadin/map", version = "25.0.0-alpha19")
+@NpmPackage(value = "proj4", version = "2.17.0")
 @JsModule("@vaadin/map/src/vaadin-map.js")
 @JsModule("./vaadin-map/mapConnector.js")
 public class Map extends MapBase {

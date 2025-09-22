@@ -22,23 +22,22 @@ import java.util.stream.Stream;
 
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.experimental.FeatureFlags;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
 
 /**
  * Dashboard is a responsive layout component that allows users to organize
@@ -57,12 +56,11 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dashboard")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha13")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/dashboard/src/vaadin-dashboard.js")
 @JsModule("./flow-component-renderer.js")
-@NpmPackage(value = "@vaadin/dashboard", version = "24.8.0-alpha13")
-public class Dashboard extends Component implements HasWidgets, HasSize {
+@NpmPackage(value = "@vaadin/dashboard", version = "25.0.0-alpha19")
+public class Dashboard extends Component
+        implements HasWidgets, HasSize, HasThemeVariant<DashboardVariant> {
 
     private static final ThreadLocal<Boolean> suppressClientUpdates = ThreadLocal
             .withInitial(() -> false);
@@ -74,8 +72,6 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     private DashboardI18n i18n;
 
     private boolean pendingUpdate = false;
-
-    private boolean featureFlagEnabled;
 
     /**
      * Creates an empty dashboard.
@@ -546,7 +542,6 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-        checkFeatureFlag();
         getElement().executeJs(
                 "Vaadin.FlowComponentHost.patchVirtualContainer(this);");
         customizeItemMovedEvent();
@@ -626,25 +621,13 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     }
 
     private void setI18nWithJS() {
-        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(i18n);
-
-        // Remove properties with null values to prevent errors in web
-        // component
-        removeNullValuesFromJsonObject(i18nJson);
+        ObjectNode i18nJson = JacksonUtils.beanToJson(i18n);
 
         // Assign new I18N object to WC, by merging the existing
         // WC I18N, and the values from the new DashboardI18n instance,
         // into an empty object
         getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
                 i18nJson);
-    }
-
-    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
-            }
-        }
     }
 
     private static String getWidgetRepresentation(DashboardWidget widget,
@@ -703,10 +686,10 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
 
     private void handleItemMovedClientEvent(DomEvent e, String itemKey,
             String itemsKey, String sectionKey) {
-        int itemNodeId = (int) e.getEventData().getNumber(itemKey);
-        JsonArray itemsNodeIds = e.getEventData().getArray(itemsKey);
-        Integer sectionNodeId = e.getEventData().hasKey(sectionKey)
-                ? (int) e.getEventData().getNumber(sectionKey)
+        int itemNodeId = e.getEventData().get(itemKey).intValue();
+        ArrayNode itemsNodeIds = (ArrayNode) e.getEventData().get(itemsKey);
+        Integer sectionNodeId = e.getEventData().has(sectionKey)
+                ? e.getEventData().get(sectionKey).intValue()
                 : null;
         DashboardSection section = null;
         List<Component> reorderedItems;
@@ -746,9 +729,9 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
 
     private void handleItemResizedClientEvent(DomEvent e, String idKey,
             String colspanKey, String rowspanKey) {
-        int nodeId = (int) e.getEventData().getNumber(idKey);
-        int colspan = (int) e.getEventData().getNumber(colspanKey);
-        int rowspan = (int) e.getEventData().getNumber(rowspanKey);
+        int nodeId = e.getEventData().get(idKey).intValue();
+        int colspan = e.getEventData().get(colspanKey).intValue();
+        int rowspan = e.getEventData().get(rowspanKey).intValue();
         DashboardWidget resizedWidget = getWidgets().stream()
                 .filter(child -> nodeId == child.getElement().getNode().getId())
                 .findAny().orElseThrow();
@@ -771,7 +754,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     }
 
     private void handleItemRemovedClientEvent(DomEvent e, String idKey) {
-        int nodeId = (int) e.getEventData().getNumber(idKey);
+        int nodeId = e.getEventData().get(idKey).intValue();
         Component removedItem = getItem(nodeId);
         withoutClientUpdate(removedItem::removeFromParent);
         fireEvent(new DashboardItemRemovedEvent(this, true, removedItem,
@@ -800,7 +783,7 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
     }
 
     private static List<Component> getReorderedItemsList(
-            JsonArray reorderedItemsFromClient,
+            ArrayNode reorderedItemsFromClient,
             Component reorderedItemsParent) {
         Objects.requireNonNull(reorderedItemsFromClient);
         Map<Integer, Component> nodeIdToItems = reorderedItemsParent
@@ -809,67 +792,32 @@ public class Dashboard extends Component implements HasWidgets, HasSize {
                         item -> item.getElement().getNode().getId(),
                         Function.identity()));
         List<Component> items = new ArrayList<>();
-        for (int index = 0; index < reorderedItemsFromClient
-                .length(); index++) {
-            int nodeIdFromClient = (int) ((JsonObject) reorderedItemsFromClient
-                    .get(index)).getNumber("id");
+        for (int index = 0; index < reorderedItemsFromClient.size(); index++) {
+            int nodeIdFromClient = reorderedItemsFromClient.get(index).get("id")
+                    .intValue();
             items.add(nodeIdToItems.get(nodeIdFromClient));
         }
         return items;
     }
 
-    private static JsonArray getSectionItems(JsonArray items,
+    private static ArrayNode getSectionItems(ArrayNode items,
             int sectionNodeId) {
         for (int rootLevelIdx = 0; rootLevelIdx < items
-                .length(); rootLevelIdx++) {
-            JsonObject item = items.get(rootLevelIdx);
-            int itemNodeId = (int) item.getNumber("id");
+                .size(); rootLevelIdx++) {
+            JsonNode item = items.get(rootLevelIdx);
+            int itemNodeId = item.get("id").intValue();
             if (sectionNodeId == itemNodeId) {
-                JsonObject sectionObj = items.get(rootLevelIdx);
-                return sectionObj.getArray("items");
+                JsonNode sectionObj = items.get(rootLevelIdx);
+                return (ArrayNode) sectionObj.get("items");
             }
         }
         return null;
     }
 
     /**
-     * Checks whether the Dashboard component feature flag is active. Succeeds
-     * if the flag is enabled, and throws otherwise.
-     *
-     * @throws ExperimentalFeatureException
-     *             when the {@link FeatureFlags#DASHBOARD_COMPONENT} feature is
-     *             not enabled
-     */
-    private void checkFeatureFlag() {
-        boolean enabled = featureFlagEnabled || getFeatureFlags()
-                .isEnabled(FeatureFlags.DASHBOARD_COMPONENT);
-        if (!enabled) {
-            throw new ExperimentalFeatureException();
-        }
-    }
-
-    /**
-     * Gets the feature flags for the current UI.
-     * <p>
-     * Not private in order to support mocking
-     *
-     * @return the current set of feature flags
-     */
-    FeatureFlags getFeatureFlags() {
-        return FeatureFlags
-                .get(UI.getCurrent().getSession().getService().getContext());
-    }
-
-    /**
-     * Only for test use.
-     */
-    void setFeatureFlagEnabled(boolean featureFlagEnabled) {
-        this.featureFlagEnabled = featureFlagEnabled;
-    }
-
-    /**
      * The internationalization properties for {@link Dashboard}.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class DashboardI18n implements Serializable {
 
         private String selectSection;

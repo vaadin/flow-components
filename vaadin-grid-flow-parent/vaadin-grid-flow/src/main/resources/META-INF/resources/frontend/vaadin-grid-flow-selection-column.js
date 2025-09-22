@@ -1,4 +1,4 @@
-import '@vaadin/grid/vaadin-grid-column.js';
+import '@vaadin/grid/src/vaadin-grid-column.js';
 import { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
 import { GridSelectionColumnBaseMixin } from '@vaadin/grid/src/vaadin-grid-selection-column-base-mixin.js';
 

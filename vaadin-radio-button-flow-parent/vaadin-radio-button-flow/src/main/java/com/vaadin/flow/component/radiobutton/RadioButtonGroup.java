@@ -38,7 +38,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupDataView;
 import com.vaadin.flow.component.radiobutton.dataview.RadioButtonGroupListDataView;
-import com.vaadin.flow.component.shared.HasClientValidation;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.shared.InputField;
@@ -101,14 +100,11 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-radio-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha13")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/radio-group", version = "24.8.0-alpha13")
+@NpmPackage(value = "@vaadin/radio-group", version = "25.0.0-alpha19")
 @JsModule("@vaadin/radio-group/src/vaadin-radio-group.js")
 public class RadioButtonGroup<T>
-        extends AbstractSinglePropertyField<RadioButtonGroup<T>, T>
-        implements HasAriaLabel, HasClientValidation,
-        HasDataView<T, Void, RadioButtonGroupDataView<T>>,
+        extends AbstractSinglePropertyField<RadioButtonGroup<T>, T> implements
+        HasAriaLabel, HasDataView<T, Void, RadioButtonGroupDataView<T>>,
         HasListDataView<T, RadioButtonGroupListDataView<T>>,
         InputField<AbstractField.ComponentValueChangeEvent<RadioButtonGroup<T>, T>, T>,
         HasThemeVariant<RadioGroupVariant>, HasValidationProperties,

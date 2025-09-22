@@ -30,7 +30,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -46,10 +46,8 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-message-input")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha13")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/message-input/src/vaadin-message-input.js")
-@NpmPackage(value = "@vaadin/message-input", version = "24.8.0-alpha13")
+@NpmPackage(value = "@vaadin/message-input", version = "25.0.0-alpha19")
 public class MessageInput extends Component implements Focusable<MessageInput>,
         HasSize, HasStyle, HasEnabled, HasTooltip {
 
@@ -151,6 +149,6 @@ public class MessageInput extends Component implements Focusable<MessageInput>,
     public void setI18n(MessageInputI18n i18n) {
         Objects.requireNonNull(i18n, "The i18n object should not be null");
         this.i18n = i18n;
-        getElement().setPropertyJson("i18n", JsonUtils.beanToJson(i18n));
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
     }
 }

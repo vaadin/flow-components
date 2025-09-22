@@ -189,8 +189,8 @@ public class GridWithTemplateIT extends AbstractComponentIT {
             clickElementWithJs(btn);
 
             int size = i + 1;
-            WebElement label = container.findElement(By.id("label-" + size));
-            Assert.assertEquals("Label " + size, label.getText());
+            WebElement span = container.findElement(By.id("text-" + size));
+            Assert.assertEquals("Text " + size, span.getText());
         }
     }
 

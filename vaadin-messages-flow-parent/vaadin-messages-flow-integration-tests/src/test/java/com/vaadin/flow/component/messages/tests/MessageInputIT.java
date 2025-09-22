@@ -68,7 +68,7 @@ public class MessageInputIT extends AbstractComponentIT {
                 .getPropertyString("placeholder");
         Assert.assertEquals("Viesti", inputPlaceholder);
 
-        String buttonText = messageInput.$("vaadin-button").first().getText();
+        String buttonText = messageInput.getSubmitButton().getText();
         Assert.assertEquals("Lähetä", buttonText);
     }
 }

@@ -41,11 +41,19 @@ import com.vaadin.flow.shared.Registration;
 /**
  * TabSheet consists of a set of tabs and the content area. The content area
  * displays a component associated with the selected tab.
+ * <p>
+ * When switching between tabs, the content component of the previously selected
+ * tab is hidden and disabled. When switching back to that tab, its content
+ * component is revealed again and re-enabled.
+ * <p>
+ * To avoid re-enabling components that should remain disabled, wrap the tab
+ * content inside a container element such as {@code Div} or
+ * {@code VerticalLayout}, instead of adding them directly to the TabSheet.
  *
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabsheet")
-@NpmPackage(value = "@vaadin/tabsheet", version = "24.8.0-alpha13")
+@NpmPackage(value = "@vaadin/tabsheet", version = "25.0.0-alpha19")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
         HasSuffix, HasThemeVariant<TabSheetVariant> {

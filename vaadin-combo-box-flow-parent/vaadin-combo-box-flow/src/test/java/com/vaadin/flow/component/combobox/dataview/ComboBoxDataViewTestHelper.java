@@ -31,11 +31,11 @@ final class ComboBoxDataViewTestHelper {
         try {
             // Reset the client filter on server side as though it's sent from
             // client
-            Method setRequestedRangeMethod = ComboBoxBase.class
-                    .getDeclaredMethod("setRequestedRange", int.class,
-                            int.class, String.class);
-            setRequestedRangeMethod.setAccessible(true);
-            setRequestedRangeMethod.invoke(comboBox, 0, comboBox.getPageSize(),
+            Method setViewportRangeMethod = ComboBoxBase.class
+                    .getDeclaredMethod("setViewportRange", int.class, int.class,
+                            String.class);
+            setViewportRangeMethod.setAccessible(true);
+            setViewportRangeMethod.invoke(comboBox, 0, comboBox.getPageSize(),
                     clientFilter);
         } catch (Exception e) {
             throw new RuntimeException(e);

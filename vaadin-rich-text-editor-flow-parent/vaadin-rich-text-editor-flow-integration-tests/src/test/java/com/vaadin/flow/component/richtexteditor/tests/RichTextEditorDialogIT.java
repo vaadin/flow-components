@@ -34,8 +34,7 @@ public class RichTextEditorDialogIT extends AbstractComponentIT {
         String expectedHtml = "<ul><li>Item 1</li><li>Item 2</li></ul>";
         String expectedDelta = "[{\"insert\":\"Item 1\"},{\"attributes\":{\"list\":\"bullet\"},\"insert\":\"\\n\"},{\"insert\":\"Item 2\"},{\"attributes\":{\"list\":\"bullet\"},\"insert\":\"\\n\"}]";
 
-        Assert.assertEquals(expectedHtml,
-                editor.getEditor().getProperty("innerHTML"));
+        Assert.assertEquals(expectedHtml, editor.getProperty("htmlValue"));
         Assert.assertEquals(expectedDelta, editor.getProperty("value"));
     }
 }

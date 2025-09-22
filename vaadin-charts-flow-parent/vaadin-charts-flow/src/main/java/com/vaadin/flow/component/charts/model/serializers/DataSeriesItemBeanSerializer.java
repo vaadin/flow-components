@@ -8,14 +8,13 @@
  */
 package com.vaadin.flow.component.charts.model.serializers;
 
-import java.io.IOException;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.OhlcItem;
+
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.JsonNodeFactory;
 
 /**
  * Custom bean serializer for {@link DataSeriesItem}
@@ -32,13 +31,12 @@ public class DataSeriesItemBeanSerializer
     @Override
     public void serialize(DataSeriesItem bean,
             BeanSerializerDelegator<DataSeriesItem> serializer,
-            JsonGenerator jgen, SerializerProvider provider)
-            throws IOException {
+            JsonGenerator jgen, SerializationContext context) {
 
         if (bean.isCustomized()) {
             jgen.writeStartObject();
             // write fields as per normal serialization rules
-            serializer.serializeFields(bean, jgen, provider);
+            serializer.serializeProperties(bean, jgen, context);
             jgen.writeEndObject();
 
         } else if (bean instanceof OhlcItem) {
@@ -71,7 +69,7 @@ public class DataSeriesItemBeanSerializer
                 // If no x set, make it like list series, just number or
                 // min-max pairs
                 if (y != null) {
-                    jgen.writeObject(y);
+                    jgen.writePOJO(y);
                 } else {
                     ArrayNode jsonArray = JsonNodeFactory.instance.arrayNode();
                     jsonArray.addPOJO(bean.getLow());

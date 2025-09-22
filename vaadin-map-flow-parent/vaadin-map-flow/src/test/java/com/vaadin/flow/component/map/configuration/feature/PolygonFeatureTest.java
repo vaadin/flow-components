@@ -55,6 +55,14 @@ public class PolygonFeatureTest {
     }
 
     @Test
+    public void individualStyleInstances() {
+        PolygonFeature polygon1 = new PolygonFeature();
+        PolygonFeature polygon2 = new PolygonFeature();
+
+        Assert.assertNotEquals(polygon1.getStyle(), polygon2.getStyle());
+    }
+
+    @Test
     public void initializeWithCoordinates() {
         List<Coordinate> coordinates = List.of(outerCoordinates);
         PolygonFeature polygonFeature = new PolygonFeature(coordinates);

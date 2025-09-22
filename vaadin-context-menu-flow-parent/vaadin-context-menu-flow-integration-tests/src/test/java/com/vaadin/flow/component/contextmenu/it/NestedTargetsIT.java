@@ -31,32 +31,32 @@ public class NestedTargetsIT extends AbstractContextMenuIT {
     @Before
     public void init() {
         open();
-        verifyClosed();
+        verifyClosedAndRemoved();
     }
 
     @Test
     public void nestedTargets_rightClickParentTargetOutsideChildTarget_onlyParentTargetMenuOpened() {
         rightClickOn("not-in-child-target");
-        verifyNumOfOverlays(1);
+        verifyNumberOfMenus(1);
 
         Assert.assertArrayEquals(new String[] { "menu on parent target" },
                 getMenuItemCaptions());
 
         getMenuItems().get(0).click();
-        verifyClosed();
+        verifyClosedAndRemoved();
         Assert.assertEquals("parent", findElement(By.id("messages")).getText());
     }
 
     @Test
     public void nestedTargets_rightClickChildTarget_onlyChildTargetMenuOpened() {
         rightClickOn("child-target");
-        verifyNumOfOverlays(1);
+        verifyNumberOfMenus(1);
 
         Assert.assertArrayEquals(new String[] { "menu on child target" },
                 getMenuItemCaptions());
 
         getMenuItems().get(0).click();
-        verifyClosed();
+        verifyClosedAndRemoved();
         Assert.assertEquals("child", findElement(By.id("messages")).getText());
     }
 }

@@ -20,9 +20,12 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 
+import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
+import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -32,7 +35,7 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-date-time-picker")
 public class DateTimePickerElement extends TestBenchElement
-        implements HasLabel, HasHelper {
+        implements HasLabel, HasHelper, HasValidation {
 
     private static final String VALUE_PROPERTY = "value";
 
@@ -139,6 +142,7 @@ public class DateTimePickerElement extends TestBenchElement
      */
     private void setValue(String value) {
         setProperty(VALUE_PROPERTY, value);
+        triggerChange(this);
     }
 
     /**
@@ -206,7 +210,7 @@ public class DateTimePickerElement extends TestBenchElement
 
     /**
      * This is needed when simulating user input by explicitly setting the value
-     * property of inner inputs.
+     * property.
      */
     private void triggerChange(TestBenchElement pickerElement) {
         executeScript(
@@ -247,14 +251,22 @@ public class DateTimePickerElement extends TestBenchElement
         return !getPropertyBoolean("autoOpenDisabled");
     }
 
-    private TestBenchElement getDatePicker() {
-        return $("vaadin-date-picker").withAttribute("slot", "date-picker")
-                .first();
+    /**
+     * Get the DatePickerElement for date picker part.
+     *
+     * @return DatePickerElement
+     */
+    public DatePickerElement getDatePicker() {
+        return this.$(DatePickerElement.class).first();
     }
 
-    private TestBenchElement getTimePicker() {
-        return $("vaadin-time-picker").withAttribute("slot", "time-picker")
-                .first();
+    /**
+     * Get the TimePickerElement for time picker part.
+     *
+     * @return TimePickerElement
+     */
+    public TimePickerElement getTimePicker() {
+        return this.$(TimePickerElement.class).first();
     }
 
     /**

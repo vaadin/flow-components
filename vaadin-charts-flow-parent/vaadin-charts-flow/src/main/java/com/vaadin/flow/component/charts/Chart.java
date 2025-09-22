@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -68,12 +69,9 @@ import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.shared.Registration;
-
-import elemental.json.JsonObject;
-import elemental.json.JsonValue;
-import elemental.json.impl.JreJsonFactory;
 
 /**
  * Vaadin Charts is a feature-rich interactive charting library for Vaadin. It
@@ -90,17 +88,13 @@ import elemental.json.impl.JreJsonFactory;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-chart")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.8.0-alpha13")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/charts", version = "24.8.0-alpha13")
+@NpmPackage(value = "@vaadin/charts", version = "25.0.0-alpha19")
 @JsModule("@vaadin/charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
     private Configuration configuration;
 
     private Registration configurationUpdateRegistration;
-
-    private transient JreJsonFactory jsonFactory = new JreJsonFactory();
 
     private final ConfigurationChangeListener changeListener = new ProxyChangeForwarder(
             this);
@@ -164,14 +158,6 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
         }
     }
 
-    JreJsonFactory getJsonFactory() {
-        if (jsonFactory == null) {
-            jsonFactory = new JreJsonFactory();
-        }
-
-        return jsonFactory;
-    }
-
     /**
      * Draws a chart using the current configuration.
      *
@@ -206,8 +192,8 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     public void drawChart(boolean resetConfiguration) {
         validateTimelineAndConfiguration();
 
-        final JsonObject configurationNode = getJsonFactory()
-                .parse(ChartSerialization.toJSON(configuration));
+        final ObjectNode configurationNode = JacksonUtils
+                .readTree(ChartSerialization.toJSON(configuration));
 
         getElement().callJsFunction("updateConfiguration", configurationNode,
                 resetConfiguration);
@@ -751,8 +737,8 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
                     toJsonValue((AbstractConfigurationObject) drilldownSeries));
         }
 
-        private JsonValue toJsonValue(AbstractConfigurationObject series) {
-            return getJsonFactory().parse(ChartSerialization.toJSON(series));
+        private ObjectNode toJsonValue(AbstractConfigurationObject series) {
+            return JacksonUtils.readTree((ChartSerialization.toJSON(series)));
         }
 
         private Series resolveSeriesFor(int seriesIndex) {

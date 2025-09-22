@@ -23,7 +23,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -36,7 +35,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.FooterRow.FooterCell;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
-import com.vaadin.flow.component.html.NativeLabel;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.dom.Element;
@@ -651,11 +650,10 @@ public class HeaderFooterTest {
                 "The cell prepended on top of a joined cell should be "
                         + "a parent for the same column elements",
                 2, bottomChildColumns.size());
-        Assert.assertThat(
-                "The cell prepended on top of a joined cell should be "
-                        + "a parent for the same column elements",
-                bottomChildColumns,
-                CoreMatchers.hasItems(firstColumn, secondColumn));
+        Assert.assertTrue("The child columns should contain firstColumn",
+                bottomChildColumns.contains(firstColumn));
+        Assert.assertTrue("The child columns should contain secondColumn",
+                bottomChildColumns.contains(secondColumn));
     }
 
     @Test
@@ -1143,7 +1141,7 @@ public class HeaderFooterTest {
                 .forEach(cell -> cell.setText(textContent));
         HeaderRow newHeaderRow = grid.appendHeaderRow();
         newHeaderRow.getCells()
-                .forEach(cell -> cell.setComponent(new NativeLabel("NEW")));
+                .forEach(cell -> cell.setComponent(new Span("NEW")));
         grid.removeHeaderRow(newHeaderRow);
         assertRowTextContent(textContent, grid.getHeaderRows().get(0));
     }
@@ -1155,7 +1153,7 @@ public class HeaderFooterTest {
                 defaultHeaderRow);
         HeaderRow newHeaderRow = grid.appendHeaderRow();
         newHeaderRow.getCells()
-                .forEach(cell -> cell.setComponent(new NativeLabel("NEW")));
+                .forEach(cell -> cell.setComponent(new Span("NEW")));
         grid.removeHeaderRow(newHeaderRow);
         assertRowComponents(defaultHeaderRowComponents,
                 grid.getHeaderRows().get(0));
@@ -1192,7 +1190,7 @@ public class HeaderFooterTest {
                 .forEach(cell -> cell.setText(textContent));
         FooterRow newFooterRow = grid.prependFooterRow();
         newFooterRow.getCells()
-                .forEach(cell -> cell.setComponent(new NativeLabel("NEW")));
+                .forEach(cell -> cell.setComponent(new Span("NEW")));
         grid.removeFooterRow(newFooterRow);
         assertRowTextContent(textContent, grid.getFooterRows().get(0));
     }
@@ -1204,7 +1202,7 @@ public class HeaderFooterTest {
                 footerRow);
         FooterRow newFooterRow = grid.prependFooterRow();
         newFooterRow.getCells()
-                .forEach(cell -> cell.setComponent(new NativeLabel("NEW")));
+                .forEach(cell -> cell.setComponent(new Span("NEW")));
         grid.removeFooterRow(newFooterRow);
         assertRowComponents(footerRowComponents, grid.getFooterRows().get(0));
     }
@@ -1545,9 +1543,8 @@ public class HeaderFooterTest {
 
     private List<? extends Component> setComponentsToRow(
             AbstractRow<? extends AbstractRow.AbstractCell> row) {
-        List<NativeLabel> rowComponents = IntStream
-                .range(0, grid.getColumns().size()).mapToObj(Integer::toString)
-                .map(NativeLabel::new).toList();
+        List<Span> rowComponents = IntStream.range(0, grid.getColumns().size())
+                .mapToObj(Integer::toString).map(Span::new).toList();
         for (int i = 0; i < rowComponents.size(); i++) {
             row.getCells().get(i).setComponent(rowComponents.get(i));
         }

@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +54,7 @@ public class AddingColumnsIT extends AbstractComponentIT {
     @Test
     public void gridRendered_addColumnWithComponentRenderer_cellsRendered() {
         clickElementWithJs("add-component-column");
-        assertCellContentsContain("<label>foo</label>", "<label>bar</label>");
+        assertCellContentsContain("<span>foo</span>", "<span>bar</span>");
     }
 
     @Test
@@ -77,10 +75,10 @@ public class AddingColumnsIT extends AbstractComponentIT {
         // JDK16 adds extra comma after year in en_US
         Assert.assertTrue(
                 TestHelper.stripComments(grid.getCell(0, 0).getInnerHTML())
-                        .matches("January 1, 1980,? 1:20 AM"));
+                        .matches("January 1, 1980,? 1:20[ \\u00A0]AM"));
         Assert.assertTrue(
                 TestHelper.stripComments(grid.getCell(1, 0).getInnerHTML())
-                        .matches("January 1, 1980,? 1:30 AM"));
+                        .matches("January 1, 1980,? 1:30[ \\u00A0]AM"));
     }
 
     @Test
@@ -99,12 +97,12 @@ public class AddingColumnsIT extends AbstractComponentIT {
 
     private void assertCellContentsContain(String expectedFirstRow,
             String expectedSecondRow) {
-        MatcherAssert.assertThat(
-                TestHelper.stripComments(grid.getCell(0, 0).getInnerHTML()),
-                CoreMatchers.containsString(expectedFirstRow));
-        MatcherAssert.assertThat(
-                TestHelper.stripComments(grid.getCell(1, 0).getInnerHTML()),
-                CoreMatchers.containsString(expectedSecondRow));
+        Assert.assertTrue("First row should contain expected content",
+                TestHelper.stripComments(grid.getCell(0, 0).getInnerHTML())
+                        .contains(expectedFirstRow));
+        Assert.assertTrue("Second row should contain expected content",
+                TestHelper.stripComments(grid.getCell(1, 0).getInnerHTML())
+                        .contains(expectedSecondRow));
     }
 
 }

@@ -23,8 +23,10 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.testbench.HasClearButton;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -34,7 +36,7 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-date-picker")
 public class DatePickerElement extends TestBenchElement
-        implements HasLabel, HasHelper {
+        implements HasLabel, HasHelper, HasClearButton, HasValidation {
 
     @Element("vaadin-date-picker-overlay-content")
     public static class OverlayContentElement extends TestBenchElement {
@@ -206,15 +208,12 @@ public class DatePickerElement extends TestBenchElement
     }
 
     /**
-     * Gets the content of the first date picker overlay on the page Should only
-     * be used with a single date picker at a time, there is no check that the
-     * overlay belongs to this specific date picker
+     * Gets the content of the date picker overlay.
      *
-     * @return
+     * @return the overlay content element
      */
     public OverlayContentElement getOverlayContent() {
-        return this.$("vaadin-date-picker-overlay").onPage().waitForFirst()
-                .$(OverlayContentElement.class).first();
+        return $(OverlayContentElement.class).first();
     }
 
     @Override

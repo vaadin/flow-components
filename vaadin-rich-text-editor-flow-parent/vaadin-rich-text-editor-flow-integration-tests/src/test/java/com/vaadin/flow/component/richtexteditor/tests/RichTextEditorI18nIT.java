@@ -31,58 +31,52 @@ public class RichTextEditorI18nIT extends AbstractComponentIT {
     public void setFullI18n_updatesAllTexts() {
         $("button").id("set-full-i18n").click();
 
-        Assert.assertEquals("Undo custom", getToolbarButtonTooltipText("undo"));
-        Assert.assertEquals("Redo custom", getToolbarButtonTooltipText("redo"));
-        Assert.assertEquals("Bold custom", getToolbarButtonTooltipText("bold"));
+        Assert.assertEquals("Undo custom", getToolbarButtonAriaLabel("undo"));
+        Assert.assertEquals("Redo custom", getToolbarButtonAriaLabel("redo"));
+        Assert.assertEquals("Bold custom", getToolbarButtonAriaLabel("bold"));
         Assert.assertEquals("Italic custom",
-                getToolbarButtonTooltipText("italic"));
+                getToolbarButtonAriaLabel("italic"));
         Assert.assertEquals("Underline custom",
-                getToolbarButtonTooltipText("underline"));
+                getToolbarButtonAriaLabel("underline"));
         Assert.assertEquals("Strike custom",
-                getToolbarButtonTooltipText("strike"));
-        Assert.assertEquals("Color custom",
-                getToolbarButtonTooltipText("color"));
+                getToolbarButtonAriaLabel("strike"));
+        Assert.assertEquals("Color custom", getToolbarButtonAriaLabel("color"));
         Assert.assertEquals("Background custom",
-                getToolbarButtonTooltipText("background"));
-        Assert.assertEquals("Header 1 custom",
-                getToolbarButtonTooltipText("h1"));
-        Assert.assertEquals("Header 2 custom",
-                getToolbarButtonTooltipText("h2"));
-        Assert.assertEquals("Header 3 custom",
-                getToolbarButtonTooltipText("h3"));
+                getToolbarButtonAriaLabel("background"));
+        Assert.assertEquals("Header 1 custom", getToolbarButtonAriaLabel("h1"));
+        Assert.assertEquals("Header 2 custom", getToolbarButtonAriaLabel("h2"));
+        Assert.assertEquals("Header 3 custom", getToolbarButtonAriaLabel("h3"));
         Assert.assertEquals("Subscript custom",
-                getToolbarButtonTooltipText("subscript"));
+                getToolbarButtonAriaLabel("subscript"));
         Assert.assertEquals("Superscript custom",
-                getToolbarButtonTooltipText("superscript"));
+                getToolbarButtonAriaLabel("superscript"));
         Assert.assertEquals("Ordered list custom",
-                getToolbarButtonTooltipText("ol"));
+                getToolbarButtonAriaLabel("ol"));
         Assert.assertEquals("Bullet list custom",
-                getToolbarButtonTooltipText("ul"));
+                getToolbarButtonAriaLabel("ul"));
         Assert.assertEquals("Align left custom",
-                getToolbarButtonTooltipText("left"));
+                getToolbarButtonAriaLabel("left"));
         Assert.assertEquals("Align center custom",
-                getToolbarButtonTooltipText("center"));
+                getToolbarButtonAriaLabel("center"));
         Assert.assertEquals("Align right custom",
-                getToolbarButtonTooltipText("right"));
-        Assert.assertEquals("Image custom",
-                getToolbarButtonTooltipText("image"));
-        Assert.assertEquals("Link custom", getToolbarButtonTooltipText("link"));
+                getToolbarButtonAriaLabel("right"));
+        Assert.assertEquals("Image custom", getToolbarButtonAriaLabel("image"));
+        Assert.assertEquals("Link custom", getToolbarButtonAriaLabel("link"));
         Assert.assertEquals("Blockquote custom",
-                getToolbarButtonTooltipText("blockquote"));
+                getToolbarButtonAriaLabel("blockquote"));
         Assert.assertEquals("Code block custom",
-                getToolbarButtonTooltipText("code"));
-        Assert.assertEquals("Clean custom",
-                getToolbarButtonTooltipText("clean"));
+                getToolbarButtonAriaLabel("code"));
+        Assert.assertEquals("Clean custom", getToolbarButtonAriaLabel("clean"));
     }
 
     @Test
     public void setPartialI18n_mergesWithExistingI18n() {
         $("button").id("set-partial-i18n").click();
 
-        Assert.assertEquals("Undo custom", getToolbarButtonTooltipText("undo"));
-        Assert.assertEquals("Redo custom", getToolbarButtonTooltipText("redo"));
-        Assert.assertEquals("bold", getToolbarButtonTooltipText("bold"));
-        Assert.assertEquals("italic", getToolbarButtonTooltipText("italic"));
+        Assert.assertEquals("Undo custom", getToolbarButtonAriaLabel("undo"));
+        Assert.assertEquals("Redo custom", getToolbarButtonAriaLabel("redo"));
+        Assert.assertEquals("bold", getToolbarButtonAriaLabel("bold"));
+        Assert.assertEquals("italic", getToolbarButtonAriaLabel("italic"));
     }
 
     @Test
@@ -92,13 +86,13 @@ public class RichTextEditorI18nIT extends AbstractComponentIT {
         $("button").id("attach").click();
 
         editor = $(RichTextEditorElement.class).waitForFirst();
-        Assert.assertEquals("Undo custom", getToolbarButtonTooltipText("undo"));
-        Assert.assertEquals("Redo custom", getToolbarButtonTooltipText("redo"));
+        Assert.assertEquals("Undo custom", getToolbarButtonAriaLabel("undo"));
+        Assert.assertEquals("Redo custom", getToolbarButtonAriaLabel("redo"));
     }
 
-    private String getToolbarButtonTooltipText(String buttonId) {
-        TestBenchElement tooltip = editor.$("vaadin-tooltip")
-                .withAttribute("for", "btn-" + buttonId).first();
-        return tooltip.getPropertyString("text");
+    private String getToolbarButtonAriaLabel(String buttonId) {
+        TestBenchElement button = editor.$("button")
+                .withAttribute("id", "btn-" + buttonId).first();
+        return button.getDomAttribute("aria-label");
     }
 }

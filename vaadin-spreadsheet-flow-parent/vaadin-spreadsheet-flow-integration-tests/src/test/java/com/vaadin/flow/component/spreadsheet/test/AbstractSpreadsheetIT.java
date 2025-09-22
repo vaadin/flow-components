@@ -42,8 +42,6 @@ import com.vaadin.tests.AbstractComponentIT;
 
 public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
-    // Should be COMMAND for macOS
-    private Keys metaKey = Keys.CONTROL;
     private SpreadsheetElement spreadsheet;
     private static final String BACKGROUND_COLOR = "background-color";
 
@@ -155,16 +153,13 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
     private void selectElement(WebElement element, boolean ctrl,
             boolean shift) {
+        Keys metaKey = isMac() ? Keys.COMMAND : Keys.CONTROL;
         if (ctrl) {
             new Actions(getDriver()).moveToElement(element).keyDown(metaKey)
                     .click().keyUp(metaKey).build().perform();
         } else if (shift) {
             new Actions(getDriver()).moveToElement(element).keyDown(Keys.SHIFT)
                     .click().keyUp(Keys.SHIFT).build().perform();
-        } else if (ctrl && shift) {
-            new Actions(getDriver()).moveToElement(element).keyDown(Keys.SHIFT)
-                    .keyDown(metaKey).click().keyUp(Keys.SHIFT).keyUp(metaKey)
-                    .build().perform();
         } else {
             new Actions(getDriver()).moveToElement(element).click().build()
                     .perform();
@@ -359,7 +354,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     public void setLocale(Locale locale) {
         ComboBoxElement localeSelect = $(ComboBoxElement.class)
                 .id("localeSelect");
-        localeSelect.selectByText(locale.getDisplayName());
+        localeSelect.selectByText(locale.getDisplayName(Locale.ENGLISH));
     }
 
     public void loadTestFixture(TestFixtures fixture) {
@@ -562,6 +557,21 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
         findElementInShadowRoot(By.cssSelector(".addressfield")).clear();
         findElementInShadowRoot(By.cssSelector(".addressfield")).sendKeys(cell);
         new Actions(getDriver()).sendKeys(Keys.RETURN).perform();
+    }
+
+    /**
+     * Suppresses the overlay that appears when hovering over a cell with an
+     * invalid formula. The overlay can appear when using setCellValue, and can
+     * cause subsequent button clicks to fail. Can be used in tests that enter
+     * invalid formulas in cells to test the invalid formular indicator (though
+     * obviously not in tests that check the overlay itself).
+     */
+    public void suppressInvalidFormulaCommentOverlay() {
+        executeScript("""
+                arguments[0].addEventListener("mouseover", e => {
+                  e.stopPropagation();
+                }, true);
+                """, getSpreadsheetInShadowRoot());
     }
 
     // Context menu helpers

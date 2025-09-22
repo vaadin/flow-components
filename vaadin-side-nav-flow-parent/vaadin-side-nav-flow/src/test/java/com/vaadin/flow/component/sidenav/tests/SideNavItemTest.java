@@ -28,9 +28,11 @@ import org.junit.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.shared.HasTooltip;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.BeforeEvent;
@@ -44,9 +46,6 @@ import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.Router;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
-
-import elemental.json.JsonArray;
-import elemental.json.impl.JsonUtil;
 
 public class SideNavItemTest {
 
@@ -216,6 +215,22 @@ public class SideNavItemTest {
 
         assertPath("test-path");
         Assert.assertEquals(prefixComponent, sideNavItem.getPrefixComponent());
+    }
+
+    // TOOLTIP TESTS
+    @Test
+    public void implementsHasTooltip() {
+        sideNavItem = new SideNavItem("Test item", "test-path");
+        Assert.assertTrue(sideNavItem instanceof HasTooltip);
+    }
+
+    @Test
+    public void tooltipTextIsSet() {
+        sideNavItem = new SideNavItem("Test item", "test-path");
+        sideNavItem.setTooltipText("Test tooltip text");
+        Assert.assertNotNull(sideNavItem.getTooltip());
+        Assert.assertEquals("Test tooltip text",
+                sideNavItem.getTooltip().getText());
     }
 
     // EXPAND AND COLLAPSE TESTS
@@ -778,13 +793,12 @@ public class SideNavItemTest {
             Assert.assertFalse(
                     sideNavItem.getElement().hasProperty("pathAliases"));
         } else {
-            String aliasesProperty = sideNavItem.getElement()
-                    .getProperty("pathAliases");
-            Assert.assertNotNull(aliasesProperty);
-            JsonArray actualAliasesArray = JsonUtil.parse(aliasesProperty);
+            ArrayNode actualAliasesArray = (ArrayNode) sideNavItem.getElement()
+                    .getPropertyRaw("pathAliases");
+            Assert.assertNotNull(actualAliasesArray);
             Set<String> actualAliasesSet = new HashSet<>();
-            for (int i = 0; i < actualAliasesArray.length(); i++) {
-                actualAliasesSet.add(actualAliasesArray.getString(i));
+            for (int i = 0; i < actualAliasesArray.size(); i++) {
+                actualAliasesSet.add(actualAliasesArray.get(i).asText());
             }
             Assert.assertEquals(expectedAliases, actualAliasesSet);
         }
