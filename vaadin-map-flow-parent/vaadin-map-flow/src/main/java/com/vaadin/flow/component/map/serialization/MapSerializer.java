@@ -37,19 +37,27 @@ import elemental.json.impl.JreJsonFactory;
 public class MapSerializer implements Serializable {
 
     private final ObjectWriter writer;
+    private final Map<Object, StreamRegistration> streamRegistrationCache = new HashMap<>();
 
-    public MapSerializer() {
-        // Add map-instance specific serializer to handle Flow stream resources
-        SimpleModule module = new SimpleModule().addSerializer(
+    public MapSerializer(com.vaadin.flow.component.map.MapBase map) {
+        // Create mapper that automatically registers stream resources and
+        // download handlers in the current UI's stream resource registry
+        SimpleModule streamResourceModule = new SimpleModule().addSerializer(
                 StreamResource.class, new StreamResourceSerializer());
-        // Add map-instance specific serializer to handle Flow stream resources
-        SimpleModule downloadModule = new SimpleModule().addSerializer(
+        SimpleModule downloadHandlerModule = new SimpleModule().addSerializer(
                 DownloadHandler.class, new DownloadHandlerSerializer());
 
         ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(module);
-        mapper.registerModule(downloadModule);
+        mapper.registerModule(streamResourceModule);
+        mapper.registerModule(downloadHandlerModule);
         writer = mapper.writer();
+
+        // Unregister stream registrations when the map is detached
+        map.addDetachListener(event -> {
+            streamRegistrationCache.values()
+                    .forEach(StreamRegistration::unregister);
+            streamRegistrationCache.clear();
+        });
     }
 
     /**
@@ -83,9 +91,8 @@ public class MapSerializer implements Serializable {
      * returns the dynamic URL as serialized value.
      */
     @Deprecated(since = "24.8", forRemoval = true)
-    private static class StreamResourceSerializer
+    private class StreamResourceSerializer
             extends StdSerializer<StreamResource> {
-        private final Map<StreamResource, URI> streamResourceURICache = new HashMap<>();
 
         public StreamResourceSerializer() {
             super(StreamResource.class);
@@ -103,16 +110,15 @@ public class MapSerializer implements Serializable {
         }
 
         private URI getURI(StreamResource resource) {
-            URI uri = streamResourceURICache.get(resource);
-            if (uri == null) {
+            StreamRegistration registration = streamRegistrationCache
+                    .get(resource);
+            if (registration == null) {
                 StreamResourceRegistry resourceRegistry = UI.getCurrent()
                         .getSession().getResourceRegistry();
-                StreamRegistration streamRegistration = resourceRegistry
-                        .registerResource(resource);
-                uri = streamRegistration.getResourceUri();
-                streamResourceURICache.put(resource, uri);
+                registration = resourceRegistry.registerResource(resource);
+                streamRegistrationCache.put(resource, registration);
             }
-            return uri;
+            return registration.getResourceUri();
         }
     }
 
@@ -123,9 +129,8 @@ public class MapSerializer implements Serializable {
      * registry, and are available under a dynamic URL. The serializer also
      * returns the dynamic URL as serialized value.
      */
-    private static class DownloadHandlerSerializer
+    private class DownloadHandlerSerializer
             extends StdSerializer<DownloadHandler> {
-        private final Map<DownloadHandler, URI> streamResourceURICache = new HashMap<>();
 
         public DownloadHandlerSerializer() {
             super(DownloadHandler.class);
@@ -143,16 +148,15 @@ public class MapSerializer implements Serializable {
         }
 
         private URI getURI(DownloadHandler resource) {
-            URI uri = streamResourceURICache.get(resource);
-            if (uri == null) {
+            StreamRegistration registration = streamRegistrationCache
+                    .get(resource);
+            if (registration == null) {
                 StreamResourceRegistry resourceRegistry = UI.getCurrent()
                         .getSession().getResourceRegistry();
-                StreamRegistration streamRegistration = resourceRegistry
-                        .registerResource(resource);
-                uri = streamRegistration.getResourceUri();
-                streamResourceURICache.put(resource, uri);
+                registration = resourceRegistry.registerResource(resource);
+                streamRegistrationCache.put(resource, registration);
             }
-            return uri;
+            return registration.getResourceUri();
         }
     }
 }
