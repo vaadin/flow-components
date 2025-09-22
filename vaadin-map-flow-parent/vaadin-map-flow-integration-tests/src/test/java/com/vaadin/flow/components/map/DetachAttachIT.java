@@ -8,10 +8,14 @@
  */
 package com.vaadin.flow.components.map;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.vaadin.flow.component.map.Assets;
 import com.vaadin.flow.component.map.testbench.MapElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
@@ -70,5 +74,24 @@ public class DetachAttachIT extends AbstractComponentIT {
         Assert.assertEquals(22.3, view.getCenter().getX(), 0.0001);
         Assert.assertEquals(60.45, view.getCenter().getY(), 0.0001);
         Assert.assertEquals(14, view.getZoom(), 0.1);
+
+        MapElement.LayerReference featureLayer = mapReference.getLayers()
+                .getLayer(1);
+        MapElement.VectorSourceReference source = featureLayer.getSource()
+                .asVectorSource();
+        MapElement.FeatureCollectionReference features = source.getFeatures();
+        MapElement.FeatureReference feature = features.getFeature(0);
+
+        MapElement.Coordinate coordinates = feature.getGeometry()
+                .getCoordinates();
+        Assert.assertEquals(22.3, coordinates.getX(), 0.001);
+        Assert.assertEquals(60.45, coordinates.getY(), 0.001);
+
+        MapElement.IconReference icon = feature.getStyle().getImage();
+        Pattern urlPattern = Pattern.compile(
+                "VAADIN/dynamic/resource/.*/" + Assets.POINT.getFileName());
+        Matcher matcher = urlPattern.matcher(icon.getSrc());
+        Assert.assertTrue("Icon URL does not match expected pattern: "
+                + urlPattern.pattern(), matcher.matches());
     }
 }
