@@ -100,6 +100,12 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     private Receiver receiver;
 
     /**
+     * Represents the name of the target location or identifier where files
+     * or data are to be uploaded. Default value is set to "upload".
+     */
+    private String uploadTargetName = "upload";
+
+    /**
      * Create a new instance of Upload.
      * <p>
      * The upload handler must be set through
@@ -194,6 +200,19 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     public Upload(UploadHandler handler) {
         this();
         setUploadHandler(handler);
+    }
+
+    /**
+     * Create a new instance of Upload with the given upload handler and target name.
+     *
+     * @param handler
+     *            upload handler that handles the upload, not {@code null}
+     * @param targetName
+     *            the endpoint name (single path segment) to publish the upload under, not blank
+     */
+    public Upload(UploadHandler handler, String targetName) {
+        this();
+        setUploadHandler(handler, targetName);
     }
 
     /**
@@ -731,7 +750,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
                 handler, this.getElement()) {
             @Override
             public String getName() {
-                return "upload";
+                return uploadTargetName;
             }
         };
         runBeforeClientResponse(ui -> getElement().setAttribute("target",
@@ -742,6 +761,23 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
             addListener(UploadCompleteEvent.class, event -> endUpload());
         }
         receiver = null;
+    }
+
+    /**
+     * Set the upload handler to be used for this upload component.
+     * <p>
+     * The given handler defines how uploaded file content is handled on the
+     * server and invoked per each single file to be uploaded. Note! This method
+     * overrides the receiver set by {@link #setReceiver(Receiver)}.
+     *
+     * @param handler
+     *            upload handler to use for file receptions, not {@code null}
+     * @param targetName
+     *            endpoint name (single path segment), not blank
+     */
+    public void setUploadHandler(UploadHandler handler, String targetName) {
+        setUploadTargetName(targetName);
+        setUploadHandler(handler);
     }
 
     private boolean isMultiFileReceiver(Receiver receiver) {
@@ -820,6 +856,24 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
      */
     public void clearFileList() {
         getElement().setPropertyJson("files", JacksonUtils.createArrayNode());
+    }
+
+    /**
+     * Retrieves the name of the upload target.
+     *
+     * @return the name of the upload target as a String.
+     */
+    public String getUploadTargetName() {
+        return uploadTargetName;
+    }
+
+    /**
+     * Sets the name of the upload target.
+     *
+     * @param uploadTargetName the name to set for the upload target
+     */
+    public void setUploadTargetName(String uploadTargetName) {
+        this.uploadTargetName = uploadTargetName;
     }
 
     private static class DefaultStreamVariable implements StreamVariable {

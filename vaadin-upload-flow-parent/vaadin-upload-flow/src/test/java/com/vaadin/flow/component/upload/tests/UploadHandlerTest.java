@@ -101,6 +101,18 @@ public class UploadHandlerTest {
     }
 
     @Test
+    public void setUploadHandler_withCustomTarget_generatedUrlEndsWithCustomName() {
+        String targetName = "custom-target";
+        upload.setUploadHandler(event -> {
+        }, targetName);
+        fakeClientCommunication();
+
+        String targetUploadUrl = upload.getElement().getAttribute("target");
+        Assert.assertTrue("Upload url should end with custom target name 'custom-target'",
+                targetUploadUrl.endsWith(targetName));
+    }
+
+    @Test
     public void uploadWithStandardHandler_activeUploadsIsChanged_from0to1_from1to0()
             throws IOException, URISyntaxException {
         // Not uploading initially
