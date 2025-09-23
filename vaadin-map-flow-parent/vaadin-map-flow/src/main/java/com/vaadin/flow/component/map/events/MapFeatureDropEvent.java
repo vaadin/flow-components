@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.map.events;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
@@ -17,6 +16,8 @@ import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
+
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Provides data for when a feature is dropped after a drag operation
