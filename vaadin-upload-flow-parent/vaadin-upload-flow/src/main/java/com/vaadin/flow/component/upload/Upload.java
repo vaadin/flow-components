@@ -111,15 +111,15 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
         getElement().addEventListener("file-reject", event -> {
             String detailError = event.getEventData().get(eventDetailError)
-                    .asText();
+                    .asString();
             String detailFileName = event.getEventData()
-                    .get(eventDetailFileName).asText();
+                    .get(eventDetailFileName).asString();
             fireEvent(new FileRejectedEvent(this, detailError, detailFileName));
         }).addEventData(eventDetailError).addEventData(eventDetailFileName);
 
         getElement().addEventListener("file-remove", event -> {
             String detailFileName = event.getEventData()
-                    .get(eventDetailFileName).asText();
+                    .get(eventDetailFileName).asString();
             fireEvent(new FileRemovedEvent(this, detailFileName));
         }).addEventData(eventDetailFileName);
 

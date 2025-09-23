@@ -249,10 +249,10 @@ public class RichTextEditorTest {
         ArrayNode jsonArray = (ArrayNode) rte.getElement()
                 .getPropertyRaw("colorOptions");
         Assert.assertEquals(4, jsonArray.size());
-        Assert.assertEquals("#000000", jsonArray.get(0).asText());
-        Assert.assertEquals("#0066cc", jsonArray.get(1).asText());
-        Assert.assertEquals("#008a00", jsonArray.get(2).asText());
-        Assert.assertEquals("#e60000", jsonArray.get(3).asText());
+        Assert.assertEquals("#000000", jsonArray.get(0).asString());
+        Assert.assertEquals("#0066cc", jsonArray.get(1).asString());
+        Assert.assertEquals("#008a00", jsonArray.get(2).asString());
+        Assert.assertEquals("#e60000", jsonArray.get(3).asString());
     }
 
     @Test

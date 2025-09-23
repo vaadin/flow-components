@@ -256,7 +256,7 @@ public class GridContextMenu<T> extends
     @Override
     protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {
         Grid<T> grid = (Grid<T>) getTarget();
-        String key = eventDetail.get("key").asText();
+        String key = eventDetail.get("key").asString();
 
         if (getDynamicContentHandler() != null) {
             final T item = grid.getDataCommunicator().getKeyMapper().get(key);
