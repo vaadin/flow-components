@@ -108,7 +108,8 @@ public class UploadHandlerTest {
         fakeClientCommunication();
 
         String targetUploadUrl = upload.getElement().getAttribute("target");
-        Assert.assertTrue("Upload url should end with custom target name 'custom-target'",
+        Assert.assertTrue(
+                "Upload url should end with custom target name 'custom-target'",
                 targetUploadUrl.endsWith(targetName));
     }
 

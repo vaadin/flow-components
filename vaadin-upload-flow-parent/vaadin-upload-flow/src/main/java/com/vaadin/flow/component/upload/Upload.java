@@ -100,8 +100,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     private Receiver receiver;
 
     /**
-     * Represents the name of the target location or identifier where files
-     * or data are to be uploaded. Default value is set to "upload".
+     * Represents the name of the target location or identifier where files or
+     * data are to be uploaded. Default value is set to "upload".
      */
     private String uploadTargetName = "upload";
 
@@ -203,12 +203,14 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     }
 
     /**
-     * Create a new instance of Upload with the given upload handler and target name.
+     * Create a new instance of Upload with the given upload handler and target
+     * name.
      *
      * @param handler
      *            upload handler that handles the upload, not {@code null}
      * @param targetName
-     *            the endpoint name (single path segment) to publish the upload under, not blank
+     *            the endpoint name (single path segment) to publish the upload
+     *            under, not blank
      */
     public Upload(UploadHandler handler, String targetName) {
         this();
@@ -870,7 +872,8 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
     /**
      * Sets the name of the upload target.
      *
-     * @param uploadTargetName the name to set for the upload target
+     * @param uploadTargetName
+     *            the name to set for the upload target
      */
     public void setUploadTargetName(String uploadTargetName) {
         this.uploadTargetName = uploadTargetName;
