@@ -19,6 +19,7 @@
         <module>vaadin-accordion-flow-parent</module>
         <module>vaadin-avatar-flow-parent</module>
         <module>vaadin-app-layout-flow-parent</module>
+        <module>vaadin-aura-theme-flow-parent</module>
         <module>vaadin-button-flow-parent</module>
         <module>vaadin-card-flow-parent</module>
         <module>vaadin-checkbox-flow-parent</module>
@@ -535,6 +536,16 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>3.6.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.4.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonatype.plugins</groupId>
+                    <artifactId>nexus-staging-maven-plugin</artifactId>
+                    <version>1.7.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>

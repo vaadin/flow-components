@@ -11,7 +11,6 @@ package com.vaadin.flow.component.charts;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
@@ -19,6 +18,8 @@ import com.vaadin.flow.component.charts.model.Lang;
 import com.vaadin.flow.component.charts.model.style.Theme;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The ChartOptions configures a page local global options like localized texts

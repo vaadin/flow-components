@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
@@ -49,6 +47,9 @@ import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Virtual List allows you to render a long list of items inside a scrollable
