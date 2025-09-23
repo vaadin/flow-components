@@ -59,11 +59,32 @@ packages.forEach(pkg => {
     console.log(`  - ${pkg.name}@${pkg.version}`);
 });
 
+// Determine the theme name from the package name
+// @vaadin/aura -> aura, @vaadin/vaadin-lumo-styles -> lumo
+let themeName = null;
+let themePackage = null;
+for (const pkg of packages) {
+    if (pkg.name.includes('aura')) {
+        themeName = 'aura';
+        themePackage = pkg;
+        break;
+    } else if (pkg.name.includes('lumo')) {
+        themeName = 'lumo';
+        themePackage = packages.find(p => p.name === '@vaadin/vaadin-lumo-styles') || pkg;
+        break;
+    }
+}
+
+if (!themeName || !themePackage) {
+    console.error('Could not determine theme name from packages');
+    process.exit(1);
+}
+
 // Create temporary directory for npm install
 const tempDir = path.join(projectRoot, 'target', 'npm-workspace');
 fs.mkdirSync(tempDir, { recursive: true });
 
-// Create package.json with all dependencies
+// Create package.json with all dependencies plus PostCSS
 const packageJson = {
     name: 'theme-extractor',
     version: '1.0.0',
@@ -74,9 +95,32 @@ packages.forEach(pkg => {
     packageJson.dependencies[pkg.name] = pkg.version;
 });
 
+// Add PostCSS and plugins for minification
+packageJson.dependencies['postcss'] = '^8.4.31';
+packageJson.dependencies['postcss-cli'] = '^10.1.0';
+packageJson.dependencies['cssnano'] = '^6.0.1';
+packageJson.dependencies['postcss-import'] = '^15.1.0';
+
 fs.writeFileSync(
     path.join(tempDir, 'package.json'),
     JSON.stringify(packageJson, null, 2)
+);
+
+// Create PostCSS config
+const postcssConfig = `
+module.exports = {
+    plugins: [
+        require('postcss-import')(),
+        require('cssnano')({
+            preset: 'default',
+        })
+    ]
+}
+`;
+
+fs.writeFileSync(
+    path.join(tempDir, 'postcss.config.js'),
+    postcssConfig
 );
 
 // Run npm install
@@ -86,37 +130,32 @@ execSync('npm install', {
     stdio: 'inherit'
 });
 
-// Copy files recursively
-function copyRecursive(src, dest) {
-    const stats = fs.statSync(src);
-    
-    if (stats.isDirectory()) {
-        fs.mkdirSync(dest, { recursive: true });
-        const files = fs.readdirSync(src);
-        
-        files.forEach(file => {
-            copyRecursive(path.join(src, file), path.join(dest, file));
-        });
-    } else {
-        fs.copyFileSync(src, dest);
-    }
+// Find the main CSS file
+const cssFileName = `${themeName}.css`;
+const cssSourcePath = path.join(tempDir, 'node_modules', themePackage.name, cssFileName);
+
+if (!fs.existsSync(cssSourcePath)) {
+    console.error(`Main CSS file not found: ${cssSourcePath}`);
+    process.exit(1);
 }
 
-// Copy files from node_modules to target/classes for each package
-packages.forEach(pkg => {
-    const sourceDir = path.join(tempDir, 'node_modules', pkg.name);
-    const targetDir = path.join(projectRoot, 'target/classes/META-INF/resources', pkg.name);
+// Create target directory
+const targetDir = path.join(projectRoot, 'target/classes/META-INF/resources', themePackage.name);
+fs.mkdirSync(targetDir, { recursive: true });
 
-    if (!fs.existsSync(sourceDir)) {
-        console.warn(`Warning: Package ${pkg.name} not found in node_modules, skipping...`);
-        return;
-    }
+// Run PostCSS to minify the CSS
+const outputPath = path.join(targetDir, cssFileName);
+console.log(`Minifying ${cssFileName}...`);
 
-    // Create target directory
-    fs.mkdirSync(targetDir, { recursive: true });
+try {
+    execSync(`npx postcss ${cssSourcePath} -o ${outputPath}`, {
+        cwd: tempDir,
+        stdio: 'inherit'
+    });
+    console.log(`Successfully minified and saved ${cssFileName} to ${outputPath}`);
+} catch (error) {
+    console.error('Error during minification:', error);
+    process.exit(1);
+}
 
-    console.log(`Copying ${pkg.name} from ${sourceDir} to ${targetDir}`);
-    copyRecursive(sourceDir, targetDir);
-});
-
-console.log('Successfully extracted all NPM packages to resources');
+console.log(`Successfully processed ${themeName} theme`);
