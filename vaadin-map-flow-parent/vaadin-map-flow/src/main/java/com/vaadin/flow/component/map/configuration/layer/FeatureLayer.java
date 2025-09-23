@@ -34,6 +34,12 @@ import com.vaadin.flow.component.map.configuration.style.TextStyle;
  * <p>
  * The layer is a high-level abstraction built on top of {@link VectorLayer},
  * and uses a {@link VectorSource} by default.
+ * <p>
+ * Clustering of point-based features can be enabled using
+ * {@link #setClusteringEnabled(boolean)}. When clustering is enabled, only
+ * features that extend from {@link PointBasedFeature}, such as
+ * {@link MarkerFeature} can be added to the layer.Enabling clustering will
+ * switch the layer's source to a {@link ClusterSource}.
  */
 public class FeatureLayer extends VectorLayer {
 
@@ -43,12 +49,8 @@ public class FeatureLayer extends VectorLayer {
     private Style clusterStyle;
 
     public FeatureLayer() {
-        setSource(this.createDefaultSource());
+        setSource(new VectorSource());
         setClusterStyle(createDefaultClusterStyle());
-    }
-
-    protected VectorSource createDefaultSource() {
-        return new VectorSource();
     }
 
     @Override
@@ -115,33 +117,6 @@ public class FeatureLayer extends VectorLayer {
      */
     public void removeAllFeatures() {
         this.getSource().removeAllFeatures();
-    }
-
-    /**
-     * The {@link Style} that defines how individual clusters should be visually
-     * displayed when clustering is enabled. By default, uses an image of a
-     * circle with text displaying the number of features in the cluster.
-     *
-     * @return the current cluster style
-     */
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-    @JsonIdentityReference(alwaysAsId = true)
-    public Style getClusterStyle() {
-        return clusterStyle;
-    }
-
-    /**
-     * Sets the style for individual clusters. This style is applied when
-     * clustering is enabled.
-     *
-     * @param clusterStyle
-     *            the new cluster style, not null
-     */
-    public void setClusterStyle(Style clusterStyle) {
-        Objects.requireNonNull(clusterStyle);
-        removeChild(this.clusterStyle);
-        this.clusterStyle = clusterStyle;
-        addChild(clusterStyle);
     }
 
     /**
@@ -222,6 +197,33 @@ public class FeatureLayer extends VectorLayer {
         if (clusteringEnabled && getSource() instanceof ClusterSource) {
             ((ClusterSource) getSource()).setMinDistance(clusterMinDistance);
         }
+    }
+
+    /**
+     * The {@link Style} that defines how individual clusters should be rendered
+     * when clustering is enabled. By default, uses an image of a circle with
+     * text displaying the number of features in the cluster.
+     *
+     * @return the current cluster style
+     */
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
+    public Style getClusterStyle() {
+        return clusterStyle;
+    }
+
+    /**
+     * Sets the style for individual clusters. This style is applied when
+     * clustering is enabled.
+     *
+     * @param clusterStyle
+     *            the new cluster style, not null
+     */
+    public void setClusterStyle(Style clusterStyle) {
+        Objects.requireNonNull(clusterStyle);
+        removeChild(this.clusterStyle);
+        this.clusterStyle = clusterStyle;
+        addChild(clusterStyle);
     }
 
     private void switchSourceType() {
