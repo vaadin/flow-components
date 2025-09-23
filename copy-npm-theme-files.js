@@ -5,12 +5,13 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 // Check command line arguments
-if (process.argv.length < 3) {
-    console.error('Usage: node copy-npm-theme-files.js <path-to-theme-java-file>');
+if (process.argv.length < 4) {
+    console.error('Usage: node copy-npm-theme-files.js <path-to-theme-java-file> <css-file-name>');
     process.exit(1);
 }
 
 const javaFilePath = process.argv[2];
+const cssFileName = process.argv[3];
 const projectDir = path.dirname(javaFilePath);
 
 // Find the project root (where pom.xml is located)
@@ -59,25 +60,16 @@ packages.forEach(pkg => {
     console.log(`  - ${pkg.name}@${pkg.version}`);
 });
 
-// Determine the theme name from the package name
-// @vaadin/aura -> aura, @vaadin/vaadin-lumo-styles -> lumo
-let themeName = null;
+// Find the package that contains the CSS file
 let themePackage = null;
 for (const pkg of packages) {
-    if (pkg.name.includes('aura')) {
-        themeName = 'aura';
-        themePackage = pkg;
-        break;
-    } else if (pkg.name.includes('lumo')) {
-        themeName = 'lumo';
-        themePackage = packages.find(p => p.name === '@vaadin/vaadin-lumo-styles') || pkg;
+    // For now, assume the CSS file is in one of the packages
+    // We'll check which one actually has it after npm install
+    themePackage = pkg;
+    if (pkg.name.includes('styles') || pkg.name.includes('aura')) {
+        // Prefer packages with 'styles' or 'aura' in the name
         break;
     }
-}
-
-if (!themeName || !themePackage) {
-    console.error('Could not determine theme name from packages');
-    process.exit(1);
 }
 
 // Create temporary directory for npm install
@@ -130,17 +122,27 @@ execSync('npm install', {
     stdio: 'inherit'
 });
 
-// Find the main CSS file
-const cssFileName = `${themeName}.css`;
-const cssSourcePath = path.join(tempDir, 'node_modules', themePackage.name, cssFileName);
+// Find the CSS file in the installed packages
+let cssSourcePath = null;
+let cssPackage = null;
 
-if (!fs.existsSync(cssSourcePath)) {
-    console.error(`Main CSS file not found: ${cssSourcePath}`);
+for (const pkg of packages) {
+    const possiblePath = path.join(tempDir, 'node_modules', pkg.name, cssFileName);
+    if (fs.existsSync(possiblePath)) {
+        cssSourcePath = possiblePath;
+        cssPackage = pkg;
+        console.log(`Found ${cssFileName} in package ${pkg.name}`);
+        break;
+    }
+}
+
+if (!cssSourcePath) {
+    console.error(`CSS file '${cssFileName}' not found in any of the installed packages`);
     process.exit(1);
 }
 
 // Create target directory
-const targetDir = path.join(projectRoot, 'target/classes/META-INF/resources', themePackage.name);
+const targetDir = path.join(projectRoot, 'target/classes/META-INF/resources', cssPackage.name);
 fs.mkdirSync(targetDir, { recursive: true });
 
 // Run PostCSS to minify the CSS
@@ -158,4 +160,4 @@ try {
     process.exit(1);
 }
 
-console.log(`Successfully processed ${themeName} theme`);
+console.log(`Successfully processed theme with ${cssFileName}`);
