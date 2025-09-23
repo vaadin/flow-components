@@ -92,6 +92,7 @@ packageJson.dependencies['postcss'] = '^8.4.31';
 packageJson.dependencies['postcss-cli'] = '^10.1.0';
 packageJson.dependencies['cssnano'] = '^6.0.1';
 packageJson.dependencies['postcss-import'] = '^15.1.0';
+packageJson.dependencies['postcss-url'] = '^10.1.3';
 
 fs.writeFileSync(
     path.join(tempDir, 'package.json'),
@@ -103,6 +104,7 @@ const postcssConfig = `
 module.exports = {
     plugins: [
         require('postcss-import')(),
+        require('postcss-url')(),
         require('cssnano')({
             preset: 'default',
         })
