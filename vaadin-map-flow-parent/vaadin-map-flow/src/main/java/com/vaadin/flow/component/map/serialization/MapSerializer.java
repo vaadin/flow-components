@@ -8,29 +8,29 @@
  */
 package com.vaadin.flow.component.map.serialization;
 
-import java.io.IOException;
-import java.io.Serializable;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.node.BaseJsonNode;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.node.BaseJsonNode;
+import tools.jackson.databind.ser.std.StdSerializer;
+
 /**
  * Custom JSON serializer for the map component using a Jackson
  * {@link ObjectMapper}
  */
-public class MapSerializer implements Serializable {
+public class MapSerializer {
 
     private final ObjectMapper mapper;
     private final Map<Object, StreamRegistration> streamRegistrationCache = new HashMap<>();
@@ -38,15 +38,12 @@ public class MapSerializer implements Serializable {
     public MapSerializer(com.vaadin.flow.component.map.MapBase map) {
         // Create mapper that automatically registers stream resources and
         // download handlers in the current UI's stream resource registry
-        SimpleModule streamResourceModule = new SimpleModule().addSerializer(
-                StreamResource.class, new StreamResourceSerializer());
-        SimpleModule downloadHandlerModule = new SimpleModule().addSerializer(
-                DownloadHandler.class, new DownloadHandlerSerializer());
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(streamResourceModule);
-        mapper.registerModule(downloadHandlerModule);
-        this.mapper = mapper;
+        SimpleModule mapModule = new SimpleModule()
+                .addSerializer(StreamResource.class,
+                        new StreamResourceSerializer())
+                .addSerializer(DownloadHandler.class,
+                        new DownloadHandlerSerializer());
+        this.mapper = JsonMapper.builder().addModule(mapModule).build();
 
         // Unregister stream registrations when the map is detached
         map.addDetachListener(event -> {
@@ -89,7 +86,7 @@ public class MapSerializer implements Serializable {
 
         @Override
         public void serialize(StreamResource value, JsonGenerator gen,
-                SerializerProvider provider) throws IOException {
+                SerializationContext context) {
             if (value == null) {
                 gen.writeNull();
                 return;
@@ -127,7 +124,7 @@ public class MapSerializer implements Serializable {
 
         @Override
         public void serialize(DownloadHandler value, JsonGenerator gen,
-                SerializerProvider provider) throws IOException {
+                SerializationContext context) {
             if (value == null) {
                 gen.writeNull();
                 return;
