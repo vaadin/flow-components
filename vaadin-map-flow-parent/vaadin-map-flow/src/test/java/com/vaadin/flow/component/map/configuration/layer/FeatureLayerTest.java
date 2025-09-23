@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
+import com.vaadin.flow.component.map.configuration.feature.PolygonFeature;
 import com.vaadin.flow.component.map.configuration.source.ClusterSource;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 import com.vaadin.flow.component.map.configuration.style.Style;
@@ -165,6 +166,51 @@ public class FeatureLayerTest {
         featureLayer.setClusterStyle(customStyle);
 
         Assert.assertEquals(customStyle, featureLayer.getClusterStyle());
+    }
+
+    @Test
+    public void addPointBasedFeatureWhenClusteringEnabled() {
+        featureLayer.setClusteringEnabled(true);
+        MarkerFeature markerFeature = new MarkerFeature();
+
+        featureLayer.addFeature(markerFeature);
+
+        Assert.assertEquals(1, featureLayer.getFeatures().size());
+        Assert.assertTrue(featureLayer.getFeatures().contains(markerFeature));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void addNonPointBasedFeatureWhenClusteringEnabled() {
+        featureLayer.setClusteringEnabled(true);
+        PolygonFeature polygonFeature = new PolygonFeature();
+
+        featureLayer.addFeature(polygonFeature);
+    }
+
+    @Test
+    public void addNonPointBasedFeatureWhenClusteringDisabled() {
+        PolygonFeature polygonFeature = new PolygonFeature();
+
+        featureLayer.addFeature(polygonFeature);
+
+        Assert.assertEquals(1, featureLayer.getFeatures().size());
+        Assert.assertTrue(featureLayer.getFeatures().contains(polygonFeature));
+    }
+
+    @Test
+    public void enableClusteringFiltersNonPointBasedFeatures() {
+        MarkerFeature markerFeature = new MarkerFeature();
+        PolygonFeature polygonFeature = new PolygonFeature();
+        featureLayer.addFeature(markerFeature);
+        featureLayer.addFeature(polygonFeature);
+        Assert.assertEquals(2, featureLayer.getFeatures().size());
+
+        featureLayer.setClusteringEnabled(true);
+
+        Assert.assertTrue(featureLayer.isClusteringEnabled());
+        Assert.assertEquals(1, featureLayer.getFeatures().size());
+        Assert.assertTrue(featureLayer.getFeatures().contains(markerFeature));
+        Assert.assertFalse(featureLayer.getFeatures().contains(polygonFeature));
     }
 
     private static class TestFeatureLayer extends FeatureLayer {

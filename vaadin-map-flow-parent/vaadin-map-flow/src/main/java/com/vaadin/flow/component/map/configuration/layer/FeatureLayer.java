@@ -18,6 +18,8 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.vaadin.flow.component.map.Assets;
 import com.vaadin.flow.component.map.configuration.Constants;
 import com.vaadin.flow.component.map.configuration.Feature;
+import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
+import com.vaadin.flow.component.map.configuration.feature.PointBasedFeature;
 import com.vaadin.flow.component.map.configuration.source.ClusterSource;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
 import com.vaadin.flow.component.map.configuration.style.Fill;
@@ -80,12 +82,21 @@ public class FeatureLayer extends VectorLayer {
     }
 
     /**
-     * Adds a feature to the layer
+     * Adds a feature to the layer. When clustering is enabled, only features
+     * that extend from {@link PointBasedFeature}, such as {@link MarkerFeature}
+     * are supported.
      *
      * @param feature
      *            the feature to be added
+     * @throws IllegalArgumentException
+     *             if clustering is enabled and the feature is not a
+     *             {@link PointBasedFeature}
      */
     public void addFeature(Feature feature) {
+        if (clusteringEnabled && !(feature instanceof PointBasedFeature)) {
+            throw new IllegalArgumentException(
+                    "Only PointBasedFeature types are supported when clustering is enabled");
+        }
         this.getSource().addFeature(feature);
     }
 
@@ -146,8 +157,12 @@ public class FeatureLayer extends VectorLayer {
     /**
      * Enables or disables clustering for this layer. When clustering is
      * enabled, the layer will use a {@link ClusterSource} instead of a regular
-     * {@link VectorSource}. All existing features will be transferred to the
-     * new source.
+     * {@link VectorSource}.
+     * <p>
+     * Only features that extend from {@link PointBasedFeature}, such as
+     * {@link MarkerFeature}, are supported for clustering. When enabling
+     * clustering, any existing features that are not point based will be
+     * removed from the layer's source.
      *
      * @param clusteringEnabled
      *            true to enable clustering, false to disable
@@ -231,7 +246,10 @@ public class FeatureLayer extends VectorLayer {
         setSource(newSource);
 
         for (Feature feature : currentFeatures) {
-            newSource.addFeature(feature);
+            // When enabling clustering, only add PointBasedFeature types
+            if (!clusteringEnabled || feature instanceof PointBasedFeature) {
+                newSource.addFeature(feature);
+            }
         }
     }
 
