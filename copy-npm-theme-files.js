@@ -104,7 +104,7 @@ const postcssConfig = `
 module.exports = {
     plugins: [
         require('postcss-import')(),
-        require('postcss-url')(),
+        require('postcss-url')({ url: 'rebase' }),
         require('cssnano')({
             preset: 'default',
         })
