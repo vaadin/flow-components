@@ -274,7 +274,7 @@ public class CellSelectionManager implements Serializable {
      *
      * @param rowIndex
      *            Index of row, 1-based
-     * @param columnIndex
+     * @param colIndex
      *            Index of column, 1-based
      */
     void handleCellAddressChange(int rowIndex, int colIndex,

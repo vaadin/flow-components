@@ -84,7 +84,7 @@ public class DataSeriesItemBullet extends DataSeriesItem {
     }
 
     /**
-     * @see #setPartialFill(ItemPartialFill)
+     * @see #setPartialFill(TargetOptions)
      */
     public TargetOptions getTargetOptions() {
         if (targetOptions == null) {

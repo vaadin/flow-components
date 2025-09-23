@@ -214,7 +214,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * Enabling timeline mode in these unsupported chart types results in an
      * <code>IllegalArgumentException</code>
      * <p>
-     * Note: for Timeline chart type see {@link ChartType.TIMELINE} and
+     * Note: for Timeline chart type see {@link ChartType#TIMELINE} and
      * {@link PlotOptionsTimeline}.
      *
      * @param timeline
