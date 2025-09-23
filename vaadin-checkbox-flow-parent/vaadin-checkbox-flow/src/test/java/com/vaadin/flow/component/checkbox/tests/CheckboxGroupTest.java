@@ -33,7 +33,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
@@ -56,6 +55,8 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
+
+import tools.jackson.databind.node.ArrayNode;
 
 public class CheckboxGroupTest {
 

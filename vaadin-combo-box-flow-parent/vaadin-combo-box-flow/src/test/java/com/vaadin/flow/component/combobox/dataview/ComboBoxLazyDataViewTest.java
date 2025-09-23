@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.BackEndDataProvider;
@@ -40,6 +39,8 @@ import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.tests.dataprovider.MockUI;
+
+import tools.jackson.databind.JsonNode;
 
 public class ComboBoxLazyDataViewTest {
 

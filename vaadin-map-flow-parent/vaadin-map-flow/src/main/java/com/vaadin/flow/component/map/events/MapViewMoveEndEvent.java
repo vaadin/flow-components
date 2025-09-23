@@ -8,7 +8,6 @@
  */
 package com.vaadin.flow.component.map.events;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
@@ -16,6 +15,8 @@ import com.vaadin.flow.component.map.MapBase;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Extent;
 import com.vaadin.flow.component.map.configuration.View;
+
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Fired when viewport movement has ended.

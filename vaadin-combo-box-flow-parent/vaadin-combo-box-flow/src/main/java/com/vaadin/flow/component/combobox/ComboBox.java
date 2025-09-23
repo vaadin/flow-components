@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Unit;
@@ -34,6 +33,8 @@ import com.vaadin.flow.data.provider.DataKeyMapper;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.function.SerializableBiPredicate;
 import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Combo Box allows the user to choose a value from a filterable list of options

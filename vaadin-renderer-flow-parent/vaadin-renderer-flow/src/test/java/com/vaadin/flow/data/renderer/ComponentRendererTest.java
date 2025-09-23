@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
@@ -31,6 +30,8 @@ import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.node.ObjectNode;
 
 public class ComponentRendererTest {
 
