@@ -9,9 +9,10 @@
 package com.vaadin.flow.component.map;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
-import com.vaadin.flow.component.map.configuration.layer.ClusterLayer;
+import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
 import com.vaadin.flow.component.map.configuration.style.Icon;
 import com.vaadin.flow.component.map.configuration.style.Style;
 import com.vaadin.flow.component.map.configuration.style.TextStyle;
@@ -25,17 +26,28 @@ public class ClusterPage extends Div {
         map.getView().setCenter(new Coordinate(0, 0));
         map.getView().setZoom(0);
 
-        map.addLayer(createDefaultClusterLayer());
-        map.addLayer(createCustomClusterLayer());
+        configureClustering(map);
 
-        add(map);
+        NativeButton toggleClusteringButton = new NativeButton(
+                "Toggle clustering", e -> {
+                    FeatureLayer layer = map.getFeatureLayer();
+                    layer.setClusteringEnabled(!layer.isClusteringEnabled());
+                });
+        toggleClusteringButton.setId("toggle-clustering");
+
+        NativeButton customizeStyleButton = new NativeButton(
+                "Customize cluster style", e -> customizeStyle(map));
+        customizeStyleButton.setId("customize-style");
+
+        add(map, toggleClusteringButton, customizeStyleButton);
     }
 
-    private ClusterLayer createDefaultClusterLayer() {
-        ClusterLayer layer = new ClusterLayer();
-        layer.setId("cluster-layer");
-        layer.getSource().setDistance(50);
-        layer.getSource().setMinDistance(50);
+    private void configureClustering(Map map) {
+        FeatureLayer layer = map.getFeatureLayer();
+        layer.setId("feature-layer");
+        layer.setClusteringEnabled(true);
+        layer.setClusterDistance(50);
+        layer.setClusterMinDistance(50);
 
         // Cluster feature in some region
         MarkerFeature marker = new MarkerFeature(new Coordinate(0, 0));
@@ -53,13 +65,10 @@ public class ClusterPage extends Div {
         marker.setId("m4");
         marker.setText("Separate");
         layer.addFeature(marker);
-
-        return layer;
     }
 
-    private ClusterLayer createCustomClusterLayer() {
-        ClusterLayer layer = new ClusterLayer();
-        layer.setId("custom-cluster-layer");
+    private void customizeStyle(Map map) {
+        FeatureLayer layer = map.getFeatureLayer();
 
         DownloadHandler downloadHandler = DownloadHandler.forClassResource(
                 getClass(), "/META-INF/resources/frontend/custom-cluster.png",
@@ -80,15 +89,6 @@ public class ClusterPage extends Div {
         customStyle.setImage(clusterIcon);
         customStyle.setTextStyle(textStyle);
 
-        layer.setStyle(customStyle);
-
-        MarkerFeature marker = new MarkerFeature(new Coordinate(-40, 0));
-        layer.addFeature(marker);
-        marker = new MarkerFeature(new Coordinate(-42, 2));
-        layer.addFeature(marker);
-        marker = new MarkerFeature(new Coordinate(-38, 2));
-        layer.addFeature(marker);
-
-        return layer;
+        layer.setClusterStyle(customStyle);
     }
 }

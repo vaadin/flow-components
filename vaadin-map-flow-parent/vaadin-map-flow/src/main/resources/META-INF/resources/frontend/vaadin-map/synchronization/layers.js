@@ -59,7 +59,7 @@ export function synchronizeVectorLayer(target, source, context) {
   return target;
 }
 
-export function synchronizeClusterLayer(target, source, context) {
+export function synchronizeFeatureLayer(target, source, context) {
   if (!target) {
     target = new VectorLayer(
       createOptions({
@@ -73,7 +73,7 @@ export function synchronizeClusterLayer(target, source, context) {
   synchronizeLayer(target, source);
   target.setSource(context.lookup.get(source.source));
 
-  const style = context.lookup.get(source.style);
+  const style = context.lookup.get(source.clusterStyle);
 
   target.setStyle((feature) => {
     const size = feature.get('features').length;

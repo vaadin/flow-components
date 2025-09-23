@@ -30,6 +30,16 @@ public class ClusterSource extends VectorSource {
         super(new Options());
     }
 
+    /**
+     * Creates a new cluster source with custom options.
+     *
+     * @param options
+     *            the options for the cluster source
+     */
+    public ClusterSource(Options options) {
+        super(options);
+    }
+
     @Override
     public String getType() {
         return Constants.OL_SOURCE_CLUSTER;

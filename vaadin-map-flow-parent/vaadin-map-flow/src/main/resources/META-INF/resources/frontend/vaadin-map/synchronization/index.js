@@ -15,7 +15,7 @@ import Stroke from 'ol/style/Stroke';
 import Text from 'ol/style/Text';
 import View from 'ol/View';
 import {
-  synchronizeClusterLayer,
+  synchronizeFeatureLayer,
   synchronizeImageLayer,
   synchronizeTileLayer,
   synchronizeVectorLayer
@@ -127,7 +127,7 @@ const synchronizerLookup = {
   'ol/Map': synchronizeMap,
   'ol/View': synchronizeView,
   // Layers
-  'ol/layer/Cluster': synchronizeClusterLayer,
+  'ol/layer/Feature': synchronizeFeatureLayer,
   'ol/layer/Image': synchronizeImageLayer,
   'ol/layer/Tile': synchronizeTileLayer,
   'ol/layer/Vector': synchronizeVectorLayer,

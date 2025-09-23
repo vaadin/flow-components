@@ -18,7 +18,7 @@ public class Constants {
     public static final String OL_LAYER_IMAGE = "ol/layer/Image";
     public static final String OL_LAYER_TILE = "ol/layer/Tile";
     public static final String OL_LAYER_VECTOR = "ol/layer/Vector";
-    public static final String OL_LAYER_CLUSTER = "ol/layer/Cluster";
+    public static final String OL_LAYER_FEATURE = "ol/layer/Feature";
     // Sources
     public static final String OL_SOURCE_XYZ = "ol/source/XYZ";
     public static final String OL_SOURCE_OSM = "ol/source/OSM";

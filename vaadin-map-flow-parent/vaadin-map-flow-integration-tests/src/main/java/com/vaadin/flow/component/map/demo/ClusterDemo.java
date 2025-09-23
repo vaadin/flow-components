@@ -11,10 +11,11 @@ package com.vaadin.flow.component.map.demo;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
-import com.vaadin.flow.component.map.configuration.layer.ClusterLayer;
+import com.vaadin.flow.component.map.configuration.layer.FeatureLayer;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-map/demo/cluster")
@@ -24,20 +25,22 @@ public class ClusterDemo extends Div {
         map.getView().setCenter(new Coordinate(0, 0));
         map.getView().setZoom(0);
 
-        ClusterLayer clusterLayer = new ClusterLayer();
-        clusterLayer.getSource().setDistance(50);
-        clusterLayer.getSource().setMinDistance(50);
+        FeatureLayer layer = map.getFeatureLayer();
+        layer.setClusteringEnabled(true);
+        layer.setClusterDistance(50);
+        layer.setClusterMinDistance(50);
 
         final int numMarkers = 500;
         for (int i = 0; i < numMarkers; i++) {
             double lon = ThreadLocalRandom.current().nextDouble(-60, 60);
             double lat = ThreadLocalRandom.current().nextDouble(-45, 45);
             MarkerFeature marker = new MarkerFeature(new Coordinate(lon, lat));
-            clusterLayer.addFeature(marker);
+            layer.addFeature(marker);
         }
 
-        map.addLayer(clusterLayer);
+        NativeButton toggleClustering = new NativeButton("Toggle clustering",
+                e -> layer.setClusteringEnabled(!layer.isClusteringEnabled()));
 
-        add(map);
+        add(map, toggleClustering);
     }
 }
