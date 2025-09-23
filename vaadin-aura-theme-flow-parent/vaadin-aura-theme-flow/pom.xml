@@ -20,6 +20,27 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-npm-package</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <executable>node</executable>
+                            <arguments>
+                                <argument>${project.basedir}/../../copy-npm-theme-files.js</argument>
+                                <argument>${project.basedir}/src/main/java/com/vaadin/flow/theme/aura/Aura.java</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>biz.aQute.bnd</groupId>
                 <artifactId>bnd-maven-plugin</artifactId>
             </plugin>
