@@ -27,10 +27,10 @@ public class ClusterIT extends AbstractComponentIT {
     }
 
     @Test
-    public void defaultCluster() {
+    public void clusteringEnabled() {
         MapElement.MapReference mapReference = map.getMapReference();
         MapElement.LayerReference layer = mapReference.getLayers()
-                .getLayer("cluster-layer");
+                .getLayer("feature-layer");
         MapElement.ClusterSourceReference source = layer.getSource()
                 .asClusterSource();
 
@@ -51,15 +51,34 @@ public class ClusterIT extends AbstractComponentIT {
     }
 
     @Test
-    public void defaultCluster_zoomedIn() {
+    public void clusteringEnabled_zoomedIn() {
         map.getMapReference().getView().setZoom(6);
         MapElement.MapReference mapReference = map.getMapReference();
         MapElement.LayerReference layer = mapReference.getLayers()
-                .getLayer("cluster-layer");
+                .getLayer("feature-layer");
         MapElement.ClusterSourceReference source = layer.getSource()
                 .asClusterSource();
 
         // Should expand to clusters for individual features
         Assert.assertEquals(4, source.getClusterCount());
+    }
+
+    @Test
+    public void clusteringDisabled() {
+        clickElementWithJs("toggle-clustering");
+
+        MapElement.MapReference mapReference = map.getMapReference();
+        MapElement.LayerReference layer = mapReference.getLayers()
+                .getLayer("feature-layer");
+        MapElement.VectorSourceReference source = layer.getSource()
+                .asVectorSource();
+
+        // Layer's source should just have 4 features
+        MapElement.FeatureCollectionReference features = source.getFeatures();
+        Assert.assertEquals(4, features.getLength());
+        Assert.assertNotNull(features.getFeature("m1"));
+        Assert.assertNotNull(features.getFeature("m2"));
+        Assert.assertNotNull(features.getFeature("m3"));
+        Assert.assertNotNull(features.getFeature("m4"));
     }
 }

@@ -36,7 +36,7 @@ public class ClusterPage extends Div {
         toggleClusteringButton.setId("toggle-clustering");
 
         NativeButton customizeStyleButton = new NativeButton(
-                "Customize cluster style", e -> customizeStyle(map));
+                "Customize cluster style", e -> customizeClusterStyle(map));
         customizeStyleButton.setId("customize-style");
 
         add(map, toggleClusteringButton, customizeStyleButton);
@@ -67,7 +67,7 @@ public class ClusterPage extends Div {
         layer.addFeature(marker);
     }
 
-    private void customizeStyle(Map map) {
+    private void customizeClusterStyle(Map map) {
         FeatureLayer layer = map.getFeatureLayer();
 
         DownloadHandler downloadHandler = DownloadHandler.forClassResource(

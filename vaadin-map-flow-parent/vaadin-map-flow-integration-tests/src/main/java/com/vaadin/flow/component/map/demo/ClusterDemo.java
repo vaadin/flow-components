@@ -11,7 +11,6 @@ package com.vaadin.flow.component.map.demo;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.feature.MarkerFeature;
@@ -38,9 +37,6 @@ public class ClusterDemo extends Div {
             layer.addFeature(marker);
         }
 
-        NativeButton toggleClustering = new NativeButton("Toggle clustering",
-                e -> layer.setClusteringEnabled(!layer.isClusteringEnabled()));
-
-        add(map, toggleClustering);
+        add(map);
     }
 }
