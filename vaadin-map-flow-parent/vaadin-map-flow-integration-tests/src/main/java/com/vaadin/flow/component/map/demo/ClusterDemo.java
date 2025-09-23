@@ -31,8 +31,8 @@ public class ClusterDemo extends Div {
 
         final int numMarkers = 500;
         for (int i = 0; i < numMarkers; i++) {
-            double lon = ThreadLocalRandom.current().nextDouble(-60, 60);
-            double lat = ThreadLocalRandom.current().nextDouble(-45, 45);
+            double lon = ThreadLocalRandom.current().nextDouble(-60, 60); // NOSONAR
+            double lat = ThreadLocalRandom.current().nextDouble(-45, 45); // NOSONAR
             MarkerFeature marker = new MarkerFeature(new Coordinate(lon, lat));
             layer.addFeature(marker);
         }
