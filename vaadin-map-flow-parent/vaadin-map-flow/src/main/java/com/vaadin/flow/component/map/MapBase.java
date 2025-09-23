@@ -13,8 +13,6 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.node.BaseJsonNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -33,9 +31,10 @@ import com.vaadin.flow.component.map.events.MapFeatureDropEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
 import com.vaadin.flow.component.map.serialization.MapSerializer;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.BaseJsonNode;
 
 /**
  * Base class for the map component. Contains all base functionality for the map
@@ -119,16 +118,7 @@ public abstract class MapBase extends Component
         Set<AbstractConfigurationObject> changedObjects = new LinkedHashSet<>();
         configuration.collectChanges(changedObjects::add);
 
-        // TODO: Once Flow has switched to Jackson 3, we can directly use
-        // JsonNode instead of serializing to string and parsing back
-        String jsonString = getSerializer().toJson(changedObjects).toString();
-        BaseJsonNode jsonChanges;
-        try {
-            jsonChanges = (BaseJsonNode) JacksonUtils.getMapper()
-                    .readTree(jsonString);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        BaseJsonNode jsonChanges = getSerializer().toJson(changedObjects);
 
         this.getElement().executeJs("this.$connector.synchronize($0)",
                 jsonChanges);
