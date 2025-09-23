@@ -28,12 +28,13 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.GridArrayUpdater;
 import com.vaadin.flow.data.provider.ArrayUpdater.Update;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.tests.dataprovider.MockUI;
+
+import tools.jackson.databind.JsonNode;
 
 public class TreeGridSetViewportRangeByIndexPathTest {
     private MockUI ui;
