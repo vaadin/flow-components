@@ -6,7 +6,7 @@
         <artifactId>vaadin-aura-theme-flow-parent</artifactId>
         <version>25.0-SNAPSHOT</version>
     </parent>
-    <artifactId>vaadin-aura-theme-flow</artifactId>
+    <artifactId>vaadin-aura-theme</artifactId>
     <packaging>jar</packaging>
     <name>Vaadin Aura Theme</name>
     <description>Vaadin Aura Theme</description>

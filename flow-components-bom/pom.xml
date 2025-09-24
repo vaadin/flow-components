@@ -34,7 +34,7 @@
             </dependency>
             <dependency>
                 <groupId>com.vaadin</groupId>
-                <artifactId>vaadin-aura-theme-flow</artifactId>
+                <artifactId>vaadin-aura-theme</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
