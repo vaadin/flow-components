@@ -45,7 +45,8 @@ public class GridViewHeaderAndFooterRowsIT extends AbstractComponentIT {
         assertRendereredHeaderCell(grid.getHeaderCell(0, 0), "Name", true);
         assertRendereredHeaderCell(grid.getHeaderCell(0, 1), "Age", true);
         assertRendereredHeaderCell(grid.getHeaderCell(0, 2), "Street", false);
-        assertRendereredHeaderCell(grid.getHeaderCell(0, 3), "Postal Code", false);
+        assertRendereredHeaderCell(grid.getHeaderCell(0, 3), "Postal Code",
+                false);
 
         Assert.assertTrue(
                 "The first column group should have 'Basic Information' header text",
@@ -58,7 +59,8 @@ public class GridViewHeaderAndFooterRowsIT extends AbstractComponentIT {
                         .contains("Address Information"));
 
         Assert.assertTrue("There should be a cell with the renderered footer",
-                grid.getFooterCell(0, 0).getText().contains("Total: 500 people"));
+                grid.getFooterCell(0, 0).getText()
+                        .contains("Total: 500 people"));
     }
 
     @Test
