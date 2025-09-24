@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,13 +15,13 @@
  */
 package com.vaadin.flow.component.grid.it;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-
-import java.util.List;
 
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.testbench.GridElement;
@@ -64,16 +64,16 @@ public class GridViewConfiguringColumnsIT extends AbstractComponentIT {
                 .executeScript(firstCellHiddenScript, grid));
 
         Assert.assertNotEquals("true",
-                grid.getAttribute("columnReorderingAllowed"));
+                grid.getDomProperty("columnReorderingAllowed"));
 
         WebElement toggleUserReordering = findElement(
                 By.id("toggle-user-reordering"));
         clickElementWithJs(toggleUserReordering);
         Assert.assertEquals("true",
-                grid.getAttribute("columnReorderingAllowed"));
+                grid.getDomProperty("columnReorderingAllowed"));
         clickElementWithJs(toggleUserReordering);
         Assert.assertNotEquals("true",
-                grid.getAttribute("columnReorderingAllowed"));
+                grid.getDomProperty("columnReorderingAllowed"));
 
         String frozenStatusScript = "return arguments[0].frozen";
         assertFrozenColumn(grid, frozenStatusScript, "toggle-id-column-frozen",

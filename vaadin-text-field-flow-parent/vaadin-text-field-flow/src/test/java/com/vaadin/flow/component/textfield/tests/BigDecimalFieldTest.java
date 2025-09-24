@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,22 +15,30 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
-import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.component.shared.InputField;
-import com.vaadin.flow.component.textfield.BigDecimalField;
-import com.vaadin.flow.component.textfield.TextFieldVariant;
-import com.vaadin.flow.dom.ThemeList;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertNull;
 
 import java.math.BigDecimal;
 import java.util.Locale;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.component.AbstractField;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.component.textfield.BigDecimalField;
+import com.vaadin.flow.component.textfield.TextFieldVariant;
+import com.vaadin.flow.di.Instantiator;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.ThemeList;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
 
 public class BigDecimalFieldTest extends TextFieldTest {
 
@@ -40,6 +48,11 @@ public class BigDecimalFieldTest extends TextFieldTest {
     public void setup() {
         field = new BigDecimalField();
         field.setLocale(Locale.US);
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Override
@@ -52,9 +65,41 @@ public class BigDecimalFieldTest extends TextFieldTest {
 
     @Override
     @Test
-    public void initialValuePropertyValue() {
-        assertEquals(field.getEmptyValue(),
-                field.getElement().getProperty("value"));
+    public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
+        BigDecimalField bigDecimalField = new BigDecimalField();
+        Assert.assertNull(bigDecimalField.getValue());
+        Assert.assertEquals("",
+                bigDecimalField.getElement().getProperty("value"));
+    }
+
+    @Override
+    @Test
+    public void initialValueIsNull_valuePropertyHasEmptyString() {
+    }
+
+    @Override
+    @Test
+    public void createElementWithValue_createComponentInstanceFromElement_valuePropertyMatchesValue() {
+        Element element = new Element("vaadin-big-decimal-field");
+        element.setProperty("value", "1");
+        UI ui = new UI();
+        UI.setCurrent(ui);
+        VaadinSession session = Mockito.mock(VaadinSession.class);
+        ui.getInternals().setSession(session);
+        VaadinService service = Mockito.mock(VaadinService.class);
+        Mockito.when(session.getService()).thenReturn(service);
+
+        Instantiator instantiator = Mockito.mock(Instantiator.class);
+
+        Mockito.when(service.getInstantiator()).thenReturn(instantiator);
+
+        Mockito.when(instantiator.createComponent(BigDecimalField.class))
+                .thenAnswer(invocation -> new BigDecimalField());
+
+        BigDecimalField bigDecimalField = Component.from(element,
+                BigDecimalField.class);
+        Assert.assertEquals("1",
+                bigDecimalField.getElement().getProperty("value"));
     }
 
     @Test

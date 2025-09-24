@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,10 +15,10 @@
  */
 package com.vaadin.flow.component.grid.testbench;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
@@ -96,7 +96,7 @@ public class GridElement extends TestBenchElement {
      */
     public int getRowCount() {
         waitUntilLoadingFinished();
-        return getPropertyDouble("_effectiveSize").intValue();
+        return getPropertyDouble("_flatSize").intValue();
     }
 
     /**
@@ -196,27 +196,80 @@ public class GridElement extends TestBenchElement {
     }
 
     /**
-     * Gets the <code>tr</code> element for the given row index.
+     * Gets the rows (present in the DOM) specified by the lower and upper row
+     * indexes.
+     *
+     * @param firstRowIndex
+     *            the lower row index to be retrieved (inclusive)
+     * @param lastRowIndex
+     *            the upper row index to be retrieved (inclusive)
+     * @return a {@link GridTRElement} list with the rows contained between the
+     *         given coordinates.
+     * @throws IndexOutOfBoundsException
+     *             if either of the provided row indexes do not exist
+     */
+    public List<GridTRElement> getRows(int firstRowIndex, int lastRowIndex)
+            throws IndexOutOfBoundsException {
+        int rowCount = getRowCount();
+        if (firstRowIndex < 0 || lastRowIndex < 0 || firstRowIndex >= rowCount
+                || lastRowIndex >= rowCount) {
+            throw new IndexOutOfBoundsException(
+                    "firstRowIndex and lastRowIndex: expected to be 0.."
+                            + (rowCount - 1) + " but were " + firstRowIndex
+                            + " and " + lastRowIndex);
+        }
+        String script = "var grid = arguments[0];"
+                + "var firstRowIndex = arguments[1];"
+                + "var lastRowIndex = arguments[2];"
+                + "var rowsInDom = grid._getRenderedRows();"
+                + "return Array.from(rowsInDom).filter((row) => { return row.index >= firstRowIndex && row.index <= lastRowIndex;});";
+        Object rows = executeScript(script, this, firstRowIndex, lastRowIndex);
+        if (rows != null) {
+            return ((ArrayList<?>) rows).stream().map(
+                    elem -> ((TestBenchElement) elem).wrap(GridTRElement.class))
+                    .toList();
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Gets the {@code tr} element for the given row index.
      *
      * @param rowIndex
      *            the row index
-     * @return the tr element for the row
+     * @return the {@code tr} element for the row, or {@code null} if the row is
+     *         not in viewport
      * @throws IndexOutOfBoundsException
      *             if no row with given index exists
      */
     public GridTRElement getRow(int rowIndex) throws IndexOutOfBoundsException {
-        int rowCount = getRowCount();
-        if (rowIndex < 0 || rowIndex >= rowCount) {
-            throw new IndexOutOfBoundsException("rowIndex: expected to be 0.."
-                    + (rowCount - 1) + " but was " + rowIndex);
+        return getRow(rowIndex, false);
+    }
+
+    /**
+     * Gets the {@code tr} element for the given row index.
+     * <p>
+     * Returns {@code null} if the row is not in viewport and the provided
+     * {@code scroll} parameter is {@code false}.
+     *
+     * @param rowIndex
+     *            the row index
+     * @param scroll
+     *            whether to scroll to the row index
+     * @return the {@code tr} element for the row, or {@code null} if the row is
+     *         not in viewport and the provided {@code scroll} parameter is
+     *         {@code false}
+     * @throws IndexOutOfBoundsException
+     *             if no row with given index exists
+     */
+    public GridTRElement getRow(int rowIndex, boolean scroll)
+            throws IndexOutOfBoundsException {
+        if (scroll && !isRowInView(rowIndex)) {
+            scrollToFlatRow(rowIndex);
         }
-        String script = "var grid = arguments[0];"
-                + "var rowIndex = arguments[1];"
-                + "var rowsInDom = grid.$.items.children;"
-                + "var rowInDom = Array.from(rowsInDom).filter(function(row) { return !row.hidden && row.index == rowIndex;})[0];"
-                + "return rowInDom;";
-        return ((TestBenchElement) executeScript(script, this, rowIndex))
-                .wrap(GridTRElement.class);
+        var rows = getRows(rowIndex, rowIndex);
+        return rows.size() == 1 ? rows.get(0) : null;
     }
 
     /**
@@ -320,7 +373,7 @@ public class GridElement extends TestBenchElement {
         List<WebElement> headerCells = headerRows.get(rowIndex)
                 .findElements(By.tagName("th"));
         String slotName = headerCells.get(columnIndex)
-                .findElement(By.tagName("slot")).getAttribute("name");
+                .findElement(By.tagName("slot")).getDomAttribute("name");
 
         return findElement(By.cssSelector(
                 "vaadin-grid-cell-content[slot='" + slotName + "']"));
@@ -360,7 +413,7 @@ public class GridElement extends TestBenchElement {
             CheckboxElement checkbox = wrapElement(cell.getFirstChildElement(),
                     getCommandExecutor()).wrap(CheckboxElement.class);
             if (!checkbox.isChecked()) {
-                checkbox.click();
+                checkbox.getWrappedElement().click();
             }
         } else {
             setActiveItem(row);
@@ -390,7 +443,7 @@ public class GridElement extends TestBenchElement {
             CheckboxElement checkbox = wrapElement(cell.getFirstChildElement(),
                     getCommandExecutor()).wrap(CheckboxElement.class);
             if (checkbox.isChecked()) {
-                checkbox.click();
+                checkbox.getWrappedElement().click();
             }
         } else {
             removeActiveItem(row);
@@ -414,6 +467,7 @@ public class GridElement extends TestBenchElement {
      * @return the multi-select column, or null
      */
     private GridColumnElement getMultiSelectColumn() {
+        generatedColumnIdsIfNeeded();
         List<Long> columnIds = (List<Long>) executeScript(
                 "return arguments[0]._getColumns().filter(function(col) { return typeof col.selectAll != 'undefined';}).map(function(column) { return column.__generatedTbId;});",
                 this);
@@ -429,5 +483,60 @@ public class GridElement extends TestBenchElement {
         CheckboxElement selectAllCheckbox = $(CheckboxElement.class)
                 .id("selectAllCheckbox");
         selectAllCheckbox.click();
+    }
+
+    /**
+     * Gets all the currently visible rows.
+     *
+     * @return a {@link GridTRElement} list representing the currently visible
+     *         rows.
+     */
+    public List<GridTRElement> getVisibleRows() {
+        return getRows(getFirstVisibleRowIndex(), getLastVisibleRowIndex());
+    }
+
+    /**
+     * Gets the grid cells for the given row and column elements.
+     *
+     * @param rowIndex
+     *            the row index
+     * @param columnElements
+     *            the column elements
+     * @return a {@link GridTHTDElement} list with the cells for the given
+     *         coordinates.
+     */
+    public List<GridTHTDElement> getCells(int rowIndex,
+            GridColumnElement... columnElements) {
+        GridTRElement row = getRow(rowIndex);
+        return row != null ? row.getCells(columnElements) : new ArrayList<>();
+    }
+
+    /**
+     * Gets the grid cells for the given row.
+     *
+     * @param rowIndex
+     *            the row index
+     * @return a {@link GridTHTDElement} list with the cells for the given
+     *         coordinates.
+     */
+    public List<GridTHTDElement> getCells(int rowIndex) {
+        return getCells(rowIndex,
+                getAllColumns().toArray(new GridColumnElement[0]));
+    }
+
+    /**
+     * Gets the empty state content.
+     *
+     * @return the empty state content
+     * @throws NoSuchElementException
+     *             if no empty state content was found
+     */
+    public TestBenchElement getEmptyStateContent() {
+        try {
+            return findElement(By.cssSelector("[slot='empty-state']"));
+        } catch (NoSuchElementException e) {
+            throw new NoSuchElementException(
+                    "No empty state content was found");
+        }
     }
 }

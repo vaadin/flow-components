@@ -1,9 +1,14 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.test;
 
 import java.io.IOException;
-
-import com.vaadin.flow.component.spreadsheet.test.util.PopupHelper;
-import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -12,6 +17,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
+
+import com.vaadin.flow.component.spreadsheet.test.util.PopupHelper;
+import com.vaadin.flow.testutil.TestPath;
 
 /**
  * Tests for hyperlinks.
@@ -169,7 +177,7 @@ public class HyperlinkIT extends AbstractSpreadsheetIT {
 
     public String getSelectedCell() {
         String elemClass = findElementInShadowRoot(
-                By.cssSelector(".sheet-selection")).getAttribute("class");
+                By.cssSelector(".sheet-selection")).getDomAttribute("class");
 
         int rowStart = elemClass.indexOf("row");
         if (rowStart == -1) {

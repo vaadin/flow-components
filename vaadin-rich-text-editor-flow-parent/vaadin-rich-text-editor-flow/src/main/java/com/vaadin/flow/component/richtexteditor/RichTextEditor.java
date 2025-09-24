@@ -1,16 +1,21 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.richtexteditor;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
+import org.jsoup.nodes.Document;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEvent;
@@ -32,9 +37,12 @@ import com.vaadin.flow.data.value.HasValueChangeMode;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.PropertyChangeListener;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-import elemental.json.JsonObject;
+
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Rich Text Editor is an input field for entering rich text. It allows you to
@@ -54,9 +62,7 @@ import elemental.json.JsonObject;
  *
  */
 @Tag("vaadin-rich-text-editor")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/rich-text-editor", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/rich-text-editor", version = "25.0.0-alpha19")
 @JsModule("@vaadin/rich-text-editor/src/vaadin-rich-text-editor.js")
 public class RichTextEditor
         extends AbstractSinglePropertyField<RichTextEditor, String>
@@ -68,40 +74,46 @@ public class RichTextEditor
     private AsHtml asHtml;
     private AsDelta asDelta;
 
+    private boolean pendingPresentationUpdate = false;
+
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content that is gotten from this method will
-     * not update the lang on the component if not set back using
-     * {@link RichTextEditor#setI18n(RichTextEditorI18n)}
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(RichTextEditorI18n)}
      *
-     * @return the i18n object. It will be <code>null</code>, If the i18n
-     *         properties weren't set.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public RichTextEditorI18n getI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Sets the internationalization object for this component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(RichTextEditorI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {
-                JsonObject i18nObject = (JsonObject) JsonSerializer
-                        .toJson(this.i18n);
-                for (String key : i18nObject.keys()) {
-                    getElement().executeJs("this.set('i18n." + key + "', $0)",
-                            i18nObject.get(key));
-                }
+                setI18nWithJS();
             }
         });
+    }
+
+    private void setI18nWithJS() {
+        ObjectNode i18nJson = JacksonUtils.beanToJson(i18n);
+
+        // Assign new I18N object to WC, by merging the existing
+        // WC I18N, and the values from the new RichTextEditorI18n instance,
+        // into an empty object
+        getElement().executeJs("this.i18n = Object.assign({}, this.i18n, $0);",
+                i18nJson);
     }
 
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
@@ -143,6 +155,11 @@ public class RichTextEditor
         // presentation value to run the necessary JS for initializing the
         // client-side element
         setPresentationValue(getValue());
+
+        // Element state is not persisted across attach/detach
+        if (this.i18n != null) {
+            setI18nWithJS();
+        }
     }
 
     /**
@@ -216,8 +233,14 @@ public class RichTextEditor
         getElement().setProperty("htmlValue", presentationValue);
         // htmlValue property is not writeable, HTML value needs to be set using
         // method exposed by web component instead
-        getElement().callJsFunction("dangerouslySetHtmlValue",
-                presentationValue);
+        if (!pendingPresentationUpdate) {
+            pendingPresentationUpdate = true;
+            runBeforeClientResponse(ui -> {
+                getElement().callJsFunction("dangerouslySetHtmlValue",
+                        getElement().getProperty("htmlValue"));
+                pendingPresentationUpdate = false;
+            });
+        }
     }
 
     private static String presentationToModel(String htmlValue) {
@@ -228,6 +251,41 @@ public class RichTextEditor
     private static String modelToPresentation(String htmlValue) {
         // Sanitize HTML sent to client
         return sanitize(htmlValue);
+    }
+
+    /**
+     * Returns whether the value is considered to be empty.
+     * <p>
+     * As the editor's HTML value always contains a minimal markup, this does
+     * not check if the value is an empty string. Instead, this method considers
+     * the value to not be empty if the user has added some content, which can
+     * be:
+     * <ul>
+     * <li>Text, whitespaces or line breaks</li>
+     * <li>An image</li>
+     * </ul>
+     * <p>
+     * Note that a single empty HTML tag, such as a heading, blockquote, etc.,
+     * is not considered as content.
+     *
+     * @return {@code true} if considered empty; {@code false} if not
+     */
+    @Override
+    public boolean isEmpty() {
+        Document document = org.jsoup.Jsoup.parse(getValue());
+
+        // Get non-normalized text including spaces and newlines
+        // Note that <br>s count as newlines
+        String text = document.body().wholeText();
+
+        // Remove first newline occurrence as Quill editor adds a single <br> in
+        // every element even without the user having typed anything
+        text = text.replaceFirst("\n", "");
+
+        boolean hasText = !text.isEmpty();
+        boolean hasImages = document.selectFirst("img") != null;
+
+        return !hasText && !hasImages;
     }
 
     /**
@@ -269,19 +327,54 @@ public class RichTextEditor
         return getElement().getProperty("value");
     }
 
+    /**
+     * Gets an unmodifiable list of colors in HEX format used by the text color
+     * picker and background color picker controls of the text editor.
+     * <p>
+     * Returns {@code null} by default, which means the web component shows a
+     * default color palette.
+     *
+     * @since 24.5
+     * @return an unmodifiable list of colors options
+     */
+    public List<String> getColorOptions() {
+        List<String> options = JacksonSerializer.toObjects(String.class,
+                (ArrayNode) getElement().getPropertyRaw("colorOptions"));
+        return Collections.unmodifiableList(options);
+    }
+
+    /**
+     * Sets the list of colors in HEX format to use by the text color picker and
+     * background color picker controls of the text editor.
+     *
+     * @since 24.5
+     * @param colorOptions
+     *            the list of colors to set, not null
+     */
+    public void setColorOptions(List<String> colorOptions) {
+        Objects.requireNonNull(colorOptions, "Color options must not be null");
+        getElement().setPropertyJson("colorOptions",
+                JacksonSerializer.toJson(colorOptions));
+    }
+
     static String sanitize(String html) {
-        return org.jsoup.Jsoup.clean(html,
+        var settings = new org.jsoup.nodes.Document.OutputSettings();
+        settings.prettyPrint(false);
+        var safeHtml = org.jsoup.Jsoup.clean(html, "",
                 org.jsoup.safety.Safelist.basic()
                         .addTags("img", "h1", "h2", "h3", "s")
                         .addAttributes("img", "align", "alt", "height", "src",
                                 "title", "width")
                         .addAttributes(":all", "style")
-                        .addProtocols("img", "src", "data"));
+                        .addProtocols("img", "src", "data"),
+                settings);
+        return safeHtml;
     }
 
     /**
      * The internationalization properties for {@link RichTextEditor}.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class RichTextEditorI18n implements Serializable {
         private String undo;
         private String redo;
@@ -292,10 +385,14 @@ public class RichTextEditor
         private String h1;
         private String h2;
         private String h3;
+        private String color;
+        private String background;
         private String subscript;
         private String superscript;
         private String listOrdered;
         private String listBullet;
+        private String outdent;
+        private String indent;
         private String alignLeft;
         private String alignCenter;
         private String alignRight;
@@ -495,6 +592,48 @@ public class RichTextEditor
         }
 
         /**
+         * Gets the translated word for {@code color}
+         *
+         * @return the translated word for color
+         */
+        public String getColor() {
+            return color;
+        }
+
+        /**
+         * Sets the translated word for {@code color}.
+         *
+         * @param color
+         *            the translated word for color
+         * @return this instance for method chaining
+         */
+        public RichTextEditorI18n setColor(String color) {
+            this.color = color;
+            return this;
+        }
+
+        /**
+         * Gets the translated word for {@code background}
+         *
+         * @return the translated word for background
+         */
+        public String getBackground() {
+            return background;
+        }
+
+        /**
+         * Sets the translated word for {@code background}.
+         *
+         * @param background
+         *            the translated word for background
+         * @return this instance for method chaining
+         */
+        public RichTextEditorI18n setBackground(String background) {
+            this.background = background;
+            return this;
+        }
+
+        /**
          * Gets the translated word for {@code subscript}
          *
          * @return the translated word for subscript
@@ -564,6 +703,48 @@ public class RichTextEditor
          */
         public String getListBullet() {
             return listBullet;
+        }
+
+        /**
+         * Sets the translated word for {@code outdent}.
+         *
+         * @param outdent
+         *            the translated word for outdent
+         * @return this instance for method chaining
+         */
+        public RichTextEditorI18n setOutdent(String outdent) {
+            this.outdent = outdent;
+            return this;
+        }
+
+        /**
+         * Gets the translated word for {@code outdent}
+         *
+         * @return the translated word for outdent
+         */
+        public String getOutdent() {
+            return outdent;
+        }
+
+        /**
+         * Sets the translated word for {@code indent}.
+         *
+         * @param indent
+         *            the translated word for indent
+         * @return this instance for method chaining
+         */
+        public RichTextEditorI18n setIndent(String indent) {
+            this.indent = indent;
+            return this;
+        }
+
+        /**
+         * Gets the translated word for {@code indent}
+         *
+         * @return the translated word for indent
+         */
+        public String getIndent() {
+            return indent;
         }
 
         /**
@@ -754,12 +935,12 @@ public class RichTextEditor
         @Override
         public String toString() {
             return "[" + undo + ", " + redo + ", " + bold + ", " + italic + ", "
-                    + underline + ", " + strike + ", " + h1 + ", " + h2 + ", "
-                    + h3 + ", " + subscript + ", " + superscript + ", "
-                    + listOrdered + ", " + listBullet + ", " + alignLeft + ", "
-                    + alignCenter + ", " + alignRight + ", " + image + ", "
-                    + link + ", " + blockquote + ", " + codeBlock + ", " + clean
-                    + "]";
+                    + underline + ", " + strike + ", " + color + ", "
+                    + background + ", " + h1 + ", " + h2 + ", " + h3 + ", "
+                    + subscript + ", " + superscript + ", " + listOrdered + ", "
+                    + listBullet + ", " + alignLeft + ", " + alignCenter + ", "
+                    + alignRight + ", " + image + ", " + link + ", "
+                    + blockquote + ", " + codeBlock + ", " + clean + "]";
         }
     }
 
@@ -893,6 +1074,28 @@ public class RichTextEditor
         public String getEmptyValue() {
             return "";
         }
+
+        /**
+         * Returns whether the value is considered to be empty.
+         * <p>
+         * As the editor's HTML value always contains a minimal markup, this
+         * does not check if the value is an empty string. Instead, this method
+         * considers the value to not be empty if the user has added some
+         * content, which can be:
+         * <ul>
+         * <li>Text, whitespaces or line breaks</li>
+         * <li>An image</li>
+         * </ul>
+         * <p>
+         * Note that a single empty HTML tag, such as a heading, blockquote,
+         * etc., is not considered as content.
+         *
+         * @return {@code true} if considered empty; {@code false} if not
+         */
+        @Override
+        public boolean isEmpty() {
+            return RichTextEditor.this.isEmpty();
+        }
     }
 
     private class AsDelta
@@ -1012,15 +1215,15 @@ public class RichTextEditor
         public void setValue(String value) {
             Objects.requireNonNull(value, "Delta value must not be null");
 
-            if (!Objects.equals(value, getValue())) {
+            if (!valueEquals(value, getValue())) {
                 RichTextEditor.this.getElement().setProperty("value", value);
                 // After setting delta value, manually sync back the updated
                 // HTML value, which will eventually trigger a server-side value
                 // change event on the component
                 RichTextEditor.this.getElement()
-                        .executeJs("return this.htmlValue").then(jsonValue -> {
+                        .executeJs("return this.htmlValue").then(jsonNode -> {
                             isHtmlValueSync = true;
-                            RichTextEditor.this.setValue(jsonValue.asString());
+                            RichTextEditor.this.setValue(jsonNode.asString());
                             isHtmlValueSync = false;
                         });
 

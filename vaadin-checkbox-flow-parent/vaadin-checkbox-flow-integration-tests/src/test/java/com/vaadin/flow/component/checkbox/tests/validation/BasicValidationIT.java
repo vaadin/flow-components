@@ -1,13 +1,30 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.checkbox.tests.validation;
+
+import static com.vaadin.flow.component.checkbox.tests.validation.BasicValidationPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.checkbox.tests.validation.BasicValidationPage.REQUIRED_ERROR_MESSAGE;
+
+import org.junit.Test;
+import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.component.checkbox.testbench.CheckboxGroupElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
-import org.junit.Test;
-import org.openqa.selenium.Keys;
-
-import static com.vaadin.flow.component.checkbox.tests.validation.BasicValidationPage.REQUIRED_BUTTON;
 
 @TestPath("vaadin-checkbox-group/validation/basic")
 public class BasicValidationIT
@@ -17,13 +34,16 @@ public class BasicValidationIT
     public void fieldIsInitiallyValid() {
         assertClientValid();
         assertServerValid();
+        assertErrorMessage(null);
     }
 
     @Test
     public void triggerBlur_assertValidity() {
         testField.$(CheckboxElement.class).last().sendKeys(Keys.TAB);
+        assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -31,8 +51,10 @@ public class BasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.$(CheckboxElement.class).last().sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -40,19 +62,24 @@ public class BasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.selectByText("foo");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         testField.deselectByText("foo");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
     public void detach_attach_preservesInvalidState() {
         // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.$(CheckboxElement.class).last().sendKeys(Keys.TAB);
+        testField.selectByText("foo");
+        testField.deselectByText("foo");
 
         detachAndReattachField();
 
@@ -61,19 +88,31 @@ public class BasicValidationIT
     }
 
     @Test
-    public void webComponentCanNotModifyInvalidState() {
-        assertWebComponentCanNotModifyInvalidState();
+    public void detach_attachAndInvalidate_preservesInvalidState() {
+        detachField();
+        attachAndInvalidateField();
 
-        detachAndReattachField();
+        assertServerInvalid();
+        assertClientInvalid();
+    }
 
-        assertWebComponentCanNotModifyInvalidState();
+    @Test
+    public void detach_hide_attach_showAndInvalidate_preservesInvalidState() {
+        detachField();
+        hideField();
+        attachField();
+        showAndInvalidateField();
+
+        assertServerInvalid();
+        assertClientInvalid();
     }
 
     @Test
     public void clientSideInvalidStateIsNotPropagatedToServer() {
         // Make the field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.$(CheckboxElement.class).last().sendKeys(Keys.TAB);
+        testField.selectByText("foo");
+        testField.deselectByText("foo");
 
         executeScript("arguments[0].invalid = false", testField);
 

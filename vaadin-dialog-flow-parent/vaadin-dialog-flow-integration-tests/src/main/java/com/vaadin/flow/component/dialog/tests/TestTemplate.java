@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,8 +18,8 @@ package com.vaadin.flow.component.dialog.tests;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.littemplate.LitTemplate;
 import com.vaadin.flow.component.template.Id;
 
@@ -42,9 +42,9 @@ public class TestTemplate extends LitTemplate {
         button.addClickListener(event -> {
             count++;
             int id = count;
-            Label label = new Label("Label " + id);
-            label.setId("label-" + id);
-            div.add(label);
+            Span span = new Span("Text " + id);
+            span.setId("text-" + id);
+            div.add(span);
         });
     }
 }

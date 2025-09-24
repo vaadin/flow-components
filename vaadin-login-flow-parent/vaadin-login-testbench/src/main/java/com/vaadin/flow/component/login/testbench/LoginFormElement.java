@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -39,7 +39,7 @@ public class LoginFormElement extends TestBenchElement implements Login {
 
     @Override
     public ButtonElement getSubmitButton() {
-        return $(ButtonElement.class).first();
+        return $(ButtonElement.class).withAttribute("slot", "submit").first();
     }
 
     private TestBenchElement getFormWrapper() {
@@ -48,7 +48,7 @@ public class LoginFormElement extends TestBenchElement implements Login {
 
     @Override
     public ButtonElement getForgotPasswordButton() {
-        return $(ButtonElement.class).attribute("slot", "forgot-password")
+        return $(ButtonElement.class).withAttribute("slot", "forgot-password")
                 .first();
     }
 
@@ -64,30 +64,34 @@ public class LoginFormElement extends TestBenchElement implements Login {
 
     @Override
     public String getFormTitle() {
-        return getFormWrapper().$(TestBenchElement.class)
-                .attribute("part", "form").first().$("h2").first().getText();
+        return $(TestBenchElement.class).withAttribute("part", "form-title")
+                .first().getText();
     }
 
     @Override
     public TestBenchElement getErrorComponent() {
         return getFormWrapper().$(TestBenchElement.class)
-                .attribute("part", "error-message").first();
+                .withAttribute("part", "error-message").first();
     }
 
     @Override
     public String getErrorMessageTitle() {
-        return getErrorComponent().$("h5").first().getText();
+        return getErrorComponent().$(TestBenchElement.class)
+                .withAttribute("part", "error-message-title").first().getText();
     }
 
     @Override
     public String getErrorMessage() {
-        return getErrorComponent().$("p").first().getText();
+        return getErrorComponent().$(TestBenchElement.class)
+                .withAttribute("part", "error-message-description").first()
+                .getText();
     }
 
     @Override
     public String getAdditionalInformation() {
         return getFormWrapper().$(TestBenchElement.class)
-                .attribute("part", "footer").first().$("p").first().getText();
+                .withAttribute("part", "footer").first().$("div").first()
+                .getText();
     }
 
     @Override

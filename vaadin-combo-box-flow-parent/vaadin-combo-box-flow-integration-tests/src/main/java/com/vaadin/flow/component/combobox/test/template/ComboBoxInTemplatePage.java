@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,17 +19,17 @@ import java.util.Arrays;
 
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-combo-box/combo-box-in-template")
 public class ComboBoxInTemplatePage extends Div {
 
-    private Label message;
+    private Span message;
 
     public ComboBoxInTemplatePage() {
-        message = new Label("-");
+        message = new Span("-");
         message.setId("message");
         add(message);
 

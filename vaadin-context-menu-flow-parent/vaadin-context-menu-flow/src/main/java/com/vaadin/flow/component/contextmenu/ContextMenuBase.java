@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,13 +15,13 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
@@ -29,11 +29,12 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
+import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.function.SerializableRunnable;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Base functionality for server-side components based on
@@ -52,15 +53,13 @@ import elemental.json.JsonObject;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/context-menu", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/context-menu", version = "25.0.0-alpha19")
 @JsModule("@vaadin/context-menu/src/vaadin-context-menu.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./contextMenuConnector.js")
 @JsModule("./contextMenuTargetConnector.js")
 public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
-        extends Component implements HasComponents, HasStyle {
+        extends Component implements HasStyle {
 
     public static final String EVENT_DETAIL = "event.detail";
 
@@ -71,9 +70,10 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     private String openOnEventName = "vaadin-contextmenu";
     private Registration targetBeforeOpenRegistration;
     private Registration targetAttachRegistration;
+    private Registration targetDetachRegistration;
     private PendingJavaScriptResult targetJsRegistration;
 
-    private boolean autoAddedToTheUi;
+    private OverlayAutoAddController<ContextMenuBase<C, I, S>> overlayAutoAddController;
 
     /**
      * Creates an empty context menu.
@@ -86,13 +86,6 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         // contextMenuConnector.js make a server round-trip first.
         getElement().setProperty("openOn", "none");
 
-        getElement().addEventListener("opened-changed", event -> {
-            if (autoAddedToTheUi && !isOpened()) {
-                getElement().removeFromParent();
-                autoAddedToTheUi = false;
-            }
-        });
-
         getElement().addPropertyChangeListener("opened", event -> {
             fireEvent(new OpenedChangeEvent<>((C) this,
                     event.isUserOriginated()));
@@ -103,7 +96,11 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
             String appId = event.getUI().getInternals().getAppId();
             initConnector(appId);
             resetContent();
+            updateListenOn();
         });
+
+        overlayAutoAddController = new OverlayAutoAddController<>(this,
+                () -> false);
     }
 
     /**
@@ -120,18 +117,14 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         if (getTarget() != null) {
             targetBeforeOpenRegistration.remove();
             targetAttachRegistration.remove();
-            getTarget().getElement().callJsFunction(
-                    "$contextMenuTargetConnector.removeConnector");
-            if (isTargetJsPending()) {
-                targetJsRegistration.cancelExecution();
-                targetJsRegistration = null;
-            }
+            targetDetachRegistration.remove();
+            getTarget().getElement().executeJs(
+                    "if (this.$contextMenuTargetConnector) { this.$contextMenuTargetConnector.removeConnector() }");
+            cancelTargetJavascriptExecution();
         }
 
         this.target = target;
-        getElement().getNode().runWhenAttached(
-                ui -> ui.beforeClientResponse(this, context -> ui.getPage()
-                        .executeJs("$0.listenOn=$1", this, target)));
+        updateListenOn();
 
         if (target == null) {
             return;
@@ -142,12 +135,20 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         target.getUI().ifPresent(this::onTargetAttach);
         targetAttachRegistration = target
                 .addAttachListener(e -> onTargetAttach(e.getUI()));
+        targetDetachRegistration = target
+                .addDetachListener(e -> cancelTargetJavascriptExecution());
 
         // Server round-trip before opening the overlay
         targetBeforeOpenRegistration = target.getElement()
                 .addEventListener("vaadin-context-menu-before-open",
                         this::beforeOpenHandler)
                 .addEventData(EVENT_DETAIL);
+    }
+
+    private void updateListenOn() {
+        var target = getTarget();
+        getElement().executeJs("this.listenOn=$0;",
+                target == null ? this : target);
     }
 
     /**
@@ -194,106 +195,127 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * Closes this context menu if it is currently open.
      */
     public void close() {
+        // See https://github.com/vaadin/flow-components/issues/6449
+        getElement().setProperty("opened", false);
         getElement().callJsFunction("close");
     }
 
     /**
-     * Adds a new item component with the given text content to the context menu
-     * overlay.
-     * <p>
-     * This is a convenience method for the use case where you have a list of
-     * highlightable {@link MenuItem}s inside the overlay. If you want to
-     * configure the contents of the overlay without wrapping them inside
-     * {@link MenuItem}s, or if you just want to add some non-highlightable
-     * components between the items, use the {@link #add(Component...)} method.
+     * Creates a new menu item with the given text content and adds it to the
+     * context menu.
      *
      * @param text
      *            the text content for the created menu item
      * @return the created menu item
-     * @see #add(Component...)
      */
     public I addItem(String text) {
         return getMenuManager().addItem(text);
     }
 
     /**
-     * Adds a new item component with the given component to the context menu
-     * overlay.
-     * <p>
-     * This is a convenience method for the use case where you have a list of
-     * highlightable {@link MenuItem}s inside the overlay. If you want to
-     * configure the contents of the overlay without wrapping them inside
-     * {@link MenuItem}s, or if you just want to add some non-highlightable
-     * components between the items, use the {@link #add(Component...)} method.
+     * Creates a new menu item with the given component content and adds it to
+     * the context menu.
      *
      * @param component
      *            the component to add to the created menu item
      * @return the created menu item
-     * @see #add(Component...)
      */
     public I addItem(Component component) {
         return getMenuManager().addItem(component);
     }
 
     /**
-     * Adds the given components into the context menu overlay.
+     * Adds the given components to the context menu.
      * <p>
      * For the common use case of having a list of high-lightable items inside
-     * the overlay, you can use the {@link #addItem(String)} convenience methods
-     * instead.
-     * <p>
-     * The added elements in the DOM will not be children of the
-     * {@code <vaadin-context-menu>} element, but will be inserted into an
-     * overlay that is attached into the {@code <body>}.
+     * the menu, use {@link #addItem(String)} and its overload methods instead.
      *
      * @param components
      *            the components to add
      * @see HasMenuItems#addItem(String, ComponentEventListener)
      * @see HasMenuItems#addItem(Component, ComponentEventListener)
      */
-    @Override
-    public void add(Component... components) {
-        getMenuManager().add(components);
+    public void addComponent(Component... components) {
+        getMenuManager().addComponent(components);
     }
 
-    @Override
+    /**
+     * Adds the given components to the context menu.
+     * <p>
+     * For the common use case of having a list of high-lightable items inside
+     * the menu, use {@link #addItem(String)} and its overload methods instead.
+     *
+     * @param components
+     *            the components to add
+     * @see HasMenuItems#addItem(String, ComponentEventListener)
+     * @see HasMenuItems#addItem(Component, ComponentEventListener)
+     */
+    public void addComponent(Collection<Component> components) {
+        if (components == null) {
+            return;
+        }
+        getMenuManager().addComponent(components.toArray(Component[]::new));
+    }
+
+    /**
+     * Removes the given components from the context menu.
+     *
+     * @param components
+     *            the components to remove
+     */
     public void remove(Component... components) {
         getMenuManager().remove(components);
     }
 
     /**
-     * Removes all of the child components. This also removes all the items
-     * added with {@link #addItem(String)} and its overload methods.
+     * Removes all the child components. This also removes all the items added
+     * with {@link #addItem(String)} and its overload methods.
      */
-    @Override
     public void removeAll() {
         getMenuManager().removeAll();
     }
 
     /**
-     * Adds the given component into this context menu at the given index.
+     * Adds the given component to the context menu at the given index.
      * <p>
-     * The added elements in the DOM will not be children of the
-     * {@code <vaadin-context-menu>} element, but will be inserted into an
-     * overlay that is attached into the {@code <body>}.
+     * For the common use case of having a list of high-lightable items inside
+     * the menu, use {@link #addItem(String)} and its overload methods instead.
      *
      * @param index
      *            the index, where the component will be added
      * @param component
      *            the component to add
-     * @see #add(Component...)
      */
-    @Override
     public void addComponentAtIndex(int index, Component component) {
         getMenuManager().addComponentAtIndex(index, component);
     }
 
     /**
+     * Adds the given component as the first child to the context menu.
+     * <p>
+     * For the common use case of having a list of high-lightable items inside
+     * the menu, use {@link #addItem(String)} and its overload methods instead.
+     *
+     * @param component
+     *            the component to add
+     */
+    public void addComponentAsFirst(Component component) {
+        getMenuManager().addComponentAtIndex(0, component);
+    }
+
+    /**
+     * Adds a separator between items.
+     */
+    public void addSeparator() {
+        getMenuManager().addSeparator();
+    }
+
+    /**
      * Gets the child components of this component. This includes components
-     * added with {@link #add(Component...)} and the {@link MenuItem} components
-     * created with {@link #addItem(String)} and its overload methods. This
-     * doesn't include the components added to the sub menus of this context
-     * menu.
+     * added with {@link #addComponent(Component...)} and the {@link MenuItem}
+     * components created with {@link #addItem(String)} and its overload
+     * methods. This doesn't include the components added to the sub menus of
+     * this context menu.
      *
      * @return the child components of this component
      */
@@ -328,8 +350,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     }
 
     /**
-     * {@code opened-changed} event is sent when the overlay opened state
-     * changes.
+     * {@code opened-changed} event is sent when the opened state changes.
      */
     public static class OpenedChangeEvent<TComponent extends ContextMenuBase<TComponent, ?, ?>>
             extends ComponentEvent<TComponent> {
@@ -402,7 +423,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      * @return {@code true} if the context menu should be opened, {@code false}
      *         otherwise.
      */
-    protected boolean onBeforeOpenMenu(JsonObject eventDetail) {
+    protected boolean onBeforeOpenMenu(ObjectNode eventDetail) {
         return true;
     }
 
@@ -413,6 +434,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
     private void onTargetAttach(UI ui) {
         ui.getInternals().addComponentDependencies(ContextMenu.class);
         requestTargetJsExecutions();
+        updateListenOn();
     }
 
     /*
@@ -422,9 +444,7 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
      */
     private void requestTargetJsExecutions() {
         if (target != null) {
-            if (isTargetJsPending()) {
-                targetJsRegistration.cancelExecution();
-            }
+            cancelTargetJavascriptExecution();
             targetJsRegistration = target.getElement().executeJs(
                     "window.Vaadin.Flow.contextMenuTargetConnector.init(this);"
                             + "this.$contextMenuTargetConnector.updateOpenOn($0);",
@@ -432,43 +452,25 @@ public abstract class ContextMenuBase<C extends ContextMenuBase<C, I, S>, I exte
         }
     }
 
-    private boolean isTargetJsPending() {
-        return targetJsRegistration != null
-                && !targetJsRegistration.isSentToBrowser();
+    private void cancelTargetJavascriptExecution() {
+        if (targetJsRegistration != null
+                && !targetJsRegistration.isSentToBrowser()) {
+            targetJsRegistration.cancelExecution();
+        }
+        targetJsRegistration = null;
     }
 
     private void beforeOpenHandler(DomEvent event) {
-        JsonObject eventDetail = event.getEventData().getObject(EVENT_DETAIL);
+        ObjectNode eventDetail = (ObjectNode) event.getEventData()
+                .get(EVENT_DETAIL);
 
         boolean shouldOpenMenu = onBeforeOpenMenu(eventDetail);
 
         if (shouldOpenMenu) {
-            addContextMenuToUi();
+            overlayAutoAddController.add();
             target.getElement().callJsFunction(
                     "$contextMenuTargetConnector.openMenu", getElement());
         }
-    }
-
-    private void addContextMenuToUi() {
-        if (getElement().getNode().getParent() == null) {
-            UI ui = getCurrentUI();
-            ui.beforeClientResponse(ui, context -> {
-                ui.addToModalComponent(this);
-                autoAddedToTheUi = true;
-            });
-        }
-    }
-
-    private UI getCurrentUI() {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        return ui;
     }
 
     private void initConnector(String appId) {

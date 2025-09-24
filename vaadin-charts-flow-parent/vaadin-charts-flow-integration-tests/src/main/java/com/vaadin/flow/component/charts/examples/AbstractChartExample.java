@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.charts.examples;
 
 import java.util.concurrent.Executors;
@@ -9,15 +17,16 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.server.Command;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Abstract class for all chart examples.
@@ -34,19 +43,22 @@ public abstract class AbstractChartExample extends Div {
     }
 
     protected String createEventString(ComponentEvent<Chart> event) {
-        ObjectMapper mapper = new ObjectMapper()
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+        JsonMapper mapper = JsonMapper.builder()
+                .changeDefaultPropertyInclusion(handler -> handler
+                        .withValueInclusion(JsonInclude.Include.NON_NULL))
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
                 .enable(SerializationFeature.INDENT_OUTPUT)
-                .setVisibility(PropertyAccessor.ALL,
-                        JsonAutoDetect.Visibility.NONE)
-                .setVisibility(PropertyAccessor.FIELD,
-                        JsonAutoDetect.Visibility.ANY)
-                .addMixIn(Command.class, JacksonMixinForIgnoreCommand.class);
+                .changeDefaultVisibility(handler -> handler
+                        .withVisibility(PropertyAccessor.ALL,
+                                JsonAutoDetect.Visibility.NONE)
+                        .withVisibility(PropertyAccessor.FIELD,
+                                JsonAutoDetect.Visibility.ANY))
+                .addMixIn(Command.class, JacksonMixinForIgnoreCommand.class)
+                .build();
 
         try {
             return mapper.writeValueAsString(event);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             e.printStackTrace(); // NOSONAR
             return "";
         }

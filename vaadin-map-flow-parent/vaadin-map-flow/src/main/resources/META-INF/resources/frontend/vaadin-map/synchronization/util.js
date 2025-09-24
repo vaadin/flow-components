@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
@@ -16,6 +16,22 @@
  */
 export function convertToCoordinateArray(coordinate) {
   return [coordinate.x, coordinate.y];
+}
+
+/**
+ * Helper to convert a coordinate object from the server with
+ * the shape [[{ x: number, y: number}]]
+ * to the structure of a GeoJSON coordinate array for polygons.
+ * @param coordinates
+ * @returns {*[[]]}
+ */
+export function convertToGeoJSONCoordinateArray(coordinates) {
+  return (
+    coordinates
+      // The first linear ring of the array defines the outer-boundary or surface of the polygon
+      // Each subsequent linear ring defines a hole in the surface of the polygon
+      .map((linearRing) => linearRing.map((coordinate) => convertToCoordinateArray(coordinate)))
+  );
 }
 
 /**

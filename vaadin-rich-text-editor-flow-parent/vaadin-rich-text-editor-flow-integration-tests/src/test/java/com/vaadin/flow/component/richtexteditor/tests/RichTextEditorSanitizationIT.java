@@ -1,12 +1,21 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.richtexteditor.tests;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.vaadin.flow.component.richtexteditor.testbench.RichTextEditorElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 @TestPath("vaadin-rich-text-editor/sanitization")
 public class RichTextEditorSanitizationIT extends AbstractComponentIT {
@@ -38,7 +47,9 @@ public class RichTextEditorSanitizationIT extends AbstractComponentIT {
         // Server-side sanitization requires a base64 encoded URL
         String value = "<img onload=\"console.log('load')\" onerror=\"console.log('error')\" src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2P4v5ThPwAG7wKklwQ/bwAAAABJRU5ErkJggg==\">"
                 + "<script>console.log('script')</script>";
-        editor.getEditor().setProperty("innerHTML", value);
+
+        executeScript("arguments[0].dangerouslySetHtmlValue(arguments[1])",
+                editor, value);
 
         // Wait for the web component to update the htmlValue property
         waitUntil(driver -> editor.getPropertyString("htmlValue")
@@ -46,7 +57,7 @@ public class RichTextEditorSanitizationIT extends AbstractComponentIT {
 
         editor.dispatchEvent("change");
 
-        String expectedValue = "<p><img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2P4v5ThPwAG7wKklwQ/bwAAAABJRU5ErkJggg==\"></p> <p><br></p>";
+        String expectedValue = "<p><img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2P4v5ThPwAG7wKklwQ/bwAAAABJRU5ErkJggg==\">console.log('script')</p>";
         Assert.assertEquals(expectedValue, valueOutput.getText());
     }
 }

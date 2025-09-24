@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,29 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.avatar;
-
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.internal.JsonSerializer;
-import com.vaadin.flow.internal.NodeOwner;
-import com.vaadin.flow.internal.StateTree;
-import com.vaadin.flow.server.AbstractStreamResource;
-import com.vaadin.flow.server.Command;
-import com.vaadin.flow.server.StreamRegistration;
-import com.vaadin.flow.server.StreamResourceRegistry;
-import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.shared.Registration;
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -44,11 +22,39 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonIncludeProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.NodeOwner;
+import com.vaadin.flow.internal.StateTree;
+import com.vaadin.flow.server.AbstractStreamResource;
+import com.vaadin.flow.server.Command;
+import com.vaadin.flow.server.StreamRegistration;
+import com.vaadin.flow.server.StreamResourceRegistry;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.AbstractDownloadHandler;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Avatar Group is used to group multiple Avatars together. It can be used, for
@@ -63,23 +69,25 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-avatar-group")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/avatar-group/src/vaadin-avatar-group.js")
-@NpmPackage(value = "@vaadin/avatar-group", version = "24.3.0-alpha1")
-public class AvatarGroup extends Component implements HasOverlayClassName,
-        HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
+@NpmPackage(value = "@vaadin/avatar-group", version = "25.0.0-alpha19")
+public class AvatarGroup extends Component
+        implements HasStyle, HasSize, HasThemeVariant<AvatarGroupVariant> {
 
     /**
      * Item to be set as an avatar for the avatar group.
      *
      * @author Vaadin Ltd
      */
+    // Explicitly whitelist properties to send to the client
+    @JsonIncludeProperties({ "name", "abbr", "img", "colorIndex", "className" })
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class AvatarGroupItem implements Serializable {
         private String name;
         private String abbr;
         private String img;
         private Integer colorIndex;
+        private Set<String> classNames = new LinkedHashSet<>();
 
         private AvatarGroup host;
         private StreamRegistration resourceRegistration;
@@ -155,6 +163,7 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
          *
          * @return the abbreviation
          */
+        @JsonProperty("abbr")
         public String getAbbreviation() {
             return abbr;
         }
@@ -180,6 +189,7 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
          *
          * @return the image url
          */
+        @JsonProperty("img")
         public String getImage() {
             return img;
         }
@@ -201,9 +211,9 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
          * name is set.
          * <p>
          * Setting the image with this method resets the image resource provided
-         * with {@link AvatarGroupItem#setImageResource(AbstractStreamResource)}
+         * with {@link AvatarGroupItem#setImageHandler(DownloadHandler)}
          *
-         * @see AvatarGroupItem#setImageResource(AbstractStreamResource)
+         * @see AvatarGroupItem#setImageHandler(DownloadHandler)
          * @param url
          *            the image url
          */
@@ -220,12 +230,46 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
          * Sets the image for the avatar.
          * <p>
          * Setting the image as a resource with this method resets the image URL
+         * that was set with {@link AvatarGroupItem#setImage(String)}.
+         * <p>
+         * Sets the <code>Content-Disposition</code> header to
+         * <code>inline</code> for pre-defined download handlers, created by
+         * factory methods in {@link DownloadHandler}, as well as for other
+         * {@link AbstractDownloadHandler} implementations.
+         *
+         * @see AvatarGroupItem#setImage(String)
+         * @param downloadHandler
+         *            the download resource or {@code null} to remove the
+         *            resource
+         */
+        public void setImageHandler(DownloadHandler downloadHandler) {
+            if (downloadHandler == null) {
+                unsetResource();
+                return;
+            }
+            if (downloadHandler instanceof AbstractDownloadHandler<?> handler) {
+                // change disposition to inline in pre-defined handlers,
+                // where it is 'attachment' by default
+                handler.inline();
+            }
+
+            setImageResource(new StreamResourceRegistry.ElementStreamResource(
+                    downloadHandler, getHost() != null ? getHost().getElement()
+                            : UI.getCurrent().getElement()));
+        }
+
+        /**
+         * Sets the image for the avatar.
+         * <p>
+         * Setting the image as a resource with this method resets the image URL
          * that was set with {@link AvatarGroupItem#setImage(String)}
          *
          * @see AvatarGroupItem#setImage(String)
          * @param resource
          *            the resource value or {@code null} to remove the resource
+         * @deprecated Use {@link #setImageHandler(DownloadHandler)} instead
          */
+        @Deprecated(since = "24.8", forRemoval = true)
         public void setImageResource(AbstractStreamResource resource) {
             imageResource = resource;
 
@@ -362,6 +406,47 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
             }
         }
 
+        /**
+         * Adds one or more class names to this item. Multiple class names can
+         * be specified by using multiple parameters.
+         *
+         * @param classNames
+         *            the class name or class names to be added to the item
+         */
+        public void addClassNames(String... classNames) {
+            this.classNames.addAll(Arrays.asList(classNames));
+            if (getHost() != null) {
+                getHost().setClientItems();
+            }
+        }
+
+        /**
+         * Removes one or more class names from this item. Multiple class names
+         * can be specified by using multiple parameters.
+         *
+         * @param classNames
+         *            the class name or class names to be removed from the item
+         */
+        public void removeClassNames(String... classNames) {
+            this.classNames.removeAll(Arrays.asList(classNames));
+            if (getHost() != null) {
+                getHost().setClientItems();
+            }
+        }
+
+        /**
+         * Gets the CSS class name set on this item.
+         *
+         * @return a space-delimited list of CSS class names
+         */
+        public String getClassName() {
+            if (classNames.isEmpty()) {
+                return null;
+            } else {
+                return classNames.stream().collect(Collectors.joining(" "));
+            }
+        }
+
         private AvatarGroup getHost() {
             return host;
         }
@@ -378,6 +463,7 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
     /**
      * The internationalization properties for {@link AvatarGroup}.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class AvatarGroupI18n implements Serializable {
         private String anonymous;
         private HashMap<String, String> activeUsers = new HashMap();
@@ -525,37 +611,13 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
             pendingUpdate = true;
             getElement().getNode().runWhenAttached(
                     ui -> ui.beforeClientResponse(this, ctx -> {
-                        getElement().setPropertyJson("items",
-                                createItemsJsonArray(items));
+                        ArrayNode jsonItems = items.stream()
+                                .map(JacksonUtils::beanToJson)
+                                .collect(JacksonUtils.asArray());
+                        getElement().setPropertyJson("items", jsonItems);
                         pendingUpdate = false;
                     }));
         }
-    }
-
-    private JsonArray createItemsJsonArray(Collection<AvatarGroupItem> items) {
-        JsonArray jsonItems = Json.createArray();
-        for (AvatarGroupItem item : items) {
-            JsonObject jsonItem = Json.createObject();
-            if (item.getName() != null) {
-                jsonItem.put("name", item.getName());
-            }
-
-            if (item.getAbbreviation() != null) {
-                jsonItem.put("abbr", item.getAbbreviation());
-            }
-
-            if (item.getImage() != null) {
-                jsonItem.put("img", item.getImage());
-            }
-
-            if (item.getColorIndex() != null) {
-                jsonItem.put("colorIndex", item.getColorIndex());
-            }
-
-            jsonItems.set(jsonItems.length(), jsonItem);
-        }
-
-        return jsonItems;
     }
 
     /**
@@ -596,36 +658,34 @@ public class AvatarGroup extends Component implements HasOverlayClassName,
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content that is gotten from this method will
-     * not update the lang on the component if not set back using
-     * {@link AvatarGroup#setI18n(AvatarGroupI18n)}
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(AvatarGroupI18n)}
      *
-     * @return the i18n object. It will be <code>null</code>, If the i18n
-     *         properties weren't set.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public AvatarGroupI18n getI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Sets the internationalization object for this component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(AvatarGroupI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
-        JsonObject i18nObject = (JsonObject) JsonSerializer.toJson(i18n);
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
+        ObjectNode i18nObject = JacksonUtils.beanToJson(i18n);
         i18nObject.remove("manyActiveUsers");
         i18nObject.remove("oneActiveUser");
 
-        JsonObject activeUsers = Json.createObject();
+        ObjectNode activeUsers = JacksonUtils.createObjectNode();
         activeUsers.put("many", i18n.getManyActiveUsers());
         activeUsers.put("one", i18n.getOneActiveUser());
 
-        i18nObject.put("activeUsers", activeUsers);
+        i18nObject.set("activeUsers", activeUsers);
         getElement().setPropertyJson("i18n", i18nObject);
     }
 

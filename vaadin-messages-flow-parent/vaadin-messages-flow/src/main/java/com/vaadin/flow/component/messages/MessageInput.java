@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,6 +22,7 @@ import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.Focusable;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
@@ -29,7 +30,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.internal.JsonUtils;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
 
 /**
@@ -45,12 +46,10 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-message-input")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/message-input/src/vaadin-message-input.js")
-@NpmPackage(value = "@vaadin/message-input", version = "24.3.0-alpha1")
-public class MessageInput extends Component
-        implements HasSize, HasStyle, HasEnabled, HasTooltip {
+@NpmPackage(value = "@vaadin/message-input", version = "25.0.0-alpha19")
+public class MessageInput extends Component implements Focusable<MessageInput>,
+        HasSize, HasStyle, HasEnabled, HasTooltip {
 
     private MessageInputI18n i18n;
 
@@ -126,20 +125,19 @@ public class MessageInput extends Component
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content returned by this method will not update
-     * the component if not set back using
-     * {@link MessageInput#setI18n(MessageInputI18n)}.
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(MessageInputI18n)}.
      *
-     * @return the i18n object, or {@code null} if one has not been set with
-     *         {@link #setI18n(MessageInputI18n)}
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public MessageInputI18n getI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization properties for this component. It enabled
-     * you to customize and translate the language used in the message input.
+     * Sets the internationalization object for this component. It enabled you
+     * to customize and translate the language used in the message input.
      * <p>
      * Note: updating the object properties after setting the i18n will not
      * update the component. To make the changes effective, you need to set the
@@ -151,6 +149,6 @@ public class MessageInput extends Component
     public void setI18n(MessageInputI18n i18n) {
         Objects.requireNonNull(i18n, "The i18n object should not be null");
         this.i18n = i18n;
-        getElement().setPropertyJson("i18n", JsonUtils.beanToJson(i18n));
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
     }
 }

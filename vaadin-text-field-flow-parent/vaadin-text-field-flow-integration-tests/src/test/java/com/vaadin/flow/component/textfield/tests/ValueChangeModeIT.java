@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,6 +14,10 @@
  * the License.
  */
 package com.vaadin.flow.component.textfield.tests;
+
+import static org.junit.Assert.assertTrue;
+
+import java.time.Duration;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -30,15 +34,9 @@ import com.vaadin.flow.component.textfield.testbench.NumberFieldElement;
 import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
 import com.vaadin.flow.component.textfield.testbench.TextAreaElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import com.vaadin.testbench.TestBenchElement;
-
-import com.vaadin.tests.AbstractComponentIT;
-
-import static org.junit.Assert.assertTrue;
-
 import com.vaadin.flow.testutil.TestPath;
-
-import java.time.Duration;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for changing the ValueChangeMode of TextField, TextArea and

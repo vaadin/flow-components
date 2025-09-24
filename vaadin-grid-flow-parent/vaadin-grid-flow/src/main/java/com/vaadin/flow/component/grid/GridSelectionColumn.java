@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,7 +20,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.function.SerializableRunnable;
 
 /**
@@ -29,13 +28,12 @@ import com.vaadin.flow.function.SerializableRunnable;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-grid-flow-selection-column")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./vaadin-grid-flow-selection-column.js")
 public class GridSelectionColumn extends Component {
 
     private final SerializableRunnable selectAllCallback;
     private final SerializableRunnable deselectAllCallback;
+    private boolean shiftKeyDown = false;
 
     /**
      * Constructs a new grid selection column configured to use the given
@@ -125,6 +123,15 @@ public class GridSelectionColumn extends Component {
     @Synchronize("drag-select-changed")
     public boolean isDragSelect() {
         return getElement().getProperty("dragSelect", false);
+    }
+
+    @ClientCallable
+    private void setShiftKeyDown(boolean shiftKeyDown) {
+        this.shiftKeyDown = shiftKeyDown;
+    }
+
+    boolean isShiftKeyDown() {
+        return shiftKeyDown;
     }
 
     @ClientCallable

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,10 +15,10 @@
  */
 package com.vaadin.flow.component.accordion.testbench;
 
-import com.vaadin.testbench.elementsbase.Element;
-import com.vaadin.flow.component.details.testbench.DetailsElement;
-
 import static com.vaadin.flow.component.accordion.testbench.AccordionElement.OPENED_PROPERTY;
+
+import com.vaadin.flow.component.details.testbench.DetailsElement;
+import com.vaadin.testbench.elementsbase.Element;
 
 /**
  * TestBench element for the vaadin-accordion-panel element

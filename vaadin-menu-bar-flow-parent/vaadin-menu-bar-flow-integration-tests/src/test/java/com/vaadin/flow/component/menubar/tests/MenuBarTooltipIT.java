@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -77,10 +77,9 @@ public class MenuBarTooltipIT extends AbstractComponentIT {
         executeScript(
                 "arguments[0].dispatchEvent(new Event('mouseover', {bubbles:true}))",
                 button);
-        waitForElementPresent(By.tagName("vaadin-tooltip-overlay"));
     }
 
     private String getActiveTooltipText() {
-        return findElement(By.tagName("vaadin-tooltip-overlay")).getText();
+        return findElement(By.tagName("vaadin-tooltip")).getText();
     }
 }

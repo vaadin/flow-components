@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,6 +20,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 @Route("vaadin-avatar/avatar-test")
 public class AvatarPage extends Div {
@@ -69,6 +70,20 @@ public class AvatarPage extends Div {
                 });
         toggleImgResource.setId("toggle-res");
 
+        NativeButton toggleImgHandler = new NativeButton("Toggle image handler",
+                e -> {
+                    if (avatar.getImageResource() == null) {
+                        DownloadHandler download = DownloadHandler
+                                .forClassResource(getClass(),
+                                        "/META-INF/resources/frontend/images/user.png",
+                                        "user+.png");
+                        avatar.setImageHandler(download);
+                    } else {
+                        avatar.setImageHandler(null);
+                    }
+                });
+        toggleImgHandler.setId("toggle-res-handler");
+
         Div dataImg = new Div();
         dataImg.setId("data-block-img");
 
@@ -92,6 +107,7 @@ public class AvatarPage extends Div {
         getPropertyValues.setId("get-props");
 
         add(avatar, toggleImage, toggleAbbr, toggleName, toggleImgResource,
-                dataImg, dataAbbr, dataName, dataResource, getPropertyValues);
+                toggleImgHandler, dataImg, dataAbbr, dataName, dataResource,
+                getPropertyValues);
     }
 }

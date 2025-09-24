@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,6 +24,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 @Route("vaadin-avatar/avatar-group-test")
 public class AvatarGroupPage extends Div {
@@ -60,6 +61,31 @@ public class AvatarGroupPage extends Div {
                 });
         setItemsWithResource.setId("set-items-with-resource");
 
-        add(avatarGroup, updateItems, setItemsWithResource);
+        NativeButton setItemsWithDownloadHandler = new NativeButton(
+                "Set new item with download resource image", e -> {
+                    DownloadHandler download = DownloadHandler.forClassResource(
+                            getClass(),
+                            "/META-INF/resources/frontend/images/user.png",
+                            "avatar-group-img");
+                    AvatarGroupItem newItem = new AvatarGroupItem();
+                    newItem.setImageHandler(download);
+
+                    avatarGroup.setItems(newItem);
+                });
+        setItemsWithDownloadHandler.setId("set-items-with-download-resource");
+
+        NativeButton addClassNames = new NativeButton("Add class name", e -> {
+            items.get(0).addClassNames("red");
+        });
+        addClassNames.setId("add-class-names");
+
+        NativeButton removeClassNames = new NativeButton("Remove class name",
+                e -> {
+                    items.get(0).removeClassNames("red");
+                });
+        removeClassNames.setId("remove-class-names");
+
+        add(avatarGroup, updateItems, setItemsWithResource, addClassNames,
+                removeClassNames, setItemsWithDownloadHandler);
     }
 }

@@ -1,8 +1,12 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.test;
-
-import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
-import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
-import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -11,6 +15,10 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.interactions.Actions;
 
+import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
+import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
+import com.vaadin.flow.testutil.TestPath;
+
 @TestPath("vaadin-spreadsheet")
 public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
 
@@ -18,6 +26,7 @@ public class RemoveInsertRowIT extends AbstractSpreadsheetIT {
     public void init() {
         open();
         createNewSpreadsheet();
+        suppressInvalidFormulaCommentOverlay();
     }
 
     @Test

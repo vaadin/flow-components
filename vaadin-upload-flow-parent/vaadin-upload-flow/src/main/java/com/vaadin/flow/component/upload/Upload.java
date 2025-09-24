@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,19 +17,16 @@ package com.vaadin.flow.component.upload;
 
 import java.io.OutputStream;
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.EventData;
+import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
@@ -37,23 +34,25 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.DomEventListener;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.streams.UploadCompleteEvent;
+import com.vaadin.flow.internal.streams.UploadStartEvent;
 import com.vaadin.flow.server.NoInputStreamException;
 import com.vaadin.flow.server.NoOutputStreamException;
 import com.vaadin.flow.server.StreamReceiver;
+import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.StreamVariable;
+import com.vaadin.flow.server.streams.UploadEvent;
+import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonNull;
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Upload is a component for uploading one or more files. It shows the upload
@@ -63,11 +62,9 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-upload")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/upload", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/upload", version = "25.0.0-alpha19")
 @JsModule("@vaadin/upload/src/vaadin-upload.js")
-public class Upload extends Component implements HasSize, HasStyle {
+public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
     /**
      * Server-side component for the default {@code <vaadin-upload>} icon.
@@ -80,7 +77,7 @@ public class Upload extends Component implements HasSize, HasStyle {
     }
 
     private StreamVariable streamVariable;
-    private boolean interrupted = false;
+    private volatile boolean interrupted = false;
 
     private int activeUploads = 0;
     private boolean uploading;
@@ -104,33 +101,43 @@ public class Upload extends Component implements HasSize, HasStyle {
     /**
      * Create a new instance of Upload.
      * <p>
-     * The receiver must be set before performing an upload.
+     * The upload handler must be set through
+     * {@link #setUploadHandler(UploadHandler)} before performing an upload.
      */
     public Upload() {
         final String eventDetailError = "event.detail.error";
+        final String eventDetailFileName = "event.detail.file.name";
+
         getElement().addEventListener("file-reject", event -> {
-            String detailError = event.getEventData()
-                    .getString(eventDetailError);
-            fireEvent(new FileRejectedEvent(this, detailError));
-        }).addEventData(eventDetailError);
+            String detailError = event.getEventData().get(eventDetailError)
+                    .asString();
+            String detailFileName = event.getEventData()
+                    .get(eventDetailFileName).asString();
+            fireEvent(new FileRejectedEvent(this, detailError, detailFileName));
+        }).addEventData(eventDetailError).addEventData(eventDetailFileName);
+
+        getElement().addEventListener("file-remove", event -> {
+            String detailFileName = event.getEventData()
+                    .get(eventDetailFileName).asString();
+            fireEvent(new FileRemovedEvent(this, detailFileName));
+        }).addEventData(eventDetailFileName);
 
         // If client aborts upload mark upload as interrupted on server also
         getElement().addEventListener("upload-abort",
                 event -> interruptUpload());
 
-        runBeforeClientResponse(ui -> getElement().setAttribute("target",
-                new StreamReceiver(getElement().getNode(), "upload",
-                        getStreamVariable())));
+        setUploadHandler(new FailFastUploadHandler());
 
         final String elementFiles = "element.files";
         DomEventListener allFinishedListener = e -> {
-            JsonArray files = e.getEventData().getArray(elementFiles);
+            ArrayNode files = (ArrayNode) e.getEventData().get(elementFiles);
 
-            boolean isUploading = IntStream.range(0, files.length())
+            boolean isUploading = IntStream.range(0, files.size())
                     .anyMatch(index -> {
                         final String KEY = "uploading";
-                        JsonObject object = files.getObject(index);
-                        return object.hasKey(KEY) && object.getBoolean(KEY);
+                        JsonNode object = files.get(index);
+                        return object.has(KEY)
+                                && object.get(KEY).booleanValue();
                     });
 
             if (this.uploading && !isUploading) {
@@ -168,11 +175,24 @@ public class Upload extends Component implements HasSize, HasStyle {
      *
      * @param receiver
      *            receiver that handles the upload
+     * @deprecated use {@link #Upload(UploadHandler)} instead
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Upload(Receiver receiver) {
         this();
 
         setReceiver(receiver);
+    }
+
+    /**
+     * Create a new instance of Upload with the given upload handler.
+     *
+     * @param handler
+     *            upload handler that handles the upload, not {@code null}
+     */
+    public Upload(UploadHandler handler) {
+        this();
+        setUploadHandler(handler);
     }
 
     /**
@@ -187,7 +207,7 @@ public class Upload extends Component implements HasSize, HasStyle {
         return addListener(AllFinishedEvent.class, listener);
     }
 
-    private StreamVariable getStreamVariable() {
+    StreamVariable getStreamVariable() {
         if (streamVariable == null) {
             streamVariable = new DefaultStreamVariable(this);
         }
@@ -203,6 +223,7 @@ public class Upload extends Component implements HasSize, HasStyle {
      */
     public void setMaxFiles(int maxFiles) {
         getElement().setProperty("maxFiles", maxFiles);
+        getElement().executeJs("this.maxFiles = $0", maxFiles);
     }
 
     /**
@@ -212,6 +233,11 @@ public class Upload extends Component implements HasSize, HasStyle {
      */
     public int getMaxFiles() {
         return (int) getElement().getProperty("maxFiles", 0.0);
+    }
+
+    private void removeMaxFiles() {
+        getElement().removeProperty("maxFiles");
+        getElement().executeJs("this.maxFiles = Infinity");
     }
 
     /**
@@ -285,13 +311,21 @@ public class Upload extends Component implements HasSize, HasStyle {
     }
 
     /**
-     * Specify the types of files that the server accepts. Syntax: a MIME type
-     * pattern (wildcards are allowed) or file extensions. Notice that MIME
-     * types are widely supported, while file extensions are only implemented in
-     * certain browsers, so it should be avoided.
+     * Specify the types of files that the Upload web-component accepts. Syntax:
+     * a MIME type pattern (wildcards are allowed) or file extensions. Notice
+     * that MIME types are widely supported, while file extensions are only
+     * implemented in certain browsers, so it should be avoided.
      * <p>
      * Example: <code>"video/*","image/tiff"</code> or
      * <code>".pdf","audio/mp3"</code>
+     * <p>
+     * File format restrictions are checked only on the client side (browser).
+     * They indicate the hints for users as to what file types to upload. Using
+     * this method won’t restrict the uploaded file’s format on the server side.
+     * If required, it’s the responsibility of the application developer to
+     * implement application-specific restrictions on the server side in one or
+     * more of the Upload component’s event listeners (e.g., in
+     * {@link #addSucceededListener}).
      *
      * @param acceptedFileTypes
      *            the allowed file types to be uploaded, or <code>null</code> to
@@ -315,7 +349,7 @@ public class Upload extends Component implements HasSize, HasStyle {
         if (accepted == null) {
             return Collections.emptyList();
         }
-        return Arrays.asList(accepted.split(","));
+        return List.of(accepted.split(","));
     }
 
     /**
@@ -405,6 +439,10 @@ public class Upload extends Component implements HasSize, HasStyle {
      * accepted on same component.
      */
     private void startUpload() {
+        if (!isEnabled()) {
+            throw new IllegalStateException(
+                    "Cannot start upload because the Upload component is disabled");
+        }
         if (getMaxFiles() != 0 && getMaxFiles() <= activeUploads) {
             throw new IllegalStateException(
                     "Maximum supported amount of uploads already started");
@@ -418,7 +456,7 @@ public class Upload extends Component implements HasSize, HasStyle {
      * The interruption will be done by the receiving thread so this method will
      * return immediately and the actual interrupt will happen a bit later.
      * <p>
-     * Note! this will interrupt all uploads in multi-upload mode.
+     * Note! this will interrupt all ongoing uploads in multi-upload mode.
      */
     public void interruptUpload() {
         if (isUploading()) {
@@ -428,7 +466,9 @@ public class Upload extends Component implements HasSize, HasStyle {
 
     private void endUpload() {
         activeUploads--;
-        interrupted = false;
+        if (activeUploads == 0) {
+            interrupted = false;
+        }
     }
 
     /**
@@ -486,9 +526,30 @@ public class Upload extends Component implements HasSize, HasStyle {
      *            bytes received so far
      * @param contentLength
      *            actual size of the file being uploaded, if known
+     *
+     * @deprecated since 24.4. Use
+     *             {@link #fireUpdateProgress(long, long, String)}
      */
+    @Deprecated(since = "24.4")
     protected void fireUpdateProgress(long totalBytes, long contentLength) {
-        fireEvent(new ProgressUpdateEvent(this, totalBytes, contentLength));
+        fireEvent(
+                new ProgressUpdateEvent(this, totalBytes, contentLength, null));
+    }
+
+    /**
+     * Emit the progress event.
+     *
+     * @param totalBytes
+     *            bytes received so far
+     * @param contentLength
+     *            actual size of the file being uploaded, if known
+     * @param fileName
+     *            name of the file being uploaded
+     */
+    protected void fireUpdateProgress(long totalBytes, long contentLength,
+            String fileName) {
+        fireEvent(new ProgressUpdateEvent(this, totalBytes, contentLength,
+                fileName));
     }
 
     /**
@@ -497,7 +558,14 @@ public class Upload extends Component implements HasSize, HasStyle {
      * @param listener
      *            progress listener to add
      * @return registration for removal of listener
+     * @deprecated use
+     *             {@link com.vaadin.flow.server.streams.TransferProgressListener}
+     *             with {@link com.vaadin.flow.server.streams.UploadHandler}
+     *             implementing the
+     *             {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}
+     *             interface.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Registration addProgressListener(
             ComponentEventListener<ProgressUpdateEvent> listener) {
         return addListener(ProgressUpdateEvent.class, listener);
@@ -509,7 +577,14 @@ public class Upload extends Component implements HasSize, HasStyle {
      * @param listener
      *            failed listener to add
      * @return registration for removal of listener
+     * @deprecated use
+     *             {@link com.vaadin.flow.server.streams.TransferProgressListener}
+     *             with {@link com.vaadin.flow.server.streams.UploadHandler}
+     *             implementing the
+     *             {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}
+     *             interface.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Registration addFailedListener(
             ComponentEventListener<FailedEvent> listener) {
         return addListener(FailedEvent.class, listener);
@@ -521,7 +596,14 @@ public class Upload extends Component implements HasSize, HasStyle {
      * @param listener
      *            finished listener to add
      * @return registration for removal of listener
+     * @deprecated use
+     *             {@link com.vaadin.flow.server.streams.TransferProgressListener}
+     *             with {@link com.vaadin.flow.server.streams.UploadHandler}
+     *             implementing the
+     *             {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}
+     *             interface.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Registration addFinishedListener(
             ComponentEventListener<FinishedEvent> listener) {
         return addListener(FinishedEvent.class, listener);
@@ -533,7 +615,14 @@ public class Upload extends Component implements HasSize, HasStyle {
      * @param listener
      *            start listener to add
      * @return registration for removal of listener
+     * @deprecated use
+     *             {@link com.vaadin.flow.server.streams.TransferProgressListener}
+     *             with {@link com.vaadin.flow.server.streams.UploadHandler}
+     *             implementing the
+     *             {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}
+     *             interface.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Registration addStartedListener(
             ComponentEventListener<StartedEvent> listener) {
         return addListener(StartedEvent.class, listener);
@@ -545,7 +634,14 @@ public class Upload extends Component implements HasSize, HasStyle {
      * @param listener
      *            succeeded listener to add
      * @return registration for removal of listener
+     * @deprecated use
+     *             {@link com.vaadin.flow.server.streams.TransferProgressListener}
+     *             with {@link com.vaadin.flow.server.streams.UploadHandler}
+     *             implementing the
+     *             {@link com.vaadin.flow.server.streams.TransferProgressAwareHandler}
+     *             interface.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Registration addSucceededListener(
             ComponentEventListener<SucceededEvent> listener) {
         return addListener(SucceededEvent.class, listener);
@@ -566,10 +662,25 @@ public class Upload extends Component implements HasSize, HasStyle {
     }
 
     /**
+     * Adds a listener for events fired when a file is removed.
+     *
+     * @param listener
+     *            the listener
+     * @return a {@link Registration} for removing the event listener
+     */
+    public Registration addFileRemovedListener(
+            ComponentEventListener<FileRemovedEvent> listener) {
+        return addListener(FileRemovedEvent.class, listener);
+    }
+
+    /**
      * Return the current receiver.
+     * <p>
+     * Will return null when used with the UploadHandler which is recommended.
      *
      * @return the StreamVariable.
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public Receiver getReceiver() {
         return receiver;
     }
@@ -583,26 +694,68 @@ public class Upload extends Component implements HasSize, HasStyle {
      *
      * @param receiver
      *            receiver to use for file reception
+     * @see #setUploadHandler(UploadHandler)
+     * @deprecated use {@link #setUploadHandler(UploadHandler)} instead
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public void setReceiver(Receiver receiver) {
+        Receiver oldReceiver = this.receiver;
         this.receiver = receiver;
-        if (!(receiver instanceof MultiFileReceiver)) {
-            setMaxFiles(1);
+
+        if (isMultiFileReceiver(receiver)) {
+            if (oldReceiver != null && !isMultiFileReceiver(oldReceiver)) {
+                removeMaxFiles();
+            }
         } else {
-            getElement().removeAttribute("maxFiles");
+            setMaxFiles(1);
         }
+        runBeforeClientResponse(ui -> getElement().setAttribute("target",
+                new StreamReceiver(getElement().getNode(), "upload",
+                        getStreamVariable())));
+    }
+
+    /**
+     * Set the upload handler to be used for this upload component.
+     * <p>
+     * The given handler defines how uploaded file content is handled on the
+     * server and invoked per each single file to be uploaded. Note! This method
+     * overrides the receiver set by {@link #setReceiver(Receiver)}.
+     *
+     * @param handler
+     *            upload handler to use for file receptions, not {@code null}
+     */
+    public void setUploadHandler(UploadHandler handler) {
+        Objects.requireNonNull(handler, "UploadHandler cannot be null");
+        StreamResourceRegistry.ElementStreamResource elementStreamResource = new StreamResourceRegistry.ElementStreamResource(
+                handler, this.getElement()) {
+            @Override
+            public String getName() {
+                return "upload";
+            }
+        };
+        runBeforeClientResponse(ui -> getElement().setAttribute("target",
+                elementStreamResource));
+        if (!hasListener(UploadStartEvent.class)
+                && !(handler instanceof FailFastUploadHandler)) {
+            addListener(UploadStartEvent.class, event -> startUpload());
+            addListener(UploadCompleteEvent.class, event -> endUpload());
+        }
+        receiver = null;
+    }
+
+    private boolean isMultiFileReceiver(Receiver receiver) {
+        return receiver instanceof MultiFileReceiver;
     }
 
     /**
      * Set the internationalization properties for this component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(UploadI18N i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
 
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {
@@ -612,11 +765,7 @@ public class Upload extends Component implements HasSize, HasStyle {
     }
 
     private void setI18nWithJS() {
-        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
-
-        // Remove null values so that we don't overwrite existing WC
-        // translations with empty ones
-        deeplyRemoveNullValuesFromJsonObject(i18nJson);
+        ObjectNode i18nJson = JacksonUtils.beanToJson(this.i18n);
 
         // Assign new I18N object to WC, by deeply merging the existing
         // WC I18N, and the values from the new UploadI18N instance,
@@ -648,16 +797,6 @@ public class Upload extends Component implements HasSize, HasStyle {
         }
     }
 
-    private void deeplyRemoveNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.OBJECT) {
-                deeplyRemoveNullValuesFromJsonObject(jsonObject.get(key));
-            } else if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
-            }
-        }
-    }
-
     void runBeforeClientResponse(SerializableConsumer<UI> command) {
         getElement().getNode().runWhenAttached(ui -> ui
                 .beforeClientResponse(this, context -> command.accept(ui)));
@@ -666,49 +805,20 @@ public class Upload extends Component implements HasSize, HasStyle {
     /**
      * Get the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content that is gotten from this method will
-     * not update the language on the component if not set back using
-     * {@link Upload#setI18n(UploadI18N)}
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using {@link #setI18n(UploadI18N)}
      *
-     * @return the object with the i18n properties. If the i18n properties
-     *         weren't set, the object will return <code>null</code>.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public UploadI18N getI18n() {
         return i18n;
-    }
-
-    private String getStringObject(String propertyName, String subName) {
-        String result = null;
-        JsonObject json = (JsonObject) getElement()
-                .getPropertyRaw(propertyName);
-        if (json != null && json.hasKey(subName)
-                && !(json.get(subName) instanceof JsonNull)) {
-            result = json.getString(subName);
-        }
-        return result;
-    }
-
-    private String getStringObject(String propertyName, String object,
-            String subName) {
-        String result = null;
-        JsonObject json = (JsonObject) getElement()
-                .getPropertyRaw(propertyName);
-        if (json != null && json.hasKey(object)
-                && !(json.get(object) instanceof JsonNull)) {
-            json = json.getObject(object);
-            if (json != null && json.hasKey(subName)
-                    && !(json.get(subName) instanceof JsonNull)) {
-                result = json.getString(subName);
-            }
-        }
-        return result;
     }
 
     /**
      * Clear the list of files being processed, or already uploaded.
      */
     public void clearFileList() {
-        getElement().setPropertyJson("files", Json.createArray());
+        getElement().setPropertyJson("files", JacksonUtils.createArrayNode());
     }
 
     private static class DefaultStreamVariable implements StreamVariable {
@@ -729,7 +839,7 @@ public class Upload extends Component implements HasSize, HasStyle {
         @Override
         public void onProgress(StreamVariable.StreamingProgressEvent event) {
             upload.fireUpdateProgress(event.getBytesReceived(),
-                    event.getContentLength());
+                    event.getContentLength(), event.getFileName());
         }
 
         @Override
@@ -793,6 +903,20 @@ public class Upload extends Component implements HasSize, HasStyle {
                 upload.fireUploadFinish(event.getFileName(),
                         event.getMimeType(), event.getContentLength());
             }
+        }
+    }
+
+    /**
+     * An internal implementation of the UploadHandler interface that just
+     * reminds the developer that UploadHandler must be set to Upload. Upload
+     * event listeners are not registered for this handler.
+     */
+    private static final class FailFastUploadHandler implements UploadHandler {
+        @Override
+        public void handleUploadRequest(UploadEvent event) {
+            throw new IllegalStateException(
+                    "Upload cannot be performed without a upload handler set. "
+                            + "Please firstly set the upload handler implementation with upload.setUploadHandler()");
         }
     }
 }

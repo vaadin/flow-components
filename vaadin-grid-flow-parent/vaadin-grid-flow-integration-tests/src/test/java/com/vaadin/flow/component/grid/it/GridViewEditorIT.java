@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -60,7 +60,7 @@ public class GridViewEditorIT extends AbstractComponentIT {
         TestBenchElement subscriberCheckbox = subscriberCell
                 .$("vaadin-checkbox").first();
         boolean isSubscriber = subscriberCheckbox
-                .getAttribute("checked") != null;
+                .getDomAttribute("checked") != null;
 
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
@@ -154,8 +154,7 @@ public class GridViewEditorIT extends AbstractComponentIT {
         nameInput.sendKeys(Keys.ENTER);
 
         GridTHTDElement editColumn = row.getCell(grid.getAllColumns().get(2));
-        editColumn.$("vaadin-button").attribute("class", "save").first()
-                .click();
+        editColumn.$("vaadin-button").withClassName("save").first().click();
 
         String validation = findElement(By.id("validation")).getText();
         // There is an error in the status message
@@ -165,8 +164,7 @@ public class GridViewEditorIT extends AbstractComponentIT {
         // No save events
         Assert.assertEquals("", msg.getText());
 
-        editColumn.$("vaadin-button").attribute("class", "cancel").first()
-                .click();
+        editColumn.$("vaadin-button").withClassName("cancel").first().click();
 
         Assert.assertEquals(personName, nameCell.getText());
         // Still no any save events
@@ -232,14 +230,14 @@ public class GridViewEditorIT extends AbstractComponentIT {
                 .getCell(grid.getAllColumns().get(2)).$("vaadin-button")
                 .first();
         Assert.assertEquals(Boolean.TRUE.toString(),
-                nextEditButton.getAttribute("disabled"));
+                nextEditButton.getDomAttribute("disabled"));
 
         GridTHTDElement subscriberCell = row.getCell(subscriberColumn);
 
         TestBenchElement subscriberCheckbox = subscriberCell
                 .$("vaadin-checkbox").first();
         boolean isSubscriber = subscriberCheckbox
-                .getAttribute("checked") != null;
+                .getDomAttribute("checked") != null;
 
         // Write valid name.
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
@@ -296,7 +294,7 @@ public class GridViewEditorIT extends AbstractComponentIT {
         WebElement nextEditButton = grid.getRow(1).getCell(editColumn)
                 .$("vaadin-button").first();
         Assert.assertEquals(Boolean.TRUE.toString(),
-                nextEditButton.getAttribute("disabled"));
+                nextEditButton.getDomAttribute("disabled"));
 
         TestBenchElement nameField = nameCell.$("vaadin-text-field").first();
 
@@ -337,10 +335,10 @@ public class GridViewEditorIT extends AbstractComponentIT {
         emailInput = emailField.$("input").first();
 
         Assert.assertEquals(Boolean.TRUE.toString(),
-                emailInput.getAttribute("readonly"));
+                emailInput.getDomAttribute("readonly"));
 
         Assert.assertEquals("Not a subscriber",
-                emailInput.getAttribute("value"));
+                emailInput.getDomProperty("value"));
 
         // Switch subscriber value on
         checkbox = subscriberCell.$("vaadin-checkbox").first();
@@ -391,9 +389,9 @@ public class GridViewEditorIT extends AbstractComponentIT {
 
         TestBenchElement emailField = row.getCell(grid.getAllColumns().get(2))
                 .$("vaadin-text-field").first();
-        Assert.assertNotNull(emailField.getAttribute("focused"));
+        Assert.assertNotNull(emailField.getDomAttribute("focused"));
         Assert.assertEquals("Not a subscriber",
-                emailField.getAttribute("value"));
+                emailField.getDomProperty("value"));
 
         subscriberCell.$("vaadin-checkbox").first().click();
 

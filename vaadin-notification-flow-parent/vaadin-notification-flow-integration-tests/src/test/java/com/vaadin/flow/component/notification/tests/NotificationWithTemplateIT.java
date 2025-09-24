@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,9 +23,9 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-notification/notification-template-test")
 public class NotificationWithTemplateIT extends AbstractComponentIT {
@@ -57,8 +57,8 @@ public class NotificationWithTemplateIT extends AbstractComponentIT {
             btn.click();
 
             int size = i + 1;
-            WebElement label = container.findElement(By.id("label-" + size));
-            Assert.assertEquals("Label " + size, label.getText());
+            WebElement span = container.findElement(By.id("text-" + size));
+            Assert.assertEquals("Text " + size, span.getText());
         }
     }
 }

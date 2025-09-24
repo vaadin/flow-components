@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,15 +19,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.notification.testbench.NotificationElement;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.component.notification.testbench.NotificationElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the {@link NotificationView}.
@@ -67,6 +67,7 @@ public class NotificationIT extends AbstractComponentIT {
 
     @Test
     public void notificationWithStaticConvenienceMethod() {
+        clickElementWithJs(findElement(By.id("static-notification-button")));
         checkNotificationIsOpen();
         assertNotificationContent("static");
         checkNotificationIsClosed();
@@ -93,29 +94,9 @@ public class NotificationIT extends AbstractComponentIT {
         Assert.assertEquals(1, notification
                 .findElements(By.id("button-inside-notification")).size());
         Assert.assertEquals(1, notification
-                .findElements(By.id("label-inside-notification")).size());
+                .findElements(By.id("text-inside-notification")).size());
         notification.findElement(By.id("button-inside-notification")).click();
         checkNotificationIsClosed();
-    }
-
-    @Test
-    public void styleNotificationContent() {
-        scrollIntoViewAndClick(
-                findElement(By.id("styled-content-notification-button")));
-
-        WebElement content = null;
-        for (WebElement notification : getNotifications()) {
-            List<WebElement> nestedElements = notification
-                    .findElements(By.className("my-style"));
-            if (!nestedElements.isEmpty()) {
-                content = nestedElements.get(0);
-                break;
-            }
-        }
-
-        Assert.assertNotNull("Notification content element is not found",
-                content);
-        Assert.assertEquals("rgba(255, 0, 0, 1)", content.getCssValue("color"));
     }
 
     private void assertNotificationContent(String expected) {

@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
@@ -22,7 +22,6 @@ public class Title extends AbstractConfigurationObject {
     private String text;
     private Boolean useHTML;
     private VerticalAlign verticalAlign;
-    private Number widthAdjust;
     private Number x;
     private Number y;
 
@@ -163,23 +162,6 @@ public class Title extends AbstractConfigurationObject {
      */
     public void setVerticalAlign(VerticalAlign verticalAlign) {
         this.verticalAlign = verticalAlign;
-    }
-
-    /**
-     * @see #setWidthAdjust(Number)
-     */
-    public Number getWidthAdjust() {
-        return widthAdjust;
-    }
-
-    /**
-     * Adjustment made to the title width, normally to reserve space for the
-     * exporting burger menu.
-     * <p>
-     * Defaults to: -44
-     */
-    public void setWidthAdjust(Number widthAdjust) {
-        this.widthAdjust = widthAdjust;
     }
 
     /**

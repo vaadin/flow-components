@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,10 +15,11 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import java.util.Arrays;
+
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.function.SerializableRunnable;
 
 /**
@@ -49,7 +50,7 @@ import com.vaadin.flow.function.SerializableRunnable;
  */
 @SuppressWarnings("serial")
 public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
-        implements HasMenuItems, HasOverlayClassName {
+        implements HasMenuItems {
 
     /**
      * Creates an empty context menu.
@@ -80,6 +81,34 @@ public class ContextMenu extends ContextMenuBase<ContextMenu, MenuItem, SubMenu>
     public MenuItem addItem(Component component,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener) {
         return getMenuManager().addItem(component, clickListener);
+    }
+
+    /**
+     * Gets position of the context menu with respect to its {@code target}.
+     *
+     * @return the position
+     */
+    public ContextMenuPosition getPosition() {
+        String positionString = getElement().getProperty("position");
+        return Arrays.stream(ContextMenuPosition.values())
+                .filter(p -> p.getPosition().equals(positionString)).findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Sets position of the context menu with respect to its target. When null
+     * is passed, resets to default behaviour of opening context menu at the
+     * location of the click.
+     * <p>
+     * By default, no position is set and the context menu opens at the location
+     * of the click.
+     *
+     * @param position
+     *            the position to set
+     * @see #setTarget(Component)
+     */
+    public void setPosition(ContextMenuPosition position) {
+        getElement().setProperty("position", position.getPosition());
     }
 
     @Override

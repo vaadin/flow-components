@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet;
@@ -13,11 +13,18 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFTable;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTAutoFilter;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 
 /**
@@ -73,7 +80,15 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
      */
     public SpreadsheetFilterTable(Spreadsheet spreadsheet, Sheet sheet,
             CellRangeAddress fullTableRegion) {
-        super(spreadsheet, sheet, fullTableRegion);
+        this(spreadsheet, spreadsheet.getActiveSheet(), fullTableRegion, null,
+                null);
+    }
+
+    public SpreadsheetFilterTable(Spreadsheet spreadsheet, Sheet sheet,
+            CellRangeAddress fullTableRegion,
+            CTAutoFilter ctWorksheetAutoFilter, XSSFTable xssfTable) {
+        super(spreadsheet, sheet, fullTableRegion, ctWorksheetAutoFilter,
+                xssfTable);
 
         popupButtonToFiltersMap = new HashMap<>();
         popupButtonToClearButtonMap = new HashMap<>();
@@ -136,11 +151,11 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
             popupButtonToClearButtonMap.get(popupButton).setEnabled(false);
             popupButton.markActive(false);
         }
-        Spreadsheet spreadsheet = getSpreadsheet();
-        for (int r = filteringRegion.getFirstRow(); r <= filteringRegion
-                .getLastRow(); r++) {
-            spreadsheet.setRowHidden(r, false);
-        }
+        getSpreadsheet().setRowsHidden(IntStream
+                .range(filteringRegion.getFirstRow(),
+                        filteringRegion.getLastRow() + 1)
+                .boxed().collect(
+                        Collectors.toMap(Function.identity(), index -> false)));
     }
 
     /**
@@ -199,6 +214,8 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
         final Button button = new Button("Clear filters");
         button.setDisableOnClick(true);
         button.setEnabled(false);
+        button.addThemeVariants(ButtonVariant.LUMO_TERTIARY,
+                ButtonVariant.LUMO_SMALL);
         button.addClassName(CLEAR_FILTERS_BUTTON_CLASSNAME);
         button.addClickListener(event -> clearAllFilters());
         return button;
@@ -238,11 +255,11 @@ public class SpreadsheetFilterTable extends SpreadsheetTable {
             popupButton.markActive(!temp.isEmpty());
             filteredRows.addAll(temp);
         }
-        Spreadsheet spreadsheet = getSpreadsheet();
-        for (int r = filteringRegion.getFirstRow(); r <= filteringRegion
-                .getLastRow(); r++) {
-            spreadsheet.setRowHidden(r, filteredRows.contains(r));
-        }
+        getSpreadsheet().setRowsHidden(IntStream
+                .range(filteringRegion.getFirstRow(),
+                        filteringRegion.getLastRow() + 1)
+                .boxed().collect(Collectors.toMap(Function.identity(),
+                        filteredRows::contains)));
     }
 
     /**

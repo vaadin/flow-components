@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,19 +13,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.combobox.test.dataview;
 
 import java.util.Arrays;
 
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.combobox.test.AbstractComboBoxIT;
-import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.test.AbstractComboBoxIT;
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
 import com.vaadin.flow.internal.Range;
 
@@ -33,7 +32,7 @@ public abstract class AbstractItemCountComboBoxIT extends AbstractComboBoxIT {
 
     // changing the dimension might get combo box change what it fetches and
     // how many items it shows, so changing this is a bad idea ...
-    private static final Dimension TARGET_SIZE = new Dimension(1000, 900);
+    private static final Dimension TARGET_SIZE = new Dimension(1000, 1100);
     protected ComboBoxElement comboBoxElement;
     protected int countIncreasePageCount = 4;
     protected int pageSize = new ComboBox<String>().getPageSize();
@@ -58,7 +57,7 @@ public abstract class AbstractItemCountComboBoxIT extends AbstractComboBoxIT {
     protected void doScroll(int itemToScroll, int expectedItems,
             String expectedItemText, RangeLog... rangeLogs) {
         scrollToItem(comboBoxElement, itemToScroll);
-        waitUntilTextInContent(expectedItemText);
+        waitUntilTextInContent(comboBoxElement, expectedItemText);
         verifyFetchForUndefinedItemCountCallback(rangeLogs);
         verifyItemsCount(expectedItems);
     }

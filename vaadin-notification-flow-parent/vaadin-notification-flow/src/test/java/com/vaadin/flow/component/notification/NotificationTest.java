@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,9 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.concurrent.NotThreadSafe;
-
-import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -35,11 +32,12 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.internal.UIInternals;
 import com.vaadin.flow.component.notification.Notification.Position;
 import com.vaadin.flow.server.VaadinSession;
+
+import net.jcip.annotations.NotThreadSafe;
 
 /**
  * Unit tests for the Notification.
@@ -65,32 +63,38 @@ public class NotificationTest {
 
     @Test
     public void createNotificationWithComponents_componentsArePartOfGetChildren() {
-        Label label1 = new Label("Label 1");
-        Label label2 = new Label("Label 2");
-        Label label3 = new Label("Label 3");
+        Span span1 = new Span("Text 1");
+        Span span2 = new Span("Text 2");
+        Span span3 = new Span("Text 3");
 
-        Notification notification = new Notification(label1, label2);
+        Notification notification = new Notification(span1, span2);
 
         List<Component> children = notification.getChildren()
                 .collect(Collectors.toList());
         Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label1, label2));
+        Assert.assertTrue(children.contains(span1));
+        Assert.assertTrue(children.contains(span2));
 
-        notification.add(label3);
+        notification.add(span3);
         children = notification.getChildren().collect(Collectors.toList());
         Assert.assertEquals(3, children.size());
-        Assert.assertThat(children,
-                CoreMatchers.hasItems(label1, label2, label3));
+        Assert.assertTrue(children.contains(span1));
+        Assert.assertTrue(children.contains(span2));
+        Assert.assertTrue(children.contains(span3));
 
-        notification.remove(label2);
+        notification.remove(span2);
         children = notification.getChildren().collect(Collectors.toList());
         Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label1, label3));
+        Assert.assertTrue("Children should contain span1",
+                children.contains(span1));
+        Assert.assertTrue("Children should contain span3",
+                children.contains(span3));
 
-        label1.getElement().removeFromParent();
+        span1.getElement().removeFromParent();
         children = notification.getChildren().collect(Collectors.toList());
         Assert.assertEquals(1, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label3));
+        Assert.assertTrue("Children should contain span3",
+                children.contains(span3));
 
         notification.removeAll();
         children = notification.getChildren().collect(Collectors.toList());
@@ -106,9 +110,10 @@ public class NotificationTest {
         List<Component> children = notification.getChildren()
                 .collect(Collectors.toList());
         Assert.assertEquals(1, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(container2));
-        Assert.assertThat(children,
-                CoreMatchers.not(CoreMatchers.hasItem(container1)));
+        Assert.assertTrue("Children should contain container2",
+                children.contains(container2));
+        Assert.assertFalse("Children should not contain container1",
+                children.contains(container1));
     }
 
     @Test
@@ -128,7 +133,7 @@ public class NotificationTest {
 
         Collection<Notification> notificationsToCheck = Arrays.asList(
                 new Notification(), new Notification("test"),
-                new Notification(new Label("one"), new Label("two")));
+                new Notification(new Span("one"), new Span("two")));
 
         Assert.assertEquals(
                 "Not all of the Notification constructors without duration parameter are tested",
@@ -358,5 +363,28 @@ public class NotificationTest {
         int expectedInvocationsCount = 2 * notifications.size();
         Assert.assertEquals(expectedInvocationsCount,
                 listenerInvokedCount.get());
+    }
+
+    @Test
+    public void setText_notificationHasUnmodifiedText() {
+        Notification notification = new Notification();
+        notification.setText("foo > bar");
+
+        Assert.assertEquals("foo > bar",
+                notification.getElement().getProperty("text"));
+    }
+
+    @Test
+    public void setAssertive_isAssertive() {
+        Notification notification = new Notification();
+        notification.setAssertive(true);
+        Assert.assertEquals(notification.isAssertive(), true);
+        Assert.assertTrue(
+                notification.getElement().getProperty("assertive", false));
+
+        notification.setAssertive(false);
+        Assert.assertEquals(notification.isAssertive(), false);
+        Assert.assertFalse(
+                notification.getElement().getProperty("assertive", false));
     }
 }

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.login;
 
 import org.junit.After;
@@ -9,7 +24,6 @@ import org.mockito.Mockito;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.server.VaadinSession;
 
 public class LoginOverlaySlotsTest {
@@ -53,13 +67,20 @@ public class LoginOverlaySlotsTest {
                 "custom-form-area");
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void customFormArea_addAfterOpened_throwsUnsupportedOperationException() {
+    @Test
+    public void customFormArea_addAfterOpened_componentsAreAdded() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
         overlay.setOpened(true);
         overlay.getCustomFormArea().add(foo, bar);
+
+        Assert.assertEquals(foo.getElement().getParent(), overlay.getElement());
+        Assert.assertEquals(bar.getElement().getParent(), overlay.getElement());
+        Assert.assertEquals(foo.getElement().getAttribute("slot"),
+                "custom-form-area");
+        Assert.assertEquals(bar.getElement().getAttribute("slot"),
+                "custom-form-area");
     }
 
     @Test
@@ -80,8 +101,8 @@ public class LoginOverlaySlotsTest {
                 "custom-form-area");
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void customFormArea_removeAfterOpened_throwsUnsupportedOperationException() {
+    @Test
+    public void customFormArea_removeAfterOpened_componentsAreRemoved() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
@@ -89,6 +110,9 @@ public class LoginOverlaySlotsTest {
         overlay.setOpened(true);
 
         overlay.getCustomFormArea().remove(foo);
+        Assert.assertEquals(foo.getElement().getParent(), null);
+        Assert.assertNotEquals(foo.getElement().getAttribute("slot"),
+                "custom-form-area");
     }
 
     @Test
@@ -104,8 +128,8 @@ public class LoginOverlaySlotsTest {
         Assert.assertEquals(bar.getElement().getParent(), null);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void customFormArea_removeAllAfterOpened_throwsUnsupportedOperationException() {
+    @Test
+    public void customFormArea_removeAllAfterOpened_componentsAreRemoved() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
@@ -113,6 +137,9 @@ public class LoginOverlaySlotsTest {
         overlay.setOpened(true);
 
         overlay.getCustomFormArea().removeAll();
+
+        Assert.assertEquals(foo.getElement().getParent(), null);
+        Assert.assertEquals(bar.getElement().getParent(), null);
     }
 
     @Test
@@ -128,13 +155,18 @@ public class LoginOverlaySlotsTest {
         Assert.assertEquals(bar.getElement().getAttribute("slot"), "footer");
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void footer_addAfterOpened_throwsUnsupportedOperationException() {
+    @Test
+    public void footer_addAfterOpened_componentsAreAdded() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
         overlay.setOpened(true);
         overlay.getFooter().add(foo, bar);
+
+        Assert.assertEquals(foo.getElement().getParent(), overlay.getElement());
+        Assert.assertEquals(bar.getElement().getParent(), overlay.getElement());
+        Assert.assertEquals(foo.getElement().getAttribute("slot"), "footer");
+        Assert.assertEquals(bar.getElement().getAttribute("slot"), "footer");
     }
 
     @Test
@@ -152,8 +184,8 @@ public class LoginOverlaySlotsTest {
         Assert.assertEquals(bar.getElement().getParent(), null);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void footer_removeAfterOpened_throwsUnsupportedOperationException() {
+    @Test
+    public void footer_removeAfterOpened_componentsAreRemoved() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
@@ -161,6 +193,9 @@ public class LoginOverlaySlotsTest {
         overlay.setOpened(true);
 
         overlay.getFooter().remove(foo);
+
+        Assert.assertEquals(foo.getElement().getParent(), null);
+        Assert.assertNotEquals(foo.getElement().getAttribute("slot"), "footer");
     }
 
     @Test
@@ -176,8 +211,8 @@ public class LoginOverlaySlotsTest {
         Assert.assertEquals(bar.getElement().getParent(), null);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void footer_removeAllAfterOpened_throwsUnsupportedOperationException() {
+    @Test
+    public void footer_removeAllAfterOpened_componentsAreRemoved() {
         TestComponent foo = new TestComponent();
         TestComponent bar = new TestComponent();
 
@@ -185,5 +220,8 @@ public class LoginOverlaySlotsTest {
         overlay.setOpened(true);
 
         overlay.getFooter().removeAll();
+
+        Assert.assertEquals(foo.getElement().getParent(), null);
+        Assert.assertEquals(bar.getElement().getParent(), null);
     }
 }

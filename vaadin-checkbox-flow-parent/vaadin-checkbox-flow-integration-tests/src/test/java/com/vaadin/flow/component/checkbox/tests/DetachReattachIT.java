@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,15 +15,16 @@
  */
 package com.vaadin.flow.component.checkbox.tests;
 
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.TestBenchElement;
-import org.junit.Assert;
-import org.junit.Test;
-import org.openqa.selenium.By;
-
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-checkbox/detach-reattach")
 public class DetachReattachIT extends AbstractComponentIT {
@@ -33,11 +34,11 @@ public class DetachReattachIT extends AbstractComponentIT {
         open();
 
         clickButton("setValue");
-        List checkedBeforeDetach = getCheckboxexCheckedState();
+        List<Boolean> checkedBeforeDetach = getCheckboxesCheckedState();
         clickButton("detach");
         clickButton("attach");
         Assert.assertEquals("Checkboxes should remain checked on reattach",
-                checkedBeforeDetach, getCheckboxexCheckedState());
+                checkedBeforeDetach, getCheckboxesCheckedState());
     }
 
     @Test
@@ -50,15 +51,14 @@ public class DetachReattachIT extends AbstractComponentIT {
         clickButton("attach");
         Assert.assertTrue(
                 "Checkboxes should not be checked after deselectAll on reattach",
-                getCheckboxexCheckedState().stream()
-                        .allMatch(checked -> checked == null));
+                getCheckboxesCheckedState().stream()
+                        .noneMatch(checked -> checked));
     }
 
-    private List getCheckboxexCheckedState() {
+    private List<Boolean> getCheckboxesCheckedState() {
         TestBenchElement group = $("vaadin-checkbox-group").first();
-        return group.findElements(By.tagName("vaadin-checkbox")).stream()
-                .map(checkbox -> checkbox.getAttribute("checked"))
-                .collect(Collectors.toList());
+        return group.$(CheckboxElement.class).all().stream()
+                .map(CheckboxElement::isChecked).collect(Collectors.toList());
     }
 
     private void clickButton(String id) {

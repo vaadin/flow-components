@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.combobox.test.dataview;
 
 import static com.vaadin.flow.component.combobox.test.dataview.AbstractItemCountComboBoxPage.DEFAULT_DATA_PROVIDER_SIZE;
@@ -146,6 +145,8 @@ public class ItemCountUnknownComboBoxIT extends AbstractItemCountComboBoxIT {
     @Test
     public void undefinedItemCount_enterClientFilter_displaysFilteredItem() {
         open(300);
+
+        comboBoxElement.openPopup();
 
         assertLoadedItemsCount("Should be 50 items before filtering", 50,
                 comboBoxElement);

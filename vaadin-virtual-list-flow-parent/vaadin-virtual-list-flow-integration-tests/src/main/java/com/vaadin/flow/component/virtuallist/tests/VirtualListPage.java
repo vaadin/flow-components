@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,7 +24,6 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
@@ -90,7 +89,6 @@ public class VirtualListPage extends Div {
         createTemplateWithEventHandlers();
         createListWithComponentRenderer();
         createListWithComponentRendererWithBeansAndPlaceholder();
-        createDetachableList();
         createListsWithBasicRenderers();
         createListInsideFlexContainer();
     }
@@ -107,13 +105,21 @@ public class VirtualListPage extends Div {
                 evt -> list.setItems("Another item 1", "Another item 2"));
         NativeButton setEmptyList = new NativeButton("Change list 3",
                 evt -> list.setItems());
+        NativeButton setItemAccessibleNameGenerator = new NativeButton(
+                "Set item accessible name generator",
+                evt -> list.setItemAccessibleNameGenerator(
+                        item -> item.contains("2") ? null
+                                : "Accessible " + item));
 
         list.setId("list-with-strings");
         setListWith3Items.setId("list-with-strings-3-items");
         setListWith2Items.setId("list-with-strings-2-items");
         setEmptyList.setId("list-with-strings-0-items");
+        setItemAccessibleNameGenerator
+                .setId("list-with-strings-accessible-name");
 
-        add(list, setListWith3Items, setListWith2Items, setEmptyList);
+        add(list, setListWith3Items, setListWith2Items, setEmptyList,
+                setItemAccessibleNameGenerator);
     }
 
     private void createDataProviderWithStrings() {
@@ -298,39 +304,6 @@ public class VirtualListPage extends Div {
         list.setPlaceholderItem(placeholder);
 
         add(list);
-    }
-
-    private void createDetachableList() {
-        Div container1 = new Div(new Text("Container 1"));
-        container1.setId("detachable-list-container-1");
-        Div container2 = new Div(new Text("Container 2"));
-        container2.setId("detachable-list-container-2");
-
-        VirtualList<Person> list = new VirtualList<>();
-        list.setId("detachable-list");
-
-        list.setItems(createPeople(20));
-        list.setRenderer(Person::getName);
-        container1.add(list);
-        add(container1);
-        NativeButton detach = new NativeButton("Detach list",
-                e -> list.getParent().ifPresent(
-                        parent -> ((HasComponents) parent).remove(list)));
-        detach.setId("detachable-list-detach");
-        NativeButton attach1 = new NativeButton("Attach list to container 1",
-                e -> container1.add(list));
-        attach1.setId("detachable-list-attach-1");
-        NativeButton attach2 = new NativeButton("Attach list to container 2",
-                e -> container2.add(list));
-        attach2.setId("detachable-list-attach-2");
-        NativeButton invisible = new NativeButton("Set list invisble",
-                e -> list.setVisible(false));
-        invisible.setId("detachable-list-invisible");
-        NativeButton visible = new NativeButton("Set list visible",
-                e -> list.setVisible(true));
-        visible.setId("detachable-list-visible");
-        add(container1, container2, detach, attach1, attach2, invisible,
-                visible);
     }
 
     private void createListsWithBasicRenderers() {

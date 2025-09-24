@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.component.spreadsheet.client.js;
 
 import java.util.ArrayList;
@@ -91,7 +99,8 @@ public class SpreadsheetJsApi {
 
                 "height", "width", "description", "descriptionContentMode",
                 "caption", "styles", "id", "primaryStyleName", "errorMessage",
-                "captionAsHtml", "tabIndex", "enabled" }) {
+                "captionAsHtml", "tabIndex", "enabled",
+                "showCustomEditorOnFocus" }) {
             if (sce.isInitialStateChange()
                     || sce.hasPropertyChanged(propertyName)) {
                 SpreadsheetWidget w = connector.getWidget();
@@ -177,6 +186,8 @@ public class SpreadsheetJsApi {
                     w.setWidth(s.width);
                 if ("id".equals(propertyName))
                     w.setId(s.id);
+                if ("showCustomEditorOnFocus".equals(propertyName))
+                    w.setShowCustomEditorOnFocus(s.showCustomEditorOnFocus);
             }
         }
     }
@@ -434,6 +445,10 @@ public class SpreadsheetJsApi {
 
     public void setNamedRanges(String namedRanges) {
         getState().namedRanges = Parser.parseArraylistString(namedRanges);
+    }
+
+    public void setShowCustomEditorOnFocus(boolean showCustomEditorOnFocus) {
+        getState().showCustomEditorOnFocus = showCustomEditorOnFocus;
     }
 
     public void setHeight(String height) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,9 +21,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the {@link TimePickerPage}.
@@ -137,10 +137,18 @@ public class TimePickerIT extends AbstractComponentIT {
         TimePickerElement picker = $(TimePickerElement.class)
                 .id("time-picker-helper-component");
         Assert.assertEquals("helper-component",
-                picker.getHelperComponent().getAttribute("id"));
+                picker.getHelperComponent().getDomAttribute("id"));
 
         $("button").id("button-clear-helper-component").click();
         Assert.assertNull(picker.getHelperComponent());
+    }
+
+    @Test
+    public void timePickerWithSmallMs_msNotRoundedDownToZero() {
+        TimePickerElement picker = $(TimePickerElement.class)
+                .id("picker-with-small-ms");
+
+        validatePickerValue(picker, "00:00:00.050");
     }
 
     private void selectStep(String step) {

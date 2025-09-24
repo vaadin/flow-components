@@ -1,13 +1,14 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.map.configuration.layer;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vaadin.flow.component.map.configuration.AbstractConfigurationObject;
 
 /**
@@ -61,6 +62,8 @@ public abstract class Layer extends AbstractConfigurationObject {
     /**
      * @return the z-index of the layer, or null if not defined
      */
+    @JsonProperty("zIndex") // Jackson ignores properties that don't start with
+                            // uppercase letters
     public Integer getzIndex() {
         return zIndex;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -24,20 +24,20 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.shared.InputField;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
@@ -46,6 +46,11 @@ import com.vaadin.flow.server.VaadinSession;
 
 public class TimePickerTest {
     private static final String PROP_AUTO_OPEN_DISABLED = "autoOpenDisabled";
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
 
     @Test
     public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
@@ -77,6 +82,18 @@ public class TimePickerTest {
 
         picker.getElement().setProperty("value", "07:40");
         assertEquals(LocalTime.of(7, 40), picker.getValue());
+    }
+
+    @Test
+    public void emptyValueIsNull() {
+        TimePicker picker = new TimePicker();
+        Assert.assertNull(picker.getEmptyValue());
+    }
+
+    @Test
+    public void setInitialValue_emptyValueIsNull() {
+        TimePicker picker = new TimePicker(LocalTime.of(5, 30));
+        Assert.assertNull(picker.getEmptyValue());
     }
 
     @Test
@@ -177,7 +194,8 @@ public class TimePickerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testSetStep_lessThan0Ms_throwsException() {
-        TimePicker timePicker=new TimePicker();timePicker.setStep(Duration.ofNanos(500_000));
+        TimePicker timePicker = new TimePicker();
+        timePicker.setStep(Duration.ofNanos(500_000));
     }
 
     @Test
@@ -252,13 +270,6 @@ public class TimePickerTest {
     public void implementsHasAllowedCharPattern() {
         Assert.assertTrue("TimePicker should support char pattern",
                 HasAllowedCharPattern.class
-                        .isAssignableFrom(new TimePicker().getClass()));
-    }
-
-    @Test
-    public void implementsHasOverlayClassName() {
-        Assert.assertTrue("TimePicker should support overlay class name",
-                HasOverlayClassName.class
                         .isAssignableFrom(new TimePicker().getClass()));
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,9 +20,12 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 
+import com.vaadin.flow.component.datepicker.testbench.DatePickerElement;
+import com.vaadin.flow.component.timepicker.testbench.TimePickerElement;
 import com.vaadin.testbench.ElementQuery;
 import com.vaadin.testbench.HasHelper;
 import com.vaadin.testbench.HasLabel;
+import com.vaadin.testbench.HasValidation;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.testbench.elementsbase.Element;
 
@@ -32,7 +35,7 @@ import com.vaadin.testbench.elementsbase.Element;
  */
 @Element("vaadin-date-time-picker")
 public class DateTimePickerElement extends TestBenchElement
-        implements HasLabel, HasHelper {
+        implements HasLabel, HasHelper, HasValidation {
 
     private static final String VALUE_PROPERTY = "value";
 
@@ -139,6 +142,7 @@ public class DateTimePickerElement extends TestBenchElement
      */
     private void setValue(String value) {
         setProperty(VALUE_PROPERTY, value);
+        triggerChange(this);
     }
 
     /**
@@ -206,7 +210,7 @@ public class DateTimePickerElement extends TestBenchElement
 
     /**
      * This is needed when simulating user input by explicitly setting the value
-     * property of inner inputs.
+     * property.
      */
     private void triggerChange(TestBenchElement pickerElement) {
         executeScript(
@@ -247,12 +251,22 @@ public class DateTimePickerElement extends TestBenchElement
         return !getPropertyBoolean("autoOpenDisabled");
     }
 
-    private TestBenchElement getDatePicker() {
-        return $("vaadin-date-picker").attribute("slot", "date-picker").first();
+    /**
+     * Get the DatePickerElement for date picker part.
+     *
+     * @return DatePickerElement
+     */
+    public DatePickerElement getDatePicker() {
+        return this.$(DatePickerElement.class).first();
     }
 
-    private TestBenchElement getTimePicker() {
-        return $("vaadin-time-picker").attribute("slot", "time-picker").first();
+    /**
+     * Get the TimePickerElement for time picker part.
+     *
+     * @return TimePickerElement
+     */
+    public TimePickerElement getTimePicker() {
+        return this.$(TimePickerElement.class).first();
     }
 
     /**
@@ -263,7 +277,7 @@ public class DateTimePickerElement extends TestBenchElement
     @Override
     public TestBenchElement getHelperComponent() {
         final ElementQuery<TestBenchElement> query = $(TestBenchElement.class)
-                .attribute("slot", "helper");
+                .withAttribute("slot", "helper");
         if (query.exists()) {
             TestBenchElement last = query.last();
             // To avoid getting the "slot" element, for components with slotted

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,23 +20,25 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.shared.InputField;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
-import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.datepicker.DatePicker.DatePickerI18n;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.InputField;
+import com.vaadin.flow.data.binder.Result;
 import com.vaadin.flow.di.Instantiator;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.VaadinSession;
 
@@ -46,6 +48,11 @@ import net.jcip.annotations.NotThreadSafe;
 public class DatePickerTest {
 
     private static final String OPENED_PROPERTY_NOT_UPDATED = "The server-side \"opened\"-property was not updated synchronously";
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
+    }
 
     @Test
     public void initialValueIsNotSpecified_valuePropertyHasEmptyString() {
@@ -84,6 +91,18 @@ public class DatePickerTest {
         Assert.assertEquals(LocalDate.of(2018, 4, 25), picker.getValue());
         Assert.assertEquals("2018-04-25",
                 picker.getElement().getProperty("value"));
+    }
+
+    @Test
+    public void emptyValueIsNull() {
+        DatePicker picker = new DatePicker();
+        Assert.assertNull(picker.getEmptyValue());
+    }
+
+    @Test
+    public void setInitialValue_emptyValueIsNull() {
+        DatePicker picker = new DatePicker(LocalDate.of(2018, 4, 25));
+        Assert.assertNull(picker.getEmptyValue());
     }
 
     @Test
@@ -274,13 +293,6 @@ public class DatePickerTest {
     }
 
     @Test
-    public void implementsHasOverlayClassName() {
-        Assert.assertTrue("DatePicker should support overlay class name",
-                HasOverlayClassName.class
-                        .isAssignableFrom(new DatePicker().getClass()));
-    }
-
-    @Test
     public void implementsHasTooltip() {
         DatePicker picker = new DatePicker();
         Assert.assertTrue(picker instanceof HasTooltip);
@@ -371,6 +383,27 @@ public class DatePickerTest {
         var field = new DatePicker();
         Assert.assertTrue(
                 field instanceof InputField<AbstractField.ComponentValueChangeEvent<DatePicker, LocalDate>, LocalDate>);
+    }
+
+    @Test
+    public void setFallbackParser_getFallbackParser() {
+        DatePicker datePicker = new DatePicker();
+        Assert.assertNull(datePicker.getFallbackParser());
+
+        SerializableFunction<String, Result<LocalDate>> fallbackParser = (
+                s) -> {
+            if (s.equals("tomorrow")) {
+                return Result.ok(LocalDate.now().plusDays(1));
+            } else {
+                return Result.error("Invalid date format");
+            }
+        };
+
+        datePicker.setFallbackParser(fallbackParser);
+        Assert.assertEquals(fallbackParser, datePicker.getFallbackParser());
+
+        datePicker.setFallbackParser(null);
+        Assert.assertNull(datePicker.getFallbackParser());
     }
 
     @Tag("div")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -39,19 +39,19 @@ public class DetailsElement extends TestBenchElement {
      * Returns content element
      */
     public TestBenchElement getContent() {
-        TestBenchElement contentPlaceholder = $(TestBenchElement.class)
-                .attribute("part", "content").first();
+        TestBenchElement contentSlot = $("slot").withoutAttribute("name")
+                .first();
 
         return (TestBenchElement) executeScript(
-                "return arguments[0].firstElementChild.assignedNodes()[0];",
-                contentPlaceholder);
+                "return arguments[0].assignedNodes()[0];", contentSlot);
     }
 
     /**
      * Whether the details are opened or not
      */
     public boolean isOpened() {
-        return getPropertyBoolean("opened");
+        Boolean result = getPropertyBoolean("opened");
+        return result != null && result;
     }
 
     /**
@@ -65,7 +65,8 @@ public class DetailsElement extends TestBenchElement {
      * Returns a wrapper of the summary component
      */
     public TestBenchElement getSummaryWrapper() {
-        return $(TestBenchElement.class).attribute("slot", "summary").first();
+        return $(TestBenchElement.class).withAttribute("slot", "summary")
+                .first();
     }
 
     /**

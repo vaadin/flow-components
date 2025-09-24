@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts;
@@ -35,6 +35,9 @@ import com.vaadin.flow.component.charts.events.ChartRedrawEvent;
 import com.vaadin.flow.component.charts.events.ChartSelectionEvent;
 import com.vaadin.flow.component.charts.events.DrilldownEvent;
 import com.vaadin.flow.component.charts.events.PointClickEvent;
+import com.vaadin.flow.component.charts.events.PointDragEvent;
+import com.vaadin.flow.component.charts.events.PointDragStartEvent;
+import com.vaadin.flow.component.charts.events.PointDropEvent;
 import com.vaadin.flow.component.charts.events.PointLegendItemClickEvent;
 import com.vaadin.flow.component.charts.events.PointMouseOutEvent;
 import com.vaadin.flow.component.charts.events.PointMouseOverEvent;
@@ -59,17 +62,17 @@ import com.vaadin.flow.component.charts.model.Configuration;
 import com.vaadin.flow.component.charts.model.DataSeries;
 import com.vaadin.flow.component.charts.model.DataSeriesItem;
 import com.vaadin.flow.component.charts.model.DrilldownCallback;
-import com.vaadin.flow.component.charts.model.PlotOptionsTimeline;
 import com.vaadin.flow.component.charts.model.DrilldownCallback.DrilldownDetails;
+import com.vaadin.flow.component.charts.model.PlotOptionsTimeline;
 import com.vaadin.flow.component.charts.model.Series;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.JsonObject;
-import elemental.json.JsonValue;
-import elemental.json.impl.JreJsonFactory;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Vaadin Charts is a feature-rich interactive charting library for Vaadin. It
@@ -86,9 +89,7 @@ import elemental.json.impl.JreJsonFactory;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-chart")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/charts", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/charts", version = "25.0.0-alpha19")
 @JsModule("@vaadin/charts/src/vaadin-chart.js")
 public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
@@ -96,14 +97,13 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
     private Registration configurationUpdateRegistration;
 
-    private transient JreJsonFactory jsonFactory = new JreJsonFactory();
-
     private final ConfigurationChangeListener changeListener = new ProxyChangeForwarder(
             this);
 
     private final static List<ChartType> TIMELINE_NOT_SUPPORTED = Arrays.asList(
             ChartType.PIE, ChartType.GAUGE, ChartType.SOLIDGAUGE,
-            ChartType.PYRAMID, ChartType.FUNNEL, ChartType.ORGANIZATION);
+            ChartType.PYRAMID, ChartType.FUNNEL, ChartType.ORGANIZATION,
+            ChartType.GANTT);
 
     private DrillCallbackHandler drillCallbackHandler;
 
@@ -127,12 +127,6 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
         getConfiguration().getChart().setType(type);
     }
 
-    static String wrapJSExpressionInTryCatchWrapper(String expression) {
-        return String.format("const f = function(){return %s;}.bind(this);"
-                + "return Vaadin.Flow.tryCatchWrapper(f, 'Vaadin Charts', 'vaadin-charts-flow')();",
-                expression);
-    }
-
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
@@ -147,23 +141,22 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
         configurationUpdateRegistration = ui.beforeClientResponse(this,
                 context -> {
                     drawChart(resetConfiguration);
+                    reportUsage();
 
                     if (configuration != null) {
                         // Start listening to data series events once the chart
-                        // has been
-                        // drawn.
+                        // has been drawn.
                         configuration.addChangeListener(changeListener);
                     }
                     configurationUpdateRegistration = null;
                 });
     }
 
-    JreJsonFactory getJsonFactory() {
-        if (jsonFactory == null) {
-            jsonFactory = new JreJsonFactory();
+    private void reportUsage() {
+        final ChartType type = getConfiguration().getChart().getType();
+        if (type == ChartType.GANTT) {
+            UsageStatistics.markAsUsed("flow-components/chart/gantt", null);
         }
-
-        return jsonFactory;
     }
 
     /**
@@ -200,8 +193,8 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     public void drawChart(boolean resetConfiguration) {
         validateTimelineAndConfiguration();
 
-        final JsonObject configurationNode = getJsonFactory()
-                .parse(ChartSerialization.toJSON(configuration));
+        final ObjectNode configurationNode = JacksonUtils
+                .readTree(ChartSerialization.toJSON(configuration));
 
         getElement().callJsFunction("updateConfiguration", configurationNode,
                 resetConfiguration);
@@ -217,11 +210,12 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * <li>ChartType.PYRAMID</li>
      * <li>ChartType.FUNNEL</li>
      * <li>ChartType.ORGANIZATION</li>
+     * <li>ChartType.GANTT</li>
      * </ul>
      * Enabling timeline mode in these unsupported chart types results in an
      * <code>IllegalArgumentException</code>
      * <p>
-     * Note: for Timeline chart type see {@link ChartType.TIMELINE} and
+     * Note: for Timeline chart type see {@link ChartType#TIMELINE} and
      * {@link PlotOptionsTimeline}.
      *
      * @param timeline
@@ -601,6 +595,38 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
     }
 
     /**
+     * Adds a point drag start listener, which will be notified when starting to
+     * drag a point.
+     *
+     * @param listener
+     */
+    public Registration addPointDragStartListener(
+            ComponentEventListener<PointDragStartEvent> listener) {
+        return addListener(PointDragStartEvent.class, listener);
+    }
+
+    /**
+     * Adds a point drop listener, which will be notified point is dropped.
+     *
+     * @param listener
+     */
+    public Registration addPointDropListener(
+            ComponentEventListener<PointDropEvent> listener) {
+        return addListener(PointDropEvent.class, listener);
+    }
+
+    /**
+     * Adds a point drag listener, which will be notified while point is
+     * dragged.
+     *
+     * @param listener
+     */
+    public Registration addPointDragListener(
+            ComponentEventListener<PointDragEvent> listener) {
+        return addListener(PointDragEvent.class, listener);
+    }
+
+    /**
      * Adds a x axes extremes set listener, which will be notified when an x
      * axis extremes are set
      *
@@ -706,14 +732,14 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
 
         private void callClientSideAddSeriesAsDrilldown(int seriesIndex,
                 int pointIndex, Series drilldownSeries) {
-            final String JS = "this.__callChartFunction($0, this.configuration.series[$1].data[$2], $3)";
-            getElement().executeJs(wrapJSExpressionInTryCatchWrapper(JS),
+            getElement().executeJs(
+                    "this.__callChartFunction($0, this.configuration.series[$1].data[$2], $3)",
                     "addSeriesAsDrilldown", seriesIndex, pointIndex,
                     toJsonValue((AbstractConfigurationObject) drilldownSeries));
         }
 
-        private JsonValue toJsonValue(AbstractConfigurationObject series) {
-            return getJsonFactory().parse(ChartSerialization.toJSON(series));
+        private ObjectNode toJsonValue(AbstractConfigurationObject series) {
+            return JacksonUtils.readTree((ChartSerialization.toJSON(series)));
         }
 
         private Series resolveSeriesFor(int seriesIndex) {

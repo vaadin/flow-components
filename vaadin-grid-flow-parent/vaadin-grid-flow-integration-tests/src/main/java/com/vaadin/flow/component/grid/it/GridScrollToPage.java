@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.grid.it;
 
 import java.util.List;
@@ -50,6 +65,19 @@ public class GridScrollToPage extends Div {
                 });
         addRowAndScrollToIndex.setId("add-row-and-scroll-to-index");
 
+        NativeButton scrollToItem500 = new NativeButton("Scroll to item 500",
+                e -> grid.scrollToItem(items.get(500)));
+        scrollToItem500.setId("scroll-to-item-500");
+
+        NativeButton addRowAndScrollToItem = new NativeButton(
+                "Add row and scroll to item", e -> {
+                    String itemToAdd = String.valueOf(items.size());
+                    items.add(itemToAdd);
+                    grid.getDataProvider().refreshAll();
+                    grid.scrollToItem(itemToAdd);
+                });
+        addRowAndScrollToItem.setId("add-row-and-scroll-to-item");
+
         NativeButton setSmallPageSize = new NativeButton(
                 "Set small page size (5)", e -> {
                     grid.setPageSize(5);
@@ -57,7 +85,7 @@ public class GridScrollToPage extends Div {
         setSmallPageSize.setId("set-small-page-size");
 
         add(grid, scrollToStart, scrollToEnd, scrollToRow500,
-                addRowsAndScrollToEnd, addRowAndScrollToIndex,
-                setSmallPageSize);
+                addRowsAndScrollToEnd, addRowAndScrollToIndex, scrollToItem500,
+                addRowAndScrollToItem, setSmallPageSize);
     }
 }

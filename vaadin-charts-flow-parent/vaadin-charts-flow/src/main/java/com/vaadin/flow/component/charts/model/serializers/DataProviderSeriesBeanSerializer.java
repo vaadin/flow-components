@@ -1,31 +1,31 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model.serializers;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.ValueNode;
-import com.vaadin.flow.component.charts.model.DataProviderSeries;
-import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
-
-import java.io.IOException;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 import static com.vaadin.flow.component.charts.model.DataProviderSeries.CLOSE_PROPERTY;
 import static com.vaadin.flow.component.charts.model.DataProviderSeries.HIGH_PROPERTY;
 import static com.vaadin.flow.component.charts.model.DataProviderSeries.LOW_PROPERTY;
 import static com.vaadin.flow.component.charts.model.DataProviderSeries.OPEN_PROPERTY;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import com.vaadin.flow.component.charts.model.DataProviderSeries;
+import com.vaadin.flow.component.charts.model.PlotOptionsSeries;
+
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.ValueNode;
 
 /**
  * Custom bean serializer for {@link DataProviderSeries}
@@ -48,21 +48,21 @@ public class DataProviderSeriesBeanSerializer
     @Override
     public void serialize(DataProviderSeries bean,
             BeanSerializerDelegator<DataProviderSeries> serializer,
-            JsonGenerator jgen, SerializerProvider provider)
-            throws IOException {
+            JsonGenerator jgen, SerializationContext context) {
         jgen.writeStartObject();
 
         if (bean.getPlotOptions() != null
                 && !(bean.getPlotOptions() instanceof PlotOptionsSeries)) {
-            jgen.writeObjectField("type", bean.getPlotOptions().getChartType());
+            jgen.writePOJOProperty("type",
+                    bean.getPlotOptions().getChartType());
         }
 
         // write other fields as per normal serialization rules
-        serializer.serializeFields(bean, jgen, provider);
+        serializer.serializeProperties(bean, jgen, context);
 
         ArrayNode data = createDataArray(bean);
 
-        jgen.writeObjectField("data", data);
+        jgen.writePOJOProperty("data", data);
 
         jgen.writeEndObject();
     }

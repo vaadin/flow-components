@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,7 +18,6 @@ package com.vaadin.flow.component.contextmenu.it;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.dom.Element;
@@ -41,14 +40,14 @@ public class ContextMenuPage extends Div {
     }
 
     private void createContextMenuAndAddComponentAtIndex() {
-        Label target = new Label(
+        Div target = new Div(
                 "Target for context menu with opened change listener");
         target.setId("context-menu-add-component-target");
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.setTarget(target);
 
         contextMenu.setId("menu-add-component-at-index");
-        contextMenu.add(new NativeButton(), new NativeButton(),
+        contextMenu.addComponent(new NativeButton(), new NativeButton(),
                 new NativeButton());
 
         NativeButton addedButton = new NativeButton("Added Button");
@@ -78,13 +77,13 @@ public class ContextMenuPage extends Div {
     }
 
     private void addContextMenuWithOpenedChangeListener() {
-        Label target = new Label(
+        Div target = new Div(
                 "Target for context menu with opened change listener");
         target.setId("context-menu-test");
         ContextMenu contextMenu = new ContextMenu();
         contextMenu.setTarget(target);
         Paragraph content = new Paragraph("Context menu test.");
-        contextMenu.add(content);
+        contextMenu.addComponent(content);
 
         Div message = new Div();
         message.setId("message");
@@ -99,13 +98,13 @@ public class ContextMenuPage extends Div {
 
     private void addContextMenuWithControls() {
         ContextMenu contextMenu = new ContextMenu();
-        Label target = new Label(
+        Div target = new Div(
                 "Target for context menu with setOpenOnClick() and setTarget()");
         target.setId("context-menu-with-controls");
         contextMenu.setTarget(target);
 
         Paragraph content = new Paragraph("Context menu With SetOpenOnClick.");
-        contextMenu.add(content);
+        contextMenu.addComponent(content);
 
         String current = "Current state is ";
         Div message = new Div();
@@ -126,7 +125,7 @@ public class ContextMenuPage extends Div {
             message.setText(current + contextMenu.isOpenOnClick());
         });
 
-        Label altTarget = new Label("Alternative target");
+        Div altTarget = new Div("Alternative target");
         altTarget.setId("alt-target");
 
         NativeButton changeTarget = new NativeButton("Change target",

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -77,18 +77,18 @@ public class IconIT extends AbstractComponentIT {
     @Test
     public void allAvailableIcons() {
         WebElement allIcons = findElement(By.id("all-icons"));
-        List<WebElement> labels = allIcons.findElements(By.tagName("label"));
+        List<WebElement> spans = allIcons.findElements(By.tagName("span"));
         List<WebElement> icons = allIcons
                 .findElements(By.tagName("vaadin-icon"));
 
-        Assert.assertEquals(VaadinIcon.values().length, labels.size());
+        Assert.assertEquals(VaadinIcon.values().length, spans.size());
         Assert.assertEquals(VaadinIcon.values().length, icons.size());
 
-        for (int i = 0; i < labels.size(); i += 17) {
-            WebElement label = labels.get(i);
+        for (int i = 0; i < spans.size(); i += 17) {
+            WebElement span = spans.get(i);
             WebElement icon = icons.get(i);
             String enumName = VaadinIcon.values()[i].name();
-            Assert.assertEquals(enumName, label.getText());
+            Assert.assertEquals(enumName, span.getText());
             assertIconProperty(icon, "vaadin",
                     enumName.toLowerCase().replace('_', '-'));
         }
@@ -102,7 +102,7 @@ public class IconIT extends AbstractComponentIT {
     private void assertIconProperty(WebElement icon, String collection,
             String iconName) {
         Assert.assertEquals(collection + ":" + iconName,
-                icon.getAttribute("icon"));
+                icon.getDomAttribute("icon"));
     }
 
     private void assertCssValue(WebElement element, String propertyName,

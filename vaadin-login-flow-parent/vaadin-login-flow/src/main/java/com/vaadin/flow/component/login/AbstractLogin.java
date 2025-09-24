@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.login;
 
+import org.slf4j.LoggerFactory;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -24,9 +26,13 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.dom.PropertyChangeListener;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.BaseJsonNode;
 
 /**
  * Abstract component for the {@code <vaadin-login-overlay>} and
@@ -37,6 +43,17 @@ import com.vaadin.flow.shared.Registration;
  * {@link com.vaadin.flow.component.HasEnabled#setEnabled(boolean)} method.
  * Setting error {@link #setError(boolean)} true makes component automatically
  * enabled for the next login attempt.
+ * <p>
+ * </p>
+ * Server side login listener do not work in combination with HTML form
+ * submission configured by setting the {@code action} attribute. The reason is
+ * that form submission, depending on the authentication process result, will
+ * cause a redirection to a different page or to current login view. In both
+ * cases a new Flow UI will be created and the event will potentially be
+ * forwarded to a dismissed UI. In addition, if the HTTP session ID is changed
+ * as a consequence of the authentication process, the server may respond to the
+ * login event with a session expiration error, cause a client resynchronization
+ * that can in turn cancel a potential redirect issued by the form submission.
  *
  * @author Vaadin Ltd
  */
@@ -51,19 +68,15 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
 
     private static final PropertyChangeListener NO_OP = event -> {
     };
+    private Registration registration;
 
     /**
      * Initializes a new AbstractLogin with a default localization.
      */
     public AbstractLogin() {
         this(LoginI18n.createDefault());
-        getElement().addPropertyChangeListener(PROP_DISABLED, LOGIN_EVENT,
-                NO_OP);
         getElement().setProperty("_preventAutoEnable", true);
-        addLoginListener(e -> {
-            setEnabled(false);
-            setError(false);
-        });
+        registerDefaultLoginListener();
     }
 
     /**
@@ -76,15 +89,43 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
         setI18n(i18n);
     }
 
+    private void registerDefaultLoginListener() {
+        DomListenerRegistration disabledPropertyRegistration = getElement()
+                .addPropertyChangeListener(PROP_DISABLED, LOGIN_EVENT, NO_OP);
+        Registration loginListenerRegistration = addLoginListener(e -> {
+            setEnabled(false);
+            setError(false);
+        });
+        this.registration = Registration.combine(disabledPropertyRegistration,
+                loginListenerRegistration);
+    }
+
     /**
      * Sets the path where to send the form-data when a form is submitted. Once
      * action is defined a {@link AbstractLogin.LoginEvent} is not fired
      * anymore.
+     * <p>
+     * The {@code action} attribute should not be used together with login
+     * listeners added with {@link #addLoginListener(ComponentEventListener)}.
+     * See class Javadoc for more information.
      *
      * @see #getAction()
+     * @see #addLoginListener(ComponentEventListener)
      */
     public void setAction(String action) {
-        getElement().setProperty(PROP_ACTION, action);
+        if (action == null) {
+            getElement().removeProperty(PROP_ACTION);
+            if (registration == null) {
+                registerDefaultLoginListener();
+            }
+        } else {
+            getElement().setProperty(PROP_ACTION, action);
+            if (registration != null) {
+                registration.remove();
+                registration = null;
+            }
+            warnIfActionAndLoginListenerUsedTogether();
+        }
     }
 
     /**
@@ -102,11 +143,10 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      *
      * Calling this method with {@code true} will also enable the component.
      *
-     * @see #isError()
-     *
      * @param error
      *            {@code true} to show the error message and enable component
      *            for next login attempt, {@code false} to hide an error
+     * @see #isError()
      */
     public void setError(boolean error) {
         if (error) {
@@ -129,10 +169,9 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * Sets whether to show or hide the forgot password button. The button is
      * visible by default
      *
-     * @see #isForgotPasswordButtonVisible()
-     *
      * @param forgotPasswordButtonVisible
      *            whether to display or hide the button
+     * @see #isForgotPasswordButtonVisible()
      */
     public void setForgotPasswordButtonVisible(
             boolean forgotPasswordButtonVisible) {
@@ -158,15 +197,67 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
      * @see LoginI18n#createDefault()
      */
     public void setI18n(LoginI18n i18n) {
-        getElement().setPropertyJson("i18n", JsonSerializer.toJson(i18n));
+        BaseJsonNode jsonNode = i18n != null ? JacksonUtils.beanToJson(i18n)
+                : JacksonUtils.nullNode();
+        getElement().setPropertyJson("i18n", jsonNode);
     }
 
     /**
-     * Adds `login` event listener
+     * Returns {@link LoginI18n} set earlier via {@link #setI18n(LoginI18n)}.
+     * <p>
+     * </p>
+     * Note that a copy of the original object is returned: changes done to the
+     * copy will not be reflected back until the object is set via
+     * {@link #setI18n(LoginI18n)}.
+     *
+     * @return currently set {@link LoginI18n} or null if none was set.
+     */
+    LoginI18n getI18n() {
+        final JsonNode json = (JsonNode) getElement().getPropertyRaw("i18n");
+        if (json == null || json.isNull()) {
+            return null;
+        }
+        return JacksonUtils.readToObject(json, LoginI18n.class);
+    }
+
+    /**
+     * Shows given error message and sets {@link #setError(boolean)} to true.
+     *
+     * @param title
+     *            the {@link LoginI18n.ErrorMessage#getTitle() error message
+     *            title}, may be null.
+     * @param message
+     *            the {@link LoginI18n.ErrorMessage#getMessage() error message},
+     *            may be null.
+     */
+    public void showErrorMessage(String title, String message) {
+        var loginI18n = getI18n();
+        if (loginI18n == null) {
+            loginI18n = LoginI18n.createDefault();
+        }
+        if (loginI18n.getErrorMessage() == null) {
+            loginI18n.setErrorMessage(new LoginI18n.ErrorMessage());
+        }
+        loginI18n.getErrorMessage().setTitle(title);
+        loginI18n.getErrorMessage().setMessage(message);
+        setI18n(loginI18n);
+        setError(true);
+    }
+
+    /**
+     * Adds `login` event listener.
+     * <p>
+     * Login listeners should not be used together with the {@code action}
+     * attribute. See class Javadoc for more information.
+     *
+     * @see #setAction(String)
      */
     public Registration addLoginListener(
             ComponentEventListener<LoginEvent> listener) {
-        return ComponentUtil.addListener(this, LoginEvent.class, listener);
+        Registration registration = ComponentUtil.addListener(this,
+                LoginEvent.class, listener);
+        warnIfActionAndLoginListenerUsedTogether();
+        return registration;
     }
 
     /**
@@ -221,5 +312,13 @@ public abstract class AbstractLogin extends Component implements HasEnabled {
     @Override
     public void onEnabledStateChanged(boolean enabled) {
         getElement().setProperty(PROP_DISABLED, !enabled);
+    }
+
+    private void warnIfActionAndLoginListenerUsedTogether() {
+        if (getElement().hasProperty(PROP_ACTION)
+                && !getListeners(LoginEvent.class).isEmpty()) {
+            LoggerFactory.getLogger(getClass()).warn(
+                    "Using the action attribute together with login listeners is discouraged. See the AbstractLogin JavaDoc for more information. This may throw an exception in the future.");
+        }
     }
 }

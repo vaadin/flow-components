@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet;
@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 import org.apache.poi.ss.usermodel.BorderFormatting;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.xssf.model.ThemesTable;
 import org.apache.poi.xssf.usermodel.XSSFBorderFormatting;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -24,7 +25,6 @@ import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder.BorderSide;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellFill;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBorder;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTCfRule;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTColor;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTDxf;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTFont;
@@ -103,13 +103,13 @@ public class XSSFColorConverter implements ColorConverter {
         sb.append(attr);
         sb.append(":");
         if (color == null || color.isAuto()) {
-            sb.append("#000;");
+            sb.append("var(--default-color);");
             return sb.toString();
         }
 
         byte[] argb = color.getARGB();
         if (argb == null) {
-            sb.append("#000;");
+            sb.append("var(--default-color);");
             return sb.toString();
         }
 
@@ -147,7 +147,7 @@ public class XSSFColorConverter implements ColorConverter {
         sb.append(attr);
         sb.append(":");
         if (color == null || color.getAuto()) {
-            sb.append("#000;");
+            sb.append("var(--default-color);");
             return sb.toString();
         }
 
@@ -161,7 +161,7 @@ public class XSSFColorConverter implements ColorConverter {
         }
 
         if (argb == null) {
-            sb.append("#000;");
+            sb.append("var(--default-color);");
             return sb.toString();
         }
 
@@ -241,7 +241,7 @@ public class XSSFColorConverter implements ColorConverter {
         defaultBackgroundColor = styleColor(fillBackgroundColorColor);
 
         if (defaultBackgroundColor == null) {
-            defaultBackgroundColor = "rgba(255,255,255,1.0);";
+            defaultBackgroundColor = "var(--default-background-color);";
         }
         sb.append("background-color:");
         sb.append(defaultBackgroundColor);
@@ -249,8 +249,9 @@ public class XSSFColorConverter implements ColorConverter {
         XSSFColor xssfColor = cs.getFont().getXSSFColor();
         defaultColor = styleColor(xssfColor);
 
-        if (defaultColor == null) {
-            defaultColor = "rgba(0,0,0,1.0);";
+        if (defaultColor == null
+                || defaultColor.equals("rgba(0, 0, 0, 1.0);")) {
+            defaultColor = "var(--default-color);";
         }
         sb.append("color:");
         sb.append(defaultColor);
@@ -287,6 +288,11 @@ public class XSSFColorConverter implements ColorConverter {
 
                 // CF rules have tint in bgColor but not the XSSFColor.
                 return styleColor(themeColor, bgColor.getTint());
+            } else if (bgColor.isSetIndexed()) {
+                XSSFColor mappedColor = new XSSFColor(
+                        IndexedColors.fromInt((int) bgColor.getIndexed()),
+                        workbook.getStylesSource().getIndexedColors());
+                return styleColor(mappedColor, bgColor.getTint());
             } else {
                 byte[] rgb = bgColor.getRgb();
                 return rgb == null ? null : ColorConverterUtil.toRGBA(rgb);
@@ -319,6 +325,11 @@ public class XSSFColorConverter implements ColorConverter {
                     .getThemeColor((int) ctColor.getTheme());
 
             return styleColor(themeColor, ctColor.getTint());
+        } else if (ctColor.isSetIndexed()) {
+            XSSFColor mappedColor = new XSSFColor(
+                    IndexedColors.fromInt((int) ctColor.getIndexed()),
+                    workbook.getStylesSource().getIndexedColors());
+            return styleColor(mappedColor, ctColor.getTint());
         } else {
             byte[] rgb = ctColor.getRgb();
             return rgb == null ? null : ColorConverterUtil.toRGBA(rgb);
@@ -404,16 +415,12 @@ public class XSSFColorConverter implements ColorConverter {
      */
     private CTDxf getXMLColorDataWithReflection(
             XSSFConditionalFormattingRule rule) {
-        CTCfRule realRule = null;
-
         Method declaredMethod = null;
         try {
-            declaredMethod = rule.getClass().getDeclaredMethod("getCTCfRule");
+            declaredMethod = rule.getClass().getDeclaredMethod("getDxf",
+                    boolean.class);
             declaredMethod.setAccessible(true);
-            realRule = (CTCfRule) declaredMethod.invoke(rule);
-            CTDxf dxf = workbook.getStylesSource().getCTStylesheet().getDxfs()
-                    .getDxfArray((int) realRule.getDxfId());
-            return dxf;
+            return (CTDxf) declaredMethod.invoke(rule, false);
         } catch (Exception e) {
             LOGGER.debug(e.getMessage());
             return null;

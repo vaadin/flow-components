@@ -179,4 +179,31 @@ describe('flow-component-renderer', () => {
 
     expect(getByNodeId).to.not.have.been.called;
   });
+
+  it('should not end up in an update loop', async () => {
+    const container = fixtureSync<HTMLDivElement>(`<div></div>`);
+
+    // Try to render with node id 0 without there being an element for it
+    render(html`${window.Vaadin.FlowComponentHost.getNode('ROOT', 0)}`, container);
+    await nextFrame();
+
+    // Manually clear the container (simulate Grid's editor in EditorRenderer.java)
+    container.innerHTML = '';
+    delete (container as any)._$litPart$;
+
+    // Render once again with a different node id
+    render(html`${window.Vaadin.FlowComponentHost.getNode('ROOT', 1)}`, container);
+    await nextFrame();
+
+    // Supply an element for the new node id
+    const element = document.createElement('div');
+    elements[1] = element;
+    await nextFrame();
+
+    // Verify that the flow component directive is not in an update loop
+    const { getByNodeId } = window.Vaadin.Flow.clients.ROOT;
+    getByNodeId.resetHistory();
+    await nextFrame();
+    expect(getByNodeId).to.not.have.been.called;
+  });
 });

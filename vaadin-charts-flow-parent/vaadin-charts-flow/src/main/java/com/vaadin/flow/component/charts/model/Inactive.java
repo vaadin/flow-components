@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
@@ -51,7 +51,7 @@ public class Inactive extends AbstractConfigurationObject {
 
     /**
      * Enable separate styles for the hovered series to visualize that the user
-     * hovers either the series itself or the legend. .
+     * hovers either the series itself or the legend.
      * <p>
      * Defaults to: true
      */
@@ -64,6 +64,15 @@ public class Inactive extends AbstractConfigurationObject {
      */
     public Number getLineWidth() {
         return lineWidth;
+    }
+
+    /**
+     * Pixel width of the graph line.
+     * <p>
+     * Defaults to: 2
+     */
+    public void setLineWidth(Number lineWidth) {
+        this.lineWidth = lineWidth;
     }
 
     /**

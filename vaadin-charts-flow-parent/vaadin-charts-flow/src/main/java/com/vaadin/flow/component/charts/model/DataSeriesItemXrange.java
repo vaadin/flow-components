@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
@@ -129,8 +129,8 @@ public class DataSeriesItemXrange extends DataSeriesItem {
     /**
      * Sets the X2 value of this data item. Defaults to null.
      *
-     * @param x
-     *            X-value of the item.
+     * @param x2
+     *            X2 value of the item.
      */
     public void setX2(Number x2) {
         this.x2 = x2;

@@ -14,15 +14,15 @@ NOTE: a valid unix terminal with a regular shell is needed for running the utili
 
 ## Compiling all modules but excluding ITs
 
-- `mvn clean compile -Drelease -T C2`
+- `mvn clean compile -Drelease -T 2C`
 
 ## Compiling all the components and their modules including ITs
 
-- `mvn clean test-compile -DskipFrontend -T C2`
+- `mvn clean test-compile -DskipFrontend -T 2C`
 
 ## Installing all modules
 
-- `mvn clean install -DskipTests -Drelease -T C2`
+- `mvn clean install -DskipTests -Drelease -T 2C`
 
 ## Serving the IT pages of a component
 
@@ -38,7 +38,7 @@ Then navigate to `http://localhost:8080/vaadin-checkbox/checkbox-test` to see th
 
 NOTE: this takes a long while and consumes a lot of resources in your computer, it's better to run tests in the merged repo as it is indicated in the following sections
 
-- `mvn clean verify -T C2`
+- `mvn clean verify -T 2C`
 
 ## Merging ITs of all components in one module
 
@@ -120,6 +120,7 @@ It expects `TBLICENSE` and `TBHUB` variables when run in the CI server.
 Optionally it's possible to run just a bunch of modules e.g. `./scripts/build.sh grid combo-box`
 
 ## Using the component in a Flow application
+
 To use the component in an application using maven,
 add the following dependency to your `pom.xml`:
 ```
@@ -130,15 +131,12 @@ add the following dependency to your `pom.xml`:
 </dependency>
 ```
 
-## Flow documentation
-Documentation for flow can be found in [Flow documentation](https://github.com/vaadin/flow-and-components-documentation/blob/main/documentation/Overview.asciidoc).
-
 ## Contributing
-- Use the coding conventions from [Flow coding conventions](https://github.com/vaadin/flow/tree/main/eclipse)
-- [Submit a pull request](https://www.digitalocean.com/community/tutorials/how-to-create-a-pull-request-on-github) with detailed title and description
-- Wait for response from one of Vaadin Flow team members
+
+For submitting pull requests to this repo please check our [contributing guidelines](https://vaadin.com/docs/latest/contributing/pr).
 
 ### Update package version for `@NpmPackage` in all files
+
 There are scripts available for updating the `@NpmPackage` annotation to its latest patch version:
 
 - `./scripts/updateNpmVer.js`
@@ -154,7 +152,7 @@ If you need to make any modification in a component, consider whether it is conv
 
 ### Formatting
 
-Run `mvn formatter:format` before pushing your code.
+Run `mvn spotless:apply` before pushing your code.
 
 ## Bug and enhancement tickets
 - Bug tickets and enhancement requests for the web component implementations should go to the Vaadin web components monorepo https://github.com/vaadin/web-components/.

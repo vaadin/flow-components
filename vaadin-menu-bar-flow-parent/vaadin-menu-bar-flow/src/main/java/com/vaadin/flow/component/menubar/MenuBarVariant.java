@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,7 +21,6 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * Set of theme variants applicable for {@code vaadin-menu-bar} component.
  */
 public enum MenuBarVariant implements ThemeVariant {
-    //@formatter:off
     LUMO_SMALL("small"),
     LUMO_LARGE("large"),
     LUMO_TERTIARY("tertiary"),
@@ -30,10 +29,7 @@ public enum MenuBarVariant implements ThemeVariant {
     LUMO_CONTRAST("contrast"),
     LUMO_ICON("icon"),
     LUMO_END_ALIGNED("end-aligned"),
-    MATERIAL_CONTAINED("contained"),
-    MATERIAL_OUTLINED("outlined"),
-    MATERIAL_END_ALIGNED("end-aligned");
-    //@formatter:on
+    LUMO_DROPDOWN_INDICATORS("dropdown-indicators");
 
     private final String variant;
 

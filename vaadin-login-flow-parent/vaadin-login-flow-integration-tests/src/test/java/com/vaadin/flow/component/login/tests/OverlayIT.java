@@ -1,22 +1,37 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.login.tests;
 
-import com.vaadin.flow.component.login.testbench.LoginFormElement;
-import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
-import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-public class OverlayIT extends BasicIT {
+import com.vaadin.flow.component.login.testbench.LoginOverlayElement;
+import com.vaadin.flow.component.textfield.testbench.PasswordFieldElement;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
-    @Override
-    protected String getBaseURL() {
-        return super.getBaseURL() + "/overlay";
-    }
+@TestPath("vaadin-login/overlay")
+public class OverlayIT extends AbstractComponentIT {
 
-    @Override
-    public LoginFormElement getLoginForm() {
-        openOverlay();
-        return $(LoginOverlayElement.class).waitForFirst().getLoginForm();
+    @Before
+    public void init() {
+        open();
     }
 
     private void openOverlay() {
@@ -32,23 +47,36 @@ public class OverlayIT extends BasicIT {
                 overlay.getPasswordField(), () -> overlay.submit());
     }
 
-    @Override
+    @Test
     public void testDefaults() {
-        super.testDefaults();
+        openOverlay();
         LoginOverlayElement loginOverlay = $(LoginOverlayElement.class)
                 .waitForFirst();
         Assert.assertEquals("App name", loginOverlay.getTitle());
         Assert.assertEquals("Application description",
                 loginOverlay.getDescription());
-        checkLoginForm(loginOverlay.getUsernameField(),
-                loginOverlay.getPasswordField(),
-                loginOverlay.getSubmitButton());
+
+        Assert.assertEquals("Log in", loginOverlay.getFormTitle());
+        Assert.assertEquals("", loginOverlay.getErrorMessageTitle());
+        Assert.assertEquals("", loginOverlay.getErrorMessage());
+        Assert.assertEquals("Forgot password",
+                loginOverlay.getForgotPasswordButton().getText().trim());
+        Assert.assertFalse(
+                loginOverlay.getForgotPasswordButton().hasAttribute("hidden"));
+        Assert.assertEquals("", loginOverlay.getAdditionalInformation());
+
+        Assert.assertEquals("Username",
+                loginOverlay.getUsernameField().getLabel());
+        Assert.assertEquals("Password",
+                loginOverlay.getPasswordField().getLabel());
+        Assert.assertEquals("Log in",
+                loginOverlay.getSubmitButton().getText().trim());
     }
 
     @Test
     public void testOverlaySelfAttached() {
-        getDriver()
-                .get(super.getBaseURL() + "/vaadin-login/overlayselfattached");
+        String url = getRootURL() + "/vaadin-login/overlayselfattached";
+        getDriver().get(url);
 
         Assert.assertFalse($(LoginOverlayElement.class).exists());
         openOverlay();
@@ -61,13 +89,12 @@ public class OverlayIT extends BasicIT {
         loginOverlay.getPasswordField().setValue("value");
         loginOverlay.submit();
 
-        Assert.assertFalse($(LoginOverlayElement.class).exists());
+        waitUntil(driver -> !$(LoginOverlayElement.class).exists());
     }
 
     @Test
     public void testTitleComponent() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-login") + "/component-title";
+        String url = getRootURL() + getTestPath() + "/component-title";
         getDriver().get(url);
         openOverlay();
 
@@ -86,7 +113,7 @@ public class OverlayIT extends BasicIT {
 
         title = loginOverlay.getTitleComponent();
         Assert.assertEquals("vaadin:vaadin-h",
-                title.$("vaadin-icon").first().getAttribute("icon"));
+                title.$("vaadin-icon").first().getDomAttribute("icon"));
 
         Assert.assertEquals("Component title", title.$("h3").first().getText());
 
@@ -99,27 +126,25 @@ public class OverlayIT extends BasicIT {
 
     @Test
     public void testResetTitleComponent() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-login") + "/component-title";
+        String url = getRootURL() + getTestPath() + "/component-title";
         getDriver().get(url);
         checkTitleComponentWasReset();
     }
 
     private void checkTitleComponentWasReset() {
-        // Setting title as String should detach the title component
+        // Setting title as String should restore the default title component
         $("button").id("removeCustomTitle").click();
         openOverlay();
 
         LoginOverlayElement loginOverlay = $(LoginOverlayElement.class)
                 .waitForFirst();
 
-        Assert.assertFalse(loginOverlay.hasTitleComponent());
         Assert.assertEquals("Make title string again", loginOverlay.getTitle());
     }
 
+    @Test
     public void testTitleAndDescriptionStrings() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-login")
+        String url = getRootURL() + getTestPath()
                 + "/property-title-description";
         getDriver().get(url);
         openOverlay();
@@ -131,4 +156,11 @@ public class OverlayIT extends BasicIT {
                 loginOverlay.getDescription());
     }
 
+    protected void checkSuccessfulLogin(TextFieldElement usernameField,
+            PasswordFieldElement passwordField, Runnable submit) {
+        usernameField.setValue("username");
+        passwordField.setValue("password");
+        submit.run();
+        Assert.assertEquals("Successful login", $("div").id("info").getText());
+    }
 }

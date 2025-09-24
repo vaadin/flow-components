@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,12 +21,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.Notification.Position;
 
-import javax.annotation.concurrent.NotThreadSafe;
+import net.jcip.annotations.NotThreadSafe;
 
 @NotThreadSafe
 public class NotificationTest {
@@ -60,8 +60,17 @@ public class NotificationTest {
     }
 
     @Test
+    public void stringDurationPositionAndAssertiveCtor() {
+        notification = new Notification("fooo", 10000, Position.TOP_END, true);
+        Assert.assertEquals(10000, notification.getDuration(), 0);
+        Assert.assertEquals("top-end",
+                notification.getPosition().getClientName());
+        Assert.assertTrue(notification.isAssertive());
+    }
+
+    @Test
     public void componentCtor() {
-        notification = new Notification(new Label(), new NativeButton());
+        notification = new Notification(new Span(), new NativeButton());
 
         notification.setPosition(Position.BOTTOM_END);
         Assert.assertEquals("bottom-end",
@@ -70,10 +79,11 @@ public class NotificationTest {
 
     @Test
     public void staticCtor() {
-        notification = Notification.show("fooooo", 4000,
-                Position.BOTTOM_CENTER);
+        notification = Notification.show("fooooo", 4000, Position.BOTTOM_CENTER,
+                true);
         Assert.assertEquals("bottom-center",
                 notification.getPosition().getClientName());
+        Assert.assertTrue(notification.isAssertive());
     }
 
     @Test

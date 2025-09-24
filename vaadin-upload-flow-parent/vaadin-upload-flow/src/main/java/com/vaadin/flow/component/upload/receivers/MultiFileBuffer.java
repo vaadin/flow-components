@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -37,7 +37,10 @@ import com.vaadin.flow.component.upload.MultiFileReceiver;
  * <p>
  * For a custom file the constructor {@link AbstractFileBuffer(FileFactory)}
  * should be used.
+ * 
+ * @deprecated Use {@link com.vaadin.flow.server.streams.UploadHandler} instead
  */
+@Deprecated(since = "24.8", forRemoval = true)
 public class MultiFileBuffer extends AbstractFileBuffer
         implements MultiFileReceiver {
 
@@ -67,7 +70,8 @@ public class MultiFileBuffer extends AbstractFileBuffer
     @Override
     public OutputStream receiveUpload(String fileName, String mimeType) {
         FileOutputStream outputBuffer = createFileOutputStream(fileName);
-        files.put(fileName, new FileData(fileName, mimeType, outputBuffer));
+        getFilesMap().put(fileName,
+                new FileData(fileName, mimeType, outputBuffer));
 
         return outputBuffer;
     }
@@ -78,7 +82,15 @@ public class MultiFileBuffer extends AbstractFileBuffer
      * @return files stored
      */
     public Set<String> getFiles() {
-        return files.keySet();
+        return getFilesMap().keySet();
+    }
+
+    private Map<String, FileData> getFilesMap() {
+        if (files == null) {
+            // Restore transient map if it is null
+            files = new HashMap<>();
+        }
+        return files;
     }
 
     /**
@@ -89,7 +101,7 @@ public class MultiFileBuffer extends AbstractFileBuffer
      * @return file data for filename or null if not found
      */
     public FileData getFileData(String fileName) {
-        return files.get(fileName);
+        return getFilesMap().get(fileName);
     }
 
     /**
@@ -100,9 +112,9 @@ public class MultiFileBuffer extends AbstractFileBuffer
      * @return file output stream or null if not available
      */
     public FileDescriptor getFileDescriptor(String fileName) {
-        if (files.containsKey(fileName)) {
+        if (getFilesMap().containsKey(fileName)) {
             try {
-                return ((FileOutputStream) files.get(fileName)
+                return ((FileOutputStream) getFilesMap().get(fileName)
                         .getOutputBuffer()).getFD();
             } catch (IOException e) {
                 getLogger().log(Level.WARNING,
@@ -121,9 +133,10 @@ public class MultiFileBuffer extends AbstractFileBuffer
      * @return input stream for file or empty stream if file not found
      */
     public InputStream getInputStream(String fileName) {
-        if (files.containsKey(fileName)) {
+        if (getFilesMap().containsKey(fileName)) {
             try {
-                return new FileInputStream(files.get(fileName).getFile());
+                return new FileInputStream(
+                        getFilesMap().get(fileName).getFile());
             } catch (IOException e) {
                 getLogger().log(Level.WARNING,
                         "Failed to create InputStream for: '" + fileName + "'",

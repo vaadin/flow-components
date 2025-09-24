@@ -1,13 +1,21 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.test;
 
-import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
-import com.vaadin.flow.testutil.TestPath;
+import java.util.Locale;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Locale;
+import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
+import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-spreadsheet")
 public class CustomFormatIT extends AbstractSpreadsheetIT {

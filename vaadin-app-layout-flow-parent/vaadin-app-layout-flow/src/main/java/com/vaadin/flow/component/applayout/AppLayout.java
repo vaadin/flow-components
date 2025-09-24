@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.Locale;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
@@ -32,11 +33,10 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.router.RouterLayout;
 
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * App Layout is a component for building common application layouts.
@@ -52,9 +52,7 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-app-layout")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/app-layout", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/app-layout", version = "25.0.0-alpha19")
 @JsModule("@vaadin/app-layout/src/vaadin-app-layout.js")
 public class AppLayout extends Component implements RouterLayout, HasStyle {
     private static final PropertyDescriptor<String, String> primarySectionProperty = PropertyDescriptors
@@ -70,27 +68,25 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
     /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the i18n object that is returned from this method will not
-     * update the the component, unless it is set again using
-     * {@link AppLayout#setI18n(AppLayoutI18n)}
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(AppLayoutI18n)}
      *
-     * @return the i18n object. It will be <code>null</code>, if the i18n
-     *         properties are not set.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public AppLayoutI18n getI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Sets the internationalization object for this component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(AppLayoutI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
 
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {
@@ -100,11 +96,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
     }
 
     private void setI18nWithJS() {
-        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
-
-        // Remove properties with null values to prevent errors in web
-        // component
-        removeNullValuesFromJsonObject(i18nJson);
+        ObjectNode i18nJson = JacksonUtils.beanToJson(i18n);
 
         // Assign new I18N object to WC, by merging the existing
         // WC I18N, and the values from the new AppLayoutI18n instance,
@@ -120,14 +112,6 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
         // Element state is not persisted across attach/detach
         if (this.i18n != null) {
             setI18nWithJS();
-        }
-    }
-
-    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
-            }
         }
     }
 
@@ -362,6 +346,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
     /**
      * The internationalization properties for {@link AppLayout}
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class AppLayoutI18n implements Serializable {
         private String drawer;
 

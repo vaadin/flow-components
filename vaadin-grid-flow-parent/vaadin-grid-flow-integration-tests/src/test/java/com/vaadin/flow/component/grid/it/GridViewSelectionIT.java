@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,21 +15,21 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.data.bean.Person;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
+import com.vaadin.flow.data.bean.Person;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
@@ -79,16 +79,16 @@ public class GridViewSelectionIT extends AbstractComponentIT {
         // deselect 1
         getCellContent(grid.getCell(0, 0)).click();
         Assert.assertEquals("Select all should be checked", "true",
-                selectAllCheckbox.getAttribute("checked"));
+                selectAllCheckbox.getDomAttribute("checked"));
         Assert.assertEquals("Select all should be indeterminate", "true",
-                selectAllCheckbox.getAttribute("indeterminate"));
+                selectAllCheckbox.getDomAttribute("indeterminate"));
 
         // reselect 1
         getCellContent(grid.getCell(0, 0)).click();
         Assert.assertEquals("Select all should be checked", "true",
-                selectAllCheckbox.getAttribute("checked"));
+                selectAllCheckbox.getDomAttribute("checked"));
         Assert.assertNull("Select all should not be indeterminate",
-                selectAllCheckbox.getAttribute("indeterminate"));
+                selectAllCheckbox.getDomAttribute("indeterminate"));
     }
 
     /**
@@ -126,18 +126,18 @@ public class GridViewSelectionIT extends AbstractComponentIT {
         TestBenchElement table = grid.$("table").first();
         // table should have aria-multiselectable set to true
         Assert.assertTrue(Boolean
-                .parseBoolean(table.getAttribute("aria-multiselectable")));
+                .parseBoolean(table.getDomAttribute("aria-multiselectable")));
 
         Assert.assertTrue(Boolean
-                .parseBoolean(grid.getRow(0).getAttribute("aria-selected")));
+                .parseBoolean(grid.getRow(0).getDomAttribute("aria-selected")));
         Assert.assertTrue(Boolean
-                .parseBoolean(grid.getRow(1).getAttribute("aria-selected")));
+                .parseBoolean(grid.getRow(1).getDomAttribute("aria-selected")));
         Assert.assertFalse(Boolean
-                .parseBoolean(grid.getRow(2).getAttribute("aria-selected")));
+                .parseBoolean(grid.getRow(2).getDomAttribute("aria-selected")));
 
         grid.select(2);
         Assert.assertTrue(Boolean
-                .parseBoolean(grid.getRow(2).getAttribute("aria-selected")));
+                .parseBoolean(grid.getRow(2).getDomAttribute("aria-selected")));
     }
 
     @Test

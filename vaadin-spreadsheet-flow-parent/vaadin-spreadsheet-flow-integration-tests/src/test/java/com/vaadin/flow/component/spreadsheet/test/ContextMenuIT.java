@@ -1,8 +1,12 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.test;
-
-import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
-import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
-import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -10,6 +14,10 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.interactions.Actions;
+
+import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
+import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
+import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-spreadsheet")
 public class ContextMenuIT extends AbstractSpreadsheetIT {
@@ -26,8 +34,9 @@ public class ContextMenuIT extends AbstractSpreadsheetIT {
         // Make sure to use a small enough viewport so that the document needs
         // to be scrolled to see the cell
         getDriver().manage().window().setSize(WINDOW_SIZE_SMALL);
-        // Scroll the document horizontally
-        executeScript("document.documentElement.scrollLeft = 100");
+        // Scroll the document so the cell is visible
+        executeScript(
+                "document.documentElement.scrollLeft = 100;document.documentElement.scrollTop = 200;");
 
         var cell = getSpreadsheet().getCellAt("B2");
         // Open context menu for the cell

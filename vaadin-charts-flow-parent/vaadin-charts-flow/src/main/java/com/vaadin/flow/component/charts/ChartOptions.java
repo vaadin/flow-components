@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts;
@@ -17,9 +17,9 @@ import com.vaadin.flow.component.charts.model.AbstractConfigurationObject;
 import com.vaadin.flow.component.charts.model.Lang;
 import com.vaadin.flow.component.charts.model.style.Theme;
 import com.vaadin.flow.component.charts.util.ChartSerialization;
+import com.vaadin.flow.internal.JacksonUtils;
 
-import elemental.json.JsonObject;
-import elemental.json.impl.JreJsonFactory;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * The ChartOptions configures a page local global options like localized texts
@@ -33,16 +33,8 @@ public class ChartOptions extends AbstractConfigurationObject {
     @JsonUnwrapped
     private Theme theme;
     private Lang lang;
-    private transient JreJsonFactory jsonFactory;
 
     protected ChartOptions() {
-    }
-
-    private JreJsonFactory getJsonFactory() {
-        if (jsonFactory == null) {
-            jsonFactory = new JreJsonFactory();
-        }
-        return jsonFactory;
     }
 
     private void updateOptions() {
@@ -52,8 +44,8 @@ public class ChartOptions extends AbstractConfigurationObject {
             return;
         }
 
-        JsonObject configurationNode = getJsonFactory()
-                .parse(ChartSerialization.toJSON(this));
+        final ObjectNode configurationNode = JacksonUtils
+                .readTree(ChartSerialization.toJSON(this));
         ui.getElement().executeJs(
                 "customElements.get('vaadin-chart').__callHighchartsFunction('setOptions',$0,$1)",
                 true, configurationNode);

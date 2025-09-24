@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.html.Span;
-import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,13 +26,16 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.internal.PendingJavaScriptInvocation;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.dom.DomEvent;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.internal.nodefeature.ElementListenerMap;
 import com.vaadin.flow.server.VaadinSession;
 
 /**
@@ -60,34 +61,37 @@ public class DialogTest {
 
     @Test
     public void createDialogWithComponents_componentsArePartOfGetChildren() {
-        Label label1 = new Label("Label 1");
-        Label label2 = new Label("Label 2");
-        Label label3 = new Label("Label 3");
+        Span span1 = new Span("Text 1");
+        Span span2 = new Span("Text 2");
+        Span span3 = new Span("Text 3");
 
-        Dialog dialog = new Dialog(label1, label2);
+        Dialog dialog = new Dialog(span1, span2);
         dialog.setWidth("200px");
         dialog.setHeight("100px");
 
         List<Component> children = dialog.getChildren()
                 .collect(Collectors.toList());
         Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label1, label2));
+        Assert.assertTrue(children.contains(span1));
+        Assert.assertTrue(children.contains(span2));
 
-        dialog.add(label3);
+        dialog.add(span3);
         children = dialog.getChildren().collect(Collectors.toList());
         Assert.assertEquals(3, children.size());
-        Assert.assertThat(children,
-                CoreMatchers.hasItems(label1, label2, label3));
+        Assert.assertTrue(children.contains(span1));
+        Assert.assertTrue(children.contains(span2));
+        Assert.assertTrue(children.contains(span3));
 
-        dialog.remove(label2);
+        dialog.remove(span2);
         children = dialog.getChildren().collect(Collectors.toList());
         Assert.assertEquals(2, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label1, label3));
+        Assert.assertTrue(children.contains(span1));
+        Assert.assertTrue(children.contains(span3));
 
-        label1.getElement().removeFromParent();
+        span1.getElement().removeFromParent();
         children = dialog.getChildren().collect(Collectors.toList());
         Assert.assertEquals(1, children.size());
-        Assert.assertThat(children, CoreMatchers.hasItems(label3));
+        Assert.assertTrue(children.contains(span3));
 
         dialog.removeAll();
         children = dialog.getChildren().collect(Collectors.toList());
@@ -132,6 +136,32 @@ public class DialogTest {
     }
 
     @Test
+    public void draggedEvent_topLeftPropertiesSynced() {
+        Dialog dialog = new Dialog();
+
+        // Emulate a drag event
+        ComponentUtil.fireEvent(dialog,
+                new Dialog.DialogDraggedEvent(dialog, true, "20", "10"));
+
+        Assert.assertEquals("20", dialog.getLeft());
+        Assert.assertEquals("10", dialog.getTop());
+    }
+
+    @Test
+    public void resizeEvent_widthHeightTopLeftPropertiesSynced() {
+        Dialog dialog = new Dialog();
+
+        // Emulate a resize event
+        ComponentUtil.fireEvent(dialog, new Dialog.DialogResizeEvent(dialog,
+                true, "200", "100", "10", "20"));
+
+        Assert.assertEquals("200", dialog.getWidth());
+        Assert.assertEquals("100", dialog.getHeight());
+        Assert.assertEquals("10", dialog.getLeft());
+        Assert.assertEquals("20", dialog.getTop());
+    }
+
+    @Test
     public void isResizable_falseByDefault() {
         Dialog dialog = new Dialog();
 
@@ -159,6 +189,49 @@ public class DialogTest {
     }
 
     @Test
+    public void getRole_defaultDialog() {
+        Dialog dialog = new Dialog();
+
+        Assert.assertEquals("dialog", dialog.getRole());
+        Assert.assertEquals("dialog", dialog.getOverlayRole());
+        Assert.assertEquals("dialog", dialog.getElement().getProperty("role"));
+    }
+
+    @Test
+    public void setOverlayRole_getOverlayRole() {
+        Dialog dialog = new Dialog();
+        dialog.setOverlayRole("alertdialog");
+
+        Assert.assertEquals("alertdialog", dialog.getRole());
+        Assert.assertEquals("alertdialog", dialog.getOverlayRole());
+        Assert.assertEquals("alertdialog",
+                dialog.getElement().getProperty("role"));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setOverlayRole_null_throws() {
+        Dialog dialog = new Dialog();
+        dialog.setOverlayRole(null);
+    }
+
+    @Test
+    public void setRole_getRole() {
+        Dialog dialog = new Dialog();
+        dialog.setRole("alertdialog");
+
+        Assert.assertEquals("alertdialog", dialog.getRole());
+        Assert.assertEquals("alertdialog", dialog.getOverlayRole());
+        Assert.assertEquals("alertdialog",
+                dialog.getElement().getProperty("role"));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void setRole_null_throws() {
+        Dialog dialog = new Dialog();
+        dialog.setRole(null);
+    }
+
+    @Test
     public void setModal_dialogCanBeModeless() {
         Dialog dialog = new Dialog();
         dialog.setModal(false);
@@ -167,29 +240,6 @@ public class DialogTest {
         // modeless is false and modal is true by default
         Assert.assertFalse("modal can be set to false",
                 !dialog.getElement().getProperty("modeless", false));
-    }
-
-    // vaadin/flow#7799,vaadin/vaadin-dialog#229
-    @Test
-    public void dialogAttached_targetedWithShortcutListenOn_addsJsExecutionForTransportingShortcutEvents() {
-        Dialog dialog = new Dialog();
-        dialog.open();
-        // there are a 6 invocations pending after opening a dialog (???) clear
-        // those first
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-        ui.getInternals().dumpPendingJavaScriptInvocations();
-
-        // adding a shortcut with listenOn(dialog) makes flow pass events from
-        // overlay to dialog so that shortcuts inside dialog work
-        Shortcuts.addShortcutListener(dialog, event -> {
-        }, Key.KEY_A).listenOn(dialog);
-        ui.getInternals().getStateTree().runExecutionsBeforeClientResponse();
-
-        final List<PendingJavaScriptInvocation> pendingJavaScriptInvocations = ui
-                .getInternals().dumpPendingJavaScriptInvocations();
-        Assert.assertEquals(
-                "Shortcut transferring invocation should be pending", 1,
-                pendingJavaScriptInvocations.size());
     }
 
     private void addDivAtIndex(int index) {
@@ -224,6 +274,18 @@ public class DialogTest {
 
         Assert.assertTrue(thirdContent.getParent().isPresent());
         Assert.assertEquals(thirdContent.getParent().get(), dialog);
+
+        Span fourthContent = new Span("fourth_content");
+        dialog.getHeader().addComponentAsFirst(fourthContent);
+
+        Assert.assertTrue(fourthContent.getParent().isPresent());
+        Assert.assertEquals(fourthContent.getParent().get(), dialog);
+
+        Span fifthContent = new Span("fifth_content");
+        dialog.getHeader().addComponentAtIndex(2, fifthContent);
+
+        Assert.assertTrue(fifthContent.getParent().isPresent());
+        Assert.assertEquals(fifthContent.getParent().get(), dialog);
     }
 
     @Test
@@ -279,7 +341,7 @@ public class DialogTest {
     @Test(expected = NullPointerException.class)
     public void callAddToHeaderOrFooter_withNull_shouldThrowError() {
         Dialog dialog = new Dialog();
-        dialog.getHeader().add(null);
+        dialog.getHeader().add((Component) null);
     }
 
     @Test(expected = NullPointerException.class)
@@ -343,6 +405,33 @@ public class DialogTest {
 
         fakeClientResponse();
         Assert.assertNull(dialog.getElement().getParent());
+    }
+
+    @Test
+    public void position_setTopLeft_positionIsDefined() {
+        Dialog dialog = new Dialog();
+        dialog.setTop("10px");
+        dialog.setLeft("20px");
+
+        Assert.assertEquals("10px", dialog.getTop());
+        Assert.assertEquals("20px", dialog.getLeft());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void addClosedListener_listenerInvokedOnClose() {
+        Dialog dialog = new Dialog();
+        ComponentEventListener<Dialog.ClosedEvent> listener = Mockito
+                .mock(ComponentEventListener.class);
+        dialog.addClosedListener(listener);
+
+        Element element = dialog.getElement();
+        dialog.getElement().getNode().getFeature(ElementListenerMap.class)
+                .fireEvent(new DomEvent(element, "closed",
+                        JacksonUtils.createObjectNode()));
+
+        Mockito.verify(listener, Mockito.times(1))
+                .onComponentEvent(Mockito.any(Dialog.ClosedEvent.class));
     }
 
     private void fakeClientResponse() {

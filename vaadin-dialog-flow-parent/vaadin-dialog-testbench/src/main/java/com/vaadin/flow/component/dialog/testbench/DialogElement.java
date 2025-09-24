@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,8 +15,6 @@
  */
 package com.vaadin.flow.component.dialog.testbench;
 
-import org.openqa.selenium.JavascriptException;
-import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.StaleElementReferenceException;
 
 import com.vaadin.testbench.TestBenchElement;
@@ -44,23 +42,4 @@ public class DialogElement extends TestBenchElement {
             return false;
         }
     }
-
-    @Override
-    public SearchContext getContext() {
-        // Find child elements inside the overlay, not the dialog element
-        return getOverlay();
-    }
-
-    /**
-     * Gets the overlay element connected to the dialog.
-     * <p>
-     * The overlay contains the content of the dialog but is not a child element
-     * of the dialog element.
-     *
-     * @return the overlay element
-     */
-    private TestBenchElement getOverlay() {
-        return getPropertyElement("$", "overlay");
-    }
-
 }

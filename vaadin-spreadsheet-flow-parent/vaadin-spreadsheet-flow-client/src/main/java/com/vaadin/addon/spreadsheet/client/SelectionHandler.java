@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.addon.spreadsheet.client;
@@ -129,7 +129,6 @@ public class SelectionHandler {
             spreadsheet.customCellEditorDisplayed = false;
             sheetWidget.removeCustomCellEditor();
         }
-        spreadsheet.cellLocked = locked;
         sheetWidget.setSelectedCell(col, row);
         newSelectedCellSet();
 
@@ -165,12 +164,25 @@ public class SelectionHandler {
     }
 
     public void newSelectedCellSet() {
+        newSelectedCellSet(false);
+    }
+
+    /**
+     * Sets the new selected cell and displays a custom cell editor if
+     * applicable. If the custom cell editor is displayed, it will be focused if
+     * <code>focusEditor</code> is true.
+     *
+     * @param focusEditor
+     *            if true, the custom cell editor will be focused
+     */
+    public void newSelectedCellSet(boolean focusEditor) {
         if (spreadsheet.customCellEditorDisplayed) {
             spreadsheet.customCellEditorDisplayed = false;
             sheetWidget.removeCustomCellEditor();
         }
 
-        if (!sheetWidget.isSelectedCellCustomized() && !spreadsheet.cellLocked
+        if (!sheetWidget.isSelectedCellCustomized()
+                && !spreadsheet.isCurrentCellLocked()
                 && spreadsheet.customEditorFactory != null
                 && spreadsheet.customEditorFactory
                         .hasCustomEditor(sheetWidget.getSelectedCellKey())) {
@@ -179,7 +191,7 @@ public class SelectionHandler {
             if (customEditor != null) {
                 spreadsheet.customCellEditorDisplayed = true;
                 spreadsheet.formulaBarWidget.setFormulaFieldEnabled(false);
-                sheetWidget.displayCustomCellEditor(customEditor);
+                sheetWidget.displayCustomCellEditor(customEditor, focusEditor);
             }
         }
     }

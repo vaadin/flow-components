@@ -1,12 +1,19 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.crud;
+
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -16,27 +23,20 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasSize;
-import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.HasTheme;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
-import elemental.json.JsonObject;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * A component for performing <a href=
@@ -48,9 +48,7 @@ import java.util.stream.Collectors;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-crud")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/crud", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/crud", version = "25.0.0-alpha19")
 @JsModule("@vaadin/crud/src/vaadin-crud.js")
 @JsModule("@vaadin/crud/src/vaadin-crud-edit-column.js")
 public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
@@ -130,6 +128,9 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
     public Crud() {
         setI18n(CrudI18n.createDefault(), false);
         registerHandlers();
+
+        // Prevent web component from creating default buttons
+        getElement().setProperty("_noDefaultButtons", true);
 
         newButton = new Button();
         newButton.getElement().setAttribute("theme", "primary");
@@ -293,7 +294,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      *            true to open or false to close
      */
     public void setOpened(boolean opened) {
-        getElement().callJsFunction("set", "editorOpened", opened);
+        getElement().executeJs("this.editorOpened = $0", opened);
     }
 
     /**
@@ -313,7 +314,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
      * @see #getSaveButton()
      */
     public void setDirty(boolean dirty) {
-        getElement().executeJs("this.set('__isDirty', $0)", dirty);
+        getElement().executeJs("this.__isDirty = $0", dirty);
     }
 
     /**
@@ -525,7 +526,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
     }
 
     private void setI18n(CrudI18n i18n, boolean fireEvent) {
-        getElement().setPropertyJson("i18n", JsonSerializer.toJson(i18n));
+        getElement().setPropertyJson("i18n", JacksonUtils.beanToJson(i18n));
         if (fireEvent) {
             ComponentUtil.fireEvent(this.grid,
                     new CrudI18nUpdatedEvent(this, false, i18n));
@@ -904,11 +905,11 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
          *            an ignored parameter for a side effect
          */
         public EditEvent(Crud<E> source, boolean fromClient,
-                @EventData("event.detail.item") JsonObject item,
+                @EventData("event.detail.item") ObjectNode item,
                 @EventData(EVENT_PREVENT_DEFAULT_JS) Object ignored) {
             super(source, fromClient);
             this.item = source.getGrid().getDataCommunicator().getKeyMapper()
-                    .get(item.getString("key"));
+                    .get(item.get("key").asString());
         }
 
         private EditEvent(Crud<E> source, boolean fromClient, E item) {

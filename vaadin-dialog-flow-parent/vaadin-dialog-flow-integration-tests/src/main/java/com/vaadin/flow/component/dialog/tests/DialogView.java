@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,20 +15,20 @@
  */
 package com.vaadin.flow.component.dialog.tests;
 
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
+
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResource;
-
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Page created for testing purposes. Not suitable for demos.
@@ -71,41 +71,41 @@ public class DialogView extends Div {
         dialog.setCloseOnEsc(false);
         dialog.setCloseOnOutsideClick(false);
 
-        Label messageLabel = new Label();
+        Span message = new Span();
 
         Button confirmButton = new Button("Confirm", event -> {
-            messageLabel.setText("Confirmed!");
+            message.setText("Confirmed!");
             dialog.close();
         });
         Button cancelButton = new Button("Cancel", event -> {
-            messageLabel.setText("Cancelled...");
+            message.setText("Cancelled...");
             dialog.close();
         });
         dialog.add(confirmButton, cancelButton);
         button.addClickListener(event -> dialog.open());
 
-        messageLabel.setId("confirmation-dialog-label");
+        message.setId("confirmation-dialog-message");
         button.setId("confirmation-dialog-button");
-        add(button, messageLabel);
+        add(button, message);
     }
 
     private void addCloseFromServerSideDialog() {
         NativeButton button = new NativeButton(BUTTON_CAPTION);
-        Label messageLabel = new Label();
+        Span message = new Span();
 
         Dialog dialog = new Dialog(new Text("Close me with the esc-key"));
         dialog.setCloseOnOutsideClick(false);
 
         dialog.addDialogCloseActionListener(e -> {
-            messageLabel.setText("Closed from server-side");
+            message.setText("Closed from server-side");
             dialog.close();
         });
 
         button.addClickListener(event -> dialog.open());
 
-        messageLabel.setId("server-side-close-dialog-label");
+        message.setId("server-side-close-dialog-message");
         button.setId("server-side-close-dialog-button");
-        add(button, messageLabel);
+        add(button, message);
     }
 
     private void addDialogWithFocusedElement() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,6 +15,8 @@
  */
 package com.vaadin.flow.component.textfield.tests;
 
+import static org.junit.Assert.assertFalse;
+
 import java.util.List;
 
 import org.junit.Assert;
@@ -25,12 +27,9 @@ import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.textfield.BigDecimalField;
 import com.vaadin.flow.component.textfield.testbench.BigDecimalFieldElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-
-import static org.junit.Assert.assertFalse;
-import static org.openqa.selenium.support.ui.ExpectedConditions.attributeToBe;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for {@link BigDecimalField}.
@@ -50,12 +49,12 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
     @Test
     public void shouldHaveInputModeDecimal() {
         Assert.assertEquals("decimal",
-                field.$("input").first().getAttribute("inputmode"));
+                field.$("input").first().getDomAttribute("inputmode"));
     }
 
     @Test
     public void shouldHaveSameWidthAsNumberField() {
-        // The width-property is set as 8em, but getComputedStyle returns the
+        // The width-property is set as 12em, but getComputedStyle returns the
         // width in pixels.
         String widthInEm = (String) executeScript(
                 "const style = getComputedStyle(arguments[0]);"
@@ -63,7 +62,7 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
                         + "const fontSize = parseFloat(style.fontSize);"
                         + "return (widthInPx / fontSize) + 'em';",
                 field);
-        Assert.assertEquals("8em", widthInEm);
+        Assert.assertEquals("12em", widthInEm);
     }
 
     @Test
@@ -148,18 +147,6 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
     }
 
     @Test
-    public void assertRequired() {
-        assertFalse(field.hasAttribute("required"));
-
-        WebElement toggleRequired = findElement(By.id("toggle-required"));
-        toggleRequired.click();
-        waitUntil(attributeToBe(field, "required", "true"));
-
-        toggleRequired.click();
-        waitUntil(attributeToBe(field, "required", ""));
-    }
-
-    @Test
     public void assertClearValue() {
         field = $(BigDecimalFieldElement.class).id("clear-big-decimal-field");
 
@@ -167,9 +154,7 @@ public class BigDecimalFieldPageIT extends AbstractComponentIT {
         input.sendKeys("300");
         blur();
 
-        TestBenchElement clearButton = field.$(TestBenchElement.class)
-                .attributeContains("part", "clear-button").first();
-        clearButton.click();
+        field.clickClearButton();
 
         assertValueChange(2, 300, null);
     }

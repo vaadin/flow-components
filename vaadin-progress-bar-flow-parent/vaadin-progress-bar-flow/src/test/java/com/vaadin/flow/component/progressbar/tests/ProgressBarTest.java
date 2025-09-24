@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -12,20 +12,15 @@
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
  * License for the specific language governing permissions and limitations under
  * the License.
- *
  */
-
 package com.vaadin.flow.component.progressbar.tests;
 
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.progressbar.ProgressBar;
-
-import static org.hamcrest.CoreMatchers.is;
-
-import static org.junit.Assert.assertThat;
 
 /**
  * @author Vaadin Ltd.
@@ -40,9 +35,12 @@ public class ProgressBarTest {
 
         ProgressBar progressBar = new ProgressBar();
 
-        assertThat("initial min is wrong", progressBar.getMin(), is(0.0));
-        assertThat("initial max is wrong", progressBar.getMax(), is(1.0));
-        assertThat("initial value is wrong", progressBar.getValue(), is(0.0));
+        Assert.assertEquals("initial min is wrong", 0.0, progressBar.getMin(),
+                0.0);
+        Assert.assertEquals("initial max is wrong", 1.0, progressBar.getMax(),
+                0.0);
+        Assert.assertEquals("initial value is wrong", 0.0,
+                progressBar.getValue(), 0.0);
     }
 
     @Test
@@ -52,9 +50,12 @@ public class ProgressBarTest {
 
         ProgressBar progressBar = new ProgressBar(min, max);
 
-        assertThat("initial min is wrong", progressBar.getMin(), is(min));
-        assertThat("initial max is wrong", progressBar.getMax(), is(max));
-        assertThat("initial value is wrong", progressBar.getValue(), is(min));
+        Assert.assertEquals("initial min is wrong", min, progressBar.getMin(),
+                0.0);
+        Assert.assertEquals("initial max is wrong", max, progressBar.getMax(),
+                0.0);
+        Assert.assertEquals("initial value is wrong", min,
+                progressBar.getValue(), 0.0);
     }
 
     @Test
@@ -65,9 +66,12 @@ public class ProgressBarTest {
 
         ProgressBar progressBar = new ProgressBar(min, max, value);
 
-        assertThat("initial min is wrong", progressBar.getMin(), is(min));
-        assertThat("initial max is wrong", progressBar.getMax(), is(max));
-        assertThat("initial value is wrong", progressBar.getValue(), is(value));
+        Assert.assertEquals("initial min is wrong", min, progressBar.getMin(),
+                0.0);
+        Assert.assertEquals("initial max is wrong", max, progressBar.getMax(),
+                0.0);
+        Assert.assertEquals("initial value is wrong", value,
+                progressBar.getValue(), 0.0);
     }
 
     @Test
@@ -125,12 +129,14 @@ public class ProgressBarTest {
         double value = 25;
 
         ProgressBar progressBar = new ProgressBar(min, max);
-        assertThat("initial value is wrong", progressBar.getValue(), is(min));
+        Assert.assertEquals("initial value is wrong", min,
+                progressBar.getValue(), 0.0);
         progressBar.setValue(value);
 
-        assertThat("min is wrong", progressBar.getMin(), is(min));
-        assertThat("max is wrong", progressBar.getMax(), is(max));
-        assertThat("updated value is wrong", progressBar.getValue(), is(value));
+        Assert.assertEquals("min is wrong", min, progressBar.getMin(), 0.0);
+        Assert.assertEquals("max is wrong", max, progressBar.getMax(), 0.0);
+        Assert.assertEquals("updated value is wrong", value,
+                progressBar.getValue(), 0.0);
     }
 
     @Test
@@ -140,12 +146,14 @@ public class ProgressBarTest {
         double value = 42;
 
         ProgressBar progressBar = new ProgressBar(min, max, value);
-        assertThat("initial value is wrong", progressBar.getValue(), is(value));
+        Assert.assertEquals("initial value is wrong", value,
+                progressBar.getValue(), 0.0);
         progressBar.setValue(min);
 
-        assertThat("min is wrong", progressBar.getMin(), is(min));
-        assertThat("max is wrong", progressBar.getMax(), is(max));
-        assertThat("updated value is wrong", progressBar.getValue(), is(min));
+        Assert.assertEquals("min is wrong", min, progressBar.getMin(), 0.0);
+        Assert.assertEquals("max is wrong", max, progressBar.getMax(), 0.0);
+        Assert.assertEquals("updated value is wrong", min,
+                progressBar.getValue(), 0.0);
     }
 
     @Test
@@ -155,12 +163,14 @@ public class ProgressBarTest {
         double value = 66;
 
         ProgressBar progressBar = new ProgressBar(min, max, value);
-        assertThat("initial value is wrong", progressBar.getValue(), is(value));
+        Assert.assertEquals("initial value is wrong", value,
+                progressBar.getValue(), 0.0);
         progressBar.setValue(max);
 
-        assertThat("min is wrong", progressBar.getMin(), is(min));
-        assertThat("max is wrong", progressBar.getMax(), is(max));
-        assertThat("updated value is wrong", progressBar.getValue(), is(max));
+        Assert.assertEquals("min is wrong", min, progressBar.getMin(), 0.0);
+        Assert.assertEquals("max is wrong", max, progressBar.getMax(), 0.0);
+        Assert.assertEquals("updated value is wrong", max,
+                progressBar.getValue(), 0.0);
     }
 
     @Test

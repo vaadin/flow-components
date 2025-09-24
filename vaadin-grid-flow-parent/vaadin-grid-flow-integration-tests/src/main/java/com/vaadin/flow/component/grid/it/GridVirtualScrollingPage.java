@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.router.Route;
@@ -35,7 +35,7 @@ public class GridVirtualScrollingPage extends Div {
                     query -> getStream(query).mapToObj(Integer::toString),
                     query -> 100 * 1000 * 1000);
 
-    private Label info;
+    private Span info;
 
     public GridVirtualScrollingPage() {
         Grid<String> grid = new Grid<>();
@@ -44,7 +44,7 @@ public class GridVirtualScrollingPage extends Div {
         grid.addColumn(i -> i).setHeader("text");
         grid.addColumn(i -> String.valueOf(i.length())).setHeader("length");
 
-        info = new Label();
+        info = new Span();
         info.setId("query-info");
 
         add(grid, info);

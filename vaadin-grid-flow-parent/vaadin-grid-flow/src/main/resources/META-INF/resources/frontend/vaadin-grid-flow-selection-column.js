@@ -1,9 +1,8 @@
-import '@vaadin/grid/vaadin-grid-column.js';
+import '@vaadin/grid/src/vaadin-grid-column.js';
 import { GridColumn } from '@vaadin/grid/src/vaadin-grid-column.js';
 import { GridSelectionColumnBaseMixin } from '@vaadin/grid/src/vaadin-grid-selection-column-base-mixin.js';
 
-class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridColumn) {
-
+export class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridColumn) {
   static get is() {
     return 'vaadin-grid-flow-selection-column';
   }
@@ -42,7 +41,6 @@ class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridColumn) {
     }
   }
 
-
   /**
    * Override a method from `GridSelectionColumnBaseMixin` to handle the user
    * selecting all items.
@@ -76,6 +74,7 @@ class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridColumn) {
    * @override
    */
   _selectItem(item) {
+    this.$server.setShiftKeyDown(this._shiftKeyDown);
     this._grid.$connector.doSelection([item], true);
   }
 
@@ -88,6 +87,7 @@ class GridFlowSelectionColumn extends GridSelectionColumnBaseMixin(GridColumn) {
    * @override
    */
   _deselectItem(item) {
+    this.$server.setShiftKeyDown(this._shiftKeyDown);
     this._grid.$connector.doDeselection([item], true);
     // Optimistically update select all state
     this.selectAll = false;

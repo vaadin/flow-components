@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet;
@@ -15,7 +15,8 @@ import org.apache.poi.ss.usermodel.ClientAnchor;
 
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo.Type;
-import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
 
 /**
  * SheetImageWrapper is an utility class of the Spreadsheet component. In
@@ -28,7 +29,7 @@ import com.vaadin.flow.server.StreamResource;
 public class SheetImageWrapper extends SheetOverlayWrapper
         implements Serializable {
 
-    private StreamResource resource;
+    private DownloadHandler handler;
 
     private final byte[] data;
     private final String MIMEType;
@@ -46,14 +47,18 @@ public class SheetImageWrapper extends SheetOverlayWrapper
      * @return Image resource
      */
     @Override
-    public StreamResource getResource() {
-        if (resource == null) {
-            resource = new StreamResource(getId(),
-                    () -> new ByteArrayInputStream(data));
-            resource.setContentType(MIMEType);
+    public DownloadHandler getResourceHandler() {
+        if (handler == null) {
+            // change disposition to inline in pre-defined handlers,
+            // where it is 'attachment' by default
+            handler = DownloadHandler
+                    .fromInputStream(downloadEvent -> new DownloadResponse(
+                            new ByteArrayInputStream(data), "download",
+                            MIMEType, data.length))
+                    .inline();
         }
 
-        return resource;
+        return handler;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -21,27 +21,29 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.HasAriaLabel;
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.listbox.ListBox;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
 import com.vaadin.flow.component.listbox.dataview.ListBoxListDataView;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.SelectionPreservationMode;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.selection.MultiSelectionEvent;
 
-import elemental.json.JsonArray;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
 
 public class MultiSelectListBoxTest {
 
@@ -363,6 +365,73 @@ public class MultiSelectListBoxTest {
         Assert.assertTrue(listBox.getAriaLabelledBy().isEmpty());
     }
 
+    @Test
+    public void discardSelectionOnDataChange_noExtraChangeEventsFired() {
+        listBox.setSelectionPreservationMode(SelectionPreservationMode.DISCARD);
+
+        Item selectedItem = items.get(0);
+        listBox.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNotNull(selectionEvent);
+        selectionEvent = null;
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assert.assertNotNull(selectionEvent);
+    }
+
+    @Test
+    public void preserveExistingSelectionOnDataChange_noExtraChangeEventsFired() {
+        listBox.setSelectionPreservationMode(
+                SelectionPreservationMode.PRESERVE_EXISTING);
+
+        Item selectedItem = items.get(0);
+        listBox.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNotNull(selectionEvent);
+        selectionEvent = null;
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(items.get(1));
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(selectedItem);
+        listBox.getDataProvider().refreshAll();
+        Assert.assertTrue(listBox.getSelectedItems().isEmpty());
+        Assert.assertNotNull(selectionEvent);
+    }
+
+    @Test
+    public void preserveAllSelectionOnDataChange_noExtraChangeEventsFired() {
+        listBox.setSelectionPreservationMode(
+                SelectionPreservationMode.PRESERVE_ALL);
+
+        Item selectedItem = items.get(0);
+        listBox.select(selectedItem);
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNotNull(selectionEvent);
+        selectionEvent = null;
+
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(items.get(1));
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+
+        items.remove(selectedItem);
+        listBox.getDataProvider().refreshAll();
+        Assert.assertEquals(Set.of(selectedItem), listBox.getSelectedItems());
+        Assert.assertNull(selectionEvent);
+    }
+
     private void assertValueChangeEvents(Set<Item>... expectedValues) {
         Assert.assertEquals(expectedValues.length, eventValues.size());
         IntStream.range(0, expectedValues.length).forEach(i -> {
@@ -371,16 +440,16 @@ public class MultiSelectListBoxTest {
     }
 
     private void assertSelectedValuesProperty(int... indices) {
-        JsonArray selectedValues = (JsonArray) listBox.getElement()
+        ArrayNode selectedValues = (ArrayNode) listBox.getElement()
                 .getPropertyRaw("selectedValues");
         Set<Integer> actualIndices = jsonArrayToSet(selectedValues);
         Assert.assertEquals(
                 "The selectedValues property had different length than expected.",
-                selectedValues.length(), indices.length);
+                selectedValues.size(), indices.length);
         for (int index : indices) {
-            Assert.assertThat(
+            Assert.assertTrue(
                     "The selectedValues property didn't contain expected value.",
-                    actualIndices, CoreMatchers.hasItem(index));
+                    actualIndices.contains(index));
         }
     }
 
@@ -392,17 +461,12 @@ public class MultiSelectListBoxTest {
     }
 
     private <T> Set<T> createSet(T... items) {
-        Set<T> set = new HashSet<>();
-        Arrays.stream(items).forEach(set::add);
-        return set;
+        return new HashSet<>(Arrays.asList(items));
     }
 
-    private Set<Integer> jsonArrayToSet(JsonArray jsonArray) {
-        Set<Integer> set = new HashSet<>();
-        IntStream.range(0, jsonArray.length()).forEach(i -> {
-            set.add((int) jsonArray.getNumber(i));
-        });
-        return set;
+    private Set<Integer> jsonArrayToSet(ArrayNode jsonArray) {
+        return jsonArray.valueStream().map(JsonNode::asInt)
+                .collect(Collectors.toSet());
     }
 
     public static class Item {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -35,7 +35,7 @@ public class ClearItemsIT extends AbstractComboBoxIT {
     @Test
     public void loadItems_setEmptyDataSet_open_loadingStateResolved() {
         combo.openPopup();
-        assertRendered("foo");
+        assertRendered(combo, "foo");
         combo.closePopup();
         clickButton("set-empty-data-provider");
         combo.openPopup();
@@ -46,7 +46,7 @@ public class ClearItemsIT extends AbstractComboBoxIT {
     @Test
     public void loadItems_clearAndRefreshDataProvider_open_loadingStateResolved() {
         combo.openPopup();
-        assertRendered("foo");
+        assertRendered(combo, "foo");
         combo.closePopup();
         clickButton("clear-and-refresh-data-provider");
         combo.openPopup();

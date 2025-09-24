@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,34 +15,34 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.InputField;
-import com.vaadin.flow.data.provider.DataCommunicator;
-import com.vaadin.flow.data.provider.DataKeyMapper;
-import com.vaadin.flow.data.provider.IdentifierProviderChangeEvent;
-import com.vaadin.flow.data.selection.MultiSelect;
-import com.vaadin.flow.data.selection.MultiSelectionEvent;
-import com.vaadin.flow.data.selection.MultiSelectionListener;
-import com.vaadin.flow.internal.JsonSerializer;
-import com.vaadin.flow.shared.Registration;
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasSize;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasThemeVariant;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataKeyMapper;
+import com.vaadin.flow.data.provider.IdentifierProviderChangeEvent;
+import com.vaadin.flow.data.selection.MultiSelect;
+import com.vaadin.flow.data.selection.MultiSelectionEvent;
+import com.vaadin.flow.data.selection.MultiSelectionListener;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * MultiSelectComboBox allows the user to select one or more values from a
@@ -66,15 +66,39 @@ import java.util.Set;
  * override the {@code pageSize} to be bigger than the size of your data set.
  * However, then the full data set will be sent to the client immediately, and
  * you will lose the benefits of lazy loading.
+ * <h2>Validation</h2>
+ * <p>
+ * MultiSelectComboBox comes with a built-in validation mechanism that verifies
+ * that the field is not empty when {@link #setRequiredIndicatorVisible(boolean)
+ * required} is enabled.
+ * <p>
+ * Validation is triggered whenever the user initiates a value change, for
+ * example by selection from the dropdown or manual entry followed by Enter or
+ * blur. Programmatic value changes trigger validation as well. If validation
+ * fails, the component is marked as invalid and an error message is displayed
+ * below the input.
+ * <p>
+ * The required error message can be configured using either
+ * {@link MultiSelectComboBoxI18n#setRequiredErrorMessage(String)} or
+ * {@link #setErrorMessage(String)}.
+ * <p>
+ * For more advanced validation that requires custom rules, you can use
+ * {@link Binder}. Please note that Binder provides its own API for the required
+ * validation, see {@link Binder.BindingBuilder#asRequired(String)
+ * asRequired()}.
+ * <p>
+ * However, if Binder doesn't fit your needs and you want to implement fully
+ * custom validation logic, you can disable the built-in validation by setting
+ * {@link #setManualValidation(boolean)} to true. This will allow you to control
+ * the invalid state and the error message manually using
+ * {@link #setInvalid(boolean)} and {@link #setErrorMessage(String)} API.
  *
  * @param <TItem>
  *            the type of the items to be selectable from the combo box
  * @author Vaadin Ltd
  */
 @Tag("vaadin-multi-select-combo-box")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/multi-select-combo-box", version = "25.0.0-alpha19")
 @JsModule("@vaadin/multi-select-combo-box/src/vaadin-multi-select-combo-box.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./comboBoxConnector.js")
@@ -84,7 +108,7 @@ public class MultiSelectComboBox<TItem>
         HasThemeVariant<MultiSelectComboBoxVariant> {
 
     private final MultiSelectComboBoxSelectionModel<TItem> selectionModel;
-    private MultiSelectComboBoxI18n i18n;
+    private AutoExpandMode autoExpand;
 
     /**
      * Default constructor. Creates an empty combo box.
@@ -108,7 +132,7 @@ public class MultiSelectComboBox<TItem>
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public MultiSelectComboBox(int pageSize) {
-        super("selectedItems", new LinkedHashSet<>(), JsonArray.class,
+        super("selectedItems", new LinkedHashSet<>(), ArrayNode.class,
                 MultiSelectComboBox::presentationToModel,
                 MultiSelectComboBox::modelToPresentation);
 
@@ -133,6 +157,8 @@ public class MultiSelectComboBox<TItem>
         // Initialize page size and data provider
         setPageSize(pageSize);
         setItems(new DataCommunicator.EmptyDataProvider<>());
+
+        setAutoExpand(AutoExpandMode.NONE);
     }
 
     /**
@@ -238,14 +264,14 @@ public class MultiSelectComboBox<TItem>
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
-        if (i18n != null) {
-            this.updateI18n();
+        if (getI18n() != null) {
+            updateI18n();
         }
     }
 
     private static <T> Set<T> presentationToModel(
             MultiSelectComboBox<T> multiSelectComboBox,
-            JsonArray presentation) {
+            ArrayNode presentation) {
 
         DataKeyMapper<T> keyMapper = multiSelectComboBox.getKeyMapper();
 
@@ -254,31 +280,60 @@ public class MultiSelectComboBox<TItem>
         }
 
         Set<T> set = new LinkedHashSet<>();
-        for (int i = 0; i < presentation.length(); i++) {
-            String key = presentation.getObject(i).getString("key");
+        for (int i = 0; i < presentation.size(); i++) {
+            String key = presentation.get(i).get("key").asString();
             set.add(keyMapper.get(key));
         }
         return set;
     }
 
-    private static <T> JsonArray modelToPresentation(
+    private static <T> ArrayNode modelToPresentation(
             MultiSelectComboBox<T> multiSelectComboBox, Set<T> model) {
-        JsonArray array = Json.createArray();
+        ArrayNode array = JacksonUtils.createArrayNode();
         if (model == null || model.isEmpty()) {
             return array;
         }
 
         model.stream().map(multiSelectComboBox::generateJson)
-                .forEach(jsonObject -> array.set(array.length(), jsonObject));
+                .forEach(array::add);
 
         return array;
     }
 
-    private JsonObject generateJson(TItem item) {
-        JsonObject jsonObject = Json.createObject();
+    private ObjectNode generateJson(TItem item) {
+        ObjectNode jsonObject = JacksonUtils.createObjectNode();
         jsonObject.put("key", getKeyMapper().key(item));
         getDataGenerator().generateData(item, jsonObject);
         return jsonObject;
+    }
+
+    /**
+     * Sets whether the user is required to provide a value. When required, an
+     * indicator appears next to the label and the field invalidates if the
+     * value is cleared.
+     * <p>
+     * NOTE: The required indicator is only visible when the field has a label,
+     * see {@link #setLabel(String)}.
+     *
+     * @param required
+     *            {@code true} to make the field required, {@code false}
+     *            otherwise
+     * @see MultiSelectComboBoxI18n#setRequiredErrorMessage(String)
+     */
+    @Override
+    public void setRequiredIndicatorVisible(boolean required) {
+        super.setRequiredIndicatorVisible(required);
+    }
+
+    /**
+     * Gets whether the user is required to provide a value.
+     *
+     * @return {@code true} if the field is required, {@code false} otherwise
+     * @see #setRequiredIndicatorVisible(boolean)
+     */
+    @Override
+    public boolean isRequiredIndicatorVisible() {
+        return super.isRequiredIndicatorVisible();
     }
 
     /**
@@ -352,7 +407,7 @@ public class MultiSelectComboBox<TItem>
         if (value == null || value.isEmpty()) {
             return;
         }
-        JsonArray selectedItems = modelToPresentation(this, value);
+        ArrayNode selectedItems = modelToPresentation(this, value);
         getElement().setPropertyJson("selectedItems", selectedItems);
     }
 
@@ -395,29 +450,159 @@ public class MultiSelectComboBox<TItem>
     }
 
     /**
-     * Gets the internationalization object previously set for this component.
-     * <p>
-     * Note: updating the i18n object that is returned from this method will not
-     * update the component, unless it is set again using
-     * {@link #setI18n(MultiSelectComboBoxI18n)}
-     *
-     * @return the i18n object. It will be <code>null</code>, if it has not been
-     *         set previously
+     * Defines possible behavior of the component when not all selected items
+     * can be displayed as chips within the current field width.
      */
-    public MultiSelectComboBoxI18n getI18n() {
-        return i18n;
+    public enum AutoExpandMode {
+        /**
+         * Field expands vertically and chips wrap.
+         */
+        VERTICAL(false, true),
+
+        /**
+         * Field expands horizontally until max-width is reached, then collapses
+         * to overflow chip.
+         */
+        HORIZONTAL(true, false),
+
+        /**
+         * Field expands horizontally until max-width is reached, then expands
+         * vertically and chips wrap.
+         */
+        BOTH(true, true),
+
+        /**
+         * Field does not expand and collapses to overflow chip.
+         */
+        NONE(false, false);
+
+        private final boolean expandHorizontally;
+        private final boolean expandVertically;
+
+        AutoExpandMode(boolean expandHorizontally, boolean expandVertically) {
+            this.expandHorizontally = expandHorizontally;
+            this.expandVertically = expandVertically;
+        }
+
+        /**
+         * Gets whether to expand horizontally.
+         *
+         * @return Whether to expand horizontally
+         */
+        public boolean getExpandHorizontally() {
+            return expandHorizontally;
+        }
+
+        /**
+         * Gets whether to expand vertically.
+         *
+         * @return Whether to expand vertically
+         */
+        public boolean getExpandVertically() {
+            return expandVertically;
+        }
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Gets the behavior of the component when not all selected items can be
+     * displayed as chips within the current field width.
+     *
+     * @since 24.3
+     * @return The current {@link AutoExpandMode}
+     */
+    public AutoExpandMode getAutoExpand() {
+        return autoExpand;
+    }
+
+    /**
+     * Sets the behavior of the component when not all selected items can be
+     * displayed as chips within the current field width.
+     *
+     * Expansion only works with undefined size in the desired direction (i.e.
+     * setting `max-width` limits the component's width).
+     *
+     * @param {AutoExpandMode}
+     *            autoExpandMode
+     * @since 24.3
+     */
+    public void setAutoExpand(AutoExpandMode autoExpandMode) {
+        Objects.requireNonNull(autoExpandMode,
+                "The mode to be set cannot be null");
+        autoExpand = autoExpandMode;
+
+        getElement().setProperty("autoExpandHorizontally",
+                autoExpandMode.getExpandHorizontally());
+        getElement().setProperty("autoExpandVertically",
+                autoExpandMode.getExpandVertically());
+    }
+
+    /**
+     * Gets whether selected items are grouped at the top of the overlay.
+     *
+     * @since 24.3
+     * @return {@code true} if enabled, {@code false} otherwise
+     */
+    public boolean isSelectedItemsOnTop() {
+        return getElement().getProperty("selectedItemsOnTop", false);
+    }
+
+    /**
+     * Enables or disables grouping of the selected items at the top of the
+     * overlay.
+     *
+     * @since 24.3
+     * @param selectedItemsOnTop
+     *            {@code true} to group selected items at the top
+     */
+    public void setSelectedItemsOnTop(boolean selectedItemsOnTop) {
+        getElement().setProperty("selectedItemsOnTop", selectedItemsOnTop);
+    }
+
+    /**
+     * Gets whether the filter is kept after selecting items. {@code false} by
+     * default.
+     *
+     * @since 24.4
+     * @return {@code true} if enabled, {@code false} otherwise
+     */
+    public boolean isKeepFilter() {
+        return getElement().getProperty("keepFilter", false);
+    }
+
+    /**
+     * Enables or disables keeping the filter after selecting items. By default,
+     * the filter is cleared after selecting an item and the overlay shows the
+     * unfiltered list of items again. Enabling this option will keep the
+     * filter, which allows to select multiple filtered items in succession.
+     *
+     * @param keepFilter
+     *            whether to keep the filter after selecting an item
+     */
+    public void setKeepFilter(boolean keepFilter) {
+        getElement().setProperty("keepFilter", keepFilter);
+    }
+
+    /**
+     * Gets the internationalization object previously set for this component.
+     * <p>
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using
+     * {@link #setI18n(MultiSelectComboBoxI18n)}
+     *
+     * @return the i18n object or {@code null} if no i18n object has been set
+     */
+    public MultiSelectComboBoxI18n getI18n() {
+        return (MultiSelectComboBoxI18n) super.getI18n();
+    }
+
+    /**
+     * Sets the internationalization object for this component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(MultiSelectComboBoxI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        super.setI18n(i18n);
         updateI18n();
     }
 
@@ -427,11 +612,7 @@ public class MultiSelectComboBox<TItem>
      * settings of the web component.
      */
     private void updateI18n() {
-        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
-
-        // Remove null values so that we don't overwrite existing WC
-        // translations with empty ones
-        removeNullValuesFromJsonObject(i18nJson);
+        ObjectNode i18nJson = JacksonUtils.beanToJson(getI18n());
 
         // Assign new I18N object to WC, by merging the existing
         // WC I18N, and the values from the new I18n instance,
@@ -440,11 +621,28 @@ public class MultiSelectComboBox<TItem>
                 i18nJson);
     }
 
-    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
-            }
-        }
+    /**
+     * Sets the dropdown overlay width.
+     *
+     * @param width
+     *            the new dropdown width. Pass in null to set the dropdown width
+     *            back to the default value.
+     */
+    public void setOverlayWidth(String width) {
+        getStyle().set("--vaadin-multi-select-combo-box-overlay-width", width);
+    }
+
+    /**
+     * Sets the dropdown overlay width. Negative number implies unspecified size
+     * (the dropdown width is reverted back to the default value).
+     *
+     * @param width
+     *            the width of the dropdown.
+     * @param unit
+     *            the unit used for the dropdown.
+     */
+    public void setOverlayWidth(float width, Unit unit) {
+        Objects.requireNonNull(unit, "Unit can not be null");
+        setOverlayWidth(HasSize.getCssSize(width, unit));
     }
 }

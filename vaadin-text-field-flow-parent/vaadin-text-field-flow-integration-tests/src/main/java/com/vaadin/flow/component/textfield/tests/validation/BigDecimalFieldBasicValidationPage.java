@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,11 +25,18 @@ public class BigDecimalFieldBasicValidationPage
     public static final String REQUIRED_BUTTON = "required-button";
     public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
 
+    public static final String REQUIRED_ERROR_MESSAGE = "Field is required";
+    public static final String BAD_INPUT_ERROR_MESSAGE = "Number has incorrect format";
+
     public BigDecimalFieldBasicValidationPage() {
         super();
 
+        testField.setI18n(new BigDecimalField.BigDecimalFieldI18n()
+                .setRequiredErrorMessage(REQUIRED_ERROR_MESSAGE)
+                .setBadInputErrorMessage(BAD_INPUT_ERROR_MESSAGE));
+
         add(createButton(REQUIRED_BUTTON, "Enable required", event -> {
-            testField.setRequiredIndicatorVisible(true);
+            testField.setRequired(true);
         }));
 
         add(createButton(CLEAR_VALUE_BUTTON, "Clear value", event -> {
@@ -37,7 +44,14 @@ public class BigDecimalFieldBasicValidationPage
         }));
     }
 
+    @Override
     protected BigDecimalField createTestField() {
-        return new BigDecimalField();
+        return new BigDecimalField() {
+            @Override
+            protected void validate() {
+                super.validate();
+                incrementServerValidationCounter();
+            }
+        };
     }
 }

@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
@@ -357,7 +357,9 @@ public class Legend extends AbstractConfigurationObject {
 
     /**
      * @see #setLineHeight(Number)
+     * @deprecated
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public Number getLineHeight() {
         return lineHeight;
     }
@@ -368,7 +370,10 @@ public class Legend extends AbstractConfigurationObject {
      * padding between items using itemMarginTop and itemMarginBottom.
      * <p>
      * Defaults to: 16
+     *
+     * @deprecated Use {@code Style#setLineHeight(String)} instead.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setLineHeight(Number lineHeight) {
         this.lineHeight = lineHeight;
     }

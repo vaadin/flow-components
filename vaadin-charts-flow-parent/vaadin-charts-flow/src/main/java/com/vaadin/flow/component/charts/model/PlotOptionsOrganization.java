@@ -1,20 +1,20 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
-
-import com.vaadin.flow.component.charts.model.style.Color;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Plot options for {@link ChartType#ORGANIZATION} charts.
@@ -42,6 +42,7 @@ public class PlotOptionsOrganization extends AbstractPlotOptions {
     private Boolean getExtremesFromAll;
     private Number hangingIndent;
     private Label label;
+    private Link link;
     private Color linkColor;
     private String linkedTo;
     private Number linkLineWidth;
@@ -435,8 +436,27 @@ public class PlotOptionsOrganization extends AbstractPlotOptions {
     }
 
     /**
+     * @see #setLink(Link)
+     * @return the link configuration
+     */
+    public Link getLink() {
+        if (link == null) {
+            link = new Link();
+        }
+        return link;
+    }
+
+    /**
+     * Link styling options.
+     */
+    public void setLink(Link link) {
+        this.link = link;
+    }
+
+    /**
      * @see #setLinkColor(Color)
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public Color getLinkColor() {
         return linkColor;
     }
@@ -445,7 +465,10 @@ public class PlotOptionsOrganization extends AbstractPlotOptions {
      * <p>
      * The color of the links between nodes.
      * </p>
+     *
+     * @deprecated use {@link #getLink()}.{@link Link#setColor(Color)} instead.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setLinkColor(Color linkColor) {
         this.linkColor = linkColor;
     }
@@ -477,6 +500,7 @@ public class PlotOptionsOrganization extends AbstractPlotOptions {
     /**
      * @see #setLinkLineWidth(Number)
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public Number getLinkLineWidth() {
         return linkLineWidth;
     }
@@ -485,7 +509,11 @@ public class PlotOptionsOrganization extends AbstractPlotOptions {
      * <p>
      * The line width of the links connecting nodes, in pixels.
      * </p>
+     *
+     * @deprecated use {@link #getLink()}.{@link Link#setLineWidth(Number)}
+     *             instead.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setLinkLineWidth(Number linkLineWidth) {
         this.linkLineWidth = linkLineWidth;
     }
@@ -509,6 +537,7 @@ public class PlotOptionsOrganization extends AbstractPlotOptions {
     /**
      * @see #setLinkRadius(Number)
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public Number getLinkRadius() {
         return linkRadius;
     }
@@ -517,7 +546,11 @@ public class PlotOptionsOrganization extends AbstractPlotOptions {
      * <p>
      * Radius for the rounded corners of the links between nodes.
      * </p>
+     *
+     * @deprecated use {@link #getLink()}.{@link Link#setRadius(Number)}
+     *             instead.
      */
+    @Deprecated(since = "25.0", forRemoval = true)
     public void setLinkRadius(Number linkRadius) {
         this.linkRadius = linkRadius;
     }

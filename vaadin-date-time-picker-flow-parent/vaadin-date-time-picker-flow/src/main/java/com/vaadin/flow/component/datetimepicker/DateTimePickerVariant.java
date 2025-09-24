@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,14 +22,11 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * component.
  */
 public enum DateTimePickerVariant implements ThemeVariant {
-    //@formatter:off
     LUMO_SMALL("small"),
     LUMO_ALIGN_LEFT("align-left"),
     LUMO_ALIGN_CENTER("align-center"),
     LUMO_ALIGN_RIGHT("align-right"),
-    LUMO_HELPER_ABOVE_FIELD("helper-above-field"),
-    MATERIAL_ALWAYS_FLOAT_LABEL("always-float-label");
-    //@formatter:on
+    LUMO_HELPER_ABOVE_FIELD("helper-above-field");
 
     private final String variant;
 

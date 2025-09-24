@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,9 +29,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 
 /**
  *
@@ -92,11 +91,11 @@ public class GridTestPageIT extends AbstractComponentIT {
     public void grid_does_not_loose_data_on_new_property_sync() {
         int size = Integer
                 .valueOf(findElement(By.id("grid-with-component-renderers"))
-                        .getAttribute("size"));
+                        .getDomProperty("size"));
         findElement(By.id("toggle-column-ordering")).click();
         int updatedSize = Integer
                 .valueOf(findElement(By.id("grid-with-component-renderers"))
-                        .getAttribute("size"));
+                        .getDomProperty("size"));
         Assert.assertEquals(
                 "When some property is synced, grid size property should stay the same",
                 size, updatedSize);
@@ -110,8 +109,8 @@ public class GridTestPageIT extends AbstractComponentIT {
         // verify that the properties needed for the details row are not loaded
         items.forEach((row, map) -> {
             Assert.assertEquals("Item " + row, map.get("col0"));
-            Assert.assertThat(map.keySet(),
-                    CoreMatchers.not(CoreMatchers.hasItem("detailsProperty")));
+            Assert.assertFalse("detailsProperty should not be loaded initially",
+                    map.keySet().contains("detailsProperty"));
         });
 
         // click on the cell to open the details row
@@ -129,8 +128,9 @@ public class GridTestPageIT extends AbstractComponentIT {
                 Assert.assertEquals("Details opened! 0",
                         map.get(detailsProperty));
             } else {
-                Assert.assertThat(map.keySet(), CoreMatchers
-                        .not(CoreMatchers.hasItem("detailsProperty")));
+                Assert.assertFalse(
+                        "detailsProperty should not be loaded for other rows",
+                        map.keySet().contains("detailsProperty"));
             }
         });
     }
@@ -143,8 +143,8 @@ public class GridTestPageIT extends AbstractComponentIT {
         // verify that the nodeId of the details row is not loaded
         items.forEach((row, map) -> {
             Assert.assertEquals("Item " + row, map.get("col0"));
-            Assert.assertThat(map.keySet(),
-                    CoreMatchers.not(CoreMatchers.hasItem("nodeId")));
+            Assert.assertFalse("nodeId should not be loaded initially",
+                    map.keySet().contains("nodeId"));
         });
 
         // click on the cell to open the details row
@@ -178,8 +178,9 @@ public class GridTestPageIT extends AbstractComponentIT {
          */
         Map<String, Map<String, ?>> items = getItems(driver, grid);
         items.forEach((row, map) -> {
-            Assert.assertThat(map.keySet(),
-                    CoreMatchers.not(CoreMatchers.hasItem("col0")));
+            Assert.assertFalse(
+                    "col0 key should not be present after column removal",
+                    map.keySet().contains("col0"));
             Assert.assertEquals("Item " + row, map.get("col1"));
             Assert.assertEquals(String.valueOf(row),
                     String.valueOf(map.get("col2")));
@@ -194,10 +195,11 @@ public class GridTestPageIT extends AbstractComponentIT {
          */
         items = getItems(driver, grid);
         items.forEach((row, map) -> {
-            Assert.assertThat(map.keySet(),
-                    CoreMatchers.not(CoreMatchers.hasItem("col0")));
-            Assert.assertThat(map.keySet(),
-                    CoreMatchers.not(CoreMatchers.hasItem("col1")));
+            Assert.assertFalse("col0 key should not be present",
+                    map.keySet().contains("col0"));
+            Assert.assertFalse(
+                    "col1 key should not be present after column removal",
+                    map.keySet().contains("col1"));
             Assert.assertEquals(String.valueOf(row),
                     String.valueOf(map.get("col2")));
         });
@@ -344,9 +346,9 @@ public class GridTestPageIT extends AbstractComponentIT {
                 grid);
 
         invisible.click();
-        waitUntil(driver -> "true".equals(grid.getAttribute("hidden")));
+        waitUntil(driver -> "true".equals(grid.getDomAttribute("hidden")));
         visible.click();
-        waitUntil(driver -> grid.getAttribute("hidden") == null);
+        waitUntil(driver -> grid.getDomAttribute("hidden") == null);
         items = getItems(driver, grid);
         Assert.assertEquals(50, items.size());
         items.forEach((row, map) -> {
@@ -373,9 +375,9 @@ public class GridTestPageIT extends AbstractComponentIT {
         assertSelection(grid, "Item 0");
 
         invisible.click();
-        waitUntil(driver -> "true".equals(grid.getAttribute("hidden")));
+        waitUntil(driver -> "true".equals(grid.getDomAttribute("hidden")));
         visible.click();
-        waitUntil(driver -> grid.getAttribute("hidden") == null);
+        waitUntil(driver -> grid.getDomAttribute("hidden") == null);
         assertSelection(grid, "Item 0");
     }
 
@@ -485,8 +487,15 @@ public class GridTestPageIT extends AbstractComponentIT {
     public static Map<String, Map<String, ?>> getItems(WebDriver driver,
             WebElement element) {
         Object result = ((JavascriptExecutor) driver).executeScript(
-                "const items = arguments[0]._dataProviderController.rootCache.items;"
-                        + "return items.reduce((obj, item, i) => ({ ...obj, [i]: item }), {});",
+                """
+                        const { items } = arguments[0]._dataProviderController.rootCache;
+                        return items.reduce((obj, item, i) => {
+                            if (item) {
+                                obj[i] = item;
+                            }
+                            return obj;
+                        }, {});
+                        """,
                 element);
 
         return (Map<String, Map<String, ?>>) result;

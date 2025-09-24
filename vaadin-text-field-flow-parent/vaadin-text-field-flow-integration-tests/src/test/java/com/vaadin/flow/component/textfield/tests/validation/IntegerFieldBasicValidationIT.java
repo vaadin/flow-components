@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,18 +15,23 @@
  */
 package com.vaadin.flow.component.textfield.tests.validation;
 
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.BAD_INPUT_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.CLEAR_VALUE_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.MAX_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.MAX_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.MIN_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.MIN_INPUT;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.REQUIRED_BUTTON;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.REQUIRED_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.STEP_ERROR_MESSAGE;
+import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldBasicValidationPage.STEP_INPUT;
+
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.tests.validation.AbstractValidationIT;
-
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBasicPage.MIN_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBasicPage.MAX_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBasicPage.STEP_INPUT;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBasicPage.REQUIRED_BUTTON;
-import static com.vaadin.flow.component.textfield.tests.validation.IntegerFieldValidationBasicPage.CLEAR_VALUE_BUTTON;
 
 @TestPath("vaadin-integer-field/validation/basic")
 public class IntegerFieldBasicValidationIT
@@ -35,13 +40,16 @@ public class IntegerFieldBasicValidationIT
     public void fieldIsInitiallyValid() {
         assertClientValid();
         assertServerValid();
+        assertErrorMessage(null);
     }
 
     @Test
     public void triggerBlur_assertValidity() {
         testField.sendKeys(Keys.TAB);
+        assertValidationCount(0);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -49,8 +57,10 @@ public class IntegerFieldBasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.sendKeys(Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
+        assertValidationCount(0);
+        assertServerValid();
+        assertClientValid();
+        assertErrorMessage(null);
     }
 
     @Test
@@ -58,21 +68,28 @@ public class IntegerFieldBasicValidationIT
         $("button").id(REQUIRED_BUTTON).click();
 
         testField.setValue("1234");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
         testField.setValue("");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
-    }
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
 
-    @Test
-    public void min_triggerBlur_assertValidity() {
-        $("input").id(MIN_INPUT).sendKeys("2", Keys.ENTER);
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
-        testField.sendKeys(Keys.TAB);
-        assertServerValid();
-        assertClientValid();
+        testField.setValue("");
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(REQUIRED_ERROR_MESSAGE);
     }
 
     @Test
@@ -80,25 +97,28 @@ public class IntegerFieldBasicValidationIT
         $("input").id(MIN_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.setValue("1");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(MIN_ERROR_MESSAGE);
 
         testField.setValue("2");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         testField.setValue("3");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-    }
+        assertErrorMessage("");
 
-    @Test
-    public void max_triggerBlur_assertValidity() {
-        $("input").id(MAX_INPUT).sendKeys("2", Keys.ENTER);
-
-        testField.sendKeys(Keys.TAB);
-        assertServerValid();
+        testField.setValue("");
+        assertValidationCount(1);
         assertClientValid();
+        assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -106,25 +126,28 @@ public class IntegerFieldBasicValidationIT
         $("input").id(MAX_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.setValue("3");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(MAX_ERROR_MESSAGE);
 
         testField.setValue("2");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         testField.setValue("1");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
-    }
+        assertErrorMessage("");
 
-    @Test
-    public void step_triggerBlur_assertValidity() {
-        $("input").id(STEP_INPUT).sendKeys("2", Keys.ENTER);
-
-        testField.sendKeys(Keys.TAB);
-        assertServerValid();
+        testField.setValue("");
+        assertValidationCount(1);
         assertClientValid();
+        assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
@@ -132,63 +155,121 @@ public class IntegerFieldBasicValidationIT
         $("input").id(STEP_INPUT).sendKeys("2", Keys.ENTER);
 
         testField.setValue("1");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(STEP_ERROR_MESSAGE);
 
         testField.setValue("2");
+        assertValidationCount(1);
         assertClientValid();
         assertServerValid();
+        assertErrorMessage("");
 
         testField.setValue("3");
+        assertValidationCount(1);
         assertClientInvalid();
         assertServerInvalid();
+        assertErrorMessage(STEP_ERROR_MESSAGE);
+
+        testField.setValue("");
+        assertValidationCount(1);
+        assertClientValid();
+        assertServerValid();
+        assertErrorMessage("");
     }
 
     @Test
     public void badInput_changeValue_assertValidity() {
-        testField.sendKeys("--2", Keys.TAB);
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
 
         testField.setValue("2");
+        assertValidationCount(1);
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
 
-        testField.sendKeys("--2", Keys.TAB);
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
+
+        testField.setValue("");
+        assertValidationCount(1);
+        assertServerValid();
+        assertClientValid();
+        assertErrorMessage("");
     }
 
     @Test
-    public void badInput_setValue_clearValue_assertValidity() {
-        testField.sendKeys("--2", Keys.TAB);
-        assertServerInvalid();
-        assertClientInvalid();
+    public void setValue_clearValue_assertValidity() {
+        testField.setValue("2");
+        assertServerValid();
+        assertClientValid();
+        assertErrorMessage("");
 
         $("button").id(CLEAR_VALUE_BUTTON).click();
         assertServerValid();
         assertClientValid();
+        assertErrorMessage("");
     }
 
     @Test
-    public void integerOverflow_setValueExceedingMaxInteger_assertValidity() {
-        testField.sendKeys("999999999999", Keys.TAB);
+    public void badInput_setValue_clearValue_assertValidity() {
+        testField.sendKeys("--2", Keys.ENTER);
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
+
+        $("button").id(CLEAR_VALUE_BUTTON).click();
+        assertValidationCount(1);
+        assertServerValid();
+        assertClientValid();
+        assertErrorMessage("");
     }
 
     @Test
-    public void integerOverflow_setValueExceedingMinInteger_assertValidity() {
-        testField.sendKeys("-999999999999", Keys.TAB);
+    public void maxIntegerOverflow_changeValue_assertValidity() {
+        testField.setValue("999999999999");
+        assertValidationCount(1);
         assertServerInvalid();
         assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
+
+        testField.setValue("");
+        assertValidationCount(1);
+        assertServerValid();
+        assertClientValid();
+        assertErrorMessage("");
+    }
+
+    @Test
+    public void minIntegerOverflow_changeValue_assertValidity() {
+        testField.setValue("-999999999999");
+        assertValidationCount(1);
+        assertServerInvalid();
+        assertClientInvalid();
+        assertErrorMessage(BAD_INPUT_ERROR_MESSAGE);
+
+        testField.setValue("");
+        assertValidationCount(1);
+        assertServerValid();
+        assertClientValid();
+        assertErrorMessage("");
     }
 
     @Test
     public void detach_attach_preservesInvalidState() {
         // Make field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
+        testField.setValue("2");
+        testField.setValue("");
 
         detachAndReattachField();
 
@@ -197,25 +278,38 @@ public class IntegerFieldBasicValidationIT
     }
 
     @Test
-    public void webComponentCanNotModifyInvalidState() {
-        assertWebComponentCanNotModifyInvalidState();
+    public void detach_attachAndInvalidate_preservesInvalidState() {
+        detachField();
+        attachAndInvalidateField();
 
-        detachAndReattachField();
+        assertServerInvalid();
+        assertClientInvalid();
+    }
 
-        assertWebComponentCanNotModifyInvalidState();
+    @Test
+    public void detach_hide_attach_showAndInvalidate_preservesInvalidState() {
+        detachField();
+        hideField();
+        attachField();
+        showAndInvalidateField();
+
+        assertServerInvalid();
+        assertClientInvalid();
     }
 
     @Test
     public void clientSideInvalidStateIsNotPropagatedToServer() {
         // Make the field invalid
         $("button").id(REQUIRED_BUTTON).click();
-        testField.sendKeys(Keys.TAB);
+        testField.setValue("2");
+        testField.setValue("");
 
         executeScript("arguments[0].invalid = false", testField);
 
         assertServerInvalid();
     }
 
+    @Override
     protected IntegerFieldElement getTestField() {
         return $(IntegerFieldElement.class).first();
     }

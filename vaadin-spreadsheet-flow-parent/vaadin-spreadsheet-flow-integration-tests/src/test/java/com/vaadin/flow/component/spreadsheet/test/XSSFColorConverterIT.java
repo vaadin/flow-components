@@ -1,10 +1,15 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.test;
 
 import java.io.IOException;
 import java.io.InputStream;
-
-import com.vaadin.flow.component.spreadsheet.ColorConverterUtil;
-import com.vaadin.flow.testutil.TestPath;
 
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -16,6 +21,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTColors;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTRgbColor;
+
+import com.vaadin.flow.component.spreadsheet.ColorConverterUtil;
+import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-spreadsheet")
 public class XSSFColorConverterIT extends AbstractSpreadsheetIT {

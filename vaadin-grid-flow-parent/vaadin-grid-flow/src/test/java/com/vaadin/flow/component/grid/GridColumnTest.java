@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,7 +15,13 @@
  */
 package com.vaadin.flow.component.grid;
 
-import com.vaadin.flow.data.renderer.Renderer;
+import static org.junit.Assert.assertNotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiFunction;
+
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -24,18 +30,13 @@ import org.junit.rules.ExpectedException;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid.Column;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.SerializableComparator;
 import com.vaadin.flow.function.ValueProvider;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BiFunction;
-
-import static org.junit.Assert.assertNotNull;
 
 public class GridColumnTest {
 
@@ -56,10 +57,15 @@ public class GridColumnTest {
         firstColumn = grid.addColumn(str -> str);
         secondColumn = grid.addColumn(str -> str);
         thirdColumn = grid.addColumn(str -> str);
-        renderer = new IconRenderer<String>(generator -> new Label(":D"));
+        renderer = new IconRenderer<String>(generator -> new Span(":D"));
         fourthColumn = grid.addColumn(renderer);
 
         UI.setCurrent(new UI());
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test

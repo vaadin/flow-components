@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.map.configuration;
@@ -26,6 +26,7 @@ public class Constants {
     public static final String OL_SOURCE_IMAGE_WMS = "ol/source/ImageWMS";
     // Geometry
     public static final String OL_GEOMETRY_POINT = "ol/geom/Point";
+    public static final String OL_GEOMETRY_POLYGON = "ol/geom/Polygon";
     // Style
     public static final String OL_STYLE_ICON = "ol/style/Icon";
     public static final String OL_STYLE_FILL = "ol/style/Fill";

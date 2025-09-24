@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.addon.spreadsheet.client;
@@ -91,7 +91,12 @@ public class Cell {
             element.setInnerText("");
             element.getStyle().clearZIndex();
         } else {
-            element.getStyle().setZIndex(ZINDEXVALUE);
+            if (sheetWidget.isMergedCell(SheetWidget.toKey(col, row))
+                    && !(this instanceof MergedCell)) {
+                element.getStyle().clearZIndex();
+            } else {
+                element.getStyle().setZIndex(ZINDEXVALUE);
+            }
             if (needsMeasure && getCellWidth() > 0 && sheetWidget
                     .measureValueWidth(cellStyle, value) > getCellWidth()) {
                 element.setInnerText("###");

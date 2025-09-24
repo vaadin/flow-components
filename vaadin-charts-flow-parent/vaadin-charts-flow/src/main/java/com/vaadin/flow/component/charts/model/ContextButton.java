@@ -1,15 +1,15 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
 
-import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.model.style.ButtonTheme;
+import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * Options for the export button.
@@ -17,6 +17,7 @@ import com.vaadin.flow.component.charts.model.style.ButtonTheme;
 public class ContextButton extends AbstractConfigurationObject {
 
     private HorizontalAlign align;
+    private Number buttonSpacing;
     private Boolean enabled;
     private Number height;
     private ContextButtonMenuItem[] menuItems;
@@ -55,6 +56,25 @@ public class ContextButton extends AbstractConfigurationObject {
 
     public ContextButton(Boolean enabled) {
         this.enabled = enabled;
+    }
+
+    /**
+     * Gets the spacing between the context button and other exporting buttons.
+     * 
+     * @return the button spacing
+     */
+    public Number getButtonSpacing() {
+        return buttonSpacing;
+    }
+
+    /**
+     * Sets the spacing between the context button and other exporting buttons.
+     * 
+     * @param buttonSpacing
+     *            the spacing value
+     */
+    public void setButtonSpacing(Number buttonSpacing) {
+        this.buttonSpacing = buttonSpacing;
     }
 
     /**

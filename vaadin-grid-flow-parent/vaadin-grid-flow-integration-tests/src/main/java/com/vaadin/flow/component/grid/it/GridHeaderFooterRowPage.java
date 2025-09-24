@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,8 +25,8 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
@@ -93,7 +93,7 @@ public class GridHeaderFooterRowPage extends Div {
         button = new NativeButton("Set components for headers",
                 event -> grid.getHeaderRows().stream()
                         .flatMap(row -> row.getCells().stream())
-                        .forEach(cell -> cell.setComponent(new Label("foo"))));
+                        .forEach(cell -> cell.setComponent(new Span("foo"))));
         button.setId("set-components-for-headers");
         add(button);
 
@@ -124,7 +124,7 @@ public class GridHeaderFooterRowPage extends Div {
         add(grid2);
 
         IntStream.range(0, 4)
-                .forEach(i -> grid2.addColumn(ValueProvider.identity()));
+                .forEach(i -> grid2.addColumn(item -> item + "-" + (i + 1)));
 
         button = new NativeButton("Prepend header",
                 event -> grid2.prependHeaderRow().getCells()
@@ -162,6 +162,16 @@ public class GridHeaderFooterRowPage extends Div {
             b.setId("join-footers-" + i + (i + 1));
             add(b);
         });
+
+        NativeButton removeAllFooterRows = new NativeButton(
+                "removeAllFooterRows", event -> grid2.removeAllFooterRows());
+        removeAllFooterRows.setId("remove-all-footer-rows");
+        add(removeAllFooterRows);
+
+        NativeButton removeAllHeaderRows = new NativeButton(
+                "removeAllHeaderRows", event -> grid2.removeAllHeaderRows());
+        removeAllHeaderRows.setId("remove-all-header-rows");
+        add(removeAllHeaderRows);
     }
 
 }

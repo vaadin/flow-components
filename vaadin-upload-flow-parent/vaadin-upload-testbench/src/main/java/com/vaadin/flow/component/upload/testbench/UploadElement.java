@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,16 +17,13 @@ package com.vaadin.flow.component.upload.testbench;
 
 import java.io.File;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import org.openqa.selenium.WebDriver.Timeouts;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chromium.ChromiumDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WrapsDriver;
 import org.openqa.selenium.WrapsElement;
+import org.openqa.selenium.chromium.ChromiumDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.safari.SafariDriver;
@@ -129,29 +126,29 @@ public class UploadElement extends TestBenchElement {
     }
 
     /**
+     * Removes the file with the given index. Does nothing if there is no file
+     * with the given index.
+     *
+     * @param index
+     *            the index of the file to remove
+     */
+    public void removeFile(int index) {
+        executeScript(
+                "arguments[0]._removeFile(arguments[0].files[arguments[1]])",
+                this, index);
+    }
+
+    /**
      * Wait for the given number of seconds for all uploads to finish.
      *
      * @param maxSeconds
      *            the number of seconds to wait for the upload to finish
      */
     private void waitForUploads(int maxSeconds) {
-        Timeouts timeouts = getDriver().manage().timeouts();
-        timeouts.setScriptTimeout(maxSeconds, TimeUnit.SECONDS);
+        String script = "return arguments[0].files.every((file) => !file.uploading);";
 
-        String script = "var callback = arguments[arguments.length - 1];"
-                + "var upload = arguments[0];"
-                + "window.setTimeout(function() {"
-                + "  var inProgress = upload.files.filter(function(file) { return file.uploading;}).length >0;"
-                + "  if (!inProgress) callback();" //
-                + "}, 500);";
-        getCommandExecutor().getDriver().executeAsyncScript(script, this);
-
-    }
-
-    private void removeFile(int i) {
-        executeScript(
-                "arguments[0]._removeFile(arguments[0].files[arguments[1]])",
-                this, i);
+        waitUntil(driver -> (Boolean) executeScript(script, UploadElement.this),
+                maxSeconds);
     }
 
     private void startUpload() {

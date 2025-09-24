@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,7 +18,6 @@ package com.vaadin.flow.component.textfield.tests;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.TextField;
@@ -52,14 +51,6 @@ public class TextFieldPage extends Div {
                 event -> textField.setReadOnly(!textField.isReadOnly()));
         add(button);
 
-        NativeButton required = new NativeButton(
-                "Set/unset field required property");
-        required.setId("required");
-        required.addClickListener(
-                event -> textField.setRequiredIndicatorVisible(
-                        !textField.isRequiredIndicatorVisible()));
-        add(required);
-
         TextField valueChangeSource = new TextField();
         valueChangeSource.getStyle().set("display", "block");
         valueChangeSource.setId("value-change");
@@ -83,12 +74,13 @@ public class TextFieldPage extends Div {
         addFocusShortcut();
         addHelperText();
         addHelperComponent();
+        addPlaceholderOnlyField();
     }
 
     private void handleTextFieldValue(TextField field) {
-        Label label = new Label(field.getValue());
-        label.addClassName("text-field-value");
-        add(label);
+        Span valueMessage = new Span(field.getValue());
+        valueMessage.addClassName("text-field-value");
+        add(valueMessage);
     }
 
     private void addDisabledField() {
@@ -154,5 +146,12 @@ public class TextFieldPage extends Div {
         clearButton
                 .addClickListener(event -> textField.setHelperComponent(null));
         add(textField, clearButton);
+    }
+
+    private void addPlaceholderOnlyField() {
+        TextField textField = new TextField();
+        textField.setId("placeholder-field");
+        textField.setPlaceholder("Placeholder caption");
+        add(textField);
     }
 }

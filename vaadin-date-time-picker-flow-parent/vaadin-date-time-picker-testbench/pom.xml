@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>vaadin-date-time-picker-flow-parent</artifactId>
         <groupId>com.vaadin</groupId>
-        <version>24.3-SNAPSHOT</version>
+        <artifactId>vaadin-date-time-picker-flow-parent</artifactId>
+        <version>25.0-SNAPSHOT</version>
     </parent>
     <artifactId>vaadin-date-time-picker-testbench</artifactId>
     <packaging>jar</packaging>
@@ -13,13 +13,22 @@
     <dependencies>
         <dependency>
             <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-date-picker-testbench</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
             <artifactId>vaadin-testbench-shared</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-time-picker-testbench</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     <build>
-        <plugins>
-        </plugins>
+        <plugins/>
     </build>
     <profiles>
         <profile>

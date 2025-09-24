@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -30,13 +30,13 @@ import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.ExecutionContext;
 
-import elemental.json.JsonObject;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Renderer and DataGenerator used by {@link Column} to control the state of the
  * editor components.
  * <p>
- * Components are created during the {@link #generateData(Object, JsonObject)}
+ * Components are created during the {@link #generateData(Object, ObjectNode)}
  * calls, and the proper data is sent to the client-side to be rendered.
  *
  * @author Vaadin Ltd.
@@ -87,7 +87,7 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
     }
 
     @Override
-    public void generateData(T item, JsonObject jsonObject) {
+    public void generateData(T item, ObjectNode jsonObject) {
         if (editor.isOpen() && component != null) {
             int nodeId = getComponentNodeId(component);
             jsonObject.put("_" + columnInternalId + "_editor", nodeId);
@@ -178,13 +178,10 @@ public class EditorRenderer<T> extends Renderer<T> implements DataGenerator<T> {
 
                 // If editing, render the editor, otherwise use the original renderer
                 "if (root.__editing) { Vaadin.FlowComponentHost.setChildNodes('" + appId + "', [model.item._" + columnInternalId + "_editor], root); }" +
-                "else if (!originalRender) { root.textContent = model.item." + columnInternalId + " }" +
-                "else { originalRender(root, container, model); }" +
+                "else if (originalRender) { originalRender(root, container, model) }" +
+                "else { this._defaultRenderer(root, container, model) }" +
             "};");
         //@formatter:on
-
-        // clear the path property, since we are using an explicit renderer
-        container.removeProperty("path");
     }
 
     private void runBeforeClientResponse(Element container,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -109,9 +109,17 @@ abstract class AbstractColumn<T extends AbstractColumn<T>> extends Component
                 ? HtmlUtils.escape(getBottomLevelColumn().getInternalId())
                 : null;
 
-        grid.getElement().executeJs(
-                "this.$connector.setHeaderRenderer($0, { content: $1, showSorter: $2, sorterPath: $3 })",
-                this.getElement(), headerContent, showSorter, sorterPath);
+        var jsExpression = "this.$connector.setHeaderRenderer($0, { content: $1, showSorter: $2, sorterPath: $3 });";
+        // The JS execution of setting the actual header component will be
+        // delayed until when the header is set visible. Therefore, we
+        // explicitly set the header empty if the header component is initially
+        // hidden.
+        if (headerComponent != null && !headerComponent.isVisible()) {
+            grid.getElement().executeJs(jsExpression, getElement(), "",
+                    showSorter, sorterPath);
+        }
+        grid.getElement().executeJs(jsExpression, getElement(), headerContent,
+                showSorter, sorterPath);
     }
 
     private void scheduleFooterRendering() {

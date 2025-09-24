@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,15 +15,16 @@
  */
 package com.vaadin.flow.component.login;
 
-import com.vaadin.flow.internal.JsonSerializer;
-import elemental.json.JsonFactory;
-import elemental.json.JsonValue;
-import elemental.json.impl.JreJsonFactory;
-import org.apache.commons.io.IOUtils;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
+
+import org.apache.commons.io.IOUtils;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.JsonNode;
 
 /**
  * Internationalization object for customizing the component UI texts. An
@@ -32,16 +33,17 @@ import java.nio.charset.StandardCharsets;
  *
  * @see LoginForm#setI18n(LoginI18n)
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LoginI18n implements Serializable {
 
-    private static final JsonValue DEFAULT_I18N;
+    private static final JsonNode DEFAULT_I18N;
 
     static {
         try {
-            final JsonFactory JSON_FACTORY = new JreJsonFactory();
-            DEFAULT_I18N = JSON_FACTORY.parse(
-                    IOUtils.toString(LoginI18n.class.getResource("i18n.json"),
-                            StandardCharsets.UTF_8));
+            String jsonString = IOUtils.toString(
+                    LoginI18n.class.getResource("i18n.json"),
+                    StandardCharsets.UTF_8);
+            DEFAULT_I18N = JacksonUtils.readTree(jsonString);
         } catch (IOException e) {
             throw new IllegalStateException(
                     "Cannot find the default i18n configuration. "
@@ -58,7 +60,7 @@ public class LoginI18n implements Serializable {
      * @return a new instance with the default messages
      */
     public static LoginI18n createDefault() {
-        return JsonSerializer.toObject(LoginI18n.class, DEFAULT_I18N);
+        return JacksonUtils.readToObject(DEFAULT_I18N, LoginI18n.class);
     }
 
     /**
@@ -124,6 +126,7 @@ public class LoginI18n implements Serializable {
     /**
      * I18n properties for the header.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Header implements Serializable {
         private String title;
         private String description;
@@ -162,6 +165,7 @@ public class LoginI18n implements Serializable {
     /**
      * I18n properties for the form.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Form implements Serializable {
         private String title;
         private String username;
@@ -248,6 +252,7 @@ public class LoginI18n implements Serializable {
     /**
      * I18n properties for the error message.
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class ErrorMessage implements Serializable {
         private String title;
         private String message;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,23 +15,23 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
-import com.vaadin.flow.data.provider.SortDirection;
-import com.vaadin.testbench.TestBenchElement;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid-it-demo/sorting")
@@ -147,7 +147,7 @@ public class GridViewSortingIT extends AbstractComponentIT {
 
         WebElement sorter = grid.getHeaderCell(0).$("vaadin-grid-sorter")
                 .first();
-        Assert.assertNull(sorter.getAttribute("direction"));
+        Assert.assertNull(sorter.getDomProperty("direction"));
     }
 
     @Test
@@ -249,13 +249,13 @@ public class GridViewSortingIT extends AbstractComponentIT {
             String directionValue = direction == SortDirection.ASCENDING ? "asc"
                     : "desc";
             Assert.assertEquals(directionValue,
-                    columnSorter.getAttribute("direction"));
+                    columnSorter.getDomProperty("direction"));
 
             // Check order part displays correct order value
             String orderValue = String
                     .valueOf(querySortOrders.indexOf(querySortOrder) + 1);
             TestBenchElement orderElement = columnSorter.$("*")
-                    .attribute("part", "order").first();
+                    .withAttribute("part", "order").first();
             Assert.assertEquals(orderValue, orderElement.getText());
         });
     }

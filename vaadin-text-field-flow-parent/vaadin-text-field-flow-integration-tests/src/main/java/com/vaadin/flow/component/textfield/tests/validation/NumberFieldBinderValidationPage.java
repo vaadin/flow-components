@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,9 +28,14 @@ public class NumberFieldBinderValidationPage
     public static final String MAX_INPUT = "max-input";
     public static final String EXPECTED_VALUE_INPUT = "expected-value-input";
     public static final String CLEAR_VALUE_BUTTON = "clear-value-button";
+    public static final String RESET_BEAN_BUTTON = "reset-bean-button";
 
-    public static final String REQUIRED_ERROR_MESSAGE = "The field is required";
-    public static final String UNEXPECTED_VALUE_ERROR_MESSAGE = "The field doesn't match the expected value";
+    public static final String REQUIRED_ERROR_MESSAGE = "Field is required";
+    public static final String BAD_INPUT_ERROR_MESSAGE = "Number has incorrect format";
+    public static final String MIN_ERROR_MESSAGE = "Number is too small";
+    public static final String MAX_ERROR_MESSAGE = "Number is too big";
+    public static final String STEP_ERROR_MESSAGE = "Number does not match the step";
+    public static final String UNEXPECTED_VALUE_ERROR_MESSAGE = "Number does not match the expected value";
 
     public static class Bean {
         private Double property;
@@ -56,6 +61,15 @@ public class NumberFieldBinderValidationPage
                 .withValidator(value -> value.equals(expectedValue),
                         UNEXPECTED_VALUE_ERROR_MESSAGE)
                 .bind("property");
+        binder.addStatusChangeListener(event -> {
+            incrementServerValidationCounter();
+        });
+
+        testField.setI18n(new NumberField.NumberFieldI18n()
+                .setBadInputErrorMessage(BAD_INPUT_ERROR_MESSAGE)
+                .setMinErrorMessage(MIN_ERROR_MESSAGE)
+                .setMaxErrorMessage(MAX_ERROR_MESSAGE)
+                .setStepErrorMessage(STEP_ERROR_MESSAGE));
 
         add(createInput(EXPECTED_VALUE_INPUT, "Set expected value", event -> {
             expectedValue = Double.parseDouble(event.getValue());
@@ -79,8 +93,13 @@ public class NumberFieldBinderValidationPage
         add(createButton(CLEAR_VALUE_BUTTON, "Clear value", event -> {
             testField.clear();
         }));
+
+        add(createButton(RESET_BEAN_BUTTON, "Reset bean", event -> {
+            binder.setBean(new Bean());
+        }));
     }
 
+    @Override
     protected NumberField createTestField() {
         return new NumberField();
     }

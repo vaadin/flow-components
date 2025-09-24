@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,6 +18,7 @@ package com.vaadin.flow.component.orderedlayout;
 import java.util.Set;
 
 import com.vaadin.flow.component.HasElement;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.dom.ThemeList;
 
@@ -93,16 +94,95 @@ public interface ThemableLayout extends HasElement {
      *            it if {@code false}
      */
     default void setSpacing(boolean spacing) {
+        if (!spacing) {
+            getElement().getStyle().remove("gap");
+        }
         getThemeList().set("spacing", spacing);
     }
 
     /**
-     * Shows if {@code spacing} theme setting is applied to the component.
+     * Shows if {@code spacing} setting is applied to the component, either by
+     * setting the {@code spacing} theme or by setting the {@code gap} style.
      *
      * @return {@code true} if theme setting is applied, {@code false} otherwise
      */
     default boolean isSpacing() {
-        return getThemeList().contains("spacing");
+        return getThemeList().contains("spacing")
+                || getElement().getStyle().has("gap");
+    }
+
+    /**
+     * Sets the spacing between the components inside the layout.
+     *
+     * @param spacing
+     *            the spacing between the components. The value must be a valid
+     *            CSS length, i.e. must provide a unit (e.g. "1px", "1rem",
+     *            "1%") for values other than 0.
+     */
+    default void setSpacing(String spacing) {
+        getElement().getStyle().set("gap", spacing);
+    }
+
+    /**
+     * Sets the spacing between the components inside the layout.
+     *
+     * @param spacing
+     *            the spacing between the components
+     * @param unit
+     *            the unit of the spacing value
+     */
+    default void setSpacing(float spacing, Unit unit) {
+        if (spacing < 0) {
+            setSpacing(false);
+        }
+        setSpacing(spacing + unit.toString());
+    }
+
+    /**
+     * Gets the spacing between the components inside the layout.
+     *
+     * <p>
+     * The value returned is the value set by {@link #setSpacing(String)} or
+     * {@link #setSpacing(float, Unit)}. If the spacing was set using
+     * {@link #setSpacing(boolean)}, this method will return {@code null}. On
+     * this case, use {@link #isSpacing()} instead.
+     *
+     * @return the spacing between the components
+     */
+    default String getSpacing() {
+        return getElement().getStyle().get("gap");
+    }
+
+    /**
+     * Sets whether items should wrap to new lines/columns when they exceed the
+     * layout's boundaries. When enabled, items maintain their size and create
+     * new rows or columns as needed, depending on the layout's orientation.
+     * <p>
+     * When disabled, items will be compressed to fit within a single
+     * row/column.
+     *
+     * @param wrap
+     *            true to enable wrapping, false to force items into a single
+     *            row/column
+     */
+    default void setWrap(boolean wrap) {
+        getThemeList().set("wrap", wrap);
+    }
+
+    /**
+     * Gets whether items will wrap to new lines/columns when they exceed the
+     * layout's boundaries.
+     * <p>
+     * When wrapping is enabled, items maintain their defined dimensions by
+     * creating new rows or columns as needed. When disabled, items may be
+     * compressed to fit within the available space.
+     *
+     * @return true if wrapping is enabled, false if items are forced into a
+     *         single row/column
+     * @see #setWrap(boolean)
+     */
+    default boolean isWrap() {
+        return getThemeList().contains("wrap");
     }
 
     /**

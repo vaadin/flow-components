@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -249,17 +249,11 @@ public interface FlexComponent extends HasOrderedComponents, HasStyle, HasSize {
             throw new IllegalArgumentException(
                     "Flex grow property cannot be negative");
         }
-        if (flexGrow == 0) {
-            for (HasElement component : components) {
-                component.getElement().getStyle()
-                        .remove(FlexConstants.FLEX_GROW_CSS_PROPERTY);
-            }
-        } else {
-            for (HasElement component : components) {
-                component.getElement().getStyle().set(
-                        FlexConstants.FLEX_GROW_CSS_PROPERTY,
-                        String.valueOf(flexGrow));
-            }
+
+        for (HasElement component : components) {
+            component.getElement().getStyle().set(
+                    FlexConstants.FLEX_GROW_CSS_PROPERTY,
+                    String.valueOf(flexGrow));
         }
     }
 

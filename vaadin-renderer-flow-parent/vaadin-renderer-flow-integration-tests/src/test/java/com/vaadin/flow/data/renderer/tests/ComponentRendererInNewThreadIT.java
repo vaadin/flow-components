@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,25 +15,44 @@
  */
 package com.vaadin.flow.data.renderer.tests;
 
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-renderer-flow/component-renderer-in-new-thread")
 public class ComponentRendererInNewThreadIT extends AbstractComponentIT {
 
-    @Test
-    public void componentRendererInNewThread_uiNotNullWhileTemplateExpressionIsCalculated() {
+    @Before
+    public void init() {
         open();
-        findElement(By.id("add-component")).click();
+    }
 
-        waitUntil(driver -> findElement(By.id("null-ui-count")) != null
-                && findElement(By.id("non-null-ui-count")) != null, 2);
+    @Test
+    public void addComponentRendererBeforeAttach_componentIsRendered() {
+        findElement(By.id("add-component-renderer-before-attach")).click();
 
-        Assert.assertEquals("0", findElement(By.id("null-ui-count")).getText());
-        Assert.assertNotEquals("0",
-                findElement(By.id("non-null-ui-count")).getText());
+        WebElement component = waitUntil(driver -> findElement(
+                By.tagName("lit-renderer-test-component")));
+
+        WebElement item0 = component.findElement(By.id("item-0"));
+        Assert.assertNotNull(item0);
+        Assert.assertEquals("Item", item0.getText());
+    }
+
+    @Test
+    public void addComponentRendererAfterAttach_componentIsRendered() {
+        findElement(By.id("add-component-renderer-after-attach")).click();
+
+        WebElement component = waitUntil(driver -> findElement(
+                By.tagName("lit-renderer-test-component")));
+
+        WebElement item0 = component.findElement(By.id("item-0"));
+        Assert.assertNotNull(item0);
+        Assert.assertEquals("Item", item0.getText());
     }
 }

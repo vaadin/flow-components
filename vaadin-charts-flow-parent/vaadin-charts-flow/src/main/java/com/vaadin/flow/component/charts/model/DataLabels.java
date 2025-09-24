@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
@@ -58,6 +58,7 @@ public class DataLabels extends AbstractDataLabels {
     private Number connectorWidth;
     private Number distance;
     private Boolean softConnector;
+    private HorizontalAlign position;
 
     public DataLabels() {
     }
@@ -597,5 +598,22 @@ public class DataLabels extends AbstractDataLabels {
      */
     public void setSoftConnector(Boolean softConnector) {
         this.softConnector = softConnector;
+    }
+
+    /**
+     * @see #setPosition(HorizontalAlign)
+     */
+    public HorizontalAlign getPosition() {
+        return position;
+    }
+
+    /**
+     * Aligns data labels relative to points. If center alignment is not
+     * possible, it defaults to right. Defaults to "center".
+     * 
+     * @param position
+     */
+    public void setPosition(HorizontalAlign position) {
+        this.position = position;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,9 +28,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.internal.NodeOwner;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.server.AbstractStreamResource;
@@ -38,7 +36,12 @@ import com.vaadin.flow.server.Command;
 import com.vaadin.flow.server.StreamRegistration;
 import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.AbstractDownloadHandler;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.ser.std.ToStringSerializer;
 
 /**
  * Item to render as a message component inside a {@link MessageList}.
@@ -51,6 +54,8 @@ public class MessageListItem implements Serializable {
     private MessageList host;
 
     private String text;
+    // Value of the text property in the client
+    String clientText;
     private Instant time;
 
     private String userName;
@@ -64,6 +69,7 @@ public class MessageListItem implements Serializable {
     private AbstractStreamResource imageResource;
 
     private Set<String> themeNames = new LinkedHashSet<>();
+    private Set<String> classNames = new LinkedHashSet<>();
 
     /**
      * Creates an empty message list item. Use the setter methods to configure
@@ -85,6 +91,25 @@ public class MessageListItem implements Serializable {
     }
 
     /**
+     * Creates a message list item with the provided text content and user name.
+     * <p>
+     * The text will be rendered as plain text in the message body. The user
+     * name will also be displayed in the message component. The user name is
+     * also used in the message's avatar.
+     *
+     * @param text
+     *            the text content of the message
+     * @param userName
+     *            the user name of the message sender
+     * @see #setText(String)
+     * @see #setUserName(String)
+     */
+    public MessageListItem(String text, String userName) {
+        this(text);
+        this.userName = userName;
+    }
+
+    /**
      * Creates a message list item with the provided text content, time and user
      * name.
      * <p>
@@ -103,9 +128,8 @@ public class MessageListItem implements Serializable {
      * @see #setUserName(String)
      */
     public MessageListItem(String text, Instant time, String userName) {
-        this(text);
+        this(text, userName);
         this.time = time;
-        this.userName = userName;
     }
 
     /**
@@ -154,7 +178,22 @@ public class MessageListItem implements Serializable {
      */
     public void setText(String text) {
         this.text = text;
-        propsChanged();
+        if (getHost() != null) {
+            getHost().scheduleItemsTextUpdate();
+        }
+    }
+
+    /**
+     * Appends the provided text to the message's text content.
+     *
+     * @param text
+     *            the text to append to the message's text content
+     */
+    public void appendText(String text) {
+        if (text == null) {
+            return;
+        }
+        setText(Optional.ofNullable(this.text).orElse("") + text);
     }
 
     /**
@@ -235,8 +274,8 @@ public class MessageListItem implements Serializable {
      * Gets the URL to the message sender's image.
      * <p>
      * If the image is set as a stream resource with
-     * {@link MessageListItem#setUserImageResource(AbstractStreamResource)},
-     * this method will return a URL that is generated for that resource.
+     * {@link MessageListItem#setUserImageHandler(DownloadHandler)}, this method
+     * will return a URL that is generated for that resource.
      *
      * @return the URL to the message sender's image, or {@code null} if none is
      *         set
@@ -251,12 +290,12 @@ public class MessageListItem implements Serializable {
      * avatar in the message component.
      * <p>
      * Setting the image with this method resets the image resource provided
-     * with {@link MessageListItem#setUserImageResource(AbstractStreamResource)}
+     * with {@link MessageListItem#setUserImageHandler(DownloadHandler)}
      *
      * @param userImage
      *            the URL to the message sender's image, or {@code null} to
      *            remove the image
-     * @see MessageListItem#setUserImageResource(AbstractStreamResource)
+     * @see MessageListItem#setUserImageHandler(DownloadHandler)
      */
     public void setUserImage(String userImage) {
         unsetResource();
@@ -343,6 +382,52 @@ public class MessageListItem implements Serializable {
     }
 
     /**
+     * Adds one or more class names to this item. Multiple class names can be
+     * specified by using multiple parameters.
+     *
+     * @param classNames
+     *            the class name or class names to be added to the item
+     */
+    public void addClassNames(String... classNames) {
+        this.classNames.addAll(Arrays.asList(classNames));
+        propsChanged();
+    }
+
+    /**
+     * Removes one or more class names from this item. Multiple class names can
+     * be specified by using multiple parameters.
+     *
+     * @param classNames
+     *            the class name or class names to be removed from the item
+     */
+    public void removeClassNames(String... classNames) {
+        this.classNames.removeAll(Arrays.asList(classNames));
+        propsChanged();
+    }
+
+    /**
+     * Checks if the message has the given class name.
+     *
+     * @param className
+     *            the class name to check for
+     * @return <code>true</code> if the message has the given class name,
+     *         <code>false</code> otherwise
+     */
+    public boolean hasClassName(String className) {
+        return classNames.contains(className);
+    }
+
+    // Used only for Jackson serialization
+    @JsonGetter
+    private String getClassName() {
+        if (classNames.isEmpty()) {
+            return null;
+        } else {
+            return classNames.stream().collect(Collectors.joining(" "));
+        }
+    }
+
+    /**
      * Gets the image resource of the message sender's avatar.
      *
      * @return the image resource value, or {@code null} if the image has not
@@ -359,11 +444,45 @@ public class MessageListItem implements Serializable {
      * <p>
      * Setting the image as a resource with this method overrides the image URL
      * set with {@link MessageListItem#setUserImage(String)}.
+     * <p>
+     * Sets the <code>Content-Disposition</code> header to <code>inline</code>
+     * for pre-defined download handlers, created by factory methods in
+     * {@link DownloadHandler}, as well as for other
+     * {@link AbstractDownloadHandler} implementations.
+     *
+     * @param downloadHandler
+     *            download handler for the image resource, or {@code null} to
+     *            remove the resource
+     * @see MessageListItem#setUserImage(String)
+     */
+    public void setUserImageHandler(DownloadHandler downloadHandler) {
+        if (downloadHandler == null) {
+            unsetResource();
+            return;
+        }
+        if (downloadHandler instanceof AbstractDownloadHandler<?> handler) {
+            // change disposition to inline in pre-defined handlers,
+            // where it is 'attachment' by default
+            handler.inline();
+        }
+
+        setUserImageResource(new StreamResourceRegistry.ElementStreamResource(
+                downloadHandler, getHost() != null ? getHost().getElement()
+                        : UI.getCurrent().getElement()));
+    }
+
+    /**
+     * Sets the image for the message sender's avatar.
+     * <p>
+     * Setting the image as a resource with this method overrides the image URL
+     * set with {@link MessageListItem#setUserImage(String)}.
      *
      * @param resource
      *            the image resource, or {@code null} to remove the resource
      * @see MessageListItem#setUserImage(String)
+     * @deprecated Use {@link #setUserImageHandler(DownloadHandler)} instead
      */
+    @Deprecated(since = "24.8", forRemoval = true)
     public void setUserImageResource(AbstractStreamResource resource) {
         imageResource = resource;
 

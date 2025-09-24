@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Focusable;
@@ -29,6 +30,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.component.virtuallist.paging.PagelessDataCommunicator;
 import com.vaadin.flow.data.binder.HasDataProvider;
 import com.vaadin.flow.data.provider.ArrayUpdater;
@@ -37,16 +39,17 @@ import com.vaadin.flow.data.provider.CompositeDataGenerator;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.dom.DisabledUpdateMode;
+import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.ValueProvider;
-import com.vaadin.flow.internal.JsonUtils;
-import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.server.Command;
 import com.vaadin.flow.shared.Registration;
 
-import elemental.json.Json;
-import elemental.json.JsonValue;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Virtual List allows you to render a long list of items inside a scrollable
@@ -66,9 +69,7 @@ import elemental.json.JsonValue;
  *            the type of the items supported by the list
  */
 @Tag("vaadin-virtual-list")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/virtual-list", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/virtual-list", version = "25.0.0-alpha19")
 @JsModule("@vaadin/virtual-list/src/vaadin-virtual-list.js")
 @JsModule("./flow-component-renderer.js")
 @JsModule("./virtualListConnector.js")
@@ -83,9 +84,9 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         }
 
         @Override
-        public void set(int start, List<JsonValue> items) {
+        public void set(int start, List<JsonNode> items) {
             enqueue("$connector.set", start,
-                    items.stream().collect(JsonUtils.asArray()));
+                    items.stream().collect(JacksonUtils.asArray()));
         }
 
         @Override
@@ -119,6 +120,8 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
 
     private Renderer<T> renderer;
 
+    private SerializableFunction<T, String> itemAccessibleNameGenerator = item -> null;
+
     private final CompositeDataGenerator<T> dataGenerator = new CompositeDataGenerator<>();
     private final List<Registration> renderingRegistrations = new ArrayList<>();
     private transient T placeholderItem;
@@ -134,6 +137,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
     public VirtualList() {
         setRenderer((ValueProvider<T, String>) String::valueOf);
         addAttachListener((e) -> this.setPlaceholderItem(this.placeholderItem));
+        dataGenerator.addDataGenerator(this::generateItemAccessibleName);
     }
 
     private void initConnector() {
@@ -142,6 +146,13 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
                 .getPage().executeJs(
                         "window.Vaadin.Flow.virtualListConnector.initLazy($0)",
                         getElement());
+    }
+
+    private void generateItemAccessibleName(T item, ObjectNode jsonObject) {
+        var accessibleName = this.itemAccessibleNameGenerator.apply(item);
+        if (accessibleName != null) {
+            jsonObject.put("accessibleName", accessibleName);
+        }
     }
 
     @Override
@@ -244,7 +255,7 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         this.placeholderItem = placeholderItem;
 
         runBeforeClientResponse(() -> {
-            var json = Json.createObject();
+            var json = JacksonUtils.createObjectNode();
 
             if (placeholderItem != null) {
                 // Use the renderer's data generator to create the final
@@ -290,8 +301,80 @@ public class VirtualList<T> extends Component implements HasDataProvider<T>,
         setRenderer(renderer);
     }
 
+    @AllowInert
     @ClientCallable(DisabledUpdateMode.ALWAYS)
-    private void setRequestedRange(int start, int length) {
-        getDataCommunicator().setRequestedRange(start, length);
+    private void setViewportRange(int start, int length) {
+        getDataCommunicator().setViewportRange(start, length);
+    }
+
+    /**
+     * Scrolls to the given row index. Scrolls so that the element is shown at
+     * the start of the visible area whenever possible.
+     * <p>
+     * If the index parameter exceeds current item set size the grid will scroll
+     * to the end.
+     *
+     * @param rowIndex
+     *            zero based index of the item to scroll to in the current view.
+     */
+    public void scrollToIndex(int rowIndex) {
+        getElement().getNode().runWhenAttached(
+                ui -> ui.beforeClientResponse(this, ctx -> getElement()
+                        .executeJs("this.scrollToIndex($0)", rowIndex)));
+    }
+
+    /**
+     * Scrolls to the first element.
+     */
+    public void scrollToStart() {
+        scrollToIndex(0);
+    }
+
+    /**
+     * Scrolls to the last element of the list.
+     */
+    public void scrollToEnd() {
+        scrollToIndex(Integer.MAX_VALUE);
+    }
+
+    /**
+     * A function that generates accessible names for virtual list items. The
+     * function gets the item as an argument and the return value should be a
+     * string representing that item. The result gets applied to the
+     * corresponding virtual list child element as an `aria-label` attribute.
+     *
+     * @param itemAccessibleNameGenerator
+     *            the item accessible name generator to set, not {@code null}
+     * @throws NullPointerException
+     *             if {@code itemAccessibleNameGenerator} is {@code null}
+     */
+    public void setItemAccessibleNameGenerator(
+            SerializableFunction<T, String> itemAccessibleNameGenerator) {
+        Objects.requireNonNull(itemAccessibleNameGenerator,
+                "Item accessible name generator can not be null");
+        this.itemAccessibleNameGenerator = itemAccessibleNameGenerator;
+        getDataCommunicator().reset();
+    }
+
+    /**
+     * Gets the function that generates accessible names for virtual list items.
+     *
+     * @return the item accessible name generator
+     */
+    public SerializableFunction<T, String> getItemAccessibleNameGenerator() {
+        return itemAccessibleNameGenerator;
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+
+        // When the component is detached and reattached in the same roundtrip,
+        // data communicator will clear all data generators, which will also
+        // remove all components rendered by component renderers. Thus reset the
+        // data communicator to re-render components. This also fixes the case
+        // where the virtual list is used in Popover or manually attached
+        // Dialog, see https://github.com/vaadin/web-components/issues/8630
+        getDataCommunicator().reset();
     }
 }

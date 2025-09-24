@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
@@ -123,7 +123,7 @@ public abstract class AbstractSeries extends AbstractConfigurationObject
      * the client it is still "cached" there and thus setting it visible happens
      * quickly.
      *
-     * @see #setVisible(boolean, boolean)
+     * @see #setVisible(Boolean, boolean)
      *
      * @param visible
      *            true if the series should be displayed, false if not
@@ -169,7 +169,7 @@ public abstract class AbstractSeries extends AbstractConfigurationObject
     }
 
     /**
-     * @see #setxAxis(Number)
+     * @see #setxAxis(Integer)
      * @return The index of the X-axis that this data series is bound to.
      *         Returns null if undefined.
      */
@@ -190,7 +190,7 @@ public abstract class AbstractSeries extends AbstractConfigurationObject
     }
 
     /**
-     * @see #setyAxis(Number)
+     * @see #setyAxis(Integer)
      * @return The index of the Y-axis that this data series is bound to.
      *         Returns null if undefined.
      */
@@ -211,7 +211,7 @@ public abstract class AbstractSeries extends AbstractConfigurationObject
     }
 
     /**
-     * @see #setColorAxis(Number)
+     * @see #setColorAxis(Integer)
      * @return The index of the color-axis that this data series is bound to.
      *         Returns null if undefined.
      */
@@ -240,7 +240,7 @@ public abstract class AbstractSeries extends AbstractConfigurationObject
      * Note, that this method cannot be used until series and axis are both
      * attached to same configuration object.
      *
-     * @see #setyAxis(Number)
+     * @see #setyAxis(Integer)
      *
      * @param secondaryAxis
      */

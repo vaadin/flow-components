@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,8 +20,8 @@ import java.util.Arrays;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.NativeButton;
-import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-renderer-flow/lit-renderer")
@@ -29,7 +29,7 @@ public class LitRendererPage extends Div {
 
     public LitRendererPage() {
 
-        LitRendererTestComponent component = new LitRendererTestComponent();
+        LitRendererTestComponentWrapper component = new LitRendererTestComponentWrapper();
         component.setItems(Arrays.asList("0", "1", "2", "3", "4"));
         setLitRenderer(component);
 
@@ -50,10 +50,31 @@ public class LitRendererPage extends Div {
         setSimpleLitRendererButton.setId("setSimpleLitRendererButton");
         add(setSimpleLitRendererButton);
 
+        NativeButton setCheckboxRenderer = new NativeButton(
+                "Set LitRenderer with checkbox", e -> {
+                    component.setRenderer(LitRenderer.<String> of(
+                            "<input type='checkbox' .checked='${live(item.checked)}'>")
+                            .withProperty("checked", "2"::equals));
+                });
+        setCheckboxRenderer.setId("setCheckboxRenderer");
+        add(setCheckboxRenderer);
+
         NativeButton removeRendererButton = new NativeButton("Remove renderer",
                 e -> component.setRenderer(null));
         removeRendererButton.setId("removeRendererButton");
         add(removeRendererButton);
+
+        NativeButton longRefreshButton = new NativeButton("Long data refresh",
+                e -> {
+                    try {
+                        // Simulate heavy work
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ignored) { // NOSONAR
+                    }
+                    component.setItems(Arrays.asList("0", "1", "2", "3", "4"));
+                });
+        longRefreshButton.setId("longRefreshButton");
+        add(longRefreshButton);
 
         add(new Div(new Text("Details:")));
 
@@ -74,10 +95,9 @@ public class LitRendererPage extends Div {
                 });
         toggleAttachedButton.setId("toggleAttachedButton");
         add(toggleAttachedButton);
-
     }
 
-    private void setLitRenderer(LitRendererTestComponent component) {
+    private void setLitRenderer(LitRendererTestComponentWrapper component) {
         component.setRenderer(LitRenderer.<String> of(new StringBuilder()
                 .append("<div tabindex=\"0\"")
                 .append("  id=\"content-${index}\"")
@@ -91,18 +111,20 @@ public class LitRendererPage extends Div {
                             .executeJs("console.warn(`event: clicked, item: "
                                     + item + "`)");
                 }).withFunction("keyPressed", (item, args) -> {
-                    getElement().executeJs(
-                            "console.warn(`event: keyPressed, item: " + item
-                                    + ", key: " + args.getString(0) + "`)");
+                    getElement()
+                            .executeJs("console.warn(`event: keyPressed, item: "
+                                    + item + ", key: " + args.get(0).asString()
+                                    + "`)");
                 }).withFunction("dragged", (item, args) -> {
                     getElement()
                             .executeJs("console.warn(`event: dragged, item: "
-                                    + item + ", argument count: "
-                                    + args.length() + "`)");
+                                    + item + ", argument count: " + args.size()
+                                    + "`)");
                 }));
     }
 
-    private void setDetailsLitRenderer(LitRendererTestComponent component) {
+    private void setDetailsLitRenderer(
+            LitRendererTestComponentWrapper component) {
         LitRenderer<String> renderer = LitRenderer.<String> of(
                 "<div id=\"details-${index}\">Details: ${item.value}</div>");
         component.setDetailsRenderer(renderer);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,28 +15,26 @@
  */
 package com.vaadin.flow.component.grid.contextmenu;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
-import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Rectangle;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 
 import com.vaadin.flow.component.grid.testbench.GridElement;
+import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
-import org.openqa.selenium.interactions.Actions;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/context-menu-grid")
 public class ContextMenuGridIT extends AbstractComponentIT {
-
-    private static final String OVERLAY_TAG = "vaadin-context-menu-overlay";
 
     private GridElement grid;
 
@@ -98,6 +96,24 @@ public class ContextMenuGridIT extends AbstractComponentIT {
     }
 
     @Test
+    public void setOpenOnClickAndMultiSelect_clickOnRow_itemClickGetsTargetItem() {
+        $("button").id("toggle-open-on-click").click();
+        $("button").id("set-multi-select").click();
+        grid.getCell(14, 1).click();
+        $("vaadin-context-menu-item").first().click();
+        assertMessage("Person 14");
+        verifyClosed();
+    }
+
+    @Test
+    public void setOpenOnClickAndMultiSelect_clickOnSelectionColum_noContextMenuOpen() {
+        $("button").id("toggle-open-on-click").click();
+        $("button").id("set-multi-select").click();
+        grid.getCell(14, 0).click();
+        verifyClosed();
+    }
+
+    @Test
     public void setOpenOnClick_contextClickOnRow_noContextMenuOpen() {
         $("button").id("toggle-open-on-click").click();
         grid.getCell(22, 0).contextClick();
@@ -109,14 +125,14 @@ public class ContextMenuGridIT extends AbstractComponentIT {
         $("button").id("add-sub-menu").click();
         grid.getCell(45, 1).contextClick();
         openSubMenu($("vaadin-context-menu-item").get(3));
-        waitUntil(driver -> $(OVERLAY_TAG).all().size() == 2);
+        waitUntil(driver -> getContextMenus().size() == 2);
         getSubMenuItems().get(0).click();
         assertMessage("Person 45");
         verifyClosed();
 
         grid.getCell(29, 0).contextClick();
         openSubMenu($("vaadin-context-menu-item").get(3));
-        waitUntil(driver -> $("vaadin-context-menu-overlay").all().size() == 2);
+        waitUntil(driver -> getContextMenus().size() == 2);
         getSubMenuItems().get(1).click();
         assertMessage("Grid id: grid-with-context-menu");
         verifyClosed();
@@ -139,13 +155,13 @@ public class ContextMenuGridIT extends AbstractComponentIT {
 
         grid.getCell(0, 0).contextClick();
 
-        waitUntil(driver -> $(OVERLAY_TAG).all().size() == 1);
+        waitUntil(driver -> getContextMenus().size() == 1);
 
-        TestBenchElement menuOverlay = $(OVERLAY_TAG).first();
+        TestBenchElement menu = getContextMenus().get(0);
 
-        TestBenchElement overlayContainer = menuOverlay
-                .$("vaadin-context-menu-list-box").first();
-        List<WebElement> items = overlayContainer.findElements(By.xpath("./*"));
+        TestBenchElement listBox = menu.$("vaadin-context-menu-list-box")
+                .first();
+        List<WebElement> items = listBox.findElements(By.xpath("./*"));
         Assert.assertEquals(4, items.size());
         Assert.assertEquals("vaadin-context-menu-item",
                 items.get(0).getTagName().toLowerCase(Locale.ENGLISH));
@@ -168,19 +184,18 @@ public class ContextMenuGridIT extends AbstractComponentIT {
 
         grid.getCell(0, 0).contextClick();
 
-        waitUntil(driver -> $(OVERLAY_TAG).all().size() == 1);
-        TestBenchElement menuOverlay = $(OVERLAY_TAG).first();
+        waitUntil(driver -> getContextMenus().size() == 1);
+        TestBenchElement menu = getContextMenus().get(0);
 
-        TestBenchElement overlayContainer = menuOverlay
-                .$("vaadin-context-menu-list-box").first();
-        openSubMenu(overlayContainer.$("vaadin-context-menu-item").get(3));
+        TestBenchElement listBox = menu.$("vaadin-context-menu-list-box")
+                .first();
+        openSubMenu(listBox.$("vaadin-context-menu-item").get(3));
 
-        waitUntil(driver -> $(OVERLAY_TAG).all().size() == 2);
-        TestBenchElement subMenuOverlay = $(OVERLAY_TAG).get(1);
+        waitUntil(driver -> getContextMenus().size() == 2);
+        TestBenchElement subMenu = getContextMenus().get(1);
 
-        List<WebElement> items = subMenuOverlay
-                .$("vaadin-context-menu-list-box").first()
-                .findElements(By.xpath("./*"));
+        List<WebElement> items = subMenu.$("vaadin-context-menu-list-box")
+                .first().findElements(By.xpath("./*"));
         Assert.assertEquals(4, items.size());
         Assert.assertEquals("vaadin-context-menu-item",
                 items.get(0).getTagName().toLowerCase(Locale.ENGLISH));
@@ -193,7 +208,7 @@ public class ContextMenuGridIT extends AbstractComponentIT {
                 items.get(3).getTagName().toLowerCase(Locale.ENGLISH));
         Assert.assertEquals("Link", items.get(3).getText());
 
-        subMenuOverlay.$("vaadin-context-menu-item").get(0).click();
+        subMenu.$("vaadin-context-menu-item").get(0).click();
 
         assertMessage("Person 0");
     }
@@ -205,8 +220,8 @@ public class ContextMenuGridIT extends AbstractComponentIT {
         waitUntil(driver -> grid.getRowCount() > 0);
 
         grid.getCell(0, 0).contextClick();
-        waitUntil(driver -> $(OVERLAY_TAG).all().size() == 1);
-        $(OVERLAY_TAG).get(0).$("vaadin-context-menu-item").first().click();
+        waitUntil(driver -> getContextMenus().size() == 1);
+        getContextMenus().get(0).$("vaadin-context-menu-item").first().click();
 
         verifyClosed();
 
@@ -214,8 +229,8 @@ public class ContextMenuGridIT extends AbstractComponentIT {
 
         grid.getCell(0, 0).contextClick();
 
-        getDriver().manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-        Assert.assertFalse(isElementPresent(By.tagName(OVERLAY_TAG)));
+        getDriver().manage().timeouts().implicitlyWait(Duration.ofSeconds(1));
+        verifyClosed();
     }
 
     @Test
@@ -223,9 +238,10 @@ public class ContextMenuGridIT extends AbstractComponentIT {
         grid.getCell(23, 0).contextClick();
         assertMessage("pre-open: name=Person 23, colId=Name-Id");
 
-        // ensure closing
-        grid.getCell(29, 1).contextClick();
-        verifyClosed();
+        // click another cell, open another context menu
+        grid.getCell(28, 1).contextClick();
+        waitUntil(driver -> $("span").id("message").getText()
+                .equals("pre-open: name=Person 28, colId=Born-Id"));
     }
 
     @Test
@@ -233,13 +249,14 @@ public class ContextMenuGridIT extends AbstractComponentIT {
         grid.getCell(6, 1).contextClick();
         assertMessage("pre-open: name=Person 6, colId=Born-Id");
 
-        // ensure closing
-        grid.getCell(19, 1).contextClick();
-        verifyClosed();
+        // click another cell, open another context menu
+        grid.getCell(3, 1).contextClick();
+        waitUntil(driver -> $("span").id("message").getText()
+                .equals("pre-open: name=Person 3, colId=Born-Id"));
     }
 
     private void assertMessage(String expected) {
-        Assert.assertEquals(expected, $("label").id("message").getText());
+        Assert.assertEquals(expected, $("span").id("message").getText());
     }
 
     private void openSubMenu(TestBenchElement parentItem) {
@@ -248,12 +265,17 @@ public class ContextMenuGridIT extends AbstractComponentIT {
                 parentItem);
     }
 
+    private List<TestBenchElement> getContextMenus() {
+        return $("vaadin-context-menu").withAttribute("opened").all();
+    }
+
     private List<TestBenchElement> getSubMenuItems() {
-        return $(OVERLAY_TAG).get(1).$("vaadin-context-menu-item").all();
+        return getContextMenus().get(1).$("vaadin-context-menu-item").all();
     }
 
     private void verifyClosed() {
-        waitForElementNotPresent(By.tagName(OVERLAY_TAG));
+        waitForElementNotPresent(By.cssSelector(
+                "vaadin-context-menu[opened], vaadin-context-menu[closing]"));
     }
 
 }

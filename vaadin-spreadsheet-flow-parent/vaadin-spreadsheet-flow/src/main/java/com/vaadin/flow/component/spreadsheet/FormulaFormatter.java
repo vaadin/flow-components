@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet;
@@ -191,12 +191,12 @@ public class FormulaFormatter implements Serializable {
             Locale locale) {
         List<FormulaToken> unlocalizedTokens = new LinkedList<FormulaToken>();
 
+        var decimalFormat = getDecimalFormat(locale);
         for (FormulaToken token : tokens) {
             if (token instanceof NumberToken) {
                 try {
-                    unlocalizedTokens
-                            .add(new NumberToken(getDecimalFormat(locale)
-                                    .parse(token.toString()).toString()));
+                    unlocalizedTokens.add(new NumberToken(
+                            decimalFormat.parse(token.toString()).toString()));
                 } catch (ParseException e) {
                     LOGGER.info("ERROR parsing token: " + token, e);
                     unlocalizedTokens.add(token);
@@ -280,6 +280,7 @@ public class FormulaFormatter implements Serializable {
         DecimalFormat instance = (DecimalFormat) DecimalFormat
                 .getInstance(locale);
         instance.setGroupingUsed(false);
+        instance.setMaximumFractionDigits(16);
         return instance;
     }
 

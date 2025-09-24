@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -14,6 +14,8 @@
  * the License.
  */
 package com.vaadin.flow.component.notification.tests;
+
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -54,7 +56,7 @@ public class NotificationWithClassNamesIT extends AbstractComponentIT {
         waitForElementPresent(By.tagName(NOTIFICATION_CARD));
 
         NotificationElement notification = $(NotificationElement.class).first();
-        assertClassAttribute(notification, "custom");
+        assertClassAttribute(notification, Set.of("custom"));
     }
 
     @Test
@@ -65,7 +67,7 @@ public class NotificationWithClassNamesIT extends AbstractComponentIT {
         addClassName.click();
 
         NotificationElement notification = $(NotificationElement.class).first();
-        assertClassAttribute(notification, "custom added");
+        assertClassAttribute(notification, Set.of("custom", "added"));
     }
 
     @Test
@@ -77,7 +79,7 @@ public class NotificationWithClassNamesIT extends AbstractComponentIT {
         clearClassNames.click();
 
         NotificationElement notification = $(NotificationElement.class).first();
-        assertClassAttribute(notification, "");
+        assertClassAttribute(notification, Set.of());
     }
 
     @Test
@@ -95,7 +97,7 @@ public class NotificationWithClassNamesIT extends AbstractComponentIT {
         waitForElementPresent(By.tagName(NOTIFICATION_CARD));
 
         NotificationElement notification = $(NotificationElement.class).first();
-        assertClassAttribute(notification, "added");
+        assertClassAttribute(notification, Set.of("added"));
     }
 
     @Test
@@ -112,20 +114,18 @@ public class NotificationWithClassNamesIT extends AbstractComponentIT {
         addClassName.click();
 
         NotificationElement notification = $(NotificationElement.class).first();
-        assertClassAttribute(notification, "custom added");
+        assertClassAttribute(notification, Set.of("custom", "added"));
 
         NotificationElement otherNotification = $(NotificationElement.class)
                 .get(1);
-        assertClassAttribute(otherNotification, "other");
+        assertClassAttribute(otherNotification, Set.of("other"));
     }
 
     private void assertClassAttribute(TestBenchElement notification,
-            String expected) {
-        String className = notification.getAttribute("class");
-        Assert.assertEquals(expected, className);
+            Set<String> expected) {
+        Assert.assertEquals(expected, notification.getClassNames());
 
         TestBenchElement card = (TestBenchElement) notification.getContext();
-        String cardClassName = card.getAttribute("class");
-        Assert.assertEquals(expected, cardClassName);
+        Assert.assertEquals(expected, card.getClassNames());
     }
 }

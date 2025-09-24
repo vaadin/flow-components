@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,23 +20,26 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.grid.dataview.GridListDataView;
-import com.vaadin.flow.data.provider.*;
-import com.vaadin.flow.dom.Element;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
+import com.vaadin.flow.data.provider.*;
+import com.vaadin.flow.data.selection.SelectionListener;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.tests.dataprovider.MockUI;
 
 public class AbstractGridMultiSelectionModelTest {
 
     private Set<String> selected;
     private Set<String> deselected;
     private Grid<String> grid;
-    private DataCommunicatorTest.MockUI ui;
+    private MockUI ui;
 
     @Before
     public void setup() {
@@ -60,7 +63,7 @@ public class AbstractGridMultiSelectionModelTest {
             }
         };
 
-        ui = new DataCommunicatorTest.MockUI();
+        ui = new MockUI();
         ui.add(grid);
     }
 
@@ -470,6 +473,248 @@ public class AbstractGridMultiSelectionModelTest {
                 dataView.getItems().count(), grid.getSelectedItems().size());
         Assert.assertTrue("Selected items do not contain filtered item",
                 grid.getSelectedItems().contains(items.get(0)));
+    }
+
+    @Test
+    public void selectFromClient_withItemSelectableProvider_preventsSelection() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItemSelectableProvider(item -> !item.equals("foo"));
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        // prevents selection of non-selectable item
+        selectionModel.selectFromClient("foo");
+        Assert.assertEquals(Set.of(), grid.getSelectedItems());
+
+        // allows selection of selectable item
+        selectionModel.selectFromClient("bar");
+        Assert.assertEquals(Set.of("bar"), grid.getSelectedItems());
+    }
+
+    @Test
+    public void deselectFromClient_withItemSelectableProvider_preventsDeselection() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItemSelectableProvider(item -> !item.equals("foo"));
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        // prevents deselection of non-selectable item
+        selectionModel.select("foo");
+        selectionModel.deselectFromClient("foo");
+        Assert.assertEquals(Set.of("foo"), grid.getSelectedItems());
+
+        // allows deselection of selectable item
+        selectionModel.select("bar");
+        selectionModel.deselectFromClient("bar");
+        Assert.assertEquals(Set.of("foo"), grid.getSelectedItems());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void selectFromClient_clientItemToggleEventIsFired() {
+        grid.setItems("Item 0", "Item 1");
+        grid.setSelectionMode(SelectionMode.MULTI);
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        SelectionListener<Grid<String>, String> selectionListenerSpy = Mockito
+                .spy(SelectionListener.class);
+        selectionModel.addSelectionListener(selectionListenerSpy);
+
+        ComponentEventListener<ClientItemToggleEvent<String>> clientItemToggleListenerSpy = Mockito
+                .spy(ComponentEventListener.class);
+        selectionModel.addClientItemToggleListener(clientItemToggleListenerSpy);
+
+        selectionModel.selectFromClient("Item 0");
+
+        InOrder inOrder = Mockito.inOrder(selectionListenerSpy,
+                clientItemToggleListenerSpy);
+        inOrder.verify(selectionListenerSpy, Mockito.times(1))
+                .selectionChange(Mockito.any());
+        inOrder.verify(clientItemToggleListenerSpy, Mockito.times(1))
+                .onComponentEvent(Mockito.any());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void deselectFromClient_clientItemToggleEventIsFired() {
+        grid.setItems("Item 0", "Item 1");
+        grid.setSelectionMode(SelectionMode.MULTI);
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        selectionModel.selectFromClient("Item 0");
+
+        SelectionListener<Grid<String>, String> selectionListenerSpy = Mockito
+                .spy(SelectionListener.class);
+        selectionModel.addSelectionListener(selectionListenerSpy);
+
+        ComponentEventListener<ClientItemToggleEvent<String>> clientItemToggleListenerSpy = Mockito
+                .spy(ComponentEventListener.class);
+        selectionModel.addClientItemToggleListener(clientItemToggleListenerSpy);
+
+        selectionModel.deselectFromClient("Item 0");
+
+        InOrder inOrder = Mockito.inOrder(selectionListenerSpy,
+                clientItemToggleListenerSpy);
+        inOrder.verify(selectionListenerSpy, Mockito.times(1))
+                .selectionChange(Mockito.any());
+        inOrder.verify(clientItemToggleListenerSpy, Mockito.times(1))
+                .onComponentEvent(Mockito.any());
+    }
+
+    @Test
+    public void select_withItemSelectableProvider_allowsSelection() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItemSelectableProvider(item -> !item.equals("foo"));
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        // allows selection using select
+        selectionModel.select("foo");
+        Assert.assertEquals(Set.of("foo"), grid.getSelectedItems());
+
+        // allows selection using selectItems
+        selectionModel.deselectAll();
+        selectionModel.selectItems("foo", "bar");
+        Assert.assertEquals(Set.of("foo", "bar"), grid.getSelectedItems());
+
+        // allows selection using updateSelection
+        selectionModel.deselectAll();
+        selectionModel.updateSelection(Set.of("foo", "bar"), Set.of());
+        Assert.assertEquals(Set.of("foo", "bar"), grid.getSelectedItems());
+    }
+
+    @Test
+    public void deselect_withItemSelectableProvider_allowsDeselection() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItemSelectableProvider(item -> !item.equals("foo"));
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        // allows deselection using deselect
+        selectionModel.select("foo");
+        selectionModel.deselect("foo");
+        Assert.assertEquals(Set.of(), grid.getSelectedItems());
+
+        // allows deselection using deselectItems
+        selectionModel.selectItems("foo", "bar");
+        selectionModel.deselectItems("foo", "bar");
+        Assert.assertEquals(Set.of(), grid.getSelectedItems());
+
+        // allows deselection using updateSelection
+        selectionModel.updateSelection(Set.of("foo", "bar"), Set.of());
+        selectionModel.updateSelection(Set.of(), Set.of("foo", "bar"));
+        Assert.assertEquals(Set.of(), grid.getSelectedItems());
+    }
+
+    @Test
+    public void selectAll_withItemSelectableProvider_works() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItemSelectableProvider(item -> true);
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        selectionModel.selectAll();
+
+        Assert.assertEquals(2, selectionModel.getSelectedItems().size());
+    }
+
+    @Test
+    public void deselectAll_withItemSelectableProvider_works() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItemSelectableProvider(item -> true);
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        selectionModel.selectAll();
+        selectionModel.deselectAll();
+
+        Assert.assertEquals(0, selectionModel.getSelectedItems().size());
+    }
+
+    @Test
+    public void clientSelectAll_withItemSelectableProvider_ignored() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItemSelectableProvider(item -> true);
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+
+        selectionModel.clientSelectAll();
+
+        Assert.assertEquals(0, selectionModel.getSelectedItems().size());
+    }
+
+    @Test
+    public void clientDeselectAll_withItemSelectableProvider_ignored() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        grid.setItemSelectableProvider(item -> true);
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+        selectionModel.selectAll();
+
+        selectionModel.clientSelectAll();
+
+        Assert.assertEquals(2, selectionModel.getSelectedItems().size());
+    }
+
+    @Test
+    public void setItemSelectableProvider_updatesSelectAllVisibility() {
+        grid.setSelectionMode(SelectionMode.MULTI);
+
+        AbstractGridMultiSelectionModel<String> selectionModel = (AbstractGridMultiSelectionModel<String>) grid
+                .getSelectionModel();
+        GridSelectionColumn selectionColumn = selectionModel
+                .getSelectionColumn();
+
+        // Visible initially
+        Assert.assertFalse(selectionColumn.getElement()
+                .getProperty("_selectAllHidden", false));
+
+        // Set provider, should hide select all checkbox
+        grid.setItemSelectableProvider(item -> false);
+        Assert.assertTrue(selectionColumn.getElement()
+                .getProperty("_selectAllHidden", false));
+
+        // Try to explicitly make the checkbox visible, should still be hidden
+        selectionModel.setSelectAllCheckboxVisibility(
+                GridMultiSelectionModel.SelectAllCheckboxVisibility.VISIBLE);
+        Assert.assertTrue(selectionColumn.getElement()
+                .getProperty("_selectAllHidden", false));
+
+        // Remove provider, should show select all checkbox
+        grid.setItemSelectableProvider(null);
+        Assert.assertFalse(selectionColumn.getElement()
+                .getProperty("_selectAllHidden", false));
+    }
+
+    @Test
+    public void setMultiSelect_removeGrid_setSingleSelect_addGrid_selectionColumnRemoved() {
+        grid.setItems("foo", "bar");
+        grid.setSelectionMode(SelectionMode.MULTI);
+        ui.remove(grid);
+        grid.setSelectionMode(SelectionMode.SINGLE);
+        ui.add(grid);
+        Assert.assertThrows(IllegalStateException.class,
+                () -> getGridSelectionColumn(grid));
     }
 
     private void verifySelectAllCheckboxVisibilityInMultiSelectMode(

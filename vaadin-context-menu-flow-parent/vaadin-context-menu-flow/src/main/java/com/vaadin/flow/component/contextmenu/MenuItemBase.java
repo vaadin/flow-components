@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,20 +15,19 @@
  */
 package com.vaadin.flow.component.contextmenu;
 
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dependency.NpmPackage;
-
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.vaadin.flow.component.shared.internal.DisableOnClickController;
 
 /**
  * Base class for item component used inside {@link ContextMenu}s.
@@ -44,8 +43,6 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("serial")
 @Tag("vaadin-context-menu-item")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends MenuItemBase<C, I, S>, S extends SubMenuBase<C, I, S>>
         extends Component
         implements HasAriaLabel, HasComponents, HasEnabled, HasText {
@@ -58,6 +55,9 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
     private boolean checkable = false;
 
     private Set<String> themeNames = new LinkedHashSet<>();
+
+    private final DisableOnClickController<MenuItemBase<C, I, S>> disableOnClickController = new DisableOnClickController<>(
+            this);
 
     /**
      * Default constructor
@@ -215,6 +215,35 @@ public abstract class MenuItemBase<C extends ContextMenuBase<C, I, S>, I extends
      */
     public boolean isKeepOpen() {
         return getElement().getProperty("_keepOpen", false);
+    }
+
+    /**
+     * Sets whether the item should be disabled when clicked.
+     * <p>
+     * When set to {@code true}, the item will be immediately disabled on the
+     * client-side when clicked, preventing further clicks until re-enabled from
+     * the server-side.
+     *
+     * @param disableOnClick
+     *            whether the item should be disabled when clicked
+     */
+    public void setDisableOnClick(boolean disableOnClick) {
+        disableOnClickController.setDisableOnClick(disableOnClick);
+    }
+
+    /**
+     * Gets whether the item is set to be disabled when clicked.
+     *
+     * @return whether the item is set to be disabled on click
+     */
+    public boolean isDisableOnClick() {
+        return disableOnClickController.isDisableOnClick();
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        HasComponents.super.setEnabled(enabled);
+        disableOnClickController.onSetEnabled(enabled);
     }
 
     /**

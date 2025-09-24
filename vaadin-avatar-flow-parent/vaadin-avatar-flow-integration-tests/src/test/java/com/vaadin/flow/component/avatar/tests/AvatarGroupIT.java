@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,12 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.avatar.tests;
-
-import com.vaadin.flow.component.avatar.testbench.AvatarGroupElement;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,7 +21,9 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import static org.hamcrest.CoreMatchers.startsWith;
+import com.vaadin.flow.component.avatar.testbench.AvatarGroupElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
 /**
  * Integration tests for the {@link AvatarGroupPage}.
@@ -59,12 +56,36 @@ public class AvatarGroupIT extends AbstractComponentIT {
         clickElementWithJs("set-items-with-resource");
         String imageUrl = $(AvatarGroupElement.class).first()
                 .getAvatarElement(0).getPropertyString("img");
-        Assert.assertThat(imageUrl, startsWith("VAADIN/dynamic"));
+        Assert.assertTrue("Image URL should start with 'VAADIN/dynamic'",
+                imageUrl.startsWith("VAADIN/dynamic"));
         checkLogsForErrors(); // would fail if the image wasn't hosted
+    }
+
+    @Test
+    public void avatarGroupAttached_setItemsWithDownloadHandler_imageLoaded() {
+        clickElementWithJs("set-items-with-download-resource");
+        String imageUrl = $(AvatarGroupElement.class).first()
+                .getAvatarElement(0).getPropertyString("img");
+        Assert.assertTrue(imageUrl.startsWith("VAADIN/dynamic"));
+        checkLogsForErrors(); // would fail if the image wasn't hosted
+    }
+
+    @Test
+    public void addClassNames_removeClassNames_avatarsUpdated() {
+        findElement(By.id("add-class-names")).click();
+        Assert.assertEquals("red", getAvatarClassName(0));
+
+        findElement(By.id("remove-class-names")).click();
+        Assert.assertNull(getAvatarClassName(0));
     }
 
     private String getAvatarAbbr(int index) {
         return $(AvatarGroupElement.class).waitForFirst()
                 .getAvatarElement(index).getAbbr();
+    }
+
+    private String getAvatarClassName(int index) {
+        return $(AvatarGroupElement.class).waitForFirst()
+                .getAvatarElement(index).getDomAttribute("class");
     }
 }

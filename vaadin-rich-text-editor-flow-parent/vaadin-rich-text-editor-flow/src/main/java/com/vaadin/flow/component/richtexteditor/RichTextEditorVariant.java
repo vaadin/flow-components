@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.richtexteditor;
@@ -15,11 +15,7 @@ import com.vaadin.flow.component.shared.ThemeVariant;
  * component.
  */
 public enum RichTextEditorVariant implements ThemeVariant {
-    //@formatter:off
-    LUMO_NO_BORDER("no-border"),
-    LUMO_COMPACT("compact"),
-    MATERIAL_NO_BORDER("no-border");
-    //@formatter:on
+    LUMO_NO_BORDER("no-border"), LUMO_COMPACT("compact");
 
     private final String variant;
 

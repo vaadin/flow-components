@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,13 +18,14 @@ package com.vaadin.flow.component.shared.internal;
 import java.io.Serializable;
 import java.util.AbstractSet;
 import java.util.Iterator;
+
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.dom.ClassList;
 
 /**
  * Internal class that provides shared functionality for setting CSS class names
  * to overlay only components that support {@link HasStyle}, such as
- * {@link Dialog}. Not intended to be used publicly.
+ * {@code Dialog}. Not intended to be used publicly.
  */
 public class OverlayClassListProxy extends AbstractSet<String>
         implements ClassList {

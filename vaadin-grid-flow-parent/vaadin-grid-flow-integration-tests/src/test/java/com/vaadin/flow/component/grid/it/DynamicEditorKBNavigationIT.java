@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.tests.AbstractComponentIT;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -29,6 +28,7 @@ import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/dynamic-editor-keyboard")
 public class DynamicEditorKBNavigationIT extends AbstractComponentIT {
@@ -79,7 +79,7 @@ public class DynamicEditorKBNavigationIT extends AbstractComponentIT {
 
         TestBenchElement emailField = emailCell.$("vaadin-text-field").first();
         String isReadonly = emailField.$("input").first()
-                .getAttribute("readonly");
+                .getDomAttribute("readonly");
 
         Assert.assertEquals(Boolean.TRUE.toString(), isReadonly);
 
@@ -90,9 +90,9 @@ public class DynamicEditorKBNavigationIT extends AbstractComponentIT {
         new Actions(getDriver()).sendKeys(Keys.BACK_SPACE).build().perform();
 
         emailField = emailCell.$("vaadin-text-field").first();
-        Assert.assertNotNull(emailField.getAttribute("focused"));
+        Assert.assertNotNull(emailField.getDomAttribute("focused"));
         Assert.assertEquals("Not a subscriber",
-                emailField.getAttribute("value"));
+                emailField.getDomProperty("value"));
 
         // Change the subscriber status back
         checkbox = subscriberCell.$("vaadin-checkbox").first();

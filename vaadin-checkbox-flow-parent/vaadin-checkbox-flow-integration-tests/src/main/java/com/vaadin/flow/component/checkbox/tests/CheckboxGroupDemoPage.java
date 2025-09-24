@@ -1,12 +1,25 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.checkbox.tests;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
-import com.vaadin.flow.component.checkbox.CheckboxGroupVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
@@ -62,7 +75,6 @@ public class CheckboxGroupDemoPage extends Div {
         addDisabled();
         addDisabledItems();
         addReadOnlyGroup();
-        addComponentWithThemeVariant();
         addHelperCheckboxGroup();
         addItemIconRenderer();
     }
@@ -144,19 +156,6 @@ public class CheckboxGroupDemoPage extends Div {
         button.setId("switch-read-only");
 
         addCard("Read-only checkbox group", group, button, valueInfo);
-    }
-
-    private void addComponentWithThemeVariant() {
-        CheckboxGroup<String> group = new CheckboxGroup<>();
-        group.setItems("foo", "bar", "baz");
-        group.setId("checkbox-group-theme-variants");
-        group.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
-
-        Button removeVariantButton = new Button("Remove theme variant", e -> {
-            group.removeThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
-        });
-        removeVariantButton.setId("remove-theme-variant-button");
-        addCard("Button theme variants", group, removeVariantButton);
     }
 
     private void addHelperCheckboxGroup() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -67,7 +67,7 @@ public class MenuManagerTest {
         manager = new MenuManager<ContextMenu, MenuItem, SubMenu>(menu, reset,
                 factory, MenuItem.class, parent) {
             @Override
-            public void add(Component... components) {
+            public void addComponent(Component... components) {
                 Stream.of(components).forEach(addedComponents::add);
             }
         };
@@ -164,7 +164,7 @@ public class MenuManagerTest {
         manager = new MenuManager<ContextMenu, MenuItem, SubMenu>(menu, reset,
                 factory, MenuItem.class, parent);
 
-        manager.add(component1, component2);
+        manager.addComponent(component1, component2);
 
         List<Component> children = manager.getChildren()
                 .collect(Collectors.toList());
@@ -182,7 +182,7 @@ public class MenuManagerTest {
         manager = new MenuManager<ContextMenu, MenuItem, SubMenu>(menu, reset,
                 factory, MenuItem.class, parent);
 
-        manager.add(Mockito.mock(Component.class));
+        manager.addComponent(Mockito.mock(Component.class));
     }
 
     @Test
@@ -193,7 +193,7 @@ public class MenuManagerTest {
         manager = new MenuManager<ContextMenu, MenuItem, SubMenu>(menu, reset,
                 factory, MenuItem.class, parent);
 
-        manager.add(component1, component2);
+        manager.addComponent(component1, component2);
 
         manager.remove(component1, component2);
 
@@ -224,7 +224,7 @@ public class MenuManagerTest {
         manager = new MenuManager<ContextMenu, MenuItem, SubMenu>(menu, reset,
                 factory, MenuItem.class, parent);
 
-        manager.add(component1, component2);
+        manager.addComponent(component1, component2);
 
         manager.removeAll();
 
@@ -246,7 +246,7 @@ public class MenuManagerTest {
         manager = new MenuManager<ContextMenu, MenuItem, SubMenu>(menu, reset,
                 factory, MenuItem.class, parent);
 
-        manager.add(component1, component2);
+        manager.addComponent(component1, component2);
         manager.addComponentAtIndex(1, component3);
 
         List<Component> children = manager.getChildren()
@@ -291,7 +291,7 @@ public class MenuManagerTest {
         Mockito.when(factory.apply(menu, reset)).thenReturn(item);
 
         manager.addItem("foo");
-        manager.add(component);
+        manager.addComponent(component);
         manager.addItem("bar");
 
         Assert.assertEquals(2, manager.getItems().size());

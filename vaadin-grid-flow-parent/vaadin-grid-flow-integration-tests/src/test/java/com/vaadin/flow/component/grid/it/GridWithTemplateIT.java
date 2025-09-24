@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,9 +23,9 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
 
 @TestPath("vaadin-grid/grid-template-test")
 public class GridWithTemplateIT extends AbstractComponentIT {
@@ -161,19 +161,19 @@ public class GridWithTemplateIT extends AbstractComponentIT {
 
         Assert.assertEquals(
                 "The flexGrow property should be 2 on the first column", "2",
-                columns.get(0).getAttribute("flexGrow"));
+                columns.get(0).getDomProperty("flexGrow"));
         Assert.assertEquals(
                 "The flexGrow property should be 0 on the second column", "0",
-                columns.get(1).getAttribute("flexGrow"));
+                columns.get(1).getDomProperty("flexGrow"));
         Assert.assertEquals(
                 "The width property should be 20px on the second column",
-                "20px", columns.get(1).getAttribute("width"));
+                "20px", columns.get(1).getDomProperty("width"));
         Assert.assertEquals(
                 "The frozen property should be true on the third column",
-                "true", columns.get(2).getAttribute("frozen"));
+                "true", columns.get(2).getDomProperty("frozen"));
         Assert.assertEquals(
                 "The resizable property should be true on the third column",
-                "true", columns.get(2).getAttribute("resizable"));
+                "true", columns.get(2).getDomProperty("resizable"));
     }
 
     private void clickOnTheButtonInsideTheTestTemplate(TestBenchElement grid,
@@ -189,17 +189,16 @@ public class GridWithTemplateIT extends AbstractComponentIT {
             clickElementWithJs(btn);
 
             int size = i + 1;
-            WebElement label = container.findElement(By.id("label-" + size));
-            Assert.assertEquals("Label " + size, label.getText());
+            WebElement span = container.findElement(By.id("text-" + size));
+            Assert.assertEquals("Text " + size, span.getText());
         }
     }
 
     private TestBenchElement findTestTemplateElement(TestBenchElement grid,
             String id) {
         TestBenchElement list = grid.$("*").id(id);
-        Assert.assertNotNull(
-                "Could not find the <test-template> of id '" + id
-                        + "' inside the grid '" + grid.getAttribute("id") + "'",
+        Assert.assertNotNull("Could not find the <test-template> of id '" + id
+                + "' inside the grid '" + grid.getDomAttribute("id") + "'",
                 list);
         return list;
     }

@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
@@ -82,7 +82,7 @@ public class RangeSeries extends DataSeries {
     /**
      * Sets the numeric data for this series.
      *
-     * @param values
+     * @param data
      *            low-high pairs, or x-low-high triplets
      */
     public void setRangeData(Number[]... data) {

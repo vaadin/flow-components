@@ -1,27 +1,35 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.gridpro.tests;
 
-import com.vaadin.flow.component.gridpro.testbench.GridProElement;
-import com.vaadin.flow.component.gridpro.testbench.GridTHTDElement;
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractParallelTest;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.Keys;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.vaadin.flow.component.gridpro.testbench.GridProElement;
+import com.vaadin.flow.component.gridpro.testbench.GridTHTDElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class BasicIT extends AbstractParallelTest {
+@TestPath("vaadin-grid-pro")
+public class BasicIT extends AbstractComponentIT {
 
     private GridProElement grid, beanGrid;
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-grid-pro");
-        getDriver().get(url);
+        open();
         grid = $(GridProElement.class).waitForFirst();
         beanGrid = $(GridProElement.class).get(1);
     }
@@ -72,7 +80,7 @@ public class BasicIT extends AbstractParallelTest {
                 .$("vaadin-grid-pro-edit-text-field").first();
 
         textField.setProperty("value", "Person 999");
-        textField.dispatchEvent("focusout");
+        executeScript("arguments[0].blur();", textField);
         sorter.click();
         sorter.click();
         Assert.assertEquals("Person 999", bodyCell.getInnerHTML());
@@ -94,7 +102,7 @@ public class BasicIT extends AbstractParallelTest {
         TestBenchElement checkbox = cell.$("vaadin-grid-pro-edit-checkbox")
                 .first();
         checkbox.click();
-        checkbox.dispatchEvent("focusout");
+        executeScript("arguments[0].blur();", checkbox);
 
         waitUntil(driver -> cell.$("span").exists());
         Assert.assertEquals("Yes", cell.$("span").first().getText());
@@ -118,13 +126,68 @@ public class BasicIT extends AbstractParallelTest {
             return comboItems.size() > 0;
         });
         comboBox.setProperty("value", "2");
-        comboBox.dispatchEvent("focusout");
+        executeScript("arguments[0].blur();", comboBox);
 
         waitUntil(driver -> cell.$("span").exists());
         Assert.assertEquals("City 2", cell.$("span").first().getText());
 
         Assert.assertEquals("City{id=2, name='City 2', person='Person 1'}",
                 getPanelText("prop-panel"));
+    }
+
+    private String LOADING_EDITOR_ATTRIBUTE = "loading-editor";
+
+    @Test
+    public void customComboBox_loadingEditorStateOnEdit() {
+        var cell = grid.getCell(0, 4);
+
+        var hasLoadingStateOnEditStart = (Boolean) executeScript(
+                """
+                            const [cell, grid, attribute] = arguments;
+
+                            // Enter edit mode with double click
+                            cell.dispatchEvent(new CustomEvent('dblclick', {composed: true, bubbles: true}));
+
+                            return grid.hasAttribute(attribute);
+                        """,
+                cell, grid, LOADING_EDITOR_ATTRIBUTE);
+        // Expect the editor to be hidden when the edit starts
+        Assert.assertTrue(hasLoadingStateOnEditStart);
+
+        // After the round trip to the server...
+        var editor = cell.$("vaadin-combo-box").first();
+        // The editor should be visible
+        Assert.assertFalse(grid.hasAttribute(LOADING_EDITOR_ATTRIBUTE));
+        // The editor should have focus
+        Assert.assertTrue("Editor should have focus",
+                (Boolean) executeScript(
+                        "return arguments[0].contains(document.activeElement)",
+                        editor));
+    }
+
+    @Test
+    public void customComboBox_loadingEditorStateClearedOnEditStop() {
+        var cell = grid.getCell(0, 4);
+        var nonCustomEditorCell = grid.getCell(0, 1);
+
+        var hasLoadingStateAttribute = (Boolean) executeScript(
+                """
+                            const [cell, nonCustomEditorCell, grid, attribute] = arguments;
+
+                            // Enter edit mode with double click
+                            cell.dispatchEvent(new CustomEvent('dblclick', {composed: true, bubbles: true}));
+                            await new Promise(resolve => requestAnimationFrame(resolve));
+
+                            // Focus another cell
+                            nonCustomEditorCell.focus();
+                            await new Promise(resolve => requestAnimationFrame(resolve));
+
+                            return grid.hasAttribute(attribute);
+
+                        """,
+                cell, nonCustomEditorCell, grid, LOADING_EDITOR_ATTRIBUTE);
+
+        Assert.assertFalse(hasLoadingStateAttribute);
     }
 
     @Test
@@ -136,10 +199,39 @@ public class BasicIT extends AbstractParallelTest {
     @Test
     public void cellEditStartedListenerCalledOnce() {
         assertCellEnterEditModeOnDoubleClick(0, 2, "vaadin-combo-box");
-        Assert.assertEquals("Person{id=1, age=23, name='Person 1', "
-                + "isSubscriber=false, email='person1@vaadin.com', "
-                + "department=sales, city='City 1', employmentYear=2019}",
-                getPanelText("events" + "-panel"));
+        String eventsPanelText = getPanelText("events-panel");
+        Assert.assertEquals(1,
+                eventsPanelText.split("CellEditStarted").length - 1);
+        Assert.assertTrue(eventsPanelText
+                .contains("Person{id=1, age=23, name='Person 1', "
+                        + "isSubscriber=false, email='person1@vaadin.com', "
+                        + "department=sales, city='City 1', employmentYear=2019}"));
+    }
+
+    @Test
+    public void itemClickListenerListenerCalledOnce() {
+        GridTHTDElement cell = grid.getCell(0, 1);
+        cell.click(10, 10);
+
+        String eventsPanelText = getPanelText("events-panel");
+        Assert.assertEquals(1, eventsPanelText.split("ItemClicked").length - 1);
+        Assert.assertTrue(eventsPanelText
+                .contains("Person{id=1, age=23, name='Person 1', "
+                        + "isSubscriber=false, email='person1@vaadin.com', "
+                        + "department=sales, city='City 1', employmentYear=2019}"));
+    }
+
+    @Test
+    public void columnUsesFocusButtonMode_itemClickListenerListenerCalledOnce() {
+        GridTHTDElement cell = grid.getCell(0, 2);
+        cell.click(10, 10);
+
+        String eventsPanelText = getPanelText("events-panel");
+        Assert.assertEquals(1, eventsPanelText.split("ItemClicked").length - 1);
+        Assert.assertTrue(eventsPanelText
+                .contains("Person{id=1, age=23, name='Person 1', "
+                        + "isSubscriber=false, email='person1@vaadin.com', "
+                        + "department=sales, city='City 1', employmentYear=2019}"));
     }
 
     @Test
@@ -276,6 +368,36 @@ public class BasicIT extends AbstractParallelTest {
         selectedText = (String) getCommandExecutor()
                 .executeScript("return document.getSelection().toString()");
         Assert.assertEquals("2019", selectedText);
+    }
+
+    @Test
+    public void customField_startEditing_doNotChangeValue_itemPropertyChangeListenerNotCalled() {
+        GridTHTDElement cell = grid.getCell(0, 6);
+        assertCellEnterEditModeOnDoubleClick(0, 6, "vaadin-text-field", grid,
+                true);
+
+        TestBenchElement input = cell.$("input").first();
+        input.sendKeys(Keys.ENTER);
+
+        Assert.assertFalse(
+                getPanelText("events-panel").contains("ItemPropertyChanged"));
+    }
+
+    @Test
+    public void columnWithManualRefresh_updateProperty_propertyUpdatedCorrectly() {
+        Assert.assertEquals("Person 1", grid.getCell(0, 1).getInnerHTML());
+
+        assertCellEnterEditModeOnDoubleClick(0, 1,
+                "vaadin-grid-pro-edit-text-field");
+
+        var textField = grid.getCell(0, 1).$("vaadin-grid-pro-edit-text-field")
+                .first();
+
+        textField.setProperty("value", "Updated Person 1");
+        textField.sendKeys(Keys.ENTER);
+
+        Assert.assertEquals("Updated Person 1",
+                grid.getCell(0, 1).getInnerHTML());
     }
 
     private void assertCellEnterEditModeOnDoubleClick(Integer rowIndex,

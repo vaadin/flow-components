@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,30 +15,31 @@
  */
 package com.vaadin.flow.component.combobox;
 
-import com.vaadin.flow.component.Focusable;
-import com.vaadin.flow.component.HasAriaLabel;
-import com.vaadin.flow.component.HasLabel;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
-import com.vaadin.flow.component.shared.HasAllowedCharPattern;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
-import com.vaadin.flow.component.shared.HasTooltip;
-import com.vaadin.flow.data.provider.AbstractDataProvider;
-import com.vaadin.flow.data.provider.DataCommunicator;
-import com.vaadin.flow.data.provider.DataCommunicatorTest;
-import com.vaadin.flow.data.provider.DataProvider;
-import com.vaadin.flow.data.provider.ListDataProvider;
-import com.vaadin.flow.data.provider.Query;
-import com.vaadin.flow.shared.Registration;
-import com.vaadin.tests.DataProviderListenersTest;
-import elemental.json.Json;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Stream;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.stream.Stream;
+import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.HasAriaLabel;
+import com.vaadin.flow.component.HasLabel;
+import com.vaadin.flow.component.HasPlaceholder;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.combobox.dataview.ComboBoxListDataView;
+import com.vaadin.flow.component.shared.HasAllowedCharPattern;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.data.provider.AbstractDataProvider;
+import com.vaadin.flow.data.provider.DataCommunicator;
+import com.vaadin.flow.data.provider.DataProvider;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.internal.JacksonUtils;
+import com.vaadin.flow.shared.Registration;
+import com.vaadin.tests.dataprovider.DataProviderListenersTest;
+import com.vaadin.tests.dataprovider.MockUI;
 
 /**
  * Suite of basic tests that apply to both, ComboBox and MultiSelectComboBox
@@ -79,16 +80,16 @@ public abstract class ComboBoxBaseTest {
     }
 
     @Test
-    public void implementsHasOverlayClassName() {
-        Assert.assertTrue("ComboBox should support overlay class name",
-                HasOverlayClassName.class.isAssignableFrom(
+    public void implementsHasTooltip() {
+        Assert.assertTrue("ComboBox should support setting a tooltip",
+                HasTooltip.class.isAssignableFrom(
                         createComboBox(String.class).getClass()));
     }
 
     @Test
-    public void implementsHasTooltip() {
-        Assert.assertTrue("ComboBox should support setting a tooltip",
-                HasTooltip.class.isAssignableFrom(
+    public void implementsHasPlaceholder() {
+        Assert.assertTrue("ComboBox should support setting a placeholder",
+                HasPlaceholder.class.isAssignableFrom(
                         createComboBox(String.class).getClass()));
     }
 
@@ -242,7 +243,8 @@ public abstract class ComboBoxBaseTest {
         comboBox.setItemLabelGenerator(obj -> null);
         comboBox.setItems(Arrays.asList("foo", "bar"));
 
-        comboBox.getDataGenerator().generateData("foo", Json.createObject());
+        comboBox.getDataGenerator().generateData("foo",
+                JacksonUtils.createObjectNode());
     }
 
     @Test
@@ -261,7 +263,7 @@ public abstract class ComboBoxBaseTest {
     @Test
     public void setDataProvider_inMemoryDataProvider_fetchesEagerly() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
-        DataCommunicatorTest.MockUI ui = new DataCommunicatorTest.MockUI();
+        MockUI ui = new MockUI();
         ui.add(comboBox);
 
         DataProvider<String, String> dataProvider = Mockito
@@ -298,7 +300,7 @@ public abstract class ComboBoxBaseTest {
     @Test
     public void setDataProvider_backendDataProvider_fetchesOnOpened() {
         ComboBoxBase<?, String, ?> comboBox = createComboBox(String.class);
-        DataCommunicatorTest.MockUI ui = new DataCommunicatorTest.MockUI();
+        MockUI ui = new MockUI();
         ui.add(comboBox);
 
         DataProvider<String, String> dataProvider = Mockito.spy(DataProvider
@@ -339,7 +341,7 @@ public abstract class ComboBoxBaseTest {
         DataProviderListenersTest
                 .checkOldListenersRemovedOnComponentAttachAndDetach(
                         createComboBox(Object.class), 2, 2, new int[] { 1, 3 },
-                        new DataCommunicatorTest.MockUI());
+                        new MockUI());
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -26,9 +26,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
+import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public class BeanGridSortingTest {
 
@@ -265,15 +266,15 @@ public class BeanGridSortingTest {
 
     private void callSortersChanged(String columnId, String direction) {
         try {
-            JsonObject json = Json.createObject();
+            ObjectNode json = JacksonUtils.createObjectNode();
             json.put("path", grid.getColumnByKey(columnId).getInternalId());
             json.put("direction", direction);
 
-            JsonArray array = Json.createArray();
-            array.set(0, json);
+            ArrayNode array = JacksonUtils.createArrayNode();
+            array.add(json);
 
             Method method = Grid.class.getDeclaredMethod("sortersChanged",
-                    JsonArray.class);
+                    ArrayNode.class);
             method.setAccessible(true);
             method.invoke(grid, array);
         } catch (NoSuchMethodException | SecurityException

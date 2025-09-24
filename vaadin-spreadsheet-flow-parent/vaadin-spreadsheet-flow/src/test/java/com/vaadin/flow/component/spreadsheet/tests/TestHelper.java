@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests;
 
 import java.io.File;
@@ -7,8 +15,9 @@ import java.net.URISyntaxException;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.Spreadsheet.SpreadsheetEvent;
+import com.vaadin.flow.internal.JacksonUtils;
 
-import elemental.json.impl.JsonUtil;
+import tools.jackson.core.JacksonException;
 
 public class TestHelper {
 
@@ -25,8 +34,13 @@ public class TestHelper {
      */
     public static void fireClientEvent(Spreadsheet spreadsheet,
             String eventName, String jsonDataArray) {
-        ComponentUtil.fireEvent(spreadsheet, new SpreadsheetEvent(spreadsheet,
-                true, eventName, JsonUtil.parse(jsonDataArray)));
+        try {
+            ComponentUtil.fireEvent(spreadsheet,
+                    new SpreadsheetEvent(spreadsheet, true, eventName,
+                            JacksonUtils.getMapper().readTree(jsonDataArray)));
+        } catch (JacksonException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

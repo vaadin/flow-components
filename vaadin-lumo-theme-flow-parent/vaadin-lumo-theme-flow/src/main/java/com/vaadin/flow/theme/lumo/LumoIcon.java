@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,10 +15,12 @@
  */
 package com.vaadin.flow.theme.lumo;
 
+import java.util.Locale;
+
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.IconFactory;
-
-import java.util.Locale;
 
 /**
  * Enumeration of all icons in the
@@ -33,9 +35,52 @@ import java.util.Locale;
  *
  * @author Vaadin Ltd
  */
+@NpmPackage(value = "@vaadin/vaadin-lumo-styles", version = "25.0.0-alpha19")
+@JsModule("@vaadin/vaadin-lumo-styles/vaadin-iconset.js")
 public enum LumoIcon implements IconFactory {
 
-    ALIGN_CENTER, ALIGN_LEFT, ALIGN_RIGHT, ANGLE_DOWN, ANGLE_LEFT, ANGLE_RIGHT, ANGLE_UP, ARROW_DOWN, ARROW_LEFT, ARROW_RIGHT, ARROW_UP, BAR_CHART, BELL, CALENDAR, CHECKMARK, CHEVRON_DOWN, CHEVRON_LEFT, CHEVRON_RIGHT, CHEVRON_UP, CLOCK, COG, CROSS, DOWNLOAD, DROPDOWN, EDIT, ERROR, EYE, EYE_DISABLED, MENU, MINUS, ORDERED_LIST, PHONE, PHOTO, PLAY, PLUS, REDO, RELOAD, SEARCH, UNDO, UNORDERED_LIST, UPLOAD, USER;
+    ALIGN_CENTER,
+    ALIGN_LEFT,
+    ALIGN_RIGHT,
+    ANGLE_DOWN,
+    ANGLE_LEFT,
+    ANGLE_RIGHT,
+    ANGLE_UP,
+    ARROW_DOWN,
+    ARROW_LEFT,
+    ARROW_RIGHT,
+    ARROW_UP,
+    BAR_CHART,
+    BELL,
+    CALENDAR,
+    CHECKMARK,
+    CHEVRON_DOWN,
+    CHEVRON_LEFT,
+    CHEVRON_RIGHT,
+    CHEVRON_UP,
+    CLOCK,
+    COG,
+    CROSS,
+    DOWNLOAD,
+    DROPDOWN,
+    EDIT,
+    ERROR,
+    EYE,
+    EYE_DISABLED,
+    MENU,
+    MINUS,
+    ORDERED_LIST,
+    PHONE,
+    PHOTO,
+    PLAY,
+    PLUS,
+    REDO,
+    RELOAD,
+    SEARCH,
+    UNDO,
+    UNORDERED_LIST,
+    UPLOAD,
+    USER;
 
     /**
      * Creates a new {@link Icon} instance with the icon determined by the name

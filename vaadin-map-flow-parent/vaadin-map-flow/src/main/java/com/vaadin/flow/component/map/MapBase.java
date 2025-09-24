@@ -1,12 +1,17 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.map;
+
+import java.beans.PropertyChangeEvent;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
 
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
@@ -20,20 +25,16 @@ import com.vaadin.flow.component.map.configuration.Extent;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.View;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
-import com.vaadin.flow.component.map.events.MapFeatureClickEvent;
 import com.vaadin.flow.component.map.events.MapClickEvent;
+import com.vaadin.flow.component.map.events.MapFeatureClickEvent;
 import com.vaadin.flow.component.map.events.MapFeatureDropEvent;
 import com.vaadin.flow.component.map.events.MapViewMoveEndEvent;
 import com.vaadin.flow.component.map.serialization.MapSerializer;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
-import elemental.json.JsonValue;
 
-import java.beans.PropertyChangeEvent;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import tools.jackson.databind.node.BaseJsonNode;
 
 /**
  * Base class for the map component. Contains all base functionality for the map
@@ -45,12 +46,11 @@ import java.util.Set;
 public abstract class MapBase extends Component
         implements HasSize, HasStyle, HasThemeVariant<MapVariant> {
     private final Configuration configuration;
-    private final MapSerializer serializer;
+    private transient MapSerializer serializer;
 
     private StateTree.ExecutionRegistration pendingConfigurationSync;
 
     protected MapBase() {
-        this.serializer = new MapSerializer();
         this.configuration = new Configuration();
         this.configuration
                 .addPropertyChangeListener(this::configurationPropertyChange);
@@ -118,7 +118,7 @@ public abstract class MapBase extends Component
         Set<AbstractConfigurationObject> changedObjects = new LinkedHashSet<>();
         configuration.collectChanges(changedObjects::add);
 
-        JsonValue jsonChanges = serializer.toJson(changedObjects);
+        BaseJsonNode jsonChanges = getSerializer().toJson(changedObjects);
 
         this.getElement().executeJs("this.$connector.synchronize($0)",
                 jsonChanges);
@@ -152,6 +152,13 @@ public abstract class MapBase extends Component
                 event.getFeature().getGeometry().translate(deltaX, deltaY);
             }
         });
+    }
+
+    MapSerializer getSerializer() {
+        if (serializer == null) {
+            serializer = new MapSerializer(this);
+        }
+        return serializer;
     }
 
     /**

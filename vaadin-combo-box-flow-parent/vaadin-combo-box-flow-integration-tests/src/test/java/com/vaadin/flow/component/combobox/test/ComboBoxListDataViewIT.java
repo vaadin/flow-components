@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.combobox.test;
 
 import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.AGE_FILTER;
@@ -34,12 +33,12 @@ import static com.vaadin.flow.component.combobox.test.ComboBoxListDataViewPage.S
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.component.textfield.testbench.IntegerFieldElement;
 import com.vaadin.flow.testutil.TestPath;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 
 @TestPath("vaadin-combo-box/combobox-list-data-view-page")
 public class ComboBoxListDataViewIT extends AbstractComboBoxIT {

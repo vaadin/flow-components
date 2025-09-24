@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.board.tests;
 
 import com.vaadin.flow.component.Component;
@@ -5,7 +13,7 @@ import com.vaadin.flow.component.board.Board;
 import com.vaadin.flow.component.board.Row;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.Route;
 
 @Route("vaadin-board/RowTypes")
@@ -86,13 +94,13 @@ public class RowTypes extends Div {
 
         Div innerContainer = new Div();
 
-        Label numberLbl = new Label(number);
-        numberLbl.addClassName("box__number");
+        Span numberText = new Span(number);
+        numberText.addClassName("box__number");
 
-        Label sizeLbl = new Label(size);
-        sizeLbl.addClassName("box__size");
+        Span sizeText = new Span(size);
+        sizeText.addClassName("box__size");
 
-        innerContainer.add(numberLbl, sizeLbl);
+        innerContainer.add(numberText, sizeText);
         innerContainer.addClassName("box");
 
         boxContainer.add(innerContainer);

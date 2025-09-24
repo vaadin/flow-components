@@ -1,14 +1,23 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.map.configuration.feature;
 
-import com.vaadin.flow.component.map.Assets;
-import com.vaadin.flow.component.map.configuration.Coordinate;
-import com.vaadin.flow.component.map.configuration.style.Icon;
+import java.beans.PropertyChangeListener;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.beans.PropertyChangeListener;
+import com.vaadin.flow.component.map.Assets;
+import com.vaadin.flow.component.map.configuration.Coordinate;
+import com.vaadin.flow.component.map.configuration.style.Icon;
 
 public class MarkerFeatureTest {
     private PropertyChangeListener propertyChangeListenerMock;
@@ -27,9 +36,9 @@ public class MarkerFeatureTest {
         Assert.assertEquals(0, markerFeature.getCoordinates().getY(), 0);
 
         Assert.assertNotNull(markerFeature.getIcon());
-        Assert.assertNotNull(markerFeature.getIcon().getImg());
+        Assert.assertNotNull(markerFeature.getIcon().getImgHandler());
         Assert.assertEquals(Assets.PIN.getFileName(),
-                markerFeature.getIcon().getImg().getName());
+                markerFeature.getIcon().getImgHandler().getUrlPostfix());
 
         Assert.assertNotNull(markerFeature.getIcon().getImgSize());
         Assert.assertEquals(Assets.PIN.getWidth(),
@@ -63,7 +72,7 @@ public class MarkerFeatureTest {
         MarkerFeature markerFeature = new MarkerFeature(coordinate, icon);
 
         Assert.assertNotNull(markerFeature.getIcon());
-        Assert.assertEquals(markerFeature.getIcon(), markerFeature.getIcon());
+        Assert.assertEquals(icon, markerFeature.getIcon());
     }
 
     @Test

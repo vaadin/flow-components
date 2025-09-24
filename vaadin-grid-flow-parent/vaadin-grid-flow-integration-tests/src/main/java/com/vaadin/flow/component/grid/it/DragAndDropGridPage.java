@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -144,6 +144,15 @@ public class DragAndDropGridPage extends Div {
         });
         multiSelectButton.setId("multiselect");
         add(multiSelectButton);
+
+        NativeButton removeOnItemClick = new NativeButton(
+                "remove on item click", e -> {
+                    grid.addItemClickListener(event -> {
+                        grid.removeFromParent();
+                    });
+                });
+        removeOnItemClick.setId("remove-on-item-click");
+        add(removeOnItemClick);
     }
 
 }

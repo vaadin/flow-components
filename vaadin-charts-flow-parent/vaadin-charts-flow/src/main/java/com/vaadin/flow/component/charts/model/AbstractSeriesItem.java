@@ -1,18 +1,17 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
 
+import java.time.Instant;
+
 import com.vaadin.flow.component.charts.model.style.Color;
 import com.vaadin.flow.component.charts.util.Util;
-
-import java.time.Instant;
-import java.util.Date;
 
 /**
  * Abstract superclass for chart series items
@@ -100,14 +99,6 @@ public class AbstractSeriesItem extends AbstractConfigurationObject {
      */
     public void setX(Instant instant) {
         setX(Util.toHighchartsTS(instant));
-    }
-
-    /**
-     * @deprecated as of 4.0. Use {@link #setX(Instant)}
-     */
-    @Deprecated
-    public void setX(Date date) {
-        setX(Util.toHighchartsTS(date));
     }
 
     /**

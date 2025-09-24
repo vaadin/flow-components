@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
@@ -13,7 +13,7 @@ package com.vaadin.flow.component.charts.model;
  * <a href="http://en.wikipedia.org/wiki/Box_plot">box plot charts</a>. Plot box
  * charts visualize well some statistical data.
  *
- * @see PlotOptionsBoxPlot
+ * @see PlotOptionsBoxplot
  *
  */
 public class BoxPlotItem extends DataSeriesItem {

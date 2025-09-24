@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -86,6 +86,7 @@ public class GridUpdateDataProviderPage extends Div {
      */
     public GridUpdateDataProviderPage() {
         createBasicGrid();
+        createEmptyGrid();
         createBeanGrid();
     }
 
@@ -111,6 +112,22 @@ public class GridUpdateDataProviderPage extends Div {
         updateProvider.setId("update-basic-provider");
 
         add(new H2("Basic grid"), grid, updateProvider);
+    }
+
+    private void createEmptyGrid() {
+        Grid<String> grid = new Grid<>();
+        grid.setId("empty-grid");
+
+        grid.addColumn(i -> i).setHeader("text");
+
+        NativeButton setItemsAndPageSize = new NativeButton(
+                "Set items and page size", event -> {
+                    grid.setItems("foo", "bar", "baz");
+                    grid.setPageSize(10);
+                });
+        setItemsAndPageSize.setId("set-items-and-page-size");
+
+        add(new H2("Empty grid"), grid, setItemsAndPageSize);
     }
 
     private void createBeanGrid() {

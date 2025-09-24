@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,8 +25,8 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.grid.Grid;
 
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Drag start event of {@link Grid} rows.
@@ -54,13 +54,13 @@ public class GridDragStartEvent<T> extends ComponentEvent<Grid<T>> {
      *            Event details from {@code detail}.
      */
     public GridDragStartEvent(Grid<T> source, boolean fromClient,
-            @EventData("event.detail") JsonObject details) {
+            @EventData("event.detail") ObjectNode details) {
         super(source, fromClient);
-        JsonArray items = details.getArray("draggedItems");
+        JsonNode items = details.get("draggedItems");
 
         draggedItems = new ArrayList<>();
-        IntStream.range(0, items.length()).forEach(i -> {
-            String itemKey = items.getObject(i).getString("key");
+        IntStream.range(0, items.size()).forEach(i -> {
+            String itemKey = items.get(i).get("key").asString();
             T item = source.getDataCommunicator().getKeyMapper().get(itemKey);
             draggedItems.add(item);
         });

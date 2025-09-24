@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,16 +15,17 @@
  */
 package com.vaadin.flow.component.combobox;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.vaadin.flow.data.provider.ArrayUpdater;
 import com.vaadin.flow.data.provider.DataCommunicator;
 import com.vaadin.flow.data.provider.DataGenerator;
 import com.vaadin.flow.data.provider.KeyMapper;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.StateNode;
-import elemental.json.JsonArray;
 
-import java.util.HashSet;
-import java.util.Set;
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Customized data communicator that uses a custom key mapper for preserving
@@ -86,7 +87,7 @@ public class ComboBoxDataCommunicator<TItem> extends DataCommunicator<TItem> {
 
     public ComboBoxDataCommunicator(ComboBoxBase<?, TItem, ?> comboBox,
             DataGenerator<TItem> dataGenerator, ArrayUpdater arrayUpdater,
-            SerializableConsumer<JsonArray> dataUpdater, StateNode stateNode,
+            SerializableConsumer<ArrayNode> dataUpdater, StateNode stateNode,
             boolean fetchEnabled) {
         super(dataGenerator, arrayUpdater, dataUpdater, stateNode,
                 fetchEnabled);

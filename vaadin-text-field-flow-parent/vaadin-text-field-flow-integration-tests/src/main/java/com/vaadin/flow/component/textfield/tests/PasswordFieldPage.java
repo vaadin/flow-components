@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -46,14 +46,6 @@ public class PasswordFieldPage extends Div {
                 .setReadOnly(!passwordField.isReadOnly()));
         add(button);
 
-        NativeButton required = new NativeButton(
-                "Set/unset field required property");
-        required.setId("required");
-        required.addClickListener(
-                event -> passwordField.setRequiredIndicatorVisible(
-                        !passwordField.isRequiredIndicatorVisible()));
-        add(required);
-
         PasswordField passwordFieldClear = new PasswordField();
         passwordFieldClear.setId("clear-password-field");
         passwordFieldClear.getStyle().set("display", "block");
@@ -82,7 +74,6 @@ public class PasswordFieldPage extends Div {
 
         PasswordField passwordField = new PasswordField();
         passwordField.setLabel("Password field label");
-        passwordField.setPlaceholder("placeholder text");
         passwordField.addValueChangeListener(event -> message.setText(
                 String.format("Password field value changed from '%s' to '%s'",
                         event.getOldValue(), event.getValue())));

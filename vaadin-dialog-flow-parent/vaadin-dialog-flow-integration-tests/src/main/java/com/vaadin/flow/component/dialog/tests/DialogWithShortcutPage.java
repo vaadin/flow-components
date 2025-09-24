@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.dialog.tests;
 
 import java.util.EventObject;
@@ -26,7 +41,6 @@ public class DialogWithShortcutPage extends VerticalLayout {
     public static final String MODELESS_SHORTCUT_LISTEN_ON_DIALOG = "modeless-shortcur-listen-on-dialog";
     public static final String LISTEN_ON_DIALOG = "listen-on-dialog";
     public static final String LISTEN_ON_DIALOG_ALLOW_DEFAULT = "listen-on-dialog-allow-default";
-    public static final String SHORTCUT_ON_UI = "shortcut-on-ui";
     public static final String DIALOG_ID = "dialog";
     public static final String REUSABLE_DIALOG = "reusable-dialog";
     public static final String UI_ID = "ui-id";
@@ -58,10 +72,6 @@ public class DialogWithShortcutPage extends VerticalLayout {
                 e -> createAndOpenDialog(true, false));
         dialogWithShortcutListenOnDialogAllowBrowserDefault
                 .setId(LISTEN_ON_DIALOG_ALLOW_DEFAULT);
-        final NativeButton dialogWithShortcutOnUi = new NativeButton(
-                "Dialog with shortcut on UI",
-                e -> createAndOpenDialog(false, true));
-        dialogWithShortcutOnUi.setId(SHORTCUT_ON_UI);
         final NativeButton reusableDialogButton = new NativeButton(
                 "Reusable dialog", event -> {
                     if (reusableDialog == null) {
@@ -72,7 +82,7 @@ public class DialogWithShortcutPage extends VerticalLayout {
                 });
         reusableDialogButton.setId(REUSABLE_DIALOG);
         add(modelessWithShortcutOnUi, modelessWithShortcutListenOnDialog,
-                dialogWithShortcutOnUi, dialogWithShortcutListenOnDialog,
+                dialogWithShortcutListenOnDialog,
                 dialogWithShortcutListenOnDialogAllowBrowserDefault,
                 reusableDialogButton);
 

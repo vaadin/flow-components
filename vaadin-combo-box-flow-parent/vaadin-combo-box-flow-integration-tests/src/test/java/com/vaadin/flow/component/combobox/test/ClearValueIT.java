@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,17 +15,18 @@
  */
 package com.vaadin.flow.component.combobox.test;
 
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.tests.AbstractComponentIT;
-import com.vaadin.flow.testutil.TestPath;
-import com.vaadin.testbench.ElementQuery;
-import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.ElementQuery;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-combo-box/clear-value")
 public class ClearValueIT extends AbstractComponentIT {
@@ -69,12 +70,11 @@ public class ClearValueIT extends AbstractComponentIT {
         comboBox.openPopup();
         comboBox.closePopup();
 
-        comboBox.$("[part~='clear-button']").get(0).click();
+        comboBox.clickClearButton();
 
         comboBox.openPopup();
 
-        TestBenchElement overlay = $("vaadin-combo-box-overlay").first();
-        ElementQuery<TestBenchElement> items = overlay
+        ElementQuery<TestBenchElement> items = comboBox
                 .$("vaadin-combo-box-item");
 
         items.all()
@@ -180,7 +180,7 @@ public class ClearValueIT extends AbstractComponentIT {
         Assert.assertEquals(String.format(
                 "Unexpected 'allowCustomValue' property name for combo box with id '%s'",
                 comboBoxId), Boolean.toString(allowCustomValue),
-                comboBox.getAttribute("allowCustomValue"));
+                comboBox.getPropertyString("allowCustomValue"));
 
         findElement(By.id(buttonId)).click();
 

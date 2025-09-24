@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.map.events;
@@ -16,7 +16,8 @@ import com.vaadin.flow.component.map.configuration.Coordinate;
 import com.vaadin.flow.component.map.configuration.Feature;
 import com.vaadin.flow.component.map.configuration.layer.VectorLayer;
 import com.vaadin.flow.component.map.configuration.source.VectorSource;
-import elemental.json.JsonArray;
+
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Provides data for when a feature is dropped after a drag operation
@@ -33,8 +34,8 @@ public class MapFeatureDropEvent extends ComponentEvent<Map> {
     public MapFeatureDropEvent(Map source, boolean fromClient,
             @EventData("event.detail.feature.id") String featureId,
             @EventData("event.detail.layer.id") String layerId,
-            @EventData("event.detail.coordinate") JsonArray coordinate,
-            @EventData("event.detail.startCoordinate") JsonArray startCoordinate) {
+            @EventData("event.detail.coordinate") ArrayNode coordinate,
+            @EventData("event.detail.startCoordinate") ArrayNode startCoordinate) {
         super(source, fromClient);
 
         FeatureEventDetails featureEventDetails = MapEventUtil

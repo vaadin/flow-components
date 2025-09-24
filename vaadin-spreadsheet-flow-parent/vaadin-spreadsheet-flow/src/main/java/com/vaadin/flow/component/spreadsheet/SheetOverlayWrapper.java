@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet;
@@ -18,7 +18,7 @@ import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.spreadsheet.client.OverlayInfo;
-import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 @SuppressWarnings("serial")
 public abstract class SheetOverlayWrapper implements Serializable {
@@ -277,7 +277,12 @@ public abstract class SheetOverlayWrapper implements Serializable {
         return anchor;
     }
 
-    public StreamResource getResource() {
+    /**
+     * Gets the handler serving this image
+     *
+     * @return Image resource
+     */
+    public DownloadHandler getResourceHandler() {
         return null;
     }
 

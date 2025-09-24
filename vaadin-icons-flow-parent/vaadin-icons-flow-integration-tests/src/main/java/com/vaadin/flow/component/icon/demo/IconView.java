@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,7 +19,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
@@ -98,7 +98,7 @@ public class IconView extends Div {
             iconComponent.getStyle().set("color", "#00b4f0").set("marginBottom",
                     "3px");
             VerticalLayout iconWithName = new VerticalLayout(iconComponent,
-                    new Label(icon.name()));
+                    new Span(icon.name()));
             iconWithName.setSizeUndefined();
             iconWithName
                     .setDefaultHorizontalComponentAlignment(Alignment.CENTER);

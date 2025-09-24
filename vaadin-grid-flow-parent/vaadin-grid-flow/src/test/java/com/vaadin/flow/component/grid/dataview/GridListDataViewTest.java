@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,21 +13,22 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.grid.dataview;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.data.provider.AbstractListDataView;
-import com.vaadin.flow.data.provider.AbstractListDataViewListenerTest;
-import com.vaadin.flow.data.provider.HasListDataView;
-import com.vaadin.flow.data.provider.ListDataProvider;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.data.provider.AbstractListDataView;
+import com.vaadin.flow.data.provider.HasListDataView;
+import com.vaadin.flow.data.provider.ListDataProvider;
+import com.vaadin.tests.dataprovider.AbstractListDataViewListenerTest;
 
 public class GridListDataViewTest extends AbstractListDataViewListenerTest {
 
@@ -111,11 +112,17 @@ public class GridListDataViewTest extends AbstractListDataViewListenerTest {
 
     @Test
     public void dataView_setFilter_methodsUseFilteredData() {
+        AtomicInteger refreshed = new AtomicInteger(0);
         String[] items = new String[] { "item1", "item2", "item3", "item4" };
         Grid<String> grid = new Grid<>();
         GridListDataView<String> dataView = grid.setItems(items);
+        grid.getDataProvider().addDataProviderListener(e -> {
+            refreshed.incrementAndGet();
+        });
 
         dataView.setFilter(s -> s.endsWith("4"));
+        Assert.assertEquals("Filter change did not fire DataChangeEvent", 1,
+                refreshed.get());
 
         Assert.assertEquals("Filter was not applied to data size", 1,
                 dataView.getItemCount());

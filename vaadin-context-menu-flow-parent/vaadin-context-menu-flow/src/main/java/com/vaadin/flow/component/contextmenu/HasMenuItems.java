@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -33,15 +33,8 @@ import com.vaadin.flow.component.ComponentEventListener;
 public interface HasMenuItems extends Serializable {
 
     /**
-     * Adds a new item component with the given text content and click listener
-     * to the context menu overlay.
-     * <p>
-     * This is a convenience method for the use case where you have a list of
-     * highlightable {@link MenuItem}s inside the overlay. If you want to
-     * configure the contents of the overlay without wrapping them inside
-     * {@link MenuItem}s, or if you just want to add some non-highlightable
-     * components between the items, use the
-     * {@link ContextMenu#add(Component...)} method.
+     * Creates a new menu item with the given text content and click listener
+     * and adds it to the context menu overlay.
      *
      * @param text
      *            the text content for the new item
@@ -50,22 +43,13 @@ public interface HasMenuItems extends Serializable {
      *            not add listener
      * @return the added {@link MenuItem} component
      * @see #addItem(Component, ComponentEventListener)
-     * @see ContextMenu#add(Component...)
-     * @see SubMenu#add(Component...)
      */
     MenuItem addItem(String text,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener);
 
     /**
-     * Adds a new item component with the given component and click listener to
-     * the context menu overlay.
-     * <p>
-     * This is a convenience method for the use case where you have a list of
-     * highlightable {@link MenuItem}s inside the overlay. If you want to
-     * configure the contents of the overlay without wrapping them inside
-     * {@link MenuItem}s, or if you just want to add some non-highlightable
-     * components between the items, use the
-     * {@link ContextMenu#add(Component...)} method.
+     * Creates a new menu item with the given component content and click
+     * listener and adds it to the context menu overlay.
      *
      * @param component
      *            the component inside the new item
@@ -74,8 +58,6 @@ public interface HasMenuItems extends Serializable {
      *            not add listener
      * @return the added {@link MenuItem} component
      * @see #addItem(String, ComponentEventListener)
-     * @see ContextMenu#add(Component...)
-     * @see SubMenu#add(Component...)
      */
     MenuItem addItem(Component component,
             ComponentEventListener<ClickEvent<MenuItem>> clickListener);

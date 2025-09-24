@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet;
@@ -58,10 +58,14 @@ public class SpreadsheetStyleFactory implements Serializable {
      * @author Vaadin Ltd.
      */
     public enum BorderStyle {
-        SOLID_THIN("solid", 1, 1), DOTTED_THIN("dotted", 1, 1), DASHED_THIN(
-                "dashed", 1, 1), SOLID_MEDIUM("solid", 2, 2), DASHED_MEDIUM(
-                        "dashed", 2, 2), SOLID_THICK("solid", 3,
-                                4), DOUBLE("double", 3, 4), NONE("none", 0, 0);
+        SOLID_THIN("solid", 1, 1),
+        DOTTED_THIN("dotted", 1, 1),
+        DASHED_THIN("dashed", 1, 1),
+        SOLID_MEDIUM("solid", 2, 2),
+        DASHED_MEDIUM("dashed", 2, 2),
+        SOLID_THICK("solid", 3, 4),
+        DOUBLE("double", 3, 4),
+        NONE("none", 0, 0);
 
         private final int size;
         private final String borderStyle;
@@ -830,7 +834,8 @@ public class SpreadsheetStyleFactory implements Serializable {
                 sb.append("font-style:italic;");
             }
             defaultFontHeightInPoints = defaultFont.getFontHeightInPoints();
-            sb.append("font-size:");
+            sb.append("font-size: var(--default-font-size);");
+            sb.append("--default-font-size:");
             sb.append(defaultFontHeightInPoints);
             sb.append("pt;");
             if (defaultFont.getUnderline() != Font.U_NONE) {
@@ -881,7 +886,8 @@ public class SpreadsheetStyleFactory implements Serializable {
 
     private String styleFontFamily(Font font) {
         StringBuilder sb = new StringBuilder();
-        sb.append("font-family:");
+        sb.append("font-family: var(--default-font-family);");
+        sb.append("--default-font-family:");
         String fontName = font.getFontName();
         if (fontName.contains(" ")) {
             sb.append("\"");

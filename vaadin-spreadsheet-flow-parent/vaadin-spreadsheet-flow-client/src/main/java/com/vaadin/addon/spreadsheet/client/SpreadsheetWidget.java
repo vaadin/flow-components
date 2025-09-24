@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.addon.spreadsheet.client;
@@ -34,6 +34,7 @@ import com.vaadin.addon.spreadsheet.client.MergedRegionUtil.MergedRegionContaine
 import com.vaadin.addon.spreadsheet.client.SheetTabSheet.SheetTabSheetHandler;
 import com.vaadin.addon.spreadsheet.client.SpreadsheetConnector.CommsTrigger;
 import com.vaadin.addon.spreadsheet.shared.GroupingData;
+import com.vaadin.client.BrowserInfo;
 import com.vaadin.client.Focusable;
 import com.vaadin.client.ServerConnector;
 import com.vaadin.client.Util;
@@ -123,7 +124,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     private boolean inlineEditing;
     private boolean cancelDeferredCommit;
     private boolean selectedCellIsFormulaType;
-    boolean cellLocked;
     boolean customCellEditorDisplayed;
     private boolean sheetProtected;
     private boolean cancelNextSheetRelayout;
@@ -432,6 +432,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     /**
      * @return the customEditorFactory
      */
+    @Override
     public SpreadsheetCustomEditorFactory getCustomEditorFactory() {
         return customEditorFactory;
     }
@@ -448,11 +449,58 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
     }
 
     /**
+     * Show custom editors for the cells with the given keys.
+     *
+     * @param cellKeysToEditorIdMap
+     *            a map of cell keys to editor IDs
+     */
+    public void showCellCustomEditors(
+            HashMap<String, String> cellKeysToEditorIdMap) {
+
+        if (cellKeysToEditorIdMap == null || customEditorFactory == null) {
+            return;
+        }
+
+        var jsniUtil = sheetWidget.getSheetJsniUtil();
+        for (var entry : cellKeysToEditorIdMap.entrySet()) {
+            Widget customEditor = customEditorFactory
+                    .getCustomEditor(entry.getKey());
+            if (customEditor != null) {
+                jsniUtil.parseColRow(entry.getKey());
+                var col = jsniUtil.getParsedCol();
+                var row = jsniUtil.getParsedRow();
+                var cell = sheetWidget.getCell(col, row);
+                sheetWidget.displayCustomCellEditor(customEditor, false, cell);
+            }
+        }
+    }
+
+    /**
+     * Remove custom editors for the cells with the given keys.
+     *
+     * @param customEditors
+     *            a map of cell keys to custom editor widgets
+     */
+    public void removeCellCustomEditors(HashMap<String, Slot> customEditors) {
+        if (customEditors == null || customEditors.isEmpty()) {
+            return;
+        }
+
+        for (var customEditor : customEditors.values()) {
+            if (customEditor != null) {
+                sheetWidget.removeCustomCellEditor(
+                        customEditor.getListener().getCellAddress(),
+                        customEditor);
+            }
+        }
+    }
+
+    /**
      * Called when the {@link #customEditorFactory} might have a new editor for
      * the currently selected cell.
      */
     public void loadSelectedCellEditor() {
-        if (!sheetWidget.isSelectedCellCustomized() && !cellLocked
+        if (!sheetWidget.isSelectedCellCustomized() && !isCurrentCellLocked()
                 && customEditorFactory != null && customEditorFactory
                         .hasCustomEditor(sheetWidget.getSelectedCellKey())) {
             Widget customEditor = customEditorFactory
@@ -460,9 +508,18 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             if (customEditor != null) {
                 customCellEditorDisplayed = true;
                 formulaBarWidget.setFormulaFieldEnabled(false);
-                sheetWidget.displayCustomCellEditor(customEditor);
+                sheetWidget.displayCustomCellEditor(customEditor, false);
             }
         }
+    }
+
+    boolean isCellLocked(int col, int row) {
+        return sheetWidget.isCellLocked(col, row);
+    }
+
+    boolean isCurrentCellLocked() {
+        return isCellLocked(sheetWidget.getSelectedCellColumn(),
+                sheetWidget.getSelectedCellRow());
     }
 
     public void addVisibleCellComment(String key) {
@@ -706,7 +763,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                     updateSelectedCellValues(column, row);
                 }
                 if (updateToActionHandler) {
-                    selectionHandler.newSelectedCellSet();
+                    selectionHandler.newSelectedCellSet(false);
                     spreadsheetHandler.cellSelected(row, column, true);
                     startDelayedSendingTimer();
                 }
@@ -729,12 +786,11 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                         sheetWidget.getOriginalCellValue(column, row));
             }
         }
-        cellLocked = sheetWidget.isCellLocked(column, row);
         if (!customCellEditorDisplayed) {
-            formulaBarWidget.setFormulaFieldEnabled(!cellLocked);
+            formulaBarWidget.setFormulaFieldEnabled(!isCellLocked(column, row));
         } else {
             sheetWidget.displayCustomCellEditor(customEditorFactory
-                    .getCustomEditor(sheetWidget.getSelectedCellKey()));
+                    .getCustomEditor(sheetWidget.getSelectedCellKey()), false);
         }
         if (name != null) {
             formulaBarWidget.setSelectedCellAddress(name);
@@ -894,7 +950,9 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             cellEditingDone(editedValue, true);
         } else if (customCellEditorDisplayed) {
             customCellEditorDisplayed = false;
-            sheetWidget.removeCustomCellEditor();
+            if (isShowCustomEditorOnFocus()) {
+                sheetWidget.removeCustomCellEditor();
+            }
             formulaBarWidget.setFormulaFieldEnabled(true);
         }
     }
@@ -1021,13 +1079,12 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
         }
         formulaBarEditing = false;
         checkEditableAndNotify();
-        if (!cellLocked) {
-            if (!inlineEditing && !customCellEditorDisplayed) {
-                inlineEditing = true;
-                sheetWidget.startEditingCell(true, true, value);
-                formulaBarWidget.setInFullFocus(true);
-                formulaBarWidget.startInlineEdit(true);
-            }
+        if (!isCellLocked(column, row) && !inlineEditing
+                && !customCellEditorDisplayed) {
+            inlineEditing = true;
+            sheetWidget.startEditingCell(true, true, value);
+            formulaBarWidget.setInFullFocus(true);
+            formulaBarWidget.startInlineEdit(true);
         }
     }
 
@@ -1109,7 +1166,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
             case KeyCodes.KEY_BACKSPACE:
             case KeyCodes.KEY_DELETE:
                 checkEditableAndNotify();
-                if (!cellLocked) {
+                if (!isCurrentCellLocked()) {
                     spreadsheetHandler.deleteSelectedCells();
                     formulaBarWidget.setCellPlainValue("");
                 }
@@ -1181,7 +1238,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 }
                 checkEditableAndNotify();
                 if (!sheetWidget.isSelectedCellCustomized() && !inlineEditing
-                        && !cellLocked && !customCellEditorDisplayed) {
+                        && !isCurrentCellLocked()
+                        && !customCellEditorDisplayed) {
                     cachedCellValue = sheetWidget.getSelectedCellLatestValue();
                     formulaBarWidget.cacheFormulaFieldValue();
                     formulaBarEditing = false;
@@ -1190,6 +1248,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                             formulaBarWidget.getFormulaFieldValue());
                     formulaBarWidget.setInFullFocus(true);
                     formulaBarWidget.startInlineEdit(true);
+                } else if (customCellEditorDisplayed) {
+                    sheetWidget.focusCustomEditor();
                 }
                 break;
             }
@@ -1198,7 +1258,8 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                 checkEditableAndNotify();
 
                 if (!sheetWidget.isSelectedCellCustomized() && !inlineEditing
-                        && !cellLocked && !customCellEditorDisplayed) {
+                        && !isCurrentCellLocked()
+                        && !customCellEditorDisplayed) {
                     // cache value and start editing cell as empty
                     inlineEditing = true;
                     cachedCellValue = sheetWidget.getSelectedCellLatestValue();
@@ -1219,6 +1280,25 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                         formulaBarWidget.cacheFormulaFieldValue();
                     }
                     formulaBarWidget.setCellPlainValue(enteredCharacter);
+                } else if (getCustomEditorFactory() != null
+                        && getCustomEditorFactory().hasCustomEditor(
+                                sheetWidget.getSelectedCellKey())) {
+                    Widget customEditor = getCustomEditorFactory()
+                            .getCustomEditor(sheetWidget.getSelectedCellKey());
+                    if (customEditor instanceof Slot) {
+                        var assignedElement = ((Slot) customEditor)
+                                .getAssignedElement();
+                        assignedElement.focus();
+
+                        if (BrowserInfo.get().isFirefox()) {
+                            // Chrome and Safari pass down the keypress event to
+                            // the focused input while Firefox doesn't, so we do
+                            // our best effort to try to set the 'value'
+                            // property of the custom editor
+                            assignedElement.setPropertyString("value",
+                                    enteredCharacter);
+                        }
+                    }
                 }
             }
         }
@@ -1251,7 +1331,7 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
      * Checks if selected cell is locked, and sends an RPC to server if it is.
      */
     private void checkEditableAndNotify() {
-        if (cellLocked) {
+        if (isCurrentCellLocked()) {
 
             if (!okToSendCellProtectRpc) {
                 // don't send just yet
@@ -1688,7 +1768,6 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
                         sheetWidget.removeCustomCellEditor();
                     }
                 } else { // might need to load the custom editor
-                    cellLocked = false;
                     selectionHandler.newSelectedCellSet();
                     if (customCellEditorDisplayed) {
                         // need to update the editor value on client side
@@ -2077,5 +2156,24 @@ public class SpreadsheetWidget extends Composite implements SheetHandler,
 
     public void setHost(Element host, Node renderRoot) {
         sheetWidget.setHost(host, renderRoot);
+    }
+
+    /**
+     * Returns whether the custom editor is shown when the cell gets focus.
+     * 
+     * @return true if the custom editor is shown on focus, false otherwise
+     */
+    public boolean isShowCustomEditorOnFocus() {
+        return sheetWidget.isShowCustomEditorOnFocus();
+    }
+
+    /**
+     * Sets whether the custom editor should be shown when the cell gets focus.
+     * 
+     * @param showCustomEditorOnFocus
+     *            true to show the custom editor on focus, false to not show it
+     */
+    public void setShowCustomEditorOnFocus(boolean showCustomEditorOnFocus) {
+        sheetWidget.setShowCustomEditorOnFocus(showCustomEditorOnFocus);
     }
 }

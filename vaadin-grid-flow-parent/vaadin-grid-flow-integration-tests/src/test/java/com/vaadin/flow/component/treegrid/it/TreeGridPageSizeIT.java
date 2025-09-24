@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,7 +17,6 @@ package com.vaadin.flow.component.treegrid.it;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -38,7 +37,6 @@ public class TreeGridPageSizeIT extends AbstractTreeGridIT {
     public void treegridWithPageSize10_changeTo80_revertBackTo10() {
         TreeGridElement grid = getTreeGrid();
 
-        waitUntil(test -> grid.getNumberOfExpandedRows() == 12, 1);
         // assert here only minimum required fetches
         assertLogContainsFetch(0, 3, "root");
         assertLogContainsFetch(0, 3, "Granddad 0");
@@ -61,7 +59,6 @@ public class TreeGridPageSizeIT extends AbstractTreeGridIT {
         blur();
         button.click();
 
-        waitUntil(test -> grid.getNumberOfExpandedRows() == 12, 1);
         // assert here only minimum required fetches
         assertLogContainsFetch(0, 3, "root");
         assertLogContainsFetch(0, 3, "Granddad 0");
@@ -81,7 +78,6 @@ public class TreeGridPageSizeIT extends AbstractTreeGridIT {
         blur();
         button.click();
 
-        waitUntil(test -> grid.getNumberOfExpandedRows() == 12, 1);
         // assert here only minimum required fetches
         assertLogContainsFetch(0, 3, "root");
         assertLogContainsFetch(0, 3, "Granddad 0");

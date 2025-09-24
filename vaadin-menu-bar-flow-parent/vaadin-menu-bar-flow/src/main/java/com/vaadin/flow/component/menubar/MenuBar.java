@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
@@ -36,16 +37,14 @@ import com.vaadin.flow.component.contextmenu.MenuManager;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.function.SerializableRunnable;
-import com.vaadin.flow.internal.JsonSerializer;
+import com.vaadin.flow.internal.JacksonUtils;
 
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Menu Bar is a horizontal button bar with hierarchical drop-down menus. Menu
@@ -54,16 +53,13 @@ import elemental.json.JsonType;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-menu-bar")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("./menubarConnector.js")
 @JsModule("@vaadin/menu-bar/src/vaadin-menu-bar.js")
 @JsModule("@vaadin/tooltip/src/vaadin-tooltip.js")
-@NpmPackage(value = "@vaadin/menu-bar", version = "24.3.0-alpha1")
-@NpmPackage(value = "@vaadin/tooltip", version = "24.3.0-alpha1")
-public class MenuBar extends Component
-        implements HasEnabled, HasMenuItems, HasOverlayClassName, HasSize,
-        HasStyle, HasThemeVariant<MenuBarVariant> {
+@NpmPackage(value = "@vaadin/menu-bar", version = "25.0.0-alpha19")
+@NpmPackage(value = "@vaadin/tooltip", version = "25.0.0-alpha19")
+public class MenuBar extends Component implements HasEnabled, HasMenuItems,
+        HasSize, HasStyle, HasThemeVariant<MenuBarVariant> {
 
     private MenuManager<MenuBar, MenuItem, SubMenu> menuManager;
     private MenuItemsArrayGenerator<MenuItem> menuItemsArrayGenerator;
@@ -365,29 +361,72 @@ public class MenuBar extends Component
     }
 
     /**
+     * Sets reverse collapse order for the menu bar.
+     *
+     * @param reverseCollapseOrder
+     *            If {@code true}, the buttons will be collapsed into the
+     *            overflow menu starting from the "start" end of the bar instead
+     *            of the "end".
+     */
+    public void setReverseCollapseOrder(boolean reverseCollapseOrder) {
+        getElement().setProperty("reverseCollapse", reverseCollapseOrder);
+    }
+
+    /**
+     * Gets whether the menu bar uses reverse collapse order.
+     *
+     * @return {@code true} if the buttons will be collapsed into the overflow
+     *         menu starting from the "start" end of the bar instead of the
+     *         "end".
+     *
+     */
+    public boolean isReverseCollapseOrder() {
+        return getElement().getProperty("reverseCollapse", false);
+    }
+
+    /**
+     * Sets tab navigation for the menu bar.
+     *
+     * @param tabNavigation
+     *            If {@code true}, the top-level menu items is traversable by
+     *            tab instead of arrow keys (i.e. disabling roving tabindex)
+     */
+    public void setTabNavigation(boolean tabNavigation) {
+        getElement().setProperty("tabNavigation", tabNavigation);
+    }
+
+    /**
+     * Gets whether the menu bar uses tab navigation.
+     *
+     * @return {@code true} if the top-level menu items is traversable by tab
+     *         instead of arrow keys (i.e. disabling roving tabindex)
+     *
+     */
+    public boolean isTabNavigation() {
+        return getElement().getProperty("tabNavigation", false);
+    }
+
+    /**
      * Gets the internationalization object previously set for this component.
      * <p>
-     * Note: updating the object content that is gotten from this method will
-     * not update the lang on the component if not set back using
-     * {@link MenuBar#setI18n(MenuBarI18n)}
+     * NOTE: Updating the instance that is returned from this method will not
+     * update the component if not set again using {@link #setI18n(MenuBarI18n)}
      *
-     * @return the i18n object. It will be <code>null</code>, If the i18n
-     *         properties weren't set.
+     * @return the i18n object or {@code null} if no i18n object has been set
      */
     public MenuBarI18n getI18n() {
         return i18n;
     }
 
     /**
-     * Sets the internationalization properties for this component.
+     * Sets the internationalization object for this component.
      *
      * @param i18n
-     *            the internationalized properties, not <code>null</code>
+     *            the i18n object, not {@code null}
      */
     public void setI18n(MenuBarI18n i18n) {
-        Objects.requireNonNull(i18n,
-                "The I18N properties object should not be null");
-        this.i18n = i18n;
+        this.i18n = Objects.requireNonNull(i18n,
+                "The i18n properties object should not be null");
 
         runBeforeClientResponse(ui -> {
             if (i18n == this.i18n) {
@@ -397,11 +436,7 @@ public class MenuBar extends Component
     }
 
     private void setI18nWithJS() {
-        JsonObject i18nJson = (JsonObject) JsonSerializer.toJson(this.i18n);
-
-        // Remove properties with null values to prevent errors in web
-        // component
-        removeNullValuesFromJsonObject(i18nJson);
+        ObjectNode i18nJson = JacksonUtils.beanToJson(i18n);
 
         // Assign new I18N object to WC, by merging the existing
         // WC I18N, and the values from the new MenuBarI18n instance,
@@ -417,14 +452,6 @@ public class MenuBar extends Component
         // Element state is not persisted across attach/detach
         if (this.i18n != null) {
             setI18nWithJS();
-        }
-    }
-
-    private void removeNullValuesFromJsonObject(JsonObject jsonObject) {
-        for (String key : jsonObject.keys()) {
-            if (jsonObject.get(key).getType() == JsonType.NULL) {
-                jsonObject.remove(key);
-            }
         }
     }
 
@@ -462,6 +489,7 @@ public class MenuBar extends Component
     /**
      * The internationalization properties for {@link MenuBar}
      */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class MenuBarI18n implements Serializable {
         private String moreOptions;
 
@@ -513,5 +541,12 @@ public class MenuBar extends Component
         }
 
         item.getElement().setProperty("tooltip", tooltipText);
+    }
+
+    /**
+     * Closes the current submenu.
+     */
+    public void close() {
+        getElement().callJsFunction("close");
     }
 }

@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests.charts;
 
 import org.junit.Assert;
@@ -66,12 +74,7 @@ public class StyleTest extends ChartTestBase {
         Assert.assertEquals(GradientColor.class,
                 conf.getChart().getBackgroundColor().getClass());
 
-        final String correctGradientJson = "{\"color\":" + "{\"stops\":"
-                + "[[0.35,\"rgba(145,66,13,1.00)\"],[0.45,\"rgba(157,195,230,1.00)\"],"
-                + "[0.51,\"rgba(169,209,142,0.38)\"]],"
-                + "\"linearGradient\":{\"x1\":0.6710100716628344,"
-                + "\"y1\":0.03015368960704584,\"x2\":0.32898992833716556,"
-                + "\"y2\":0.9698463103929542}}}";
+        final String correctGradientJson = "{\"color\":{\"linearGradient\":{\"x1\":0.6710100716628344,\"x2\":0.32898992833716556,\"y1\":0.03015368960704584,\"y2\":0.9698463103929542},\"stops\":[[0.35,\"rgba(145,66,13,1.00)\"],[0.45,\"rgba(157,195,230,1.00)\"],[0.51,\"rgba(169,209,142,0.38)\"]]}}";
 
         final String actualGradientJson = colorToJson(
                 conf.getChart().getBackgroundColor());

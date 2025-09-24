@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -22,7 +22,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.NotFoundException;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
@@ -32,18 +45,8 @@ import com.vaadin.flow.router.RouteParameters;
 import com.vaadin.flow.router.Router;
 import com.vaadin.flow.server.VaadinContext;
 import com.vaadin.flow.server.startup.ApplicationRouteRegistry;
-import elemental.json.JsonArray;
-import elemental.json.impl.JsonUtil;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.sidenav.SideNavItem;
-import com.vaadin.flow.dom.Element;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
+import tools.jackson.databind.node.ArrayNode;
 
 public class SideNavItemTest {
 
@@ -213,6 +216,22 @@ public class SideNavItemTest {
 
         assertPath("test-path");
         Assert.assertEquals(prefixComponent, sideNavItem.getPrefixComponent());
+    }
+
+    // TOOLTIP TESTS
+    @Test
+    public void implementsHasTooltip() {
+        sideNavItem = new SideNavItem("Test item", "test-path");
+        Assert.assertTrue(sideNavItem instanceof HasTooltip);
+    }
+
+    @Test
+    public void tooltipTextIsSet() {
+        sideNavItem = new SideNavItem("Test item", "test-path");
+        sideNavItem.setTooltipText("Test tooltip text");
+        Assert.assertNotNull(sideNavItem.getTooltip());
+        Assert.assertEquals("Test tooltip text",
+                sideNavItem.getTooltip().getText());
     }
 
     // EXPAND AND COLLAPSE TESTS
@@ -604,6 +623,94 @@ public class SideNavItemTest {
         }, TestRouteWithAliases.class);
     }
 
+    @Test
+    public void createFromComponentWithHasUrlParameter_pathContainsParameters() {
+        runWithMockRouter(() -> {
+            sideNavItem = new SideNavItem("test",
+                    TestRouteWithHasUrlParameter.class, "bar/baz");
+
+            assertPath("foo/bar/baz");
+        }, TestRouteWithHasUrlParameter.class);
+    }
+
+    @Test
+    public void setPathAsComponentWithHasUrlParameter_pathContainsParameters() {
+        runWithMockRouter(() -> {
+            sideNavItem.setPath(TestRouteWithHasUrlParameter.class, "bar/baz");
+
+            assertPath("foo/bar/baz");
+        }, TestRouteWithHasUrlParameter.class);
+    }
+
+    @Test
+    public void setTarget_hasTarget() {
+        sideNavItem.setTarget("_blank");
+        Assert.assertEquals("_blank",
+                sideNavItem.getElement().getProperty("target"));
+        Assert.assertEquals("_blank", sideNavItem.getTarget());
+    }
+
+    @Test
+    public void targetDefined_setToNull_noTarget() {
+        sideNavItem.setTarget("_blank");
+        sideNavItem.setTarget(null);
+        Assert.assertFalse(sideNavItem.getElement().hasProperty("target"));
+        Assert.assertNull(sideNavItem.getTarget());
+    }
+
+    @Test
+    public void isMatchNested_falseByDefault() {
+        Assert.assertFalse(sideNavItem.isMatchNested());
+    }
+
+    @Test
+    public void setMatchNested_isMatchNested() {
+        sideNavItem.setMatchNested(true);
+        Assert.assertTrue(
+                sideNavItem.getElement().getProperty("matchNested", false));
+        Assert.assertTrue(sideNavItem.isMatchNested());
+
+        sideNavItem.setMatchNested(false);
+        Assert.assertFalse(
+                sideNavItem.getElement().getProperty("matchNested", false));
+        Assert.assertFalse(sideNavItem.isMatchNested());
+    }
+
+    @Test
+    public void isRouterIgnore_falseByDefault() {
+        Assert.assertFalse(sideNavItem.isRouterIgnore());
+    }
+
+    @Test
+    public void setRouterIgnore_hasRouterIgnore() {
+        sideNavItem.setRouterIgnore(true);
+        Assert.assertTrue(
+                sideNavItem.getElement().getProperty("routerIgnore", false));
+        Assert.assertTrue(sideNavItem.isRouterIgnore());
+
+        sideNavItem.setRouterIgnore(false);
+        Assert.assertFalse(
+                sideNavItem.getElement().getProperty("routerIgnore", false));
+        Assert.assertFalse(sideNavItem.isRouterIgnore());
+    }
+
+    @Test
+    public void setOpenInNewBrowserTab_targetBlankDefinedOnProperty() {
+        // call setOpenInNewTab and check that getTarget returns "_blank"
+        sideNavItem.setOpenInNewBrowserTab(true);
+        Assert.assertEquals("_blank",
+                sideNavItem.getElement().getProperty("target"));
+        Assert.assertTrue(sideNavItem.isOpenInNewBrowserTab());
+    }
+
+    @Test
+    public void openInNewBrowserTabDefined_setOpenInNewBrowserTabToFalse() {
+        sideNavItem.setOpenInNewBrowserTab(true);
+        sideNavItem.setOpenInNewBrowserTab(false);
+        Assert.assertFalse(sideNavItem.getElement().hasProperty("target"));
+        Assert.assertFalse(sideNavItem.isOpenInNewBrowserTab());
+    }
+
     private boolean sideNavItemHasLabelElement() {
         return sideNavItem.getElement().getChildren()
                 .anyMatch(this::isLabelElement);
@@ -687,13 +794,12 @@ public class SideNavItemTest {
             Assert.assertFalse(
                     sideNavItem.getElement().hasProperty("pathAliases"));
         } else {
-            String aliasesProperty = sideNavItem.getElement()
-                    .getProperty("pathAliases");
-            Assert.assertNotNull(aliasesProperty);
-            JsonArray actualAliasesArray = JsonUtil.parse(aliasesProperty);
+            ArrayNode actualAliasesArray = (ArrayNode) sideNavItem.getElement()
+                    .getPropertyRaw("pathAliases");
+            Assert.assertNotNull(actualAliasesArray);
             Set<String> actualAliasesSet = new HashSet<>();
-            for (int i = 0; i < actualAliasesArray.length(); i++) {
-                actualAliasesSet.add(actualAliasesArray.getString(i));
+            for (int i = 0; i < actualAliasesArray.size(); i++) {
+                actualAliasesSet.add(actualAliasesArray.get(i).asString());
             }
             Assert.assertEquals(expectedAliases, actualAliasesSet);
         }
@@ -707,6 +813,15 @@ public class SideNavItemTest {
     @Route("foo/:k1/:k2/bar")
     private static class TestRouteWithRouteParams extends Component {
 
+    }
+
+    @Route("foo")
+    private static class TestRouteWithHasUrlParameter extends Component
+            implements HasUrlParameter<String> {
+        @Override
+        public void setParameter(BeforeEvent event, String parameter) {
+
+        }
     }
 
     @Route("foo/bar")

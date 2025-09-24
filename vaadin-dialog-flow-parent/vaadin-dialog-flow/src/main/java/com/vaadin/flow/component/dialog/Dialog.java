@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,7 +15,6 @@
  */
 package com.vaadin.flow.component.dialog;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,26 +32,23 @@ import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
-import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.Synchronize;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasThemeVariant;
-import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
-import com.vaadin.flow.dom.ClassList;
+import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementConstants;
+import com.vaadin.flow.dom.ElementDetachEvent;
 import com.vaadin.flow.dom.ElementDetachListener;
 import com.vaadin.flow.dom.Style;
-import com.vaadin.flow.internal.StateTree;
-import com.vaadin.flow.router.NavigationTrigger;
 import com.vaadin.flow.shared.Registration;
 
 /**
  * A Dialog is a small window that can be used to present information and user
- * interface elements in an overlay.
+ * interface elements.
  * <p>
  * Dialogs can be made modal or non-modal. A modal Dialog blocks the user from
  * interacting with the rest of the user interface while the Dialog is open, as
@@ -77,9 +73,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-dialog")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/dialog", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/dialog", version = "25.0.0-alpha19")
 @JsModule("@vaadin/dialog/src/vaadin-dialog.js")
 @JsModule("./flow-component-renderer.js")
 public class Dialog extends Component implements HasComponents, HasSize,
@@ -87,18 +81,13 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     private static final String OVERLAY_LOCATOR_JS = "this.$.overlay";
 
-    private boolean autoAddedToTheUi;
     private int configuredCloseActionListeners;
-    private String width;
     private String minWidth;
     private String maxWidth;
-    private String height;
     private String minHeight;
     private String maxHeight;
     private DialogHeader dialogHeader;
     private DialogFooter dialogFooter;
-
-    private Registration afterProgrammaticNavigationListenerRegistration;
 
     /**
      * Creates an empty dialog.
@@ -122,14 +111,26 @@ public class Dialog extends Component implements HasComponents, HasSize,
         });
 
         addListener(DialogResizeEvent.class, event -> {
-            width = event.getWidth();
-            height = event.getHeight();
+            setWidth(event.getWidth());
+            setHeight(event.getHeight());
+            setTop(event.getTop());
+            setLeft(event.getLeft());
         });
+
+        addListener(DialogDraggedEvent.class, event -> {
+            setTop(event.getTop());
+            setLeft(event.getLeft());
+        });
+
+        setRole("dialog");
+
+        // Initialize auto-add behavior
+        new OverlayAutoAddController<>(this, this::isModal);
     }
 
     /**
      * `vaadin-dialog-close-action` is sent when the user clicks outside the
-     * overlay or presses the escape key.
+     * dialog or presses the escape key.
      */
     @DomEvent("vaadin-dialog-close-action")
     public static class DialogCloseActionEvent extends ComponentEvent<Dialog> {
@@ -139,44 +140,155 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * `resize` event is sent when the user finishes resizing the overlay.
+     * Gets the top position of the dialog.
+     *
+     * @return the top position of the dialog
+     */
+    public String getTop() {
+        return getElement().getProperty("top");
+    }
+
+    /**
+     * Sets the top position of the dialog. If a unitless number is provided,
+     * pixels are assumed.
+     * <p>
+     * Note that the dialog top edge may not be the same as the viewport top
+     * edge (e.g. the "Lumo" theme defines some spacing to prevent the dialog
+     * from stretching all the way to the top of the viewport).
+     *
+     * @param top
+     *            the top position of the dialog
+     */
+    public void setTop(String top) {
+        getElement().setProperty("top", top);
+    }
+
+    /**
+     * Gets the left position of the dialog.
+     *
+     * @return the left position of the dialog
+     */
+    public String getLeft() {
+        return getElement().getProperty("left");
+    }
+
+    /**
+     * Sets the distance of the dialog from the left of its container. If a
+     * unitless number is provided, pixels are assumed.
+     * <p>
+     * Note that the dialog left edge may not be the same as the viewport left
+     * edge (e.g. the "Lumo" theme defines some spacing to prevent the dialog
+     * from stretching all the way to the left of the viewport).
+     *
+     * @param left
+     *            the left position of the dialog
+     */
+    public void setLeft(String left) {
+        getElement().setProperty("left", left);
+    }
+
+    /**
+     * `resize` event is sent when the user finishes resizing the dialog.
      */
     @DomEvent("resize")
     public static class DialogResizeEvent extends ComponentEvent<Dialog> {
 
         private final String width;
         private final String height;
+        private final String left;
+        private final String top;
 
         public DialogResizeEvent(Dialog source, boolean fromClient,
                 @EventData("event.detail.width") String width,
-                @EventData("event.detail.height") String height) {
+                @EventData("event.detail.height") String height,
+                @EventData("event.detail.left") String left,
+                @EventData("event.detail.top") String top) {
             super(source, fromClient);
             this.width = width;
             this.height = height;
+            this.left = left;
+            this.top = top;
         }
 
         /**
-         * Gets the width of the overlay after resize is done
+         * Gets the width of the dialog after resize is done
          *
-         * @return the width in pixels of the overlay
+         * @return the width in pixels of the dialog
          */
         public String getWidth() {
             return width;
         }
 
         /**
-         * Gets the height of the overlay after resize is done
+         * Gets the height of the dialog after resize is done
          *
-         * @return the height in pixels of the overlay
+         * @return the height in pixels of the dialog
          */
         public String getHeight() {
             return height;
         }
+
+        /**
+         * Gets the left position of the dialog after resize is done
+         *
+         * @return the left position in pixels of the dialog
+         */
+        public String getLeft() {
+            return left;
+        }
+
+        /**
+         * Gets the top position of the dialog after resize is done
+         *
+         * @return the top position in pixels of the dialog
+         */
+        public String getTop() {
+            return top;
+        }
     }
 
     /**
-     * {@code opened-changed} event is sent when the overlay opened state
-     * changes.
+     * `dragged` event is sent when the user finishes dragging the dialog.
+     */
+    @DomEvent("dragged")
+    public static class DialogDraggedEvent extends ComponentEvent<Dialog> {
+        private final String left;
+        private final String top;
+
+        public DialogDraggedEvent(Dialog source, boolean fromClient,
+                @EventData("event.detail.left") String left,
+                @EventData("event.detail.top") String top) {
+            super(source, fromClient);
+            this.left = left;
+            this.top = top;
+        }
+
+        /**
+         * Gets the left position of the dialog after dragging is done
+         *
+         * @return the left position in pixels of the dialog
+         */
+        public String getLeft() {
+            return left;
+        }
+
+        /**
+         * Gets the top position of the dialog after dragging is done
+         *
+         * @return the top position in pixels of the dialog
+         */
+        public String getTop() {
+            return top;
+        }
+    }
+
+    /**
+     * Event that is fired when the dialog's opened state changes.
+     * <p>
+     * Note that this event fires immediately when the opened property changes,
+     * which, when closing the dialog, is before the closing animation has
+     * finished. To wait for the animation to finish, listen for the
+     * {@link ClosedEvent} event.
      */
     public static class OpenedChangeEvent extends ComponentEvent<Dialog> {
         private final boolean opened;
@@ -191,10 +303,20 @@ public class Dialog extends Component implements HasComponents, HasSize,
         }
     }
 
+    /**
+     * Event that is fired after the dialog's closing animation has finished.
+     * Can be used to remove a dialog from the UI afterward.
+     */
+    @DomEvent("closed")
+    public static class ClosedEvent extends ComponentEvent<Dialog> {
+        public ClosedEvent(Dialog source, boolean fromClient) {
+            super(source, fromClient);
+        }
+    }
+
     @Override
     public void setWidth(String value) {
-        width = value;
-        setDimension(ElementConstants.STYLE_WIDTH, value);
+        getElement().setProperty("width", value);
     }
 
     @Override
@@ -211,8 +333,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public void setHeight(String value) {
-        height = value;
-        setDimension(ElementConstants.STYLE_HEIGHT, value);
+        getElement().setProperty("height", value);
     }
 
     @Override
@@ -229,7 +350,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public String getWidth() {
-        return width;
+        return getElement().getProperty("width");
     }
 
     @Override
@@ -244,7 +365,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     @Override
     public String getHeight() {
-        return height;
+        return getElement().getProperty("height");
     }
 
     @Override
@@ -271,11 +392,10 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * {@link #close()} method should be called explicitly to close the dialog
      * in case there are close listeners.
      *
-     * @see #close()
-     *
      * @param listener
      *            the listener to add
      * @return registration for removal of listener
+     * @see #close()
      */
     public Registration addDialogCloseActionListener(
             ComponentEventListener<DialogCloseActionEvent> listener) {
@@ -305,12 +425,12 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Adds a listener that is called after user finishes resizing the overlay.
-     * It is called only if resizing is enabled (see
+     * Adds a listener that is called after the user finishes resizing the
+     * dialog. It is called only if resizing is enabled (see
      * {@link Dialog#setResizable(boolean)}).
      * <p>
-     * Note: By default, the component will sync the width/height values after
-     * every resizing.
+     * Note: By default, the component will sync the width/height and top/left
+     * values after every resizing.
      *
      * @param listener
      *            the listener to add
@@ -319,6 +439,23 @@ public class Dialog extends Component implements HasComponents, HasSize,
     public Registration addResizeListener(
             ComponentEventListener<DialogResizeEvent> listener) {
         return addListener(DialogResizeEvent.class, listener);
+    }
+
+    /**
+     * Adds a listener that is called after the user finishes dragging the
+     * dialog. It is called only if dragging is enabled (see
+     * {@link Dialog#setDraggable(boolean)}).
+     * <p>
+     * Note: By default, the component will sync the top/left values after every
+     * dragging.
+     *
+     * @param listener
+     *            the listener to add
+     * @return registration for removal of listener
+     */
+    public Registration addDraggedListener(
+            ComponentEventListener<DialogDraggedEvent> listener) {
+        return addListener(DialogDraggedEvent.class, listener);
     }
 
     /**
@@ -359,10 +496,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * Adds the given components into this dialog.
-     * <p>
-     * The elements in the DOM will not be children of the
-     * {@code <vaadin-dialog>} element, but will be inserted into an overlay
-     * that is attached into the {@code <body>}.
      *
      * @param components
      *            the components to add
@@ -376,14 +509,9 @@ public class Dialog extends Component implements HasComponents, HasSize,
 
     /**
      * Adds the given component into this dialog at the given index.
-     * <p>
-     * The element in the DOM will not be child of the {@code <vaadin-dialog>}
-     * element, but will be inserted into an overlay that is attached into the
-     * {@code <body>}.
      *
      * @param index
      *            the index, where the component will be added.
-     *
      * @param component
      *            the component to add
      */
@@ -447,10 +575,14 @@ public class Dialog extends Component implements HasComponents, HasSize,
     /**
      * Opens the dialog.
      * <p>
-     * Note: You don't need to add the dialog component anywhere before opening
-     * it. Since {@code <vaadin-dialog>}'s location in the DOM doesn't really
-     * matter, opening a dialog will automatically add it to the {@code <body>}
-     * if necessary.
+     * If a dialog was not added manually to a parent component, it will be
+     * automatically added to the {@link UI} when opened, and automatically
+     * removed from the UI when closed. Note that the dialog is then scoped to
+     * the UI, and not the current view. As such, when navigating away from a
+     * view, the dialog will still be opened or stay open. In order to close the
+     * dialog when navigating away from a view, it should either be explicitly
+     * added as a child to the view, or it should be explicitly closed when
+     * leaving the view.
      */
     public void open() {
         setOpened(true);
@@ -459,8 +591,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
     /**
      * Closes the dialog.
      * <p>
-     * Note: This method also removes the dialog component from the DOM after
-     * closing it, unless you have added the component manually.
+     * This automatically removes the dialog from the {@link UI}, unless it was
+     * manually added to a parent component.
      */
     public void close() {
         setOpened(false);
@@ -617,7 +749,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * components will be attached to as well as the renderer function used by
      * the dialog.
      */
-    abstract static class DialogHeaderFooter implements Serializable {
+    abstract static class DialogHeaderFooter implements HasComponents {
         protected final Element root;
         private final String rendererFunction;
         private final Component dialog;
@@ -631,58 +763,60 @@ public class Dialog extends Component implements HasComponents, HasSize,
             root.getStyle().set("display", "contents");
         }
 
-        /**
-         * Adds the given components to the container.
-         *
-         * @param components
-         *            the components to be added.
-         */
+        @Override
         public void add(Component... components) {
-            Objects.requireNonNull(components, "Components should not be null");
-            for (Component component : components) {
-                Objects.requireNonNull(component,
-                        "Component to add cannot be null");
-                root.appendChild(component.getElement());
-            }
-            if (!isRendererCreated()) {
+            HasComponents.super.add(components);
+            updateRendererState();
+        }
+
+        @Override
+        public void add(Collection<Component> components) {
+            HasComponents.super.add(components);
+            updateRendererState();
+        }
+
+        @Override
+        public void add(String text) {
+            HasComponents.super.add(text);
+            updateRendererState();
+        }
+
+        @Override
+        public void remove(Component... components) {
+            HasComponents.super.remove(components);
+            updateRendererState();
+        }
+
+        @Override
+        public void remove(Collection<Component> components) {
+            HasComponents.super.remove(components);
+            updateRendererState();
+        }
+
+        @Override
+        public void removeAll() {
+            HasComponents.super.removeAll();
+            updateRendererState();
+        }
+
+        @Override
+        public void addComponentAtIndex(int index, Component component) {
+            HasComponents.super.addComponentAtIndex(index, component);
+            updateRendererState();
+        }
+
+        @Override
+        public void addComponentAsFirst(Component component) {
+            HasComponents.super.addComponentAsFirst(component);
+            updateRendererState();
+        }
+
+        private void updateRendererState() {
+            if (root.getChildCount() == 0) {
+                removeRenderer();
+            } else if (!isRendererCreated()) {
                 initRenderer();
             }
-        }
-
-        /**
-         * Removes the given components from the container.
-         *
-         * <p>
-         * Note that the component needs to be removed from this method in order
-         * to guarantee the correct state of the component.
-         *
-         * @param components
-         *            the components to be removed.
-         */
-        public void remove(Component... components) {
-            Objects.requireNonNull(components, "Components should not be null");
-            for (Component component : components) {
-                Objects.requireNonNull(component,
-                        "Component to remove cannot be null");
-                if (root.equals(component.getElement().getParent())) {
-                    root.removeChild(component.getElement());
-                }
-            }
-            if (root.getChildCount() == 0) {
-                dialog.getElement()
-                        .executeJs("this." + rendererFunction + " = null;");
-                setRendererCreated(false);
-            }
-        }
-
-        /**
-         * Removes all components from the container.
-         */
-        public void removeAll() {
-            root.removeAllChildren();
-            dialog.getElement()
-                    .executeJs("this." + rendererFunction + " = null;");
-            setRendererCreated(false);
         }
 
         /**
@@ -700,6 +834,12 @@ public class Dialog extends Component implements HasComponents, HasSize,
                     + " = (root) => {" + "if (root.firstChild) { "
                     + "   return;" + "}" + "root.appendChild($0);" + "}", root);
             setRendererCreated(true);
+        }
+
+        private void removeRenderer() {
+            dialog.getElement()
+                    .executeJs("this." + rendererFunction + " = null;");
+            setRendererCreated(false);
         }
 
         /**
@@ -724,6 +864,11 @@ public class Dialog extends Component implements HasComponents, HasSize,
         void setRendererCreated(boolean rendererCreated) {
             this.rendererCreated = rendererCreated;
         }
+
+        @Override
+        public Element getElement() {
+            return root;
+        }
     }
 
     /**
@@ -732,9 +877,9 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * For a modal dialog the server-side modality will be removed when dialog
      * is not visible so that interactions can be made in the application.
      *
-     * @see Component#setVisible(boolean)
      * @param visible
      *            dialog visibility
+     * @see Component#setVisible(boolean)
      */
     @Override
     public void setVisible(boolean visible) {
@@ -744,71 +889,38 @@ public class Dialog extends Component implements HasComponents, HasSize,
                 ui -> ui.setChildComponentModal(this, visible && isModal()));
     }
 
-    private UI getCurrentUI() {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        return ui;
-    }
-
-    private void ensureAttached() {
-        UI ui = getCurrentUI();
-        StateTree.ExecutionRegistration addToUiRegistration = ui
-                .beforeClientResponse(ui, context -> {
-                    if (getElement().getNode().getParent() == null
-                            && isOpened()) {
-                        ui.addToModalComponent(this);
-                        ui.setChildComponentModal(this, isModal());
-                        autoAddedToTheUi = true;
-                    }
-                    if (afterProgrammaticNavigationListenerRegistration != null) {
-                        afterProgrammaticNavigationListenerRegistration
-                                .remove();
-                    }
-                });
-        if (ui.getSession() != null) {
-            afterProgrammaticNavigationListenerRegistration = ui
-                    .addAfterNavigationListener(event -> {
-                        if (event.getLocationChangeEvent()
-                                .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
-                            addToUiRegistration.remove();
-                            afterProgrammaticNavigationListenerRegistration
-                                    .remove();
-                        }
-                    });
-        }
-    }
-
     /**
-     * Registers event listeners on the dialog's overlay that prevent it from
-     * closing itself on outside click and escape press. Instead, the event
-     * listeners delegate to the server-side {@link #handleClientClose()}
-     * method. This serves two purposes:
+     * Registers a close listener for the dialog's overlay to prevent it from
+     * closing itself. Instead, the event listener delegates to the server-side
+     * {@link #handleClientClose()} method. This serves two purposes:
      * <ul>
-     * <li>Prevent the client overlay from closing if a custom close action
+     * <li>Prevent the client dialog from closing if a custom close action
      * listener is registered</li>
-     * <li>Prevent the client overlay from closing if the server-side dialog has
+     * <li>Prevent the client dialog from closing if the server-side dialog has
      * become inert in the meantime, in which case the @ClientCallable call to
      * {@link #handleClientClose()} will never be processed</li>
      * </ul>
      */
     private void registerClientCloseHandler() {
-        //@formatter:off
-        getElement().executeJs("const listener = (e) => {"
-                + "  if (e.type == 'vaadin-overlay-escape-press' && !this.noCloseOnEsc ||"
-                + "      e.type == 'vaadin-overlay-outside-click' && !this.noCloseOnOutsideClick) {"
-                + "    e.preventDefault();"
-                + "    this.$server.handleClientClose();"
-                + "  }"
-                + "};"
-                + "this.$.overlay.addEventListener('vaadin-overlay-outside-click', listener);"
-                + "this.$.overlay.addEventListener('vaadin-overlay-escape-press', listener);");
-        //@formatter:on
+        // The web component dispatches the close event first on its overlay and
+        // then globally on the document. To allow other tools, such as Copilot,
+        // to prevent closing overlays through a global listener, we first
+        // listen for the close event on the overlay, and then add a one-time
+        // listener on the document. Only if the event was not prevented after
+        // being dispatched on the document, we prevent it ourselves and
+        // delegate closing to the server-side. Do not register the listener on
+        // the document directly, as that would leak memory.
+        getElement().executeJs(
+                """
+                          this.$.overlay.addEventListener('vaadin-overlay-close', () => {
+                            document.addEventListener('vaadin-overlay-close', (e) => {
+                              if (!e.defaultPrevented && e.detail.overlay === this.$.overlay) {
+                                e.preventDefault();
+                                this.$server.handleClientClose();
+                              }
+                            }, { once: true });
+                          });
+                        """);
     }
 
     @ClientCallable
@@ -827,10 +939,14 @@ public class Dialog extends Component implements HasComponents, HasSize,
     /**
      * Opens or closes the dialog.
      * <p>
-     * Note: You don't need to add the dialog component anywhere before opening
-     * it. Since {@code <vaadin-dialog>}'s location in the DOM doesn't really
-     * matter, opening a dialog will automatically add it to the {@code <body>}
-     * if necessary.
+     * If a dialog was not added manually to a parent component, it will be
+     * automatically added to the {@link UI} when opened, and automatically
+     * removed from the UI when closed. Note that the dialog is then scoped to
+     * the UI, and not the current view. As such, when navigating away from a
+     * view, the dialog will still be opened or stay open. In order to close the
+     * dialog when navigating away from a view, it should either be explicitly
+     * added as a child to the view, or it should be explicitly closed when
+     * leaving the view.
      *
      * @param opened
      *            {@code true} to open the dialog, {@code false} to close it
@@ -842,12 +958,6 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     private void doSetOpened(boolean opened, boolean fromClient) {
-        if (opened) {
-            ensureAttached();
-        } else if (autoAddedToTheUi) {
-            getElement().removeFromParent();
-            autoAddedToTheUi = false;
-        }
         setModality(opened && isModal());
         getElement().setProperty("opened", opened);
         fireEvent(new OpenedChangeEvent(this, fromClient));
@@ -858,7 +968,7 @@ public class Dialog extends Component implements HasComponents, HasSize,
      *
      * @return the {@code opened} property from the dialog
      */
-    @Synchronize(property = "opened", value = "opened-changed")
+    @Synchronize(property = "opened", value = "opened-changed", allowInert = true)
     public boolean isOpened() {
         return getElement().getProperty("opened", false);
     }
@@ -870,7 +980,12 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     /**
-     * Add a lister for event fired by the {@code opened-changed} events.
+     * Add a listener for when the dialog's opened state changes.
+     * <p>
+     * Note that this event fires immediately when the opened property changes,
+     * which, when closing the dialog, is before the closing animation has
+     * finished. To wait for the animation to finish, use
+     * {@link #addClosedListener(ComponentEventListener)}.
      *
      * @param listener
      *            the listener to add
@@ -879,6 +994,19 @@ public class Dialog extends Component implements HasComponents, HasSize,
     public Registration addOpenedChangeListener(
             ComponentEventListener<OpenedChangeEvent> listener) {
         return addListener(OpenedChangeEvent.class, listener);
+    }
+
+    /**
+     * Add a lister for when the dialog's closing animation has finished. Can be
+     * used to remove the dialog from the UI afterward.
+     *
+     * @param listener
+     *            the listener to add
+     * @return a Registration for removing the event listener
+     */
+    public Registration addClosedListener(
+            ComponentEventListener<ClosedEvent> listener) {
+        return addListener(ClosedEvent.class, listener);
     }
 
     /**
@@ -897,8 +1025,8 @@ public class Dialog extends Component implements HasComponents, HasSize,
      * {@inheritDoc}
      * <p>
      * Note: To listen for closing the dialog, you should use
-     * {@link #addOpenedChangeListener(ComponentEventListener)}, as the
-     * component is not necessarily removed from the DOM when closing.
+     * {@link #addClosedListener(ComponentEventListener)}, as the component is
+     * not necessarily removed from the DOM when closing.
      */
     @Override
     public Registration addDetachListener(
@@ -907,19 +1035,25 @@ public class Dialog extends Component implements HasComponents, HasSize,
     }
 
     private Map<Element, Registration> childDetachListenerMap = new HashMap<>();
-    private ElementDetachListener childDetachListener = e -> {
-        var child = e.getSource();
-        var childDetachedFromContainer = !getElement().getChildren().anyMatch(
-                containerChild -> Objects.equals(child, containerChild));
+    // Must not use lambda here as that would break serialization. See
+    // https://github.com/vaadin/flow-components/issues/5597
+    private ElementDetachListener childDetachListener = new ElementDetachListener() {
+        @Override
+        public void onDetach(ElementDetachEvent e) {
+            var child = e.getSource();
+            var childDetachedFromContainer = !getElement().getChildren()
+                    .anyMatch(containerChild -> Objects.equals(child,
+                            containerChild));
 
-        if (childDetachedFromContainer) {
-            // The child was removed from the dialog
+            if (childDetachedFromContainer) {
+                // The child was removed from the dialog
 
-            // Remove the registration for the child detach listener
-            childDetachListenerMap.get(child).remove();
-            childDetachListenerMap.remove(child);
+                // Remove the registration for the child detach listener
+                childDetachListenerMap.get(child).remove();
+                childDetachListenerMap.remove(child);
 
-            this.updateVirtualChildNodeIds();
+                updateVirtualChildNodeIds();
+            }
         }
     };
 
@@ -952,13 +1086,57 @@ public class Dialog extends Component implements HasComponents, HasSize,
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
 
-        // vaadin/flow#7799,vaadin/vaadin-dialog#229
-        // as the locator is stored inside component's attributes, no need to
-        // remove the data as it should live as long as the component does
-        Shortcuts.setShortcutListenOnElement(OVERLAY_LOCATOR_JS, this);
         initHeaderFooterRenderer();
         updateVirtualChildNodeIds();
         registerClientCloseHandler();
+    }
+
+    /**
+     * Sets the ARIA role for the dialog element, used by screen readers.
+     *
+     * @param role
+     *            the role to set
+     */
+    public void setRole(String role) {
+        Objects.requireNonNull(role, "Role cannot be null");
+
+        getElement().setProperty("role", role);
+    }
+
+    /**
+     * Sets the ARIA role for the dialog element, used by screen readers.
+     *
+     * @param role
+     *            the role to set
+     * @deprecated Use {@link #setRole(String)} instead
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
+    public void setOverlayRole(String role) {
+        Objects.requireNonNull(role, "Role cannot be null");
+
+        setRole(role);
+    }
+
+    /**
+     * Gets the ARIA role for the dialog element, used by screen readers.
+     * Defaults to {@code dialog}.
+     *
+     * @return the role
+     */
+    public String getRole() {
+        return getElement().getProperty("role");
+    }
+
+    /**
+     * Gets the ARIA role for the dialog element, used by screen readers.
+     * Defaults to {@code dialog}.
+     *
+     * @return the role
+     * @deprecated Use {@link #getRole()} instead
+     */
+    @Deprecated(since = "25.0", forRemoval = true)
+    public String getOverlayRole() {
+        return getRole();
     }
 
     /**
@@ -1016,42 +1194,19 @@ public class Dialog extends Component implements HasComponents, HasSize,
                 "this.renderer = (root) => Vaadin.FlowComponentHost.setChildNodes($0, this.virtualChildNodeIds, root)",
                 appId);
 
-        setDimension(ElementConstants.STYLE_WIDTH, width);
         setDimension(ElementConstants.STYLE_MIN_WIDTH, minWidth);
         setDimension(ElementConstants.STYLE_MAX_WIDTH, maxWidth);
-        setDimension(ElementConstants.STYLE_HEIGHT, height);
         setDimension(ElementConstants.STYLE_MIN_HEIGHT, minHeight);
         setDimension(ElementConstants.STYLE_MAX_HEIGHT, maxHeight);
     }
 
     /**
-     * Sets the CSS class names of the dialog overlay element. This method
-     * overwrites any previous set class names.
-     *
-     * @param className
-     *            a space-separated string of class names to set, or
-     *            <code>null</code> to remove all class names
-     */
-    @Override
-    public void setClassName(String className) {
-        getClassNames().clear();
-        if (className != null) {
-            addClassNames(className.split(" "));
-        }
-    }
-
-    @Override
-    public ClassList getClassNames() {
-        return new OverlayClassListProxy(this);
-    }
-
-    /**
      * @throws UnsupportedOperationException
-     *             Dialog does not support adding styles to overlay
+     *             Dialog does not support adding styles
      */
     @Override
     public Style getStyle() {
         throw new UnsupportedOperationException(
-                "Dialog does not support adding styles to overlay");
+                "Dialog does not support adding styles");
     }
 }

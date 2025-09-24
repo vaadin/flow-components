@@ -1,15 +1,21 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.test;
 
-import com.google.common.base.Predicate;
-import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
-import com.vaadin.flow.component.html.testbench.DivElement;
-import com.vaadin.flow.component.spreadsheet.testbench.AddressUtil;
-import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
-import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
-import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
-import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
-import com.vaadin.testbench.TestBenchElement;
-import com.vaadin.tests.AbstractComponentIT;
+import java.util.List;
+import java.util.Locale;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
+
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,17 +29,19 @@ import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.logging.Level;
-import java.util.stream.Collectors;
+import com.google.common.base.Predicate;
+import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
+import com.vaadin.flow.component.html.testbench.DivElement;
+import com.vaadin.flow.component.spreadsheet.testbench.AddressUtil;
+import com.vaadin.flow.component.spreadsheet.testbench.SheetCellElement;
+import com.vaadin.flow.component.spreadsheet.testbench.SpreadsheetElement;
+import com.vaadin.flow.component.spreadsheet.tests.fixtures.TestFixtures;
+import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
-    // Should be COMMAND for macOS
-    private Keys metaKey = Keys.CONTROL;
     private SpreadsheetElement spreadsheet;
     private static final String BACKGROUND_COLOR = "background-color";
 
@@ -145,16 +153,13 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
 
     private void selectElement(WebElement element, boolean ctrl,
             boolean shift) {
+        Keys metaKey = isMac() ? Keys.COMMAND : Keys.CONTROL;
         if (ctrl) {
             new Actions(getDriver()).moveToElement(element).keyDown(metaKey)
                     .click().keyUp(metaKey).build().perform();
         } else if (shift) {
             new Actions(getDriver()).moveToElement(element).keyDown(Keys.SHIFT)
                     .click().keyUp(Keys.SHIFT).build().perform();
-        } else if (ctrl && shift) {
-            new Actions(getDriver()).moveToElement(element).keyDown(Keys.SHIFT)
-                    .keyDown(metaKey).click().keyUp(Keys.SHIFT).keyUp(metaKey)
-                    .build().perform();
         } else {
             new Actions(getDriver()).moveToElement(element).click().build()
                     .perform();
@@ -229,7 +234,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     public boolean isCellActiveWithinSelection(String address) {
         SheetCellElement cell = getSpreadsheet().getCellAt(address);
         return cell.isCellSelected()
-                && !cell.getAttribute("class").contains("cell-range");
+                && !cell.getClassNames().contains("cell-range");
     }
 
     public void clickOnColumnHeader(String columnAddress, Keys... modifiers) {
@@ -349,7 +354,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     public void setLocale(Locale locale) {
         ComboBoxElement localeSelect = $(ComboBoxElement.class)
                 .id("localeSelect");
-        localeSelect.selectByText(locale.getDisplayName());
+        localeSelect.selectByText(locale.getDisplayName(Locale.ENGLISH));
     }
 
     public void loadTestFixture(TestFixtures fixture) {
@@ -398,7 +403,7 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     }
 
     public String getAddressFieldValue() {
-        return getAddressField().getAttribute("value");
+        return getAddressField().getDomProperty("value");
     }
 
     public void setAddressFieldValue(String address) {
@@ -416,15 +421,15 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
     }
 
     public String getFormulaFieldValue() {
-        return getFormulaField().getAttribute("value");
+        return getFormulaField().getDomProperty("value");
     }
 
     public String getSelectionFormula() {
         final var sprElement = getSpreadsheet();
 
-        WebElement selection = findElementInShadowRoot(
-                org.openqa.selenium.By.className("sheet-selection"));
-        final String[] classes = selection.getAttribute("class").split(" ");
+        TestBenchElement selection = sprElement.$("*")
+                .withClassName("sheet-selection").first();
+        final Set<String> classes = selection.getClassNames();
 
         int startRow = -1;
         int startColumn = -1;
@@ -552,6 +557,21 @@ public abstract class AbstractSpreadsheetIT extends AbstractComponentIT {
         findElementInShadowRoot(By.cssSelector(".addressfield")).clear();
         findElementInShadowRoot(By.cssSelector(".addressfield")).sendKeys(cell);
         new Actions(getDriver()).sendKeys(Keys.RETURN).perform();
+    }
+
+    /**
+     * Suppresses the overlay that appears when hovering over a cell with an
+     * invalid formula. The overlay can appear when using setCellValue, and can
+     * cause subsequent button clicks to fail. Can be used in tests that enter
+     * invalid formulas in cells to test the invalid formular indicator (though
+     * obviously not in tests that check the overlay itself).
+     */
+    public void suppressInvalidFormulaCommentOverlay() {
+        executeScript("""
+                arguments[0].addEventListener("mouseover", e => {
+                  e.stopPropagation();
+                }, true);
+                """, getSpreadsheetInShadowRoot());
     }
 
     // Context menu helpers

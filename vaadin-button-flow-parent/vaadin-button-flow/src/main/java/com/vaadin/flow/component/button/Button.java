@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,7 +15,13 @@
  */
 package com.vaadin.flow.component.button;
 
-import com.vaadin.flow.component.AttachEvent;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import com.vaadin.experimental.Feature;
+import com.vaadin.experimental.FeatureFlags;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
@@ -26,26 +32,22 @@ import com.vaadin.flow.component.HasEnabled;
 import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.HasText;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.KeyModifier;
+import com.vaadin.flow.component.ShortcutRegistration;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.shared.HasPrefix;
 import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.internal.DisableOnClickController;
+import com.vaadin.flow.dom.DisabledUpdateMode;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.internal.nodefeature.ElementAttributeMap;
-import com.vaadin.flow.internal.nodefeature.NodeFeature;
 import com.vaadin.flow.shared.Registration;
-
-import java.io.Serializable;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * The Button component allows users to perform actions. It comes in several
@@ -54,11 +56,8 @@ import java.util.stream.Stream;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-button")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/button", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/button", version = "25.0.0-alpha19")
 @JsModule("@vaadin/button/src/vaadin-button.js")
-@JsModule("./buttonFunctions.js")
 public class Button extends Component
         implements ClickNotifier<Button>, Focusable<Button>, HasAriaLabel,
         HasEnabled, HasPrefix, HasSize, HasStyle, HasSuffix, HasText,
@@ -66,16 +65,8 @@ public class Button extends Component
 
     private Component iconComponent;
     private boolean iconAfterText;
-    private boolean disableOnClick = false;
-    private PendingJavaScriptResult initDisableOnClick;
-
-    // Register immediately as first listener
-    private Registration disableListener = addClickListener(
-            buttonClickEvent -> {
-                if (disableOnClick) {
-                    doDisableOnClick();
-                }
-            });
+    private final DisableOnClickController<Button> disableOnClickController = new DisableOnClickController<>(
+            this);
 
     /**
      * Default constructor. Creates an empty button.
@@ -271,15 +262,17 @@ public class Button extends Component
     }
 
     /**
-     * Simulates a click on this button on the server side. Calling this method
-     * executes all registered click listeners on the server side, but does not
-     * execute possible client side registered listeners.
+     * Simulates a click on this button on the server side if it is enabled.
+     * Calling this method executes all registered click listeners on the server
+     * side, but does not execute possible client side registered listeners.
      *
      * @see #clickInClient()
      */
     public void click() {
-        fireEvent(new ClickEvent<>(this, false, 0, 0, 0, 0, 0, 0, false, false,
-                false, false));
+        if (isEnabled()) {
+            fireEvent(new ClickEvent<>(this, false, 0, 0, 0, 0, 0, 0, false,
+                    false, false, false));
+        }
     }
 
     /**
@@ -332,44 +325,131 @@ public class Button extends Component
     }
 
     /**
-     * Set the button so that it is disabled on click.
+     * Sets whether the button should be disabled when clicked.
      * <p>
-     * Enabling the button needs to happen from the server.
+     * When set to {@code true}, the button will be immediately disabled on the
+     * client-side when clicked, preventing further clicks until re-enabled from
+     * the server-side.
      *
      * @param disableOnClick
-     *            true to disable button immediately when clicked
+     *            whether the button should be disabled when clicked
      */
     public void setDisableOnClick(boolean disableOnClick) {
-        this.disableOnClick = disableOnClick;
-        if (disableOnClick) {
-            getElement().setAttribute("disableOnClick", "true");
-            initDisableOnClick();
-        } else {
-            getElement().removeAttribute("disableOnClick");
-        }
+        disableOnClickController.setDisableOnClick(disableOnClick);
     }
 
     /**
-     * Get if button is set to be disabled on click.
+     * Gets whether the button is set to be disabled when clicked.
      *
-     * @return {@code true} if button gets disabled on click, else {@code false}
+     * @return whether button is set to be disabled on click
      */
     public boolean isDisableOnClick() {
-        return disableOnClick;
+        return disableOnClickController.isDisableOnClick();
     }
 
     /**
-     * Initialize client side disabling so disabled if immediate on click even
-     * if server-side handling takes some time.
+     * Sets the button explicitly disabled or enabled. When disabled, the button
+     * is rendered as "dimmed" and prevents all user interactions (mouse and
+     * keyboard).
+     * <p>
+     * Since disabled buttons are not focusable and cannot react to hover events
+     * by default, it can cause accessibility issues by making them entirely
+     * invisible to assistive technologies, and prevents the use of Tooltips to
+     * explain why the action is not available. This can be addressed with the
+     * feature flag {@code accessibleDisabledButtons}, which makes disabled
+     * buttons focusable and hoverable, while preventing them from being
+     * triggered. To enable this feature flag, add the following line to
+     * {@code src/main/resources/vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.accessibleDisabledButtons = true
+     * </pre>
+     *
+     * This feature flag will also enable focus events and focus shortcuts for
+     * disabled buttons.
      */
-    private void initDisableOnClick() {
-        if (initDisableOnClick == null) {
-            initDisableOnClick = getElement().executeJs(
-                    "window.Vaadin.Flow.button.initDisableOnClick($0)");
-            getElement().getNode()
-                    .runWhenAttached(ui -> ui.beforeClientResponse(this,
-                            executionContext -> this.initDisableOnClick = null));
+    @Override
+    public void setEnabled(boolean enabled) {
+        Focusable.super.setEnabled(enabled);
+        disableOnClickController.onSetEnabled(enabled);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * By default, focus shortcuts are only active when the button is enabled.
+     * To make disabled buttons also focusable, enable the following feature
+     * flag in {@code src/main/resources/vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.accessibleDisabledButtons = true
+     * </pre>
+     *
+     * This feature flag will enable focus events and focus shortcuts for
+     * disabled buttons.
+     */
+    @Override
+    public ShortcutRegistration addFocusShortcut(Key key,
+            KeyModifier... keyModifiers) {
+        ShortcutRegistration registration = Focusable.super.addFocusShortcut(
+                key, keyModifiers);
+        if (isFeatureFlagEnabled(FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS)) {
+            registration.setDisabledUpdateMode(DisabledUpdateMode.ALWAYS);
         }
+        return registration;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * By default, buttons are only focusable in the enabled state. To make
+     * disabled buttons also focusable, enable the following feature flag in
+     * {@code src/main/resources/vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.accessibleDisabledButtons = true
+     * </pre>
+     *
+     * This feature flag will enable focus events and focus shortcuts for
+     * disabled buttons.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Registration addFocusListener(
+            ComponentEventListener<FocusEvent<Button>> listener) {
+        return getEventBus().addListener(FocusEvent.class,
+                (ComponentEventListener) listener, registration -> {
+                    if (isFeatureFlagEnabled(
+                            FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS)) {
+                        registration.setDisabledUpdateMode(
+                                DisabledUpdateMode.ALWAYS);
+                    }
+                });
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * By default, buttons are only focusable in the enabled state. To make
+     * disabled buttons also focusable, enable the following feature flag in
+     * {@code src/main/resources/vaadin-featureflags.properties}:
+     *
+     * <pre>
+     * com.vaadin.experimental.accessibleDisabledButtons = true
+     * </pre>
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Registration addBlurListener(
+            ComponentEventListener<BlurEvent<Button>> listener) {
+        return getEventBus().addListener(BlurEvent.class,
+                (ComponentEventListener) listener, registration -> {
+                    if (isFeatureFlagEnabled(
+                            FeatureFlags.ACCESSIBLE_DISABLED_BUTTONS)) {
+                        registration.setDisabledUpdateMode(
+                                DisabledUpdateMode.ALWAYS);
+                    }
+                });
     }
 
     private void updateIconSlot() {
@@ -402,8 +482,6 @@ public class Button extends Component
      * {@code exclusion} array. This includes child components, text content as
      * well as child elements that have been added directly to this component
      * using the {@link Element} API.
-     *
-     * @see Button#removeAll()
      */
     private void removeAll(Element... exclusion) {
         Set<Element> toExclude = Stream.of(exclusion)
@@ -436,41 +514,21 @@ public class Button extends Component
         }
     }
 
-    /*
-     * https://github.com/vaadin/vaadin-button-flow/issues/115 because of the
-     * latency compensation, we need to hack the "diffstate" for the server side
-     * state, so that the disabled value can be reverted during the same
-     * roundtrip.
+    /**
+     * Checks whether the given feature flag is active.
+     *
+     * @param feature
+     *            the feature flag to check
+     * @return {@code true} if the feature flag is active, {@code false}
+     *         otherwise
      */
-    private void doDisableOnClick() {
-        ElementAttributeMap elementAttributeMap = getElement().getNode()
-                .getFeature(ElementAttributeMap.class);
-        elementAttributeMap.set("disabled", "true");
-        Map<NodeFeature, Serializable> changes = getElement().getNode()
-                .getChangeTracker(elementAttributeMap, () -> null);
-        // Remove the change, if it was applied. It should have been
-        // applied unless something else has done the exact same thing already
-        // (which is almost impossible, but ...)
-        if (changes != null) {
-            changes.remove("disabled");
-            setEnabled(false);
-            getUI().ifPresent(
-                    ui -> ui.beforeClientResponse(this, executionContext -> {
-                        // in case the disabled status was reverted,
-                        // the client might not update the value in
-                        // case it was that already
-                        if (isEnabled()) {
-                            executionContext.getUI().getPage().executeJs(
-                                    "$0.disabled = false;", getElement());
-                        }
-                    }));
+    private boolean isFeatureFlagEnabled(Feature feature) {
+        UI ui = UI.getCurrent();
+        if (ui == null) {
+            return false;
         }
-    }
 
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        if (isDisableOnClick()) {
-            initDisableOnClick();
-        }
+        return FeatureFlags.get(ui.getSession().getService().getContext())
+                .isEnabled(feature);
     }
 }

@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.component.spreadsheet.client;
@@ -43,15 +43,12 @@ import com.vaadin.client.ServerConnector;
 import com.vaadin.client.annotations.OnStateChange;
 import com.vaadin.client.communication.JsonDecoder;
 import com.vaadin.client.metadata.ConnectorBundleLoader;
-import com.vaadin.client.metadata.ConnectorBundleLoader.CValUiInfo;
 import com.vaadin.client.metadata.InvokationHandler;
 import com.vaadin.client.metadata.OnStateChangeMethod;
 import com.vaadin.client.metadata.ProxyHandler;
 import com.vaadin.client.metadata.TypeData;
 import com.vaadin.client.metadata.TypeDataStore;
 import com.vaadin.client.metadata.TypeDataStore.MethodAttribute;
-import com.vaadin.client.ui.UnknownComponentConnector;
-import com.vaadin.client.ui.UnknownExtensionConnector;
 import com.vaadin.server.widgetsetutils.metadata.ClientRpcVisitor;
 import com.vaadin.server.widgetsetutils.metadata.ConnectorBundle;
 import com.vaadin.server.widgetsetutils.metadata.ConnectorInitVisitor;
@@ -65,13 +62,8 @@ import com.vaadin.server.widgetsetutils.metadata.TypeVisitor;
 import com.vaadin.server.widgetsetutils.metadata.WidgetInitVisitor;
 import com.vaadin.shared.annotations.DelegateToWidget;
 import com.vaadin.shared.annotations.NoLayout;
-import com.vaadin.shared.communication.ClientRpc;
-import com.vaadin.shared.communication.ServerRpc;
 import com.vaadin.shared.ui.Connect;
 import com.vaadin.shared.ui.Connect.LoadStyle;
-import com.vaadin.tools.CvalAddonsChecker;
-import com.vaadin.tools.CvalChecker;
-import com.vaadin.tools.CvalChecker.InvalidCvalException;
 import com.vaadin.tools.ReportUsage;
 
 public class ConnectorBundleLoaderFactory extends Generator {
@@ -218,8 +210,6 @@ public class ConnectorBundleLoaderFactory extends Generator {
         ReportUsage.checkForUpdatesInBackgroundThread();
     }
 
-    private CvalAddonsChecker cvalChecker = new CvalAddonsChecker();
-
     @Override
     public String generate(TreeLogger logger, GeneratorContext context,
             String typeName) throws UnableToCompleteException {
@@ -249,23 +239,6 @@ public class ConnectorBundleLoaderFactory extends Generator {
                 className);
         if (printWriter == null) {
             return;
-        }
-
-        List<CValUiInfo> cvalInfos = null;
-        try {
-            if (cvalChecker != null) {
-                cvalInfos = cvalChecker.run();
-                // Don't run twice
-                cvalChecker = null;
-            }
-        } catch (InvalidCvalException e) {
-            System.err.println("\n\n\n\n" + CvalChecker.LINE);
-            for (String line : e.getMessage().split("\n")) {
-                System.err.println(line);
-            }
-            System.err.println(CvalChecker.LINE + "\n\n\n\n");
-            System.exit(1);
-            throw new UnableToCompleteException();
         }
 
         List<ConnectorBundle> bundles = buildBundles(logger,
@@ -380,18 +353,6 @@ public class ConnectorBundleLoaderFactory extends Generator {
             // Close add(new ...
             w.outdent();
             w.println("});");
-        }
-
-        if (cvalInfos != null && !cvalInfos.isEmpty()) {
-            w.println("{");
-            for (CValUiInfo c : cvalInfos) {
-                if ("evaluation".equals(c.type)) {
-                    w.println("cvals.add(new CValUiInfo(\"" + c.product
-                            + "\", \"" + c.version + "\", \"" + c.widgetset
-                            + "\", null));");
-                }
-            }
-            w.println("}");
         }
 
         w.outdent();

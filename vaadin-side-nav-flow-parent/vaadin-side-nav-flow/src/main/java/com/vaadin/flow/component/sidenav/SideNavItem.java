@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,24 +15,6 @@
  */
 package com.vaadin.flow.component.sidenav;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.Synchronize;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.HasPrefix;
-import com.vaadin.flow.component.shared.HasSuffix;
-import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.internal.JsonSerializer;
-import com.vaadin.flow.internal.UrlUtil;
-import com.vaadin.flow.router.QueryParameters;
-import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.router.RouteConfiguration;
-import com.vaadin.flow.router.RouteParameters;
-import com.vaadin.flow.router.internal.ConfigureRoutes;
-import elemental.json.JsonArray;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -41,6 +23,29 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.HasEnabled;
+import com.vaadin.flow.component.Synchronize;
+import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.NpmPackage;
+import com.vaadin.flow.component.shared.HasPrefix;
+import com.vaadin.flow.component.shared.HasSuffix;
+import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.internal.JacksonSerializer;
+import com.vaadin.flow.internal.UrlUtil;
+import com.vaadin.flow.router.HasUrlParameter;
+import com.vaadin.flow.router.QueryParameters;
+import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.router.internal.ConfigureRoutes;
+import com.vaadin.flow.router.internal.HasUrlParameterFormat;
+
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * A menu item for the {@link SideNav} component.
@@ -53,10 +58,10 @@ import java.util.stream.Collectors;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-side-nav-item")
-@NpmPackage(value = "@vaadin/side-nav", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/side-nav", version = "25.0.0-alpha19")
 @JsModule("@vaadin/side-nav/src/vaadin-side-nav-item.js")
-public class SideNavItem extends SideNavItemContainer
-        implements HasPrefix, HasSuffix {
+public class SideNavItem extends Component implements HasSideNavItems,
+        HasEnabled, HasPrefix, HasSuffix, HasTooltip {
 
     private Element labelElement;
 
@@ -99,6 +104,26 @@ public class SideNavItem extends SideNavItemContainer
     public SideNavItem(String label, Class<? extends Component> view) {
         setPath(view);
         setLabel(label);
+    }
+
+    /**
+     * Creates a new menu item using the given label that links to the given
+     * view, which must implement {@link HasUrlParameter}.
+     *
+     * @param label
+     *            the label for the item
+     * @param view
+     *            the view to link to, must implement {@link HasUrlParameter}
+     * @param parameter
+     *            the URL parameter for the view
+     * @param <T>
+     *            the type of the URL parameter
+     * @param <C>
+     *            the type of the view
+     */
+    public <T, C extends Component & HasUrlParameter<T>> SideNavItem(
+            String label, Class<? extends C> view, T parameter) {
+        this(label, view, HasUrlParameterFormat.getParameters(parameter));
     }
 
     /**
@@ -171,11 +196,6 @@ public class SideNavItem extends SideNavItemContainer
         setPath(view, routeParameters);
         setLabel(label);
         setPrefixComponent(prefixComponent);
-    }
-
-    @Override
-    protected void setupSideNavItem(SideNavItem item) {
-        item.getElement().setAttribute("slot", "children");
     }
 
     /**
@@ -272,6 +292,33 @@ public class SideNavItem extends SideNavItemContainer
      *
      * @param view
      *            The view to link to. The view should be annotated with the
+     *            {@link com.vaadin.flow.router.Route} annotation and must
+     *            implement {@link HasUrlParameter}. Set to null to disable
+     *            navigation for this item.
+     * @param parameter
+     *            the URL parameter for the view
+     * @param <T>
+     *            the type of the URL parameter
+     * @param <C>
+     *            the type of the view
+     */
+    public <T, C extends Component & HasUrlParameter<T>> void setPath(
+            Class<? extends C> view, T parameter) {
+        setPath(view, HasUrlParameterFormat.getParameters(parameter));
+    }
+
+    /**
+     * Retrieves {@link com.vaadin.flow.router.Route} and
+     * {@link com.vaadin.flow.router.RouteAlias} annotations from the specified
+     * view, and then sets the corresponding path and path aliases for this
+     * item.
+     * <p>
+     * Note: Vaadin Router will be used to determine the URL path of the view
+     * and this URL will be then set to this navigation item using
+     * {@link SideNavItem#setPath(String)}.
+     *
+     * @param view
+     *            The view to link to. The view should be annotated with the
      *            {@link com.vaadin.flow.router.Route} annotation. Set to null
      *            to disable navigation for this item.
      * @param routeParameters
@@ -325,13 +372,13 @@ public class SideNavItem extends SideNavItemContainer
      * @return the path aliases for this item, empty if none
      */
     public Set<String> getPathAliases() {
-        JsonArray pathAliases = (JsonArray) getElement()
+        ArrayNode pathAliases = (ArrayNode) getElement()
                 .getPropertyRaw("pathAliases");
         if (pathAliases == null) {
             return Collections.emptySet();
         }
         return new HashSet<>(
-                JsonSerializer.toObjects(String.class, pathAliases));
+                JacksonSerializer.toObjects(String.class, pathAliases));
     }
 
     /**
@@ -348,13 +395,125 @@ public class SideNavItem extends SideNavItemContainer
         if (pathAliases == null || pathAliases.isEmpty()) {
             getElement().removeProperty("pathAliases");
         } else {
-            JsonArray aliasesAsJson = JsonSerializer.toJson(pathAliases.stream()
+            ArrayNode aliasesAsJson = JacksonSerializer.toJson(pathAliases
+                    .stream()
                     .map(alias -> Objects.requireNonNull(alias,
                             "Alias to set cannot be null"))
                     .map(this::updateQueryParameters).map(this::sanitizePath)
                     .collect(Collectors.toSet()));
             getElement().setPropertyJson("pathAliases", aliasesAsJson);
         }
+    }
+
+    /**
+     * Gets the target of this item.
+     *
+     * @return the target of this item
+     */
+    public String getTarget() {
+        return getElement().getProperty("target");
+    }
+
+    /**
+     * Where to display the linked URL, as the name for a browsing context.
+     * <p>
+     * The following keywords have special meanings for where to load the URL:
+     * <ul>
+     * <li><code>_self</code>: the current browsing context. (Default)</li>
+     * <li><code>_blank</code>: usually a new tab, but users can configure
+     * browsers to open a new window instead.</li>
+     * <li><code>_parent</code>: the parent browsing context of the current one.
+     * If no parent, behaves as <code>_self</code>.</li>
+     * <li><code>_top</code>: the topmost browsing context (the "highest"
+     * context that’s an ancestor of the current one). If no ancestors, behaves
+     * as <code>_self</code>.</li>
+     * </ul>
+     * </p>
+     *
+     * @param target
+     *            the target of this item
+     */
+    public void setTarget(String target) {
+        if (target == null) {
+            getElement().removeProperty("target");
+        } else {
+            getElement().setProperty("target", target);
+        }
+    }
+
+    /**
+     * Gets whether this item also matches nested paths / routes.
+     *
+     * @return true if this item also matches nested paths / routes, false
+     *         otherwise
+     */
+    public boolean isMatchNested() {
+        return getElement().getProperty("matchNested", false);
+    }
+
+    /**
+     * Sets whether to also match nested paths / routes. {@code false} by
+     * default.
+     * <p>
+     * When enabled, an item with the path {@code /path} is considered current
+     * when the browser URL is {@code /path}, {@code /path/child},
+     * {@code /path/child/grandchild}, etc.
+     * <p>
+     * Note that this only affects matching of the URLs path, not the base
+     * origin or query parameters.
+     *
+     * @param value
+     *            true to also match nested paths / routes, false otherwise
+     */
+    public void setMatchNested(boolean value) {
+        getElement().setProperty("matchNested", value);
+    }
+
+    /**
+     * @return true if this item should be ignored by the Vaadin router and
+     *         behave like a regular anchor.
+     */
+    public boolean isRouterIgnore() {
+        return getElement().getProperty("routerIgnore", false);
+    }
+
+    /**
+     * The routing mechanism in Vaadin by default intercepts all side nav items
+     * with a relative URL. This method can be used to make the router ignore
+     * this item. This makes it behave like a regular anchor, causing a full
+     * page load.
+     *
+     * @param ignore
+     *            true if this item should not be intercepted by the single-page
+     *            web application routing mechanism in Vaadin.
+     */
+    public void setRouterIgnore(boolean ignore) {
+        getElement().setProperty("routerIgnore", ignore);
+    }
+
+    /**
+     * Sets whether the target URL should be opened in a new browser tab.
+     * <p>
+     * This is a convenience method for setting the target to
+     * <code>_blank</code>. See {@link #setTarget(String)} for more information.
+     * </p>
+     *
+     * @param openInNewBrowserTab
+     *            true if the target URL should be opened in a new browser tab,
+     *            false otherwise
+     */
+    public void setOpenInNewBrowserTab(boolean openInNewBrowserTab) {
+        setTarget(openInNewBrowserTab ? "_blank" : null);
+    }
+
+    /**
+     * Gets whether the target URL should be opened in a new browser tab.
+     *
+     * @return true if the target URL should be opened in a new browser tab,
+     *         false otherwise
+     */
+    public boolean isOpenInNewBrowserTab() {
+        return "_blank".equals(getTarget());
     }
 
     private Set<String> getPathAliasesFromView(Class<? extends Component> view,

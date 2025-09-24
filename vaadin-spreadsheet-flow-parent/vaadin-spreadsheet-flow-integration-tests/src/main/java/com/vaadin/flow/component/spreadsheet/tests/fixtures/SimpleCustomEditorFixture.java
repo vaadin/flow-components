@@ -1,7 +1,23 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.tests.fixtures;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Sheet;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -9,12 +25,6 @@ import com.vaadin.flow.component.spreadsheet.Spreadsheet;
 import com.vaadin.flow.component.spreadsheet.SpreadsheetComponentFactory;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Sheet;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 
 public class SimpleCustomEditorFixture implements SpreadsheetFixture {
 
@@ -30,6 +40,7 @@ public class SimpleCustomEditorFixture implements SpreadsheetFixture {
                     componentType.getHeaderText());
         }
         spreadsheet.setSpreadsheetComponentFactory(new CustomEditorFactory());
+        spreadsheet.setColumnWidth(0, 200);
     }
 
     private static class CustomEditorFactory
@@ -48,7 +59,18 @@ public class SimpleCustomEditorFixture implements SpreadsheetFixture {
         @Override
         public Component getCustomComponentForCell(Cell cell, int rowIndex,
                 int columnIndex, Spreadsheet spreadsheet, Sheet sheet) {
-            return null;
+            if (rowIndex != 0 || columnIndex != 0) {
+                return null;
+            }
+
+            Button toggleCustomEditorVisibilityButton = new Button(
+                    "Toggle custom editor", event -> {
+                        spreadsheet.setShowCustomEditorOnFocus(
+                                !spreadsheet.isShowCustomEditorOnFocus());
+                    });
+            toggleCustomEditorVisibilityButton
+                    .setId("toggleCustomEditorVisibilityButton");
+            return toggleCustomEditorVisibilityButton;
         }
 
         @Override
@@ -57,7 +79,7 @@ public class SimpleCustomEditorFixture implements SpreadsheetFixture {
                 Sheet sheet) {
             EditorType editorType = EditorType.getEditorTypeByIndex(rowIndex,
                     columnIndex);
-            if (editorType == null) {
+            if (editorType == null || !sheet.getSheetName().equals("Sheet1")) {
                 return null;
             }
             return getCustomEditor(editorType, rowIndex, columnIndex,
@@ -162,9 +184,11 @@ public class SimpleCustomEditorFixture implements SpreadsheetFixture {
     }
 
     private enum EditorType {
-        TEXT_FIELD(1, "TextField"), CHECKBOX(2, "Checkbox"), DATE_PICKER(3,
-                "DatePicker"), TEXT_AREA(4,
-                        "TextArea"), COMBO_BOX(5, "ComboBox");
+        TEXT_FIELD(1, "TextField"),
+        CHECKBOX(2, "Checkbox"),
+        DATE_PICKER(3, "DatePicker"),
+        TEXT_AREA(4, "TextArea"),
+        COMBO_BOX(5, "ComboBox");
 
         private final int columnIndex;
 

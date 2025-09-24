@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -54,6 +54,98 @@ public class EmailFieldBasicValidationTest
         }
     }
 
+    @Test
+    public void required_validate_emptyErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setValue("john@vaadin.com");
+        testField.setValue("");
+        Assert.assertEquals("", testField.getErrorMessage());
+    }
+
+    @Test
+    public void required_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new EmailField.EmailFieldI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setValue("john@vaadin.com");
+        testField.setValue("");
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
+    }
+
+    @Test
+    public void minLength_validate_emptyErrorMessageDisplayed() {
+        testField.setMinLength(13);
+        testField.setValue("a@vaadin.com");
+        Assert.assertEquals("", testField.getErrorMessage());
+    }
+
+    @Test
+    public void minLength_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setMinLength(13);
+        testField.setI18n(new EmailField.EmailFieldI18n()
+                .setMinLengthErrorMessage("Value is too short"));
+        testField.setValue("a@vaadin.com");
+        Assert.assertEquals("Value is too short", testField.getErrorMessage());
+    }
+
+    @Test
+    public void maxLength_validate_emptyErrorMessageDisplayed() {
+        testField.setMaxLength(13);
+        testField.setValue("aaa@vaadin.com");
+        Assert.assertEquals("", testField.getErrorMessage());
+    }
+
+    @Test
+    public void maxLength_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setMaxLength(13);
+        testField.setI18n(new EmailField.EmailFieldI18n()
+                .setMaxLengthErrorMessage("Value is too long"));
+        testField.setValue("aaa@vaadin.com");
+        Assert.assertEquals("Value is too long", testField.getErrorMessage());
+    }
+
+    @Test
+    public void pattern_validate_emptyErrorMessageDisplayed() {
+        testField.setValue("foobar");
+        Assert.assertEquals("", testField.getErrorMessage());
+    }
+
+    @Test
+    public void pattern_setI18nErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setI18n(new EmailField.EmailFieldI18n()
+                .setPatternErrorMessage("Value has incorrect format"));
+        testField.setValue("foobar");
+        Assert.assertEquals("Value has incorrect format",
+                testField.getErrorMessage());
+    }
+
+    @Test
+    public void setI18nAndCustomErrorMessage_validate_customErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new EmailField.EmailFieldI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setErrorMessage("Custom error message");
+        testField.setValue("john@vaadin.com");
+        testField.setValue("");
+        Assert.assertEquals("Custom error message",
+                testField.getErrorMessage());
+    }
+
+    @Test
+    public void setI18nAndCustomErrorMessage_validate_removeCustomErrorMessage_validate_i18nErrorMessageDisplayed() {
+        testField.setRequiredIndicatorVisible(true);
+        testField.setI18n(new EmailField.EmailFieldI18n()
+                .setRequiredErrorMessage("Field is required"));
+        testField.setErrorMessage("Custom error message");
+        testField.setValue("john@vaadin.com");
+        testField.setValue("");
+        testField.setErrorMessage("");
+        testField.setValue("john@vaadin.com");
+        testField.setValue("");
+        Assert.assertEquals("Field is required", testField.getErrorMessage());
+    }
+
+    @Override
     protected EmailField createTestField() {
         return new EmailField();
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.combobox.test.dataview;
 
 import static com.vaadin.flow.component.combobox.test.dataview.FilterConverterComboBoxPage.DEFINED_COUNT_COMBO_BOX_ID;
@@ -22,11 +21,11 @@ import static com.vaadin.flow.component.combobox.test.dataview.FilterConverterCo
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 
 import com.vaadin.flow.component.combobox.test.AbstractComboBoxIT;
 import com.vaadin.flow.component.combobox.testbench.ComboBoxElement;
 import com.vaadin.flow.testutil.TestPath;
-import org.openqa.selenium.Keys;
 
 @TestPath("filter-converter-lazy-data-view-combo-box-page")
 public class FilterConverterComboBoxIT extends AbstractComboBoxIT {
@@ -65,7 +64,7 @@ public class FilterConverterComboBoxIT extends AbstractComboBoxIT {
 
         scrollToItem(definedCountComboBox, 499);
 
-        waitUntilTextInContent("Item 499");
+        waitUntilTextInContent(definedCountComboBox, "Item 499");
     }
 
     @Test
@@ -86,10 +85,10 @@ public class FilterConverterComboBoxIT extends AbstractComboBoxIT {
 
         scrollToItem(unknownCountComboBox, 199);
 
-        waitUntilTextInContent("Item 199");
+        waitUntilTextInContent(unknownCountComboBox, "Item 199");
 
         scrollToItem(unknownCountComboBox, 399);
 
-        waitUntilTextInContent("Item 399");
+        waitUntilTextInContent(unknownCountComboBox, "Item 399");
     }
 }

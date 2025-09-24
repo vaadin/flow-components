@@ -1,3 +1,18 @@
+/*
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.vaadin.flow.component.select;
 
 import java.util.ArrayList;
@@ -11,8 +26,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.shared.InputField;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -20,14 +34,16 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasAriaLabel;
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.data.SelectListDataView;
-import com.vaadin.flow.component.shared.HasOverlayClassName;
 import com.vaadin.flow.component.shared.HasTooltip;
+import com.vaadin.flow.component.shared.InputField;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -48,6 +64,11 @@ public class SelectTest {
     @Before
     public void setup() {
         select = new Select<>();
+    }
+
+    @After
+    public void tearDown() {
+        UI.setCurrent(null);
     }
 
     @Test
@@ -127,7 +148,7 @@ public class SelectTest {
         Assert.assertEquals("Invalid number of items", 0,
                 getListBox().getChildren().count());
 
-        select = new Select<>("label", null, "foo", "bar", "baz");
+        select = new Select<>("label", "foo", "bar", "baz");
 
         Assert.assertEquals("Invalid number of items", 3,
                 getListBox().getChildren().count());
@@ -246,13 +267,13 @@ public class SelectTest {
         select.setTextRenderer(bean -> "!" + bean.getProperty());
 
         Assert.assertEquals(
-                "<vaadin-select-item value=\"1\">\n <span>!foo</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"1\"><span>!foo</span></vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
         Assert.assertEquals(
-                "<vaadin-select-item value=\"2\">\n <span>!bar</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"2\"><span>!bar</span></vaadin-select-item>",
                 getListBoxChild(1).getOuterHTML());
         Assert.assertEquals(
-                "<vaadin-select-item value=\"3\">\n <span>!baz</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"3\"><span>!baz</span></vaadin-select-item>",
                 getListBoxChild(2).getOuterHTML());
     }
 
@@ -263,21 +284,21 @@ public class SelectTest {
                 (SerializableFunction<String, Span>) Span::new));
 
         Assert.assertEquals(
-                "<vaadin-select-item value=\"1\">\n <span>foo</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"1\"><span>foo</span></vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
         Assert.assertEquals(
-                "<vaadin-select-item value=\"2\">\n <span>bar</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"2\"><span>bar</span></vaadin-select-item>",
                 getListBoxChild(1).getOuterHTML());
         Assert.assertEquals(
-                "<vaadin-select-item value=\"3\">\n <span>baz</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"3\"><span>baz</span></vaadin-select-item>",
                 getListBoxChild(2).getOuterHTML());
 
         select.setItems("1", "2");
         Assert.assertEquals(
-                "<vaadin-select-item value=\"4\">\n <span>1</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"4\"><span>1</span></vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
         Assert.assertEquals(
-                "<vaadin-select-item value=\"5\">\n <span>2</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"5\"><span>2</span></vaadin-select-item>",
                 getListBoxChild(1).getOuterHTML());
     }
 
@@ -288,7 +309,7 @@ public class SelectTest {
                 (SerializableFunction<String, Span>) Span::new));
         select.setItemLabelGenerator(item -> "bar");
         Assert.assertEquals(
-                "<vaadin-select-item value=\"1\" label=\"bar\">\n <span>foo</span>\n</vaadin-select-item>",
+                "<vaadin-select-item value=\"1\" label=\"bar\"><span>foo</span></vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
     }
 
@@ -318,7 +339,7 @@ public class SelectTest {
         select.setEmptySelectionCaption("EMPTY");
 
         Assert.assertEquals(
-                "<vaadin-select-item value>\n EMPTY\n</vaadin-select-item>",
+                "<vaadin-select-item value>EMPTY</vaadin-select-item>",
                 getListBoxChild(0).getOuterHTML());
 
         validateItem(0, "EMPTY", null, true);
@@ -810,13 +831,6 @@ public class SelectTest {
     }
 
     @Test
-    public void implementsHasOverlayClassName() {
-        Assert.assertTrue("Select should support overlay class name",
-                HasOverlayClassName.class
-                        .isAssignableFrom(new Select().getClass()));
-    }
-
-    @Test
     public void implementsHasTooltip() {
         Assert.assertTrue(select instanceof HasTooltip);
     }
@@ -851,6 +865,35 @@ public class SelectTest {
 
         select.setAriaLabelledBy(null);
         Assert.assertTrue(select.getAriaLabelledBy().isEmpty());
+    }
+
+    @Test
+    public void setNoVerticalOverlap() {
+        Select<String> select = new Select<>();
+
+        Assert.assertFalse(select.isNoVerticalOverlap());
+        select.setNoVerticalOverlap(true);
+        Assert.assertTrue(select.isNoVerticalOverlap());
+        select.setNoVerticalOverlap(false);
+        Assert.assertFalse(select.isNoVerticalOverlap());
+    }
+
+    @Test
+    public void setOverlayWidth() {
+        Select<String> select = new Select<>();
+
+        select.setOverlayWidth(null);
+        Assert.assertNull(
+                select.getStyle().get("--vaadin-select-overlay-width"));
+        select.setOverlayWidth("30em");
+        Assert.assertEquals("30em",
+                select.getStyle().get("--vaadin-select-overlay-width"));
+        select.setOverlayWidth(-1, Unit.EM);
+        Assert.assertNull(
+                select.getStyle().get("--vaadin-select-overlay-width"));
+        select.setOverlayWidth(100, Unit.PIXELS);
+        Assert.assertEquals("100.0px",
+                select.getStyle().get("--vaadin-select-overlay-width"));
     }
 
     @Test
@@ -894,6 +937,29 @@ public class SelectTest {
         Assert.assertEquals(1, select.getItemPosition("bar"));
         Assert.assertEquals(2, select.getItemPosition("buzz"));
         Assert.assertEquals(-1, select.getItemPosition("does not exist"));
+    }
+
+    @Test
+    public void refreshItem_selectFromClient_valueContainsUpdatedItem() {
+        Select<CustomItem> select = new Select<>();
+        SelectListDataView<CustomItem> dataView = select.setItems(
+                new CustomItem(1L, "foo"), new CustomItem(2L, "bar"),
+                new CustomItem(3L, "baz"));
+        dataView.setIdentifierProvider(CustomItem::getId);
+        selectSupplier = () -> select;
+
+        CustomItem updatedItem = new CustomItem(2L, "updated");
+        dataView.refreshItem(updatedItem);
+
+        AtomicReference<CustomItem> selectedItem = new AtomicReference<>();
+        select.addValueChangeListener(e -> selectedItem.set(e.getValue()));
+
+        // Simulate selecting an item from the client side via key
+        String itemKey = getListBoxChild(1).getProperty("value");
+        select.getElement().setProperty("value", itemKey);
+
+        Assert.assertEquals("updated", selectedItem.get().name);
+        Assert.assertEquals("updated", select.getValue().name);
     }
 
     private void validateItem(int index, String textContent, String label,

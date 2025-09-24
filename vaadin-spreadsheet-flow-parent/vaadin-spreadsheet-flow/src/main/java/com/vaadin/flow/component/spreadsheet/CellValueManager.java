@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet;
@@ -47,6 +47,7 @@ import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -91,7 +92,7 @@ public class CellValueManager implements Serializable {
     private CellValueHandler customCellValueHandler;
     private CellDeletionHandler customCellDeletionHandler;
 
-    private DataFormatter formatter;
+    private DataFormatter formatter = new CustomDataFormatter();
 
     /** Cell keys that have values sent to client side and are cached there. */
     private final HashSet<String> sentCells = new HashSet<String>();
@@ -127,11 +128,10 @@ public class CellValueManager implements Serializable {
      */
     public CellValueManager(Spreadsheet spreadsheet) {
         this.spreadsheet = spreadsheet;
+
         UI current = UI.getCurrent();
         if (current != null) {
-            formatter = new CustomDataFormatter(current.getLocale());
-        } else {
-            formatter = new CustomDataFormatter();
+            updateLocale(current.getLocale());
         }
     }
 
@@ -217,7 +217,7 @@ public class CellValueManager implements Serializable {
         cellData.col = cell.getColumnIndex() + 1;
         CellStyle cellStyle = cell.getCellStyle();
         cellData.cellStyle = "cs" + cellStyle.getIndex();
-        cellData.locked = spreadsheet.isCellLocked(cell);
+        cellData.locked = spreadsheet.isCellLocked(cell.getAddress());
         try {
             if (!spreadsheet.isCellHidden(cell)) {
                 if (cell.getCellType() == CellType.FORMULA) {
@@ -807,7 +807,8 @@ public class CellValueManager implements Serializable {
         if (selectedCellReference != null) {
             Row row = activeSheet.getRow(selectedCellReference.getRow());
             if (row != null && spreadsheet.isCellLocked(
-                    row.getCell(selectedCellReference.getCol()))) {
+                    new CellAddress(selectedCellReference.getRow(),
+                            selectedCellReference.getCol()))) {
                 return;
             }
         }
@@ -815,8 +816,8 @@ public class CellValueManager implements Serializable {
                 .getIndividualSelectedCells();
         for (CellReference cr : individualSelectedCells) {
             final Row row = activeSheet.getRow(cr.getRow());
-            if (row != null
-                    && spreadsheet.isCellLocked(row.getCell(cr.getCol()))) {
+            if (row != null && spreadsheet
+                    .isCellLocked(new CellAddress(cr.getRow(), cr.getCol()))) {
                 return;
             }
         }

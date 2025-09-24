@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.tabs;
 
 import com.vaadin.flow.component.Component;
@@ -34,10 +33,8 @@ import com.vaadin.flow.component.shared.HasTooltip;
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tab")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
 @JsModule("@vaadin/tabs/src/vaadin-tab.js")
-@NpmPackage(value = "@vaadin/tabs", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/tabs", version = "25.0.0-alpha19")
 public class Tab extends Component implements HasAriaLabel, HasComponents,
         HasLabel, HasStyle, HasThemeVariant<TabVariant>, HasTooltip {
 

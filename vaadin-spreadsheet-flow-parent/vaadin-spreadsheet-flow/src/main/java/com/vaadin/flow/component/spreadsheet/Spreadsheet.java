@@ -1,9 +1,9 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.spreadsheet;
@@ -26,22 +26,24 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.dependency.Uses;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.BaseFormulaEvaluator;
 import org.apache.poi.ss.formula.ConditionalFormattingEvaluator;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
@@ -50,7 +52,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.SheetVisibility;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeUtil;
@@ -79,7 +80,9 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.charts.Chart;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.spreadsheet.SheetOverlayWrapper.OverlayChangeListener;
 import com.vaadin.flow.component.spreadsheet.action.SpreadsheetDefaultActionHandler;
 import com.vaadin.flow.component.spreadsheet.client.CellData;
@@ -94,12 +97,17 @@ import com.vaadin.flow.component.spreadsheet.framework.ReflectTools;
 import com.vaadin.flow.component.spreadsheet.rpc.SpreadsheetClientRpc;
 import com.vaadin.flow.component.spreadsheet.shared.GroupingData;
 import com.vaadin.flow.dom.Element;
-import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.StreamResourceRegistry;
 import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.streams.AbstractDownloadHandler;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.shared.Registration;
+import com.vaadin.pro.licensechecker.BuildType;
+import com.vaadin.pro.licensechecker.Capabilities;
+import com.vaadin.pro.licensechecker.Capability;
 import com.vaadin.pro.licensechecker.LicenseChecker;
 
-import elemental.json.JsonValue;
+import tools.jackson.databind.JsonNode;
 
 /**
  * Vaadin Spreadsheet is a component which allows displaying and interacting
@@ -138,9 +146,16 @@ public class Spreadsheet extends Component
         if (service != null) {
             if (!service.getDeploymentConfiguration().isProductionMode()) {
                 LicenseChecker.checkLicenseFromStaticBlock(
-                        "vaadin-spreadsheet-flow", version);
+                        "vaadin-spreadsheet-flow", version,
+                        BuildType.DEVELOPMENT,
+                        Capabilities.of(Capability.PRE_TRIAL));
             }
         }
+    }
+
+    @Override
+    public Optional<String> getId() {
+        return Optional.ofNullable(getElement().getProperty("id"));
     }
 
     @Override
@@ -150,7 +165,6 @@ public class Spreadsheet extends Component
 
     // from SaredState
 
-    // private Map<String, URLReference> resources = new HashMap<>();
     private Map<String, String> resources = new HashMap<>();
 
     // spreadsheetState
@@ -236,6 +250,8 @@ public class Spreadsheet extends Component
     private boolean workbookChangeToggle;
 
     private Locale locale;
+
+    private Registration spreadsheetHandlerRegistration;
 
     int getCols() {
         return cols;
@@ -678,11 +694,11 @@ public class Spreadsheet extends Component
     public static class SpreadsheetEvent extends ComponentEvent<Spreadsheet> {
 
         private final String type;
-        private final JsonValue data;
+        private final JsonNode data;
 
         public SpreadsheetEvent(Spreadsheet source, boolean fromClient,
                 @EventData("event.detail.type") String type,
-                @EventData("event.detail.data") JsonValue data) {
+                @EventData("event.detail.data") JsonNode data) {
             super(source, fromClient);
             this.type = type;
             this.data = data;
@@ -692,7 +708,7 @@ public class Spreadsheet extends Component
             return type;
         }
 
-        public JsonValue getData() {
+        public JsonNode getData() {
             return data;
         }
     }
@@ -765,8 +781,9 @@ public class Spreadsheet extends Component
 
         @Override
         public void updateFormulaBar(String possibleName, int col, int row) {
-            getElement().callJsFunction("updateFormulaBar", possibleName, col,
-                    row);
+            getElement().executeJs(
+                    "queueMicrotask(() => this.updateFormulaBar($0, $1, $2));",
+                    possibleName, col, row);
         }
 
         @Override
@@ -1169,7 +1186,7 @@ public class Spreadsheet extends Component
         valueManager = createCellValueManager();
         sheetOverlays = new HashSet<SheetOverlayWrapper>();
         tables = new HashSet<SpreadsheetTable>();
-        registerRpc(new SpreadsheetHandlerImpl(this));
+        setSpreadsheetHandler(createDefaultHandler());
         defaultActionHandler = new SpreadsheetDefaultActionHandler();
         hyperlinkCellClickHandler = new DefaultHyperlinkCellClickHandler(this);
         addActionHandler(defaultActionHandler);
@@ -1183,9 +1200,28 @@ public class Spreadsheet extends Component
         });
     }
 
-    private void registerRpc(SpreadsheetHandlerImpl spreadsheetHandler) {
-        addListener(SpreadsheetEvent.class,
+    /**
+     * Register a Spreadsheet handler to listen to Spreadsheet Events. Removes
+     * the default / previously set spreadsheet handler.
+     *
+     * @param spreadsheetHandler
+     */
+    public void setSpreadsheetHandler(
+            SpreadsheetHandlerImpl spreadsheetHandler) {
+        if (this.spreadsheetHandlerRegistration != null) {
+            spreadsheetHandlerRegistration.remove();
+        }
+        spreadsheetHandlerRegistration = addListener(SpreadsheetEvent.class,
                 new SpreadsheetEventListener(spreadsheetHandler));
+    }
+
+    /**
+     * Create the default Spreadsheet handler.
+     * 
+     * @return SpreadsheetHandlerImpl
+     */
+    protected SpreadsheetHandlerImpl createDefaultHandler() {
+        return new SpreadsheetHandlerImpl(this);
     }
 
     /**
@@ -1477,6 +1513,31 @@ public class Spreadsheet extends Component
         return reload;
     }
 
+    /**
+     * Sets the visibility of the custom editor. By default, if a custom editor
+     * is defined for a cell, then it is displayed on that cell. This behavior
+     * can be changed by setting this property to true, which makes the custom
+     * editor visible when the cell is focused.
+     *
+     * @param showCustomEditorOnFocus
+     *            a boolean indicating whether the custom editor should be
+     *            visible on focus (true) or not (false)
+     */
+    public void setShowCustomEditorOnFocus(boolean showCustomEditorOnFocus) {
+        getElement().setProperty("showCustomEditorOnFocus",
+                showCustomEditorOnFocus);
+    }
+
+    /**
+     * Returns whether the custom editor is shown on focus or not.
+     *
+     * @return a boolean indicating whether the custom editor is visible on
+     *         focus (true) or not (false)
+     */
+    public boolean isShowCustomEditorOnFocus() {
+        return getElement().getProperty("showCustomEditorOnFocus", false);
+    }
+
     /*
      * (non-Javadoc)
      *
@@ -1553,16 +1614,10 @@ public class Spreadsheet extends Component
     protected boolean isRangeEditable(int row1, int col1, int row2, int col2) {
         if (isActiveSheetProtected()) {
             for (int r = row1; r <= row2; r++) {
-                final Row row = getActiveSheet().getRow(r);
-                if (row != null) {
-                    for (int c = col1; c <= col2; c++) {
-                        final Cell cell = row.getCell(c);
-                        if (isCellLocked(cell)) {
-                            return false;
-                        }
+                for (int c = col1; c <= col2; c++) {
+                    if (isCellLocked(new CellAddress(r, c))) {
+                        return false;
                     }
-                } else {
-                    return false;
                 }
             }
         }
@@ -1746,33 +1801,9 @@ public class Spreadsheet extends Component
                 SpreadsheetFactory.reloadSpreadsheetData(this,
                         getActiveSheet());
 
-                getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
+                reloadSheetStyles(false, false);
             }
         }
-    }
-
-    /**
-     * See {@link Workbook#setSheetHidden(int, boolean)}.
-     * <p>
-     * Gets the Workbook with {@link #getWorkbook()} and uses its API to access
-     * status on currently visible/hidden/very hidden sheets.
-     *
-     * If the currently active sheet is set hidden, another sheet is set as
-     * active sheet automatically. At least one sheet should be always visible.
-     *
-     * @param hidden
-     *            Visibility state to set: 0-visible, 1-hidden, 2-very hidden.
-     * @param sheetPOIIndex
-     *            Index of the target sheet within the POI model, 0-based
-     * @throws IllegalArgumentException
-     *             If the index or state is invalid, or if trying to hide the
-     *             only visible sheet.
-     * @deprecated use {@link #setSheetHidden(int, SheetVisibility)}
-     */
-    @Deprecated
-    public void setSheetHidden(int sheetPOIIndex, int hidden)
-            throws IllegalArgumentException {
-        setSheetHidden(sheetPOIIndex, SheetVisibility.values()[hidden]);
     }
 
     /**
@@ -2794,7 +2825,7 @@ public class Spreadsheet extends Component
                 r = 0;
             }
             Row row = sheet.getRow(r);
-            final Integer rowIndex = new Integer(r + 1);
+            final Integer rowIndex = r + 1;
             ArrayList<Integer> _hiddenRowIndexes = new ArrayList<>(
                     getHiddenRowIndexes());
             if (row == null) {
@@ -3267,6 +3298,26 @@ public class Spreadsheet extends Component
      *            True to hide the target column, false to show it.
      */
     public void setColumnHidden(int columnIndex, boolean hidden) {
+        doSetColumnHidden(columnIndex, hidden);
+        reloadSheetStyles(false, true);
+    }
+
+    /**
+     * Hides or shows the given columns. Used internally in order to defer the
+     * style calculations until visibility of all columns are updated.
+     *
+     * @see #setColumnHidden(int, boolean)
+     *
+     * @param columnIndexToHidden
+     *            Map of 0-based column indexes to the indicator whether the
+     *            column should be hidden
+     */
+    void setColumnsHidden(Map<Integer, Boolean> columnIndexToHidden) {
+        columnIndexToHidden.forEach(this::doSetColumnHidden);
+        reloadSheetStyles(false, true);
+    }
+
+    private void doSetColumnHidden(int columnIndex, boolean hidden) {
         getActiveSheet().setColumnHidden(columnIndex, hidden);
         ArrayList<Integer> _hiddenColumnIndexes = new ArrayList<>(
                 getHiddenColumnIndexes());
@@ -3285,13 +3336,6 @@ public class Spreadsheet extends Component
         }
         setHiddenColumnIndexes(_hiddenColumnIndexes);
         setColW(_colW);
-
-        if (hasSheetOverlays()) {
-            reloadImageSizesFromPOI = true;
-            loadOrUpdateOverlays();
-        }
-
-        getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
     }
 
     /**
@@ -3315,24 +3359,47 @@ public class Spreadsheet extends Component
      *            True to hide the target row, false to show it.
      */
     public void setRowHidden(int rowIndex, boolean hidden) {
+        doSetRowHidden(rowIndex, hidden);
+        reloadSheetStyles(true, true);
+    }
+
+    /**
+     * Hides or shows the given rows. Used internally in order to defer the
+     * style calculations until visibility of all rows are updated.
+     *
+     * @see #setRowHidden(int, boolean)
+     *
+     * @param rowIndexToHidden
+     *            Map of 0-based row indexes to the indicator whether the row
+     *            should be hidden
+     */
+    void setRowsHidden(Map<Integer, Boolean> rowIndexToHidden) {
+        rowIndexToHidden.forEach(this::doSetRowHidden);
+        reloadSheetStyles(true, true);
+    }
+
+    private void reloadSheetStyles(boolean calculateSheetSizes,
+            boolean updateOverlays) {
+        if (calculateSheetSizes) {
+            // can't assume the state already had room for the row in its
+            // arrays, it may have been created recently. This avoids
+            // ArrayIndexOutOfBoundsException
+            SpreadsheetFactory.calculateSheetSizes(this, getActiveSheet());
+        }
+        if (updateOverlays && hasSheetOverlays()) {
+            reloadImageSizesFromPOI = true;
+            loadOrUpdateOverlays();
+        }
+        getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
+    }
+
+    private void doSetRowHidden(int rowIndex, boolean hidden) {
         final Sheet activeSheet = getActiveSheet();
         Row row = activeSheet.getRow(rowIndex);
         if (row == null) {
             row = activeSheet.createRow(rowIndex);
         }
         row.setZeroHeight(hidden);
-
-        // can't assume the state already had room for the row in its
-        // arrays, it may have been created above. This avoids
-        // ArrayIndexOutOfBoundsException
-        SpreadsheetFactory.calculateSheetSizes(this, getActiveSheet());
-
-        if (hasSheetOverlays()) {
-            reloadImageSizesFromPOI = true;
-            loadOrUpdateOverlays();
-        }
-
-        getSpreadsheetStyleFactory().reloadActiveSheetCellStyles();
     }
 
     /**
@@ -3524,15 +3591,22 @@ public class Spreadsheet extends Component
      *
      * Provides package visibility.
      */
-    protected void setResource(String key, StreamResource resource) {
+    protected void setResource(String key, DownloadHandler resource) {
         if (resource == null) {
             resources.remove(key);
             getElement().removeAttribute("resource-" + key);
         } else {
+            if (resource instanceof AbstractDownloadHandler<?> handler) {
+                // change disposition to inline in pre-defined handlers,
+                // where it is 'attachment' by default
+                handler.inline();
+            }
             resources.put(key, resource.toString());
             getElement().setProperty("resources",
                     Serializer.serialize(new ArrayList<>(resources.keySet())));
-            getElement().setAttribute("resource-" + key, resource);
+            getElement().setAttribute("resource-" + key,
+                    new StreamResourceRegistry.ElementStreamResource(resource,
+                            this.getElement()));
         }
     }
 
@@ -3680,12 +3754,11 @@ public class Spreadsheet extends Component
             final short col = selectedCellReference.getCol();
             final int row = selectedCellReference.getRow();
             final String key = SpreadsheetUtil.toKey(col + 1, row + 1);
-            HashMap<String, String> cellKeysToEditorIdMap = new HashMap<>(
-                    getCellKeysToEditorIdMap());
-            if (cellKeysToEditorIdMap != null
-                    && cellKeysToEditorIdMap.containsKey(key)
+            var currentCellKeysToEditorIdMap = getCellKeysToEditorIdMap();
+            if (currentCellKeysToEditorIdMap != null
+                    && currentCellKeysToEditorIdMap.containsKey(key)
                     && customComponents != null) {
-                String componentId = cellKeysToEditorIdMap.get(key);
+                String componentId = currentCellKeysToEditorIdMap.get(key);
                 for (Component c : customComponents) {
                     if (getComponentNodeId(c).equals(componentId)) {
                         customComponentFactory.onCustomEditorDisplayed(
@@ -3695,7 +3768,8 @@ public class Spreadsheet extends Component
                     }
                 }
             }
-            setCellKeysToEditorIdMap(cellKeysToEditorIdMap);
+            setCellKeysToEditorIdMap(currentCellKeysToEditorIdMap == null ? null
+                    : new HashMap<>(currentCellKeysToEditorIdMap));
         }
     }
 
@@ -3783,29 +3857,36 @@ public class Spreadsheet extends Component
     }
 
     /**
-     * Gets the locked state of the given cell.
+     * Returns whether or not the cell at the given address in the active sheet
+     * is locked.
      *
-     * @param cell
-     *            The cell to check
+     * @param cellAddress
+     *            The address of the cell to check
      * @return true if the cell is locked, false otherwise
      */
-    public boolean isCellLocked(Cell cell) {
-        if (isActiveSheetProtected()) {
-            if (cell != null) {
-                if (cell.getCellStyle().getIndex() != 0) {
-                    return cell.getCellStyle().getLocked();
-                } else {
-                    return getLockedColumnIndexes()
-                            .contains(cell.getColumnIndex() + 1)
-                            && getLockedRowIndexes()
-                                    .contains(cell.getRowIndex() + 1);
-                }
-            } else {
-                return true;
-            }
-        } else {
+    public boolean isCellLocked(CellAddress cellAddress) {
+        // Locking cells only works if the sheet is protected
+        if (!isActiveSheetProtected()) {
             return false;
         }
+
+        Sheet sheet = getActiveSheet();
+        Row row = sheet.getRow(cellAddress.getRow());
+        Cell cell = row != null ? row.getCell(cellAddress.getColumn()) : null;
+
+        // If there is a cell with a custom cell style, return its locked state
+        if (cell != null && cell.getCellStyle().getIndex() != 0) {
+            return cell.getCellStyle().getLocked();
+        }
+
+        // Otherwise inherit locked state from row or column styles
+        // If neither is unlocked, the locked state is inherited from the sheet
+        CellStyle rowStyle = row != null ? row.getRowStyle() : null;
+        CellStyle columnStyle = sheet.getColumnStyle(cellAddress.getColumn());
+        boolean rowLocked = rowStyle == null || rowStyle.getLocked();
+        boolean columnLocked = columnStyle == null || columnStyle.getLocked();
+
+        return rowLocked && columnLocked;
     }
 
     /**
@@ -3944,11 +4025,8 @@ public class Spreadsheet extends Component
         command.captureValues(
                 newRowSizes.keySet().toArray(new Integer[newRowSizes.size()]));
         historyManager.addCommand(command);
-        for (Entry<Integer, Float> entry : newRowSizes.entrySet()) {
-            int index = entry.getKey();
-            float height = entry.getValue();
-            setRowHeight(index - 1, height);
-        }
+        setRowHeights(newRowSizes.entrySet().stream().collect(Collectors
+                .toMap(entry -> entry.getKey() - 1, Entry::getValue)));
 
         if (hasSheetOverlays()) {
             reloadImageSizesFromPOI = true;
@@ -3966,8 +4044,34 @@ public class Spreadsheet extends Component
      *            New row height in points
      */
     public void setRowHeight(int index, float height) {
+        doSetRowHeight(index, height);
+        var isRowHidden = height == 0.0F;
+        reloadSheetStyles(true, isRowHidden);
+    }
+
+    /**
+     * Sets the row height for multiple rows. Used internally in order to defer
+     * the style calculations until all the row heights are updated.
+     *
+     * @see #setRowHeight(int, float)
+     *
+     * @param rowIndexToHeight
+     *            Map of 0-based row indexes to the new row height in points
+     */
+    void setRowHeights(Map<Integer, Float> rowIndexToHeight) {
+        var isAnyRowHidden = new AtomicBoolean();
+        rowIndexToHeight.forEach((key, value) -> {
+            doSetRowHeight(key, value);
+            if (value == 0.0F) {
+                isAnyRowHidden.set(true);
+            }
+        });
+        reloadSheetStyles(true, isAnyRowHidden.get());
+    }
+
+    private void doSetRowHeight(int index, float height) {
         if (height == 0.0F) {
-            setRowHidden(index, true);
+            doSetRowHidden(index, true);
         } else {
             Row row = getActiveSheet().getRow(index);
             ArrayList<Integer> _hiddenRowIndexes = new ArrayList<>(
@@ -3983,10 +4087,6 @@ public class Spreadsheet extends Component
             }
             row.setHeightInPoints(height);
             setHiddenRowIndexes(_hiddenRowIndexes);
-            // can't assume the state already had room for the row in its
-            // arrays, it may have been created above. This avoids
-            // ArrayIndexOutOfBoundsException
-            SpreadsheetFactory.calculateSheetSizes(this, getActiveSheet());
         }
     }
 
@@ -3996,11 +4096,8 @@ public class Spreadsheet extends Component
         command.captureValues(newColumnSizes.keySet()
                 .toArray(new Integer[newColumnSizes.size()]));
         historyManager.addCommand(command);
-        for (Entry<Integer, Integer> entry : newColumnSizes.entrySet()) {
-            int index = entry.getKey();
-            int width = entry.getValue();
-            setColumnWidth(index - 1, width);
-        }
+        setColumnWidths(newColumnSizes.entrySet().stream().collect(Collectors
+                .toMap(entry -> entry.getKey() - 1, Entry::getValue)));
 
         if (hasSheetOverlays()) {
             reloadImageSizesFromPOI = true;
@@ -4018,8 +4115,36 @@ public class Spreadsheet extends Component
      *            New column width in pixels
      */
     public void setColumnWidth(int index, int width) {
+        doSetColumnWidth(index, width);
         if (width == 0) {
-            setColumnHidden(index, true);
+            reloadSheetStyles(false, true);
+        }
+    }
+
+    /**
+     * Sets the column width for multiple columns. Used internally in order to
+     * defer the style calculations until all the column widths are updated.
+     *
+     * @see #setColumnWidth(int, int)
+     *
+     * @param columnIndexToWidth
+     *            Map of 0-based column indexes to the new column width in
+     *            pixels
+     */
+    void setColumnWidths(Map<Integer, Integer> columnIndexToWidth) {
+        var isAnyColumnHidden = new AtomicBoolean();
+        columnIndexToWidth.forEach((key, value) -> {
+            isAnyColumnHidden.set(value == 0);
+            doSetColumnWidth(key, value);
+        });
+        if (isAnyColumnHidden.get()) {
+            reloadSheetStyles(false, true);
+        }
+    }
+
+    private void doSetColumnWidth(int index, int width) {
+        if (width == 0) {
+            doSetColumnHidden(index, true);
         } else {
             ArrayList<Integer> _hiddenColumnIndexes = new ArrayList<>(
                     getHiddenColumnIndexes());
@@ -4161,8 +4286,8 @@ public class Spreadsheet extends Component
             overlayComponents.add(overlay.getComponent(true));
         }
 
-        if (overlay.getId() != null && overlay.getResource() != null) {
-            setResource(overlay.getId(), overlay.getResource());
+        if (overlay.getId() != null && overlay.getResourceHandler() != null) {
+            setResource(overlay.getId(), overlay.getResourceHandler());
         }
 
         if (overlay.getId() != null) {
@@ -4191,7 +4316,7 @@ public class Spreadsheet extends Component
                 _overlays.remove(overlay.getId());
                 setOverlays(_overlays);
             }
-            setResource(overlay.getId(), (StreamResource) null);
+            setResource(overlay.getId(), null);
         }
 
         if (overlay.getComponent(false) != null) {
@@ -4565,7 +4690,7 @@ public class Spreadsheet extends Component
                                 .put(getComponentNodeId(customComponent), key);
                         newCustomComponents.add(customComponent);
                         rowsWithComponents.add(r);
-                    } else if (!isCellLocked(cell)) {
+                    } else if (!isCellLocked(new CellAddress(r, c))) {
                         // no custom component and not locked, check if
                         // the cell has a custom editor
                         Component customEditor = customComponentFactory
@@ -6026,5 +6151,32 @@ public class Spreadsheet extends Component
             RowHeaderDoubleClickListener listener) {
         return addListener(RowHeaderDoubleClickEvent.class,
                 listener::onRowHeaderDoubleClick);
+    }
+
+    /**
+     * Define the theme of the Spreadsheet.
+     *
+     * @param theme
+     *            SpreadsheetTheme
+     */
+    public void setTheme(SpreadsheetTheme theme) {
+        getElement().setAttribute("theme", theme.getThemeName());
+    }
+
+    /**
+     * Themes for the Spreadsheet.
+     */
+    public enum SpreadsheetTheme {
+        LUMO("lumo"), VALO("");
+
+        private final String theme;
+
+        SpreadsheetTheme(String theme) {
+            this.theme = theme;
+        }
+
+        String getThemeName() {
+            return theme;
+        }
     }
 }

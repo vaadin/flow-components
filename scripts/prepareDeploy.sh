@@ -11,10 +11,10 @@ getLatest() {
    releases=`curl -s "https://repo.maven.apache.org/maven2/com/vaadin/$1/maven-metadata.xml"`
    prereleases=`curl -s "https://maven.vaadin.com/vaadin-prereleases/com/vaadin/$1/maven-metadata.xml"`
 
-   stable=`echo "$releases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | tail -1`
+   stable=`echo "$releases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | egrep 'beta|rc' | tail -1`
    [ -n "$stable" ] && echo $stable && return
-   pre=`echo "$prereleases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | grep -v "SNAPSHOT" | egrep 'alpha|beta|rc' | tail -1`
-   [ -z "$pre" ] && pre=`echo "$prereleases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | egrep 'alpha|beta|rc' | tail -1`
+   pre=`echo "$prereleases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | grep -v "SNAPSHOT" | egrep 'alpha' | tail -1`
+   [ -z "$pre" ] && pre=`echo "$prereleases" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | egrep 'alpha' | tail -1`
    [ -z "$pre" ] && pre="$2"
    expr "$pre" : ".*SNAPSHOT" >/dev/null && echo "Releases cannot depend on SNAPSHOT: $1 - $pre" && exit 1 || echo $pre
 }
@@ -43,8 +43,8 @@ setPomVersion() {
 ### Check that version is given as a parameter and has a valid format
 version=$1
 ! [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+([\.-](alpha|beta|rc)[0-9]+)?$ ]] && echo Invalid version format: $version && exit 1
-[[ $version =~ (alpha|beta|rc) ]] && profile=prerelease || profile=maven-central
-pomVersion=`cat pom.xml | grep '<version>' | head -1 | cut -d '>' -f2 | cut -d '<' -f1`
+[[ $version =~ (alpha) ]] && profile=prerelease || profile=maven-central
+pomVersion=`cat pom.xml | grep -m2 "<version>" | tail -n1 | cut -d '>' -f2 | cut -d '<' -f1`
 
 ### Extrat major.minor part from version
 versionBase=`getBaseVersion $version`
@@ -52,7 +52,7 @@ pomBase=`getBaseVersion $pomVersion`
 
 ### Get the main branch version for components
 mainPom=`curl -s "https://raw.githubusercontent.com/vaadin/flow-components/main/pom.xml"`
-mainMajorMinor=`echo "$mainPom" | grep '<version>' | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | head -1 | cut -d '-' -f1`
+mainMajorMinor=`echo "$mainPom" | grep -m2 '<version>' | tail -n1 | cut -d '>' -f2 |cut -d '<' -f1 | grep "^$base" | head -1 | cut -d '-' -f1`
 
 ### Load versions file for this platform release
 branch=$versionBase
@@ -106,7 +106,7 @@ fi
 
 echo "Deploying "`echo $modules | wc -w`" Modules from branch=$branch to profile=$profile"
 ## '.' points to the root project, 'vaadin-flow-components-shared-parent' has the common dependencies for components
-build=.,vaadin-flow-components-shared-parent,vaadin-flow-components-shared-parent/vaadin-flow-components-base,vaadin-flow-components-shared-parent/vaadin-flow-components-test-util
+build=.,vaadin-flow-components-shared-parent,vaadin-flow-components-shared-parent/vaadin-flow-components-base,vaadin-flow-components-shared-parent/vaadin-flow-components-test-util,flow-components-bom
 for i in $modules
 do
   if [ -d "$i" -o -d "$i-flow-parent" ]

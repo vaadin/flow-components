@@ -1,4 +1,16 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.spreadsheet.test;
+
+import static org.junit.Assert.assertNotEquals;
+
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -6,10 +18,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
 import com.vaadin.flow.testutil.TestPath;
-
-import java.util.List;
-
-import static org.junit.Assert.assertNotEquals;
 
 /**
  * The issue we are trying to test has a race condition: when you scroll left
@@ -49,9 +57,8 @@ public class WrongHashesOnScrollIT extends AbstractSpreadsheetIT {
                 By.cssSelector(".cell"));
 
         for (WebElement cell : elements) {
-            assertNotEquals(
-                    "Cell with class " + cell.getAttribute("class") + " fails",
-                    "###", cell.getText());
+            assertNotEquals("Cell with class " + cell.getDomAttribute("class")
+                    + " fails", "###", cell.getText());
         }
     }
 

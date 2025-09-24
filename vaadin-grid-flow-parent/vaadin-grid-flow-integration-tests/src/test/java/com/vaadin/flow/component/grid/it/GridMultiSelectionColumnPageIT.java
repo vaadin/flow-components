@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -15,14 +15,15 @@
  */
 package com.vaadin.flow.component.grid.it;
 
-import com.vaadin.testbench.TestBenchElement;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import com.vaadin.flow.component.checkbox.testbench.CheckboxElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.testbench.TestBenchElement;
 import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/grid-multi-selection-column")
@@ -40,7 +41,7 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
                 "true",
                 definedItemCountLazyGrid
                         .findElement(By.id(SELECT_ALL_CHECKBOX_ID))
-                        .getAttribute("hidden"));
+                        .getDomAttribute("hidden"));
 
         WebElement unknownItemCountLazyGrid = findElement(By.id(
                 GridMultiSelectionColumnPage.UNKNOWN_ITEM_COUNT_LAZY_GRID_ID));
@@ -49,7 +50,7 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
                 "true",
                 unknownItemCountLazyGrid
                         .findElement(By.id(SELECT_ALL_CHECKBOX_ID))
-                        .getAttribute("hidden"));
+                        .getDomAttribute("hidden"));
 
         WebElement grid = findElement(
                 By.id(GridMultiSelectionColumnPage.IN_MEMORY_GRID_ID));
@@ -57,7 +58,7 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
                 .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
         Assert.assertNull(
                 "in-memory grid selectAllCheckbox should be visible by default",
-                selectAllCheckbox.getAttribute("hidden"));
+                selectAllCheckbox.getDomAttribute("hidden"));
     }
 
     @Test
@@ -73,10 +74,10 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
 
         // Initial
         Assert.assertNull("Select all checkbox should not be checked initially",
-                selectAllCheckbox.getAttribute("checked"));
+                selectAllCheckbox.getDomAttribute("checked"));
         Assert.assertNull(
                 "Select all checkbox should not be in indeterminate state initially",
-                selectAllCheckbox.getAttribute("indeterminate"));
+                selectAllCheckbox.getDomAttribute("indeterminate"));
 
         // Select single
         // Note that in indeterminate state, the select all checkbox is also
@@ -85,10 +86,10 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
         Assert.assertEquals("Selected item count: 1", message.getText());
         Assert.assertEquals(
                 "Select all checkbox is not checked even though an item is selected",
-                "true", selectAllCheckbox.getAttribute("checked"));
+                "true", selectAllCheckbox.getDomAttribute("checked"));
         Assert.assertEquals(
                 "Select all checkbox is not in indeterminate state even though an item is selected",
-                "true", selectAllCheckbox.getAttribute("indeterminate"));
+                "true", selectAllCheckbox.getDomAttribute("indeterminate"));
 
         // Select all
         selectAllCheckbox.click();
@@ -98,10 +99,10 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
                 message.getText());
         Assert.assertEquals(
                 "Select all checkbox is not checked even though all items selected",
-                "true", selectAllCheckbox.getAttribute("checked"));
+                "true", selectAllCheckbox.getDomAttribute("checked"));
         Assert.assertNull(
                 "Select all checkbox is in indeterminate state even though all items are selected",
-                selectAllCheckbox.getAttribute("indeterminate"));
+                selectAllCheckbox.getDomAttribute("indeterminate"));
 
         // Deselect single
         // Note that in indeterminate state, the select all checkbox is also
@@ -113,10 +114,10 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
                 message.getText());
         Assert.assertEquals(
                 "Select all checkbox is not checked even though an item is selected",
-                "true", selectAllCheckbox.getAttribute("checked"));
+                "true", selectAllCheckbox.getDomAttribute("checked"));
         Assert.assertEquals(
                 "Select all checkbox is not in indeterminate state even though not all items selected",
-                "true", selectAllCheckbox.getAttribute("indeterminate"));
+                "true", selectAllCheckbox.getDomAttribute("indeterminate"));
 
         // Deselect all, needs to toggle the checkbox twice, first to select all
         // again, then to deselect all
@@ -125,10 +126,30 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
         Assert.assertEquals("Selected item count: 0", message.getText());
         Assert.assertNull(
                 "Select all checkbox is checked even though no items selected",
-                selectAllCheckbox.getAttribute("checked"));
+                selectAllCheckbox.getDomAttribute("checked"));
         Assert.assertNull(
                 "Select all checkbox is in indeterminate state even though no items are selected",
-                selectAllCheckbox.getAttribute("indeterminate"));
+                selectAllCheckbox.getDomAttribute("indeterminate"));
+    }
+
+    @Test
+    public void selectAllCheckbox_setChecked_selectsAndDeselectsItems() {
+        open();
+
+        GridElement grid = $(GridElement.class)
+                .id(GridMultiSelectionColumnPage.IN_MEMORY_GRID_ID);
+        CheckboxElement selectAllCheckbox = grid.$(CheckboxElement.class)
+                .id(SELECT_ALL_CHECKBOX_ID);
+        WebElement message = findElement(By.id("selected-item-count"));
+
+        selectAllCheckbox.setChecked(true);
+        Assert.assertEquals(
+                "Selected item count: "
+                        + GridMultiSelectionColumnPage.ITEM_COUNT,
+                message.getText());
+
+        selectAllCheckbox.setChecked(false);
+        Assert.assertEquals("Selected item count: 0", message.getText());
     }
 
     @Test
@@ -147,7 +168,7 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
                 selectAllCheckbox_selectionMode.isDisplayed());
         selectAllCheckbox_selectionMode.click();
         Assert.assertEquals("true",
-                selectAllCheckbox_selectionMode.getAttribute("checked"));
+                selectAllCheckbox_selectionMode.getDomAttribute("checked"));
         Assert.assertEquals(
                 "Selected item count: "
                         + (GridMultiSelectionColumnPage.ITEM_COUNT),
@@ -160,9 +181,9 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
                 .findElements(By.tagName("vaadin-checkbox")).get(6);
         selectCheckbox6_multiSelection.click();
         Assert.assertEquals("true",
-                selectCheckbox12_multiSelection.getAttribute("checked"));
+                selectCheckbox12_multiSelection.getDomAttribute("checked"));
         Assert.assertEquals("true",
-                selectCheckbox6_multiSelection.getAttribute("checked"));
+                selectCheckbox6_multiSelection.getDomAttribute("checked"));
     }
 
     @Test
@@ -195,21 +216,21 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
                 .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
 
         Assert.assertEquals("The selectAllCheckbox should be hidden by default",
-                "true", selectAllCheckbox.getAttribute("hidden"));
+                "true", selectAllCheckbox.getDomAttribute("hidden"));
 
         WebElement inMemory = findElement(By.id("set-in-memory-button"));
         inMemory.click();
 
         Assert.assertNull(
                 "The selectAllCheckbox should be visible with in-memory DataProvider",
-                selectAllCheckbox.getAttribute("hidden"));
+                selectAllCheckbox.getDomAttribute("hidden"));
 
         WebElement backend = findElement(By.id("set-backend-button"));
         backend.click();
 
         Assert.assertEquals(
                 "The selectAllCheckbox should be hidden with backend DataProvider",
-                "true", selectAllCheckbox.getAttribute("hidden"));
+                "true", selectAllCheckbox.getDomAttribute("hidden"));
     }
 
     @Test
@@ -238,7 +259,7 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
         // Test autoWidth of selection column is true
         WebElement gridSelectionMode = grid
                 .findElement(By.tagName("vaadin-grid-flow-selection-column"));
-        String autoWidth = gridSelectionMode.getAttribute("autoWidth");
+        String autoWidth = gridSelectionMode.getDomProperty("autoWidth");
         Assert.assertTrue("autoWidth should be true",
                 Boolean.parseBoolean(autoWidth));
     }
@@ -282,7 +303,8 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
                 GridMultiSelectionColumnPage.MULTI_SELECT_GRID_ALL_SELECTED_GRID_ID);
         WebElement selectAllCheckbox = grid
                 .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
-        Assert.assertEquals("true", selectAllCheckbox.getAttribute("checked"));
+        Assert.assertEquals("true",
+                selectAllCheckbox.getDomAttribute("checked"));
     }
 
     @Test
@@ -301,10 +323,10 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
                 .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
         Assert.assertEquals(
                 "Select all checkbox is not checked even though an item is selected",
-                "true", selectAllCheckbox.getAttribute("checked"));
+                "true", selectAllCheckbox.getDomAttribute("checked"));
         Assert.assertEquals(
                 "Select all checkbox is not in indeterminate state even though not all items selected",
-                "true", selectAllCheckbox.getAttribute("indeterminate"));
+                "true", selectAllCheckbox.getDomAttribute("indeterminate"));
     }
 
     @Test
@@ -319,6 +341,7 @@ public class GridMultiSelectionColumnPageIT extends AbstractComponentIT {
 
         WebElement selectAllCheckbox = grid
                 .findElement(By.id(SELECT_ALL_CHECKBOX_ID));
-        Assert.assertEquals("true", selectAllCheckbox.getAttribute("checked"));
+        Assert.assertEquals("true",
+                selectAllCheckbox.getDomAttribute("checked"));
     }
 }

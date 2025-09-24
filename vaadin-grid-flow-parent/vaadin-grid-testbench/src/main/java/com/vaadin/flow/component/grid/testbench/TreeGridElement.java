@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -97,7 +97,6 @@ public class TreeGridElement extends GridElement {
                 && rowIndex <= getLastVisibleRowIndex()))) {
             scrollToFlatRowAndWait(rowIndex);
         }
-        waitUntil(test -> !isLoadingExpandedRows());
 
         GridTRElement row = getRow(rowIndex);
         return row.getCell(column);
@@ -177,7 +176,7 @@ public class TreeGridElement extends GridElement {
         WebElement expandElement = getExpandToggleElement(rowIndex,
                 hierarchyColumnIndex);
         return expandElement != null
-                && !"false".equals(expandElement.getAttribute("expanded"));
+                && !"false".equals(expandElement.getDomProperty("expanded"));
     }
 
     /**
@@ -208,7 +207,7 @@ public class TreeGridElement extends GridElement {
             WebElement expandElement = getExpandToggleElement(rowIndex,
                     hierarchyColumnIndex);
             return expandElement != null && expandElement.isDisplayed()
-                    && "false".equals(expandElement.getAttribute("leaf"));
+                    && "false".equals(expandElement.getDomProperty("leaf"));
         } catch (NoSuchElementException e) {
             return false;
         }
@@ -230,19 +229,6 @@ public class TreeGridElement extends GridElement {
             int hierarchyColumnIndex) {
         GridTHTDElement cell = getCell(rowIndex, hierarchyColumnIndex);
         return cell == null ? null : cell.$("vaadin-grid-tree-toggle").first();
-    }
-
-    /**
-     * Returns a number of expanded rows in the grid element. Notice that
-     * returned number does not mean that grid has yet finished rendering all
-     * visible expanded rows.
-     *
-     * @return the number of expanded rows
-     */
-    public long getNumberOfExpandedRows() {
-        waitUntilLoadingFinished();
-        return (long) executeScript("return arguments[0].expandedItems.length;",
-                this);
     }
 
     /**
@@ -277,19 +263,36 @@ public class TreeGridElement extends GridElement {
     }
 
     /**
-     * Returns true if grid is loading expanded rows.
+     * Gets the total number of rows.
+     * <p>
+     * Note that for TreeGrid this does not return reliable results if rows are
+     * expanded. Due to the lazy-loading nature of the grid, children of
+     * expanded rows are only loaded into the grid when they are scrolled into
+     * view. Likewise, they are removed again from the grid at some point when
+     * they are scrolled out of view. These child rows then only count against
+     * the total row count while they are loaded into the grid. Effectively,
+     * that means that the total row count will depend on the scroll position of
+     * the grid.
+     * <p>
+     * We are looking into making this more reliable by adding additional APIs
+     * to TreeGrid that would allow the component to keep track of the total
+     * number of rows just based on the expanded rows, and regardless of the
+     * scroll position. Please see
+     * <a href="https://github.com/vaadin/flow-components/issues/7269">this
+     * issue</a> for more details.
      *
-     * @return <code>true</code> if grid is loading expanded rows,
-     *         <code>false</code> otherwise
+     * @return the number of rows
      */
-    public boolean isLoadingExpandedRows() {
-        return (Boolean) executeScript(
-                "return !!arguments[0].$connector ? (arguments[0].$connector.hasEnsureSubCacheQueue() || arguments[0].$connector.hasParentRequestQueue()) : arguments[0]._dataProviderController.isLoading()",
-                this);
+    @Override
+    public int getRowCount() {
+        return super.getRowCount();
     }
 
-    @Override
-    protected boolean isLoading() {
-        return super.isLoading() || isLoadingExpandedRows();
+    /**
+     * Scrolls the TreeGrid to the end.
+     */
+    public void scrollToEnd() {
+        executeScript("arguments[0].scrollToIndex(...Array(10).fill(-1));",
+                this);
     }
 }

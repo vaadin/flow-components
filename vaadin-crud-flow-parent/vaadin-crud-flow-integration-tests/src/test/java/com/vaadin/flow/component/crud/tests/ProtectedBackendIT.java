@@ -1,3 +1,11 @@
+/**
+ * Copyright 2000-2025 Vaadin Ltd.
+ *
+ * This program is available under Vaadin Commercial License and Service Terms.
+ *
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
+ * license.
+ */
 package com.vaadin.flow.component.crud.tests;
 
 import org.junit.Assert;
@@ -10,14 +18,15 @@ import com.vaadin.flow.component.confirmdialog.testbench.ConfirmDialogElement;
 import com.vaadin.flow.component.crud.testbench.CrudElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.textfield.testbench.TextFieldElement;
+import com.vaadin.flow.testutil.TestPath;
+import com.vaadin.tests.AbstractComponentIT;
 
-public class ProtectedBackendIT extends AbstractParallelTest {
+@TestPath("vaadin-crud/protectedbackend")
+public class ProtectedBackendIT extends AbstractComponentIT {
 
     @Before
     public void init() {
-        String url = getBaseURL().replace(super.getBaseURL(),
-                super.getBaseURL() + "/vaadin-crud") + "/protectedbackend";
-        getDriver().get(url);
+        open();
     }
 
     @Test
@@ -75,8 +84,9 @@ public class ProtectedBackendIT extends AbstractParallelTest {
             boolean isModifyAllowed) {
         Assert.assertTrue(crud.isEditorOpen());
 
-        TextFieldElement lastNameField = crud.getEditor()
-                .$(TextFieldElement.class).last();
+        TextFieldElement lastNameField = crud.getForm()
+                .$(TextFieldElement.class)
+                .withAttribute("editor-role", "last-name").first();
 
         lastNameField.setValue(newValue);
         crud.getEditorSaveButton().click();

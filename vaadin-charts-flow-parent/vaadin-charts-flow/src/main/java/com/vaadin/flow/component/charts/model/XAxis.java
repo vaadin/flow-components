@@ -1,16 +1,17 @@
 /**
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * This program is available under Vaadin Commercial License and Service Terms.
  *
- * See <https://vaadin.com/commercial-license-and-service-terms> for the full
+ * See {@literal <https://vaadin.com/commercial-license-and-service-terms>} for the full
  * license.
  */
 package com.vaadin.flow.component.charts.model;
 
-import com.vaadin.flow.component.charts.model.style.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import com.vaadin.flow.component.charts.model.style.Color;
 
 /**
  * <p>
@@ -25,6 +26,7 @@ import java.util.Arrays;
  */
 public class XAxis extends Axis {
 
+    private Boolean alignTicks;
     private Boolean allowDecimals;
     private Color alternateGridColor;
     private Breaks[] breaks;
@@ -32,10 +34,12 @@ public class XAxis extends Axis {
     private Number ceiling;
     private String className;
     private Crosshair crosshair;
+    private PlotLine currentDateIndicator;
     private DateTimeLabelFormats dateTimeLabelFormats;
     private String description;
     private Boolean endOnTick;
     private Number floor;
+    private AxisGrid grid;
     private Color gridLineColor;
     private DashStyle gridLineDashStyle;
     private Number gridLineWidth;
@@ -45,6 +49,8 @@ public class XAxis extends Axis {
     private Color lineColor;
     private Number lineWidth;
     private Number linkedTo;
+    private Number margin;
+    private Number maxRange;
     private Number maxPadding;
     private Number minPadding;
     private Number minRange;
@@ -56,9 +62,11 @@ public class XAxis extends Axis {
     private String minorTickInterval;
     private Number minorTickLength;
     private TickPosition minorTickPosition;
+    private Boolean minorTicks;
     private Number minorTickWidth;
     private Number offset;
     private Boolean opposite;
+    private Boolean panningEnabled;
     private ArrayList<PlotBand> plotBands;
     private ArrayList<PlotLine> plotLines;
     private Boolean reversed;
@@ -1515,5 +1523,146 @@ public class XAxis extends Axis {
 
     public void setLinkedTo(XAxis axis) {
         linkedTo = axis.getAxisIndex();
+    }
+
+    /**
+     * @see #setCurrentDateIndicator(PlotLine)
+     */
+    public PlotLine getCurrentDateIndicator() {
+        return currentDateIndicator;
+    }
+
+    /**
+     * Supported only in Gantt charts: Show an indicator on the axis for the
+     * current date and time.
+     *
+     * @param currentDateIndicator
+     */
+    public void setCurrentDateIndicator(Boolean currentDateIndicator) {
+        if (currentDateIndicator) {
+            this.currentDateIndicator = new PlotLine();
+        } else {
+            this.currentDateIndicator = null;
+        }
+    }
+
+    /**
+     * Supported only in Gantt charts: Show an indicator on the axis for the
+     * current date and time.
+     *
+     * @param currentDateIndicator
+     */
+    public void setCurrentDateIndicator(PlotLine currentDateIndicator) {
+        this.currentDateIndicator = currentDateIndicator;
+    }
+
+    /**
+     * @see #setGrid(AxisGrid)
+     */
+    public AxisGrid getGrid() {
+        return grid;
+    }
+
+    /**
+     * Set grid options for the axis labels. Relevant only for Highcharts Gantt.
+     */
+    public void setGrid(AxisGrid grid) {
+        this.grid = grid;
+    }
+
+    /**
+     * @see #setAlignTicks(Boolean)
+     */
+    public Boolean getAlignTicks() {
+        return alignTicks;
+    }
+
+    /**
+     * When using multiple axis, the ticks of two or more opposite axes will
+     * automatically be aligned by adding ticks to the axis or axes with the
+     * least ticks, as if tickAmount were specified. This can be prevented by
+     * setting alignTicks to false. If the grid lines look messy, it's a good
+     * idea to hide them for the secondary axis by setting gridLineWidth to 0.
+     * If startOnTick or endOnTick in an Axis options are set to false, then the
+     * alignTicks will be disabled for the Axis. Disabled for logarithmic axes.
+     * Defaults to true.
+     *
+     * @param alignTicks
+     */
+    public void setAlignTicks(Boolean alignTicks) {
+        this.alignTicks = alignTicks;
+    }
+
+    /**
+     * @see #setMargin(Number)
+     */
+    public Number getMargin() {
+        return margin;
+    }
+
+    /**
+     * If there are multiple axes on the same side of the chart, the pixel
+     * margin between the axes. Defaults to 0 on vertical axes, 15 on horizontal
+     * axes.
+     * 
+     * @param margin
+     */
+    public void setMargin(Number margin) {
+        this.margin = margin;
+    }
+
+    /**
+     * @see #setMaxRange(Number)
+     */
+    public Number getMaxRange() {
+        return maxRange;
+    }
+
+    /**
+     * Maximum range which can be set using the navigator's handles. Opposite of
+     * {@link #setMinRange(Number)}
+     * 
+     * @param maxRange
+     */
+    public void setMaxRange(Number maxRange) {
+        this.maxRange = maxRange;
+    }
+
+    /**
+     * @see #setPanningEnabled(Boolean)
+     */
+    public Boolean getPanningEnabled() {
+        return panningEnabled;
+    }
+
+    /**
+     * Whether to pan axis. If chart.panning is enabled, the option allows to
+     * disable panning on an individual axis. Defaults to true.
+     * 
+     * @param panningEnabled
+     */
+    public void setPanningEnabled(Boolean panningEnabled) {
+        this.panningEnabled = panningEnabled;
+    }
+
+    /**
+     * @see #setMinorTicks(Boolean)
+     */
+    public Boolean getMinorTicks() {
+        return minorTicks;
+    }
+
+    /**
+     * Enable or disable minor ticks. Unless minorTickInterval is set, the tick
+     * interval is calculated as a fifth of the tickInterval. On a logarithmic
+     * axis, minor ticks are laid out based on a best guess, attempting to enter
+     * approximately 5 minor ticks between each major tick. Prior to v6.0.0,
+     * ticks were unabled in auto layout by setting minorTickInterval to "auto".
+     * Defaults to false.
+     * 
+     * @param minorTicks
+     */
+    public void setMinorTicks(Boolean minorTicks) {
+        this.minorTicks = minorTicks;
     }
 }

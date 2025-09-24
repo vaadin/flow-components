@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,9 +23,9 @@ import com.vaadin.flow.component.grid.testbench.GridColumnElement;
 import com.vaadin.flow.component.grid.testbench.GridElement;
 import com.vaadin.flow.component.grid.testbench.GridTHTDElement;
 import com.vaadin.flow.component.grid.testbench.GridTRElement;
-import com.vaadin.tests.AbstractComponentIT;
 import com.vaadin.flow.testutil.TestPath;
 import com.vaadin.testbench.TestBenchElement;
+import com.vaadin.tests.AbstractComponentIT;
 
 @TestPath("vaadin-grid/update-editor")
 public class UpdateEditorComponentIT extends AbstractComponentIT {
@@ -46,7 +46,7 @@ public class UpdateEditorComponentIT extends AbstractComponentIT {
 
         TestBenchElement textField = nameCell.$("vaadin-text-field").first()
                 .$("input").first();
-        Assert.assertEquals("foo", textField.getAttribute("value"));
+        Assert.assertEquals("foo", textField.getDomProperty("value"));
 
         // close the editor via clicking another cell
         grid.getRow(1).click(10, 10);
@@ -59,6 +59,6 @@ public class UpdateEditorComponentIT extends AbstractComponentIT {
         // Now it should be a text area component
         TestBenchElement textArea = nameCell.$("vaadin-text-area").first()
                 .$("textarea").first();
-        Assert.assertEquals("foo", textArea.getAttribute("value"));
+        Assert.assertEquals("foo", textArea.getDomProperty("value"));
     }
 }

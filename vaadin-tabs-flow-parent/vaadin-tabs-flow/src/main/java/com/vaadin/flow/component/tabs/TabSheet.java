@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package com.vaadin.flow.component.tabs;
 
 import java.util.HashMap;
@@ -28,6 +27,7 @@ import com.vaadin.flow.component.HasSize;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.component.shared.HasPrefix;
@@ -35,16 +35,25 @@ import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.shared.Registration;
 
 /**
  * TabSheet consists of a set of tabs and the content area. The content area
  * displays a component associated with the selected tab.
+ * <p>
+ * When switching between tabs, the content component of the previously selected
+ * tab is hidden and disabled. When switching back to that tab, its content
+ * component is revealed again and re-enabled.
+ * <p>
+ * To avoid re-enabling components that should remain disabled, wrap the tab
+ * content inside a container element such as {@code Div} or
+ * {@code VerticalLayout}, instead of adding them directly to the TabSheet.
  *
  * @author Vaadin Ltd.
  */
 @Tag("vaadin-tabsheet")
-@NpmPackage(value = "@vaadin/tabsheet", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/tabsheet", version = "25.0.0-alpha19")
 @JsModule("@vaadin/tabsheet/src/vaadin-tabsheet.js")
 public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
         HasSuffix, HasThemeVariant<TabSheetVariant> {
@@ -139,16 +148,27 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
             tabToContent.get(tab).removeFromParent();
         }
 
-        // On the client, content is associated with a tab by id
-        var id = "tabsheet-tab-" + UUID.randomUUID().toString();
-        tab.setId(id);
-        content.getElement().setAttribute("tab", id);
+        linkTabToContent(tab, content);
 
         tabToContent.put(tab, content.getElement());
 
         updateContent();
 
         return tab;
+    }
+
+    private void linkTabToContent(Tab tab, Component content) {
+        runBeforeClientResponse(ui -> {
+            // On the client, content is associated with a tab by id
+            var tabId = tab.getId().orElse("tabsheet-tab-" + UUID.randomUUID());
+            tab.setId(tabId);
+            content.getElement().setAttribute("tab", tabId);
+        });
+    }
+
+    private void runBeforeClientResponse(SerializableConsumer<UI> command) {
+        getElement().getNode().runWhenAttached(ui -> ui
+                .beforeClientResponse(this, context -> command.accept(ui)));
     }
 
     /**
@@ -235,6 +255,15 @@ public class TabSheet extends Component implements HasPrefix, HasStyle, HasSize,
      */
     public void setSelectedTab(Tab selectedTab) {
         tabs.setSelectedTab(selectedTab);
+    }
+
+    /**
+     * Gets the number of tabs.
+     *
+     * @return the number of tabs
+     */
+    public int getTabCount() {
+        return tabs.getTabCount();
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -27,8 +27,9 @@ import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.grid.Grid;
 
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Drop event that occurs on the {@link Grid} or its rows.
@@ -63,20 +64,21 @@ public class GridDropEvent<T> extends ComponentEvent<Grid<T>> {
      *            Drag data from {@code detail.dragData}.
      */
     public GridDropEvent(Grid<T> source, boolean fromClient,
-            @EventData("event.detail.dropTargetItem") JsonObject item,
+            @EventData("event.detail.dropTargetItem") ObjectNode item,
             @EventData("event.detail.dropLocation") String dropLocation,
-            @EventData("event.detail.dragData") JsonArray dragData) {
+            @EventData("event.detail.dragData") ArrayNode dragData) {
         super(source, fromClient);
 
         data = new HashMap<>();
-        IntStream.range(0, dragData.length()).forEach(i -> {
-            JsonObject jsonData = dragData.getObject(i);
-            data.put(jsonData.getString("type"), jsonData.getString("data"));
+        IntStream.range(0, dragData.size()).forEach(i -> {
+            JsonNode jsonData = dragData.get(i);
+            data.put(jsonData.get("type").asString(),
+                    jsonData.get("data").asString());
         });
 
         if (item != null) {
             this.dropTargetItem = source.getDataCommunicator().getKeyMapper()
-                    .get(item.getString("key"));
+                    .get(item.get("key").asString());
         } else {
             this.dropTargetItem = null;
         }

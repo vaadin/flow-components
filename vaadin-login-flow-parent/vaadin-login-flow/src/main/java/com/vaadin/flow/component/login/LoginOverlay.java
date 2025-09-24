@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 Vaadin Ltd.
+ * Copyright 2000-2025 Vaadin Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -25,14 +25,10 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.dependency.NpmPackage;
-import com.vaadin.flow.component.shared.internal.OverlayClassListProxy;
 import com.vaadin.flow.component.shared.SlotUtils;
-import com.vaadin.flow.dom.ClassList;
+import com.vaadin.flow.component.shared.internal.OverlayAutoAddController;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.Style;
-import com.vaadin.flow.internal.StateTree;
-import com.vaadin.flow.router.NavigationTrigger;
-import com.vaadin.flow.shared.Registration;
 
 /**
  * Server-side component for the {@code <vaadin-login-overlay>} component.
@@ -47,9 +43,7 @@ import com.vaadin.flow.shared.Registration;
  * @author Vaadin Ltd
  */
 @Tag("vaadin-login-overlay")
-@NpmPackage(value = "@vaadin/polymer-legacy-adapter", version = "24.3.0-alpha1")
-@JsModule("@vaadin/polymer-legacy-adapter/style-modules.js")
-@NpmPackage(value = "@vaadin/login", version = "24.3.0-alpha1")
+@NpmPackage(value = "@vaadin/login", version = "25.0.0-alpha19")
 @JsModule("@vaadin/login/src/vaadin-login-overlay.js")
 public class LoginOverlay extends AbstractLogin implements HasStyle {
 
@@ -57,33 +51,31 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     private LoginOverlayFooter footer;
     private LoginOverlayCustomFormArea customFormArea;
 
-    private boolean autoAddedToTheUi;
-
-    private Registration afterProgrammaticNavigationListenerRegistration;
-
     public LoginOverlay() {
-        initEnsureDetachListener();
+        init();
     }
 
     public LoginOverlay(LoginI18n i18n) {
         super(i18n);
-        initEnsureDetachListener();
+        init();
     }
 
-    private void initEnsureDetachListener() {
-        getElement().addPropertyChangeListener("opened", event -> {
-            if (autoAddedToTheUi && !isOpened()) {
-                getElement().removeFromParent();
-                autoAddedToTheUi = false;
-            }
-        });
+    private void init() {
+        // Initialize auto-add behavior
+        OverlayAutoAddController<LoginOverlay> autoAddController = new OverlayAutoAddController<>(
+                this);
+        // Skip auto-adding when navigating to a new view before opening.
+        // Handles cases where LoginOverlay is used in a login view, in which
+        // case it should not be auto-added if the view redirects to a different
+        // view if the user is already authenticated
+        autoAddController.setSkipOnNavigation(true);
     }
 
     /**
      * Closes the login overlay.
      * <p>
-     * Note: This method also removes the overlay component from the DOM after
-     * closing it, unless you have added the component manually.
+     * This automatically removes the overlay from the {@link UI}, unless it was
+     * manually added to a parent component.
      */
     public void close() {
         setOpened(false);
@@ -95,11 +87,17 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
     }
 
     /**
-     * Opens or closes the login overlay. On open component becomes enabled
-     * {@link #setEnabled(boolean)}
+     * Opens or closes the login overlay. Opening the overlay automatically
+     * enables it in case it was disabled.
      * <p>
-     * Note: Overlay will be attached or detached from the DOM automatically, if
-     * it was not added manually.
+     * If an overlay was not added manually to a parent component, it will be
+     * automatically added to the {@link UI} when opened, and automatically
+     * removed from the UI when closed. Note that the overlay is then scoped to
+     * the UI, and not the current view. As such, when navigating away from a
+     * view, the overlay will still be opened or stay open. In order to close
+     * the overlay when navigating away from a view, it should either be
+     * explicitly added as a child to the view, or it should be explicitly
+     * closed when leaving the view.
      *
      * @param opened
      *            {@code true} to open the login overlay, {@code false} to close
@@ -107,55 +105,15 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
      */
     public void setOpened(boolean opened) {
         if (opened) {
-            ensureAttached();
             setEnabled(true);
         }
         getElement().setProperty("opened", opened);
     }
 
-    private UI getCurrentUI() {
-        UI ui = UI.getCurrent();
-        if (ui == null) {
-            throw new IllegalStateException("UI instance is not available. "
-                    + "It means that you are calling this method "
-                    + "out of a normal workflow where it's always implicitly set. "
-                    + "That may happen if you call the method from the custom thread without "
-                    + "'UI::access' or from tests without proper initialization.");
-        }
-        return ui;
-    }
-
-    private void ensureAttached() {
-        if (getElement().getNode().getParent() == null) {
-            UI ui = getCurrentUI();
-            StateTree.ExecutionRegistration addToUiRegistration = ui
-                    .beforeClientResponse(ui, context -> {
-                        ui.addToModalComponent(this);
-                        autoAddedToTheUi = true;
-                        if (afterProgrammaticNavigationListenerRegistration != null) {
-                            afterProgrammaticNavigationListenerRegistration
-                                    .remove();
-                        }
-                    });
-            if (ui.getSession() != null) {
-                afterProgrammaticNavigationListenerRegistration = ui
-                        .addAfterNavigationListener(event -> {
-                            if (event.getLocationChangeEvent()
-                                    .getTrigger() == NavigationTrigger.PROGRAMMATIC) {
-                                addToUiRegistration.remove();
-                                afterProgrammaticNavigationListenerRegistration
-                                        .remove();
-                            }
-                        });
-            }
-        }
-    }
-
     /**
      * Sets the application title. Detaches the component title if it was set
      * earlier. Note: the method calls {@link #setTitle(Component)}, which will
-     * reset the custom title, if it was set. Custom title can be reset only
-     * when the overlay is closed.
+     * reset the custom title, if it was set.
      *
      * Title is a part of the I18n object. See {@link #setI18n(LoginI18n)}.
      *
@@ -182,8 +140,7 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
 
     /**
      * Sets the application title, <code>null</code> to remove any previous
-     * title and to display title set via {@link #setTitle(String)}. Note: the
-     * title component has to be set when the overlay is closed.
+     * title and to display title set via {@link #setTitle(String)}.
      *
      * @see #getTitle()
      * @param title
@@ -191,9 +148,6 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
      *            previously set title
      */
     public void setTitle(Component title) {
-        if (isOpened()) {
-            return;
-        }
         if (this.title != null) {
             this.title.getElement().removeFromParent();
         }
@@ -241,6 +195,11 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
      * Gets the object from which components can be added or removed from the
      * overlay custom form area. This area is displayed only if there's at least
      * one component added with {@link LoginOverlayContent#add(Component...)}.
+     *
+     * Fields that are part of custom form area are not automatically submitted
+     * as part of the {@link LoginForm.LoginEvent}, and are not supported when
+     * setting {@code action} as their values will not be part of the login
+     * request.
      *
      * @since 24.2
      * @return the custom form area object
@@ -302,21 +261,12 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
         }
 
         /**
-         * Adds the given components to the container. Note: components have to
-         * be added when the overlay is closed.
+         * Adds the given components to the container.
          *
          * @param components
          *            the components to be added.
-         *
-         * @throws UnsupportedOperationException
-         *             when using this method while overlay is opened
          */
         public void add(Component... components) {
-            if (overlay.isOpened()) {
-                throw new UnsupportedOperationException(
-                        "LoginOverlay does not support adding content when opened");
-            }
-
             Objects.requireNonNull(components, "Components should not be null");
             for (Component component : components) {
                 Objects.requireNonNull(component,
@@ -326,21 +276,12 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
         }
 
         /**
-         * Removes the given components from the container. Note: components
-         * have to be removed when the overlay is closed.
+         * Removes the given components from the container.
          *
          * @param components
          *            the components to be removed.
-         *
-         * @throws UnsupportedOperationException
-         *             when using this method while overlay is opened
          */
         public void remove(Component... components) {
-            if (overlay.isOpened()) {
-                throw new UnsupportedOperationException(
-                        "LoginOverlay does not support removing content when opened");
-            }
-
             Objects.requireNonNull(components, "Components should not be null");
             for (Component component : components) {
                 Objects.requireNonNull(component,
@@ -356,41 +297,11 @@ public class LoginOverlay extends AbstractLogin implements HasStyle {
         }
 
         /**
-         * Removes all components from the container. Note: components have to
-         * be removed when the overlay is closed.
-         *
-         * @throws UnsupportedOperationException
-         *             when using this method while overlay is opened
+         * Removes all components from the container.
          */
         public void removeAll() {
-            if (overlay.isOpened()) {
-                throw new UnsupportedOperationException(
-                        "LoginOverlay does not support removing content when opened");
-            }
-
             SlotUtils.clearSlot(overlay, slot);
         }
-    }
-
-    /**
-     * Sets the CSS class names of the login overlay element. This method
-     * overwrites any previous set class names.
-     *
-     * @param className
-     *            a space-separated string of class names to set, or
-     *            <code>null</code> to remove all class names
-     */
-    @Override
-    public void setClassName(String className) {
-        getClassNames().clear();
-        if (className != null) {
-            addClassNames(className.split(" "));
-        }
-    }
-
-    @Override
-    public ClassList getClassNames() {
-        return new OverlayClassListProxy(this);
     }
 
     /**
