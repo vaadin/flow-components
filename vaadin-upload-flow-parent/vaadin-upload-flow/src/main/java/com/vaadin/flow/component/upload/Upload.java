@@ -350,8 +350,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         if (accepted == null) {
             return Collections.emptyList();
         }
-        List<String> types = Arrays.asList(accepted.split(","));
-        return Collections.unmodifiableList(types);
+        return List.of(accepted.split(","));
     }
 
     /**
