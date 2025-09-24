@@ -12,13 +12,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
 import com.vaadin.flow.component.map.Map;
 import com.vaadin.flow.component.map.MapBase;
 import com.vaadin.flow.component.map.configuration.Coordinate;
+
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Representing OpenLayers' @code{click} event
@@ -47,8 +48,8 @@ public class MapClickEvent extends ComponentEvent<MapBase> {
 
         List<FeatureEventDetails> features = new ArrayList<>();
         for (int i = 0; i < featureIds.size(); i++) {
-            String featureId = featureIds.get(i).asText();
-            String layerId = layerIds.get(i).asText();
+            String featureId = featureIds.get(i).asString();
+            String layerId = layerIds.get(i).asString();
             FeatureEventDetails featureEventDetails = MapEventUtil
                     .getFeatureEventDetails(source.getRawConfiguration(),
                             layerId, featureId);

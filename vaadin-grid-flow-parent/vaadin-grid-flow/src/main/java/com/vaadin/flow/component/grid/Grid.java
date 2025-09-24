@@ -38,10 +38,6 @@ import java.util.stream.Stream;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
@@ -135,6 +131,11 @@ import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.ReflectTools;
 import com.vaadin.flow.shared.Registration;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.JsonNodeType;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Grid is a component for showing tabular data. A basic Grid uses plain text to
@@ -3866,14 +3867,14 @@ public class Grid<T> extends Component implements HasStyle, HasSize,
         GridSortOrderBuilder<T> sortOrderBuilder = new GridSortOrderBuilder<>();
         for (int i = 0; i < sorters.size(); ++i) {
             JsonNode sorter = sorters.get(i);
-            Column<T> column = idToColumnMap.get(sorter.get("path").asText());
+            Column<T> column = idToColumnMap.get(sorter.get("path").asString());
             if (column == null) {
                 throw new IllegalArgumentException(
                         "Received a sorters changed call from the client for a non-existent column");
             }
             if (sorter.has("direction") && sorter.get("direction")
                     .getNodeType() == JsonNodeType.STRING) {
-                switch (sorter.get("direction").asText()) {
+                switch (sorter.get("direction").asString()) {
                 case "asc":
                     sortOrderBuilder.thenAsc(column);
                     break;

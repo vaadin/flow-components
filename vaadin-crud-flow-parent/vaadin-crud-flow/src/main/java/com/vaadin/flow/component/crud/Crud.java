@@ -15,7 +15,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -36,6 +35,8 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * A component for performing <a href=
@@ -908,7 +909,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
                 @EventData(EVENT_PREVENT_DEFAULT_JS) Object ignored) {
             super(source, fromClient);
             this.item = source.getGrid().getDataCommunicator().getKeyMapper()
-                    .get(item.get("key").asText());
+                    .get(item.get("key").asString());
         }
 
         private EditEvent(Crud<E> source, boolean fromClient, E item) {

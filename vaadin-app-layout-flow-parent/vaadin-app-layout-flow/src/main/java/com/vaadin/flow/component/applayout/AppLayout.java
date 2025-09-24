@@ -20,7 +20,6 @@ import java.util.Locale;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasElement;
@@ -36,6 +35,8 @@ import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.function.SerializableConsumer;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.router.RouterLayout;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * App Layout is a component for building common application layouts.
@@ -298,7 +299,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      * Called after a navigation event. The default behaviour is to close the
      * drawer on mobile devices after a navigation event.
      */
-    protected void afterNavigation() {
+    void afterNavigation() {
         // Close drawer after navigation on mobile devices.
         if (isOverlay()) {
             setDrawerOpened(false);

@@ -29,7 +29,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.Component;
@@ -74,6 +73,8 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.function.SerializablePredicate;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * CheckBoxGroup is a multi-selection component where items are displayed as
@@ -905,7 +906,7 @@ public class CheckboxGroup<T>
         }
         Set<T> set = new HashSet<>();
         for (int i = 0; i < presentation.size(); i++) {
-            set.add(group.keyMapper.get(presentation.get(i).asText()));
+            set.add(group.keyMapper.get(presentation.get(i).asString()));
         }
         return set;
     }

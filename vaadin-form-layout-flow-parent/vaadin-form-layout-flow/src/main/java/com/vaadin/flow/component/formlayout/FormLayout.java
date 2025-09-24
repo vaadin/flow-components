@@ -22,9 +22,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasComponents;
@@ -40,6 +37,10 @@ import com.vaadin.flow.component.shared.SlotUtils;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.internal.JacksonUtils;
+
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Form Layout allows you to build responsive forms with multiple columns and to
@@ -268,14 +269,14 @@ public class FormLayout extends Component
         @Override
         public ResponsiveStep readJson(JsonNode value) {
             minWidth = value.has(MIN_WIDTH_JSON_KEY)
-                    ? value.get(MIN_WIDTH_JSON_KEY).asText()
+                    ? value.get(MIN_WIDTH_JSON_KEY).asString()
                     : null;
 
             columns = value.get(COLUMNS_JSON_KEY).asInt();
 
             JsonNode labelsPositionValue = value.get(LABELS_POSITION_JSON_KEY);
             if (labelsPositionValue != null) {
-                String labelsPositionString = labelsPositionValue.asText();
+                String labelsPositionString = labelsPositionValue.asString();
                 if ("aside".equals(labelsPositionString)) {
                     labelsPosition = LabelsPosition.ASIDE;
                 } else if ("top".equals(labelsPositionString)) {

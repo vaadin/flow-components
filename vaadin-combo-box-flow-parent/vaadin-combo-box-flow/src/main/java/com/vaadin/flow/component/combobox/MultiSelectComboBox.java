@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.ComponentUtil;
@@ -42,6 +40,9 @@ import com.vaadin.flow.data.selection.MultiSelectionEvent;
 import com.vaadin.flow.data.selection.MultiSelectionListener;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * MultiSelectComboBox allows the user to select one or more values from a
@@ -280,7 +281,7 @@ public class MultiSelectComboBox<TItem>
 
         Set<T> set = new LinkedHashSet<>();
         for (int i = 0; i < presentation.size(); i++) {
-            String key = presentation.get(i).get("key").asText();
+            String key = presentation.get(i).get("key").asString();
             set.add(keyMapper.get(key));
         }
         return set;
