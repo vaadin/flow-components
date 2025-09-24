@@ -26,8 +26,6 @@ public class ClusterDemo extends Div {
 
         FeatureLayer layer = map.getFeatureLayer();
         layer.setClusteringEnabled(true);
-        layer.setClusterDistance(50);
-        layer.setClusterMinDistance(50);
 
         final int numMarkers = 500;
         for (int i = 0; i < numMarkers; i++) {

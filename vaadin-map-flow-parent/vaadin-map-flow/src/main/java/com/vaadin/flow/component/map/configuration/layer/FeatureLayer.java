@@ -38,14 +38,14 @@ import com.vaadin.flow.component.map.configuration.style.TextStyle;
  * Clustering of point-based features can be enabled using
  * {@link #setClusteringEnabled(boolean)}. When clustering is enabled, only
  * features that extend from {@link PointBasedFeature}, such as
- * {@link MarkerFeature} can be added to the layer.Enabling clustering will
+ * {@link MarkerFeature} can be added to the layer. Enabling clustering will
  * switch the layer's source to a {@link ClusterSource}.
  */
 public class FeatureLayer extends VectorLayer {
 
     private boolean clusteringEnabled = false;
-    private int clusterDistance = 20;
-    private int clusterMinDistance = 0;
+    private int clusterDistance = 50;
+    private int clusterMinDistance = 50;
     private Style clusterStyle;
 
     public FeatureLayer() {
@@ -150,10 +150,12 @@ public class FeatureLayer extends VectorLayer {
     }
 
     /**
-     * Returns the distance in pixels within which features should be clustered.
+     * The distance in pixels within which features should be clustered. Default
+     * is 50 pixels.
+     * <p>
      * Only applies when clustering is enabled.
      *
-     * @return the cluster distance in pixels
+     * @return the distance in pixels within which features should be clustered
      */
     @JsonIgnore
     public int getClusterDistance() {
@@ -162,10 +164,12 @@ public class FeatureLayer extends VectorLayer {
 
     /**
      * Sets the distance in pixels within which features should be clustered.
+     * <p>
      * Only applies when clustering is enabled.
      *
      * @param clusterDistance
-     *            the cluster distance in pixels
+     *            the distance in pixels within which features should be
+     *            clustered
      */
     public void setClusterDistance(int clusterDistance) {
         this.clusterDistance = clusterDistance;
@@ -175,10 +179,15 @@ public class FeatureLayer extends VectorLayer {
     }
 
     /**
-     * Returns the minimum distance in pixels between clusters. Only applies
-     * when clustering is enabled.
+     * Minimum distance in pixels between clusters. Will be capped at the
+     * configured distance. By default, no minimum distance is guaranteed. This
+     * config can be used to avoid overlapping icons. As a trade-off, the
+     * cluster feature's position will no longer be the center of all its
+     * features. Default is 50 pixels.
+     * <p>
+     * Only applies when clustering is enabled.
      *
-     * @return the minimum cluster distance in pixels
+     * @return the minimum distance between clusters in pixels
      */
     @JsonIgnore
     public int getClusterMinDistance() {
@@ -186,11 +195,12 @@ public class FeatureLayer extends VectorLayer {
     }
 
     /**
-     * Sets the minimum distance in pixels between clusters. Only applies when
-     * clustering is enabled.
+     * Sets the minimum distance in pixels between clusters.
+     * <p>
+     * Only applies when clustering is enabled.
      *
      * @param clusterMinDistance
-     *            the minimum cluster distance in pixels
+     *            the minimum distance between clusters in pixels
      */
     public void setClusterMinDistance(int clusterMinDistance) {
         this.clusterMinDistance = clusterMinDistance;
@@ -202,7 +212,8 @@ public class FeatureLayer extends VectorLayer {
     /**
      * The {@link Style} that defines how individual clusters should be rendered
      * when clustering is enabled. By default, uses an image of a circle with
-     * text displaying the number of features in the cluster.
+     * text displaying the number of features in the cluster. Non-clustered
+     * features are rendered using their own style.
      *
      * @return the current cluster style
      */
@@ -232,17 +243,16 @@ public class FeatureLayer extends VectorLayer {
                 .copyOf(currentSource.getFeatures());
 
         VectorSource newSource;
+        VectorSource.Options newOptions = createOptionsFromSource(
+                currentSource);
+
         if (clusteringEnabled) {
-            VectorSource.Options options = createOptionsFromSource(
-                    currentSource);
-            ClusterSource clusterSource = new ClusterSource(options);
+            ClusterSource clusterSource = new ClusterSource(newOptions);
             clusterSource.setDistance(clusterDistance);
             clusterSource.setMinDistance(clusterMinDistance);
             newSource = clusterSource;
         } else {
-            VectorSource.Options options = createOptionsFromSource(
-                    currentSource);
-            newSource = new VectorSource(options);
+            newSource = new VectorSource(newOptions);
         }
 
         setSource(newSource);

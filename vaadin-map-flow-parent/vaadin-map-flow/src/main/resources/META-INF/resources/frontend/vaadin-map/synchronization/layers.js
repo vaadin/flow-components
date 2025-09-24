@@ -48,7 +48,8 @@ export function synchronizeVectorLayer(target, source, context) {
     target = new VectorLayer(
       createOptions({
         ...source,
-        source: context.lookup.get(source.source)
+        source: context.lookup.get(source.source),
+        style: undefined
       })
     );
   }
@@ -60,20 +61,9 @@ export function synchronizeVectorLayer(target, source, context) {
 }
 
 export function synchronizeFeatureLayer(target, source, context) {
-  if (!target) {
-    target = new VectorLayer(
-      createOptions({
-        ...source,
-        source: context.lookup.get(source.source),
-        style: undefined
-      })
-    );
-  }
+  target = synchronizeVectorLayer(target, source, context);
 
-  synchronizeLayer(target, source);
-  target.setSource(context.lookup.get(source.source));
-
-  const style = context.lookup.get(source.clusterStyle);
+  const clusterStyle = context.lookup.get(source.clusterStyle);
 
   target.setStyle((feature) => {
     const size = feature.get('features').length;
@@ -91,13 +81,13 @@ export function synchronizeFeatureLayer(target, source, context) {
     }
 
     // Multiple features indicate a cluster
-    const textStyle = style ? style.getText() : null;
+    const textStyle = clusterStyle ? clusterStyle.getText() : null;
     if (textStyle) {
       // Override the text to show the number of features in the cluster
       textStyle.setText(size.toString());
     }
 
-    return style;
+    return clusterStyle;
   });
 
   return target;

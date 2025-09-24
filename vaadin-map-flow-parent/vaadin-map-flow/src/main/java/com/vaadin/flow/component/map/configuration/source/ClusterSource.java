@@ -20,8 +20,8 @@ import com.vaadin.flow.component.map.configuration.feature.PointBasedFeature;
  * supported.
  */
 public class ClusterSource extends VectorSource {
-    private int distance = 20;
-    private int minDistance = 0;
+    private int distance = 50;
+    private int minDistance = 50;
 
     /**
      * Creates a new cluster source.
@@ -63,7 +63,7 @@ public class ClusterSource extends VectorSource {
 
     /**
      * The distance in pixels within which features should be clustered. Default
-     * value is 20.
+     * is 50 pixels.
      *
      * @return the distance in pixels within which features should be clustered
      */
@@ -88,7 +88,7 @@ public class ClusterSource extends VectorSource {
      * configured distance. By default, no minimum distance is guaranteed. This
      * config can be used to avoid overlapping icons. As a trade-off, the
      * cluster feature's position will no longer be the center of all its
-     * features.
+     * features. Default is 50 pixels.
      *
      * @return the minimum distance in pixels between clusters
      */
