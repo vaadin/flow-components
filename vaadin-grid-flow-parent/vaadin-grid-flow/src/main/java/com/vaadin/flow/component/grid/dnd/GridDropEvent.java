@@ -72,13 +72,13 @@ public class GridDropEvent<T> extends ComponentEvent<Grid<T>> {
         data = new HashMap<>();
         IntStream.range(0, dragData.size()).forEach(i -> {
             JsonNode jsonData = dragData.get(i);
-            data.put(jsonData.get("type").asText(),
-                    jsonData.get("data").asText());
+            data.put(jsonData.get("type").asString(),
+                    jsonData.get("data").asString());
         });
 
         if (item != null) {
             this.dropTargetItem = source.getDataCommunicator().getKeyMapper()
-                    .get(item.get("key").asText());
+                    .get(item.get("key").asString());
         } else {
             this.dropTargetItem = null;
         }

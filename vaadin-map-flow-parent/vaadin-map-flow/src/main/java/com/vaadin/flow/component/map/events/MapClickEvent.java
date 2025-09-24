@@ -48,8 +48,8 @@ public class MapClickEvent extends ComponentEvent<MapBase> {
 
         List<FeatureEventDetails> features = new ArrayList<>();
         for (int i = 0; i < featureIds.size(); i++) {
-            String featureId = featureIds.get(i).asText();
-            String layerId = layerIds.get(i).asText();
+            String featureId = featureIds.get(i).asString();
+            String layerId = layerIds.get(i).asString();
             FeatureEventDetails featureEventDetails = MapEventUtil
                     .getFeatureEventDetails(source.getRawConfiguration(),
                             layerId, featureId);

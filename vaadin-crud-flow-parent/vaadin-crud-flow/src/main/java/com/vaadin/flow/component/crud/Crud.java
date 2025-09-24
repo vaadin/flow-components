@@ -909,7 +909,7 @@ public class Crud<E> extends Component implements HasSize, HasTheme, HasStyle {
                 @EventData(EVENT_PREVENT_DEFAULT_JS) Object ignored) {
             super(source, fromClient);
             this.item = source.getGrid().getDataCommunicator().getKeyMapper()
-                    .get(item.get("key").asText());
+                    .get(item.get("key").asString());
         }
 
         private EditEvent(Crud<E> source, boolean fromClient, E item) {
