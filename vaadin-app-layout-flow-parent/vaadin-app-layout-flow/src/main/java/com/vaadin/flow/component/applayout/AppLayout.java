@@ -299,7 +299,7 @@ public class AppLayout extends Component implements RouterLayout, HasStyle {
      * Called after a navigation event. The default behaviour is to close the
      * drawer on mobile devices after a navigation event.
      */
-    protected void afterNavigation() {
+    void afterNavigation() {
         // Close drawer after navigation on mobile devices.
         if (isOverlay()) {
             setDrawerOpened(false);

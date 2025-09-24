@@ -1223,7 +1223,7 @@ public class RichTextEditor
                 RichTextEditor.this.getElement()
                         .executeJs("return this.htmlValue").then(jsonNode -> {
                             isHtmlValueSync = true;
-                            RichTextEditor.this.setValue(jsonNode.asText());
+                            RichTextEditor.this.setValue(jsonNode.asString());
                             isHtmlValueSync = false;
                         });
 

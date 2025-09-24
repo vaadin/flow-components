@@ -60,7 +60,7 @@ public class GridDragStartEvent<T> extends ComponentEvent<Grid<T>> {
 
         draggedItems = new ArrayList<>();
         IntStream.range(0, items.size()).forEach(i -> {
-            String itemKey = items.get(i).get("key").asText();
+            String itemKey = items.get(i).get("key").asString();
             T item = source.getDataCommunicator().getKeyMapper().get(itemKey);
             draggedItems.add(item);
         });

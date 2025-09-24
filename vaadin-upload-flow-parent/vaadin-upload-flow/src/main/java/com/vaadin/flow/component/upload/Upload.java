@@ -17,7 +17,6 @@ package com.vaadin.flow.component.upload;
 
 import java.io.OutputStream;
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
@@ -117,15 +116,15 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
 
         getElement().addEventListener("file-reject", event -> {
             String detailError = event.getEventData().get(eventDetailError)
-                    .asText();
+                    .asString();
             String detailFileName = event.getEventData()
-                    .get(eventDetailFileName).asText();
+                    .get(eventDetailFileName).asString();
             fireEvent(new FileRejectedEvent(this, detailError, detailFileName));
         }).addEventData(eventDetailError).addEventData(eventDetailFileName);
 
         getElement().addEventListener("file-remove", event -> {
             String detailFileName = event.getEventData()
-                    .get(eventDetailFileName).asText();
+                    .get(eventDetailFileName).asString();
             fireEvent(new FileRemovedEvent(this, detailFileName));
         }).addEventData(eventDetailFileName);
 
@@ -371,7 +370,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         if (accepted == null) {
             return Collections.emptyList();
         }
-        return Arrays.asList(accepted.split(","));
+        return List.of(accepted.split(","));
     }
 
     /**

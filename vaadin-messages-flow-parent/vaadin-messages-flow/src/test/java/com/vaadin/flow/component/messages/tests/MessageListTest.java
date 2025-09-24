@@ -201,7 +201,7 @@ public class MessageListTest {
         if (theme.isNull()) {
             return null;
         } else {
-            return theme.asText();
+            return theme.asString();
         }
     }
 }

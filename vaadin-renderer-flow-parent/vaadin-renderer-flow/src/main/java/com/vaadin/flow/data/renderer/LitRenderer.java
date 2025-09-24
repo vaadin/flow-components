@@ -196,8 +196,8 @@ public class LitRenderer<SOURCE> extends Renderer<SOURCE> {
                 .getFeature(ReturnChannelMap.class)
                 .registerChannel(arguments -> {
                     // Invoked when the client calls one of the client callables
-                    String handlerName = arguments.get(0).asText();
-                    String itemKey = arguments.get(1).asText();
+                    String handlerName = arguments.get(0).asString();
+                    String itemKey = arguments.get(1).asString();
                     ArrayNode args = (ArrayNode) arguments.get(2);
 
                     SerializableBiConsumer<SOURCE, ArrayNode> handler = clientCallables
