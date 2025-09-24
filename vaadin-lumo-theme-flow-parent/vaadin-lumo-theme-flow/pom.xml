@@ -41,7 +41,7 @@
                         <configuration>
                             <executable>node</executable>
                             <arguments>
-                                <argument>${project.basedir}/../../copy-npm-theme-files.js</argument>
+                                <argument>${project.basedir}/../../scripts/copy-npm-theme-files.js</argument>
                                 <argument>${project.basedir}/src/main/java/com/vaadin/flow/theme/lumo/Lumo.java</argument>
                                 <argument>lumo.css</argument>
                                 <argument>utility.css</argument>

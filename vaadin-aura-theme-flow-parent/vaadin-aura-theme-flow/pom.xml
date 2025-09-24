@@ -33,7 +33,7 @@
                         <configuration>
                             <executable>node</executable>
                             <arguments>
-                                <argument>${project.basedir}/../../copy-npm-theme-files.js</argument>
+                                <argument>${project.basedir}/../../scripts/copy-npm-theme-files.js</argument>
                                 <argument>${project.basedir}/src/main/java/com/vaadin/flow/theme/aura/Aura.java</argument>
                                 <argument>aura.css</argument>
                             </arguments>
