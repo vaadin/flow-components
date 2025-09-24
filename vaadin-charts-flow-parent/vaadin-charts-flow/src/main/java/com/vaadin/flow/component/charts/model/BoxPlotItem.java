@@ -13,7 +13,7 @@ package com.vaadin.flow.component.charts.model;
  * <a href="http://en.wikipedia.org/wiki/Box_plot">box plot charts</a>. Plot box
  * charts visualize well some statistical data.
  *
- * @see PlotOptionsBoxPlot
+ * @see PlotOptionsBoxplot
  *
  */
 public class BoxPlotItem extends DataSeriesItem {

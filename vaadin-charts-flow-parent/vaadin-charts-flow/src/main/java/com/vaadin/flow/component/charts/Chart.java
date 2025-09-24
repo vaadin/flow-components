@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -72,6 +71,8 @@ import com.vaadin.flow.component.dependency.NpmPackage;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.UsageStatistics;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Vaadin Charts is a feature-rich interactive charting library for Vaadin. It
@@ -214,7 +215,7 @@ public class Chart extends Component implements HasStyle, HasSize, HasTheme {
      * Enabling timeline mode in these unsupported chart types results in an
      * <code>IllegalArgumentException</code>
      * <p>
-     * Note: for Timeline chart type see {@link ChartType.TIMELINE} and
+     * Note: for Timeline chart type see {@link ChartType#TIMELINE} and
      * {@link PlotOptionsTimeline}.
      *
      * @param timeline

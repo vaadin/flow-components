@@ -59,8 +59,8 @@ public class ValidationController<C extends Component & HasValidator<V> & HasVal
      * Validates the given value using the component's validator and sets the
      * {@code invalid} and {@code errorMessage} properties based on the result.
      * If a custom error message is provided with
-     * {@link #setErrorMessage(String)}, it is used. Otherwise, the error
-     * message from the validator is used.
+     * {@link HasValidation#setErrorMessage(String)}, it is used. Otherwise, the
+     * error message from the validator is used.
      * <p>
      * The method skips validation if the manual validation mode is enabled, see
      * {@link #setManualValidation(boolean)}.

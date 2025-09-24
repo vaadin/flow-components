@@ -13,7 +13,6 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.node.BaseJsonNode;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -35,6 +34,8 @@ import com.vaadin.flow.component.shared.HasThemeVariant;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
 
+import tools.jackson.databind.node.BaseJsonNode;
+
 /**
  * Base class for the map component. Contains all base functionality for the map
  * component, but does not provide any defaults. This component should not be
@@ -45,12 +46,11 @@ import com.vaadin.flow.shared.Registration;
 public abstract class MapBase extends Component
         implements HasSize, HasStyle, HasThemeVariant<MapVariant> {
     private final Configuration configuration;
-    private final MapSerializer serializer;
+    private transient MapSerializer serializer;
 
     private StateTree.ExecutionRegistration pendingConfigurationSync;
 
     protected MapBase() {
-        this.serializer = new MapSerializer(this);
         this.configuration = new Configuration();
         this.configuration
                 .addPropertyChangeListener(this::configurationPropertyChange);
@@ -118,7 +118,7 @@ public abstract class MapBase extends Component
         Set<AbstractConfigurationObject> changedObjects = new LinkedHashSet<>();
         configuration.collectChanges(changedObjects::add);
 
-        BaseJsonNode jsonChanges = serializer.toJson(changedObjects);
+        BaseJsonNode jsonChanges = getSerializer().toJson(changedObjects);
 
         this.getElement().executeJs("this.$connector.synchronize($0)",
                 jsonChanges);
@@ -152,6 +152,13 @@ public abstract class MapBase extends Component
                 event.getFeature().getGeometry().translate(deltaX, deltaY);
             }
         });
+    }
+
+    MapSerializer getSerializer() {
+        if (serializer == null) {
+            serializer = new MapSerializer(this);
+        }
+        return serializer;
     }
 
     /**

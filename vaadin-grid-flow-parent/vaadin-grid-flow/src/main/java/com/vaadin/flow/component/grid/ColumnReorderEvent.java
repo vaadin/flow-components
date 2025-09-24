@@ -19,10 +19,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.DomEvent;
 import com.vaadin.flow.component.EventData;
+
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * Event fired when the columns in the Grid are reordered.

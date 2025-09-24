@@ -15,7 +15,7 @@ import com.vaadin.flow.component.charts.Chart;
  * <p>
  * Zooming with the mouse wheel is enabled by default in
  * {@link Chart#setTimeline(Boolean)} charts. In other chart types, it is
- * enabled if {@link Zooming#getEnabled()} is set. It can be disabled by setting
+ * enabled if {@link #getEnabled()} is set. It can be disabled by setting
  * {@link #setEnabled(Boolean)} option to false.
  */
 public class ZoomingMouseWheel extends AbstractConfigurationObject {

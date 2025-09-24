@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.AbstractSinglePropertyField;
 import com.vaadin.flow.component.AttachEvent;
@@ -68,6 +67,8 @@ import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.internal.JacksonUtils;
 import com.vaadin.flow.internal.StateTree;
 import com.vaadin.flow.shared.Registration;
+
+import tools.jackson.databind.node.ObjectNode;
 
 /**
  * Date Picker is an input field that allows the user to enter a date by typing
@@ -220,7 +221,7 @@ public class DatePicker
      *
      * @param initialDate
      *            the pre-selected date in the picker
-     * @see #setValue(Object)
+     * @see #setValue(LocalDate)
      */
     public DatePicker(LocalDate initialDate) {
         this(initialDate, false);
@@ -241,7 +242,7 @@ public class DatePicker
      *            initial value is used only if element has no {@code "value"}
      *            property value, otherwise element {@code "value"} property is
      *            ignored and the initial value is set
-     * @see #setValue(Object)
+     * @see #setValue(LocalDate)
      */
     private DatePicker(LocalDate initialDate, boolean isInitialValueOptional) {
         super("value", null, String.class, PARSER, FORMATTER);
@@ -299,7 +300,7 @@ public class DatePicker
      *            the label describing the date picker
      * @param initialDate
      *            the pre-selected date in the picker
-     * @see #setValue(Object)
+     * @see #setValue(LocalDate)
      * @see #setLabel(String)
      */
     public DatePicker(String label, LocalDate initialDate) {
@@ -347,7 +348,7 @@ public class DatePicker
      *            the pre-selected date in the picker
      * @param listener
      *            the listener to receive value change events
-     * @see #setValue(Object)
+     * @see #setValue(LocalDate)
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
     public DatePicker(LocalDate initialDate,
@@ -367,7 +368,7 @@ public class DatePicker
      * @param listener
      *            the listener to receive value change events
      * @see #setLabel(String)
-     * @see #setValue(Object)
+     * @see #setValue(LocalDate)
      * @see #addValueChangeListener(HasValue.ValueChangeListener)
      */
     public DatePicker(String label, LocalDate initialDate,

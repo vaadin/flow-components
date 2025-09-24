@@ -28,10 +28,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.server.VaadinService;
+
+import tools.jackson.databind.node.ArrayNode;
 
 /**
  * @author Vaadin Ltd.
