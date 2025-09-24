@@ -281,7 +281,7 @@ public class MultiSelectComboBox<TItem>
 
         Set<T> set = new LinkedHashSet<>();
         for (int i = 0; i < presentation.size(); i++) {
-            String key = presentation.get(i).get("key").asText();
+            String key = presentation.get(i).get("key").asString();
             set.add(keyMapper.get(key));
         }
         return set;
