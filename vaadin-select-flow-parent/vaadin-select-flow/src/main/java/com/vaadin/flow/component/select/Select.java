@@ -198,6 +198,53 @@ public class Select<T> extends AbstractSinglePropertyField<Select<T>, T>
     }
 
     /**
+     * Creates a select with the defined label.
+     *
+     * @param label
+     *            the label describing the select
+     * @see #setLabel(String)
+     */
+    public Select(String label) {
+        this();
+        setLabel(label);
+    }
+
+    /**
+     * Creates a select with the defined label and populated with the items in
+     * the collection.
+     *
+     * @param label
+     *            the label describing the select
+     * @param items
+     *            the items to be shown in the list of the select
+     * @see #setLabel(String)
+     * @see #setItems(Collection)
+     */
+    public Select(String label, Collection<T> items) {
+        this();
+        setLabel(label);
+        setItems(items);
+    }
+
+    /**
+     * Creates a select with the defined label and populated with the items in
+     * the array.
+     *
+     * @param label
+     *            the label describing the select
+     * @param items
+     *            the items to be shown in the list of the select
+     * @see #setLabel(String)
+     * @see #setItems(Object...)
+     */
+    @SafeVarargs
+    public Select(String label, T... items) {
+        this();
+        setLabel(label);
+        setItems(items);
+    }
+
+    /**
      * Constructs a select with the initial value change listener.
      *
      * @param listener
