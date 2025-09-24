@@ -17,7 +17,6 @@ package com.vaadin.flow.component.upload;
 
 import java.io.OutputStream;
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
@@ -350,7 +349,7 @@ public class Upload extends Component implements HasEnabled, HasSize, HasStyle {
         if (accepted == null) {
             return Collections.emptyList();
         }
-        return Arrays.asList(accepted.split(","));
+        return List.of(accepted.split(","));
     }
 
     /**
