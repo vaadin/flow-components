@@ -405,7 +405,7 @@ public class CheckboxGroupTest {
         ArrayNode propertyValue = (ArrayNode) field.getElement()
                 .getPropertyRaw("value");
         Assert.assertEquals(1, propertyValue.size());
-        Assert.assertEquals("foo", propertyValue.get(0).asText());
+        Assert.assertEquals("foo", propertyValue.get(0).asString());
     }
 
     @Test
