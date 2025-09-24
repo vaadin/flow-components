@@ -389,11 +389,11 @@ public class GridElement extends TestBenchElement {
      * @return the GridTHTDElement for the given row and column in header.
      */
     public GridTHTDElement getHeaderCell(int rowIndex, int columnIndex) {
-        WebElement tfoot = $("*").id("header");
-        List<WebElement> footerRows = tfoot.findElements(By.tagName("tr"));
-        List<WebElement> footerCells = footerRows.get(rowIndex)
+        WebElement theader = $("*").id("header");
+        List<WebElement> headerRows = theader.findElements(By.tagName("tr"));
+        List<WebElement> headerCells = headerRows.get(rowIndex)
                 .findElements(By.tagName("th"));
-        var cell = footerCells.get(columnIndex);
+        var cell = headerCells.get(columnIndex);
         return wrapElement(cell, getCommandExecutor())
                 .wrap(GridTHTDElement.class);
     }
