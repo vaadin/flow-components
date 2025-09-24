@@ -44,6 +44,7 @@
                                 <argument>${project.basedir}/../../copy-npm-theme-files.js</argument>
                                 <argument>${project.basedir}/src/main/java/com/vaadin/flow/theme/lumo/Lumo.java</argument>
                                 <argument>lumo.css</argument>
+                                <argument>utility.css</argument>
                             </arguments>
                         </configuration>
                     </execution>

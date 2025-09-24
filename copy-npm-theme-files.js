@@ -6,12 +6,12 @@ const { execSync } = require('child_process');
 
 // Check command line arguments
 if (process.argv.length < 4) {
-    console.error('Usage: node copy-npm-theme-files.js <path-to-theme-java-file> <css-file-name>');
+    console.error('Usage: node copy-npm-theme-files.js <path-to-theme-java-file> <css-file-name1> [css-file-name2] ...');
     process.exit(1);
 }
 
 const javaFilePath = process.argv[2];
-const cssFileName = process.argv[3];
+const cssFileNames = process.argv.slice(3);
 const projectDir = path.dirname(javaFilePath);
 
 // Find the project root (where pom.xml is located)
@@ -123,47 +123,53 @@ fs.writeFileSync(
 
 // Run npm install
 console.log('Running npm install...');
-execSync('npm install', { 
+execSync('npm install', {
     cwd: tempDir,
     stdio: 'inherit'
 });
 
-// Find the CSS file in the installed packages
-let cssSourcePath = null;
-let cssPackage = null;
+// Function to process a single CSS file
+function processCssFile(cssFileName) {
+    console.log(`\nProcessing ${cssFileName}...`);
 
-for (const pkg of packages) {
-    const possiblePath = path.join(tempDir, 'node_modules', pkg.name, cssFileName);
-    if (fs.existsSync(possiblePath)) {
-        cssSourcePath = possiblePath;
-        cssPackage = pkg;
-        console.log(`Found ${cssFileName} in package ${pkg.name}`);
-        break;
+    // Find the CSS file in the installed packages
+    let cssSourcePath = null;
+    let cssPackage = null;
+
+    for (const pkg of packages) {
+        const possiblePath = path.join(tempDir, 'node_modules', pkg.name, cssFileName);
+        if (fs.existsSync(possiblePath)) {
+            cssSourcePath = possiblePath;
+            cssPackage = pkg;
+            console.log(`Found ${cssFileName} in package ${pkg.name}`);
+            break;
+        }
+    }
+
+    if (!cssSourcePath) {
+        console.error(`CSS file '${cssFileName}' not found in any of the installed packages`);
+        process.exit(1);
+    }
+
+    // Create target directory
+    const targetDir = path.join(projectRoot, 'target/classes/META-INF/resources', cssPackage.name);
+    fs.mkdirSync(targetDir, { recursive: true });
+
+    // Run PostCSS to minify the CSS
+    const outputPath = path.join(targetDir, cssFileName);
+    console.log(`Minifying ${cssFileName}...`);
+
+    try {
+        execSync(`npx postcss ${cssSourcePath} -o ${outputPath}`, {
+            cwd: tempDir,
+            stdio: 'inherit'
+        });
+        console.log(`Successfully minified and saved ${cssFileName} to ${outputPath}`);
+    } catch (error) {
+        console.error(`Error during minification of ${cssFileName}:`, error);
+        process.exit(1);
     }
 }
 
-if (!cssSourcePath) {
-    console.error(`CSS file '${cssFileName}' not found in any of the installed packages`);
-    process.exit(1);
-}
-
-// Create target directory
-const targetDir = path.join(projectRoot, 'target/classes/META-INF/resources', cssPackage.name);
-fs.mkdirSync(targetDir, { recursive: true });
-
-// Run PostCSS to minify the CSS
-const outputPath = path.join(targetDir, cssFileName);
-console.log(`Minifying ${cssFileName}...`);
-
-try {
-    execSync(`npx postcss ${cssSourcePath} -o ${outputPath}`, {
-        cwd: tempDir,
-        stdio: 'inherit'
-    });
-    console.log(`Successfully minified and saved ${cssFileName} to ${outputPath}`);
-} catch (error) {
-    console.error('Error during minification:', error);
-    process.exit(1);
-}
-
-console.log(`Successfully processed theme with ${cssFileName}`);
+// Process each CSS file
+cssFileNames.forEach(processCssFile);
